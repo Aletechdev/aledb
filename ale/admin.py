@@ -29,6 +29,8 @@ class IsolateList(admin.TabularInline):
 
 class FrozenPopulationAdmin(admin.ModelAdmin):
     inlines = [IsolateList]
+    list_display = ("__unicode__", "ale_experiment", "ale_id", "flask_number", "media")
+    list_filter = ("ale_id__ale_experiment", "ale_id", "flask_number")
 
 # each AleId should display related FrozenPopulations
 @add_link_field()
@@ -38,9 +40,9 @@ class FrozenPopulationList(admin.TabularInline):
 
 class AleIdAdmin(admin.ModelAdmin):
     inlines = [FrozenPopulationList]
-    list_display = ("__unicode__", "ale_experiment", "parent_strain")
-    list_filter = ("ale_experiment", "parent_strain")
-    search_fields = ["ale_experiment__ale_id"]
+    list_display = ("__unicode__", "ale_experiment", "description")
+    list_filter = ("ale_experiment", "description")
+    #search_fields = ["ale_experiment__ale_id"]
 
 # each AleExperiment should display related AleId's
 @add_link_field()
@@ -50,6 +52,9 @@ class AleIdList(admin.TabularInline):
 
 class AleExperimentAdmin(admin.ModelAdmin):
     inlines = [AleIdList]
+    list_display = ("__unicode__", "ale_id", "date", "person", "instrument", "simulation", "notes")
+    list_filter = ("simulation","instrument","person")
+    search_fields = ["ale_id"]
 
 
 admin.site.register(AleExperiment, AleExperimentAdmin)
