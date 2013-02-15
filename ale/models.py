@@ -51,7 +51,7 @@ class FrozenPopulation(models.Model):
     ale_id = models.ForeignKey(AleId)
     flask_number = models.IntegerField()
     person = models.CharField(max_length=200, blank=True)
-    media = models.ForeignKey(Media)  # TODO - decide where this should go
+    media = models.ForeignKey(Media)
 
     def __unicode__(self):
         #return "test"
