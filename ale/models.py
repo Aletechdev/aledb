@@ -28,6 +28,7 @@ class Media(models.Model):
     description = models.CharField(max_length=200)
     other = models.TextField(blank=True)
     # todo - figure out components
+    # maybe carbon source, etc.? or track individual chemicals
     def __unicode__(self):
         return "%s (%.1f C, %.1f mL, %.1f RPM)" % \
             (self.description, self.temperature, self.volume, self.stirring_speed)
