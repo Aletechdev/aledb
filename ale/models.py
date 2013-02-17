@@ -17,7 +17,10 @@ class AleExperiment(models.Model):
     simulation = models.BooleanField()
     notes = models.TextField(blank=True)
     def __unicode__(self):
-        return "#%d-%s %s" % (self.ale_id, self.name, self.instrument)
+        if self.simulation:
+            return "#%d-%s-SIM" % (self.ale_id, self.name)
+        else:
+            return "#%d-%s" % (self.ale_id, self.name)
     
     class Meta:
         verbose_name_plural = "ALE Experiments"
@@ -47,7 +50,8 @@ class AleId(models.Model):
     starting_strain = models.ForeignKey("Isolate", null=True, blank=True, default=None)
 
     def __unicode__(self):
-        return "ALE #%d from %s" % (self.ale_id, self.ale_experiment.name)
+        #return "ALE #%d < %s" % (self.ale_id, self.ale_experiment.name)
+        return "ALE #%d < %s" % (self.ale_id, self.ale_experiment)
 
     class Meta:
         unique_together = (("ale_experiment", "ale_id"),)
@@ -68,16 +72,12 @@ class FreezerBox(models.Model):
 
 class Flask(models.Model):
     ale_id = models.ForeignKey(AleId)
-    flask_number = models.IntegerField(blank=True,
-        help_text="Enter 0 if the population did not originate from an ALE")
+    flask_number = models.IntegerField(blank=True)
     media = models.ForeignKey(Media)
-    comments = models.CharField(max_length=200, help_text="If the population did not originate from an ALE put the name of the strain here")
+    comments = models.CharField(max_length=200, blank=True)
 
     def __unicode__(self):
-        if self.flask_number == 0:
-            return self.comments
-        else:
-            return "Flask #%d from %s" % (self.flask_number, unicode(self.ale_id))
+        return "Flask#%d < %s" % (self.flask_number, self.ale_id)
         
     def ale_experiment(self):
         return self.ale_id.ale_experiment.ale_id
@@ -95,7 +95,16 @@ class Isolate(models.Model):
     freezer_box = models.ForeignKey(FreezerBox)
     description = models.CharField(max_length=300, blank=True)
     person = models.CharField(max_length=200, blank=True)
-
+    
+    def __unicode__(self):
+        if self.flask.flask_number == 0:
+            return self.description
+        else:
+            if self.is_population:
+                return "#%d POP < %s" % (self.isolate_number, self.flask)
+            else:
+                return "#%d COL < %s" % (self.isolate_number, self.parent_isolate)
+    
     class Meta:
         unique_together = (("flask", "isolate_number"),)
     # TODO - encode experiments done on the isolate
