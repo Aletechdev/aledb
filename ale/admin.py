@@ -20,26 +20,26 @@ def add_link_field(target_model = None, field = '', link_text = unicode):
     return add_link
 
 
-# Each FrozenPopulation should display related Isolates
+# Each Flask should display related Isolates
 @add_link_field()
 class IsolateList(admin.TabularInline):
     model = Isolate
     extra = 1
     show_edit_link = True
 
-class FrozenPopulationAdmin(admin.ModelAdmin):
+class FlaskAdmin(admin.ModelAdmin):
     inlines = [IsolateList]
     list_display = ("__unicode__", "ale_experiment", "ale_id", "flask_number", "media")
     list_filter = ("ale_id__ale_experiment", "ale_id", "flask_number")
 
-# each AleId should display related FrozenPopulations
+# each AleId should display related Flasks
 @add_link_field()
-class FrozenPopulationList(admin.TabularInline):
-    model = FrozenPopulation
+class FlaskList(admin.TabularInline):
+    model = Flask
     extra = 0
 
 class AleIdAdmin(admin.ModelAdmin):
-    inlines = [FrozenPopulationList]
+    inlines = [FlaskList]
     list_display = ("__unicode__", "ale_experiment", "description")
     list_filter = ("ale_experiment", "description")
     #search_fields = ["ale_experiment__ale_id"]
@@ -60,6 +60,6 @@ class AleExperimentAdmin(admin.ModelAdmin):
 admin.site.register(AleExperiment, AleExperimentAdmin)
 admin.site.register(Instrument)
 admin.site.register(Media)
-admin.site.register(FrozenPopulation, FrozenPopulationAdmin)
+admin.site.register(Flask, FlaskAdmin)
 admin.site.register(Isolate)
 admin.site.register(AleId, AleIdAdmin)
