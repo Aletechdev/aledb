@@ -24,13 +24,14 @@ def add_link_field(target_model = None, field = '', link_text = unicode):
 @add_link_field()
 class IsolateList(admin.TabularInline):
     model = Isolate
-    extra = 1
+    extra = 0
     show_edit_link = True
 
 class FrozenPopulationAdmin(admin.ModelAdmin):
     inlines = [IsolateList]
-    list_display = ("__unicode__", "ale_experiment", "ale_id", "flask_number", "media")
-    list_filter = ("ale_id__ale_experiment", "ale_id", "flask_number")
+    extra = 0
+    list_display = ("__unicode__", "ale_experiment", "ale_id", "flask_number", "media", "freezer_box")
+    list_filter = ("ale_id__ale_experiment", "ale_id", "flask_number", "freezer_box")
 
 # each AleId should display related FrozenPopulations
 @add_link_field()
@@ -56,6 +57,9 @@ class AleExperimentAdmin(admin.ModelAdmin):
     list_filter = ("simulation","instrument","person")
     search_fields = ["ale_id"]
 
+class FreezerBoxAdmin(admin.ModelAdmin):
+    inlines = [FrozenPopulationList, IsolateList]
+
 
 admin.site.register(AleExperiment, AleExperimentAdmin)
 admin.site.register(Instrument)
@@ -63,3 +67,4 @@ admin.site.register(Media)
 admin.site.register(FrozenPopulation, FrozenPopulationAdmin)
 admin.site.register(Isolate)
 admin.site.register(AleId, AleIdAdmin)
+admin.site.register(FreezerBox, FreezerBoxAdmin)
