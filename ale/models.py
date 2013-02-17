@@ -48,7 +48,7 @@ class AleId(models.Model):
     class Meta:
         unique_together = (("ale_experiment", "ale_id"),)
 
-class FrozenPopulation(models.Model):
+class Flask(models.Model):
     ale_id = models.ForeignKey(AleId)
     flask_number = models.IntegerField()
     person = models.CharField(max_length=200, blank=True)
@@ -65,11 +65,13 @@ class FrozenPopulation(models.Model):
         unique_together = (("ale_id", "flask_number"),)
 
 class Isolate(models.Model):
-    isolate_id = models.IntegerField()
-    frozen_population = models.ForeignKey(FrozenPopulation)
+    isolate_number = models.IntegerField()
+    parent_isolate = models.ForeignKey("Isolate", blank=True, null=True)
+    flask = models.ForeignKey(Flask)
+    is_population = models.BooleanField()
     description = models.CharField(max_length=300, blank=True)
     person = models.CharField(max_length=200, blank=True)
 
     class Meta:
-        unique_together = (("frozen_population", "isolate_id"),)
+        unique_together = (("flask", "isolate_number"),)
     # TODO - encode experiments done on the isolate

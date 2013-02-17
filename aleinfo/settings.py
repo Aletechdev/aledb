@@ -3,6 +3,8 @@
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
