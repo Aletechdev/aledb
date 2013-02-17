@@ -18,6 +18,9 @@ class AleExperiment(models.Model):
     notes = models.TextField(blank=True)
     def __unicode__(self):
         return "#%d-%s %s" % (self.ale_id, self.name, self.instrument)
+    
+    class Meta:
+        verbose_name_plural = "ALE Experiments"
 
 class Media(models.Model):
     temperature = models.FloatField(default=37,
@@ -34,42 +37,66 @@ class Media(models.Model):
             (self.description, self.temperature, self.volume, self.stirring_speed)
 
     class Meta:
-        verbose_name_plural = "media"
+        verbose_name_plural = "Media"
 
 class AleId(models.Model):
     """Parallel ALE's run within an ALE experiment"""
     ale_id = models.IntegerField()
     description = models.CharField(max_length=300)
     ale_experiment = models.ForeignKey(AleExperiment)
+    starting_strain_population = models.ForeignKey("FrozenPopulation", null=True, blank=True, default=None)
+    starting_strain_isolate = models.ForeignKey("Isolate", null=True, blank=True, default=None)
 
     def __unicode__(self):
         return "ALE #%d from %s" % (self.ale_id, self.ale_experiment.name)
 
     class Meta:
         unique_together = (("ale_experiment", "ale_id"),)
+        verbose_name_plural = "ALEs"
 
+class FreezerBox(models.Model):
+    name = models.CharField(max_length=500,
+        help_text="A unique name that identifies the box form other boxes")
+    number = models.IntegerField(default = 1,
+        help_text="Start with 1. If another box with the same name is needed label it with 2, 3 etc... Make sure this box number appears on the label")
+    
+    def __unicode__(self):
+        return "Box #%i - %s" % (self.number, self.name)
+    
+    class Meta:
+        verbose_name_plural = "Freezer Boxes"
+        
 class FrozenPopulation(models.Model):
     ale_id = models.ForeignKey(AleId)
-    flask_number = models.IntegerField()
-    person = models.CharField(max_length=200, blank=True)
+    flask_number = models.IntegerField(blank=True,
+        help_text="Enter 0 if the population did not originate from an ALE")
+    person = models.CharField(max_length=50)
+    freezer_box = models.ForeignKey(FreezerBox)
     media = models.ForeignKey(Media)
+    comments = models.CharField(max_length=200, help_text="If the population did not originate from an ALE put the name of the strain here")
 
     def __unicode__(self):
-        #return "test"
-        return "Flask #%d from %s" % (self.flask_number, unicode(self.ale_id))
+        if self.flask_number == 0:
+            return self.comments
+        else:
+            return "Flask #%d from %s" % (self.flask_number, unicode(self.ale_id))
         
     def ale_experiment(self):
         return self.ale_id.ale_experiment.ale_id
 
     class Meta:
         unique_together = (("ale_id", "flask_number"),)
+        verbose_name_plural = "Frozen Populations"
+        
 
 class Isolate(models.Model):
     isolate_id = models.IntegerField()
     frozen_population = models.ForeignKey(FrozenPopulation)
+    freezer_box = models.ForeignKey(FreezerBox)
     description = models.CharField(max_length=300, blank=True)
     person = models.CharField(max_length=200, blank=True)
 
     class Meta:
         unique_together = (("frozen_population", "isolate_id"),)
     # TODO - encode experiments done on the isolate
+
