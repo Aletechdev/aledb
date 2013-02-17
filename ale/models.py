@@ -44,8 +44,7 @@ class AleId(models.Model):
     ale_id = models.IntegerField()
     description = models.CharField(max_length=300)
     ale_experiment = models.ForeignKey(AleExperiment)
-    starting_strain_population = models.ForeignKey("FrozenPopulation", null=True, blank=True, default=None)
-    starting_strain_isolate = models.ForeignKey("Isolate", null=True, blank=True, default=None)
+    starting_strain = models.ForeignKey("Isolate", null=True, blank=True, default=None)
 
     def __unicode__(self):
         return "ALE #%d from %s" % (self.ale_id, self.ale_experiment.name)
@@ -66,12 +65,11 @@ class FreezerBox(models.Model):
     class Meta:
         verbose_name_plural = "Freezer Boxes"
         
-class FrozenPopulation(models.Model):
+
+class Flask(models.Model):
     ale_id = models.ForeignKey(AleId)
     flask_number = models.IntegerField(blank=True,
         help_text="Enter 0 if the population did not originate from an ALE")
-    person = models.CharField(max_length=50)
-    freezer_box = models.ForeignKey(FreezerBox)
     media = models.ForeignKey(Media)
     comments = models.CharField(max_length=200, help_text="If the population did not originate from an ALE put the name of the strain here")
 
@@ -86,17 +84,19 @@ class FrozenPopulation(models.Model):
 
     class Meta:
         unique_together = (("ale_id", "flask_number"),)
-        verbose_name_plural = "Frozen Populations"
+        verbose_name_plural = "Flasks"
         
 
 class Isolate(models.Model):
-    isolate_id = models.IntegerField()
-    frozen_population = models.ForeignKey(FrozenPopulation)
+    isolate_number = models.IntegerField()
+    parent_isolate = models.ForeignKey("Isolate", blank=True, null=True)
+    flask = models.ForeignKey(Flask)
+    is_population = models.BooleanField()
     freezer_box = models.ForeignKey(FreezerBox)
     description = models.CharField(max_length=300, blank=True)
     person = models.CharField(max_length=200, blank=True)
 
     class Meta:
-        unique_together = (("frozen_population", "isolate_id"),)
+        unique_together = (("flask", "isolate_number"),)
     # TODO - encode experiments done on the isolate
 
