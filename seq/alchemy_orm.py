@@ -56,7 +56,10 @@ class Media(Base):
 class AleId(Base):
     __table__ = Table("ale_aleid", metadata, autoload=True)
     ale_experiment = relationship(AleExperiment, backref="ale_ids")
-    starting_strain = relationship("Isolate")
+    starting_strain = relationship("Isolate",
+        # for some reason this fails in sqlite so more specification is needed
+        primaryjoin="AleId.starting_strain_id == Isolate.id",
+        foreign_keys=[__table__.c.starting_strain_id])
 
 class FreezerBox(Base):
     __table__ = Table("ale_freezerbox", metadata, autoload=True)
@@ -71,7 +74,7 @@ class Isolate(Base):
     __table__ = Table("ale_isolate", metadata, autoload=True)
     flask = relationship("Flask", backref="isolates")
     freezer_box = relationship("FreezerBox")
-    child_isolates = relationship("Isolate",)
+    #child_isolates = relationship("Isolate")
 
 
 def query_or_create(session, class_type, **kwargs):
