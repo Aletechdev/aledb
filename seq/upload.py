@@ -6,10 +6,10 @@ from os.path import join
 
 
 def add_breseq_results(session, isolate_id, person, breseq_folder):
-    with open(breseq_folder + "summary.html") as infile:
+    with open(join(breseq_folder, "summary.html")) as infile:
         summary_html = BeautifulSoup(infile)
 
-    with open(breseq_folder + "index.html") as infile:
+    with open(join(breseq_folder, "index.html")) as infile:
         html_file = BeautifulSoup(infile)
 
     mutation_table = html_file.find("th", attrs={"class": "mutation_header_row"}).parent.parent
