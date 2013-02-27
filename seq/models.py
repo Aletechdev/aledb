@@ -6,6 +6,7 @@ class ResequencingExperiment(models.Model):
     #person = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
     person = models.CharField(max_length=200, blank=True)
     reads = models.IntegerField(blank=True, null=True)
+    average_read_length = models.FloatField(blank=True, null=True)
     mutations = models.ManyToManyField("Mutation", through="ObservedMutation")
     # TODO - add more information
 

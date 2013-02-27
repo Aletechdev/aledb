@@ -41,6 +41,50 @@ class Mutation(Base):
         backref=backref("mutations", viewonly=True),
         viewonly=True)
 
+# models for ALE objects
+
+class Instrument(Base):
+    __table__ = Table("ale_instrument", metadata, autoload=True)
+
+class AleExperiment(Base):
+    __table__ = Table("ale_aleexperiment", metadata, autoload=True)
+    instrument = relationship(Instrument, backref="ale_experiments")
+
+class Media(Base):
+    __table__ = Table("ale_media", metadata, autoload=True)
+
+class AleId(Base):
+    __table__ = Table("ale_aleid", metadata, autoload=True)
+    ale_experiment = relationship(AleExperiment, backref="ale_ids")
+    starting_strain = relationship("Isolate")
+
+class FreezerBox(Base):
+    __table__ = Table("ale_freezerbox", metadata, autoload=True)
+
+class Flask(Base):
+    __table__ = Table("ale_flask", metadata, autoload=True)
+    ale_id = relationship("AleId", backref="flasks")
+    media = relationship("Media", backref="flasks")
+    
+
+class Isolate(Base):
+    __table__ = Table("ale_isolate", metadata, autoload=True)
+    flask = relationship("Flask", backref="isolates")
+    freezer_box = relationship("FreezerBox")
+    child_isolates = relationship("Isolate",)
+
+
+def query_or_create(session, class_type, **kwargs):
+    """query an object using filter_by on the kwargs. If no such object
+    is found in the database, a new one will be created which satisfies
+    these constraints, and added to the session"""
+    result = session.query(class_type).filter_by(**kwargs).first()
+    if result is None:
+        result = class_type()
+        for key, value in kwargs.iteritems():
+            setattr(result, key, value)
+        session.add(result)
+    return result
 
 if __name__ == "__main__":
     session = Session()
