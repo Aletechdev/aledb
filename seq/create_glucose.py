@@ -6,6 +6,7 @@ from os.path import abspath, dirname, isdir, isfile
 
 session = Session()
 
+# create the instrument, experiment, etc. to the isolates for the strains
 instrument = query_or_create(session, Instrument, name="UCSD1")
 experiment = query_or_create(session, AleExperiment, name="glucose evolution",
     instrument=instrument, person="ryan", date=datetime.date.today(), simulation=False)
@@ -22,10 +23,13 @@ for i in range(11):
             freezer_box=freezer_box)
         clone = query_or_create(session, Isolate, flask=flask, isolate_number=1,
             person="Gaby", is_population=False, freezer_box=freezer_box)
+        # each clone is made from the frozen population
         clone.parent_isolate_id = population_isolate.id
 
 session.commit()
 
+
+# sloppy code to find sequencing experiments based off of folder names
 sequencing_path = "/home/aebrahim/ale_sequencing/"
 
 runs = [i for i in listdir(sequencing_path) if isdir(sequencing_path + i) and isfile(sequencing_path + i + "/index.html")]
@@ -35,13 +39,15 @@ flask_mapping = {"x": 1, "y": 2, "z": 3}
 for i in runs:
     if len(i) > 4:
         continue
+    # find the isolate from the folder name
     ale_number = int(i.split("_")[0])
     flask_letter = i.split("_")[1]
     flask_number = flask_mapping[flask_letter]
     ale_id = session.query(AleId).filter_by(ale_experiment=experiment, ale_id=ale_number).first()
     flask = session.query(Flask).filter_by(flask_number=flask_number, ale_id=ale_id).first()
     isolate = session.query(Isolate).filter_by(flask=flask, is_population=False).first()
+    # upload data
     add_breseq_results(session, isolate.id, "Gaby", sequencing_path + i)
 
 session.commit()
-from IPython import embed; embed()
+
