@@ -10,9 +10,6 @@ urlpatterns = patterns('',
     # url(r'^$', 'aleinfo.views.home', name='home'),
     #url(r'^aleinfo/', include('aleinfo.urls')),
 
-    url(r'^$', 'home.views.index'),
-    
-    url(r'^contact/', 'home.views.contact'),
     
     url(r'^grappelli/', include('grappelli.urls')),
 
