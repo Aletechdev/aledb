@@ -49,7 +49,7 @@ class AleIdAdmin(admin.ModelAdmin):
 @add_link_field()
 class AleIdList(admin.TabularInline):
     model = AleId
-    extra = 9
+    extra = 0
 
 class AleExperimentAdmin(admin.ModelAdmin):
     inlines = [AleIdList]

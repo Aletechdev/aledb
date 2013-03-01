@@ -77,7 +77,10 @@ class Flask(models.Model):
     comments = models.CharField(max_length=200, blank=True)
 
     def __unicode__(self):
-        return "Flask#%d < %s" % (self.flask_number, self.ale_id)
+        if self.ale_id.description.lower() == ('Not from ALE').lower():
+            return 'Not from ALE'
+        else:
+            return "Flask#%d < %s" % (self.flask_number, self.ale_id)
         
     def ale_experiment(self):
         return self.ale_id.ale_experiment.ale_id
@@ -97,7 +100,7 @@ class Isolate(models.Model):
     person = models.CharField(max_length=200, blank=True)
     
     def __unicode__(self):
-        if self.flask.flask_number == 0:
+        if self.flask.ale_id.description.lower() == ('Not from ALE').lower():
             return self.description
         else:
             if self.is_population:
@@ -108,4 +111,3 @@ class Isolate(models.Model):
     class Meta:
         unique_together = (("flask", "isolate_number"),)
     # TODO - encode experiments done on the isolate
-
