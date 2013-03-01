@@ -92,7 +92,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
@@ -105,6 +105,7 @@ ROOT_URLCONF = 'aleinfo.urls'
 WSGI_APPLICATION = 'aleinfo.wsgi.application'
 
 TEMPLATE_DIRS = (
+    'C:/Users/user/Desktop/ALE_Logistics/html'
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -119,6 +120,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'ale',
     'grappelli',
+    'home',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
