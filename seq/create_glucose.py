@@ -30,24 +30,30 @@ session.commit()
 
 
 # sloppy code to find sequencing experiments based off of folder names
-sequencing_path = "/home/aebrahim/ale_sequencing/"
+sequencing_path = "/home/aebrahim/sequencing/glucose_ale_reseq/"
 
 runs = [i for i in listdir(sequencing_path) if isdir(sequencing_path + i) and isfile(sequencing_path + i + "/index.html")]
 
-flask_mapping = {"x": 1, "y": 2, "z": 3}
-
 for i in runs:
-    if len(i) > 4:
-        continue
+    split = i.split("_")
     # find the isolate from the folder name
-    ale_number = int(i.split("_")[0])
-    flask_letter = i.split("_")[1]
-    flask_number = flask_mapping[flask_letter]
-    ale_id = session.query(AleId).filter_by(ale_experiment=experiment, ale_id=ale_number).first()
-    flask = session.query(Flask).filter_by(flask_number=flask_number, ale_id=ale_id).first()
-    isolate = session.query(Isolate).filter_by(flask=flask, is_population=False).first()
+    ale_number = int(split[2])
+    flask_number = int(split[4])
+    isolate_number = int(split[6])
+    pop = split[-1] == "pop"
+    print i
+    print ale_number, flask_number, isolate_number, pop
+    ale_id = query_or_create(session, AleId, ale_experiment=experiment,
+        ale_id=ale_number)
+    flask = query_or_create(session, Flask, flask_number=flask_number,
+        ale_id=ale_id, media=media)
+    isolate = query_or_create(session, Isolate, flask=flask,
+        isolate_number=isolate_number, is_population=pop,
+        freezer_box=freezer_box, person="Gaby")
+    session.commit()
     # upload data
-    add_breseq_results(session, isolate.id, "Gaby", sequencing_path + i)
+    if not pop:
+        add_breseq_results(session, isolate.id, "Gaby", sequencing_path + i)
 
 session.commit()
 
