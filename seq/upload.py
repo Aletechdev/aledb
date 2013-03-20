@@ -4,13 +4,16 @@ from BeautifulSoup import BeautifulSoup
 from os.path import join
 
 
-def add_breseq_results(session, isolate_id, person, breseq_folder):
+def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
     """add breseq results to the database
 
     Parses the html output from a breseq run and adds those objects into
     the sqlalchemy session.
     
     session.commit() is not run in the function, and should be run afterwards
+    
+    Setting the wt flag allows any mutations that appear in the starting strain
+    relative to the reference to be annotated as reference errors.
     """
     # html file displaying summary statistics
     
@@ -42,6 +45,8 @@ def add_breseq_results(session, isolate_id, person, breseq_folder):
         mutation = query_or_create(session, Mutation,
             position=int(attrs[1].text.replace(",", "")),
             sequence_change=attrs[2].text)
+        if wt:
+            mutation.reference_error = True
         if mutation.protein_change is None:
             change = attrs[3].renderContents()
             mutation.protein_change = change
