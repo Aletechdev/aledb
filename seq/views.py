@@ -15,16 +15,7 @@ def index(request):
     experiments = ResequencingExperiment.objects.all()
     template = loader.get_template("experiment_view.html")
     context = Context({"experiments": experiments})
-    return HttpResponse(template.render(context))er of servers in parallel or serially. These commands are grouped in tasks (regular python functions) and specified in a 'fabfile'.
-
-It is a bit like a dumbed down Capistrano, except it's in Python, dosn't expect you to be deploying Rails applications, and the 'put' command works.
-
-Unlike Capistrano, Fabric want's to stay small, light, easy to change and not bound to any specific framework.
-
-Registration Date: Fri 04 Jan 2008 07:52:24 PM UTC
-License: GNU General Public License v2 or later
-Development Status: 3 - Alpha 
-
+    return HttpResponse(template.render(context))
 
 def experiment_table(request):
     experiments = ResequencingExperiment.objects.all()
