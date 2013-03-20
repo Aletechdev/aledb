@@ -26,7 +26,10 @@ def experiment_table(request):
     mutation_mapping = dict((mutation.id, i) for i, mutation in enumerate(mutations))
     table_header = """<tr><td>Experiment</td>"""
     for mutation in mutations:
-        table_header += """<td>%d %s</td>""" % (mutation.position, mutation.sequence_change)
+        if mutation.reference_error:
+            table_header += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
+        else:
+            table_header += """<td>%d %s</td>""" % (mutation.position, mutation.sequence_change)
     table_header += "</tr>"
     table_entries = [[None] * len(mutations) for i in range(len(experiments))]
     for observed in ObservedMutation.objects.all():
@@ -64,8 +67,16 @@ def mutation_table(request):
             """<td class="true">%s</td>""" % observed.evidence.replace("evidence/", experiment_urls[observed.sequencing_experiment_id] + "/evidence/")
     table_body = ""
     for mutation in mutations:
-        table_body += "<tr><td>%d %s</td><td>%s</td><td>%s</td>%s</tr>\n" % \
-            (mutation.position, mutation.sequence_change, mutation.gene, mutation.protein_change, "".join(table_entries[mutation_mapping[mutation.id]]))
+        table_row = "<tr>"
+        if mutation.reference_error:
+            table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
+        else:
+            table_row += "<td>%d %s</td>" % (mutation.position, mutation.sequence_change)
+        table_row += "<td>%s</td>" % (mutation.gene)
+        table_row += "<td>%s</td>" % (mutation.protein_change)
+        table_row += "".join(table_entries[mutation_mapping[mutation.id]])
+        table_row += "</tr>"
+        table_body += table_row + "\n"
     template = loader.get_template("table_template.html")
     context = Context({"table_body": mark_safe(table_body), "title": "Mutation table", "table_header": mark_safe(table_header)})
     return HttpResponse(template.render(context))
