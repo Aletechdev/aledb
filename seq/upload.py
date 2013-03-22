@@ -42,7 +42,12 @@ def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
     except:
         None
     # average coverage is 3rd table, 2nd row (could also be more rows), 5th column
-    seq_experiment.mean_coverage = summary_html.findChildren("table")[2].findChildren("tr")[1].findChildren("td")[4].text
+    mean_coverage = summary_html.findChildren("table")[2].findChildren("tr")[1].findChildren("td")[4].text
+    try:
+        mean_coverage = int(mean_coverage)
+    except:
+        mean_coverage = 0
+    seq_experiment.mean_coverage = mean_coverage
     session.add(seq_experiment)
 
     # add in the appropriate mutations from the mutations html file
