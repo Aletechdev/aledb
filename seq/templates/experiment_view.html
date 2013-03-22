@@ -19,7 +19,7 @@
     <table id="runs" class="tablesorter"><thead><tr><th>Run name</th><th># Predicted mutations</th><th>Mean coverage</th><th>Reads</th><th>Average Read length</th></tr></thead>
     <tbody>
     {% for experiment in experiments %}
-        <tr><td>{{experiment.get_isolate_name}}</td><td>{{experiment.mutations.count}}</td><td>{{experiment.mean_coverage}}</td><td>{{experiment.reads}}</td><td>{{experiment.average_read_length}}</td></tr>
+        <tr><td><a href="{{seq_url}}{{experiment.location}}">{{experiment.get_isolate_name}}</a></td><td>{{experiment.mutations.count}}</td><td>{{experiment.mean_coverage}}</td><td>{{experiment.reads}}</td><td>{{experiment.average_read_length}}</td></tr>
     {% endfor %}
     </tbody>
     </body>

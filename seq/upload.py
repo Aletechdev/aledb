@@ -37,7 +37,10 @@ def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
     seq_experiment.person = person
     seq_experiment.reads = int(row_read_info[2].b.text.replace(",", ""))
     seq_experiment.average_read_length = row_read_info[5].text.split("&nbsp;")[0]
-    seq_experiment.percentage_mapped = float(row_read_info[7].text.replace("%", ""))
+    try:
+        seq_experiment.percentage_mapped = float(row_read_info[7].text.replace("%", ""))
+    except:
+        None
     # average coverage is 3rd table, 2nd row (could also be more rows), 5th column
     seq_experiment.mean_coverage = summary_html.findChildren("table")[2].findChildren("tr")[1].findChildren("td")[4].text
     session.add(seq_experiment)

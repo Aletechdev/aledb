@@ -34,6 +34,8 @@ class Mutation(models.Model):
     protein_change = models.CharField(max_length=300, blank=True, null=True)
     gene = models.CharField(max_length=300, blank=True, null=True)
     reference_error = models.NullBooleanField(default=False)
+    def __unicode__(self):
+        return u"%d %s" % (self.position, self.sequence_change)
     class Meta:
         unique_together = (("position", "sequence_change"),)
 
