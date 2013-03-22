@@ -4,6 +4,7 @@ from seq import views
 
 urlpatterns = patterns('',
     url('^$', views.index, name="index"),
+    url('^lists$', views.lists, name="lists"),
     url('^experiments$', views.experiment_table, name="experiment_table"),
     url('^mutations$', views.mutation_table, name="mutation_table"),
 )
