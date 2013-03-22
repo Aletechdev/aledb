@@ -3,7 +3,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>Resequencing Runs</title>
+        <title>Ale Experiments</title>
         <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script> 
         <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
         <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css" media="print, projection, screen" />
@@ -18,17 +18,15 @@
     <body>
     <table id="runs" class="tablesorter">
         <thead><tr>
-            <th>Run name</th><th># Predicted mutations</th><th>Mean coverage</th><th>Reads</th><th>Average Read length</th><th>Percent mapped</th></tr></thead>
+            <th>ALE experiment</th><th>Resequencing List</th><th>Mutation table</th><th>Mutation Table by Experiment</th>
+        </tr></thead>
     <tbody>
     {% for experiment in experiments %}
         <tr>
-            <td><a href="{{seq_url}}{{experiment.location}}">{{experiment.get_isolate_name}}</a></td>
-            <td>{{experiment.mutations.count}}</td>
-            <td>{{experiment.mean_coverage}}</td>
-            <td>{{experiment.reads}}</td>
-            <td>{{experiment.average_read_length}}</td>
-            <td>{{experiment.percentage_mapped}}%</td>
-        </tr>
+            <td>{{experiment.name}}</td>
+            <td><a href="lists?ale_experiment_id={{experiment.ale_id}}">link</a></td>
+            <td><a href="mutations?ale_experiment_id={{experiment.ale_id}}">link</a></td>
+            <td><a href="experiments?ale_experiment_id={{experiment.ale_id}}">link</a></td>
     {% endfor %}
     </tbody>
     </body>
