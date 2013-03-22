@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.template import Context, loader
 from django.utils.safestring import mark_safe
+from django.contrib.auth.decorators import login_required
 
 from seq.models import *
 from ale.models import AleExperiment
@@ -10,13 +11,6 @@ if hasattr(settings, "sequencing_url"):
     sequencing_url = settings.sequencing_url
 else:
     sequencing_url = "http://localhost/sequencing/"
-
-def index(request):
-    """display a list of ales with links to the resequencing"""
-    experiments = AleExperiment.objects.all()
-    template = loader.get_template("index.html")
-    context = Context({"experiments": experiments, "seq_url": sequencing_url})
-    return HttpResponse(template.render(context))
 
 def get_seq_experiments(request):
     """return a list of ALE experiments"""
@@ -29,6 +23,15 @@ def get_seq_experiments(request):
             "SELECT reseq_id AS id FROM id_mapping WHERE experiment_id=%d;" % ale_experiment_id)
     return experiments
 
+@login_required
+def index(request):
+    """display a list of ales with links to the resequencing"""
+    experiments = AleExperiment.objects.all()
+    template = loader.get_template("index.html")
+    context = Context({"experiments": experiments, "seq_url": sequencing_url})
+    return HttpResponse(template.render(context))
+
+@login_required
 def lists(request):
     """return a list of resequencing experiments"""
     experiments = get_seq_experiments(request)
@@ -36,6 +39,7 @@ def lists(request):
     context = Context({"experiments": experiments, "seq_url": sequencing_url})
     return HttpResponse(template.render(context))
 
+@login_required
 def experiment_table(request):
     experiments = get_seq_experiments(request)
     experiment_mapping = dict((o.id, i) for i, o in enumerate(experiments))
@@ -67,6 +71,7 @@ def experiment_table(request):
     context = Context({"table_body": mark_safe(table_body), "title": "Experiment table", "table_header": mark_safe(table_header)})
     return HttpResponse(template.render(context))
 
+@login_required
 def mutation_table(request):
     experiments = get_seq_experiments(request)
     experiment_mapping = dict((o.id, i) for i, o in enumerate(experiments))
