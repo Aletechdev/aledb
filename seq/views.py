@@ -13,8 +13,10 @@ else:
 
 def index(request):
     """display a list of ales with links to the resequencing"""
-    ales = AleExperiment.objects.all()
-    return HttpResponse("coming soon")
+    experiments = AleExperiment.objects.all()
+    template = loader.get_template("index.html")
+    context = Context({"experiments": experiments, "seq_url": sequencing_url})
+    return HttpResponse(template.render(context))
 
 def get_seq_experiments(request):
     """return a list of ALE experiments"""
