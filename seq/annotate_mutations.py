@@ -15,6 +15,8 @@ for mutation in session.query(Mutation).filter_by(gene=None):
         # intergenic
         left_gene = ome_session.query(ome.Gene).filter(ome.Gene.rightpos < position).order_by(ome.Gene.rightpos.desc()).limit(1).first()
         right_gene = ome_session.query(ome.Gene).filter(ome.Gene.leftpos > position).order_by(ome.Gene.leftpos.asc()).limit(1).first()
+        if left_gene is None:  # wrap around circular genome
+            left_gene = ome_session.query(ome.Gene).order_by(ome.Gene.rightpos.desc()).limit(1).first()
         left_gene_str = base_ecocyc_link % (left_gene.bnum, left_gene.name)
         right_gene_str = base_ecocyc_link % (right_gene.bnum, right_gene.name)
         mutation.gene = """<span class="intergenic">%s/%s</i>""" % (left_gene_str, right_gene_str)
