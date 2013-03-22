@@ -9,10 +9,11 @@ class ResequencingExperiment(models.Model):
     average_read_length = models.FloatField(blank=True, null=True)
     mutations = models.ManyToManyField("Mutation", through="ObservedMutation")
     location = models.CharField(max_length=200, blank=True, null=True)
-    
-    @property
-    def mean_coverage(self):
-        return self.average_read_length * self.reads / 4639675.
+    mean_coverage = models.FloatField(blank=True, null=True)
+    percentage_mapped = models.FloatField(blank=True, null=True)
+    #@property
+    #def mean_coverage(self):
+    #    return self.average_read_length * self.reads / 4639675.
     
     @property
     def ale_id(self):
