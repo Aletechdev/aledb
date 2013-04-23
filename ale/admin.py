@@ -57,9 +57,9 @@ class AleExperimentAdmin(admin.ModelAdmin):
     list_filter = ("simulation","instrument","person")
     search_fields = ["ale_id"]
 
+
 class FreezerBoxAdmin(admin.ModelAdmin):
     inlines = [IsolateList]
-
 
 admin.site.register(AleExperiment, AleExperimentAdmin)
 admin.site.register(Instrument)
