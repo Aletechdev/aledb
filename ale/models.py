@@ -8,7 +8,6 @@ class Instrument(models.Model):
         return self.name
 
 class AleExperiment(models.Model):
-    # TODO - id should be something that you enter
     ale_id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=40)
     person = models.CharField(max_length=200)
@@ -24,6 +23,7 @@ class AleExperiment(models.Model):
     
     class Meta:
         verbose_name_plural = "ALE Experiments"
+
 
 class Media(models.Model):
     temperature = models.FloatField(default=37,
