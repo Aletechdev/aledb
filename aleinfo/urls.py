@@ -1,5 +1,6 @@
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls import patterns, include, url
+#from aleinfo import views
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -8,7 +9,9 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'aleinfo.views.home', name='home'),
-    # url(r'^aleinfo/', include('aleinfo.foo.urls')),
+    #url(r'^aleinfo/', include('aleinfo.urls')),
+
+
     (r'^accounts/login/$', 'django.contrib.auth.views.login'),
 
     url(r'^grappelli/', include('grappelli.urls')),
