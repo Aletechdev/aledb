@@ -6,7 +6,7 @@ SELECT
   ale_aleid.id AS ale_no,
   ale_aleexperiment.ale_id AS experiment_id
 FROM seq_resequencingexperiment
-JOIN ale_isolate
+RIGHT OUTER JOIN ale_isolate
 ON seq_resequencingexperiment.isolate_id = ale_isolate.id
 JOIN ale_flask
 ON ale_flask.id = ale_isolate.flask_id
