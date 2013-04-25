@@ -1,5 +1,7 @@
 from django.db import models
 
+blank_field = {"blank": True, "null": True}
+
 # Create your models here.
 class Instrument(models.Model):
     name = models.CharField(max_length=200)
@@ -14,7 +16,7 @@ class AleExperiment(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     instrument = models.ForeignKey(Instrument)
     simulation = models.BooleanField()
-    notes = models.TextField(blank=True)
+    notes = models.TextField(**blank_field)
     def __unicode__(self):
         if self.simulation:
             return "#%d-%s-SIM" % (self.ale_id, self.name)
@@ -32,7 +34,7 @@ class Media(models.Model):
         help_text="Volume of culture in each flask (mL)")
     stirring_speed = models.FloatField(default=1123, help_text="RPM")
     description = models.CharField(max_length=200)
-    other = models.TextField(blank=True)
+    other = models.TextField(**blank_field)
     # todo - figure out components
     # maybe carbon source, etc.? or track individual chemicals
     def __unicode__(self):
@@ -45,9 +47,9 @@ class Media(models.Model):
 class AleId(models.Model):
     """Parallel ALE's run within an ALE experiment"""
     ale_id = models.IntegerField()
-    description = models.CharField(max_length=300)
+    description = models.CharField(max_length=300, **blank_field)
     ale_experiment = models.ForeignKey(AleExperiment)
-    starting_strain = models.ForeignKey("Isolate", null=True, blank=True, default=None)
+    starting_strain = models.ForeignKey("Isolate", default=None, **blank_field)
 
     def __unicode__(self):
         #return "ALE #%d < %s" % (self.ale_id, self.ale_experiment.name)
@@ -72,13 +74,14 @@ class FreezerBox(models.Model):
 
 class Flask(models.Model):
     ale_id = models.ForeignKey(AleId)
-    flask_number = models.IntegerField(blank=True)
+    flask_number = models.IntegerField(**blank_field)
     media = models.ForeignKey(Media)
-    comments = models.CharField(max_length=200, blank=True)
+    comments = models.CharField(max_length=200, **blank_field)
 
     def __unicode__(self):
-        if self.ale_id.description.lower() == ('Not from ALE').lower():
-            return 'Not from ALE'
+        if self.ale_id.description is not None:
+            if self.ale_id.description.lower() == ('Not from ALE').lower():
+                return 'Not from ALE'
         else:
             return "Flask#%d < %s" % (self.flask_number, self.ale_id)
         
@@ -92,22 +95,22 @@ class Flask(models.Model):
 
 class Isolate(models.Model):
     isolate_number = models.IntegerField()
-    parent_isolate = models.ForeignKey("Isolate", blank=True, null=True)
+    parent_isolate = models.ForeignKey("Isolate", **blank_field)
     flask = models.ForeignKey(Flask)
     is_population = models.BooleanField()
     freezer_box = models.ForeignKey(FreezerBox)
-    description = models.CharField(max_length=300, blank=True)
-    person = models.CharField(max_length=200, blank=True)
+    description = models.CharField(max_length=300, **blank_field)
+    person = models.CharField(max_length=200, **blank_field)
     
     def __unicode__(self):
-        if self.flask.ale_id.description.lower() == ('Not from ALE').lower():
-            return self.description
+        if self.flask.ale_id.description is not None:
+            if self.flask.ale_id.description.lower() == ('Not from ALE').lower():
+                return self.description
         else:
-            if self.is_population:
-                return "#%d POP < %s" % (self.isolate_number, self.flask)
-            else:
-                return "#%d COL < %s" % (self.isolate_number, self.parent_isolate)
-    
+            p_c = "POP" if self.is_population else "COL"
+            parent = self.parent_isolate if self.parent_isolate else self.flask
+            return "#%d %s < %s" % (self.isolate_number, p_c, parent)
+
     class Meta:
         unique_together = (("flask", "isolate_number"),)
     # TODO - encode experiments done on the isolate
