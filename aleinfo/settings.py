@@ -5,6 +5,8 @@ TEMPLATE_DEBUG = DEBUG
 
 GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
 
+sequencing_url = "http://clostridium.ucsd.edu/sequencing/"
+
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
 )
@@ -15,7 +17,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'cellar',                      # Or path to database file if using sqlite3.
-        'USER': 'root',                      # Not used with sqlite3.
+        'USER': 'ale',                      # Not used with sqlite3.
         'PASSWORD': 'ecoliale',                  # Not used with sqlite3.
         'HOST': '127.0.0.1',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
@@ -92,7 +94,7 @@ TEMPLATE_LOADERS = (
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
@@ -105,6 +107,7 @@ ROOT_URLCONF = 'aleinfo.urls'
 WSGI_APPLICATION = 'aleinfo.wsgi.application'
 
 TEMPLATE_DIRS = (
+    'C:/Users/user/Desktop/ALE_Logistics/html'
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.

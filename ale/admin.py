@@ -49,7 +49,7 @@ class AleIdAdmin(admin.ModelAdmin):
 @add_link_field()
 class AleIdList(admin.TabularInline):
     model = AleId
-    extra = 9
+    extra = 0
 
 class AleExperimentAdmin(admin.ModelAdmin):
     inlines = [AleIdList]
@@ -57,9 +57,9 @@ class AleExperimentAdmin(admin.ModelAdmin):
     list_filter = ("simulation","instrument","person")
     search_fields = ["ale_id"]
 
+
 class FreezerBoxAdmin(admin.ModelAdmin):
     inlines = [IsolateList]
-
 
 admin.site.register(AleExperiment, AleExperimentAdmin)
 admin.site.register(Instrument)
