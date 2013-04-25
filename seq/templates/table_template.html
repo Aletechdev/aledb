@@ -1,0 +1,57 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>{{title}}</title>
+        <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script> 
+        <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
+        <style type="text/css" title="currentStyle">
+                @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
+                .FixedHeader_Cloned th {
+                background-color: white;
+                opacity: 0.5;}
+                .intergenic {
+                    font-style: italic;
+                }
+                .mutation_in_codon {
+                    color: red;
+                    text-decoration: underline;
+                }
+                .reference_error {
+                    text-decoration: line-through;
+                }
+        </style>
+        <script type="text/javascript" charset="utf8" src="/static/DataTables/media/js/jquery.dataTables.js"></script>
+        <script type="text/javascript" charset="utf8" src="/static/DataTables/extras/FixedHeader/js/FixedHeader.js"></script>
+        <script type="text/javascript" charset="utf8" src="/static/DataTables/extras/ColReorder/media/js/ColReorder.js"></script>
+        <script type="text/javascript" charset="utf8" src="/static/DataTables/extras/TableTools/media/js/TableTools.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function() {
+                /* set true and false cell colors */
+                $(".true").css("background-color", "rgba(0, 255, 0, 0.1)");
+                $(".false").css("background-color", "rgba(255, 0, 0, 0.1)");
+                var oTable = $("#data").dataTable({
+                    "bPaginate": false,
+                    "bInfo": false,
+                    //"sDom": 'RC<"clear">lfrtip',
+                    /*"oTableTools": {
+                        "sSwfPath": "/static/DataTables/extras/TableTools/media/swf/copy_csv_xls_pdf.swf",
+                        "aButtons": [ "copy", "print" ]
+                    }*/
+                });
+                //new FixedHeader(oTable);
+            });
+        </script>
+    </head>
+    <body>
+        <table id="data">
+            <thead>
+                {{table_header}}
+            </thead>
+            <tbody>
+                {{table_body}}
+            </tbody>
+        </table>
+    </body>
+</html>
