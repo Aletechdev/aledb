@@ -23,7 +23,7 @@ elif db_settings["ENGINE"].endswith("postgresql_psycopg2"):
         (db_settings["USER"], db_settings["PASSWORD"],
         db_settings["HOST"], db_settings["NAME"])
 elif db_settings["ENGINE"].endswith("mysql"):
-    connection_str = "postgresql://%s:%s@%s/%s" % \
+    connection_str = "mysql://%s:%s@%s/%s" % \
         (db_settings["USER"], db_settings["PASSWORD"],
         db_settings["HOST"], db_settings["NAME"])
 engine = create_engine(connection_str)
