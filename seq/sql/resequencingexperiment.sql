@@ -1,5 +1,4 @@
-DROP VIEW IF EXISTS id_mapping;
-CREATE OR REPLACE VIEW id_mapping AS
+CREATE VIEW id_mapping AS
 SELECT
   seq_resequencingexperiment.id AS reseq_id,
   ale_isolate.id AS isolate_id,

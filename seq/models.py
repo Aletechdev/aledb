@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 class ResequencingExperiment(models.Model):
     isolate = models.ForeignKey("ale.Isolate")
     #person = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
