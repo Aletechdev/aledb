@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.auth.decorators import login_required
 
 from seq.models import *
-from ale.models import AleExperiment
+from ale.models import *
 import aleinfo.settings as settings
 
 if hasattr(settings, "sequencing_url"):
@@ -13,14 +13,15 @@ else:
     sequencing_url = "http://localhost/sequencing/"
 
 def get_seq_experiments(request):
-    """return a list of ALE experiments"""
+    """return a list of seq experiments for a given ALE"""
     ale_experiment_id = request.GET.get("ale_experiment_id")
     if ale_experiment_id is None:
         experiments = ResequencingExperiment.objects.all()
     else:
         ale_experiment_id = int(ale_experiment_id)
         experiments =  ResequencingExperiment.objects.raw(
-            "SELECT reseq_id AS id FROM id_mapping WHERE experiment_id=%d;" % ale_experiment_id)
+            """SELECT reseq_id AS id FROM id_mapping WHERE 
+            experiment_id=%d AND reseq_id IS NOT NULL;""" % ale_experiment_id)
     return experiments
 
 @login_required
@@ -104,3 +105,19 @@ def mutation_table(request):
     template = loader.get_template("table_template.html")
     context = Context({"table_body": mark_safe(table_body), "title": "Mutation table", "table_header": mark_safe(table_header)})
     return HttpResponse(template.render(context))
+
+@login_required
+def isolate_list(request):
+    ale_experiment_id = request.GET.get("ale_experiment_id")
+    if ale_experiment_id is None:
+        isolates = Isolate.objects.all()
+    else:
+        ale_experiment_id = int(ale_experiment_id)
+        isolates =  Isolate.objects.raw(
+            """SELECT isolate_id AS id FROM id_mapping WHERE 
+            experiment_id=%d;""" % ale_experiment_id)
+        """return a list of resequencing experiments"""
+    template = loader.get_template("isolate_view.html")
+    context = Context({"isolates": isolates, "seq_url": sequencing_url})
+    return HttpResponse(template.render(context))
+    

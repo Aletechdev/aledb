@@ -7,4 +7,5 @@ urlpatterns = patterns('',
     url('^lists$', views.lists, name="lists"),
     url('^experiments$', views.experiment_table, name="experiment_table"),
     url('^mutations$', views.mutation_table, name="mutation_table"),
+    url('^isolates$', views.isolate_list, name="isolate_table")
 )
