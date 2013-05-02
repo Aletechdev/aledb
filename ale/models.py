@@ -111,6 +111,10 @@ class Isolate(models.Model):
         if self.flask.ale_id.description is not None:
             if self.flask.ale_id.description.lower() == ('Not from ALE').lower():
                 return self.description
+            else:
+                p_c = "POP" if self.is_population else "COL"
+                parent = self.parent_isolate if self.parent_isolate else self.flask
+                return "#%d %s < %s" % (self.isolate_number, p_c, parent)
         else:
             p_c = "POP" if self.is_population else "COL"
             parent = self.parent_isolate if self.parent_isolate else self.flask
