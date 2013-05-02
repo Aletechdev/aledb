@@ -41,7 +41,7 @@ class FlaskList(admin.TabularInline):
     extra = 0
 
 class IsolateAdmin(admin.ModelAdmin):
-    inlines = [FlaskList]
+    inlines = [IsolateList]
     list_display = ("__unicode__","isolate_number","flask")
 
 class AleIdAdmin(admin.ModelAdmin):
