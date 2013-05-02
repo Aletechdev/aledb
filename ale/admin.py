@@ -24,9 +24,10 @@ def add_link_field(target_model = None, field = '', link_text = unicode):
 @add_link_field()
 class IsolateList(admin.TabularInline):
     model = Isolate
-    extra = 0
+    extra = 1
     show_edit_link = True
 
+    
 class FlaskAdmin(admin.ModelAdmin):
     inlines = [IsolateList]
     extra = 0
@@ -38,6 +39,10 @@ class FlaskAdmin(admin.ModelAdmin):
 class FlaskList(admin.TabularInline):
     model = Flask
     extra = 0
+
+class IsolateAdmin(admin.ModelAdmin):
+    inlines = [FlaskList]
+    list_display = ("__unicode__","isolate_number","flask")
 
 class AleIdAdmin(admin.ModelAdmin):
     inlines = [FlaskList]
@@ -65,6 +70,6 @@ admin.site.register(AleExperiment, AleExperimentAdmin)
 admin.site.register(Instrument)
 admin.site.register(Media)
 admin.site.register(Flask, FlaskAdmin)
-admin.site.register(Isolate)
+admin.site.register(Isolate, IsolateAdmin)
 admin.site.register(AleId, AleIdAdmin)
 admin.site.register(FreezerBox, FreezerBoxAdmin)

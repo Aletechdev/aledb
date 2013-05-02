@@ -64,7 +64,10 @@ class FreezerBox(models.Model):
         help_text="A unique name that identifies the box form other boxes")
     number = models.IntegerField(default = 1,
         help_text="Start with 1. If another box with the same name is needed label it with 2, 3 etc... Make sure this box number appears on the label")
-    
+    location = models.CharField(max_length=500, default="None",
+        help_text="Where is the box located")
+    location_last_updated = models.DateField(auto_now_add=True, auto_now=True, default="2013-05-02",
+        help_text="Date when location was last updated")
     def __unicode__(self):
         return "Box #%i - %s" % (self.number, self.name)
     
@@ -82,6 +85,8 @@ class Flask(models.Model):
         if self.ale_id.description is not None:
             if self.ale_id.description.lower() == ('Not from ALE').lower():
                 return 'Not from ALE'
+            else:
+                return "Flask#%d < %s" % (self.flask_number, self.ale_id)
         else:
             return "Flask#%d < %s" % (self.flask_number, self.ale_id)
         
