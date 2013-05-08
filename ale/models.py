@@ -66,7 +66,7 @@ class FreezerBox(models.Model):
         help_text="Start with 1. If another box with the same name is needed label it with 2, 3 etc... Make sure this box number appears on the label")
     location = models.CharField(max_length=500, default="None",
         help_text="Where is the box located")
-    location_last_updated = models.DateField(auto_now_add=True, auto_now=True, default="2013-05-02",
+    location_last_updated = models.DateField(auto_now_add=True, auto_now=True, null=True, default="2013-05-02",
         help_text="Date when location was last updated")
     def __unicode__(self):
         return "Box #%i - %s" % (self.number, self.name)
