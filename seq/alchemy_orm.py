@@ -14,6 +14,10 @@ from settings import DATABASES
 
 db_settings = DATABASES["default"]
 
+hostname = db_settings["HOST"]
+if "PORT" in db_settings:
+    hostname += ":" + db_settings["PORT"]
+
 if db_settings["ENGINE"].endswith("sqlite3"):
     db = "sqlite"
     name = os.path.join(ale_dir, db_settings["NAME"])
@@ -21,11 +25,11 @@ if db_settings["ENGINE"].endswith("sqlite3"):
 elif db_settings["ENGINE"].endswith("postgresql_psycopg2"):
     connection_str = "postgresql://%s:%s@%s/%s" % \
         (db_settings["USER"], db_settings["PASSWORD"],
-        db_settings["HOST"], db_settings["NAME"])
+        hostname, db_settings["NAME"])
 elif db_settings["ENGINE"].endswith("mysql"):
     connection_str = "mysql://%s:%s@%s/%s" % \
         (db_settings["USER"], db_settings["PASSWORD"],
-        db_settings["HOST"], db_settings["NAME"])
+        hostname, db_settings["NAME"])
 engine = create_engine(connection_str)
 Base = declarative_base()
 metadata = MetaData(bind=engine)
