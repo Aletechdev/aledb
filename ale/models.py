@@ -106,6 +106,9 @@ class Isolate(models.Model):
     freezer_box = models.ForeignKey(FreezerBox)
     description = models.CharField(max_length=300, **blank_field)
     person = models.CharField(max_length=200, **blank_field)
+
+    def seq_location(self):
+        return self.resequencingexperiment_set.values_list("location")[0][0]
     
     def __unicode__(self):
         if self.flask.ale_id.description is not None:
