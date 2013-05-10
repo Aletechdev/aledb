@@ -30,7 +30,7 @@
             <td><a href="../admin/ale/isolate/{{isolate.id}}">{{isolate}}</a></td>
             <td>{{isolate.is_population}}</td>
             {% if isolate.resequencingexperiment_set.count > 0 %}
-            <td>True</td>
+            <td><a href="{{seq_url}}{{isolate.seq_location}}">True</a></td>
             {% else %}
             <td>False</td>
             {% endif %}
