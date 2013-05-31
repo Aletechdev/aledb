@@ -26,7 +26,10 @@ class ResequencingExperiment(models.Model):
     # TODO - add more information
 
 class Mutation(models.Model):
-    #type = models.CharField(max_length=5)
+    mutation_type = models.CharField(max_length=3, null=True,
+		help_text="""Use breseq mutation codes, see the genome diff site
+		on the barrick lab wiki (http://tinyurl.com/l3fvnap) for more
+		information""")
     position = models.IntegerField()
     feature_length = models.IntegerField(blank=True, null=True)
     sequence_change = models.CharField(max_length=100)
@@ -39,7 +42,13 @@ class Mutation(models.Model):
         unique_together = (("position", "sequence_change"),)
 
 class ObservedMutation(models.Model):
+    present = models.NullBooleanField()
+    breseq_present = models.NullBooleanField()
+    wt_reads = models.IntegerField(null=True)
+    mutated_reads = models.IntegerField(null=True)
+    other_reads = models.IntegerField(null=True)
+    # TODO think up good statistical test to do
+    #something = models.FloatField(null=True)
     sequencing_experiment = models.ForeignKey(ResequencingExperiment)
     mutation = models.ForeignKey(Mutation)
-    percentage = models.FloatField(blank=True, null=True)
     evidence = models.CharField(max_length=400, blank=True, null=True)
