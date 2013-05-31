@@ -42,6 +42,9 @@ class ObservedMutation(Base):
 
 class ResequencingExperiment(Base):
     __table__ = Table("seq_resequencingexperiment", metadata, autoload=True)
+    isolate= relationship("Isolate",
+        primaryjoin="ResequencingExperiment.isolate_id == Isolate.id",
+        foreign_keys=[__table__.c.isolate_id])
 
 class Mutation(Base):
     __table__ = Table("seq_mutation", metadata, autoload=True)
