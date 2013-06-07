@@ -2,7 +2,7 @@ from alchemy_orm import *
 
 from BeautifulSoup import BeautifulSoup
 from os.path import join
-
+import gdparse
 
 def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
     """add breseq results to the database
@@ -50,12 +50,17 @@ def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
     seq_experiment.mean_coverage = mean_coverage
     session.add(seq_experiment)
 
-    # add in the appropriate mutations from the mutations html file
-    for row in mutation_rows:
+    #parse the output.gd file and retrieve a dictionary of the mutations:
+    with open(join(breseq_folder,'output.gd'),'rb') as gdfile:
+        mutation_data=gdparse.GDParser(gdfile).data['mutation']
+    
+    # add in the appropriate mutations from the index.html file
+    for row_num, row in enumerate(mutation_rows):
         attrs = row.findChildren("td")
         mutation = query_or_create(session, Mutation,
-            position=int(attrs[1].text.replace(",", "")),
-            sequence_change=attrs[2].text)
+            position=mutation_data[row_num+1]['position'], # mutations are in the same order in the html and output.gd files so we can index the ids with row_num
+            sequence_change=attrs[2].text,
+            mutation_type=mutation_data[row_num+1]['type'])
         if wt:
             mutation.reference_error = True
         if mutation.protein_change is None:
