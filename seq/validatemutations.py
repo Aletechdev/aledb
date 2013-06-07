@@ -1,187 +1,13 @@
 #!/usr/bin/python
-import os, sys
+import os
 import math, operator
 import pysam
 import alchemy_orm
 
 from pprint import pprint
 
+BASEPATH='home/phageghost/sequencing'
 PHRED_ASCII_OFFSET=33
-
-def checkNegMutations(experiment,ale_number):
-    """
-    """
-    # generate a dictionary of all mutation_ids for all runs
-    all_mutations=getAllMutations(experiment,ale_number)
-    # figure out which ones were present and then drop out
-    dropout_mutations=findDropOutMutations(all_mutations)
-    # use our checker to see what's going on at the position of each dropout mutation
-    annotated_mutations={}
-    
-    validation_session=alchemy_orm.Session()
-    
-    for flask_number in dropout_mutations:
-        # iterate through each dropout mutation in each flask
-        for dropout_mutation_id in dropout_mutations[flask_number]:
-            for isolate_number in all_mutations[flask_number]:
-                # more cheesiness -  we go query the database to get back the sequencing experiment we had in the first place:
-                seq_exp=validation_session.query(alchemy_orm.ResequencingExperiment, alchemy_orm.Isolate).filter(
-                    alchemy_orm.ResequencingExperiment.isolate.isolate_number==isolate_number,
-                    alchemy_orm.ResequencingExperiment.isolate.flask.flask_number)
-
-                # query or create an entry in the observed mutation table
-                negMutation=alchemy_orm.query_or_create(validation_session,alchemy_orm.ObservedMutation,mutation_id=dropout_mutation_id,sequencing_experiment_id=1)
-                # get the path to the breseq data:
-#                 datapath=negMutation.isolate.
-                
-                print negMutation.experiment.location
-                print negMutation.isolate.isolate_number
-                print negMutation.isolate.flask.flask_number
-#------------------------------------------------------------------------------ 
-                
-                
-                
-def findDropOutMutations(all_mutations):
-    """
-    Find the mutations that have dropped out of an ALE lineage.
-    
-    A dropout mutation is defined as one that appears in all isolates of the previous flask in a lineage but is
-    not present in any isolate of the current flask.
-    
-    Input:
-        all_mutations: A dictionary of all the mutations (as ORM objects) in a particular ALE lineage, keyed by flask.
-        
-    Output:
-        A dictionary of IDs of dropout mutations, keyed by flask number. 
-    """
-    # create a dictionary of mutations that have disappeared in all_mutations
-    dropout_mutations={}
-    # make a list of every flask for this ale sorted in chronological order 
-    flask_list=sorted(all_mutations.keys())
-    if len(flask_list)>1: # dropout mutations can only exist with more than one flask
-        # Idea: create two lists that will parallel the flask list,
-        # one for mutation ids found in every isolate of the corresponding flask (intersection of isolates)
-        # and one for mutation ids found in any isolate of the corresponding flask (union of isolates)
-        # then we compare the intersection to the union.
-        # Caveat: ORM objects are not hashable so to create sets we use their IDs
-        intersect_flask_mutations=[]
-        union_flask_mutations=[]
-        for flask_index,flask_number in enumerate(flask_list):
-            # create a list of sets of mutation ids for each isolate of this flask
-            isolate_mutations=[]
-            for isolate_number in all_mutations[flask_number]:  
-                isolate_mutations.append(set([mut.id for mut in all_mutations[flask_number][isolate_number]]))
-            intersect_flask_mutations.append(set.intersection(*isolate_mutations))
-            union_flask_mutations.append(set.union(*isolate_mutations))
-            # Find any mutations that appear in all the isolates of the previous flask
-            # but none of the isolates in the current flask (they've dropped out)
-            # then store the dropout mutations in a dictionary keyed by flask number
-            if flask_index>=1:
-                #turn the mutation IDs back into mutation objects
-                dropout_mutations[flask_number]=intersect_flask_mutations[flask_index-1]-union_flask_mutations[flask_index]
-    return dropout_mutations
-
-def getAllMutations(experiment_id,ale_number):
-    """
-    Given an experiment and ale number, return a dictionary of all observed mutations for that ale
-    """
-    mutation_validation_session=alchemy_orm.Session()
-    #===========================================================================
-    # Todo:
-    #     Do the filtering for experiment and ale number in the query, not afterward
-    #===========================================================================
-    
-    all_reseqs=mutation_validation_session.query(alchemy_orm.ResequencingExperiment)
-    all_mutations={}
-    
-    for reseq in all_reseqs:
-        # cheesy in-program filtering:
-        if reseq.isolate.flask.ale_id.ale_id==ale_number and reseq.isolate.flask.ale_id.ale_experiment.ale_id==experiment_id:
-            # key out the nested dictionary as needed
-            if reseq.isolate.flask.flask_number not in all_mutations:
-                all_mutations[reseq.isolate.flask.flask_number]={}
-            if reseq.isolate.isolate_number in all_mutations[reseq.isolate.flask.flask_number]:
-                raise Exception("Duplicate sequencing run! Ale {}, Flask {}, Isolate {} already exists for experiment {}".format(ale_number,reseq.isolate.flask.flask_number,reseq.isolate.isolate_number,experiment_id))
-            else:
-                all_mutations[reseq.isolate.flask.flask_number][reseq.isolate.isolate_number]=reseq.mutations
-    return all_mutations
-
-
-def getReads(bamfile, reference, position):
-    """
-    Uses pysam to determine the identity of bases in aligned reads at a given position (0-based).
-    
-    Input:
-        bamfile      a path to a valid bam file containing the alignment
-        reference    the name of the sequence reference in the bam file
-        position     the position to examine (0-based)
-        
-    Returns: 
-        reads        a list of dictionaries, one for each read.
-            qname    the name of the read
-            base     the base at the given position in the read
-            phred    phred quality score (in numeric format)
-    """
-    samfile=pysam.Samfile(bamfile,'rb')
-    n=0
-    reads=[]
-    for pileupcolumn in samfile.pileup(reference,position,position+1):
-        if pileupcolumn.pos==position:
-            n=pileupcolumn.n
-            for pileupread in pileupcolumn.pileups:
-                new_read={'qname':pileupread.alignment.qname,'base':pileupread.alignment.seq[pileupread.qpos], 'phred':ord(pileupread.alignment.qual[pileupread.qpos])-PHRED_ASCII_OFFSET,}
-                reads.append(new_read)
-    return reads
-
-def getRefBase(fasta_file,reference,position):
-	"""
-	Wrapper function that uses pysam to read the base at a given position (0-based) in a fasta file.
-	"""
-	return pysam.Fastafile(fasta_file).fetch(reference,position,position+1)
-
-def annotateMutation(observed_mutation, data_location):
-    """
-    Given an ObservedMutation object, and the path to a breseq data folder, update the folllowing fields on the ObservedMutation:
-		present
-		breseq_present
-		wt_reads
-		mutated_reads
-		other_reads
-    
-    Note: currently only defined for SNP mutations. Hopefully
-    """
-    defined_mutation_types=['SNP']
-    if observed_mutation.mutation.mutation_type in defined_mutation_types:
-        # figure out what the mutated base is (parse from end of text field):
-        mut_base=observed_mutation.mutation.new_sequence[-1]
-        ref_base=getRefBase(os.path.join(data_location,'reference.fasta'),observed_mutation.mutation.position - 1 ) # subtract 1 to go from 1-based sequence position to 0-based pysam position
-        reads=getReads(os.path.join(data_location,'reference.bam'),observed_mutation.mutation.position - 1 ) # subtract 1 to go from 1-based sequence position to 0-based pysam position
-        
-        total_count=len(reads)
-        mut_count=0
-        ref_count=0
-        other_count=0
-        for read in reads:
-            if read['base']==mut_base:
-                mut_count+=1
-            if read['base']==ref_base:
-                ref_count+=1
-            if read['base']!=mut_base and read['base']!=ref_base:
-                other_count+=1
-                
-        observed_mutation.wt_reads=ref_count
-        observed_mutation.mutated_reads=mut_count
-        observed_mutation.other_reads=other_count
-
-        gl_wt = genotypelikelihood(reads,ref_base,m=1,g=1)
-        gl_mut = genotypelikelihood(reads,ref_base,m=1,g=0)
-        
-        if gl_mut > gl_wt:
-            observed_mutation.present=True
-        else:
-            observed_mutation.present=False
-             
-    return observed_mutation 
 
 def genotypelikelihood(reads,reference_base, m=1, g=1):
     u"""
@@ -262,43 +88,199 @@ def genotypelikelihood(reads,reference_base, m=1, g=1):
     
     return math.log10((1/m**k) * l_product * k_product)
 
-def test():
-    s=alchemy_orm.Session()
-    q=s.query(ObservedMutation)
-    for om in q:
-        annotateMutation(s,om,None)
 
-def test2():        
-    s=alchemy_orm.Session()
-    q=s.query(alchemy_orm.ResequencingExperiment).join(alchemy_orm.Isolate, alchemy_orm.ResequencingExperiment.isolate_id == alchemy_orm.Isolate.id).\
+def getreads(bamfile, reference, position):
+    """
+    Uses pysam to determine the identity of bases in aligned reads at a given position (0-based).
+    
+    Input:
+        bamfile      a path to a valid bam file containing the alignment
+        reference    the name of the sequence reference in the bam file
+        position     the position to examine (0-based)
+        
+    Returns: 
+        reads        a list of dictionaries, one for each read.
+            qname    the name of the read
+            base     the base at the given position in the read
+            phred    phred quality score (in numeric format)
+    """
+    samfile=pysam.Samfile(bamfile,'rb')
+
+    reads=[]
+    for pileupcolumn in samfile.pileup(reference,position,position+1):
+        if pileupcolumn.pos==position:
+            for pileupread in pileupcolumn.pileups:
+                new_read={'qname':pileupread.alignment.qname,'base':pileupread.alignment.seq[pileupread.qpos], 'phred':ord(pileupread.alignment.qual[pileupread.qpos])-PHRED_ASCII_OFFSET,}
+                reads.append(new_read)
+    return reads
+
+def getrefbase(fasta_file,reference,position):
+    """
+    Wrapper function that uses pysam to read the base at a given position (0-based) in a fasta file.
+    """
+    return pysam.Fastafile(fasta_file).fetch(reference,position,position+1)
+
+def annotatemutation(session,dropout_mutation_id, sequencing_experiment, data_location):
+    """
+    Given an ObservedMutation object, and the path to a breseq data folder, update the fields on the ObservedMutation:
+        present
+        breseq_present
+        wt_reads
+        mutated_reads
+        other_reads
+    
+    Note: currently only defined for SNP mutations.
+    """
+    defined_mutation_types=['SNP']
+    
+    observed_mutation = alchemy_orm.query_or_create(session,alchemy_orm.ObservedMutation,mutation_id=dropout_mutation_id,sequencing_experiment_id=sequencing_experiment)
+    
+    pprint (observed_mutation)
+
+    if observed_mutation.mutation.mutation_type in defined_mutation_types:
+        # figure out what the mutated base is (parse from end of text field):
+        mut_base=observed_mutation.mutation.new_sequence[-1]
+        ref_base=getrefbase(os.path.join(data_location,'reference.fasta'),observed_mutation.mutation.position - 1 ) # subtract 1 to go from 1-based sequence position to 0-based pysam position
+        reads=getreads(os.path.join(data_location,'reference.bam'),observed_mutation.mutation.position - 1 ) # subtract 1 to go from 1-based sequence position to 0-based pysam position
+        
+        mut_count=0
+        ref_count=0
+        other_count=0
+        for read in reads:
+            if read['base']==mut_base:
+                mut_count+=1
+            if read['base']==ref_base:
+                ref_count+=1
+            if read['base']!=mut_base and read['base']!=ref_base:
+                other_count+=1
+                
+        observed_mutation.wt_reads=ref_count
+        observed_mutation.mutated_reads=mut_count
+        observed_mutation.other_reads=other_count
+
+        gl_wt = genotypelikelihood(reads,ref_base,m=1,g=1)
+        gl_mut = genotypelikelihood(reads,ref_base,m=1,g=0)
+        
+        if gl_mut > gl_wt:
+            observed_mutation.present=True
+        else:
+            observed_mutation.present=False
+        
+        observed_mutation.reference_genome_likelihood = gl_mut
+        
+#     return observed_mutation 
+
+def getallmutations(experiment_id,ale_number):
+    """
+    Given an experiment and ale number, return a dictionary of all observed mutations for that ale, keyed by flask number, then
+    by isolate number.
+    """
+    mutation_validation_session=alchemy_orm.Session()
+    
+    all_reseqs=mutation_validation_session.query(alchemy_orm.ResequencingExperiment).\
+        join(alchemy_orm.Isolate, alchemy_orm.ResequencingExperiment.isolate_id == alchemy_orm.Isolate.id).\
         join(alchemy_orm.Flask, alchemy_orm.Isolate.flask_id == alchemy_orm.Flask.id).\
         join(alchemy_orm.AleId, alchemy_orm.Flask.ale_id_id == alchemy_orm.AleId.id).\
         join(alchemy_orm.AleExperiment, alchemy_orm.AleId.ale_experiment_id == alchemy_orm.AleExperiment.ale_id).\
-        filter(alchemy_orm.Isolate.isolate_number==1, alchemy_orm.AleId.ale_id==7, alchemy_orm.AleExperiment.ale_id==1)
-    for i in q[0:10]:
-        m=i
-        pprint (m)
-        pprint (m.isolate.flask.ale_id.ale_id)
-        pprint (m.isolate.flask.flask_number)
-        pprint (m.isolate.isolate_number)
-        pprint (m.location)
- 
-#         pprint ( dir(m))
-#         pprint (m[0].location)
-#         pprint (m[1].flask_number)
-#         pprint (m[2].isolate_number)
+        filter(alchemy_orm.AleId.ale_id == ale_number, alchemy_orm.AleExperiment.ale_id == experiment_id)
+        
+    all_mutations={}
+    
+    # construct a nested dictionary from the mutations    
+    for reseq in all_reseqs:
+        if reseq.isolate.flask.flask_number not in all_mutations:
+            all_mutations[reseq.isolate.flask.flask_number]={}
+        if reseq.isolate.isolate_number in all_mutations[reseq.isolate.flask.flask_number]:
+            raise Exception("Duplicate sequencing run! Ale {}, Flask {}, Isolate {} already exists for experiment {}".format(ale_number,reseq.isolate.flask.flask_number,reseq.isolate.isolate_number,experiment_id))
+        else:
+            all_mutations[reseq.isolate.flask.flask_number][reseq.isolate.isolate_number]=[mut.id for mut in reseq.mutations]
+    return all_mutations
 
-#         pprint (dir(m))
+                
+def finddropoutmutations(all_mutations):
+    """
+    Find the mutations that have dropped out of an ALE lineage.
+    
+    A dropout mutation is defined as one that appears in all isolates of the previous flask in a lineage but is
+    not present in any isolate of the current flask.
+    
+    Input:
+        all_mutations: A dictionary of all the mutation IDs in a particular ALE lineage, keyed by flask number, then
+            isolate number
+        
+    Output:
+        A dictionary of IDs of dropout mutations, keyed by flask number. 
+    """
+    # create a dictionary of mutations that have disappeared in all_mutations
+    dropout_mutations={}
+    # make a list of every flask for this ale sorted in chronological order 
+    flask_list=sorted(all_mutations.keys())
+    if len(flask_list)>1: # dropout mutations can only exist with more than one flask
+        # Idea: create two lists that will parallel the flask list,
+        # one for mutation ids found in every isolate of the corresponding flask (intersection of isolates)
+        # and one for mutation ids found in any isolate of the corresponding flask (union of isolates)
+        # then we compare the intersection to the union.
+        intersect_flask_mutations=[]
+        union_flask_mutations=[]
+        for flask_index,flask_number in enumerate(flask_list):
+            # create a list of sets of mutation ids for each isolate of this flask
+            isolate_mutations=[]
+            for isolate_number in all_mutations[flask_number]:
+                # use only the first part of the tuple, the mutation id.  
+                isolate_mutations.append(set([mut for mut in all_mutations[flask_number][isolate_number]]))
+            intersect_flask_mutations.append(set.intersection(*isolate_mutations))
+            union_flask_mutations.append(set.union(*isolate_mutations))
+            # Find any mutations that appear in all the isolates of the previous flask
+            # but none of the isolates in the current flask (they've dropped out)
+            # then store the dropout mutations in a dictionary keyed by flask number
+            if flask_index >= 1:
+                dropout_mutations[flask_number]=intersect_flask_mutations[flask_index-1]-union_flask_mutations[flask_index]
+    return dropout_mutations
 
-# print getReadBases('/home/phageghost/sequencing/glucose_ale_reseq/Glucose_ALE_7_FLASK_236_Isolate_1/data/reference.bam','NC_000913',4181281)
-# print getRefBase('/home/phageghost/sequencing/glucose_ale_reseq/Glucose_ALE_7_FLASK_236_Isolate_1/data/reference.fasta','NC_000913',4181281)
-# test_reads=[{'base':'T','phred':'8'},{'base':'T','phred':8},{'base':'A','phred':'33'},{'base':'A','phred':'33'},{'base':'A','phred':'33'},{'base':'A','phred':'33'},{'base':'A','phred':'33'},{'base':'A','phred':'33'},{'base':'A','phred':'33'},{'base':'A','phred':'33'}]
-# print 10**genotypelikelihood(test_reads, 'A', 1, 0)
-# 
-# am= getAllMutations(1, 7)
-# pprint(am)
-# pprint (findDropOutMutations(am))
-test2()
 
-# print checkNegMutations(1,7)
+def validatemutations(experiment_id,ale_number):
+    """
+    """
+    # generate a dictionary of all mutation_ids for all runs
+    all_mutations=getallmutations(experiment_id,ale_number)
+    # figure out which ones were present and then drop out
+    dropout_mutations=finddropoutmutations(all_mutations)
+    # use our checker to see what's going on at the position of each dropout mutation
+    annotated_mutations={}
+    
+    validation_session=alchemy_orm.Session()
+    
+    for flask_number in dropout_mutations:
+        # iterate through each dropout mutation in each flask
+        for dropout_mutation_id in dropout_mutations[flask_number]:
+            print "mutation id={}".format(dropout_mutation_id)
+            
+            for isolate_number in all_mutations[flask_number]:
+                print "isolate = {}".format(isolate_number)
+                seq_exp=validation_session.query(alchemy_orm.ResequencingExperiment).join(alchemy_orm.Isolate, alchemy_orm.ResequencingExperiment.isolate_id == alchemy_orm.Isolate.id).\
+                    join(alchemy_orm.Flask, alchemy_orm.Isolate.flask_id == alchemy_orm.Flask.id).\
+                    join(alchemy_orm.AleId, alchemy_orm.Flask.ale_id_id == alchemy_orm.AleId.id).\
+                    join(alchemy_orm.AleExperiment, alchemy_orm.AleId.ale_experiment_id == alchemy_orm.AleExperiment.ale_id).\
+                    filter(alchemy_orm.AleExperiment.ale_id == experiment_id,
+                           alchemy_orm.Flask.flask_number == flask_number,
+                           alchemy_orm.Isolate.isolate_number == isolate_number).one()
+
+                # query or create an entry in the observed mutation table  
+#                 dropout_mutation=alchemy_orm.query_or_create(validation_session,alchemy_orm.ObservedMutation,mutation_id=dropout_mutation_id,sequencing_experiment_id=seq_exp.id)
+
+                # get the path to the breseq data:
+                datapath=os.path.join(BASEPATH,seq_exp.location)
+
+                # annotate the mutation
+                
+                annotatemutation(validation_session,dropout_mutation_id, seq_exp.id, datapath)
+        
+                
+# #------------------------------------------------------------------------------               
+
+#===============================================================================
+# Testing:
+#===============================================================================
+
+pprint ( checkNegMutations(1,7) )
     
