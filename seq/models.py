@@ -47,7 +47,7 @@ class ObservedMutation(models.Model):
     wt_reads = models.IntegerField(null=True)
     mutated_reads = models.IntegerField(null=True)
     other_reads = models.IntegerField(null=True)
-    mutant_genome_likelihood = models.FloatField(null=True)
+    reference_genome_likelihood = models.FloatField(null=True)
     sequencing_experiment = models.ForeignKey(ResequencingExperiment)
     mutation = models.ForeignKey(Mutation)
     evidence = models.CharField(max_length=400, blank=True, null=True)
