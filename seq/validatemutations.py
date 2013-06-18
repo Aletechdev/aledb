@@ -247,6 +247,11 @@ def finddropoutmutations(all_mutations):
 
 def validatemutations(experiment_id,ale_number):
     """
+    Given the id of an experiment and ALE number, finds all dropout mutations (negative predictions)
+    and checks the reads aligning to the mutation position. Based on the genome
+    likelihood values, each mutation is called as either present or not present
+    an an ObservedMutation record created in the database to store the 
+    validation annotation.
     """
     # generate a dictionary of all mutation_ids for all runs
     all_mutations=getallmutations(experiment_id,ale_number)
