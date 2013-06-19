@@ -1,11 +1,30 @@
 #!/usr/bin/python
+"""
+Implements a validatemutations() function and supporting functions to confirm the absence of dropout
+mutations for a given ALE run. Assumes access to the database given by importation of
+the alchemy_orm module.
+
+Edit the BASEPATH constant as needed for the installation.
+
+See documentation of the validatemutations function for more details.
+    
+NOTE: Currently this will only validate previously unvalidated mutations.
+    Since it creates ObservedMutation entries to store the validations, these will
+    show up as present in the mutation list and therefore not be counted
+    as "dropout mutations".
+    
+    Having the getallmutations() function filter by the ObservedMutation.breseq_present
+    field would change this behavior, although it would require adding an additional field
+    to the alchemy_orm model for ResequencingExperiment 
+"""
 import os
 import math, operator
 import pysam
 import alchemy_orm
 
-BASEPATH='/home/phageghost/sequencing'
-PHRED_ASCII_OFFSET=33
+BASEPATH='/home/phageghost/sequencing' # change this as needed
+
+PHRED_ASCII_OFFSET=33 # value to subtract from the ASCII code of the quality character to get the Phred value.
 
 def genotypelikelihood(reads,reference_base, m=1, g=1):
     u"""
@@ -126,9 +145,12 @@ def getrefbase(fasta_file,reference,position):
     """
     return pysam.Fastafile(fasta_file).fetch(reference,position,position+1)
 
-def annotatemutation(session,dropout_mutation_id, sequencing_experiment, data_location):
+def annotatemutation(session,dropout_mutation_id, sequencing_experiment, breseq_present, data_location):
     """
-    Given an ObservedMutation object, and the path to a breseq data folder, update the fields on the ObservedMutation:
+    Given the IDs of a mutation and a sequencing experiment, whether or not the mutation
+    is called by breseq, and the path to a breseq data folder,
+    create or update the following fields on an ObservedMutation:
+        
         present
         breseq_present
         wt_reads
@@ -144,10 +166,14 @@ def annotatemutation(session,dropout_mutation_id, sequencing_experiment, data_lo
     # get the information on the mutation it's associated with (can't get this to work through the ORM)
     mutation=session.query(alchemy_orm.Mutation).filter_by(id=dropout_mutation_id).one()
 
+    print "Validating mutation id {} in resequencing experiment {}".format(dropout_mutation_id, sequencing_experiment)
+    
     if mutation.mutation_type in defined_mutation_types:
+        print "mutation type: {}".format(mutation.mutation_type)
         # figure out what the mutated base is (parse from end of text field):
         mut_base=mutation.sequence_change[-1]
         ref_base=getrefbase(os.path.join(data_location,'data/reference.fasta'),'NC_000913',mutation.position - 1 ) # subtract 1 to go from 1-based sequence position to 0-based pysam position
+        
         reads=getreads(os.path.join(data_location,'data/reference.bam'),'NC_000913',mutation.position - 1 ) # subtract 1 to go from 1-based sequence position to 0-based pysam position
         
         mut_count=0
@@ -168,14 +194,25 @@ def annotatemutation(session,dropout_mutation_id, sequencing_experiment, data_lo
         gl_wt = genotypelikelihood(reads,ref_base,m=1,g=1)
         gl_mut = genotypelikelihood(reads,ref_base,m=1,g=0)
         
-        observed_mutation.breseq_present = False # if we're here, it's a dropout mutation
+        observed_mutation.reference_genome_likelihood = gl_wt
+        
+        observed_mutation.breseq_present = breseq_present # copy the value of the boolean parameter. Could also do this outside the function but more convenient here.
         
         if gl_mut > gl_wt:
             observed_mutation.present=True
         else:
             observed_mutation.present=False
         
-        observed_mutation.reference_genome_likelihood = gl_wt
+        print "reference base = {}, mutation base = {}".format(ref_base, mut_base)
+        print "{} reads support the reference".format(ref_count)
+        print "{} reads support the mutation".format(mut_count)
+        print "{} support neither".format(other_count)
+        print "likelihood of reads = {} for genome matching reference, {} for genome not matching reference".format(gl_wt, gl_mut)
+        print "mutation present? {}".format(str(observed_mutation.present).upper())
+        print 
+    else:
+        print "validation currently not implemented for mutation type {}, skipping".format(mutation.mutation_type)
+        
  
 def getallmutations(experiment_id,ale_number):
     """
@@ -198,9 +235,9 @@ def getallmutations(experiment_id,ale_number):
         if reseq.isolate.flask.flask_number not in all_mutations:
             all_mutations[reseq.isolate.flask.flask_number]={}
         if reseq.isolate.isolate_number in all_mutations[reseq.isolate.flask.flask_number]:
-            raise Exception("Duplicate sequencing run! Ale {}, Flask {}, Isolate {} already exists for experiment {}".format(ale_number,reseq.isolate.flask.flask_number,reseq.isolate.isolate_number,experiment_id))
+            raise Exception("Duplicate sequencing run! A sequencing experiment already exists for Experiment {}, Ale {}, Flask {}, Isolate {} already exists".format(experiment_id,ale_number,reseq.isolate.flask.flask_number,reseq.isolate.isolate_number))
         else:
-            all_mutations[reseq.isolate.flask.flask_number][reseq.isolate.isolate_number]=[mut.id for mut in reseq.mutations]
+            all_mutations[reseq.isolate.flask.flask_number][reseq.isolate.isolate_number]=[mut.id for mut in reseq.mutations]  # TODO exclude not present mutations 
     return all_mutations
 
                 
@@ -233,7 +270,6 @@ def finddropoutmutations(all_mutations):
             # create a list of sets of mutation ids for each isolate of this flask
             isolate_mutations=[]
             for isolate_number in all_mutations[flask_number]:
-                # use only the first part of the tuple, the mutation id.  
                 isolate_mutations.append(set([mut for mut in all_mutations[flask_number][isolate_number]]))
             intersect_flask_mutations.append(set.intersection(*isolate_mutations))
             union_flask_mutations.append(set.union(*isolate_mutations))
@@ -247,6 +283,11 @@ def finddropoutmutations(all_mutations):
 
 def validatemutations(experiment_id,ale_number):
     """
+    Given the id of an experiment and ALE number, finds all dropout mutations (negative predictions)
+    and checks the reads aligning to the mutation position. Based on the genome
+    likelihood values, each mutation is called as either present or not present
+    an an ObservedMutation record created in the database to store the 
+    validation annotation.
     """
     # generate a dictionary of all mutation_ids for all runs
     all_mutations=getallmutations(experiment_id,ale_number)
@@ -258,10 +299,10 @@ def validatemutations(experiment_id,ale_number):
     # iterate through each dropout mutation in each flask
     for flask_number in dropout_mutations:
         for dropout_mutation_id in dropout_mutations[flask_number]:
-            print "mutation id={}".format(dropout_mutation_id)
+            print "Validating dropout mutation id {}".format(dropout_mutation_id)
             
-            for isolate_number in all_mutations[flask_number]: # gotta do this for each isolate
-                print "isolate = {}".format(isolate_number) 
+            for isolate_number in all_mutations[flask_number]: # do this for each isolate
+                print "in isolate {}".format(isolate_number) 
                 seq_exp=validation_session.query(alchemy_orm.ResequencingExperiment).join(alchemy_orm.Isolate, alchemy_orm.ResequencingExperiment.isolate_id == alchemy_orm.Isolate.id).\
                     join(alchemy_orm.Flask, alchemy_orm.Isolate.flask_id == alchemy_orm.Flask.id).\
                     join(alchemy_orm.AleId, alchemy_orm.Flask.ale_id_id == alchemy_orm.AleId.id).\
@@ -270,12 +311,12 @@ def validatemutations(experiment_id,ale_number):
                            alchemy_orm.Flask.flask_number == flask_number,
                            alchemy_orm.Isolate.isolate_number == isolate_number).one()
 
+
                 # get the path to the breseq data:
                 datapath=os.path.join(BASEPATH,seq_exp.location)
 
                 # annotate the mutation
-                annotatemutation(validation_session,dropout_mutation_id, seq_exp.id, datapath)
-                
+                annotatemutation(validation_session,dropout_mutation_id, seq_exp.id, False, datapath)  
     # commit the changes
     validation_session.commit()
                 
