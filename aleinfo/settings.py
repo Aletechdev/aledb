@@ -5,7 +5,31 @@ TEMPLATE_DEBUG = DEBUG
 
 GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
 
-sequencing_url = "http://clostridium.ucsd.edu/sequencing/"
+from os.path import expanduser, dirname, join
+from ConfigParser import SafeConfigParser
+
+config = SafeConfigParser()
+# set the default settings
+config.add_section("DATABASE")
+config.set("DATABASE", "host", "127.0.0.1")
+config.set("DATABASE", "port", "5432")
+config.set("DATABASE", "user", "ale")  # Or path to database file if using sqlite3.
+config.set("DATABASE", "database", "cellar")  # Or path to database file if using sqlite3.
+config.set("DATABASE", "password", "ecoliale")
+config.set("DATABASE", "engine", "mysql")  #'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+config.add_section("OTHER")
+config.set("OTHER", "sequencing_url", "http://clostridium.ucsd.edu/sequencing/")
+config.set("OTHER", "sequencing_path", expanduser("~/sequencing/"))
+
+# read the options and write them back to the file
+settings_filepath = join(dirname(__file__), "settings.ini")
+config.read(settings_filepath)
+with open(settings_filepath, "w") as outfile:
+    config.write(outfile)
+
+
+sequencing_url = config.get("OTHER", "sequencing_url")
+sequencing_path = config.get("OTHER", "sequencing_path")
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -15,12 +39,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'cellar',                      # Or path to database file if using sqlite3.
-        'USER': 'ale_user',                      # Not used with sqlite3.
-        'PASSWORD': 'ecoliale',                  # Not used with sqlite3.
-        'HOST': '127.0.0.1',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.' + config.get("DATABASE", "engine"),
+        'NAME': config.get("DATABASE", "database"),
+        'USER': config.get("DATABASE", "user"),
+        'PASSWORD': config.get("DATABASE", "password"),
+        'HOST': config.get("DATABASE", "host"),
+        'PORT': config.get("DATABASE", "port"),
     }
 }
 
