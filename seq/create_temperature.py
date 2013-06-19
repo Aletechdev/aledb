@@ -54,3 +54,6 @@ for i in runs:
 
 session.commit()
 
+# validate mutations in each parallel ale
+for ale in experiment.ale_ids:
+    check_negative_predictions(ale.ale_experiment_id, ale.ale_id)
