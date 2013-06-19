@@ -5,7 +5,7 @@ TEMPLATE_DEBUG = DEBUG
 
 GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
 
-from os.path import expanduser, dirname, join
+from os.path import expanduser, dirname, join, isfile
 from ConfigParser import SafeConfigParser
 
 config = SafeConfigParser()
@@ -23,10 +23,10 @@ config.set("OTHER", "sequencing_path", expanduser("~/sequencing/"))
 
 # read the options and write them back to the file
 settings_filepath = join(dirname(__file__), "settings.ini")
+if not isfile(settings_filepath):
+    with open(settings_filepath, "w") as outfile:
+        config.write(outfile)
 config.read(settings_filepath)
-with open(settings_filepath, "w") as outfile:
-    config.write(outfile)
-
 
 sequencing_url = config.get("OTHER", "sequencing_url")
 sequencing_path = config.get("OTHER", "sequencing_path")

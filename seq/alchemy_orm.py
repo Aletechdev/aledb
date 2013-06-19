@@ -18,7 +18,8 @@ db_settings = DATABASES["default"]
 
 hostname = db_settings["HOST"]
 if "PORT" in db_settings:
-    hostname += ":" + db_settings["PORT"]
+    if len(db_settings["PORT"]) > 0:
+        hostname += ":" + db_settings["PORT"]
 
 if db_settings["ENGINE"].endswith("sqlite3"):
     db = "sqlite"
