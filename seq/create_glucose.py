@@ -15,8 +15,7 @@ media = query_or_create(session, Media, description="Glucose M9 media", temperat
 freezer_box = query_or_create(session, FreezerBox, name="ale box", number=1)
 
 
-# sloppy code to find sequencing experiments based off of folder names
-sequencing_path = "/home/phageghost/sequencing/glucose_ale_reseq/"
+sequencing_path = settings.sequencing_path + "glucose_ale_reseq/"
 
 runs = [i for i in listdir(sequencing_path) if isdir(sequencing_path + i) and isfile(sequencing_path + i + "/index.html") and i.startswith("Glucose_ALE")]
 

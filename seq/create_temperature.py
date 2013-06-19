@@ -14,9 +14,7 @@ experiment = query_or_create(session, AleExperiment, name="42C evolution",
 media = query_or_create(session, Media, description="Glucose M9 media", temperature=42, volume=40, stirring_speed=1123)
 freezer_box = query_or_create(session, FreezerBox, name="ale box", number=1)
 
-
-# sloppy code to find sequencing experiments based off of folder names
-sequencing_path = "/home/phageghost/sequencing/glucose_temperature_evolution/"
+sequencing_path = settings.sequencing_path + "glucose_temperature_evolution/"
 
 runs = [i for i in listdir(sequencing_path) if isdir(sequencing_path + i) and isfile(sequencing_path + i + "/index.html") and i.startswith("Sample")]
 
