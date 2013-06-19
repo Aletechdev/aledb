@@ -51,8 +51,11 @@ def experiment_table(request):
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
     table_entries = [[None] * len(mutation_mapping) for i in experiment_mapping]
     for observed in observed_mutations:
-        table_entries[experiment_mapping[observed.sequencing_experiment_id]][mutation_mapping[observed.mutation_id]] = \
-            """<td class="true">%s</td>""" % observed.evidence.replace("evidence/", experiment_urls[observed.sequencing_experiment_id] + "/evidence/")
+        if observed.breseq_present:
+            table_entries[experiment_mapping[observed.sequencing_experiment_id]][mutation_mapping[observed.mutation_id]] = \
+                """<td class="true">%s</td>""" % observed.evidence.replace("evidence/", experiment_urls[observed.sequencing_experiment_id] + "/evidence/")
+        elif observed.present is False:
+            table_entries[experiment_mapping[observed.sequencing_experiment_id]][mutation_mapping[observed.mutation_id]] = """<td class="false">%d/%d</td>""" % (observed.mutated_reads, observed.wt_reads)
     table_header = """<tr><td>Experiment</td>"""
     for mutation in mutations:
         if mutation.reference_error:
