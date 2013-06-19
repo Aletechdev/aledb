@@ -22,7 +22,7 @@ import math, operator
 import pysam
 import alchemy_orm
 
-BASEPATH='/home/phageghost/sequencing' # change this as needed
+BASEPATH = alchemy_orm.settings.sequencing_path
 
 PHRED_ASCII_OFFSET=33 # value to subtract from the ASCII code of the quality character to get the Phred value.
 
@@ -145,14 +145,13 @@ def getrefbase(fasta_file,reference,position):
     """
     return pysam.Fastafile(fasta_file).fetch(reference,position,position+1)
 
-def annotatemutation(session,dropout_mutation_id, sequencing_experiment, breseq_present, data_location):
+def annotatemutation(session, dropout_mutation_id, sequencing_experiment, data_location, verbose=False):
     """
     Given the IDs of a mutation and a sequencing experiment, whether or not the mutation
     is called by breseq, and the path to a breseq data folder,
     create or update the following fields on an ObservedMutation:
         
         present
-        breseq_present
         wt_reads
         mutated_reads
         other_reads
@@ -190,28 +189,32 @@ def annotatemutation(session,dropout_mutation_id, sequencing_experiment, breseq_
         observed_mutation.wt_reads=ref_count
         observed_mutation.mutated_reads=mut_count
         observed_mutation.other_reads=other_count
+        if observed_mutation.breseq_present is None:
+            observed_mutation.breseq_present = False
 
         gl_wt = genotypelikelihood(reads,ref_base,m=1,g=1)
         gl_mut = genotypelikelihood(reads,ref_base,m=1,g=0)
         
         observed_mutation.reference_genome_likelihood = gl_wt
-        
-        observed_mutation.breseq_present = breseq_present # copy the value of the boolean parameter. Could also do this outside the function but more convenient here.
-        
+                
         if gl_mut > gl_wt:
             observed_mutation.present=True
         else:
             observed_mutation.present=False
         
-        print "reference base = {}, mutation base = {}".format(ref_base, mut_base)
-        print "{} reads support the reference".format(ref_count)
-        print "{} reads support the mutation".format(mut_count)
-        print "{} support neither".format(other_count)
-        print "likelihood of reads = {} for genome matching reference, {} for genome not matching reference".format(gl_wt, gl_mut)
-        print "mutation present? {}".format(str(observed_mutation.present).upper())
-        print 
+        session.add(observed_mutation)
+        
+        if verbose:
+            print "reference base = %s, mutation base = %s" % (ref_base, mut_base)
+            print "%d reads support the reference" % (ref_count)
+            print "%d reads support the mutation" % (mut_count)
+            print "%d support neither" % (other_count)
+            print "likelihood of reads = {} for genome matching reference, {} for genome not matching reference".format(gl_wt, gl_mut)
+            print "mutation present? {}".format(str(observed_mutation.present).upper())
+            print 
     else:
-        print "validation currently not implemented for mutation type {}, skipping".format(mutation.mutation_type)
+        if verbose:
+            print "validation currently not implemented for mutation type {}, skipping".format(mutation.mutation_type)
         
  
 def getallmutations(experiment_id,ale_number):
@@ -281,7 +284,7 @@ def finddropoutmutations(all_mutations):
     return dropout_mutations
 
 
-def validatemutations(experiment_id,ale_number):
+def check_negative_predictions(experiment_id,ale_number):
     """
     Given the id of an experiment and ALE number, finds all dropout mutations (negative predictions)
     and checks the reads aligning to the mutation position. Based on the genome
@@ -316,7 +319,7 @@ def validatemutations(experiment_id,ale_number):
                 datapath=os.path.join(BASEPATH,seq_exp.location)
 
                 # annotate the mutation
-                annotatemutation(validation_session,dropout_mutation_id, seq_exp.id, False, datapath)  
+                annotatemutation(validation_session,dropout_mutation_id, seq_exp.id, datapath)
     # commit the changes
     validation_session.commit()
                 

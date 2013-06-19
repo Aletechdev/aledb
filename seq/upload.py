@@ -69,6 +69,7 @@ def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
         observed_mutation = ObservedMutation()
         observed_mutation.experiment = seq_experiment
         observed_mutation.mutation = mutation
+        observed_mutation.breseq_present = True
         observed_mutation.evidence = attrs[0].renderContents()
         session.add(observed_mutation)
 
