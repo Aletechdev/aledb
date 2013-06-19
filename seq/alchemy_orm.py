@@ -9,8 +9,10 @@ from sqlalchemy.ext.hybrid import hybrid_property
 # add aleinfo directory to the path
 ale_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(ale_dir, "aleinfo"))
+import settings
 
-from settings import DATABASES
+
+DATABASES = settings.DATABASES
 
 db_settings = DATABASES["default"]
 
