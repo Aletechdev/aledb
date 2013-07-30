@@ -22,6 +22,9 @@ class ResequencingExperiment(models.Model):
         return self.isolate.flask.flask_number
     
     def get_isolate_name(self):
+        if self.isolate.description is not None:
+            if len(self.isolate.description) > 0:
+                return self.isolate.description
         return u"A%d_F%d_I%d" % (self.ale_id, self.flask_number, self.isolate.isolate_number)
     # TODO - add more information
 
