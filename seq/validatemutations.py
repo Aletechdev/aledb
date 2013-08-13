@@ -220,7 +220,7 @@ def annotatemutation(session, dropout_mutation_id, sequencing_experiment, data_l
 def getallmutations(experiment_id,ale_number):
     """
     Given an experiment and ale number, return a dictionary of all observed mutations for that ale, keyed by flask number, then
-    by isolate number.
+    by isolate id.
     """
     mutation_validation_session=alchemy_orm.Session()
     
@@ -240,7 +240,7 @@ def getallmutations(experiment_id,ale_number):
         if reseq.isolate.isolate_number in all_mutations[reseq.isolate.flask.flask_number]:
             raise Exception("Duplicate sequencing run! A sequencing experiment already exists for Experiment {}, Ale {}, Flask {}, Isolate {} already exists".format(experiment_id,ale_number,reseq.isolate.flask.flask_number,reseq.isolate.isolate_number))
         else:
-            all_mutations[reseq.isolate.flask.flask_number][reseq.isolate.isolate_number]=[mut.id for mut in reseq.mutations]  # TODO exclude not present mutations 
+            all_mutations[reseq.isolate.flask.flask_number][reseq.isolate.id]=[mut.id for mut in reseq.mutations]  # TODO exclude not present mutations 
     return all_mutations
 
                 
@@ -304,16 +304,8 @@ def check_negative_predictions(experiment_id,ale_number):
         for dropout_mutation_id in dropout_mutations[flask_number]:
             print "Validating dropout mutation id {}".format(dropout_mutation_id)
             
-            for isolate_number in all_mutations[flask_number]: # do this for each isolate
-                print "in isolate {}".format(isolate_number) 
-                seq_exp=validation_session.query(alchemy_orm.ResequencingExperiment).join(alchemy_orm.Isolate, alchemy_orm.ResequencingExperiment.isolate_id == alchemy_orm.Isolate.id).\
-                    join(alchemy_orm.Flask, alchemy_orm.Isolate.flask_id == alchemy_orm.Flask.id).\
-                    join(alchemy_orm.AleId, alchemy_orm.Flask.ale_id_id == alchemy_orm.AleId.id).\
-                    join(alchemy_orm.AleExperiment, alchemy_orm.AleId.ale_experiment_id == alchemy_orm.AleExperiment.ale_id).\
-                    filter(alchemy_orm.AleExperiment.ale_id == experiment_id,
-                           alchemy_orm.Flask.flask_number == flask_number,
-                           alchemy_orm.Isolate.isolate_number == isolate_number).one()
-
+            for isolate_id in all_mutations[flask_number]: # do this for each isolate
+                seq_exp = validation_session.query(alchemy_orm.ResequencingExperiment).filter_by(isolate_id=isolate_id).one()
 
                 # get the path to the breseq data:
                 datapath=os.path.join(BASEPATH,seq_exp.location)
