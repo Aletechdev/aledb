@@ -31,10 +31,16 @@ def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
 
     # create a resequencing experiment and populate the parameters from
     # summary.html
-    seq_experiment = ResequencingExperiment()
-    seq_experiment.location = breseq_folder[breseq_folder.find("sequencing/") + 11:]
-    seq_experiment.isolate_id = isolate_id
-    seq_experiment.person = person
+    seq_experiment = query_or_create(session, ResequencingExperiment,
+        location=breseq_folder[breseq_folder.find("sequencing/") + 11:],
+        isolate_id=isolate_id,
+        person=person)
+    #seq_experiment = ResequencingExperiment()
+    #seq_experiment.location = breseq_folder[breseq_folder.find("sequencing/") + 11:]
+    #seq_experiment.isolate_id = isolate_id
+    #seq_experiment.person = person
+    # if any mutations were read in, we need to overwrite them
+    seq_experiment.mutations = []
     seq_experiment.reads = int(row_read_info[2].b.text.replace(",", ""))
     seq_experiment.average_read_length = row_read_info[5].text.split("&nbsp;")[0]
     try:
