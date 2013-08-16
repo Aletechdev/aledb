@@ -50,6 +50,7 @@ def make_table_entry(observed, experiment_urls):
 @login_required
 def experiment_table(request):
     experiments = get_seq_experiments(request)
+    extra_validation = False if request.GET.get("novalid") else True
     experiment_mapping = dict((o.id, i) for i, o in enumerate(experiments))
     # cache the urls of the experiment location
     experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiments)
@@ -58,6 +59,9 @@ def experiment_table(request):
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
     table_entries = [[None] * len(mutation_mapping) for i in experiment_mapping]
     for observed in observed_mutations:
+        # sometimes we do not want the extra validation
+        if not extra_validation and not observed.breseq_present:
+            continue
         table_entries[experiment_mapping[observed.sequencing_experiment_id]][mutation_mapping[observed.mutation_id]] = \
             make_table_entry(observed, experiment_urls)
     table_header = """<tr><td>Experiment</td>"""
@@ -82,6 +86,7 @@ def experiment_table(request):
 @login_required
 def mutation_table(request):
     experiments = get_seq_experiments(request)
+    extra_validation = False if request.GET.get("novalid") else True
     experiment_mapping = dict((o.id, i) for i, o in enumerate(experiments))
     # cache the urls of the experiment location
     experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiments)
@@ -95,6 +100,9 @@ def mutation_table(request):
     table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
     
     for observed in observed_mutations:
+        # sometimes we do not want the extra validation
+        if not extra_validation and not observed.breseq_present:
+            continue
         new_entry = make_table_entry(observed, experiment_urls)
         if new_entry is not None:
             table_entries[mutation_mapping[observed.mutation_id]][experiment_mapping[observed.sequencing_experiment_id]] = new_entry
