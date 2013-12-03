@@ -2,8 +2,11 @@ CREATE VIEW id_mapping AS
 SELECT
   seq_resequencingexperiment.id AS reseq_id,
   ale_isolate.id AS isolate_id,
+  ale_isolate.isolate_number as isolate_no,
   ale_flask.id AS flask_id,
-  ale_aleid.id AS ale_no,
+  ale_flask.flask_number AS flask_no,
+  ale_aleid.id AS ale_id,
+  ale_aleid.ale_id AS ale_no,
   ale_aleexperiment.ale_id AS experiment_id
 FROM seq_resequencingexperiment
 RIGHT OUTER JOIN ale_isolate

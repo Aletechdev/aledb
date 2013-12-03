@@ -22,7 +22,7 @@ def get_seq_experiments(request):
         experiments =  ResequencingExperiment.objects.raw(
             """SELECT reseq_id AS id FROM id_mapping WHERE 
             experiment_id=%d AND reseq_id IS NOT NULL
-            ORDER BY (ale_no, flask_id, isolate_id) ASC;""" % ale_experiment_id)
+            ORDER BY (ale_no, flask_no, isolate_no) ASC;""" % ale_experiment_id)
     return experiments
 
 @login_required
