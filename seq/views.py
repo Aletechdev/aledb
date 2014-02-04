@@ -15,23 +15,19 @@ else:
 def get_seq_experiments(request):
     """return a list of seq experiments for a given ALE"""
     ale_experiment_id = request.GET.get("ale_experiment_id")
-    ale_no = request.POST.get("ale_no")
     if ale_experiment_id is None:
-        experiments = ResequencingExperiment.objects.all()
-            
+        ale_experiment_selector = ""
     else:
-        ale_experiment_id = int(ale_experiment_id)
-        if ale_no is not None and int(ale_no) != -1:
-            ale_no = int(ale_no)
-            experiments =  ResequencingExperiment.objects.raw(
-                """SELECT reseq_id AS id FROM id_mapping WHERE 
-                experiment_id=%d AND ale_no=%d AND reseq_id IS NOT NULL
-                ORDER BY ale_no, flask_id, isolate_id ASC""" % (ale_experiment_id,ale_no))
-        else:
-            experiments =  ResequencingExperiment.objects.raw(
-                """SELECT reseq_id AS id FROM id_mapping WHERE 
-                experiment_id=%d AND reseq_id IS NOT NULL
-                ORDER BY ale_no, flask_id, isolate_id ASC""" % ale_experiment_id)
+        ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
+    ale_no = request.GET.get("ale_no")
+    if ale_no is None:
+        ale_no_selector = ""
+    else:
+        ale_no_selector = "AND ale_no = %d" % int(ale_no)
+    experiments =  ResequencingExperiment.objects.raw(
+        """SELECT reseq_id AS id FROM id_mapping WHERE 
+        reseq_id IS NOT NULL %s %s
+        ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_no_selector))
     return experiments
 
 @login_required
