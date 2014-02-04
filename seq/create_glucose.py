@@ -10,7 +10,7 @@ session = Session()
 # create the instrument, experiment, etc. to the isolates for the strains
 instrument = query_or_create(session, Instrument, name="UCSD1")
 experiment = query_or_create(session, AleExperiment, name="glucose evolution",
-    instrument=instrument, person="ryan", date=datetime.date.today(), simulation=False)
+    instrument=instrument, person="ryan", date=datetime.date(2013, 1, 1), simulation=False)
 
 media = query_or_create(session, Media, description="Glucose M9 media", temperature=37, volume=40, stirring_speed=1123)
 freezer_box = query_or_create(session, FreezerBox, name="ale box", number=1)
@@ -19,7 +19,14 @@ freezer_box = query_or_create(session, FreezerBox, name="ale box", number=1)
 sequencing_path = settings.sequencing_path + "glucose_ale_reseq/"
 
 runs = [i for i in listdir(sequencing_path) if isdir(sequencing_path + i) and isfile(sequencing_path + i + "/index.html") and i.startswith("Glucose_ALE")]
-runs.sort()
+
+def get_key(name):
+    s = name.split("_")
+    return (int(s[2]), int(s[4]), int(s[6]))
+runs.sort(key=get_key)
+print runs
+import sys
+sys.exit()
 
 # add wild type
 ale_id = query_or_create(session, AleId, ale_experiment=experiment, ale_id=0)
