@@ -16,5 +16,4 @@ ON ale_flask.id = ale_isolate.flask_id
 JOIN ale_aleid
 ON ale_aleid.id = ale_flask.ale_id_id
 JOIN ale_aleexperiment
-ON ale_aleexperiment.ale_id = ale_aleid.ale_experiment_id
-ORDER BY reseq_id;
+ON ale_aleexperiment.ale_id = ale_aleid.ale_experiment_id;
