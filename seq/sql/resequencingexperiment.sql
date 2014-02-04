@@ -3,7 +3,7 @@ SELECT
   seq_resequencingexperiment.id AS reseq_id,
   ale_isolate.id AS isolate_id,
   ale_flask.id AS flask_id,
-  ale_aleid.id AS ale_no,
+  ale_aleid.ale_id AS ale_no,
   ale_aleexperiment.ale_id AS experiment_id
 FROM seq_resequencingexperiment
 RIGHT OUTER JOIN ale_isolate
