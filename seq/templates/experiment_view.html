@@ -22,7 +22,6 @@
     <tbody>
     {% for experiment in experiments %}
         <tr>
-	    <td>{{ experiment.ale_id }}</td>
             <td><a href="{{seq_url}}{{experiment.location}}">{{experiment.get_isolate_name}}</a></td>
             <td>{{experiment.mutations.count}}</td>
             <td>{{experiment.mean_coverage}}</td>
