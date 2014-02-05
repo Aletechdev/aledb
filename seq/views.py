@@ -15,12 +15,12 @@ else:
 def get_seq_experiments(request):
     """return a list of seq experiments for a given ALE"""
     ale_experiment_id = request.GET.get("ale_experiment_id")
-    if ale_experiment_id is None:
+    if ale_experiment_id is None or ale_experiment_id == "all":
         ale_experiment_selector = ""
     else:
         ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
     ale_no = request.GET.get("ale_no")
-    if ale_no is None:
+    if ale_no is None or ale_no == "all":
         ale_no_selector = ""
     else:
         ale_no_selector = "AND ale_no = %d" % int(ale_no)
@@ -94,14 +94,14 @@ def mutation_table(request):
     
     # Get the full list of ale experiments for the lineage chosen, as well as
     # the ale number of interest
+
     experiment_id = request.GET.get("ale_experiment_id")
-    curr_id = request.GET.get("ale_no")
+    experiment_id = None if experiment_id is None or experiment_id == "all" else int(experiment_id)
+    ale_no = request.GET.get("ale_no")
+    ale_no = None if ale_no is None or ale_no == "all" else int(ale_no)
     if experiment_id is not None:
-        experiment_id = int(experiment_id)
-        list_of_experiments = ResequencingExperiment.objects.raw(
-            """SELECT reseq_id AS id FROM id_mapping WHERE experiment_id=%d
-            AND reseq_id IS NOT NULL ORDER BY ale_no, flask_id, isolate_id
-            ASC""" % experiment_id)
+        experiment = AleExperiment.objects.get(ale_id=experiment_id)
+        list_of_experiments = experiment.aleid_set.only("ale_id")
     else:
         list_of_experiments = ResequencingExperiment.objects.all()
 
@@ -139,7 +139,12 @@ def mutation_table(request):
         table_body += table_row + "\n"
     template = loader.get_template("table_template.html")
     # list_of_experiments and curr_id are added for use of the drop down list
-    context = Context({"experiments": list_of_experiments, "curr_id": curr_id, "table_body": mark_safe(table_body), "title": "Mutation table", "table_header": mark_safe(table_header)})
+    context = Context({"experiments": list_of_experiments,
+                       "ale_no": ale_no,
+                       "experiment_id": experiment_id,
+                       "table_body": mark_safe(table_body),
+                       "title": "Mutation table",
+                       "table_header": mark_safe(table_header)})
     return HttpResponse(template.render(context))
 
 @login_required
