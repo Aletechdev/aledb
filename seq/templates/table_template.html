@@ -1,14 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
    "http://www.w3.org/TR/html4/strict.dtd">
-<form action="" method="post">
-  <select name="ale_no">
-    <option value="-1">--Select Ale--</option>
-    {% for experiment in experiments %}
-    <option value="{{ experiment.ale_id }}">A{{ experiment.ale_id }}</option>
-    {% endfor %}
-  </select>
-  <input type="submit" value="Go" />
-</form> 
 
 <html>
     <head>
@@ -55,6 +46,18 @@
         </script>
     </head>
     <body>
+        {% if experiment_id %}
+        <form action="" method="get">
+            <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+            <select name="ale_no">
+                <option value="all">All ales</option>
+                {% for experiment in experiments %}
+                <option {%if ale_no == experiment.ale_id %}selected="selected"{% endif %} value="{{ experiment.ale_id }}">{{ experiment.ale_id }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" value="Go" />
+        </form>
+        {% endif %} 
         <table id="data">
             <thead>
                 {{table_header}}
