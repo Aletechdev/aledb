@@ -19,7 +19,7 @@ def get_seq_experiments(request):
         ale_experiment_selector = ""
     else:
         ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
-    ale_no = request.GET.get("ale_no")
+    ale_no = request.POST.get("ale_no")
     if ale_no is None:
         ale_no_selector = ""
     else:
@@ -92,15 +92,14 @@ def experiment_table(request):
 def mutation_table(request):
     experiments = get_seq_experiments(request)
     
-    # Get the full list of ale experiments for the lineage chosen, as well as
-    # the ale number of interest
+    # Get the full list of ale experiments for the ale number of interest
     experiment_id = request.GET.get("ale_experiment_id")
     curr_id = request.GET.get("ale_no")
     if experiment_id is not None:
         experiment_id = int(experiment_id)
         list_of_experiments = ResequencingExperiment.objects.raw(
             """SELECT reseq_id AS id FROM id_mapping WHERE experiment_id=%d
-            AND reseq_id IS NOT NULL ORDER BY ale_no, flask_id, isolate_id
+            AND reseq_id IS NOT NULL ORDER BY ale_no, flask_no, isolate_no
             ASC""" % experiment_id)
     else:
         list_of_experiments = ResequencingExperiment.objects.all()
@@ -158,38 +157,18 @@ def isolate_list(request):
     return HttpResponse(template.render(context))
     
 # Provide a table showing frequencies of each observed mutation in the lineage
-def lineage_overview(request):
+def mutation_summary(request):
     experiments = get_seq_experiments(request)
-    experiment_mapping = dict((o.id,i) for i,o in enumerate(experiments))
-    experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiments)
-    observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=experiment_mapping.keys())
-    mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
-    mutations_sorted = sorted(mutations, key=lambda Mutation: Mutation.observedmutation_set.count(), reverse=True)
-    mutation_mapping = dict((id,i)for i,id in enumerate(mutations.values_list("id", flat=True)))
-    table_header = "<tr><td>Mutation</td><td>Gene</td><td>Protein change</td><td>Observation</td>"
-    #for experiment in experiments:
-        #table_header += """<td>%s</td>""" % (experiment.get_isolate_name().replace("_", " "))
-    table_header += "</tr>"
-    table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
-    
-    for observed in observed_mutations:
-        new_entry = make_table_entry(observed, experiment_urls)
-        if new_entry is not None:
-            table_entries[mutation_mapping[observed.mutation_id]][experiment_mapping[observed.sequencing_experiment_id]] = new_entry
     table_body = ""
-    for mutation in mutations_sorted:
+    for experiment in experiments:
         table_row = "<tr>"
-        if mutation.reference_error:
-            table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
-        else:
-            table_row += "<td>%d %s</td>" % (mutation.position, mutation.sequence_change)
-        table_row += "<td>%s</td>" % (mutation.gene)
-        table_row += "<td>%s</td>" % (mutation.protein_change)
-        table_row += "<td>%d/%d</td>" % (mutation.observedmutation_set.count(),len(experiment_mapping))
-        #table_row += "<td>%s</td>" % 
-        #table_row += "".join(table_entries[mutation_mapping[mutation.id]])
+        table_row += """<td><a href="&ale_no={{experiment.ale_id}}">%s</a></td>""" % (experiment.get_isolate_name().split("_")[0])
+        # Need to work on this later
+        table_row += "<td>%d</td>" % experiment.mutations.count()
+        table_row += "<td>%d</td>" % experiment.mutations.count()
+        
         table_row += "</tr>"
         table_body += table_row + "\n"
-    template = loader.get_template("lineage.html")
-    context = Context({"table_body": mark_safe(table_body), "title": "Mutation table", "table_header": mark_safe(table_header)})
+    template = loader.get_template("summary.html")
+    context = Context({"table_body": mark_safe(table_body)})
     return HttpResponse(template.render(context))
