@@ -21,10 +21,10 @@
             <tr>
                 <th>ALE experiment</th>
                 <th>Resequencing List</th>
-                <th>Mutation table</th>
+                <th>Mutation Table</th>
                 <th>Mutation Table by Experiment</th>
                 <th>Isolates</th>
-                <th>Lineage Overview</th>
+                <th>Mutation Summary</th>
             </tr>
         </thead>
     <tbody>
@@ -35,7 +35,7 @@
             <td><a href="mutations?ale_experiment_id={{experiment.ale_id}}">link</a></td>
             <td><a href="experiments?ale_experiment_id={{experiment.ale_id}}">link</a></td>
             <td><a href="isolates?ale_experiment_id={{experiment.ale_id}}">link</a></td>
-            <td><a href="lineage?ale_experiment_id={{experiment.ale_id}}">link</a></td>
+            <td><a href="summary?ale_experiment_id={{experiment.ale_id}}">link</a></td>
     {% endfor %}
     </tbody>
     </body>
