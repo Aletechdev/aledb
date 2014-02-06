@@ -157,18 +157,26 @@ def isolate_list(request):
     return HttpResponse(template.render(context))
     
 # Provide a table showing frequencies of each observed mutation in the lineage
-def mutation_summary(request):
+def lineage_table(request):
     experiments = get_seq_experiments(request)
+    ale_experiment_id = int(request.GET.get("ale_experiment_id"))
     table_body = ""
     for experiment in experiments:
         table_row = "<tr>"
-        table_row += """<td><a href="&ale_no={{experiment.ale_id}}">%s</a></td>""" % (experiment.get_isolate_name().split("_")[0])
+        table_row += """<td><a href="summary?ale_experiment_id=%d&ale_no=%d">%s</a></td>""" % (ale_experiment_id,experiment.ale_id,experiment.get_isolate_name().split("_")[0])
         # Need to work on this later
         table_row += "<td>%d</td>" % experiment.mutations.count()
         table_row += "<td>%d</td>" % experiment.mutations.count()
         
         table_row += "</tr>"
         table_body += table_row + "\n"
-    template = loader.get_template("summary.html")
+    template = loader.get_template("lineage.html")
     context = Context({"table_body": mark_safe(table_body)})
     return HttpResponse(template.render(context))
+
+def mutation_summary(request):
+    experiments = get_seq_experiments(request)
+    
+    template = loader.get_template("summary.html")
+    context = Context({})
+    return HttpResponse(template.render(context))    
