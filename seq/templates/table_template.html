@@ -41,24 +41,28 @@
                         "aButtons": [ "copy", "print" ]
                     }*/
                 });
+
                 //new FixedHeader(oTable);
             });
         </script>
     </head>
     <body>
-        {% if experiment_id %}
+	{% if experiment_id %}
         <form action="" method="get">
             <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
             <select name="ale_no">
                 <option value="all">All ales</option>
                 {% for experiment in experiments %}
-                <option {%if ale_no == experiment.ale_id %}selected="selected"{% endif %} value="{{ experiment.ale_id }}">{{ experiment.ale_id }}</option>
+                <option {%if ale_no == experiment.ale_id %}selected="selected"{% endif %} value="{{ experiment.ale_id }}">0{{ experiment.ale_id }}</option>
                 {% endfor %}
             </select>
             <input type="submit" value="Go" />
         </form>
-        {% endif %} 
-        <table id="data">
+     	{% endif %}
+        <form action="" method="post">
+            <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+	<table id="data">
+	    <input type="submit" value="Go" />
             <thead>
                 {{table_header}}
             </thead>
@@ -66,5 +70,6 @@
                 {{table_body}}
             </tbody>
         </table>
+	</form>
     </body>
 </html>

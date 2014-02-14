@@ -15,12 +15,12 @@ else:
 def get_seq_experiments(request):
     """return a list of seq experiments for a given ALE"""
     ale_experiment_id = request.GET.get("ale_experiment_id")
-    if ale_experiment_id is None:
+    if ale_experiment_id is None or ale_experiment_id == "all":
         ale_experiment_selector = ""
     else:
         ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
-    ale_no = request.POST.get("ale_no")
-    if ale_no is None:
+    ale_no = request.GET.get("ale_no")
+    if ale_no is None or ale_no == "all":
         ale_no_selector = ""
     else:
         ale_no_selector = "AND ale_no = %d" % int(ale_no)
@@ -94,29 +94,45 @@ def mutation_table(request):
     
     # Get the full list of ale experiments for the ale number of interest
     experiment_id = request.GET.get("ale_experiment_id")
-    curr_id = request.GET.get("ale_no")
+    experiment_id = None if experiment_id is None or experiment_id == "all" else int(experiment_id)
+    ale_no = request.GET.get("ale_no")
+    ale_no = None if ale_no is None or ale_no == "all" else int(ale_no)
     if experiment_id is not None:
-        experiment_id = int(experiment_id)
-        list_of_experiments = ResequencingExperiment.objects.raw(
-            """SELECT reseq_id AS id FROM id_mapping WHERE experiment_id=%d
-            AND reseq_id IS NOT NULL ORDER BY ale_no, flask_no, isolate_no
-            ASC""" % experiment_id)
+        experiment = AleExperiment.objects.get(ale_id=experiment_id)
+        list_of_experiments = experiment.aleid_set.only("ale_id")
     else:
         list_of_experiments = ResequencingExperiment.objects.all()
 
     extra_validation = False if request.GET.get("novalid") else True
-    experiment_mapping = dict((o.id, i) for i, o in enumerate(experiments))
+    experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments))
+
+    # Remove experiment if checked
+    col = request.POST.get("chk_exp")
+    if col is not None:
+        temp = ResequencingExperiment.objects.get(id=col)
+        del experiment_mapping[temp.id]
+
     # cache the urls of the experiment location
-    experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiments)
+    experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiment_mapping.values())
     observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=experiment_mapping.keys())
     mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
+    
+    # Remove mutation if checked
+    row = request.POST.get("chk_mut")
+    if row is not None:
+        mutations = mutations.exclude(id=row)
+        observed_mutations = observed_mutations.exclude(mutation_id=row)
+
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
     table_header = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
-    for experiment in experiments:
-        table_header += """<td>%s</td>""" % (experiment.get_isolate_name().replace("_", " "))
+    for experiment in experiment_mapping.values():
+        # Add checkbox to each column.
+        table_header += """<td><input type=%s name=%s value=%d />%s</td>""" % ("checkbox","chk_exp",experiment.id,experiment.get_isolate_name().replace("_", " "))
     table_header += "</tr>"
     table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
-    
+
+    experiment_mapping = dict((o, i) for i, o in enumerate(experiment_mapping.keys()))
+
     for observed in observed_mutations:
         # sometimes we do not want the extra validation
         if not extra_validation and not observed.breseq_present:
@@ -130,15 +146,20 @@ def mutation_table(request):
         if mutation.reference_error:
             table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
         else:
-            table_row += "<td>%d %s</td>" % (mutation.position, mutation.sequence_change)
+            # Add checkbox to each row.
+            table_row += "<td><input type=%s name=%s value=%d />%d %s</td>" % ("checkbox","chk_mut",mutation.id,mutation.position,mutation.sequence_change)
         table_row += "<td>%s</td>" % (mutation.gene)
         table_row += "<td>%s</td>" % (mutation.protein_change)
         table_row += "".join(table_entries[mutation_mapping[mutation.id]])
         table_row += "</tr>"
         table_body += table_row + "\n"
     template = loader.get_template("table_template.html")
-    # list_of_experiments and curr_id are added for use of the drop down list
-    context = Context({"experiments": list_of_experiments, "curr_id": curr_id, "table_body": mark_safe(table_body), "title": "Mutation table", "table_header": mark_safe(table_header)})
+    context = Context({"experiments": list_of_experiments, 
+		       "ale_no": ale_no, 
+		       "experiment_id": experiment_id,
+		       "table_body": mark_safe(table_body), 
+		       "title": "Mutation table", 
+	 	       "table_header": mark_safe(table_header)})
     return HttpResponse(template.render(context))
 
 @login_required
@@ -161,12 +182,17 @@ def lineage_table(request):
     experiments = get_seq_experiments(request)
     ale_experiment_id = int(request.GET.get("ale_experiment_id"))
     table_body = ""
-    for experiment in experiments:
+    experiment_set = dict((e.ale_id,set()) for e in experiments)
+    for i in experiment_set:
+        for e in experiments:
+            if e.ale_id==i:
+                experiment_set.get(i).add(e)
+    for ale_no in sorted(experiment_set):
         table_row = "<tr>"
-        table_row += """<td><a href="summary?ale_experiment_id=%d&ale_no=%d">%s</a></td>""" % (ale_experiment_id,experiment.ale_id,experiment.get_isolate_name().split("_")[0])
+        table_row += """<td><a href="summary?ale_experiment_id=%d&ale_no=%d">A%s</a></td>""" % (ale_experiment_id,ale_no,ale_no)
         # Need to work on this later
-        table_row += "<td>%d</td>" % experiment.mutations.count()
-        table_row += "<td>%d</td>" % experiment.mutations.count()
+        table_row += "<td>%d</td>" % 0
+        table_row += "<td>%d</td>" % 0
         
         table_row += "</tr>"
         table_body += table_row + "\n"
@@ -176,6 +202,9 @@ def lineage_table(request):
 
 def mutation_summary(request):
     experiments = get_seq_experiments(request)
+    experiment_mapping = dict((o.id,i) for i,o in enumerate(experiments))
+    obsered_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=experiment_mapping)
+    mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation",flat=True))
     
     template = loader.get_template("summary.html")
     context = Context({})
