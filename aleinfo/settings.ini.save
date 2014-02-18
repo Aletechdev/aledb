@@ -1,0 +1,12 @@
+[DATABASE]
+host = 127.0.0.1
+port = 3306
+user = ale
+database = ale_db
+password = ecoli
+engine = mysql
+
+[OTHER]
+sequencing_url = http://clostridium.ucsd.edu/sequencing/
+sequencing_path = /home/kaiwen/sequencing/
+
