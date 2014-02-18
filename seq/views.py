@@ -191,9 +191,8 @@ def lineage_table(request):
         table_row = "<tr>"
         table_row += """<td><a href="summary?ale_experiment_id=%d&ale_no=%d">A%s</a></td>""" % (ale_experiment_id,ale_no,ale_no)
         # Need to work on this later
-        table_row += "<td>%d</td>" % 0
-        table_row += "<td>%d</td>" % 0
-        
+        table_row += "<td>%d</td>" % len(Flask.objects.filter(ale_id=AleId.objects.filter(ale_id=ale_no)))
+        table_row += "<td>%d</td>" % len(Isolate.objects.filter(flask__in=Flask.objects.filter(ale_id=AleId.objects.filter(ale_id=ale_no))))
         table_row += "</tr>"
         table_body += table_row + "\n"
     template = loader.get_template("lineage.html")
@@ -202,10 +201,71 @@ def lineage_table(request):
 
 def mutation_summary(request):
     experiments = get_seq_experiments(request)
-    experiment_mapping = dict((o.id,i) for i,o in enumerate(experiments))
-    obsered_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=experiment_mapping)
-    mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation",flat=True))
+    experiment_set = dict((i,set(Mutation.objects.filter(pk__in=ObservedMutation.objects.filter(sequencing_experiment_id=e.id).values_list("mutation",flat=True)))) for i,e in enumerate(experiments))
+    muts = set()
+    for s in experiment_set.values():
+        muts = muts | s
+    matrix = dict((m,[int(m in l) for l in experiment_set.values()]) for m in muts)
+
+    # Mutation categories
+    mut_seen_in_all = list()
+    mut_seen_in_multiple = list()
+    mut_seen_in_one = list()
+    mut_reappeared = list()
+    mut_replaced = dict()
+
+    # An algorithm that checks if a mutation is replaced by a different
+    # mutation in the same gene
+    def replaced(mutation):
+        replaced = False
+        s = matrix.get(mutation)
+        ind = s.index(1)
+        for m in muts:
+            if ind < matrix.get(m).index(1):
+                replaced = True
+                mut_replaced[mutation] = m
+                break
+        return replaced
     
+    # Classify all mutations into the five categories
+    for m in muts:
+        s = matrix.get(m)
+        if sum(s)==len(s):
+            mut_seen_in_all.append(m)
+        elif sum(s)>1 & sum(s)<len(s):
+            s_str = ''
+            for i in s:
+                s_str += str(i)
+            if s_str.find('11')!=-1:
+                mut_seen_in_multiple.append(m)
+            else:
+                mut_reappeared.append(m)
+        elif sum(s)==1:
+            if not replaced(m):
+                mut_seen_in_one.append(m)
+    
+    # HTML display
+    present_in_all = ""
+    for m in mut_seen_in_all:
+        present_in_all += "<p>%d %s<br></p>" % (m.position,m.sequence_change)
+    present_in_multiple = ""
+    for m in mut_seen_in_multiple:
+        present_in_multiple += "<p>%d %s<br></p>" % (m.position,m.sequence_change)
+    present_in_one = ""
+    for m in mut_seen_in_one:
+        present_in_one += "<p>%d %s<br></p>" % (m.position,m.sequence_change)
+    reappeared = ""
+    for m in mut_reappeared:
+        reappeared += "<p>%d %s<br></p>" % (m.position,m.sequence_change)
+    replaced = ""
+    for m,r in zip(mut_replaced.keys(),mut_replaced.values()):
+        replaced += "<p>%d %s: repalced by %d %s<br></p>" % (m.position,m.sequence_change,r.position,r.sequence_change)
+
     template = loader.get_template("summary.html")
-    context = Context({})
+    context = Context({"present_in_all":mark_safe(present_in_all),
+                       "present_in_multiple":mark_safe(present_in_multiple),
+                       "present_in_one":mark_safe(present_in_one),
+                       "reappeared":mark_safe(reappeared),
+                       "replaced":mark_safe(replaced),
+                       })
     return HttpResponse(template.render(context))    

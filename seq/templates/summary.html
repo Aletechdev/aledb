@@ -6,7 +6,7 @@
     <title>Mutation Summary</title>
     <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
-    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css" media="print, projection, screen" />
+    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style-kz.css" type="text/css" media="print, projection, screen" />
     <script type="text/javascript">
       var asInitVals = new Array();
       $(document).ready($(function() {
@@ -18,22 +18,20 @@
     <table class="tablesorter">
       <thead>
 	<tr>
-	  <th>Mutation Categories</th>
-	  <th>Stay all flasks</th>
-	  <th>Stay more than once, not all</th>
+	  <th>Present in all flasks</th>
+	  <th>Stay for multiple flasks</th>
 	  <th>Appear->Replaced by a different mutation in the same gene</th>
-	  <th>Appear->Disappear</th>
 	  <th>Appear->Disappear->Reappear</th>
+	  <th>Appear->Disappear</th>
 	</tr>
       </thead>
       <tbody>
 	<tr>
-	  <td></td>
-	  <td></td>
-	  <td></td>
-	  <td></td>
-	  <td></td>
-	  <td></td>
+	  <td>{{ present_in_all }}</td>
+	  <td>{{ present_in_multiple }}</td>
+	  <td>{{ replaced }}</td>
+	  <td>{{ reappeared }}</td>
+	  <td>{{ present_in_one }}</td>
 	</tr>
       </tbody>
     </table>
