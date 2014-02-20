@@ -25,9 +25,10 @@ def get_key(name):
     return (int(s[2]), int(s[4]), int(s[6]))
 runs.sort(key=get_key)
 print runs
+import sys
+sys.exit()
 
 # add wild type
-"""
 ale_id = query_or_create(session, AleId, ale_experiment=experiment, ale_id=0)
 flask = query_or_create(session, Flask, flask_number=0,
     ale_id=ale_id, media=media)
@@ -37,7 +38,7 @@ isolate = query_or_create(session, Isolate, flask=flask,
 session.commit()
 add_breseq_results(session, isolate.id, "BOP27", sequencing_path + "BOP27_reseq", wt=True)
 session.commit()
-"""
+
 for i in runs:
     split = i.split("_")
     # find the isolate from the folder name
