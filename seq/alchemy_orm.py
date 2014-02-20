@@ -33,7 +33,6 @@ elif db_settings["ENGINE"].endswith("mysql"):
     connection_str = "mysql://%s:%s@%s/%s" % \
         (db_settings["USER"], db_settings["PASSWORD"],
         hostname, db_settings["NAME"])
-
 engine = create_engine(connection_str)
 Base = declarative_base()
 metadata = MetaData(bind=engine)

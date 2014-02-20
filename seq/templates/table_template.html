@@ -41,28 +41,12 @@
                         "aButtons": [ "copy", "print" ]
                     }*/
                 });
-
                 //new FixedHeader(oTable);
             });
         </script>
-	<script>
-	    function removeCheckedMutations(table) {
-	        for (var rowi = table.rows.length; rowi-->1;) {
-		    var row = table.rows[rowi];
-		    var inputs = row.getElementsByTagName('input');
-		    for (var inputi = inputs.length; inputi-->0;) {
-			var input = inputs[inputi];
-			if (input.type=='checkbox' && input.checked) {
-			    row.parentNode.removeChild(row);
-			    break;
-			}
-		    }
-                }
-	    }
-	</script>
     </head>
     <body>
-	{% if experiment_id %}
+        {% if experiment_id %}
         <form action="" method="get">
             <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
             <select name="ale_no">
@@ -73,12 +57,8 @@
             </select>
             <input type="submit" value="Go" />
         </form>
-     	{% endif %}
-        <form action="" method="get">
-	    <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}" />
-	<table id="data">
-	    <input type="button" value="Remove checked mutations" onclick="removeCheckedMutations(data)" /> <br>
-	    <input type="submit" value="Remove checked experiments" />
+        {% endif %} 
+        <table id="data">
             <thead>
                 {{table_header}}
             </thead>
@@ -86,6 +66,5 @@
                 {{table_body}}
             </tbody>
         </table>
-	</form>
     </body>
 </html>
