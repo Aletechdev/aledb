@@ -91,7 +91,7 @@ def experiment_table(request):
 @login_required
 def mutation_table(request):
     experiments = get_seq_experiments(request)
-    
+ 
     # Get the full list of ale experiments for the ale number of interest
     experiment_id = request.GET.get("ale_experiment_id")
     experiment_id = None if experiment_id is None or experiment_id == "all" else int(experiment_id)
@@ -106,28 +106,20 @@ def mutation_table(request):
     extra_validation = False if request.GET.get("novalid") else True
     experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments))
 
-    # Remove experiment if checked
-    col = request.POST.get("chk_exp")
-    if col is not None:
-        temp = ResequencingExperiment.objects.get(id=col)
-        del experiment_mapping[temp.id]
+    checked_experiments = dict((e.id,request.GET.get('%d' % e.id)) for e in experiments)
+    for id in experiment_mapping.keys():
+        if checked_experiments.get(id)=='on':
+            del experiment_mapping[id]
 
     # cache the urls of the experiment location
     experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiment_mapping.values())
     observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=experiment_mapping.keys())
     mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
-    
-    # Remove mutation if checked
-    row = request.POST.get("chk_mut")
-    if row is not None:
-        mutations = mutations.exclude(id=row)
-        observed_mutations = observed_mutations.exclude(mutation_id=row)
-
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
     table_header = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
     for experiment in experiment_mapping.values():
         # Add checkbox to each column.
-        table_header += """<td><input type=%s name=%s value=%d />%s</td>""" % ("checkbox","chk_exp",experiment.id,experiment.get_isolate_name().replace("_", " "))
+        table_header += """<td><input type=%s name=%d />%s</td>""" % ("checkbox",experiment.id,experiment.get_isolate_name().replace("_", " "))
     table_header += "</tr>"
     table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
 
@@ -147,7 +139,7 @@ def mutation_table(request):
             table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
         else:
             # Add checkbox to each row.
-            table_row += "<td><input type=%s name=%s value=%d />%d %s</td>" % ("checkbox","chk_mut",mutation.id,mutation.position,mutation.sequence_change)
+            table_row += "<td><input type=%s />%d %s</td>" % ("checkbox",mutation.position,mutation.sequence_change)
         table_row += "<td>%s</td>" % (mutation.gene)
         table_row += "<td>%s</td>" % (mutation.protein_change)
         table_row += "".join(table_entries[mutation_mapping[mutation.id]])
@@ -205,6 +197,10 @@ def mutation_summary(request):
     muts = set()
     for s in experiment_set.values():
         muts = muts | s
+    
+    # Generates a binary matrix whose rows are mutations,
+    # columns are experiments, and values are either 1 or 0 
+    # depending on whether the mutation present in the experiment 
     matrix = dict((m,[int(m in l) for l in experiment_set.values()]) for m in muts)
 
     # Mutation categories
