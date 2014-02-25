@@ -104,27 +104,18 @@ def mutation_table(request):
         list_of_experiments = ResequencingExperiment.objects.all()
 
     extra_validation = False if request.GET.get("novalid") else True
-    experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments))
-
-    checked_experiments = dict((e.id,request.GET.get('%d' % e.id)) for e in experiments)
-    for id in experiment_mapping.keys():
-        if checked_experiments.get(id)=='on':
-            del experiment_mapping[id]
-
+    experiment_mapping = dict((o.id, i) for i, o in enumerate(experiments))
     # cache the urls of the experiment location
-    experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiment_mapping.values())
+    experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiments)
     observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=experiment_mapping.keys())
     mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
     table_header = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
-    for experiment in experiment_mapping.values():
-        # Add checkbox to each column.
-        table_header += """<td><input type=%s name=%d />%s</td>""" % ("checkbox",experiment.id,experiment.get_isolate_name().replace("_", " "))
+    for experiment in experiments:
+        table_header += """<td>%s</td>""" % (experiment.get_isolate_name().replace("_", " "))
     table_header += "</tr>"
     table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
-
-    experiment_mapping = dict((o, i) for i, o in enumerate(experiment_mapping.keys()))
-
+    
     for observed in observed_mutations:
         # sometimes we do not want the extra validation
         if not extra_validation and not observed.breseq_present:
@@ -138,20 +129,20 @@ def mutation_table(request):
         if mutation.reference_error:
             table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
         else:
-            # Add checkbox to each row.
-            table_row += "<td><input type=%s />%d %s</td>" % ("checkbox",mutation.position,mutation.sequence_change)
+            table_row += "<td>%d %s</td>" % (mutation.position, mutation.sequence_change)
         table_row += "<td>%s</td>" % (mutation.gene)
         table_row += "<td>%s</td>" % (mutation.protein_change)
         table_row += "".join(table_entries[mutation_mapping[mutation.id]])
         table_row += "</tr>"
         table_body += table_row + "\n"
     template = loader.get_template("table_template.html")
-    context = Context({"experiments": list_of_experiments, 
-		       "ale_no": ale_no, 
-		       "experiment_id": experiment_id,
-		       "table_body": mark_safe(table_body), 
-		       "title": "Mutation table", 
-	 	       "table_header": mark_safe(table_header)})
+    # list_of_experiments and curr_id are added for use of the drop down list
+    context = Context({"experiments": list_of_experiments,
+                       "ale_no": ale_no,
+                       "experiment_id": experiment_id,
+                       "table_body": mark_safe(table_body),
+                       "title": "Mutation table",
+                       "table_header": mark_safe(table_header)})
     return HttpResponse(template.render(context))
 
 @login_required
