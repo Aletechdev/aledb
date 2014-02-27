@@ -76,9 +76,14 @@
      	{% endif %}
         <form action="" method="get">
 	    <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}" />
+	    {% if ale_no %}
+            <input type="hidden" name="ale_no" value="{{ ale_no }}" />
+	    {% else %}
+            <input type="hidden" name="ale_no" value="all" />
+	    {% endif %}
 	<table id="data">
 	    <input type="button" value="Remove checked mutations" onclick="removeCheckedMutations(data)" /> <br>
-	    <input type="submit" value="Remove checked experiments" />
+	    <input type="submit" value="Remove checked flasks" />
             <thead>
                 {{table_header}}
             </thead>
