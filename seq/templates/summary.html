@@ -7,11 +7,17 @@
     <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
     <link rel="stylesheet" href="/static/tablesorter/themes/blue/style-kz.css" type="text/css" media="print, projection, screen" />
+    <style type="text/css" title="currentStyle">
+        @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
+	    .reference_error {
+                text-decoration: line-through;
+	    }
+    </style>
     <script type="text/javascript">
-      var asInitVals = new Array();
-      $(document).ready($(function() {
-      oTable = $("#runs").tablesorter({widgets: ['zebra']});
-      }));
+        var asInitVals = new Array();
+        $(document).ready($(function() {
+            oTable = $("#runs").tablesorter({widgets: ['zebra']});
+        }));
     </script>
   </head>
   <body>
