@@ -68,7 +68,7 @@
             <select name="ale_no">
                 <option value="all">All ales</option>
                 {% for experiment in experiments %}
-                <option {%if ale_no == experiment.ale_id %}selected="selected"{% endif %} value="{{ experiment.ale_id }}">{{ experiment.ale_id }}</option>
+                <option {%if ale_no == experiment.ale_id %}selected="selected"{% endif %} value="{{ experiment.ale_id }}">{{ experiment }}</option>
                 {% endfor %}
             </select>
             <input type="submit" value="Go" />

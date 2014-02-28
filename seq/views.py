@@ -181,10 +181,11 @@ def lineage_table(request):
                 experiment_set.get(i).add(e)
     for ale_no in sorted(experiment_set):
         table_row = "<tr>"
-        table_row += """<td><a href="summary?ale_experiment_id=%d&ale_no=%d">A%s</a></td>""" % (ale_experiment_id,ale_no,ale_no)
+        lineage_name = list(experiment_set.get(ale_no)).__getitem__(0).get_isolate_name().split('_')[0]; # lineage name
+        table_row += """<td><a href="summary?ale_experiment_id=%d&ale_no=%d">%s</a></td>""" % (ale_experiment_id,ale_no,lineage_name)
         # Need to work on this later
-        table_row += "<td>%d</td>" % len(Flask.objects.filter(ale_id=AleId.objects.filter(ale_id=ale_no)))
-        table_row += "<td>%d</td>" % len(Isolate.objects.filter(flask__in=Flask.objects.filter(ale_id=AleId.objects.filter(ale_id=ale_no))))
+        table_row += "<td>%d</td>" % len(Flask.objects.filter(flask_number__in=dict((e.flask_number,e) for e in experiment_set.get(ale_no)),ale_id__ale_id=ale_no))
+        table_row += "<td>%d</td>" % len(experiment_set.get(ale_no))
         table_row += "</tr>"
         table_body += table_row + "\n"
     template = loader.get_template("lineage.html")
@@ -243,7 +244,10 @@ def mutation_summary(request):
     # HTML display
     present_in_all = ""
     for m in mut_seen_in_all:
-        present_in_all += "<p>%d %s<br></p>" % (m.position,m.sequence_change)
+        if m.reference_error:
+            present_in_all += """<p class="reference_error">%d %s<br></p>""" % (m.position,m.sequence_change)
+        else:
+            present_in_all += "<p>%d %s<br></p>" % (m.position,m.sequence_change)
     present_in_multiple = ""
     for m in mut_seen_in_multiple:
         present_in_multiple += "<p>%d %s<br></p>" % (m.position,m.sequence_change)
