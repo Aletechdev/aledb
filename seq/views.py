@@ -104,7 +104,7 @@ def mutation_table(request):
         list_of_experiments = ResequencingExperiment.objects.all()
 
     extra_validation = False if request.GET.get("novalid") else True
-    experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments))
+    experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments) if o.isolate.__unicode__().find("POP")==-1)
 
     checked_experiments = dict((e.id,request.GET.get('%d' % e.id)) for e in experiments)
     for id in experiment_mapping.keys():
@@ -123,7 +123,7 @@ def mutation_table(request):
     table_header += "</tr>"
     table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
 
-    experiment_mapping = dict((o, i) for i, o in enumerate(experiment_mapping.keys()))
+    experiment_mapping = dict((o, i) for i, o in enumerate(sorted(experiment_mapping.keys())))
 
     for observed in observed_mutations:
         # sometimes we do not want the extra validation
@@ -136,7 +136,8 @@ def mutation_table(request):
     for mutation in mutations:
         table_row = "<tr>"
         if mutation.reference_error:
-            table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
+            #table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
+	    continue
         else:
             # Add checkbox to each row.
             table_row += "<td><input type=%s />%d %s</td>" % ("checkbox",mutation.position,mutation.sequence_change)
@@ -145,6 +146,7 @@ def mutation_table(request):
         table_row += "".join(table_entries[mutation_mapping[mutation.id]])
         table_row += "</tr>"
         table_body += table_row + "\n"
+
     template = loader.get_template("table_template.html")
     context = Context({"experiments": list_of_experiments, 
 		       "ale_no": ale_no, 
@@ -194,7 +196,8 @@ def lineage_table(request):
 
 def mutation_summary(request):
     experiments = get_seq_experiments(request)
-    experiment_set = dict((i,set(Mutation.objects.filter(pk__in=ObservedMutation.objects.filter(sequencing_experiment_id=e.id).values_list("mutation",flat=True)))) for i,e in enumerate(experiments))
+    experiments_no_pop = [e for e in experiments if e.isolate.__unicode__().find("POP")==-1]
+    experiment_set = dict((i,set(Mutation.objects.filter(pk__in=ObservedMutation.objects.filter(sequencing_experiment_id=e.id).values_list("mutation",flat=True)))) for i,e in enumerate(experiments_no_pop))
     muts = set()
     for s in experiment_set.values():
         muts = muts | s

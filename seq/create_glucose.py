@@ -1,5 +1,5 @@
 from alchemy_orm import *
-from upload import add_breseq_results
+from upload import add_breseq_results,add_pop_results
 from validatemutations import check_negative_predictions
 import datetime
 from os import listdir
@@ -54,8 +54,12 @@ for i in runs:
         freezer_box=freezer_box, person="Gaby")
     session.commit()
     # upload data
-    if not pop:
-        add_breseq_results(session, isolate.id, "Gaby", sequencing_path + i)
+    #if not pop:
+    #    add_breseq_results(session, isolate.id, "Gaby", sequencing_path + i)
+    if pop:
+	add_pop_results(session, isolate.id, "Gaby", sequencing_path + i)
+    else:
+	add_breseq_results(session,isolate.id, "Gaby", sequencing_path + i)
 
 session.commit()
 

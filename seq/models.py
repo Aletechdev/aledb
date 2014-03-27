@@ -34,6 +34,7 @@ class Mutation(models.Model):
 		on the barrick lab wiki (http://tinyurl.com/l3fvnap) for more
 		information""")
     position = models.IntegerField()
+    #frequency = models.CharField(max_length=100,blank=True,null=True)
     feature_length = models.IntegerField(blank=True, null=True)
     sequence_change = models.CharField(max_length=100)
     protein_change = models.CharField(max_length=300, blank=True, null=True)
@@ -54,3 +55,4 @@ class ObservedMutation(models.Model):
     sequencing_experiment = models.ForeignKey(ResequencingExperiment)
     mutation = models.ForeignKey(Mutation)
     evidence = models.CharField(max_length=400, blank=True, null=True)
+    frequency = models.CharField(max_length=100, blank=True, null=True)

@@ -235,6 +235,8 @@ def getallmutations(experiment_id,ale_number):
     
     # construct a nested dictionary from the mutations    
     for reseq in all_reseqs:
+	if reseq.isolate.isolate_number==0:
+	    continue # exclude population reseqs
         if reseq.isolate.flask.flask_number not in all_mutations:
             all_mutations[reseq.isolate.flask.flask_number]={}
         if reseq.isolate.isolate_number in all_mutations[reseq.isolate.flask.flask_number]:
