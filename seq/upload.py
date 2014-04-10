@@ -80,7 +80,7 @@ def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
         session.add(observed_mutation)
 
 def add_pop_results(session, isolate_id, person, breseq_folder, wt=False):
-    """add breseq results to the database
+    """add population sequencing results to the database
 
     Parses the html output from a breseq run and adds those objects into
     the sqlalchemy session.

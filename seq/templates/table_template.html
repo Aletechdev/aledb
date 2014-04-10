@@ -45,19 +45,35 @@
                 //new FixedHeader(oTable);
             });
         </script>
+	<script type="text/javascript">
+	    $(document).ready(function () {
+	        var offset = $("#data_filter").offset();
+	        
+	        $(window).scroll(function () {
+	            var scrollLeft = $(window).scrollLeft();
+	            $("#data_filter").offset({left:offset.left+scrollLeft});
+	        });
+	    });
+	</script>
 	<script>
-	    function removeCheckedMutations(table) {
-	        for (var rowi = table.rows.length; rowi-->1;) {
-		    var row = table.rows[rowi];
-		    var inputs = row.getElementsByTagName('input');
-		    for (var inputi = inputs.length; inputi-->0;) {
-			var input = inputs[inputi];
-			if (input.type=='checkbox' && input.checked) {
-			    row.parentNode.removeChild(row);
-			    break;
-			}
-		    }
-                }
+	    $(document).ready(function () {	    
+	        $("tr td:first-child").each(function () {
+	            $(this).hover(
+	                function () {
+	                    $(this).children(".shut").css("display","block");
+	                },
+	                function () {
+	                    $(this).children(".shut").css("display","none");
+	                }
+	            );
+	        });
+	    });
+	</script>
+	<script>
+	    var deleteRow = function () {
+	        var td = $(this).parent();
+	        var tr = td.parent();
+	        tr.remove();
 	    }
 	</script>
     </head>
@@ -68,7 +84,7 @@
             <select name="ale_no">
                 <option value="all">All ales</option>
                 {% for experiment in experiments %}
-                <option {%if ale_no == experiment.ale_id %}selected="selected"{% endif %} value="{{ experiment.ale_id }}">{{ experiment }}</option>
+                <option {%if ale_no == experiment.ale_id %}selected="selected"{% endif %} value="{{ experiment.ale_id }}">{{ experiment.ale_id }}</option>
                 {% endfor %}
             </select>
             <input type="submit" value="Go" />
@@ -82,7 +98,6 @@
             <input type="hidden" name="ale_no" value="all" />
 	    {% endif %}
 	<table id="data">
-	    <input type="button" value="Remove checked mutations" onclick="removeCheckedMutations(data)" /> <br>
 	    <input type="submit" value="Remove checked flasks" />
             <thead>
                 {{table_header}}

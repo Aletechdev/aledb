@@ -47,21 +47,31 @@ def compare_mutation_calls(experiment_id,ale_no):
         sh.write(0,3,"Frequency")
 
         pop_observed = pop_oms.get(i)
-        pop_calls = dict((om,float(om.frequency.replace("%",""))) for om in pop_observed)
+        pop_calls = dict((om.mutation,float(om.frequency.replace("%",""))) for om in pop_observed)
 
         clone_observed = clone_oms.get(i)
         clone_mutations = [o.mutation for o in clone_observed]
         mutation_spectrum = Counter(clone_mutations)
-  
-        j = 1
-        for m in sorted(mutation_spectrum,key=lambda mutation: mutation.position):
+        
+        for j,m in enumerate(sorted(mutation_spectrum,key = lambda mutation:mutation_spectrum.get(mutation),reverse=True)):
+            sh.write(j+1,0,m.__str__())
+            sh.write(j+1,1,"%d/%d" % (mutation_spectrum.get(m),len(clone_map.get(i))))
+            sh.write(j+1,3,pop_calls.get(m))
+    output.save("ale%d_analysis.xls" % ale_no)
+    
+        for j,m in enumerate(sorted(mutation_spectrum,key=lambda mutation: mutation.position)):
             if m.reference_error:
-                sh.write(j,0,m.__str__(),Style.easyxf('pattern: pattern solid, fore_colour red;'))
+                sh.write(j+1,0,m.__str__(),Style.easyxf('pattern: pattern solid, fore_colour red;'))
             else:
-                sh.write(j,0,m.__str__())
-            sh.write(j,1,"%d/%d" % (mutation_spectrum.get(m),len(clone_map.get(i))))
-            j = j + 1 
+                sh.write(j+1,0,m.__str__())
+                sh.write(j+1,1,"%d/%d" % (mutation_spectrum.get(m),len(clone_map.get(i))))
   
+n	Gene	Protein change	A7 F55 I5	A7 F55 I6	A7 F55 I7	A7 F55 I8	A7 F55 I9	A7 F55 I10	A7 F61 I1	A7 F88 I1	A7 F88 I2	A7 F88 I3	A7 F236 I1	A7 F422 I1	A7 F20 I1	A7 F20 I2	A7 F20 I3	A7 F55 I1	A7 F55 I2	A7 F55 I3	A7 F55 I4
+4181279 T→C	rpoB	L671P (CTG→CCG) 							RA	0/210	0/161	1/118	0/141								
+4181281 G→A	rpoB	E672K (GAA→AAA) 	RA	RA	RA	RA	RA	RA		RA	RA	RA	0/142	0/121				RA		RA	
+4182601 A→C	rpoB	M1112L (ATC→CTC) 																	RA		
+4184626 A→C	rpoC	E418D (GAA→GAC) 											RA	RA							
+4185547 G→A	rpoC	M725I (ATG→ATA) 																			RA
         j = 1
         for c in sorted(pop_calls,key=lambda observed: observed.mutation.position):
             if pop_calls.get(c) > 90:
@@ -72,9 +82,9 @@ def compare_mutation_calls(experiment_id,ale_no):
                 sh.write(j,3,c.frequency)    
                 j = j + 1
 
-        output.save("ale%d_analysis.xls" % ale_no)
+    output.save("ale%d_analysis.xls" % ale_no)
     """   
-    """
+    
     # Track fixed/frequent variants across flasks
     output = xlwt.Workbook()
     sh = output.add_sheet("track")
@@ -84,9 +94,9 @@ def compare_mutation_calls(experiment_id,ale_no):
         pop_observed = pop_oms.get(flask)
         i = 1
         for observed in sorted(pop_observed,key=lambda observed: observed.mutation.position):
-            if not observed.mutation.reference_error and float(observed.frequency.replace("%","")) > 90:
+            if not observed.mutation.reference_error and float(observed.frequency.replace("%","")) > 60:
                 print observed.mutation.__str__()
                 sh.write(i,j,observed.mutation.__str__())
                 i+=1
     output.save("ale%d_track.xls" % ale_no)
-    """
+    

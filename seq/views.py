@@ -91,7 +91,7 @@ def experiment_table(request):
 @login_required
 def mutation_table(request):
     experiments = get_seq_experiments(request)
- 
+
     # Get the full list of ale experiments for the ale number of interest
     experiment_id = request.GET.get("ale_experiment_id")
     experiment_id = None if experiment_id is None or experiment_id == "all" else int(experiment_id)
@@ -117,9 +117,10 @@ def mutation_table(request):
     mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
     table_header = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
-    for experiment in experiment_mapping.values():
+    for id in sorted(experiment_mapping):
+        experiment = experiment_mapping.get(id)
         # Add checkbox to each column.
-        table_header += """<td><input type=%s name=%d />%s</td>""" % ("checkbox",experiment.id,experiment.get_isolate_name().replace("_", " "))
+        table_header += """<td><input type=%s name=%d /><br>%s</td>""" % ("checkbox",experiment.id,experiment.get_isolate_name().replace("_", " "))
     table_header += "</tr>"
     table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
 
@@ -137,10 +138,9 @@ def mutation_table(request):
         table_row = "<tr>"
         if mutation.reference_error:
             #table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
-	    continue
+            continue
         else:
-            # Add checkbox to each row.
-            table_row += "<td><input type=%s />%d %s</td>" % ("checkbox",mutation.position,mutation.sequence_change)
+            table_row += """<td>%d %s<a href="javascript:void(0)" class="shut" style="padding-top:1px;float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="12"></a></td>""" % (mutation.position,mutation.sequence_change)
         table_row += "<td>%s</td>" % (mutation.gene)
         table_row += "<td>%s</td>" % (mutation.protein_change)
         table_row += "".join(table_entries[mutation_mapping[mutation.id]])
