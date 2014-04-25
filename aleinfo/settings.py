@@ -6,7 +6,7 @@ TEMPLATE_DEBUG = DEBUG
 GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
 
 from os.path import expanduser, dirname, join, isfile
-from ConfigParser import SafeConfigParser
+from ConfigParser import SafeConfigParser, NoOptionError
 
 config = SafeConfigParser()
 # set the default settings
@@ -15,7 +15,6 @@ config.set("DATABASE", "host", "127.0.0.1")
 config.set("DATABASE", "port", "5432")
 config.set("DATABASE", "user", "ale")  # Or path to database file if using sqlite3.
 config.set("DATABASE", "database", "cellar")  # Or path to database file if using sqlite3.
-config.set("DATABASE", "password", "ecoliale")
 config.set("DATABASE", "engine", "mysql")  #'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
 config.add_section("OTHER")
 config.set("OTHER", "sequencing_url", "http://clostridium.ucsd.edu/sequencing/")
@@ -42,12 +41,17 @@ DATABASES = {
         'ENGINE': 'django.db.backends.' + config.get("DATABASE", "engine"),
         'NAME': config.get("DATABASE", "database"),
         'USER': config.get("DATABASE", "user"),
-        'PASSWORD': config.get("DATABASE", "password"),
+	"PASSWORD": config.get("DATABASE", "password"),
         'HOST': config.get("DATABASE", "host"),
         'PORT': config.get("DATABASE", "port"),
     }
 }
-
+"""
+try:
+    DATABASES["default"]["password"] = config.get("DATABASE", "password")
+except NoOptionError:
+    None
+"""
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
