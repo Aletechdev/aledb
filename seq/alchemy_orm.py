@@ -20,7 +20,6 @@ hostname = db_settings["HOST"]
 if "PORT" in db_settings:
     if len(db_settings["PORT"]) > 0:
         hostname += ":" + db_settings["PORT"]
-
 if db_settings["ENGINE"].endswith("sqlite3"):
     db = "sqlite"
     name = os.path.join(ale_dir, db_settings["NAME"])
@@ -30,8 +29,8 @@ elif db_settings["ENGINE"].endswith("postgresql_psycopg2"):
         (db_settings["USER"], db_settings["PASSWORD"],
         hostname, db_settings["NAME"])
 elif db_settings["ENGINE"].endswith("mysql"):
-    connection_str = "mysql://%s:%s@%s/%s" % \
-        (db_settings["USER"], db_settings["PASSWORD"],
+    connection_str = "mysql://%s:%s@%s/%s?charset=utf8" % \
+        (db_settings["USER"],db_settings["PASSWORD"],
         hostname, db_settings["NAME"])
 engine = create_engine(connection_str)
 Base = declarative_base()
@@ -107,4 +106,3 @@ def query_or_create(session, class_type, **kwargs):
 if __name__ == "__main__":
     session = Session()
     from IPython import embed; embed()
-

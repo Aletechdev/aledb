@@ -106,10 +106,25 @@ def mutation_table(request):
     extra_validation = False if request.GET.get("novalid") else True
     experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments) if o.isolate.__unicode__().find("POP")==-1)
 
-    checked_experiments = dict((e.id,request.GET.get('%d' % e.id)) for e in experiments)
-    for id in experiment_mapping.keys():
-        if checked_experiments.get(id)=='on':
-            del experiment_mapping[id]
+    # Show checked flasks only
+    query_string = request.GET.get("show")
+    if query_string is not None:
+    	checked_experiment_ids = query_string.encode('latin_1').replace("{","").replace("}","")
+    	if checked_experiment_ids != "":
+            id_list = [int(i) for i in checked_experiment_ids.split(",") if i!=""]
+            ids = experiment_mapping.keys()
+            for id in ids:
+                if id not in id_list:
+                    del experiment_mapping[id]
+            
+    # Remove checked flasks
+    query_string = request.GET.get("remove")
+    if query_string is not None:
+    	checked_experiment_ids = query_string.encode('latin_1').replace("{","").replace("}","")
+    	if checked_experiment_ids != "":
+            for id in checked_experiment_ids.split(","):
+                if id != "":
+                    del experiment_mapping[int(id)]
 
     # cache the urls of the experiment location
     experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiment_mapping.values())
@@ -119,8 +134,8 @@ def mutation_table(request):
     table_header = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
     for id in sorted(experiment_mapping):
         experiment = experiment_mapping.get(id)
-        # Add checkbox to each column.
-        table_header += """<td><input type=%s name=%d /><br>%s</td>""" % ("checkbox",experiment.id,experiment.get_isolate_name().replace("_", " "))
+        # Add checkbox to each column
+        table_header += """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>""" % (experiment.id,experiment.get_isolate_name().replace("_"," "))
     table_header += "</tr>"
     table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
 
@@ -140,7 +155,7 @@ def mutation_table(request):
             #table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
             continue
         else:
-            table_row += """<td>%d %s<a href="javascript:void(0)" class="shut" style="padding-top:1px;float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="12"></a></td>""" % (mutation.position,mutation.sequence_change)
+            table_row += """<td>%d %s<a href="javascript:void(0)" class="shut" style="float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>""" % (mutation.position,mutation.sequence_change)
         table_row += "<td>%s</td>" % (mutation.gene)
         table_row += "<td>%s</td>" % (mutation.protein_change)
         table_row += "".join(table_entries[mutation_mapping[mutation.id]])

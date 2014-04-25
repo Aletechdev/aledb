@@ -9,7 +9,7 @@ session = Session()
 
 # create the instrument, experiment, etc. to the isolates for the strains
 instrument = query_or_create(session, Instrument, name="UCSD1")
-experiment = query_or_create(session, AleExperiment, name="glucose evolution",
+experiment = query_or_create(session, AleExperiment, name="Glucose Evolution",
     instrument=instrument, person="ryan", date=datetime.date(2013, 1, 1), simulation=False)
 
 media = query_or_create(session, Media, description="Glucose M9 media", temperature=37, volume=40, stirring_speed=1123)
@@ -34,7 +34,7 @@ isolate = query_or_create(session, Isolate, flask=flask,
         isolate_number=0, is_population=False,
         freezer_box=freezer_box, person="BOP27")
 session.commit()
-add_breseq_results(session, isolate.id, "BOP27", sequencing_path + "BOP27_reseq", wt=True)
+add_breseq_results(session, isolate.id, "BOP27", settings.sequencing_path + "BOP27_reseq", wt=True)
 session.commit()
 
 for i in runs:

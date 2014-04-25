@@ -1,6 +1,6 @@
 from alchemy_orm import *
 
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 from os.path import join
 import gdparse
 
