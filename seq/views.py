@@ -104,8 +104,10 @@ def mutation_table(request):
         list_of_experiments = ResequencingExperiment.objects.all()
 
     extra_validation = False if request.GET.get("novalid") else True
-    experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments) if o.isolate.__unicode__().find("POP")==-1)
 
+    #experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments) if o.isolate.__unicode__().find("POP")==-1)
+    experiment_mapping = dict((o.id, o) for o in experiments)
+ 
     # Show checked flasks only
     query_string = request.GET.get("show")
     if query_string is not None:
@@ -132,8 +134,9 @@ def mutation_table(request):
     mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
     table_header = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
+
     for id in sorted(experiment_mapping):
-        experiment = experiment_mapping.get(id)
+	experiment = experiment_mapping[id]
         # Add checkbox to each column
         table_header += """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>""" % (experiment.id,experiment.get_isolate_name().replace("_"," "))
     table_header += "</tr>"
