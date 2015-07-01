@@ -1,3 +1,5 @@
 *.pyc
+.htpasswd
+nohup.out
 cellar
 aleinfo/settings.ini
