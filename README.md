@@ -1,1 +1,1 @@
-ALE Django Website
+ALE Analytics Django Website
