@@ -73,7 +73,7 @@ def main():
     # TODO: /data/breseq defined for settings.sequencing_path.
     experiment_breseq_output_path = "/data/breseq/glycerol_dynamics_clonal/"
 
-    # Might need to explicitely sort this list in the future.
+    # Might need to explicitly sort this list in the future.
     breseq_sample_report_list = get_sample_report_list(experiment_breseq_output_path)
 
     for breseq_sample_name in breseq_sample_report_list:
@@ -84,7 +84,8 @@ def main():
         ale_number = int(split[0])
         flask_number = int(split[1])
         isolate_number = 1
-        pop = split[-1] == "clonal"
+
+        # TODO: handle population samples differently from clonal. Other creates scripts do this.
 
         print breseq_sample_name
 
@@ -103,24 +104,16 @@ def main():
                                               alchemy_orm.Isolate,
                                               flask=flask,
                                               isolate_number=isolate_number,
-                                              is_population=pop,
+                                              is_population=False,
                                               freezer_box=freezer_box,
                                               person="ryan")
 
         db_session.commit()
-        # upload data
-        # if not pop:
-        #    add_breseq_results(db_session, isolate.id, "Gaby", sequencing_path + i)
-        if pop:
-            upload.add_pop_results(db_session,
-                                   isolate.id,
-                                   "ryan",
-                                   experiment_breseq_output_path + breseq_sample_name)
-        else:
-            upload.add_breseq_results(db_session,
-                                      isolate.id,
-                                      "ryan",
-                                      experiment_breseq_output_path + breseq_sample_name)
+
+        upload.add_breseq_results(db_session,
+                                  isolate.id,
+                                  "ryan",
+                                  experiment_breseq_output_path + breseq_sample_name)
 
     db_session.commit()
 
