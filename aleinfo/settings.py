@@ -17,8 +17,8 @@ config.set("DATABASE", "user", "ale")  # Or path to database file if using sqlit
 config.set("DATABASE", "database", "cellar")  # Or path to database file if using sqlite3.
 config.set("DATABASE", "engine", "mysql")  #'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
 config.add_section("OTHER")
-config.set("OTHER", "sequencing_url", "http://clostridium.ucsd.edu/sequencing/")
-config.set("OTHER", "sequencing_path", expanduser("~/sequencing/"))
+config.set("OTHER", "sequencing_url", "http://clostridium.ucsd.edu/sequencing/")  # TODO: change
+config.set("OTHER", "sequencing_path", expanduser("~/sequencing/"))  # TODO: change
 
 # read the options and write them back to the file
 settings_filepath = join(dirname(__file__), "settings.ini")
@@ -79,7 +79,7 @@ USE_TZ = True
 # Example: "/home/media/media.lawrence.com/media/"
 MEDIA_ROOT = ''
 
-# URL that handles the media served from MEDIA_ROOT. Make sure to use a
+# URL that handles the media served bfrom MEDIA_ROOT. Make sure to use a
 # trailing slash.
 # Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
 MEDIA_URL = ''
@@ -150,7 +150,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'ale',
     'seq',
-    
+
     'grappelli',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
