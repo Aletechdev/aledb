@@ -1,4 +1,4 @@
-from alchemy_orm import *
+fro alchemy_orm import *
 from upload import add_breseq_results,add_pop_results
 from validatemutations import check_negative_predictions
 import datetime
