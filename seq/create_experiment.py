@@ -81,6 +81,8 @@ def main():
         isolate_number = 1
 
         # TODO: handle population samples differently from clonal. Other creates scripts do this.
+        # The method for handling populations was exemplified in delete obsolete scripts. Refer
+        # to them for the code when necessary.
 
         print breseq_sample_name
 
