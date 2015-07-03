@@ -14,6 +14,9 @@ def smartconvert(data_string):
     for var_type in type_list:
         try:
             converted_var=var_type(data_string.strip())
+            #Check for inifinite values:
+            if converted_var == float('Inf'):
+                converted_var = 1e6;
             return converted_var
         except ValueError:
             pass
@@ -32,11 +35,12 @@ class GDFieldError(GDParseError):
     """
     Indicates a problem encountered parsing a specific field
     """
-    def __init__(self,field_num,field_name,field_value,msg,inner_exception_msg=None):
-        self.field_num=field_num,
-        self.field_value=field_value
-        self.msg=msg
-        self.inner_exception_msg=inner_exception_msg
+    def __init__(self, field_num, field_name, field_value, msg, inner_exception_msg=None):
+        self.field_num = field_num
+        self.field_name = field_name
+        self.field_value = field_value
+        self.msg = msg
+        self.inner_exception_msg = inner_exception_msg
 
 class GDParser():
     """
@@ -52,12 +56,12 @@ class GDParser():
     See http://barricklab.org/twiki/pub/Lab/ToolsBacterialGenomeResequencing/documentation/gd_format.html
         for GenomeDiff file format specification.
     """
-    mutation_types=['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV']
-    evidence_types=['RA', 'MC', 'JC', 'UN']
-    validation_types=['TSEQ', 'PFLP', 'RFLP', 'PFGE', 'PHYL', 'CURA']
-    id2line_num={}
+    mutation_types = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV']
+    evidence_types = ['RA', 'MC', 'JC', 'UN']
+    validation_types = ['TSEQ', 'PFLP', 'RFLP', 'PFGE', 'PHYL', 'CURA']
+    id2line_num = {}
     
-    def __init__(self,file_handle=None, ignore_errors=False):
+    def __init__(self, file_handle=None, ignore_errors=False):
         """
         Constructor that populates the metadata and data properties from file_handle if given,
         otherwise initializes as blank. 
@@ -71,7 +75,7 @@ class GDParser():
         if file_handle is not None:
             self.populateFromFile(file_handle, ignore_errors)
     
-    def populateFromFile(self,file_handle, ignore_errors=False):
+    def populateFromFile(self, file_handle, ignore_errors=False):
         """
         Reads a GenomeDiff format file line by line from a file_handle or other iterable,
         parsing the contents and storing them in two property dictionaries:
@@ -221,7 +225,14 @@ class GDParser():
             line_elements=re.split('\s',line[2:],1) #Variable name and value are delineated by the first whitespace character
             var_name=line_elements[0].strip()
             var_value=line_elements[1].strip()
-            self.metadata[var_name]=var_value
+            #add a check for repeated var_names
+            if var_name in self.metadata.keys():
+                if type(self.metadata[var_name])=='list':
+                    self.metadata[var_name].append(var_value)
+                else:
+                    self.metadata[var_name] = [var_value,self.metadata[var_name]]
+            else:
+                self.metadata[var_name]=var_value
         elif re.match('[#\s]',line[0]): #comment lines begin with # or whitespace
             #this line is a comment, do nothing
             pass
@@ -252,19 +263,20 @@ class GDParser():
             
             #Field 3: parent-ids <uint32>
             #ids of evidence that support this mutation. May be set to "." or left blank.
-            if data_elements[2]!='':
-                if item_class=='mutation':
-                    if data_elements[2]=='.':
+            if data_elements[2] != '':
+                if item_class == 'mutation' or item_class == 'evidence':
+                    if data_elements[2] == '.':
                         new_data['parent_ids']='manual'
                     else:
                         try:
-                        #store the evidence ids as a list of ints  -- later check that they are valid once all the ids are loaded
+                            # Store the evidence ids as a list of ints
+                            # and later check that they are valid once all the ids are loaded
                             new_data['parent_ids'] = [int(element) for element in data_elements[2].split(',')]
                         except ValueError:
-                            raise GDFieldError(2,'parent_ids',data_elements[2],"Cannot convert an element of parent_ids to integer",ve.message)
+                            raise GDFieldError(2, 'parent_ids', data_elements[2], "Cannot convert an element of parent_ids to integer",ve.message)
                 else:
                     #we have a non-blank evidence field for something that isn't a mutation. Not good.
-                    raise GDFieldError(3,'parent_ids',data_elements[2],"Parent ID references only valid for mutation entries")
+                    raise GDFieldError(3, 'parent_ids', data_elements[2], "Parent ID references only valid for mutation entries")
             
             #===============================================================
             # Content and length of next set of fields varies by class and type 
@@ -597,4 +609,3 @@ class GDParser():
                     new_data[key]=value
             #Insert the dictionary for the new item into the class data dictionary, keyed by id.
             self.data[item_class][item_id]=new_data
-                
