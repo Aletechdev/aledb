@@ -16,6 +16,8 @@ config.set("DATABASE", "port", "5432")
 config.set("DATABASE", "user", "ale")  # Or path to database file if using sqlite3.
 config.set("DATABASE", "database", "cellar")  # Or path to database file if using sqlite3.
 config.set("DATABASE", "engine", "mysql")  #'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+config.add_section("OTHER")
+config.set("OTHER", "sequencing_path", "/data/breseq/")
 
 # read the options and write them back to the file
 settings_filepath = join(dirname(__file__), "settings.ini")
@@ -23,6 +25,8 @@ if not isfile(settings_filepath):
     with open(settings_filepath, "w") as outfile:
         config.write(outfile)
 config.read(settings_filepath)
+
+sequencing_path = config.get("OTHER", "sequencing_path")
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
