@@ -100,6 +100,7 @@ def main():
                                             ale_id=ale_id,
                                             media=media)
 
+
         isolate = alchemy_orm.query_or_create(db_session,
                                               alchemy_orm.Isolate,
                                               flask=flask,
@@ -111,11 +112,11 @@ def main():
         db_session.commit()
 
         upload.add_breseq_results(db_session,
-                                  isolate.id,
-                                  "ryan",
-                                  experiment_breseq_output_path + breseq_sample_name)
+                              isolate.id,
+                              "ryan",
+                              experiment_breseq_output_path + breseq_sample_name)
 
-    db_session.commit()
+        db_session.commit()
 
     # validate mutations in each parallel ale
     for ale in experiment.ale_ids:
