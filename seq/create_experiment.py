@@ -2,8 +2,7 @@ import alchemy_orm
 import upload
 import validatemutations
 import datetime
-from os import listdir
-from os.path import isdir, isfile
+import os
 
 BRESEQ_OUTPUT_REPORT_FILE = "index.html"
 
@@ -55,10 +54,9 @@ def main():
                                           is_population=False,
                                           freezer_box=freezer_box,
                                           person="BOP27")
+
     db_session.commit()
 
-    # add_breseq_results(db_session, isolate.id, "BOP27", settings.sequencing_path + "BOP27_reseq", wt=True)
-    # TODO: /data/breseq defined for settings.sequencing_path.
     upload.add_breseq_results(db_session,
                               isolate.id,
                               "BOP27",
@@ -68,8 +66,6 @@ def main():
     db_session.commit()
 
     # !!! ENSURE THAT THE TRAILING '/' IS ALWAYS INCLUDED
-    # sequencing_path = settings.sequencing_path + "C13-Redo/"
-    # TODO: /data/breseq defined for settings.sequencing_path.
     experiment_breseq_output_path = "/data/breseq/glycerol_dynamics_clonal/"
 
     # Might need to explicitly sort this list in the future.
@@ -125,12 +121,12 @@ def main():
 def get_sample_report_list(experiment_breseq_output_path):
     breseq_sample_report_list = []
 
-    for breseq_sample_names in listdir(experiment_breseq_output_path):
+    for breseq_sample_names in os.listdir(experiment_breseq_output_path):
 
         sample_path = experiment_breseq_output_path + breseq_sample_names
         sample_breseq_output_report = sample_path + '/' + BRESEQ_OUTPUT_REPORT_FILE
 
-        if isdir(sample_path) and isfile(sample_breseq_output_report):
+        if os.path.isdir(sample_path) and os.path.isfile(sample_breseq_output_report):
             breseq_sample_report_list.append(breseq_sample_names)
 
     return breseq_sample_report_list
