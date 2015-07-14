@@ -8,18 +8,22 @@ EXPERIMENT_PARENT_DIR = "breseq/"
 
 
 def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
+
     """add breseq results to the database
 
     Parses the html output from a breseq run and adds those objects into
     the sqlalchemy session.
+
+    The "breseq_folder" parameter is looking for the contents of the "/output" dir
+    from a breseq execution.
     
     session.commit() is not run in the function, and should be run afterwards
     
     Setting the wt flag allows any mutations that appear in the starting strain
     relative to the reference to be annotated as reference errors.
     """
-    # html file displaying summary statistics
 
+    # html file displaying summary statistics
     with open(join(breseq_folder, "summary.html")) as infile:
         summary_html = BeautifulSoup(infile)
 
