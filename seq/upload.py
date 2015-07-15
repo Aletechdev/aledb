@@ -4,10 +4,52 @@ from bs4 import BeautifulSoup
 from os.path import join
 import gdparse
 
-EXPERIMENT_PARENT_DIR = "breseq/"
+from enum import Enum
+
+
+EXPERIMENT_PARENT_DIR = "breseq/"   # TODO: See if this is necessary.
+
+BRESEQ_LOG_FILE = "log.txt"
+
+Breseq_sample_type = Enum('Breseq_sample_type', 'clonal population')
+
+BRESEQ_ANALYSIS_POPULATION_FLAG = " -p "
 
 
 def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
+
+    """
+    Figures out if the sample is clonal or population,
+    and calls the appropriate "add" function.
+    Read the output/log.txt file for " -p " option, which indicates that
+    sample was processed as a population.
+    """
+
+    breseq_log_file_path = breseq_folder + BRESEQ_LOG_FILE
+    sample_type = is_sample_clonal_or_popuation(breseq_log_file_path)
+
+    if sample_type == Breseq_sample_type.clonal:
+        add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=False)
+    elif sample_type == Breseq_sample_type.population:
+        add_breseq_population_results(session, isolate_id, person, breseq_folder, wt=False)
+    else:
+        # TODO: implement error code returning/handling for this case.
+        print('Error processing sample type. Sample not uploaded')
+
+
+def is_sample_clonal_or_popuation(breseq_log_file_path):
+
+    sample_type = Breseq_sample_type.clonal
+
+    # If Breseq's log.txt file become very large, the following will be a memory hog.
+    # For now, it's quite short.
+    if BRESEQ_ANALYSIS_POPULATION_FLAG in open(breseq_log_file_path).read():
+        return Breseq_sample_type.population
+
+    return sample_type
+
+
+def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=False):
 
     """add breseq results to the database
 
@@ -89,7 +131,7 @@ def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
         session.add(observed_mutation)
 
 
-def add_pop_results(session, isolate_id, person, breseq_folder, wt=False):
+def add_breseq_population_results(session, isolate_id, person, breseq_folder, wt=False):
     """add population sequencing results to the database
 
     Parses the html output from a breseq run and adds those objects into
