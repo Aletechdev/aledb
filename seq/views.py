@@ -7,10 +7,12 @@ from seq.models import *
 from ale.models import *
 import aleinfo.settings as settings
 
+
 if hasattr(settings, "sequencing_url"):
     sequencing_url = settings.sequencing_url
 else:
     sequencing_url = "http://localhost/sequencing/"
+
 
 def get_seq_experiments(request):
     """return a list of seq experiments for a given ALE"""
@@ -25,10 +27,11 @@ def get_seq_experiments(request):
     else:
         ale_no_selector = "AND ale_no = %d" % int(ale_no)
     experiments =  ResequencingExperiment.objects.raw(
-        """SELECT reseq_id AS id FROM id_mapping WHERE 
+        """SELECT reseq_id AS id FROM id_mapping WHERE
         reseq_id IS NOT NULL %s %s
         ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_no_selector))
     return experiments
+
 
 @login_required
 def index(request):
@@ -38,6 +41,7 @@ def index(request):
     context = Context({"experiments": experiments, "seq_url": sequencing_url})
     return HttpResponse(template.render(context))
 
+
 @login_required
 def lists(request):
     """return a list of resequencing experiments"""
@@ -46,11 +50,13 @@ def lists(request):
     context = Context({"experiments": experiments, "seq_url": sequencing_url})
     return HttpResponse(template.render(context))
 
+
 def make_table_entry(observed, experiment_urls):
     if observed.breseq_present:
         return """<td class="true">%s</td>""" % observed.evidence.replace("evidence/", experiment_urls[observed.sequencing_experiment_id] + "/evidence/")
     elif observed.present is False:
         return """<td class="false">%d/%d</td>""" % (observed.mutated_reads, observed.wt_reads)
+
 
 @login_required
 def experiment_table(request):
@@ -88,6 +94,7 @@ def experiment_table(request):
     context = Context({"table_body": mark_safe(table_body), "title": "Experiment table", "table_header": mark_safe(table_header)})
     return HttpResponse(template.render(context))
 
+
 @login_required
 def mutation_table(request):
     experiments = get_seq_experiments(request)
@@ -107,23 +114,23 @@ def mutation_table(request):
 
     #experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments) if o.isolate.__unicode__().find("POP")==-1)
     experiment_mapping = dict((o.id, o) for o in experiments)
- 
+
     # Show checked flasks only
     query_string = request.GET.get("show")
     if query_string is not None:
-    	checked_experiment_ids = query_string.encode('latin_1').replace("{","").replace("}","")
-    	if checked_experiment_ids != "":
+        checked_experiment_ids = query_string.encode('latin_1').replace("{","").replace("}","")
+        if checked_experiment_ids != "":
             id_list = [int(i) for i in checked_experiment_ids.split(",") if i!=""]
             ids = experiment_mapping.keys()
             for id in ids:
                 if id not in id_list:
                     del experiment_mapping[id]
-            
+
     # Remove checked flasks
     query_string = request.GET.get("remove")
     if query_string is not None:
-    	checked_experiment_ids = query_string.encode('latin_1').replace("{","").replace("}","")
-    	if checked_experiment_ids != "":
+        checked_experiment_ids = query_string.encode('latin_1').replace("{","").replace("}","")
+        if checked_experiment_ids != "":
             for id in checked_experiment_ids.split(","):
                 if id != "":
                     del experiment_mapping[int(id)]
@@ -136,7 +143,7 @@ def mutation_table(request):
     table_header = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
 
     for id in sorted(experiment_mapping):
-	experiment = experiment_mapping[id]
+        experiment = experiment_mapping[id]
         # Add checkbox to each column
         table_header += """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>""" % (experiment.id,experiment.get_isolate_name().replace("_"," "))
     table_header += "</tr>"
@@ -166,13 +173,15 @@ def mutation_table(request):
         table_body += table_row + "\n"
 
     template = loader.get_template("table_template.html")
-    context = Context({"experiments": list_of_experiments, 
-		       "ale_no": ale_no, 
-		       "experiment_id": experiment_id,
-		       "table_body": mark_safe(table_body), 
-		       "title": "Mutation table", 
-	 	       "table_header": mark_safe(table_header)})
+    context = Context({"experiments": list_of_experiments,
+                       "ale_no": ale_no,
+                       "experiment_id": experiment_id,
+                       "table_body": mark_safe(table_body),
+                       "title": "Mutation table",
+                       "table_header": mark_safe(table_header)})
+
     return HttpResponse(template.render(context))
+
 
 @login_required
 def isolate_list(request):
@@ -182,13 +191,14 @@ def isolate_list(request):
     else:
         ale_experiment_id = int(ale_experiment_id)
         isolates =  Isolate.objects.raw(
-            """SELECT isolate_id AS id FROM id_mapping WHERE 
+            """SELECT isolate_id AS id FROM id_mapping WHERE
             experiment_id=%d;""" % ale_experiment_id)
         """return a list of resequencing experiments"""
     template = loader.get_template("isolate_view.html")
     context = Context({"isolates": isolates, "seq_url": sequencing_url})
     return HttpResponse(template.render(context))
-    
+
+
 # Provide a table showing frequencies of each observed mutation in the lineage
 def lineage_table(request):
     experiments = get_seq_experiments(request)
@@ -212,6 +222,7 @@ def lineage_table(request):
     context = Context({"table_body": mark_safe(table_body)})
     return HttpResponse(template.render(context))
 
+
 def mutation_summary(request):
     experiments = get_seq_experiments(request)
     experiments_no_pop = [e for e in experiments if e.isolate.__unicode__().find("POP")==-1]
@@ -219,10 +230,10 @@ def mutation_summary(request):
     muts = set()
     for s in experiment_set.values():
         muts = muts | s
-    
+
     # Generates a binary matrix whose rows are mutations,
-    # columns are experiments, and values are either 1 or 0 
-    # depending on whether the mutation present in the experiment 
+    # columns are experiments, and values are either 1 or 0
+    # depending on whether the mutation present in the experiment
     matrix = dict((m,[int(m in l) for l in experiment_set.values()]) for m in muts)
 
     # Mutation categories
@@ -244,7 +255,7 @@ def mutation_summary(request):
                 mut_replaced[mutation] = m
                 break
         return replaced
-    
+
     # Classify all mutations into the five categories
     for m in muts:
         s = matrix.get(m)
@@ -261,7 +272,7 @@ def mutation_summary(request):
         elif sum(s)==1:
             if not replaced(m):
                 mut_seen_in_one.append(m)
-    
+
     # HTML display
     present_in_all = ""
     for m in mut_seen_in_all:
@@ -289,4 +300,4 @@ def mutation_summary(request):
                        "reappeared":mark_safe(reappeared),
                        "replaced":mark_safe(replaced),
                        })
-    return HttpResponse(template.render(context))    
+    return HttpResponse(template.render(context))
