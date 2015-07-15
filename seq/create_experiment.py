@@ -22,6 +22,8 @@ BRESEQ_EXPERIMENT_OUTPUT_PATH = "/data/breseq/ssw/combo/"
 # TODO: this should be an input from a user UI.
 BRESEQ_EXPERIMENT_PERSON_NAME = "Troy"
 
+BRESEQ_EXPERIMENT_NAME = "SSW BOP27"
+
 
 def main():
 
@@ -133,18 +135,18 @@ def get_project_orm(db_session):
 
     experiment = alchemy_orm.query_or_create(db_session,
                                              alchemy_orm.AleExperiment,
-                                             name="SSW BOP27",
+                                             name=BRESEQ_EXPERIMENT_NAME,
                                              instrument=instrument,
                                              person=BRESEQ_EXPERIMENT_PERSON_NAME,
-                                             date=datetime.date(1, 1, 1),
+                                             date=datetime.date(1, 1, 1), # TODO: find out what to put.
                                              simulation=False)
 
     media = alchemy_orm.query_or_create(db_session,
                                         alchemy_orm.Media,
-                                        description="asdf",
-                                        temperature=0,
-                                        volume=0,
-                                        stirring_speed=0)
+                                        description="asdf",  # TODO: find out what to put.
+                                        temperature=0,   # TODO: find out what to put.
+                                        volume=0,    # TODO: find out what to put.
+                                        stirring_speed=0)    # TODO: find out what to put.
 
     freezer_box = alchemy_orm.query_or_create(db_session,
                                               alchemy_orm.FreezerBox,
