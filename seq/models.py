@@ -55,6 +55,15 @@ class ResequencingExperiment(models.Model):
         # TODO - add more information
 
 
+class UnassignedMissingCoverageEvidence(models.Model):
+
+    seq_id = models.CharField(max_length=100)
+
+    start = models.IntegerField()
+
+    end = models.IntegerField()
+
+
 class Mutation(models.Model):
 
     mutation_type = models.CharField(max_length=3,
