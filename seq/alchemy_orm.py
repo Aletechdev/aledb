@@ -59,6 +59,11 @@ class Mutation(Base):
                                viewonly=True)
 
 
+class UnassignedMissingCoverageEvidence(Base):
+    __table__ = Table("seq_unassignedmissingcoverageevidence", metadata, autoload=True)
+    experiment = relationship("ResequencingExperiment")
+
+
 # models for ALE objects
 
 class Instrument(Base):
