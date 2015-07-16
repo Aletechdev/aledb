@@ -1,4 +1,4 @@
-import alchemy_orm
+import seq.alchemy_orm
 import upload
 import validatemutations  # TODO: find out what validatemutations does for mutations.
 import datetime
@@ -23,12 +23,12 @@ BRESEQ_EXPERIMENT_OUTPUT_PATH = "/data/breseq/glycerol_dynamics/combo/clonal/"
 # TODO: this should be an input from a user UI.
 BRESEQ_EXPERIMENT_PERSON_NAME = "Ryan"
 
-BRESEQ_EXPERIMENT_NAME = "GYD Clonal BOP27 NC_000913"
+BRESEQ_EXPERIMENT_NAME = "TEST"
 
 
 def main():
 
-    db_session = alchemy_orm.Session()
+    db_session = seq.alchemy_orm.Session()
 
     # TODO: shouldn't be returning multiple objects, because you remember return order; bad practice.
     experiment,\
@@ -90,19 +90,19 @@ def create_and_commit_ale_entry(db_session,
                                 media,
                                 freezer_box):
 
-    ale_id = alchemy_orm.query_or_create(db_session,
-                                         alchemy_orm.AleId,
+    ale_id = seq.alchemy_orm.query_or_create(db_session,
+                                         seq.alchemy_orm.AleId,
                                          ale_experiment=experiment,
                                          ale_id=ale_number)
 
-    flask = alchemy_orm.query_or_create(db_session,
-                                        alchemy_orm.Flask,
+    flask = seq.alchemy_orm.query_or_create(db_session,
+                                        seq.alchemy_orm.Flask,
                                         flask_number=flask_number,
                                         ale_id=ale_id,
                                         media=media)
 
-    isolate = alchemy_orm.query_or_create(db_session,
-                                          alchemy_orm.Isolate,
+    isolate = seq.alchemy_orm.query_or_create(db_session,
+                                          seq.alchemy_orm.Isolate,
                                           flask=flask,
                                           isolate_number=isolate_number,
                                           is_population=False,
@@ -125,27 +125,27 @@ def create_and_commit_ale_entry(db_session,
 def get_project_orm(db_session):
 
     # create the instrument, experiment, etc. to the isolates for the strains
-    instrument = alchemy_orm.query_or_create(db_session,
-                                             alchemy_orm.Instrument,
+    instrument = seq.alchemy_orm.query_or_create(db_session,
+                                             seq.alchemy_orm.Instrument,
                                              name="UCSD1")
 
-    experiment = alchemy_orm.query_or_create(db_session,
-                                             alchemy_orm.AleExperiment,
+    experiment = seq.alchemy_orm.query_or_create(db_session,
+                                             seq.alchemy_orm.AleExperiment,
                                              name=BRESEQ_EXPERIMENT_NAME,
                                              instrument=instrument,
                                              person=BRESEQ_EXPERIMENT_PERSON_NAME,
                                              date=datetime.date(2013, 1, 1), # TODO: find out what to put.
                                              simulation=False)
 
-    media = alchemy_orm.query_or_create(db_session,
-                                        alchemy_orm.Media,
+    media = seq.alchemy_orm.query_or_create(db_session,
+                                        seq.alchemy_orm.Media,
                                         description="Glycerol M9 media",  # TODO: find out what to put.
                                         temperature=30,   # TODO: find out what to put.
                                         volume=15,    # TODO: find out what to put.
                                         stirring_speed=1100)    # TODO: find out what to put.
 
-    freezer_box = alchemy_orm.query_or_create(db_session,
-                                              alchemy_orm.FreezerBox,
+    freezer_box = seq.alchemy_orm.query_or_create(db_session,
+                                              seq.alchemy_orm.FreezerBox,
                                               name="ale box",   # TODO: find out what to put.
                                               number=1) # TODO: find out what to put.
 

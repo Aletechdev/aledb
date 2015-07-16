@@ -1,4 +1,4 @@
-from alchemy_orm import *
+from seq.alchemy_orm import *
 import trnlib.omeORM as ome
 session = Session()
 ome_session = ome.Session()
