@@ -38,12 +38,6 @@ metadata = MetaData(bind=engine)
 Session = sessionmaker(bind=engine)
 
 
-class ObservedMutation(Base):
-    __table__ = Table("seq_observedmutation", metadata, autoload=True)
-    mutation = relationship("Mutation")
-    experiment = relationship("ResequencingExperiment")
-
-
 class ResequencingExperiment(Base):
     __table__ = Table("seq_resequencingexperiment", metadata, autoload=True)
     isolate = relationship("Isolate",
@@ -51,9 +45,15 @@ class ResequencingExperiment(Base):
                            foreign_keys=[__table__.c.isolate_id])
 
 
+class ObservedMutation(Base):
+    __table__ = Table("seq_observedmutation", metadata, autoload=True)
+    mutation = relationship("Mutation")
+    experiment = relationship("ResequencingExperiment")
+
+
 class Mutation(Base):
     __table__ = Table("seq_mutation", metadata, autoload=True)
-    experients = relationship(ResequencingExperiment,
+    experiments = relationship(ResequencingExperiment,
                               secondary=ObservedMutation.__table__,
                               backref=backref("mutations", viewonly=True),
                               viewonly=True)
