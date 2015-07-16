@@ -15,21 +15,34 @@ else:
 
 
 def get_seq_experiments(request):
+
     """return a list of seq experiments for a given ALE"""
+
     ale_experiment_id = request.GET.get("ale_experiment_id")
+
     if ale_experiment_id is None or ale_experiment_id == "all":
+
         ale_experiment_selector = ""
+
     else:
+
         ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
+
     ale_no = request.GET.get("ale_no")
+
     if ale_no is None or ale_no == "all":
+
         ale_no_selector = ""
+
     else:
+
         ale_no_selector = "AND ale_no = %d" % int(ale_no)
-    experiments =  ResequencingExperiment.objects.raw(
+
+    experiments = ResequencingExperiment.objects.raw(
         """SELECT reseq_id AS id FROM id_mapping WHERE
         reseq_id IS NOT NULL %s %s
         ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_no_selector))
+
     return experiments
 
 
@@ -44,10 +57,15 @@ def index(request):
 
 @login_required
 def lists(request):
+
     """return a list of resequencing experiments"""
+
     experiments = get_seq_experiments(request)
+
     template = loader.get_template("experiment_view.html")
+
     context = Context({"experiments": experiments, "seq_url": sequencing_url})
+
     return HttpResponse(template.render(context))
 
 
