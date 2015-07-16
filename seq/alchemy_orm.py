@@ -54,9 +54,9 @@ class ObservedMutation(Base):
 class Mutation(Base):
     __table__ = Table("seq_mutation", metadata, autoload=True)
     experiments = relationship(ResequencingExperiment,
-                              secondary=ObservedMutation.__table__,
-                              backref=backref("mutations", viewonly=True),
-                              viewonly=True)
+                               secondary=ObservedMutation.__table__,
+                               backref=backref("mutations", viewonly=True),
+                               viewonly=True)
 
 
 # models for ALE objects
