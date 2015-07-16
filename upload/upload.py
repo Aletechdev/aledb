@@ -1,10 +1,10 @@
-from alchemy_orm import *
+from os.path import join
 
 from bs4 import BeautifulSoup
-from os.path import join
-import gdparse
-
 from enum import Enum
+
+from seq.alchemy_orm import *
+import gdparse
 
 
 EXPERIMENT_PARENT_DIR = "breseq/"   # TODO: See if this is necessary.
@@ -26,13 +26,19 @@ def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
     """
 
     breseq_log_file_path = breseq_folder + BRESEQ_LOG_FILE
+
     sample_type = is_sample_clonal_or_popuation(breseq_log_file_path)
 
     if sample_type == Breseq_sample_type.clonal:
+
         add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=False)
+
     elif sample_type == Breseq_sample_type.population:
+
         add_breseq_population_results(session, isolate_id, person, breseq_folder, wt=False)
+
     else:
+
         # TODO: implement error code returning/handling for this case.
         print('Error processing sample type. Sample not uploaded')
 
@@ -193,7 +199,8 @@ def add_breseq_population_results(session, isolate_id, person, breseq_folder, wt
     # add in the appropriate mutations from the index.html file
     for row_num, row in enumerate(mutation_rows):
         attrs = row.findChildren("td")
-        mutation = query_or_create(session, Mutation,
+        mutation = query_or_create(session,
+                                   Mutation,
                                    position=mutation_data[row_num + 1]['position'],
                                    # mutations are in the same order in the html and output.gd files so we can index the ids with row_num,
                                    sequence_change=attrs[2].text,

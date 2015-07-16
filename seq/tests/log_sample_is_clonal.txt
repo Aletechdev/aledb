@@ -1,3 +1,0 @@
-Fri Apr 17 07:38:45 2015
-
-breseq -j 8 --polymorphism-frequency-cutoff 0.05 -r NC_000913_3.gb -o 1Glu_S1 11Glu_S13_L001_R1_001.fastq 1Glu_S1_L001_R2_001.fastq

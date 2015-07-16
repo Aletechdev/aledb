@@ -20,9 +20,9 @@ NOTE: Currently this will only validate previously unvalidated mutations.
 import os
 import math, operator
 import pysam
-import alchemy_orm
+import seq.alchemy_orm
 
-BASEPATH = alchemy_orm.settings.sequencing_path
+BASEPATH = seq.alchemy_orm.settings.sequencing_path
 
 PHRED_ASCII_OFFSET=33 # value to subtract from the ASCII code of the quality character to get the Phred value.
 
@@ -160,10 +160,10 @@ def annotatemutation(session, dropout_mutation_id, sequencing_experiment, data_l
     """
     defined_mutation_types=['SNP']
     
-    observed_mutation = alchemy_orm.query_or_create(session,alchemy_orm.ObservedMutation,mutation_id=dropout_mutation_id,sequencing_experiment_id=sequencing_experiment)
+    observed_mutation = seq.alchemy_orm.query_or_create(session, seq.alchemy_orm.ObservedMutation,mutation_id=dropout_mutation_id,sequencing_experiment_id=sequencing_experiment)
     
     # get the information on the mutation it's associated with (can't get this to work through the ORM)
-    mutation=session.query(alchemy_orm.Mutation).filter_by(id=dropout_mutation_id).one()
+    mutation=session.query(seq.alchemy_orm.Mutation).filter_by(id=dropout_mutation_id).one()
 
     print "Validating mutation id {} in resequencing experiment {}".format(dropout_mutation_id, sequencing_experiment)
     
@@ -222,14 +222,14 @@ def getallmutations(experiment_id,ale_number):
     Given an experiment and ale number, return a dictionary of all observed mutations for that ale, keyed by flask number, then
     by isolate id.
     """
-    mutation_validation_session=alchemy_orm.Session()
+    mutation_validation_session= seq.alchemy_orm.Session()
     
-    all_reseqs=mutation_validation_session.query(alchemy_orm.ResequencingExperiment).\
-        join(alchemy_orm.Isolate, alchemy_orm.ResequencingExperiment.isolate_id == alchemy_orm.Isolate.id).\
-        join(alchemy_orm.Flask, alchemy_orm.Isolate.flask_id == alchemy_orm.Flask.id).\
-        join(alchemy_orm.AleId, alchemy_orm.Flask.ale_id_id == alchemy_orm.AleId.id).\
-        join(alchemy_orm.AleExperiment, alchemy_orm.AleId.ale_experiment_id == alchemy_orm.AleExperiment.ale_id).\
-        filter(alchemy_orm.AleId.ale_id == ale_number, alchemy_orm.AleExperiment.ale_id == experiment_id)
+    all_reseqs=mutation_validation_session.query(seq.alchemy_orm.ResequencingExperiment).\
+        join(seq.alchemy_orm.Isolate, seq.alchemy_orm.ResequencingExperiment.isolate_id == seq.alchemy_orm.Isolate.id).\
+        join(seq.alchemy_orm.Flask, seq.alchemy_orm.Isolate.flask_id == seq.alchemy_orm.Flask.id).\
+        join(seq.alchemy_orm.AleId, seq.alchemy_orm.Flask.ale_id_id == seq.alchemy_orm.AleId.id).\
+        join(seq.alchemy_orm.AleExperiment, seq.alchemy_orm.AleId.ale_experiment_id == seq.alchemy_orm.AleExperiment.ale_id).\
+        filter(seq.alchemy_orm.AleId.ale_id == ale_number, seq.alchemy_orm.AleExperiment.ale_id == experiment_id)
         
     all_mutations={}
     
@@ -299,7 +299,7 @@ def check_negative_predictions(experiment_id,ale_number):
     # figure out which ones were present and then drop out
     dropout_mutations=finddropoutmutations(all_mutations)
   
-    validation_session=alchemy_orm.Session()
+    validation_session= seq.alchemy_orm.Session()
 
     # iterate through each dropout mutation in each flask
     for flask_number in dropout_mutations:
@@ -307,7 +307,7 @@ def check_negative_predictions(experiment_id,ale_number):
             print "Validating dropout mutation id {}".format(dropout_mutation_id)
             
             for isolate_id in all_mutations[flask_number]: # do this for each isolate
-                seq_exp = validation_session.query(alchemy_orm.ResequencingExperiment).filter_by(isolate_id=isolate_id).one()
+                seq_exp = validation_session.query(seq.alchemy_orm.ResequencingExperiment).filter_by(isolate_id=isolate_id).one()
 
                 # get the path to the breseq data:
                 datapath=os.path.join(BASEPATH,seq_exp.location)
