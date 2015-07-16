@@ -13,16 +13,17 @@ BRESEQ_OUTPUT_REPORT_DIR = "output/"
 BRESEQ_OUTPUT_REPORT_FILE = "index.html"
 
 # TODO: this should be an input from a user UI.
-BRESEQ_ISOLATE_OUTPUT_PATH = "/data/breseq/BOP27_reseq_v3/clonal/output/"
+# !!! ENSURE THAT THE TRAILING '/' IS ALWAYS INCLUDED. NEED TO FIX THIS SOMEHOW!!!
+BRESEQ_ISOLATE_OUTPUT_PATH = "/data/breseq/BOP27_reseq/"
 
 # TODO: this should be an input from a user UI.
-# !!! ENSURE THAT THE TRAILING '/' IS ALWAYS INCLUDED!!!
-BRESEQ_EXPERIMENT_OUTPUT_PATH = "/data/breseq/ssw/combo/"
+# !!! ENSURE THAT THE TRAILING '/' IS ALWAYS INCLUDED. NEED TO FIX THIS SOMEHOW!!!
+BRESEQ_EXPERIMENT_OUTPUT_PATH = "/data/breseq/glycerol_dynamics/combo/clonal/"
 
 # TODO: this should be an input from a user UI.
-BRESEQ_EXPERIMENT_PERSON_NAME = "Troy"
+BRESEQ_EXPERIMENT_PERSON_NAME = "Ryan"
 
-BRESEQ_EXPERIMENT_NAME = "SSW BOP27"
+BRESEQ_EXPERIMENT_NAME = "GYD Clonal BOP27 NC_000913"
 
 
 def main():
@@ -57,11 +58,6 @@ def main():
         ale_number = int(split[0])
         flask_number = int(split[1])
         isolate_number = 1  # TODO: find out why is this set to 1 for all endpoints and make it a constant.
-
-        # TODO: handle population samples differently from clonal.
-        # May have to implement other "create" scripts do this.
-        # The method for handling populations was exemplified in deleted
-        # obsolete scripts. Refer to them for the code when necessary.
 
         output_path = BRESEQ_EXPERIMENT_OUTPUT_PATH\
                       + breseq_sample_name\
@@ -131,27 +127,27 @@ def get_project_orm(db_session):
     # create the instrument, experiment, etc. to the isolates for the strains
     instrument = alchemy_orm.query_or_create(db_session,
                                              alchemy_orm.Instrument,
-                                             name="")
+                                             name="UCSD1")
 
     experiment = alchemy_orm.query_or_create(db_session,
                                              alchemy_orm.AleExperiment,
                                              name=BRESEQ_EXPERIMENT_NAME,
                                              instrument=instrument,
                                              person=BRESEQ_EXPERIMENT_PERSON_NAME,
-                                             date=datetime.date(1, 1, 1), # TODO: find out what to put.
+                                             date=datetime.date(2013, 1, 1), # TODO: find out what to put.
                                              simulation=False)
 
     media = alchemy_orm.query_or_create(db_session,
                                         alchemy_orm.Media,
-                                        description="asdf",  # TODO: find out what to put.
-                                        temperature=0,   # TODO: find out what to put.
-                                        volume=0,    # TODO: find out what to put.
-                                        stirring_speed=0)    # TODO: find out what to put.
+                                        description="Glycerol M9 media",  # TODO: find out what to put.
+                                        temperature=30,   # TODO: find out what to put.
+                                        volume=15,    # TODO: find out what to put.
+                                        stirring_speed=1100)    # TODO: find out what to put.
 
     freezer_box = alchemy_orm.query_or_create(db_session,
                                               alchemy_orm.FreezerBox,
-                                              name="ale box",
-                                              number=0)
+                                              name="ale box",   # TODO: find out what to put.
+                                              number=1) # TODO: find out what to put.
 
     # TODO: find a better way to return these, so that don't have to worry about return order.
     return experiment, media, freezer_box
