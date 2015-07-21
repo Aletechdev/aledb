@@ -80,8 +80,8 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
     with open(join(breseq_folder, "index.html")) as infile:
         html_file = BeautifulSoup(infile)
 
-
     # GETTING STATS ####################################################################################
+    # TODO: put this into it's own function
 
     # parse the mutation html file to find the correct table
     mutation_table = html_file.find("th", attrs={"class": "mutation_header_row"}).parent.parent
@@ -120,6 +120,7 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
     session.add(seq_experiment)
 
     # PARSE GD FILES ####################################################################################
+    # TODO: put this into it's own function
 
     # parse the output.gd file and retrieve a dictionary of the mutations:
     with open(join(breseq_folder, 'output.gd'), 'rb') as gdfile:
@@ -128,6 +129,7 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
         mutation_dict = gdparser.data['mutation']
 
     # GETTING MUTATIONS ####################################################################################
+    # TODO: put this into it's own function
 
     # add in the appropriate mutations from the index.html file
     for row_num, row in enumerate(mutation_rows):
