@@ -55,17 +55,6 @@ def is_sample_clonal_or_popuation(breseq_log_file_path):
     return sample_type
 
 
-def is_missing_coverage_type(evidence_data):
-
-    is_missing_coverage = False
-
-    if evidence_data[gdparse.GDParser.EVIDENCE_TYPE_KEY]\
-            == gdparse.GDParser.MISSING_COVERAGE_EVIDENCE_TYPE:
-        is_missing_coverage = True
-
-    return is_missing_coverage
-
-
 # TODO: should split up the code getting the states and details into their own methods.
 def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=False):
 
@@ -135,8 +124,8 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
     # parse the output.gd file and retrieve a dictionary of the mutations:
     with open(join(breseq_folder, 'output.gd'), 'rb') as gdfile:
         gdparser = gdparse.GDParser(gdfile)
-        evidence_data = gdparser.data['evidence']
-        mutation_data = gdparser.data['mutation']
+        evidence_dict = gdparser.data['evidence']
+        mutation_dict = gdparser.data['mutation']
 
     # GETTING MUTATIONS ####################################################################################
 
@@ -146,10 +135,10 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
         attrs = row.findChildren("td")
         mutation = query_or_create(session,
                                    Mutation,
-                                   position=mutation_data[row_num + 1]['position'],
+                                   position=mutation_dict[row_num + 1]['position'],
                                    # mutations are in the same order in the html and output.gd files so we can index the ids with row_num
                                    sequence_change=attrs[2].text,
-                                   mutation_type=mutation_data[row_num + 1]['type'])
+                                   mutation_type=mutation_dict[row_num + 1]['type'])
         if wt:
 
             mutation.reference_error = True
@@ -166,20 +155,34 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
         observed_mutation.evidence = attrs[0].renderContents()
         session.add(observed_mutation)
 
-    # GETTING MCs ####################################################################################
+    process_unassigned_missing_coverage(session, evidence_dict)
 
-    for key in evidence_data:
 
-        if is_missing_coverage_type(evidence_data[key]):
+def is_missing_coverage_type(evidence_dict):
+
+    is_missing_coverage = False
+
+    if evidence_dict[gdparse.GDParser.EVIDENCE_TYPE_KEY]\
+            == gdparse.GDParser.MISSING_COVERAGE_EVIDENCE_TYPE:
+        is_missing_coverage = True
+
+    return is_missing_coverage
+
+
+def process_unassigned_missing_coverage(db_session, evidence_dict):
+
+    for key in evidence_dict:
+
+        if is_missing_coverage_type(evidence_dict[key]):
 
             # TODO: make literals into constants
-            missing_coverage = query_or_create(session,
+            missing_coverage = query_or_create(db_session,
                                                UnassignedMissingCoverageEvidence,
-                                               seq_id=evidence_data[key]['seq_id'],
-                                               start=evidence_data[key]['start'],
-                                               end=evidence_data[key]['end'])
+                                               seq_id=evidence_dict[key]['seq_id'],
+                                               start=evidence_dict[key]['start'],
+                                               end=evidence_dict[key]['end'])
 
-            session.add(missing_coverage)
+            db_session.add(missing_coverage)
 
 
 def add_breseq_population_results(session, isolate_id, person, breseq_folder, wt=False):
