@@ -29,6 +29,8 @@ class ResequencingExperiment(models.Model):
     percentage_mapped = models.FloatField(blank=True,
                                           null=True)
 
+    unassigned_missing_coverage_evidence = models.ManyToManyField("UnassignedMissingCoverageEvidence")
+
     # @property
     # def mean_coverage(self):
     #    return self.average_read_length * self.reads / 4639675.
@@ -62,6 +64,9 @@ class UnassignedMissingCoverageEvidence(models.Model):
     start = models.IntegerField()
 
     end = models.IntegerField()
+
+    sequencing_experiment = models.ForeignKey(ResequencingExperiment)
+
 
 
 class Mutation(models.Model):
