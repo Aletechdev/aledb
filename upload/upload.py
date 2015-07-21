@@ -55,6 +55,18 @@ def is_sample_clonal_or_popuation(breseq_log_file_path):
     return sample_type
 
 
+def is_missing_coverage_type(evidence_data):
+
+    is_missing_coverage = False
+
+    if evidence_data[gdparse.GDParser.EVIDENCE_TYPE_KEY]\
+            == gdparse.GDParser.MISSING_COVERAGE_EVIDENCE_TYPE:
+        is_missing_coverage = True
+
+    return is_missing_coverage
+
+
+# TODO: should split up the code getting the states and details into their own methods.
 def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=False):
 
     """add breseq results to the database
@@ -79,6 +91,9 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
     with open(join(breseq_folder, "index.html")) as infile:
         html_file = BeautifulSoup(infile)
 
+
+    # GETTING STATS ####################################################################################
+
     # parse the mutation html file to find the correct table
     mutation_table = html_file.find("th", attrs={"class": "mutation_header_row"}).parent.parent
     mutation_rows = mutation_table.findChildren("tr", attrs={"class": "normal_table_row"})
@@ -86,11 +101,13 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
 
     # create a resequencing experiment and populate the parameters from
     # summary.html
-    seq_experiment = query_or_create(session, ResequencingExperiment,
+    seq_experiment = query_or_create(session,
+                                     ResequencingExperiment,
                                      location=breseq_folder[breseq_folder.find(EXPERIMENT_PARENT_DIR)
                                                             + len(EXPERIMENT_PARENT_DIR):],
                                      isolate_id=isolate_id,
                                      person=person)
+
     # seq_experiment = ResequencingExperiment()
     # seq_experiment.location = breseq_folder[breseq_folder.find("sequencing/") + 11:]
     # seq_experiment.isolate_id = isolate_id
@@ -109,32 +126,60 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
         mean_coverage = float(mean_coverage)
     except:
         mean_coverage = 0
+
     seq_experiment.mean_coverage = mean_coverage
     session.add(seq_experiment)
 
+    # PARSE GD FILES ####################################################################################
+
     # parse the output.gd file and retrieve a dictionary of the mutations:
     with open(join(breseq_folder, 'output.gd'), 'rb') as gdfile:
-        mutation_data = gdparse.GDParser(gdfile).data['mutation']
+        gdparser = gdparse.GDParser(gdfile)
+        evidence_data = gdparser.data['evidence']
+        mutation_data = gdparser.data['mutation']
+
+    # GETTING MUTATIONS ####################################################################################
 
     # add in the appropriate mutations from the index.html file
     for row_num, row in enumerate(mutation_rows):
+
         attrs = row.findChildren("td")
-        mutation = query_or_create(session, Mutation,
+        mutation = query_or_create(session,
+                                   Mutation,
                                    position=mutation_data[row_num + 1]['position'],
                                    # mutations are in the same order in the html and output.gd files so we can index the ids with row_num
                                    sequence_change=attrs[2].text,
                                    mutation_type=mutation_data[row_num + 1]['type'])
         if wt:
+
             mutation.reference_error = True
+
         if mutation.protein_change is None:
+
             change = attrs[3].renderContents()
             mutation.protein_change = change
+
         observed_mutation = ObservedMutation()
         observed_mutation.experiment = seq_experiment
         observed_mutation.mutation = mutation
         observed_mutation.breseq_present = True
         observed_mutation.evidence = attrs[0].renderContents()
         session.add(observed_mutation)
+
+    # GETTING MCs ####################################################################################
+
+    for key in evidence_data:
+
+        if is_missing_coverage_type(evidence_data[key]):
+
+            # TODO: make literals into constants
+            missing_coverage = query_or_create(session,
+                                               UnassignedMissingCoverageEvidence,
+                                               seq_id=evidence_data[key]['seq_id'],
+                                               start=evidence_data[key]['start'],
+                                               end=evidence_data[key]['end'])
+
+            session.add(missing_coverage)
 
 
 def add_breseq_population_results(session, isolate_id, person, breseq_folder, wt=False):
@@ -165,7 +210,8 @@ def add_breseq_population_results(session, isolate_id, person, breseq_folder, wt
 
     # create a resequencing experiment and populate the parameters from
     # summary.html
-    seq_experiment = query_or_create(session, ResequencingExperiment,
+    seq_experiment = query_or_create(session,
+                                     ResequencingExperiment,
                                      location=breseq_folder[breseq_folder.find(EXPERIMENT_PARENT_DIR)
                                                             + len(EXPERIMENT_PARENT_DIR):],
                                      isolate_id=isolate_id,
@@ -194,6 +240,7 @@ def add_breseq_population_results(session, isolate_id, person, breseq_folder, wt
     # parse the output.gd file and retrieve a dictionary of the mutations:
     with open(join(breseq_folder, 'output.gd'), 'rb') as gdfile:
         mutation_data = gdparse.GDParser(gdfile).data['mutation']
+        missing_coverage_data = gdparse.GDParser(gdfile).data['evidence']
 
     row_num = 0
     # add in the appropriate mutations from the index.html file

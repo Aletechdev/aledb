@@ -62,8 +62,13 @@ class GDParser():
     See http://barricklab.org/twiki/pub/Lab/ToolsBacterialGenomeResequencing/documentation/gd_format.html
         for GenomeDiff file format specification.
     """
+
+    EVIDENCE_TYPE_KEY = 'type'
+
+    MISSING_COVERAGE_EVIDENCE_TYPE = 'MC'
+
     mutation_types = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV']
-    evidence_types = ['RA', 'MC', 'JC', 'UN']
+    evidence_types = ['RA', MISSING_COVERAGE_EVIDENCE_TYPE, 'JC', 'UN']
     validation_types = ['TSEQ', 'PFLP', 'RFLP', 'PFGE', 'PHYL', 'CURA']
     id2line_num = {}
 
