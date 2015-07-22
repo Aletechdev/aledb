@@ -36,12 +36,13 @@ def get_seq_experiments(request):
 
     else:
 
-        ale_no_selector = "AND ale_no = %d" % int(ale_no)
+        ale_no_selector = "AND alexperimentse_no = %d" % int(ale_no)
 
     experiments = ResequencingExperiment.objects.raw(
         """SELECT reseq_id AS id FROM id_mapping WHERE
         reseq_id IS NOT NULL %s %s
         ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_no_selector))
+
 
     return experiments
 
@@ -61,10 +62,23 @@ def lists(request):
     """return a list of resequencing experiments"""
 
     experiments = get_seq_experiments(request)
-
+    superlist = []
+    missingcoverage = []
+    for ex in experiments:
+        obj = UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id = ex.id)
+        if len(obj) > 0:
+            x=[]
+            x.append(obj)
+            x.append(ex)
+            superlist.append(x)
+        else:
+            x = []
+            x.append([])
+            x.append(ex)
+            superlist.append(x)
     template = loader.get_template("experiment_view.html")
 
-    context = Context({"experiments": experiments, "seq_url": sequencing_url})
+    context = Context({"experiments": superlist, "seq_url": sequencing_url})
 
     return HttpResponse(template.render(context))
 

@@ -18,16 +18,17 @@
     <body>
     <table id="runs" class="tablesorter">
         <thead><tr>
-            <th>Run name</th><th># Predicted mutations</th><th>Mean coverage</th><th>Reads</th><th>Average Read length</th><th>Percent mapped</th></tr></thead>
+            <th>Run name</th><th># Predicted mutations</th><th>Unassigned Missing Coverage Evidence</th><th>Mean coverage</th><th>Reads</th><th>Average Read length</th><th>Percent mapped</th></tr></thead>
     <tbody>
     {% for experiment in experiments %}
         <tr>
-            <td><a href="{{seq_url}}{{experiment.location}}">{{experiment.get_isolate_name}}</a></td>
-            <td>{{experiment.mutations.count}}</td>
-            <td>{{experiment.mean_coverage}}</td>
-            <td>{{experiment.reads}}</td>
-            <td>{{experiment.average_read_length}}</td>
-            <td>{{experiment.percentage_mapped}}%</td>
+            <td><a href="{{seq_url}}{{experiment.location}}">{{experiment.1.get_isolate_name}}</a></td>
+            <td>{{experiment.1.mutations.count}}</td>
+            <td>{{experiment.0 | length}}</td>
+            <td>{{experiment.1.mean_coverage}}</td>
+            <td>{{experiment.1.reads}}</td>
+            <td>{{experiment.1.average_read_length}}</td>
+            <td>{{experiment.1.percentage_mapped}}%</td>
         </tr>
     {% endfor %}
     </tbody>

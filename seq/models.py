@@ -29,7 +29,7 @@ class ResequencingExperiment(models.Model):
     percentage_mapped = models.FloatField(blank=True,
                                           null=True)
 
-    unassigned_missing_coverage_evidence = models.ManyToManyField("UnassignedMissingCoverageEvidence")
+
 
     # @property
     # def mean_coverage(self):
