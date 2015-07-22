@@ -88,8 +88,7 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
     mutation_rows = mutation_table.findChildren("tr", attrs={"class": "normal_table_row"})
     row_read_info = summary_html.find("tr", attrs={"class": "highlight_table_row"}).findChildren("td")
 
-    # create a resequencing experiment and populate the parameters from
-    # summary.html
+    # create a resequencing experiment and populate the parameters from summary.html
     seq_experiment = query_or_create(session,
                                      ResequencingExperiment,
                                      location=breseq_folder[breseq_folder.find(EXPERIMENT_PARENT_DIR)
@@ -97,10 +96,6 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
                                      isolate_id=isolate_id,
                                      person=person)
 
-    # seq_experiment = ResequencingExperiment()
-    # seq_experiment.location = breseq_folder[breseq_folder.find("sequencing/") + 11:]
-    # seq_experiment.isolate_id = isolate_id
-    # seq_experiment.person = person
     # if any mutations were read in, we need to overwrite them
     seq_experiment.mutations = []
     seq_experiment.reads = int(row_read_info[2].b.text.replace(",", ""))
