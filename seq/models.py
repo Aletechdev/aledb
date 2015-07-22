@@ -5,8 +5,6 @@ class ResequencingExperiment(models.Model):
 
     isolate = models.ForeignKey("ale.Isolate")
 
-    # person = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
-
     person = models.CharField(max_length=200,
                               blank=True)
 
@@ -28,12 +26,6 @@ class ResequencingExperiment(models.Model):
 
     percentage_mapped = models.FloatField(blank=True,
                                           null=True)
-
-
-
-    # @property
-    # def mean_coverage(self):
-    #    return self.average_read_length * self.reads / 4639675.
 
     @property
     def ale_id(self):
