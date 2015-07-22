@@ -105,10 +105,12 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
     seq_experiment.mutations = []
     seq_experiment.reads = int(row_read_info[2].b.text.replace(",", ""))
     seq_experiment.average_read_length = row_read_info[5].text.split("&nbsp;")[0]
+
     try:
         seq_experiment.percentage_mapped = float(row_read_info[7].text.replace("%", ""))
     except:
         None
+
     # average coverage is 3rd table, 2nd row (could also be more rows), 5th column
     mean_coverage = summary_html.findChildren("table")[2].findChildren("tr")[1].findChildren("td")[4].text
     try:
@@ -171,6 +173,7 @@ def is_missing_coverage_type(evidence_dict):
     return is_missing_coverage
 
 
+# Should be able to re-use this with populations.
 def process_unassigned_missing_coverage(db_session, seq_experiment, evidence_dict):
 
     for key in evidence_dict:
