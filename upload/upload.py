@@ -157,7 +157,7 @@ def add_breseq_clonal_results(session, isolate_id, person, breseq_folder, wt=Fal
         observed_mutation.evidence = attrs[0].renderContents()
         session.add(observed_mutation)
 
-    process_unassigned_missing_coverage(session, evidence_dict)
+    process_unassigned_missing_coverage(session, seq_experiment, evidence_dict)
 
 
 def is_missing_coverage_type(evidence_dict):
@@ -171,18 +171,21 @@ def is_missing_coverage_type(evidence_dict):
     return is_missing_coverage
 
 
-def process_unassigned_missing_coverage(db_session, evidence_dict):
+def process_unassigned_missing_coverage(db_session, seq_experiment, evidence_dict):
 
     for key in evidence_dict:
 
         if is_missing_coverage_type(evidence_dict[key]):
 
             # TODO: make literals into constants
-            missing_coverage = query_or_create(db_session,
-                                               UnassignedMissingCoverageEvidence,
-                                               seq_id=evidence_dict[key]['seq_id'],
-                                               start=evidence_dict[key]['start'],
-                                               end=evidence_dict[key]['end'])
+            # Followed example given by ObservedMutations.
+            # Seems like I have to use a mix of both Django and Alchemy ORM members.
+            # Shouldn't have to do this.
+            missing_coverage = UnassignedMissingCoverageEvidence()
+            missing_coverage.seq_id = evidence_dict[key]['seq_id']
+            missing_coverage.start = evidence_dict[key]['start']
+            missing_coverage.end = evidence_dict[key]['end']
+            missing_coverage.experiment = seq_experiment
 
             db_session.add(missing_coverage)
 
