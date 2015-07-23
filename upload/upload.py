@@ -43,7 +43,7 @@ def add_breseq_results(db_session, isolate_id, person, breseq_folder, wt=False):
     seq_experiment = _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, person)
     db_session.add(seq_experiment)
 
-    experiment_mutation_dict, experiment_evidence_dict = _get_experiment_gd_info(breseq_folder)
+    experiment_mutation_dict, experiment_evidence_dict = _get_genomic_diff_experiment_info(breseq_folder)
 
     _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, experiment_mutation_dict, wt)
 
@@ -133,7 +133,7 @@ def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, pers
     return seq_experiment
 
 
-def _get_experiment_gd_info(output_dir):
+def _get_genomic_diff_experiment_info(output_dir):
 
     # TODO: 'evidence' and 'mutation' should be constant members of GDParser
     with open(join(output_dir, GENOMIC_DIFF_FILE_NAME), 'rb') as genomic_diff_file:
