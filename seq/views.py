@@ -75,20 +75,22 @@ def lists(request):
     # unique, though an experiment is currently a structure and an integral type
     # that can be used as a key.
 
-    experiments_and_mcs_list = []
+    experiments_info_list = []
 
     for experiment in experiments:
 
         mc_list = UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=experiment.id)
 
-        # Using tuple because immutable; mc_list must remain associated with particular experiment.
-        experiment_and_mc_tuple = (experiment, mc_list)
+        mapped_read_count = int((experiment.percentage_mapped / 100) * experiment.reads)
 
-        experiments_and_mcs_list.append(experiment_and_mc_tuple)
+        # Using tuple because immutable; mc_list must remain associated with particular experiment.
+        experiment_info_tuple = (experiment, mc_list, mapped_read_count)
+
+        experiments_info_list.append(experiment_info_tuple)
 
     template = loader.get_template(EXPERIMENT_LIST_TEMPLATE)
 
-    context = Context({"experiments_and_mcs_list": experiments_and_mcs_list,
+    context = Context({"experiments_info_list": experiments_info_list,
                        "sequencing_url": sequencing_url})
 
     return HttpResponse(template.render(context))
