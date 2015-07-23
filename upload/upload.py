@@ -17,16 +17,18 @@ BRESEQ_ANALYSIS_POPULATION_FLAG = " -p "
 HTML_SUMMARY_FILE_NAME = "summary.html"
 HTML_MUTATION_FILE_NAME = "index.html"
 
-HTML_CLASSES_PARSE_FOR_MUTATION_CLONAL = ["normal_table_row"]
-HTML_CLASSES_PARSE_FOR_MUTATION_POPULATION = ["normal_table_row", "polymorphism_table_row"]
+CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row"]
+POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row", "polymorphism_table_row"]
 
-PROTEIN_CHANGE_INDEX_CLONAL = 3
-PROTEIN_CHANGE_INDEX_POPULATION = 4
+CLONAL_PROTEIN_CHANGE_INDEX = 3
+POPULATION_PROTEIN_CHANGE_INDEX = 4
 
-FREQENCY_INDEX_POPULATION = 3
+POPULATION_MUTATION_FREQUENCY_INDEX = 3
+
+GENOMIC_DIFF_FILE_NAME = 'output.gd'
 
 
-def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
+def add_breseq_results(db_session, isolate_id, person, breseq_folder, wt=False):
     """
     Figures out if the sample is clonal or population,
     and calls the appropriate "add" function.
@@ -38,7 +40,14 @@ def add_breseq_results(session, isolate_id, person, breseq_folder, wt=False):
 
     sample_type = is_sample_clonal_or_popuation(breseq_log_file_path)
 
-    _commit_breseq_results(sample_type, session, isolate_id, person, breseq_folder, wt=False)
+    seq_experiment = _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, person)
+    db_session.add(seq_experiment)
+
+    experiment_mutation_dict, experiment_evidence_dict = _get_experiment_gd_info(breseq_folder)
+
+    _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, experiment_mutation_dict, wt)
+
+    _process_unassigned_missing_coverage(db_session, seq_experiment, experiment_evidence_dict)
 
 
 def is_sample_clonal_or_popuation(breseq_log_file_path):
@@ -73,7 +82,7 @@ def is_missing_coverage_type(evidence_dict):
 
 
 # Should be able to re-use this with populations.
-def process_unassigned_missing_coverage(db_session, seq_experiment, evidence_dict):
+def _process_unassigned_missing_coverage(db_session, seq_experiment, evidence_dict):
     for key in evidence_dict:
 
         if is_missing_coverage_type(evidence_dict[key]):
@@ -90,46 +99,17 @@ def process_unassigned_missing_coverage(db_session, seq_experiment, evidence_dic
             db_session.add(missing_coverage)
 
 
-# TODO: should split up the code getting the states and details into their own methods.
-def _commit_breseq_results(sample_type, db_session, isolate_id, person, breseq_folder, wt=False):
-    """add breseq results to the database
-
-    Parses the html output from a breseq run and adds those objects into
-    the sqlalchemy session.
-
-    The "breseq_folder" parameter is looking for the contents of the "/output" dir
-    from a breseq execution.
-    
-    session.commit() is not run in the function, and should be run afterwards
-    
-    Setting the wt flag allows any mutations that appear in the starting strain
-    relative to the reference to be annotated as reference errors.
-    """
-
-    statistics_html = get_beautifulsoup_html(breseq_folder, HTML_SUMMARY_FILE_NAME)
-
-    mutations_html = get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
-
-    # GETTING STATS ####################################################################################
-    # TODO: put this into it's own function
-
-    # parse the mutation html file to find the correct table
-    if sample_type == SAMPLE_TYPE.clonal:
-        html_class_to_parse = HTML_CLASSES_PARSE_FOR_MUTATION_CLONAL
-    else:
-        html_class_to_parse = HTML_CLASSES_PARSE_FOR_MUTATION_POPULATION
-
-    mutation_table = mutations_html.find("th", attrs={"class": "mutation_header_row"}).parent.parent
-    mutation_rows = mutation_table.findChildren("tr", attrs={"class": html_class_to_parse})
-    row_read_info = statistics_html.find("tr", attrs={"class": "highlight_table_row"}).findChildren("td")
-
-    # create a resequencing experiment and populate the parameters from summary.html
+def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, person):
     seq_experiment = query_or_create(db_session,
                                      ResequencingExperiment,
                                      location=breseq_folder[breseq_folder.find(EXPERIMENT_PARENT_DIR)
                                                             + len(EXPERIMENT_PARENT_DIR):],
                                      isolate_id=isolate_id,
                                      person=person)
+
+    statistics_html = get_beautifulsoup_html(breseq_folder, HTML_SUMMARY_FILE_NAME)
+
+    row_read_info = statistics_html.find("tr", attrs={"class": "highlight_table_row"}).findChildren("td")
 
     # if any mutations were read in, we need to overwrite them
     seq_experiment.mutations = []
@@ -149,39 +129,46 @@ def _commit_breseq_results(sample_type, db_session, isolate_id, person, breseq_f
         mean_coverage = 0
 
     seq_experiment.mean_coverage = mean_coverage
-    db_session.add(seq_experiment)
 
-    # PARSE GD FILES ####################################################################################
-    # TODO: put this into it's own function
+    return seq_experiment
 
-    # parse the output.gd file and retrieve a dictionary of the mutations:
-    with open(join(breseq_folder, 'output.gd'), 'rb') as gdfile:
-        gdparser = gdparse.GDParser(gdfile)
-        evidence_dict = gdparser.data['evidence']
-        mutation_dict = gdparser.data['mutation']
 
-    # GETTING MUTATIONS ####################################################################################
-    # TODO: put this into it's own function
+def _get_experiment_gd_info(output_dir):
 
-    # add in the appropriate mutations from the index.html file
+    # TODO: 'evidence' and 'mutation' should be constant members of GDParser
+    with open(join(output_dir, GENOMIC_DIFF_FILE_NAME), 'rb') as genomic_diff_file:
+        gd_parser = gdparse.GDParser(genomic_diff_file)
+        experiment_mutation_dict = gd_parser.data['mutation']
+        experiment_evidence_dict = gd_parser.data['evidence']
+
+    return experiment_mutation_dict, experiment_evidence_dict
+
+
+def _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, experiment_mutation_dict, wt):
+
+    mutations_html = get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
+
+    mutation_rows = _get_mutations_rows(mutations_html, sample_type)
+
     for row_num, row in enumerate(mutation_rows):
 
         attrs = row.findChildren("td")
         mutation = query_or_create(db_session,
                                    Mutation,
-                                   position=mutation_dict[row_num + 1]['position'],
-                                   # mutations are in the same order in the html and output.gd files so we can index the ids with row_num
+                                   position=experiment_mutation_dict[row_num + 1]['position'],
+                                   # mutations are in the same order in the html and output.gd
+                                   # files so we can index the ids with row_num
                                    sequence_change=attrs[2].text,
-                                   mutation_type=mutation_dict[row_num + 1]['type'])
+                                   mutation_type=experiment_mutation_dict[row_num + 1]['type'])
         if wt:
             mutation.reference_error = True
 
         if mutation.protein_change is None:
 
             if sample_type == SAMPLE_TYPE.clonal:
-                protein_change_index = PROTEIN_CHANGE_INDEX_CLONAL
+                protein_change_index = CLONAL_PROTEIN_CHANGE_INDEX
             else:
-                protein_change_index = PROTEIN_CHANGE_INDEX_POPULATION
+                protein_change_index = POPULATION_PROTEIN_CHANGE_INDEX
 
             change = attrs[protein_change_index].renderContents()
             mutation.protein_change = change
@@ -192,8 +179,22 @@ def _commit_breseq_results(sample_type, db_session, isolate_id, person, breseq_f
         observed_mutation.breseq_present = True
         observed_mutation.evidence = attrs[0].renderContents()
         if sample_type == SAMPLE_TYPE.population:
-            observed_mutation.frequency = attrs[FREQENCY_INDEX_POPULATION].text
+            observed_mutation.frequency = attrs[POPULATION_MUTATION_FREQUENCY_INDEX].text
 
         db_session.add(observed_mutation)
 
-    process_unassigned_missing_coverage(db_session, seq_experiment, evidence_dict)
+
+def _get_mutations_rows(mutations_html, sample_type):
+
+    # parse the mutation html file to find the correct table
+    if sample_type == SAMPLE_TYPE.clonal:
+        html_class_to_parse = CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
+    else:
+        html_class_to_parse = POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
+
+    mutation_table = mutations_html.find("th",
+                                         attrs={"class": "mutation_header_row"}).parent.parent
+
+    mutation_rows = mutation_table.findChildren("tr", attrs={"class": html_class_to_parse})
+
+    return mutation_rows
