@@ -18,24 +18,27 @@
     <body>
     <table id="runs" class="tablesorter">
         <thead><tr>
-            <th>Run name</th>
-            <th># Predicted mutations</th>
+            <th>Run Name</th>
+            <th># Predicted Mutations</th>
             <th>Unassigned Missing Coverage Evidence</th>
-            <th>Mean coverage</th>
-            <th>Reads</th>
-            <th>Average Read length</th>
-            <th>Percent mapped</th>
+            <th>Mean Coverage</th>
+            <th>Total Reads</th>
+            <th>Percent Mapped</th>
+            <th>Mapped Reads</th>
+            <th>Average Read Length</th>
+
         </tr></thead>
     <tbody>
-    {% for experiment_and_mc_tuple in experiments_and_mcs_list %}
+    {% for experiment_info_tuple in experiments_info_list %}
         <tr>
-            <td><a href="{{sequencing_url}}{{experiment.location}}">{{experiment_and_mc_tuple.0.get_isolate_name}}</a></td>
-            <td>{{experiment_and_mc_tuple.0.mutations.count}}</td>
-            <td>{{experiment_and_mc_tuple.1 | length}}</td>
-            <td>{{experiment_and_mc_tuple.0.mean_coverage}}</td>
-            <td>{{experiment_and_mc_tuple.0.reads}}</td>
-            <td>{{experiment_and_mc_tuple.0.average_read_length}}</td>
-            <td>{{experiment_and_mc_tuple.0.percentage_mapped}}%</td>
+            <td><a href="{{sequencing_url}}{{experiment.location}}">{{experiment_info_tuple.0.get_isolate_name}}</a></td>
+            <td>{{experiment_info_tuple.0.mutations.count}}</td>
+            <td>{{experiment_info_tuple.1 | length}}</td>
+            <td>{{experiment_info_tuple.0.mean_coverage}}</td>
+            <td>{{experiment_info_tuple.0.reads}}</td>
+            <td>{{experiment_info_tuple.0.percentage_mapped}}%</td>
+            <td>{{experiment_info_tuple.2}}</td>
+            <td>{{experiment_info_tuple.0.average_read_length}}</td>
         </tr>
     {% endfor %}
     </tbody>
