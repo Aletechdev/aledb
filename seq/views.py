@@ -8,6 +8,9 @@ from ale.models import *
 import aleinfo.settings as settings
 
 
+EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
+
+
 if hasattr(settings, "sequencing_url"):
     sequencing_url = settings.sequencing_url
 else:
@@ -49,10 +52,15 @@ def get_seq_experiments(request):
 
 @login_required
 def index(request):
+
     """display a list of ales with links to the resequencing"""
+
     experiments = AleExperiment.objects.all()
+
     template = loader.get_template("index.html")
+
     context = Context({"experiments": experiments, "seq_url": sequencing_url})
+
     return HttpResponse(template.render(context))
 
 
@@ -62,32 +70,41 @@ def lists(request):
     """return a list of resequencing experiments"""
 
     experiments = get_seq_experiments(request)
-    superlist = []
-    missingcoverage = []
-    for ex in experiments:
-        obj = UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id = ex.id)
-        if len(obj) > 0:
-            x=[]
-            x.append(obj)
-            x.append(ex)
-            superlist.append(x)
-        else:
-            x = []
-            x.append([])
-            x.append(ex)
-            superlist.append(x)
-    template = loader.get_template("experiment_view.html")
 
-    context = Context({"experiments": superlist, "seq_url": sequencing_url})
+    # Would rather want to use something like a dictionary since an experiment is
+    # unique, though an experiment is currently a structure and an integral type
+    # that can be used as a key.
+
+    experiments_and_mcs_list = []
+
+    for experiment in experiments:
+
+        mc_list = UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=experiment.id)
+
+        # Using tuple because immutable; mc_list must remain associated with particular experiment.
+        experiment_and_mc_tuple = (experiment, mc_list)
+
+        experiments_and_mcs_list.append(experiment_and_mc_tuple)
+
+    template = loader.get_template(EXPERIMENT_LIST_TEMPLATE)
+
+    context = Context({"experiments_and_mcs_list": experiments_and_mcs_list,
+                       "sequencing_url": sequencing_url})
 
     return HttpResponse(template.render(context))
 
 
 def make_table_entry(observed, experiment_urls):
+
     if observed.breseq_present:
-        return """<td class="true">%s</td>""" % observed.evidence.replace("evidence/", experiment_urls[observed.sequencing_experiment_id] + "/evidence/")
+
+        return """<td class="true">%s</td>""" % observed.evidence.replace("evidence/",
+                                                                          experiment_urls[observed.sequencing_experiment_id] + "/evidence/")
+
     elif observed.present is False:
-        return """<td class="false">%d/%d</td>""" % (observed.mutated_reads, observed.wt_reads)
+
+        return """<td class="false">%d/%d</td>""" % (observed.mutated_reads,
+                                                     observed.wt_reads)
 
 
 @login_required
