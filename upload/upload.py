@@ -27,6 +27,9 @@ POPULATION_PROTEIN_CHANGE_INDEX = 4
 
 POPULATION_MUTATION_FREQUENCY_INDEX = 3
 
+AVERAGE_READ_LENGTH_INDEX = 5
+READ_COUNT_INDEX = 2
+
 GENOMIC_DIFF_FILE_NAME = 'output.gd'
 
 
@@ -100,6 +103,19 @@ def _process_unassigned_missing_coverage(db_session, seq_experiment, evidence_di
 
             db_session.add(missing_coverage)
 
+
+def _parse_average_read_length(read_row_input):
+
+    output = re.findall("\d+.\d+", read_row_input)[0]
+
+    return output
+
+
+def _parse_read_count(read_row_input):
+
+    return int(read_row_input.replace(",", ""))
+
+
 def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, person):
     seq_experiment = query_or_create(db_session,
                                      ResequencingExperiment,
@@ -114,8 +130,8 @@ def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, pers
 
     # if any mutations were read in, we need to overwrite them
     seq_experiment.mutations = []
-    seq_experiment.reads = int(row_read_info[2].b.text.replace(",", ""))
-    seq_experiment.average_read_length = re.findall("\d+.\d+", row_read_info[5].text)
+    seq_experiment.reads = _parse_read_count(row_read_info[READ_COUNT_INDEX].text)
+    seq_experiment.average_read_length = _parse_average_read_length(row_read_info[AVERAGE_READ_LENGTH_INDEX].text)
 
     try:
         seq_experiment.percentage_mapped = float(row_read_info[7].text.replace("%", ""))
