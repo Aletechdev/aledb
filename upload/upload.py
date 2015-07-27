@@ -1,5 +1,7 @@
 from os.path import join
 
+import re
+
 from bs4 import BeautifulSoup
 from enum import Enum
 
@@ -98,7 +100,6 @@ def _process_unassigned_missing_coverage(db_session, seq_experiment, evidence_di
 
             db_session.add(missing_coverage)
 
-
 def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, person):
     seq_experiment = query_or_create(db_session,
                                      ResequencingExperiment,
@@ -114,7 +115,7 @@ def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, pers
     # if any mutations were read in, we need to overwrite them
     seq_experiment.mutations = []
     seq_experiment.reads = int(row_read_info[2].b.text.replace(",", ""))
-    seq_experiment.average_read_length = row_read_info[5].text.split("&nbsp;")[0]
+    seq_experiment.average_read_length = re.findall("\d+.\d+", row_read_info[5].text)
 
     try:
         seq_experiment.percentage_mapped = float(row_read_info[7].text.replace("%", ""))
