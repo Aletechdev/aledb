@@ -1,0 +1,3 @@
+[submodule "upload/gdparse"]
+	path = upload/gdparse
+	url = https://github.com/SBRG/gdparse.git
