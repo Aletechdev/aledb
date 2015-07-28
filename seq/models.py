@@ -44,7 +44,9 @@ class ResequencingExperiment(models.Model):
             if len(self.isolate.description) > 0:
                 return self.isolate.description
 
-        return u"A%d_F%d_I%d" % (self.ale_id, self.flask_number, self.isolate.isolate_number)
+        return u"A%d_F%d_I%d" % (self.ale_id,
+                                 self.flask_number,
+                                 self.isolate.isolate_number)
 
         # TODO - add more information
 
@@ -57,7 +59,8 @@ class UnassignedMissingCoverageEvidence(models.Model):
 
     end = models.IntegerField()
 
-    sequencing_experiment = models.ForeignKey(ResequencingExperiment)
+    sequencing_experiment = models.ForeignKey(ResequencingExperiment,
+                                              on_delete=models.CASCADE)
 
 
 
