@@ -195,6 +195,7 @@ def _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, e
         observed_mutation.mutation = mutation
         observed_mutation.breseq_present = True
         observed_mutation.evidence = attrs[0].renderContents()
+
         if sample_type == SAMPLE_TYPE.population:
             observed_mutation.frequency = attrs[POPULATION_MUTATION_FREQUENCY_INDEX].text
 
