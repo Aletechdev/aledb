@@ -15,7 +15,7 @@ def smartconvert(data_string):
     for var_type in type_list:
         try:
             converted_var = var_type(data_string.strip())
-            # Check for inifinite values:
+            # Check for infinite values:
             if converted_var == float('Inf'):
                 converted_var = 1e6;
             return converted_var
