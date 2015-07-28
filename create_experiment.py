@@ -1,6 +1,6 @@
 import seq.alchemy_orm
-import upload
-import validatemutations  # TODO: find out what validatemutations does for mutations.
+import upload.upload
+import upload.validatemutations  # TODO: find out what validatemutations does for mutations.
 import datetime
 import os
 
@@ -14,16 +14,18 @@ BRESEQ_OUTPUT_REPORT_FILE = "index.html"
 
 # TODO: this should be an input from a user UI.
 # !!! ENSURE THAT THE TRAILING '/' IS ALWAYS INCLUDED. NEED TO FIX THIS SOMEHOW!!!
-BRESEQ_ISOLATE_OUTPUT_PATH = "/data/breseq/BOP27_reseq/"
+# BRESEQ_ISOLATE_OUTPUT_PATH = "/data/breseq/bop/BOP27_reseq/"
+
+BRESEQ_ISOLATE_OUTPUT_PATH = "/data/breseq/bop/BOP27_reseq_v3/clonal/output/"
 
 # TODO: this should be an input from a user UI.
 # !!! ENSURE THAT THE TRAILING '/' IS ALWAYS INCLUDED. NEED TO FIX THIS SOMEHOW!!!
-BRESEQ_EXPERIMENT_OUTPUT_PATH = "/data/breseq/glycerol_dynamics/combo/clonal/"
+BRESEQ_EXPERIMENT_OUTPUT_PATH = "/data/breseq/gyd/combo/population/"
 
 # TODO: this should be an input from a user UI.
-BRESEQ_EXPERIMENT_PERSON_NAME = "Ryan"
+BRESEQ_EXPERIMENT_PERSON_NAME = "Patrick"
 
-BRESEQ_EXPERIMENT_NAME = "TEST"
+BRESEQ_EXPERIMENT_NAME = "TEST2"
 
 
 def main():
@@ -76,7 +78,7 @@ def main():
 
     # validate mutations in each parallel ale
     for ale in experiment.ale_ids:
-        validatemutations.check_negative_predictions(ale.ale_experiment_id,
+        upload.validatemutations.check_negative_predictions(ale.ale_experiment_id,
                                                      ale.ale_id)
 
 
@@ -111,7 +113,7 @@ def create_and_commit_ale_entry(db_session,
 
     db_session.commit()
 
-    upload.add_breseq_results(session=db_session,
+    upload.upload.add_breseq_results(db_session=db_session,
                               isolate_id=isolate.id,
                               person=person,
                               breseq_folder=breseq_folder,
