@@ -42,7 +42,7 @@ def add_breseq_results(db_session, isolate_id, person, breseq_folder, wt=False):
 
     breseq_log_file_path = breseq_folder + BRESEQ_LOG_FILE
 
-    sample_type = is_sample_clonal_or_popuation(breseq_log_file_path)
+    sample_type = _is_sample_clonal_or_popuation(breseq_log_file_path)
 
     seq_experiment = _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, person)
     db_session.add(seq_experiment)
@@ -54,7 +54,7 @@ def add_breseq_results(db_session, isolate_id, person, breseq_folder, wt=False):
     _process_unassigned_missing_coverage(db_session, seq_experiment, experiment_evidence_dict)
 
 
-def is_sample_clonal_or_popuation(breseq_log_file_path):
+def _is_sample_clonal_or_popuation(breseq_log_file_path):
     sample_type = SAMPLE_TYPE.clonal
 
     # If Breseq's log.txt file become very large, the following will be a memory hog.
@@ -65,7 +65,7 @@ def is_sample_clonal_or_popuation(breseq_log_file_path):
     return sample_type
 
 
-def get_beautifulsoup_html(output_folder, html_file_name):
+def _get_beautifulsoup_html(output_folder, html_file_name):
 
     output_file_path = join(output_folder, html_file_name)
 
@@ -75,7 +75,7 @@ def get_beautifulsoup_html(output_folder, html_file_name):
     return bs_html_file
 
 
-def is_missing_coverage_type(evidence_dict):
+def _is_missing_coverage_type(evidence_dict):
     is_missing_coverage = False
 
     if evidence_dict[gdparse.GDParser.EVIDENCE_TYPE_KEY] \
@@ -89,7 +89,7 @@ def is_missing_coverage_type(evidence_dict):
 def _process_unassigned_missing_coverage(db_session, seq_experiment, evidence_dict):
     for key in evidence_dict:
 
-        if is_missing_coverage_type(evidence_dict[key]):
+        if _is_missing_coverage_type(evidence_dict[key]):
             # TODO: make literals into constants
             # Followed example given by ObservedMutations.
             # Seems like I have to use a mix of both Django and Alchemy ORM members.
@@ -123,11 +123,12 @@ def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, pers
                                      isolate_id=isolate_id,
                                      person=person)
 
-    statistics_html = get_beautifulsoup_html(breseq_folder, HTML_SUMMARY_FILE_NAME)
+    statistics_html = _get_beautifulsoup_html(breseq_folder, HTML_SUMMARY_FILE_NAME)
 
     row_read_info = statistics_html.find("tr", attrs={"class": "highlight_table_row"}).findChildren("td")
 
     # if any mutations were read in, we need to overwrite them
+    # ??? WHY ??? -Patrick
     seq_experiment.mutations = []
     seq_experiment.reads = _parse_read_count(row_read_info[READ_COUNT_INDEX].text)
     seq_experiment.average_read_length = _parse_average_read_length(row_read_info[AVERAGE_READ_LENGTH_INDEX].text)
@@ -162,7 +163,7 @@ def _get_genomic_diff_experiment_info(output_dir):
 
 def _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, experiment_mutation_dict, wt):
 
-    mutations_html = get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
+    mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
 
     mutation_rows = _get_mutations_rows(mutations_html, sample_type)
 
