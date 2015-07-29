@@ -10,11 +10,13 @@ import aleinfo.settings as settings
 
 EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
 
+DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
+
 
 if hasattr(settings, "sequencing_url"):
-    sequencing_url = settings.sequencing_url
+    reseqencing_report_url = settings.sequencing_url
 else:
-    sequencing_url = "http://localhost/sequencing/"
+    reseqencing_report_url = DEFAULT_RESEQ_REPORT_URL
 
 
 def get_seq_experiments(request):
@@ -46,7 +48,6 @@ def get_seq_experiments(request):
         reseq_id IS NOT NULL %s %s
         ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_no_selector))
 
-
     return experiments
 
 
@@ -59,7 +60,7 @@ def index(request):
 
     template = loader.get_template("index.html")
 
-    context = Context({"experiments": experiments, "seq_url": sequencing_url})
+    context = Context({"experiments": experiments, "seq_url": reseqencing_report_url})
 
     return HttpResponse(template.render(context))
 
@@ -75,6 +76,18 @@ def lists(request):
     # unique, though an experiment is currently a structure and an integral type
     # that can be used as a key.
 
+    experiments_info_list = _get_experiment_info_list(experiments)
+
+    template = loader.get_template(EXPERIMENT_LIST_TEMPLATE)
+
+    context = Context({"experiments_info_list": experiments_info_list,
+                       "resequencing_report_url": reseqencing_report_url})
+
+    return HttpResponse(template.render(context))
+
+
+def _get_experiment_info_list(experiments):
+
     experiments_info_list = []
 
     for experiment in experiments:
@@ -88,12 +101,7 @@ def lists(request):
 
         experiments_info_list.append(experiment_info_tuple)
 
-    template = loader.get_template(EXPERIMENT_LIST_TEMPLATE)
-
-    context = Context({"experiments_info_list": experiments_info_list,
-                       "sequencing_url": sequencing_url})
-
-    return HttpResponse(template.render(context))
+    return experiments_info_list
 
 
 def make_table_entry(observed, experiment_urls):
@@ -115,7 +123,7 @@ def experiment_table(request):
     extra_validation = False if request.GET.get("novalid") else True
     experiment_mapping = dict((o.id, i) for i, o in enumerate(experiments))
     # cache the urls of the experiment location
-    experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiments)
+    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in experiments)
     observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=experiment_mapping.keys())
     mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
@@ -135,7 +143,7 @@ def experiment_table(request):
     table_header += "</tr>"
     table_body = ""
     for experiment in experiments:
-        table_body += """<tr><td><a href="%s">%s</a></td>""" % (sequencing_url + experiment.location, experiment.get_isolate_name())
+        table_body += """<tr><td><a href="%s">%s</a></td>""" % (reseqencing_report_url + experiment.location, experiment.get_isolate_name())
         for column in table_entries[experiment_mapping[experiment.id]]:
             if column is None:
                 table_body += """<td class="false"></td>"""
@@ -187,7 +195,7 @@ def mutation_table(request):
                     del experiment_mapping[int(id)]
 
     # cache the urls of the experiment location
-    experiment_urls = dict((i.id, sequencing_url + i.location) for i in experiment_mapping.values())
+    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in experiment_mapping.values())
     observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=experiment_mapping.keys())
     mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
@@ -246,7 +254,7 @@ def isolate_list(request):
             experiment_id=%d;""" % ale_experiment_id)
         """return a list of resequencing experiments"""
     template = loader.get_template("isolate_view.html")
-    context = Context({"isolates": isolates, "seq_url": sequencing_url})
+    context = Context({"isolates": isolates, "seq_url": reseqencing_report_url})
     return HttpResponse(template.render(context))
 
 
