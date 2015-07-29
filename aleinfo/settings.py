@@ -1,5 +1,5 @@
 from os.path import expanduser, dirname, join, isfile
-from ConfigParser import SafeConfigParser, NoOptionError
+from ConfigParser import SafeConfigParser
 
 
 DEBUG = True
@@ -14,6 +14,7 @@ settings_filepath = join(dirname(__file__), "settings.ini")
 config.read(settings_filepath)
 
 sequencing_path = config.get("OTHER", "sequencing_path")
+sequencing_url = config.get("OTHER", "sequencing_url")
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -31,12 +32,7 @@ DATABASES = {
         'PORT': config.get("DATABASE", "port"),
     }
 }
-"""
-try:
-    DATABASES["default"]["password"] = config.get("DATABASE", "password")
-except NoOptionError:
-    None
-"""
+
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
