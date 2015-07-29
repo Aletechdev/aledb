@@ -2,9 +2,9 @@ __author__ = 'pphaneuf'
 
 import unittest
 
-from upload.upload import is_sample_clonal_or_popuation
+from upload.upload import _is_sample_clonal_or_popuation
 from upload.upload import SAMPLE_TYPE
-from upload.upload import is_missing_coverage_type
+from upload.upload import _is_missing_coverage_type
 
 # Use access to protected members till can wrap acceptance testing
 # around workflow using these functions.
@@ -17,7 +17,7 @@ class TestUpload(unittest.TestCase):
 
         log_file_path = "log_sample_is_clonal.txt"
 
-        sample_type = is_sample_clonal_or_popuation(log_file_path)
+        sample_type = _is_sample_clonal_or_popuation(log_file_path)
 
         self.assertEquals(SAMPLE_TYPE.clonal, sample_type)
 
@@ -25,7 +25,7 @@ class TestUpload(unittest.TestCase):
 
         log_file_path = "log_sample_is_population.txt"
 
-        sample_type = is_sample_clonal_or_popuation(log_file_path)
+        sample_type = _is_sample_clonal_or_popuation(log_file_path)
 
         self.assertEquals(SAMPLE_TYPE.population, sample_type)
 
@@ -42,7 +42,7 @@ class TestUpload(unittest.TestCase):
                     'start_range': 499,
                     'type': 'MC'}
 
-        is_missing_coverage = is_missing_coverage_type(evidence)
+        is_missing_coverage = _is_missing_coverage_type(evidence)
 
         self.assertTrue(is_missing_coverage)
 
@@ -59,7 +59,7 @@ class TestUpload(unittest.TestCase):
                     'start_range': 499,
                     'type': 'RA'}
 
-        is_missing_coverage = is_missing_coverage_type(evidence)
+        is_missing_coverage = _is_missing_coverage_type(evidence)
 
         self.assertFalse(is_missing_coverage)
 
