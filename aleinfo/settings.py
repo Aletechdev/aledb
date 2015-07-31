@@ -5,6 +5,7 @@ from ConfigParser import SafeConfigParser
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+# TODO: change to "ALE Analytics"
 GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
 
 config = SafeConfigParser()
