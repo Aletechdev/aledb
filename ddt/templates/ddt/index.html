@@ -1,0 +1,125 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Data-driven tiles</title>
+
+    <!-- js dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="{% static 'ddt/lib/colorbrewer.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/188.0.0/prettify.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <!-- escher dependencies -->
+    <script src="{% static 'ddt/lib/escher-1.0.0.js' %}"></script>
+    <link rel="stylesheet" href="http://escher.github.io/builder-1.0.0.css"></link>
+
+    <!-- tooltip dependencies -->
+    <script src="{% static 'ddt/lib/d3tip.js' %}"></script>
+
+    <!-- Require only loaded in standalone file. -->
+    <script src="{% static 'ddt/lib/vkbeautify.0.99.00.beta.js' %}"></script>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootswatch/3.1.1/simplex/bootstrap.min.css" />
+
+    <!-- ddt js dependencies -->
+    <script src="{% static 'ddt/js/d3_tile.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_svg.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_data.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_map2d.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_table.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_html.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_chart2d.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_chart2d_boxandwhiskers.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_chart2d_heatmap.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_chart2d_horizontalbars.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_chart2d_line.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_chart2d_packlayout.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_chart2d_points.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_chart2d_verticalbars.js' %}"></script>
+    <script src="{% static 'ddt/js/d3_chart2d_treelayout.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_table.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_table_responsivetable_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_svg.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_svg_scatterlineplot2d_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_svg_scatterplot2d_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_svg_volcanoplot2d_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_svg_heatmap2d_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_svg_pcaplot2d_scores_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_svg_verticalbarschart2d_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_svg_horizontalbarschart2d_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_svg_boxandwhiskersplot2d_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_html.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_html_form_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_html_datalist_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_html_href_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_html_href_02.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_html_media_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_html_escher_01.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_tile.js' %}"></script>
+    <script src="{% static 'ddt/js/ddt_container.js' %}"></script>
+	
+	<!-- ddt unit tests -->
+    <script src="{% static 'ddt/js/unittests.js' %}"></script>
+    <script src="{% static 'ddt/data/data_unittests.js' %}"></script>
+    	
+	<!-- ddt -->
+    <script src="{% static 'ddt/data/ddt_data.js' %}"></script>
+
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, height=device-height,
+	  initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui"/>
+  </head>
+  <body>      
+	<header class="row">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-12">
+					<div id="title-box">
+						<h1 id="title">Data-driven tiles</h1>
+					</div>
+				</div>
+			</div>
+		</div>
+	</header>
+	<main>
+		<div class="container" id="container">
+		</div>
+	</main>
+
+	<script type="text/javascript">
+		//ddt data and template
+		ddt_test = new ddt_container();
+		ddt_test.set_parameters(parameters);
+		ddt_test.add_data(data);
+		ddt_test.set_tile2datamap(tile2datamap);
+		ddt_test.make_container();
+		if (typeof filtermenu !== "undefined") { ddt_test.add_datafiltermenubuttons(filtermenu); }
+		else { ddt_test.add_datafiltermenubuttons(); };
+	</script>
+
+    <script>
+     // temporary fixes for mobile browsers (currently iOS)
+     if (navigator.userAgent.match(/.*OS 7_\d/i)) {
+       $(".fill-screen-div").css('height', window.innerHeight +"px");
+       $(window).resize(function(){
+	 $(".fill-screen-div").css('height', window.innerHeight +"px");
+	 document.body.scrollTop = 0;
+       })
+     }
+    </script>
+  </body>
+	<footer>
+		<div class="container">
+			<p class="more">
+				Learn more about <a href="https://github.com/dmccloskey/ddt">this project</a>
+			</p>
+			<p class="version">
+				Version 0.0a
+			</p>
+		</div>
+	</footer>
+</html>
