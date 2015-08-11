@@ -32,7 +32,7 @@ READ_COUNT_INDEX = 2
 GENOMIC_DIFF_FILE_NAME = 'output.gd'
 
 
-def add_breseq_results(db_session, isolate_id, person, breseq_folder, wt=False):
+def add_breseq_results(db_session, isolate_id, person, breseq_folder, is_wild_type=False):
     """
     Figures out if the sample is clonal or population,
     and calls the appropriate "add" function.
@@ -49,7 +49,7 @@ def add_breseq_results(db_session, isolate_id, person, breseq_folder, wt=False):
 
     experiment_mutation_dict, experiment_evidence_dict = _get_genomic_diff_experiment_info(breseq_folder)
 
-    _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, experiment_mutation_dict, wt)
+    _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, experiment_mutation_dict, is_wild_type)
 
     _process_unassigned_missing_coverage(db_session, seq_experiment, experiment_evidence_dict)
 
@@ -161,7 +161,7 @@ def _get_genomic_diff_experiment_info(output_dir):
     return experiment_mutation_dict, experiment_evidence_dict
 
 
-def _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, experiment_mutation_dict, wt):
+def _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, experiment_mutation_dict, is_wild_type):
 
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
 
@@ -177,7 +177,9 @@ def _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, e
                                    # files so we can index the ids with row_num
                                    sequence_change=attrs[2].text,
                                    mutation_type=experiment_mutation_dict[row_num + 1]['type'])
-        if wt:
+
+        if is_wild_type:
+
             mutation.reference_error = True
 
         if mutation.protein_change is None:
