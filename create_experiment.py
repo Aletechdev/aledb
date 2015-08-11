@@ -7,7 +7,7 @@ import os
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
 WILD_TYPE_ISOLATE_NUMBER = 0
-WILD_TYPE_PERSON_NAME = "BOP27"
+WILD_TYPE_USER_NAME = "BOP27"
 
 BRESEQ_OUTPUT_REPORT_DIR = "output/"
 BRESEQ_OUTPUT_REPORT_FILE = "index.html"
@@ -20,12 +20,12 @@ BRESEQ_ISOLATE_OUTPUT_PATH = "/data/breseq/bop/BOP27_reseq_v3/clonal/output/"
 
 # TODO: this should be an input from a user UI.
 # !!! ENSURE THAT THE TRAILING '/' IS ALWAYS INCLUDED. NEED TO FIX THIS SOMEHOW!!!
-BRESEQ_EXPERIMENT_OUTPUT_PATH = "/data/breseq/gyd/combo/population/"
+BRESEQ_EXPERIMENT_OUTPUT_PATH = "/data/breseq/hgs_ale2/"
 
 # TODO: this should be an input from a user UI.
-BRESEQ_EXPERIMENT_PERSON_NAME = "Patrick"
+BRESEQ_EXPERIMENT_USER_NAME = "Patrick"
 
-BRESEQ_EXPERIMENT_NAME = "TEST2"
+BRESEQ_EXPERIMENT_NAME = "hgs_ale_2"
 
 
 def main():
@@ -39,14 +39,16 @@ def main():
         = get_project_orm(db_session)
 
     create_and_commit_ale_entry(db_session,
-                                WILD_TYPE_PERSON_NAME,
+                                WILD_TYPE_USER_NAME,
                                 BRESEQ_ISOLATE_OUTPUT_PATH,
                                 WILD_TYPE_ALE_NUMBER,
                                 WILD_TYPE_FLASK_NUMBER,
                                 WILD_TYPE_ISOLATE_NUMBER,
                                 experiment,
                                 media,
-                                freezer_box)
+                                freezer_box,
+                                # is_wild_type=True
+                                is_wild_type=False)  # This is in fact the wild type, though setting this to false hides the mutations in the mutation table.
 
     # Might need to explicitly sort this list in the future.
     breseq_sample_report_list = get_sample_report_list(
@@ -67,19 +69,20 @@ def main():
                       + BRESEQ_OUTPUT_REPORT_DIR
 
         create_and_commit_ale_entry(db_session,
-                                    BRESEQ_EXPERIMENT_PERSON_NAME,
+                                    BRESEQ_EXPERIMENT_USER_NAME,
                                     output_path,
                                     ale_number,
                                     flask_number,
                                     isolate_number,
                                     experiment,
                                     media,
-                                    freezer_box)
+                                    freezer_box,
+                                    is_wild_type=False)
 
     # validate mutations in each parallel ale
-    for ale in experiment.ale_ids:
-        upload.validatemutations.check_negative_predictions(ale.ale_experiment_id,
-                                                     ale.ale_id)
+    # for ale in experiment.ale_ids:
+    #     upload.validatemutations.check_negative_predictions(ale.ale_experiment_id,
+    #                                                  ale.ale_id)
 
 
 def create_and_commit_ale_entry(db_session,
@@ -90,7 +93,8 @@ def create_and_commit_ale_entry(db_session,
                                 isolate_number,
                                 experiment,
                                 media,
-                                freezer_box):
+                                freezer_box,
+                                is_wild_type):
 
     ale_id = seq.alchemy_orm.query_or_create(db_session,
                                          seq.alchemy_orm.AleId,
@@ -117,7 +121,7 @@ def create_and_commit_ale_entry(db_session,
                               isolate_id=isolate.id,
                               person=person,
                               breseq_folder=breseq_folder,
-                              wt=True)
+                              is_wild_type=is_wild_type)
 
     db_session.commit()
 
@@ -135,7 +139,7 @@ def get_project_orm(db_session):
                                              seq.alchemy_orm.AleExperiment,
                                              name=BRESEQ_EXPERIMENT_NAME,
                                              instrument=instrument,
-                                             person=BRESEQ_EXPERIMENT_PERSON_NAME,
+                                             person=BRESEQ_EXPERIMENT_USER_NAME,
                                              date=datetime.date(2013, 1, 1), # TODO: find out what to put.
                                              simulation=False)
 
