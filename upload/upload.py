@@ -29,10 +29,16 @@ POPULATION_MUTATION_FREQUENCY_INDEX = 3
 AVERAGE_READ_LENGTH_INDEX = 5
 READ_COUNT_INDEX = 2
 
-GENOMIC_DIFF_FILE_NAME = 'output.gd'
+OUTPUT_GENOMIC_DIFF_FILE_NAME = 'output.gd'
+ANNOTATION_GENOMIC_DIFF_FILE_NAME = 'annotated.gd'
+ANNOTATION_GENOMIC_DIFF_FILE_DIR = '/evidence/'
 
 
-def add_breseq_results(db_session, isolate_id, person, breseq_folder, is_wild_type=False):
+def add_breseq_results(db_session,
+                       isolate_id,
+                       person,
+                       breseq_folder,
+                       is_wild_type=False):
     """
     Figures out if the sample is clonal or population,
     and calls the appropriate "add" function.
@@ -44,14 +50,27 @@ def add_breseq_results(db_session, isolate_id, person, breseq_folder, is_wild_ty
 
     sample_type = _is_sample_clonal_or_popuation(breseq_log_file_path)
 
-    seq_experiment = _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, person)
+    seq_experiment = _get_reseq_experiment_with_stats(db_session,
+                                                      breseq_folder,
+                                                      isolate_id,
+                                                      person)
     db_session.add(seq_experiment)
 
-    experiment_mutation_dict, experiment_evidence_dict = _get_genomic_diff_experiment_info(breseq_folder)
+    experiment_mutation_dict, \
+    experiment_mutation_annotation_dict, \
+    experiment_evidence_dict = _get_genomic_diff_experiment_info(breseq_folder)
 
-    _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, experiment_mutation_dict, is_wild_type)
+    _process_mutations(sample_type,
+                       breseq_folder,
+                       db_session,
+                       seq_experiment,
+                       experiment_mutation_dict,
+                       experiment_mutation_annotation_dict,
+                       is_wild_type)
 
-    _process_unassigned_missing_coverage(db_session, seq_experiment, experiment_evidence_dict)
+    _process_unassigned_missing_coverage(db_session,
+                                         seq_experiment,
+                                         experiment_evidence_dict)
 
 
 def _is_sample_clonal_or_popuation(breseq_log_file_path):
@@ -66,7 +85,6 @@ def _is_sample_clonal_or_popuation(breseq_log_file_path):
 
 
 def _get_beautifulsoup_html(output_folder, html_file_name):
-
     output_file_path = join(output_folder, html_file_name)
 
     with open(output_file_path) as infile:
@@ -104,14 +122,12 @@ def _process_unassigned_missing_coverage(db_session, seq_experiment, evidence_di
 
 
 def _parse_average_read_length(read_row_input):
-
     output = re.findall("\d+.\d+", read_row_input)[0]
 
     return output
 
 
 def _parse_read_count(read_row_input):
-
     return int(read_row_input.replace(",", ""))
 
 
@@ -150,18 +166,29 @@ def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, pers
     return seq_experiment
 
 
-def _get_genomic_diff_experiment_info(output_dir):
-
+def _get_genomic_diff_experiment_info(output_file_dir):
     # TODO: 'evidence' and 'mutation' should be constant members of GDParser
-    with open(join(output_dir, GENOMIC_DIFF_FILE_NAME), 'rb') as genomic_diff_file:
-        gd_parser = gdparse.GDParser(file_handle=genomic_diff_file)
+    with open(join(output_file_dir, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
+        gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
         experiment_mutation_dict = gd_parser.data['mutation']
         experiment_evidence_dict = gd_parser.data['evidence']
 
-    return experiment_mutation_dict, experiment_evidence_dict
+    annotated_output_file_dir = output_file_dir + ANNOTATION_GENOMIC_DIFF_FILE_DIR
+
+    with open(join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as anotation_genomic_diff_file:
+        gd_parser = gdparse.GDParser(file_handle=anotation_genomic_diff_file)
+        experiment_mutation_annotation_dict = gd_parser.data['mutation']
+
+    return experiment_mutation_dict, experiment_mutation_annotation_dict, experiment_evidence_dict
 
 
-def _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, experiment_mutation_dict, is_wild_type):
+def _process_mutations(sample_type,
+                       breseq_folder,
+                       db_session,
+                       seq_experiment,
+                       experiment_mutation_dict,
+                       experiment_mutation_annotation_dict,
+                       is_wild_type):
 
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
 
@@ -169,17 +196,23 @@ def _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, e
 
     for row_num, row in enumerate(mutation_rows):
 
+        mutation_num = row_num + 1  # row_num is 0 based, mutation_num is 1 based.
+
         attrs = row.findChildren("td")
         mutation = query_or_create(db_session,
                                    Mutation,
-                                   position=experiment_mutation_dict[row_num + 1]['position'],
+                                   position=experiment_mutation_dict[mutation_num]['position'],
+                                   gene=experiment_mutation_annotation_dict[mutation_num]['gene_name'],
                                    # mutations are in the same order in the html and output.gd
                                    # files so we can index the ids with row_num
                                    sequence_change=attrs[2].text,
-                                   mutation_type=experiment_mutation_dict[row_num + 1]['type'])
+                                   mutation_type=experiment_mutation_dict[mutation_num]['type'])
 
+        '''
+        TODO: find out why this is used. I'm avoiding using it for now, since the mutation table won't the mutations
+        for those samples which have this set to true.
+        '''
         if is_wild_type:
-
             mutation.reference_error = True
 
         if mutation.protein_change is None:
@@ -205,7 +238,6 @@ def _process_mutations(sample_type, breseq_folder, db_session, seq_experiment, e
 
 
 def _get_mutations_rows(mutations_html, sample_type):
-
     # parse the mutation html file to find the correct table
     if sample_type == SAMPLE_TYPE.clonal:
         html_class_to_parse = CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
