@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from enum import Enum
 
 from seq.alchemy_orm import *
-from gdparse import gdparse
+from gdparse.gdparse import gdparse
 
 EXPERIMENT_PARENT_DIR = "breseq/"  # TODO: See if this is necessary.
 
@@ -154,7 +154,7 @@ def _get_genomic_diff_experiment_info(output_dir):
 
     # TODO: 'evidence' and 'mutation' should be constant members of GDParser
     with open(join(output_dir, GENOMIC_DIFF_FILE_NAME), 'rb') as genomic_diff_file:
-        gd_parser = gdparse.GDParser(genomic_diff_file)
+        gd_parser = gdparse.GDParser(file_handle=genomic_diff_file)
         experiment_mutation_dict = gd_parser.data['mutation']
         experiment_evidence_dict = gd_parser.data['evidence']
 
