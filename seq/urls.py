@@ -9,5 +9,5 @@ urlpatterns = patterns('',
     url('^mutations$', views.mutation_table, name="mutation_table"),
     url('^isolates$', views.isolate_list, name="isolate_table"),
     url('^lineage$', views.lineage_table, name="lineage_table"),
-    url('^summary$',views.mutation_summary, name="mutation_summary")
+    url('^summary$', views.mutation_summary, name="mutation_summary")
 )
