@@ -19,7 +19,6 @@ urlpatterns = patterns('',
 
 
                        url(r'^seq/', include('seq.urls')),
-                       url(r'^ddt/', include('ddt.urls'))
 )
 
 urlpatterns += staticfiles_urlpatterns()
