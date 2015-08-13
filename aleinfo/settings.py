@@ -74,9 +74,7 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (
-    join(BASE_DIR, 'ddt/static/'),
-)
+STATICFILES_DIRS = ()
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -127,7 +125,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'ale',
     'seq',
-    'ddt',
 
     'grappelli',
     # Uncomment the next line to enable the admin:
