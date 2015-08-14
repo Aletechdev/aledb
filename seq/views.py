@@ -151,20 +151,17 @@ def experiment_table(request):
 
 @login_required
 def mutation_table(request):
+
     experiments = _get_seq_experiments(request)
 
     # Get the full list of ale experiments for the ale number of interest
     experiment_id = request.GET.get("ale_experiment_id")
-    print(experiment_id)
 
     experiment_id = None if experiment_id is None or experiment_id == "all" else int(experiment_id)
-    print(experiment_id)
 
     ale_no = request.GET.get("ale_no")
-    print(ale_no)
 
     ale_no = None if ale_no is None or ale_no == "all" else int(ale_no)
-    print(ale_no)
 
     if experiment_id is not None:
         experiment = AleExperiment.objects.get(ale_id=experiment_id)
@@ -172,10 +169,7 @@ def mutation_table(request):
     else:
         list_of_experiments = ResequencingExperiment.objects.all()
 
-    print(list_of_experiments)
-
     extra_validation = False if request.GET.get("novalid") else True
-    print(extra_validation)
 
     # experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments) if o.isolate.__unicode__().find("POP")==-1)
     experiment_mapping = dict((o.id, o) for o in experiments)
