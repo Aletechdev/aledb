@@ -56,7 +56,8 @@ def index(request):
 
     template = loader.get_template("index.html")
 
-    context = Context({"experiments": experiments, "seq_url": reseqencing_report_url})
+    context = Context({"experiments": experiments,
+                       "seq_url": reseqencing_report_url})
 
     return HttpResponse(template.render(context))
 
@@ -152,15 +153,11 @@ def experiment_table(request):
 @login_required
 def mutation_table(request):
 
-    experiments = _get_seq_experiments(request)
-
     # Get the full list of ale experiments for the ale number of interest
     experiment_id = request.GET.get("ale_experiment_id")
-
     experiment_id = None if experiment_id is None or experiment_id == "all" else int(experiment_id)
 
     ale_no = request.GET.get("ale_no")
-
     ale_no = None if ale_no is None or ale_no == "all" else int(ale_no)
 
     if experiment_id is not None:
@@ -170,6 +167,8 @@ def mutation_table(request):
         list_of_experiments = ResequencingExperiment.objects.all()
 
     extra_validation = False if request.GET.get("novalid") else True
+
+    experiments = _get_seq_experiments(request)
 
     # experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments) if o.isolate.__unicode__().find("POP")==-1)
     experiment_mapping = dict((o.id, o) for o in experiments)
@@ -223,7 +222,7 @@ def mutation_table(request):
     table_body = ""
     for mutation in mutations:
         table_row = "<tr>"
-        if mutation.reference_error:
+        if mutation.reference_error:    # TODO: what is going on here? What is 'reference_error'?
             # table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
             continue
         else:
