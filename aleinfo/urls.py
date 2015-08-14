@@ -18,7 +18,8 @@ urlpatterns = patterns('',
                        url(r'^admin/', include(admin.site.urls)),
 
 
-                       url(r'^seq/', include('seq.urls')),
+                       url(r'^reseq/', include('seq.urls')),
+                       url(r'^mutations/', include('mutation_db_browser.urls')),
 )
 
 urlpatterns += staticfiles_urlpatterns()
