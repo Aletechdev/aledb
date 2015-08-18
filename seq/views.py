@@ -108,17 +108,18 @@ def _get_experiment_info_list(experiments):
     return experiments_info_list
 
 
-def make_table_entry(observed, experiment_urls):
-    if observed.breseq_present:
+def _make_table_entry(observed, experiment_urls):
 
-        return """<td class="true">%s</td>""" % observed.evidence.replace("evidence/",
-                                                                          experiment_urls[
-                                                                              observed.sequencing_experiment_id] + "/evidence/")
+    if observed.breseq_present:
+        table_entry = """<td class="true">%s</td>""" % observed.evidence.replace("evidence/",
+                                                                                 experiment_urls[
+                                                                                     observed.sequencing_experiment_id] + "/evidence/")
 
     elif observed.present is False:
+        table_entry = """<td class="false">%d/%d</td>""" % (observed.mutated_reads,
+                                                            observed.wt_reads)
 
-        return """<td class="false">%d/%d</td>""" % (observed.mutated_reads,
-                                                     observed.wt_reads)
+    return table_entry
 
 
 @login_required
@@ -137,7 +138,7 @@ def experiment_table(request):
         if not extra_validation and not observed.breseq_present:
             continue
         table_entries[experiment_mapping[observed.sequencing_experiment_id]][mutation_mapping[observed.mutation_id]] = \
-            make_table_entry(observed, experiment_urls)
+            _make_table_entry(observed, experiment_urls)
     table_header = """<tr><td>Experiment</td>"""
     for mutation in mutations:
         if mutation.reference_error:
@@ -164,10 +165,10 @@ def experiment_table(request):
 def mutation_table(request):
 
     # Get the full list of ale experiments for the ale number of interest
-    experiment_id = request.GET.get("ale_experiment_id")
+    experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     experiment_id = None if experiment_id is None or experiment_id == "all" else int(experiment_id)
 
-    ale_no = request.GET.get("ale_no")
+    ale_no = request.GET.get(REQUEST_ALE_NUMBER)
     ale_no = None if ale_no is None or ale_no == "all" else int(ale_no)
 
     if experiment_id is not None:
@@ -208,37 +209,51 @@ def mutation_table(request):
     observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=experiment_mapping.keys())
     mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
+
     table_header = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
 
     for checked_experiment_id in sorted(experiment_mapping):
+
         experiment = experiment_mapping[checked_experiment_id]
+
         # Add checkbox to each column
         table_header += """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>""" % (
-        experiment.id, experiment.get_isolate_name().replace("_", " "))
+            experiment.id, experiment.get_isolate_name().replace("_", " "))
+
     table_header += "</tr>"
+
     table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
 
     experiment_mapping = dict((o, i) for i, o in enumerate(sorted(experiment_mapping.keys())))
 
-    for observed in observed_mutations:
+    for observed_mutation in observed_mutations:
+
         # sometimes we do not want the extra validation
-        if not extra_validation and not observed.breseq_present:
+        if not extra_validation and not observed_mutation.breseq_present:
             continue
-        new_entry = make_table_entry(observed, experiment_urls)
+
+        new_entry = _make_table_entry(observed_mutation, experiment_urls)
+
         if new_entry is not None:
-            table_entries[mutation_mapping[observed.mutation_id]][
-                experiment_mapping[observed.sequencing_experiment_id]] = new_entry
+            table_entries[mutation_mapping[observed_mutation.mutation_id]][
+                experiment_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+
     table_body = ""
+
     for mutation in mutations:
+
         table_row = "<tr>"
+
         if mutation.reference_error:    # TODO: what is going on here? What is 'reference_error'?
             # table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
             continue
+
         else:
             table_row += """<td>%d %s<a href="javascript:void(0)" class="shut" style="float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>""" % (
-            mutation.position, mutation.sequence_change)
-        table_row += "<td>%s</td>" % (mutation.gene)
-        table_row += "<td>%s</td>" % (mutation.protein_change)
+                mutation.position, mutation.sequence_change)
+
+        table_row += "<td>%s</td>" % mutation.gene
+        table_row += "<td>%s</td>" % mutation.protein_change
         table_row += "".join(table_entries[mutation_mapping[mutation.id]])
         table_row += "</tr>"
         table_body += table_row + "\n"
@@ -256,7 +271,7 @@ def mutation_table(request):
 
 @login_required
 def isolate_list(request):
-    ale_experiment_id = request.GET.get("ale_experiment_id")
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     if ale_experiment_id is None:
         isolates = Isolate.objects.all()
     else:
@@ -273,7 +288,7 @@ def isolate_list(request):
 # Provide a table showing frequencies of each observed mutation in the lineage
 def lineage_table(request):
     experiments = _get_seq_experiments(request)
-    ale_experiment_id = int(request.GET.get("ale_experiment_id"))
+    ale_experiment_id = int(request.GET.get(REQUEST_ALE_EXPERIMENT_ID))
     table_body = ""
     experiment_set = dict((e.ale_id, set()) for e in experiments)
     for i in experiment_set:
