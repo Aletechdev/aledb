@@ -11,6 +11,10 @@ EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
 
 DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
 
+REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
+REQUEST_ALE_NUMBER = "ale_no"
+REQUEST_ALL = "all"
+
 if hasattr(settings, "sequencing_url"):
     reseqencing_report_url = settings.sequencing_url
 else:
@@ -20,25 +24,9 @@ else:
 def _get_seq_experiments(request):
     """return a list of seq experiments for a given ALE"""
 
-    ale_experiment_id = request.GET.get("ale_experiment_id")
+    ale_experiment_selector = _get_ale_experiment_selector(request)
 
-    if ale_experiment_id is None or ale_experiment_id == "all":
-
-        ale_experiment_selector = ""
-
-    else:
-
-        ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
-
-    ale_no = request.GET.get("ale_no")
-
-    if ale_no is None or ale_no == "all":
-
-        ale_no_selector = ""
-
-    else:
-
-        ale_no_selector = "AND alexperimentse_no = %d" % int(ale_no)
+    ale_no_selector = _get_ale_number_selector(request)
 
     experiments = ResequencingExperiment.objects.raw(
         """SELECT reseq_id AS id FROM id_mapping WHERE
@@ -46,6 +34,28 @@ def _get_seq_experiments(request):
         ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_no_selector))
 
     return experiments
+
+
+def _get_ale_experiment_selector(request):
+
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
+        ale_experiment_selector = ""
+    else:
+        ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
+
+    return ale_experiment_selector
+
+
+def _get_ale_number_selector(request):
+
+    ale_no = request.GET.get(REQUEST_ALE_NUMBER)
+    if ale_no is None or ale_no == REQUEST_ALL:
+        ale_no_selector = ""
+    else:
+        ale_no_selector = "AND ale_no = %d" % int(ale_no)
+
+    return ale_no_selector
 
 
 @login_required
@@ -172,7 +182,6 @@ def mutation_table(request):
 
     # experiment_mapping = dict((o.id, o) for i, o in enumerate(experiments) if o.isolate.__unicode__().find("POP")==-1)
     experiment_mapping = dict((o.id, o) for o in experiments)
-    # print(experiment_mapping)
 
     # Show checked flasks only
     query_string = request.GET.get("show")
