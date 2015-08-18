@@ -8,13 +8,12 @@ import aleinfo.settings as settings
 from seq.models import *
 
 
-#TODO: this URL is defined here and in seq/views.py; find a way to define in one place.
+# TODO: this URL is defined here and in seq/views.py; find a way to define in one place.
 DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
 
 TEMPLATE_LOCATION = "mutation_db_browser/table_template.html"
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
-
 
 if hasattr(settings, "sequencing_url"):
     reseqencing_report_url = settings.sequencing_url
@@ -25,9 +24,11 @@ else:
 @login_required
 def mutations_db_browser(request):
 
-    table_header = _get_table_heater()
+    experiment_mapping = _get_experiment_mapping()
 
-    table_body = _get_table_body()
+    table_header = _get_table_heater(experiment_mapping)
+
+    table_body = _get_table_body(experiment_mapping)
 
     template = loader.get_template(TEMPLATE_LOCATION)
     context = Context({"experiments": _get_all_reseq_experiments(),
@@ -40,18 +41,24 @@ def mutations_db_browser(request):
     return HttpResponse(template.render(context))
 
 
-def _get_table_heater():
+def _get_table_heater(experiment_mapping):
 
     table_header = HTML_MUTATION_TABLE_HEADER
+
+    for checked_experiment_id in sorted(experiment_mapping):
+
+        experiment = experiment_mapping[checked_experiment_id]
+
+        # Add checkbox to each column
+        table_header += """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>""" % (
+            experiment.id, experiment.get_isolate_name().replace("_", " "))
 
     table_header += "</tr>"
 
     return table_header
 
 
-def _get_table_body():
-
-    experiment_mapping = _get_experiment_mapping()
+def _get_table_body(experiment_mapping):
 
     observed_mutations = _get_all_observed_mutations(experiment_mapping)
 
@@ -75,7 +82,6 @@ def _get_table_body():
     table_body = ""
 
     for mutation in mutations:
-
         table_row = "<tr>"
 
         table_row += """<td>%d %s<a href="javascript:void(0)" class="shut" style="float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>""" % (
@@ -91,19 +97,16 @@ def _get_table_body():
 
 
 def _get_experiment_urls(experiment_mapping):
-
     experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in experiment_mapping.values())
 
     return experiment_urls
 
 
 def _get_all_reseq_experiments():
-
     return ResequencingExperiment.objects.all()
 
 
 def _get_experiment_mapping():
-
     all_reseq_experiments = _get_all_reseq_experiments()
 
     experiment_mapping = dict((o.id, o) for o in all_reseq_experiments)
@@ -112,14 +115,12 @@ def _get_experiment_mapping():
 
 
 def _get_all_observed_mutations(experiment_mapping):
-
     observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=experiment_mapping.keys())
 
     return observed_mutations
 
 
 def _make_table_entry(observed, experiment_urls):
-
     if observed.breseq_present:
         table_entry = """<td class="true">%s</td>""" % observed.evidence.replace("evidence/",
                                                                                  experiment_urls[
