@@ -216,9 +216,14 @@ def mutation_table(request):
 
         experiment = experiment_mapping[checked_experiment_id]
 
+        mutation_identifier = experiment.isolate.flask.ale_id.ale_experiment.name\
+                              + " "\
+                              + experiment.get_isolate_name().replace("_", " ")
+
         # Add checkbox to each column
         table_header += """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>""" % (
-            experiment.id, experiment.get_isolate_name().replace("_", " "))
+            experiment.id,
+            mutation_identifier)
 
     table_header += "</tr>"
 
