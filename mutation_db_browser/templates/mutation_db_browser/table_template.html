@@ -44,7 +44,6 @@
                         "aButtons": [ "copy", "print" ]
                     }*/
                 });
-
                 //new FixedHeader(oTable);
             });
 
@@ -55,17 +54,13 @@
 	        $(window).resize(function () {
 	            filter_offset = $("#data_filter").offset();
 	        });
-
 	        var ui_offset = [];
 	        $(".ui").each(function () {
 	            ui_offset.push($(this).offset().left);
 	        });
-
 	        $(window).scroll(function () {
 	            var scrollLeft = $(window).scrollLeft();
-
 	            $("#data_filter").offset({left:filter_offset.left+scrollLeft});
-
 	            i=0;
 	            $(".ui").each(function () {
 	                $(this).offset({left:ui_offset[i++]+scrollLeft});
@@ -125,15 +120,13 @@
 	        else if (filter_type == "show") {
 	            query_string = "&show={";
 	        };
-
 	        checked_flasks.forEach(function (id) {
 	            query_string += id + ",";
 	        });
 	        query_string += "}";
-
 	        window.location.replace(url + query_string);
-	    }    
-
+	    }
+	    
     </script>
 </head>
 <body>
@@ -143,8 +136,8 @@
     <select name="ale_no" class="ui">
         <option value="all">All ales</option>
         {% for experiment in experiments %}
-        <option {%if ale_no == experiment.ale_id %}selected="selected" {% endif %} value="{{ experiment.ale_id }}">{{
-            experiment.ale_id }}
+        <option {%if ale_no == experiment.ale_id %}selected="selected" {% endif %} value="{{ experiment.ale_id }}">
+            {{ experiment.ale_id }}
         </option>
         {% endfor %}
     </select>
