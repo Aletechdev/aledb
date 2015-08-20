@@ -16,8 +16,20 @@
         </script>
     </head>
     <body>
-    <table id="runs" class="tablesorter">
+
+    <table id="all mutations" class="tablesorter">
         <thead>
+        <tr>
+            <th>All Mutations</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><a href="mutations?">link</a></td>
+        </tbody>
+
+        <table id="runs" class="tablesorter">
+            <thead>
             <tr>
                 <th>ALE experiment</th>
                 <th>Sample Resequencing List</th>
@@ -26,17 +38,17 @@
                 <!--<th>Isolates</th>-->
                 <!--<th>Lineage Table</th>-->
             </tr>
-        </thead>
-    <tbody>
-    {% for experiment in experiments %}
-        <tr>
-            <td>{{experiment.name}}</td>
-            <td><a href="lists?ale_experiment_id={{experiment.ale_id}}">link</a></td>
-            <td><a href="mutations?ale_experiment_id={{experiment.ale_id}}">link</a></td>
-            <!--<td><a href="experiments?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
-            <!--<td><a href="isolates?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
-            <!--<td><a href="lineage?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
-    {% endfor %}
-    </tbody>
+            </thead>
+            <tbody>
+            {% for experiment in experiments %}
+            <tr>
+                <td>{{experiment.name}}</td>
+                <td><a href="lists?ale_experiment_id={{experiment.ale_id}}">link</a></td>
+                <td><a href="mutations?ale_experiment_id={{experiment.ale_id}}">link</a></td>
+                <!--<td><a href="experiments?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
+                <!--<td><a href="isolates?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
+                <!--<td><a href="lineage?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
+                {% endfor %}
+            </tbody>
     </body>
 </html>
