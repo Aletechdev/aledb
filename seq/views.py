@@ -228,11 +228,11 @@ def _get_table_header(experiment_mapping):
 
         experiment = experiment_mapping[checked_experiment_id]
 
-        mutation_identifier = experiment.isolate.flask.ale_id.ale_experiment.name
-        mutation_identifier += " "
-        mutation_identifier += experiment.get_isolate_name().replace("_", " ")
-        mutation_identifier += " "
-        mutation_identifier += """<a href="%s">%s</a>""" % (experiment_urls[checked_experiment_id], "link")
+        sample_name = experiment.isolate.flask.ale_id.ale_experiment.name
+        sample_name += " "
+        sample_name += experiment.get_isolate_name().replace("_", " ")
+
+        mutation_identifier = """<a href="%s">%s</a>""" % (experiment_urls[checked_experiment_id], sample_name)
 
         table_header += CHECKBOX_HTML % (
             experiment.id,
