@@ -17,9 +17,15 @@ REQUEST_ALL = "all"
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
 HTML_MUTATION_TABLE_ROW = """<td>%d %s<a href="javascript:void(0)" class="shut" style="float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
+CHECKBOX_HTML = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
+
+MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
+MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%s</td>"""
+
+EVIDENCE_DIR = "evidence/"
 
 
 if hasattr(settings, "sequencing_url"):
@@ -160,20 +166,6 @@ def _get_experiment_info_list(experiments):
     return experiments_info_list
 
 
-def _make_table_entry(observed, experiment_urls):
-
-    if observed.breseq_present:
-        table_entry = """<td class="true">%s</td>""" % observed.evidence.replace("evidence/",
-                                                                                 experiment_urls[
-                                                                                     observed.sequencing_experiment_id] + "/evidence/")
-
-    elif observed.present is False:
-        table_entry = """<td class="false">%d/%d</td>""" % (observed.mutated_reads,
-                                                            observed.wt_reads)
-
-    return table_entry
-
-
 @login_required
 def experiment_table(request):
     experiments = _get_seq_experiments(request)
@@ -190,7 +182,7 @@ def experiment_table(request):
         if not extra_validation and not observed.breseq_present:
             continue
         table_entries[experiment_mapping[observed.sequencing_experiment_id]][mutation_mapping[observed.mutation_id]] = \
-            _make_table_entry(observed, experiment_urls)
+            _create_table_entry(observed, experiment_urls)
     table_header = """<tr><td>Experiment</td>"""
     for mutation in mutations:
         if mutation.reference_error:
@@ -200,8 +192,7 @@ def experiment_table(request):
     table_header += "</tr>"
     table_body = ""
     for experiment in experiments:
-        table_body += """<tr><td><a href="%s">%s</a></td>""" % (
-        reseqencing_report_url + experiment.location, experiment.get_isolate_name())
+        table_body += """<tr><td><a href="%s">%s</a></td>""" % (reseqencing_report_url + experiment.location, experiment.get_isolate_name())
         for column in table_entries[experiment_mapping[experiment.id]]:
             if column is None:
                 table_body += """<td class="false"></td>"""
@@ -231,21 +222,38 @@ def _get_table_header(experiment_mapping):
 
     table_header = HTML_MUTATION_TABLE_HEADER
 
+    experiment_urls = _get_experiment_urls(experiment_mapping)
+
     for checked_experiment_id in sorted(experiment_mapping):
 
         experiment = experiment_mapping[checked_experiment_id]
 
-        mutation_identifier = experiment.isolate.flask.ale_id.ale_experiment.name\
-                              + " "\
-                              + experiment.get_isolate_name().replace("_", " ")
+        mutation_identifier = experiment.isolate.flask.ale_id.ale_experiment.name
+        mutation_identifier += " "
+        mutation_identifier += experiment.get_isolate_name().replace("_", " ")
+        mutation_identifier += " "
+        mutation_identifier += """<a href="%s">%s</a>""" % (experiment_urls[checked_experiment_id], "link")
 
-        table_header += """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>""" % (
+        table_header += CHECKBOX_HTML % (
             experiment.id,
             mutation_identifier)
 
     table_header += "</tr>"
 
     return table_header
+
+
+def _create_table_entry(observed, experiment_urls):
+
+    if observed.breseq_present:
+        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % observed.evidence.replace(EVIDENCE_DIR,
+                                                                                  experiment_urls[observed.sequencing_experiment_id] + EVIDENCE_DIR)
+
+    elif observed.present is False:
+        table_entry = MUTATION_PRESENT_FALSE_CELL_HTML % (observed.mutated_reads,
+                                                          observed.wt_reads)
+
+    return table_entry
 
 
 def _get_table_body(experiment_mapping, request):
@@ -269,7 +277,7 @@ def _get_table_body(experiment_mapping, request):
         if not extra_validation and not observed_mutation.breseq_present:
             continue
 
-        new_entry = _make_table_entry(observed_mutation, experiment_urls)
+        new_entry = _create_table_entry(observed_mutation, experiment_urls)
 
         if new_entry is not None:
             table_entries[mutation_mapping[observed_mutation.mutation_id]][
@@ -349,6 +357,7 @@ def _show_checked_flasks(request, experiment_mapping):
                     del experiment_mapping[checked_experiment_id]
 
     return experiment_mapping
+
 
 def _remove_checked_flasks(request, experiment_mapping):
 
