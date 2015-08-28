@@ -63,7 +63,6 @@ class UnassignedMissingCoverageEvidence(models.Model):
                                               on_delete=models.CASCADE)
 
 
-
 class Mutation(models.Model):
 
     mutation_type = models.CharField(max_length=3,
@@ -102,6 +101,10 @@ class Mutation(models.Model):
 
 class ObservedMutation(models.Model):
 
+    sequencing_experiment = models.ForeignKey(ResequencingExperiment)
+
+    mutation = models.ForeignKey(Mutation)
+
     present = models.NullBooleanField()
 
     breseq_present = models.NullBooleanField()
@@ -113,10 +116,6 @@ class ObservedMutation(models.Model):
     other_reads = models.IntegerField(null=True)
 
     reference_genome_likelihood = models.FloatField(null=True)
-
-    sequencing_experiment = models.ForeignKey(ResequencingExperiment)
-
-    mutation = models.ForeignKey(Mutation)
 
     evidence = models.CharField(max_length=400,
                                 blank=True,
