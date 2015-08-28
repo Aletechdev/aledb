@@ -1,15 +1,16 @@
 __author__ = 'pphaneuf'
 
+
 import unittest
 
-from upload.upload import _is_sample_clonal_or_popuation
-from upload.upload import SAMPLE_TYPE
-from upload.upload import _is_missing_coverage_type
+from manage_ale_info.upload import _is_sample_clonal_or_popuation
+from manage_ale_info.upload import SAMPLE_TYPE
+from manage_ale_info.upload import _is_missing_coverage_type
 
 # Use access to protected members till can wrap acceptance testing
 # around workflow using these functions.
-from upload.upload import _parse_average_read_length
-from upload.upload import _parse_read_count
+from manage_ale_info.upload import _parse_average_read_length
+from manage_ale_info.upload import _parse_read_count
 
 class TestUpload(unittest.TestCase):
 
