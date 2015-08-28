@@ -57,7 +57,7 @@ def create_ale_experiment(breseq_output_abs_path,
         flask_number = int(split[1])
         isolate_number = 1  # TODO: find out why is this set to 1 for all endpoints and make it a constant.
 
-        output_path = breseq_output_abs_path\
+        output_path = sanitized_breseq_output_abs_path\
                       + breseq_sample_name\
                       + "/"\
                       + BRESEQ_OUTPUT_REPORT_DIR
