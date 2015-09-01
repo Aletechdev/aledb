@@ -260,6 +260,8 @@ def _get_table_body(experiment_mapping, request):
 
     observed_mutations = _get_observed_mutations(experiment_mapping)
 
+    # print(observed_mutations)
+
     mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
 
@@ -303,10 +305,8 @@ def _get_table_body(experiment_mapping, request):
         table_row += "<td>%s</td>" % mutation.gene
         table_row += "<td>%s</td>" % mutation.protein_change
 
-        observed_mutation_frequency = 0
-        for observed_mutation in observed_mutations:
-            if observed_mutation.mutation_id == mutation.id:
-                observed_mutation_frequency = observed_mutation.frequency
+        observed_mutation_frequency = _get_observed_mutation_freq(observed_mutations_query_set=observed_mutations,
+                                                                  mutation=mutation)
 
         table_row += "<td>%s</td>" % (observed_mutation_frequency * 100)
 
@@ -315,6 +315,18 @@ def _get_table_body(experiment_mapping, request):
         table_body += table_row + "\n"
 
     return table_body
+
+
+def _get_observed_mutation_freq(observed_mutations_query_set,
+                                mutation):
+
+    observed_mutation = observed_mutations_query_set.filter(mutation_id=mutation.id)
+
+    # Should only be one ObservedMutation in QuerySet.
+    # Find a way to check for this.
+    observed_mutation_frequency = observed_mutation[0].frequency
+
+    return observed_mutation_frequency
 
 
 def _get_experiment_id(request):
