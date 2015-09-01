@@ -116,11 +116,11 @@ def mutation_table(request):
 
     experiment_mapping = _get_experiment_mapping(request)
 
-    experiment_mapping = _filter_checked_flasks(request, experiment_mapping)
+    filtered_experiment_mapping = _filter_checked_flasks(request, experiment_mapping)
 
-    table_header = _get_table_header(experiment_mapping)
+    table_header = _get_table_header(filtered_experiment_mapping)
 
-    table_body = _get_table_body(experiment_mapping, request)
+    table_body = _get_table_body(filtered_experiment_mapping, request)
 
     template = loader.get_template("table_template.html")
 
@@ -271,6 +271,7 @@ def _get_table_body(experiment_mapping, request):
 
     table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
 
+    # Populating table_entries
     for observed_mutation in observed_mutations:
 
         # sometimes we do not want the extra validation
@@ -283,6 +284,7 @@ def _get_table_body(experiment_mapping, request):
             table_entries[mutation_mapping[observed_mutation.mutation_id]][
                 experiment_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
 
+    #Populating table body
     table_body = ""
 
     for mutation in mutations:
@@ -300,8 +302,16 @@ def _get_table_body(experiment_mapping, request):
 
         table_row += "<td>%s</td>" % mutation.gene
         table_row += "<td>%s</td>" % mutation.protein_change
-        table_row += "".join(table_entries[mutation_mapping[mutation.id]])
+
+        observed_mutation_frequency = 0
+        for observed_mutation in observed_mutations:
+            if observed_mutation.mutation_id == mutation.id:
+                observed_mutation_frequency = observed_mutation.frequency
+
+        table_row += "<td>%s</td>" % (observed_mutation_frequency * 100)
+
         table_row += "</tr>"
+
         table_body += table_row + "\n"
 
     return table_body
