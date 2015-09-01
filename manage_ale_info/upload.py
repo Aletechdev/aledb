@@ -182,6 +182,13 @@ def _get_genomic_diff_experiment_info(output_file_dir):
     return experiment_mutation_dict, experiment_mutation_annotation_dict, experiment_evidence_dict
 
 
+GD_MUT_POS_ATTR_KEY = 'position'
+GD_MUT_GENE_NAME_ATTR_KEY = 'gene_name'
+GD_MUT_TYPE_ATTR_KEY = 'type'
+GD_MUT_FREQ_ATTR_KEY = 'frequency'
+
+CLONAL_ASSUMED_FREQ = 1
+
 def _process_mutations(sample_type,
                        breseq_folder,
                        db_session,
@@ -198,15 +205,18 @@ def _process_mutations(sample_type,
 
         mutation_num = row_num + 1  # row_num is 0 based, mutation_num is 1 based.
 
+        # debug
+        print(experiment_mutation_dict[mutation_num]['position'])
+
         attrs = row.findChildren("td")
         mutation = query_or_create(db_session,
                                    Mutation,
-                                   position=experiment_mutation_dict[mutation_num]['position'],
-                                   gene=experiment_mutation_annotation_dict[mutation_num]['gene_name'],
+                                   position=experiment_mutation_dict[mutation_num][GD_MUT_POS_ATTR_KEY],
+                                   gene=experiment_mutation_annotation_dict[mutation_num][GD_MUT_GENE_NAME_ATTR_KEY],
                                    # mutations are in the same order in the html and output.gd
                                    # files so we can index the ids with row_num
                                    sequence_change=attrs[2].text,
-                                   mutation_type=experiment_mutation_dict[mutation_num]['type'])
+                                   mutation_type=experiment_mutation_dict[mutation_num][GD_MUT_TYPE_ATTR_KEY])
 
         '''
         TODO: find out why this is used. I'm avoiding using it for now, since the mutation table won't the mutations
@@ -231,8 +241,13 @@ def _process_mutations(sample_type,
         observed_mutation.breseq_present = True
         observed_mutation.evidence = attrs[0].renderContents()
 
-        if sample_type == SAMPLE_TYPE.population:
-            observed_mutation.frequency = attrs[POPULATION_MUTATION_FREQUENCY_INDEX].text
+        if GD_MUT_FREQ_ATTR_KEY in experiment_mutation_dict:
+            observed_mutation.frequency = experiment_mutation_dict[mutation_num][GD_MUT_FREQ_ATTR_KEY]
+        else:
+            observed_mutation.frequency = CLONAL_ASSUMED_FREQ
+
+        print(observed_mutation.frequency)
+        print("\n")
 
         db_session.add(observed_mutation)
 
