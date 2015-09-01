@@ -73,8 +73,6 @@ class Mutation(models.Model):
 
     position = models.IntegerField()
 
-    # frequency = models.CharField(max_length=100,blank=True,null=True)
-
     feature_length = models.IntegerField(blank=True,
                                          null=True)
 
@@ -121,6 +119,6 @@ class ObservedMutation(models.Model):
                                 blank=True,
                                 null=True)
 
-    frequency = models.CharField(max_length=100,
-                                 blank=True,
-                                 null=True)
+    frequency = models.DecimalField(null=True,
+                                    max_digits=5,
+                                    decimal_places=4)
