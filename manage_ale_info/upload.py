@@ -205,9 +205,6 @@ def _process_mutations(sample_type,
 
         mutation_num = row_num + 1  # row_num is 0 based, mutation_num is 1 based.
 
-        # debug
-        print(experiment_mutation_dict[mutation_num]['position'])
-
         attrs = row.findChildren("td")
         mutation = query_or_create(db_session,
                                    Mutation,
@@ -245,9 +242,6 @@ def _process_mutations(sample_type,
             observed_mutation.frequency = experiment_mutation_dict[mutation_num][GD_MUT_FREQ_ATTR_KEY]
         else:
             observed_mutation.frequency = CLONAL_ASSUMED_FREQ
-
-        print(observed_mutation.frequency)
-        print("\n")
 
         db_session.add(observed_mutation)
 
