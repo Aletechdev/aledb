@@ -238,7 +238,7 @@ def _process_mutations(sample_type,
         observed_mutation.breseq_present = True
         observed_mutation.evidence = attrs[0].renderContents()
 
-        if GD_MUT_FREQ_ATTR_KEY in experiment_mutation_dict:
+        if GD_MUT_FREQ_ATTR_KEY in experiment_mutation_dict[mutation_num]:
             observed_mutation.frequency = experiment_mutation_dict[mutation_num][GD_MUT_FREQ_ATTR_KEY]
         else:
             observed_mutation.frequency = CLONAL_ASSUMED_FREQ
