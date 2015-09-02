@@ -182,7 +182,7 @@ def experiment_table(request):
         if not extra_validation and not observed.breseq_present:
             continue
         table_entries[experiment_mapping[observed.sequencing_experiment_id]][mutation_mapping[observed.mutation_id]] = \
-            _create_table_entry(observed, experiment_urls)
+            _get_table_mutation_entry(observed, experiment_urls)
     table_header = """<tr><td>Experiment</td>"""
     for mutation in mutations:
         if mutation.reference_error:
@@ -243,11 +243,10 @@ def _get_table_header(experiment_mapping):
     return table_header
 
 
-def _create_table_entry(observed, experiment_urls):
+def _get_table_mutation_entry(observed, experiment_urls):
 
     if observed.breseq_present:
-        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % observed.evidence.replace(EVIDENCE_DIR,
-                                                                                  experiment_urls[observed.sequencing_experiment_id] + EVIDENCE_DIR)
+        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % observed.frequency
 
     elif observed.present is False:
         table_entry = MUTATION_PRESENT_FALSE_CELL_HTML % (observed.mutated_reads,
@@ -260,8 +259,6 @@ def _get_table_body(experiment_mapping, request):
 
     observed_mutations = _get_observed_mutations(experiment_mapping)
 
-    # print(observed_mutations)
-
     mutations = Mutation.objects.filter(pk__in=observed_mutations.values_list("mutation", flat=True))
     mutation_mapping = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
 
@@ -271,6 +268,7 @@ def _get_table_body(experiment_mapping, request):
 
     extra_validation = False if request.GET.get("novalid") else True
 
+    # Initialize all sample mutation table cells as empty.
     table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
 
     # Populating table_entries
@@ -280,7 +278,7 @@ def _get_table_body(experiment_mapping, request):
         if not extra_validation and not observed_mutation.breseq_present:
             continue
 
-        new_entry = _create_table_entry(observed_mutation, experiment_urls)
+        new_entry = _get_table_mutation_entry(observed_mutation, experiment_urls)
 
         if new_entry is not None:
             table_entries[mutation_mapping[observed_mutation.mutation_id]][
@@ -304,12 +302,7 @@ def _get_table_body(experiment_mapping, request):
 
         table_row += "<td>%s</td>" % mutation.gene
         table_row += "<td>%s</td>" % mutation.protein_change
-
-        observed_mutation_frequency = _get_observed_mutation_freq(observed_mutations_query_set=observed_mutations,
-                                                                  mutation=mutation)
-
-        table_row += "<td>%s</td>" % (observed_mutation_frequency * 100)
-
+        table_row += "".join(table_entries[mutation_mapping[mutation.id]])
         table_row += "</tr>"
 
         table_body += table_row + "\n"
