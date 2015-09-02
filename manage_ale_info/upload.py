@@ -252,7 +252,6 @@ def _get_mutation_freq(mutation_dict):
     return frequency
 
 
-
 def _get_mutations_rows(mutations_html, sample_type):
     # parse the mutation html file to find the correct table
     if sample_type == SAMPLE_TYPE.clonal:
