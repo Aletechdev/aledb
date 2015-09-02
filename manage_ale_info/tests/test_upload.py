@@ -11,8 +11,39 @@ from manage_ale_info.upload import _is_missing_coverage_type
 # around workflow using these functions.
 from manage_ale_info.upload import _parse_average_read_length
 from manage_ale_info.upload import _parse_read_count
+from manage_ale_info.upload import _get_mutation_freq
+
 
 class TestUpload(unittest.TestCase):
+
+    def test_get_mutation_freq_89(self):
+
+        mutation_dict = {'seq_id': 'NC_000913',
+                         'parent_ids': [71],
+                         'frequency': 0.89,
+                         'position': 231861,
+                         'new_seq': 'T',
+                         'type': 'SNP'}
+        
+        expected_freq = 0.89
+
+        output_freq = _get_mutation_freq(mutation_dict)
+
+        self.assertEquals(expected_freq, output_freq)
+
+    def test_get_mutation_freq_missing(self):
+
+        mutation_dict = {'seq_id': 'NC_000913',
+                         'parent_ids': [71],
+                         'position': 231861,
+                         'new_seq': 'T',
+                         'type': 'SNP'}
+
+        expected_freq = 1
+
+        output_freq = _get_mutation_freq(mutation_dict)
+
+        self.assertEquals(expected_freq, output_freq)
 
     def test_is_sample_clonal_or_popuation_clonal(self):
 
@@ -83,3 +114,7 @@ class TestUpload(unittest.TestCase):
         output = _parse_read_count(input)
 
         self.assertEquals(output, expected)
+
+
+if __name__ == '__main__':
+    unittest.main()
