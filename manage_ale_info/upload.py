@@ -237,13 +237,20 @@ def _process_mutations(sample_type,
         observed_mutation.mutation = mutation
         observed_mutation.breseq_present = True
         observed_mutation.evidence = attrs[0].renderContents()
-
-        if GD_MUT_FREQ_ATTR_KEY in experiment_mutation_dict[mutation_num]:
-            observed_mutation.frequency = experiment_mutation_dict[mutation_num][GD_MUT_FREQ_ATTR_KEY]
-        else:
-            observed_mutation.frequency = CLONAL_ASSUMED_FREQ
+        observed_mutation.frequency = _get_mutation_freq(experiment_mutation_dict[mutation_num])
 
         db_session.add(observed_mutation)
+
+
+def _get_mutation_freq(mutation_dict):
+
+    frequency = CLONAL_ASSUMED_FREQ
+
+    if GD_MUT_FREQ_ATTR_KEY in mutation_dict:
+        frequency = mutation_dict[GD_MUT_FREQ_ATTR_KEY]
+
+    return frequency
+
 
 
 def _get_mutations_rows(mutations_html, sample_type):
