@@ -30,17 +30,6 @@ def get_table_mutation_entry(observed, experiment_urls):
     return table_entry
 
 
-def _get_ale_experiment_selector(request):
-
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
-        ale_experiment_selector = ""
-    else:
-        ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
-
-    return ale_experiment_selector
-
-
 def get_ale_number_selector(request):
 
     ale_no = request.GET.get(REQUEST_ALE_NUMBER)
@@ -65,3 +54,14 @@ def get_seq_experiments(request):
         ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_no_selector))
 
     return experiments
+
+
+def _get_ale_experiment_selector(request):
+
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
+        ale_experiment_selector = ""
+    else:
+        ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
+
+    return ale_experiment_selector
