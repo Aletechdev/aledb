@@ -11,15 +11,13 @@ from django.contrib.auth.decorators import login_required
 
 import aleinfo.settings as settings
 
-# TODO: used by multiple views. Also implemented within views.py; implement in one location.
-DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
+from seq.views import common
 
 
-# TODO: used by multiple views. Also implemented within views.py; implement in one location.
-if hasattr(settings, "sequencing_url"):
+if hasattr(settings, common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.sequencing_url
 else:
-    reseqencing_report_url = DEFAULT_RESEQ_REPORT_URL
+    reseqencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
 @login_required

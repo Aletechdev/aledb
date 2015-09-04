@@ -1,3 +1,6 @@
+# TODO: obsolete functionality; needs to be removed.
+
+
 from django.http import HttpResponse
 
 from django.template import Context, loader
@@ -11,66 +14,18 @@ from ale.models import *
 
 import aleinfo.settings as settings
 
-REQUEST_ALE_NUMBER = "ale_no"
-
-REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
-
-DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
-
-REQUEST_ALL = "all"
-
-MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
-MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%s</td>"""
-
-EVIDENCE_DIR = "evidence/"
+from seq.views import common
 
 
-if hasattr(settings, "sequencing_url"):
+if hasattr(settings, common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.sequencing_url
 else:
-    reseqencing_report_url = DEFAULT_RESEQ_REPORT_URL
-
-
-def _get_seq_experiments(request):
-    """return a list of seq experiments for a given ALE"""
-
-    ale_experiment_selector = _get_ale_experiment_selector(request)
-
-    ale_no_selector = _get_ale_number_selector(request)
-
-    experiments = ResequencingExperiment.objects.raw(
-        """SELECT reseq_id AS id FROM id_mapping WHERE
-        reseq_id IS NOT NULL %s %s
-        ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_no_selector))
-
-    return experiments
-
-
-def _get_ale_experiment_selector(request):
-
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
-        ale_experiment_selector = ""
-    else:
-        ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
-
-    return ale_experiment_selector
-
-
-def _get_ale_number_selector(request):
-
-    ale_no = request.GET.get(REQUEST_ALE_NUMBER)
-    if ale_no is None or ale_no == REQUEST_ALL:
-        ale_no_selector = ""
-    else:
-        ale_no_selector = "AND ale_no = %d" % int(ale_no)
-
-    return ale_no_selector
+    reseqencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
 @login_required
 def isolate_list(request):
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    ale_experiment_id = request.GET.get(common.REQUEST_ALE_EXPERIMENT_ID)
     if ale_experiment_id is None:
         isolates = Isolate.objects.all()
     else:
@@ -84,25 +39,9 @@ def isolate_list(request):
     return HttpResponse(template.render(context))
 
 
-def _get_experiment_info_list(experiments):
-    experiments_info_list = []
-
-    for experiment in experiments:
-        mc_list = UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=experiment.id)
-
-        mapped_read_count = int((experiment.percentage_mapped / 100) * experiment.reads)
-
-        # Using tuple because immutable; mc_list must remain associated with particular experiment.
-        experiment_info_tuple = (experiment, mc_list, mapped_read_count)
-
-        experiments_info_list.append(experiment_info_tuple)
-
-    return experiments_info_list
-
-
 @login_required
 def experiment_table(request):
-    experiments = _get_seq_experiments(request)
+    experiments = common.get_seq_experiments(request)
     extra_validation = False if request.GET.get("novalid") else True
     experiment_mapping = dict((o.id, i) for i, o in enumerate(experiments))
     # cache the urls of the experiment location
@@ -116,7 +55,7 @@ def experiment_table(request):
         if not extra_validation and not observed.breseq_present:
             continue
         table_entries[experiment_mapping[observed.sequencing_experiment_id]][mutation_mapping[observed.mutation_id]] = \
-            _get_table_mutation_entry(observed, experiment_urls)
+            common.get_table_mutation_entry(observed, experiment_urls)
     table_header = """<tr><td>Experiment</td>"""
     for mutation in mutations:
         if mutation.reference_error:
@@ -138,34 +77,10 @@ def experiment_table(request):
     return HttpResponse(template.render(context))
 
 
-def _get_table_mutation_entry(observed, experiment_urls):
-
-    if observed.breseq_present:
-        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % observed.frequency
-
-    elif observed.present is False:
-        table_entry = MUTATION_PRESENT_FALSE_CELL_HTML % (observed.mutated_reads,
-                                                          observed.wt_reads)
-
-    return table_entry
-
-
-def _get_observed_mutation_freq(observed_mutations_query_set,
-                                mutation):
-
-    observed_mutation = observed_mutations_query_set.filter(mutation_id=mutation.id)
-
-    # Should only be one ObservedMutation in QuerySet.
-    # Find a way to check for this.
-    observed_mutation_frequency = observed_mutation[0].frequency
-
-    return observed_mutation_frequency
-
-
 # Provide a table showing frequencies of each observed mutation in the lineage
 def lineage_table(request):
-    experiments = _get_seq_experiments(request)
-    ale_experiment_id = int(request.GET.get(REQUEST_ALE_EXPERIMENT_ID))
+    experiments = common.get_seq_experiments(request)
+    ale_experiment_id = int(request.GET.get(common.REQUEST_ALE_EXPERIMENT_ID))
     table_body = ""
     experiment_set = dict((e.ale_id, set()) for e in experiments)
     for i in experiment_set:
@@ -190,7 +105,7 @@ def lineage_table(request):
 
 
 def mutation_summary(request):
-    experiments = _get_seq_experiments(request)
+    experiments = common.get_seq_experiments(request)
     experiments_no_pop = [e for e in experiments if e.isolate.__unicode__().find("POP") == -1]
     experiment_set = dict((i, set(Mutation.objects.filter(
         pk__in=ObservedMutation.objects.filter(sequencing_experiment_id=e.id).values_list("mutation", flat=True)))) for
