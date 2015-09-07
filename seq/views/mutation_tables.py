@@ -113,7 +113,6 @@ def _get_table_header(experiment_mapping):
 
     experiment_urls = _get_experiment_urls(experiment_mapping)
 
-    # for checked_experiment_id in sorted(experiment_mapping):
     for checked_experiment_id in experiment_mapping:
 
         experiment = experiment_mapping[checked_experiment_id]
@@ -150,7 +149,6 @@ def _get_table_body(experiment_mapping, request):
 
     experiment_urls = _get_experiment_urls(experiment_mapping)
 
-    # experiment_mapping = dict((o, i) for i, o in enumerate(sorted(experiment_mapping.keys())))
     experiment_mapping = dict((o, i) for i, o in enumerate(experiment_mapping.keys()))
 
     # TODO: figure out what this is.
