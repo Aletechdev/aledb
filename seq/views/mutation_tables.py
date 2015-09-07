@@ -16,7 +16,9 @@ from seq.views import common
 
 HTML_MUTATION_TABLE_ROW = """<td>%d %s<a href="javascript:void(0)" class="shut" style="float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
 HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
+HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
+HTML_EMPTY_MUTATION_CELL = """<td class="false"></td>"""
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
@@ -87,9 +89,9 @@ def _get_experiment_list(experiment_ids):
 
 def _get_experiment_mapping(request):
 
-    experiments = common.get_seq_experiments(request)
+    seq_experiments = common.get_seq_experiments(request)
 
-    experiment_mapping = dict((o.id, o) for o in experiments)
+    experiment_mapping = dict((seq_experiment.id, seq_experiment) for seq_experiment in seq_experiments)
 
     return experiment_mapping
 
@@ -109,15 +111,18 @@ def _get_table_header(experiment_mapping):
 
     experiment_urls = _get_experiment_urls(experiment_mapping)
 
-    for checked_experiment_id in sorted(experiment_mapping):
+    # for checked_experiment_id in sorted(experiment_mapping):
+
+    print(sorted(experiment_mapping))
+
+    for checked_experiment_id in experiment_mapping:
 
         experiment = experiment_mapping[checked_experiment_id]
 
-        sample_name = experiment.isolate.flask.ale_id.ale_experiment.name
-        sample_name += " "
-        sample_name += experiment.get_isolate_name().replace("_", " ")
+        sample_name = _get_sample_name(experiment)
 
-        mutation_identifier = """<a href="%s">%s</a>""" % (experiment_urls[checked_experiment_id], sample_name)
+        mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[checked_experiment_id],
+                                                                       sample_name)
 
         table_header += HTML_CHECKBOX % (
             experiment.id,
@@ -126,6 +131,15 @@ def _get_table_header(experiment_mapping):
     table_header += "</tr>"
 
     return table_header
+
+
+def _get_sample_name(experiment):
+
+    sample_name = experiment.isolate.flask.ale_id.ale_experiment.name
+    sample_name += " "
+    sample_name += experiment.get_isolate_name().replace("_", " ")
+
+    return sample_name
 
 
 def _get_table_body(experiment_mapping, request):
@@ -137,16 +151,19 @@ def _get_table_body(experiment_mapping, request):
 
     experiment_urls = _get_experiment_urls(experiment_mapping)
 
-    experiment_mapping = dict((o, i) for i, o in enumerate(sorted(experiment_mapping.keys())))
+    # experiment_mapping = dict((o, i) for i, o in enumerate(sorted(experiment_mapping.keys())))
+    experiment_mapping = dict((o, i) for i, o in enumerate(experiment_mapping.keys()))
 
+    # TODO: figure out what this is.
     extra_validation = False if request.GET.get("novalid") else True
 
     # Initialize all sample mutation table cells as empty.
-    table_entries = [["""<td class="false"></td>"""] * len(experiment_mapping) for i in range(len(mutations))]
+    table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_mapping) for i in range(len(mutations))]
 
     # Populating table_entries
     for observed_mutation in observed_mutations:
 
+        # TODO: figure out what this is.
         # sometimes we do not want the extra validation
         if not extra_validation and not observed_mutation.breseq_present:
             continue
@@ -154,8 +171,7 @@ def _get_table_body(experiment_mapping, request):
         new_entry = common.get_table_mutation_entry(observed_mutation, experiment_urls)
 
         if new_entry is not None:
-            table_entries[mutation_mapping[observed_mutation.mutation_id]][
-                experiment_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+            table_entries[mutation_mapping[observed_mutation.mutation_id]][experiment_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
 
     #Populating table body
     table_body = ""
