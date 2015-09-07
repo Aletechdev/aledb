@@ -139,6 +139,7 @@ def _get_table_body(experiment_mapping, request):
 
     experiment_mapping = dict((o, i) for i, o in enumerate(sorted(experiment_mapping.keys())))
 
+    # TODO: figure out what this is.
     extra_validation = False if request.GET.get("novalid") else True
 
     # Initialize all sample mutation table cells as empty.
@@ -147,6 +148,7 @@ def _get_table_body(experiment_mapping, request):
     # Populating table_entries
     for observed_mutation in observed_mutations:
 
+        # TODO: figure out what this is.
         # sometimes we do not want the extra validation
         if not extra_validation and not observed_mutation.breseq_present:
             continue
@@ -154,8 +156,7 @@ def _get_table_body(experiment_mapping, request):
         new_entry = common.get_table_mutation_entry(observed_mutation, experiment_urls)
 
         if new_entry is not None:
-            table_entries[mutation_mapping[observed_mutation.mutation_id]][
-                experiment_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+            table_entries[mutation_mapping[observed_mutation.mutation_id]][experiment_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
 
     #Populating table body
     table_body = ""
