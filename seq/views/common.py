@@ -3,6 +3,8 @@ __author__ = 'pphaneuf'
 
 from seq.models import ResequencingExperiment
 
+from decimal import *
+
 
 DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
 
@@ -21,8 +23,9 @@ REQUEST_ALL = "all"
 def get_table_mutation_entry(observed, experiment_urls):
 
     if observed.breseq_present:
-        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % observed.frequency
+        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % float(observed.frequency)
 
+    # TODO: Figure out what this is supposed to do.
     elif observed.present is False:
         table_entry = MUTATION_PRESENT_FALSE_CELL_HTML % (observed.mutated_reads,
                                                           observed.wt_reads)
