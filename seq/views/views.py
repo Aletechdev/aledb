@@ -174,7 +174,7 @@ def mutation_summary(request):
         reappeared += "<p>%d %s<br></p>" % (m.position, m.sequence_change)
     replaced = ""
     for m, r in zip(mut_replaced.keys(), mut_replaced.values()):
-        replaced += "<p>%d %s: repalced by %d %s<br></p>" % (
+        replaced += "<p>%d %s: replaced by %d %s<br></p>" % (
         m.position, m.sequence_change, r.position, r.sequence_change)
 
     template = loader.get_template("summary.html")

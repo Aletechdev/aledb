@@ -18,9 +18,11 @@ BRESEQ_OUTPUT_REPORT_FILE = "index.html"
 
 def create_ale_experiment(breseq_output_abs_path,
                           ale_exp_user,
-                          ale_exp_name):
+                          ale_exp_name,
+                          breseq_wild_type_output_abs_path=None):
 
     sanitized_breseq_output_abs_path = _sanitize_path(breseq_output_abs_path)
+    sanitized_breseq_output_wild_type_output_abs_path = _sanitize_path(breseq_wild_type_output_abs_path)
 
     db_session = seq.alchemy_orm.Session()
 
@@ -32,29 +34,20 @@ def create_ale_experiment(breseq_output_abs_path,
                            ale_exp_user,
                            ale_exp_name)
 
-    # create_and_commit_ale_entry(db_session,
-    #                            WILD_TYPE_USER_NAME,
-    #                            BRESEQ_ISOLATE_OUTPUT_PATH,
-    #                            WILD_TYPE_ALE_NUMBER,
-    #                            WILD_TYPE_FLASK_NUMBER,
-    #                            WILD_TYPE_ISOLATE_NUMBER,
-    #                            experiment,
-    #                            media,
-    #                            freezer_box,
-    #                            # is_wild_type=True
-    #                            is_wild_type=False)  # This is in fact the wild type, though setting this to false hides the mutations in the mutation table.
+    if len(breseq_wild_type_output_abs_path) != 0:
+        _create_and_commit_wild_type_ale_entry(db_session,
+                                               sanitized_breseq_output_wild_type_output_abs_path,
+                                               experiment,
+                                               media,
+                                               freezer_box)
 
     # Might need to explicitly sort this list in the future.
-    breseq_sample_report_list = _get_sample_report_list(
-        sanitized_breseq_output_abs_path)
+    breseq_sample_report_list = _get_sample_report_list(sanitized_breseq_output_abs_path)
 
     for breseq_sample_name in breseq_sample_report_list:
 
-        split = breseq_sample_name.split("-")
-
-        # find the isolate from the folder name
-        ale_number = int(split[0])
-        flask_number = int(split[1])
+        ale_number = _get_ale_number(breseq_sample_name)
+        flask_number = _get_flask_number(breseq_sample_name)
         isolate_number = 1  # TODO: find out why is this set to 1 for all endpoints and make it a constant.
 
         output_path = sanitized_breseq_output_abs_path\
@@ -72,6 +65,43 @@ def create_ale_experiment(breseq_output_abs_path,
                                     media,
                                     freezer_box,
                                     is_wild_type=False)
+
+
+def _get_ale_number(breseq_sample_name):
+
+    split = breseq_sample_name.split("-")
+
+    ale_number = int(split[0])
+
+    return ale_number
+
+
+def _get_flask_number(breseq_sample_name):
+
+    split = breseq_sample_name.split("-")
+
+    flask_number = int(split[1])
+
+    return flask_number
+
+
+def _create_and_commit_wild_type_ale_entry(db_session,
+                                           breseq_wild_type_abs_path,
+                                           experiment,
+                                           media,
+                                           freezer_box):
+
+    _create_and_commit_ale_entry(db_session,
+                                 WILD_TYPE_USER_NAME,
+                                 breseq_wild_type_abs_path,
+                                 WILD_TYPE_ALE_NUMBER,
+                                 WILD_TYPE_FLASK_NUMBER,
+                                 WILD_TYPE_ISOLATE_NUMBER,
+                                 experiment,
+                                 media,
+                                 freezer_box,
+                                 # is_wild_type=True
+                                 is_wild_type=False)  # This is in fact the wild type, though setting this to false hides the mutations in the mutation table.
 
 
 def _sanitize_path(path):
