@@ -1,3 +1,5 @@
+import collections
+
 from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
@@ -91,7 +93,7 @@ def _get_experiment_mapping(request):
 
     seq_experiments = common.get_seq_experiments(request)
 
-    experiment_mapping = dict((seq_experiment.id, seq_experiment) for seq_experiment in seq_experiments)
+    experiment_mapping = collections.OrderedDict((seq_experiment.id, seq_experiment) for seq_experiment in seq_experiments)
 
     return experiment_mapping
 
@@ -112,9 +114,6 @@ def _get_table_header(experiment_mapping):
     experiment_urls = _get_experiment_urls(experiment_mapping)
 
     # for checked_experiment_id in sorted(experiment_mapping):
-
-    print(sorted(experiment_mapping))
-
     for checked_experiment_id in experiment_mapping:
 
         experiment = experiment_mapping[checked_experiment_id]
