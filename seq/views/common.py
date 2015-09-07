@@ -13,7 +13,7 @@ REQUEST_ALE_NUMBER = "ale_no"
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
 MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
-MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%s</td>"""
+MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%.2f</td>"""
 
 REQUEST_ALL = "all"
 
