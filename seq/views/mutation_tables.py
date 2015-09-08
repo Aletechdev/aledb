@@ -140,6 +140,13 @@ def _get_sample_name(experiment):
     return sample_name
 
 
+def _get_experiment_id_idx_mapping(experiment_mapping):
+
+    experiment_id_idx_mapping = dict((reseq_exp_id, idx) for idx, reseq_exp_id in enumerate(experiment_mapping.keys()))
+
+    return experiment_id_idx_mapping
+
+
 def _get_table_body(experiment_mapping, request):
 
     observed_mutations = _get_observed_mutations(experiment_mapping)
@@ -149,13 +156,13 @@ def _get_table_body(experiment_mapping, request):
 
     experiment_urls = _get_experiment_urls(experiment_mapping)
 
-    experiment_mapping = dict((o, i) for i, o in enumerate(experiment_mapping.keys()))
+    experiment_id_idx_mapping = _get_experiment_id_idx_mapping(experiment_mapping)
 
     # TODO: figure out what this is.
     extra_validation = False if request.GET.get("novalid") else True
 
     # Initialize all sample mutation table cells as empty.
-    table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_mapping) for i in range(len(mutations))]
+    table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for idx in range(len(mutations))]
 
     # Populating table_entries
     for observed_mutation in observed_mutations:
@@ -168,7 +175,7 @@ def _get_table_body(experiment_mapping, request):
         new_entry = common.get_table_mutation_entry(observed_mutation, experiment_urls)
 
         if new_entry is not None:
-            table_entries[mutation_mapping[observed_mutation.mutation_id]][experiment_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+            table_entries[mutation_mapping[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
 
     #Populating table body
     table_body = ""
