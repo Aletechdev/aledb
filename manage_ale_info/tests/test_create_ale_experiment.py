@@ -3,7 +3,7 @@ __author__ = 'pphaneuf'
 
 import unittest
 
-from manage_ale_info.create_ale_experiment import _sanitize_path
+from manage_ale_info.ale_experiment import _sanitize_path
 
 
 class TestUpload(unittest.TestCase):
