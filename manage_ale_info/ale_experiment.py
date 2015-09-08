@@ -1,10 +1,14 @@
+import datetime
+import os
+
 import seq.alchemy_orm
 
 import manage_ale_info.upload
 # import manage_ale_info.validatemutations  # TODO: find out what validatemutations does for mutations.
 
-import datetime
-import os
+from ale.models import AleExperiment
+
+from seq.models import Mutation
 
 
 WILD_TYPE_ALE_NUMBER = 0
@@ -14,6 +18,26 @@ WILD_TYPE_USER_NAME = "BOP27"
 
 BRESEQ_OUTPUT_REPORT_DIR = "output/"
 BRESEQ_OUTPUT_REPORT_FILE = "index.html"
+
+
+def delete_ale_experiment(ale_experiment_primary_key):
+
+    ale_experiment_to_delete = AleExperiment.objects.get(pk=ale_experiment_primary_key)
+
+    ale_experiment_to_delete.delete()
+
+    _delete_all_orphaned_mutations()
+
+
+def _delete_all_orphaned_mutations():
+
+    all_mutations = Mutation.objects.all()
+
+    for mutation in all_mutations:
+
+        if len(mutation.observedmutation_set.all()) == 0:
+
+            mutation.delete()
 
 
 def create_ale_experiment(breseq_output_abs_path,
