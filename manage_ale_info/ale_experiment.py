@@ -1,9 +1,11 @@
 import datetime
+
 import os
 
 import seq.alchemy_orm
 
 import manage_ale_info.upload
+
 # import manage_ale_info.validatemutations  # TODO: find out what validatemutations does for mutations.
 
 from ale.models import AleExperiment
@@ -21,6 +23,10 @@ BRESEQ_OUTPUT_REPORT_FILE = "index.html"
 
 
 def delete_ale_experiment(ale_experiment_primary_key):
+
+    """
+    Meant to be executed from Django ipython shell.
+    """
 
     ale_experiment_to_delete = AleExperiment.objects.get(pk=ale_experiment_primary_key)
 
@@ -44,6 +50,10 @@ def create_ale_experiment(breseq_output_abs_path,
                           ale_exp_user,
                           ale_exp_name,
                           breseq_wild_type_output_abs_path=None):
+
+    """
+    Meant to be executed from Django ipython shell.
+    """
 
     sanitized_breseq_output_abs_path = _sanitize_path(breseq_output_abs_path)
     sanitized_breseq_output_wild_type_output_abs_path = _sanitize_path(breseq_wild_type_output_abs_path)
