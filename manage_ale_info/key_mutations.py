@@ -29,21 +29,21 @@ def _get_seq_experiment_dict():
     return seq_experiment_dict
 
 
-def _get_mutation_seq_experiment_mutation(seq_experiment_id):
+def _get_seq_experiment_mutation(seq_experiment_id):
 
-    mutations_list = []
+    mutations_set = set()
 
     observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id=seq_experiment_id)
 
     for observed_mutation in observed_mutations:
-        mutations_list.append(observed_mutation.mutation)
+        mutations_set.add(observed_mutation.mutation)
 
-    return mutations_list
+    return mutations_set
 
 
 def _get_mutations(seq_experiment_dict, get_starting_strain_mutations=False):
 
-    mutations_list = []
+    mutations_set = set()
 
     for seq_experiment_id in seq_experiment_dict:
 
@@ -53,7 +53,7 @@ def _get_mutations(seq_experiment_dict, get_starting_strain_mutations=False):
 
             if seq_experiment.ale_id == STARTING_STRAIN_ALE_ID:
 
-                mutations_list.extend(_get_mutation_seq_experiment_mutation(seq_experiment_id))
+                mutations_set.update(_get_seq_experiment_mutation(seq_experiment_id))
 
                 break   # Only 1 starting strain, therefore don't need parse remaining experiments.
 
@@ -61,9 +61,9 @@ def _get_mutations(seq_experiment_dict, get_starting_strain_mutations=False):
 
             if seq_experiment.ale_id != STARTING_STRAIN_ALE_ID:
 
-                mutations_list.extend(_get_mutation_seq_experiment_mutation(seq_experiment_id))
+                mutations_set.update(_get_seq_experiment_mutation(seq_experiment_id))
 
-    return mutations_list
+    return mutations_set
 
 
 def _get_starting_strain_mutations(seq_experiment_dict):
@@ -80,14 +80,10 @@ def get_key_mutations():
 
     seq_experiment_dict = _get_seq_experiment_dict()
 
-    starting_strain_mutations_list = _get_starting_strain_mutations(seq_experiment_dict)
+    starting_strain_mutations_set = _get_starting_strain_mutations(seq_experiment_dict)
 
-    all_mutations_list = _get_all_mutations(seq_experiment_dict)
+    all_mutations_set = _get_all_mutations(seq_experiment_dict)
 
-    all_unique_mutations_list = [mutation for mutation in all_mutations_list if mutation not in starting_strain_mutations_list]
+    unique_mutations_set = all_mutations_set - starting_strain_mutations_set
 
-    all_unique_mutations_set = set(all_unique_mutations_list)
-
-    for mutation in all_unique_mutations_set:
-
-        print(mutation)
+    return unique_mutations_set
