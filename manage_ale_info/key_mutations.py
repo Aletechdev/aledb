@@ -14,9 +14,24 @@ __author__ = 'pphaneuf'
 STARTING_STRAIN_ALE_ID = 0
 
 
-def _get_seq_experiment_dict():
+def get_key_mutations(experiment_id):
 
-    ale_experiment_selector = "AND experiment_id = 19"
+    seq_experiment_dict = _get_seq_experiment_dict(experiment_id)
+
+    starting_strain_mutations_set = _get_starting_strain_mutations(seq_experiment_dict)
+
+    all_mutations_set = _get_all_mutations(seq_experiment_dict)
+
+    unique_mutations_set = all_mutations_set - starting_strain_mutations_set
+
+    return unique_mutations_set
+
+
+def _get_seq_experiment_dict(experiment_id):
+
+    ale_experiment_selector = "AND experiment_id = "
+
+    ale_experiment_selector += str(experiment_id)
 
     ale_number_selector = ""
 
@@ -74,16 +89,3 @@ def _get_starting_strain_mutations(seq_experiment_dict):
 def _get_all_mutations(seq_experiment_dict):
 
     return _get_mutations(seq_experiment_dict, get_starting_strain_mutations=False)
-
-
-def get_key_mutations():
-
-    seq_experiment_dict = _get_seq_experiment_dict()
-
-    starting_strain_mutations_set = _get_starting_strain_mutations(seq_experiment_dict)
-
-    all_mutations_set = _get_all_mutations(seq_experiment_dict)
-
-    unique_mutations_set = all_mutations_set - starting_strain_mutations_set
-
-    return unique_mutations_set
