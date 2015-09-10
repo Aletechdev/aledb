@@ -1,15 +1,21 @@
 import os
+
 import sys
 
+import settings     # TODO: have more explicit "settings" import.
+
 from sqlalchemy import create_engine, Table, MetaData, Column, ForeignKey, Integer
+
 from sqlalchemy.orm import sessionmaker, relationship, backref
+
 from sqlalchemy.ext.declarative import declarative_base
+
 from sqlalchemy.ext.hybrid import hybrid_property
+
 
 # add aleinfo directory to the path
 ale_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(ale_dir, "aleinfo"))
-import settings
 
 DATABASES = settings.DATABASES
 
