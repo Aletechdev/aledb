@@ -17,6 +17,9 @@ MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%.2f</td>"""
 
 REQUEST_ALL = "all"
 
+ALE_NUMBER_SELECTOR_QUERY = "AND ale_no = %d"
+ALE_EXPERIMENT_SELECTOR_QUERY = "AND experiment_id = %d"
+
 SEQ_EXPERIMENT_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
 
 
@@ -64,7 +67,7 @@ def _get_ale_experiment_selector(request):
     if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
         ale_experiment_selector = ""
     else:
-        ale_experiment_selector = "AND experiment_id = %d" % int(ale_experiment_id)
+        ale_experiment_selector = ALE_EXPERIMENT_SELECTOR_QUERY % int(ale_experiment_id)
 
     return ale_experiment_selector
 
@@ -75,6 +78,6 @@ def _get_ale_number_selector(request):
     if ale_no is None or ale_no == REQUEST_ALL:
         ale_no_selector = ""
     else:
-        ale_no_selector = "AND ale_no = %d" % int(ale_no)
+        ale_no_selector = ALE_NUMBER_SELECTOR_QUERY % int(ale_no)
 
     return ale_no_selector
