@@ -1,8 +1,11 @@
+import collections
+
 from seq.models import ResequencingExperiment
+
+import aleinfo.settings as settings
 
 
 __author__ = 'pphaneuf'
-
 
 DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
 
@@ -21,6 +24,12 @@ ALE_NUMBER_SELECTOR_QUERY = "AND ale_no = %d"
 ALE_EXPERIMENT_SELECTOR_QUERY = "AND experiment_id = %d"
 
 SEQ_EXPERIMENT_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
+
+
+if hasattr(settings, SETTINGS_SEQUENCING_URL):
+    reseqencing_report_url = settings.sequencing_url
+else:
+    reseqencing_report_url = DEFAULT_RESEQ_REPORT_URL
 
 
 def get_ale_experiment_id(request):
@@ -81,3 +90,28 @@ def _get_ale_number_selector(request):
         ale_no_selector = ALE_NUMBER_SELECTOR_QUERY % int(ale_no)
 
     return ale_no_selector
+
+
+def get_experiment_ordered_dict(request):
+
+    seq_experiments_raw_query_set = get_seq_experiments(request)
+
+    seq_experiment_ordered_dict = collections.OrderedDict((seq_experiment.id, seq_experiment) for seq_experiment in seq_experiments_raw_query_set)
+
+    return seq_experiment_ordered_dict
+
+
+def get_experiment_urls(seq_experiment_dict):
+
+    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in seq_experiment_dict.values())
+
+    return experiment_urls
+
+
+def get_sample_name(seq_experiment):
+
+    sample_name = seq_experiment.isolate.flask.ale_id.ale_experiment.name
+    sample_name += " "
+    sample_name += seq_experiment.get_isolate_name().replace("_", " ")
+
+    return sample_name

@@ -1,5 +1,3 @@
-import collections
-
 from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
@@ -46,7 +44,7 @@ def mutation_table(request):
 
     seq_experiment_list = _get_seq_experiment_list(ale_experiment_ids)
 
-    seq_experiment_ordered_dict = _get_experiment_ordered_dict(request)
+    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request)
 
     seq_experiment_ordered_dict = _filter_checked_flasks(request, seq_experiment_ordered_dict)
 
@@ -85,15 +83,6 @@ def _get_seq_experiment_list(experiment_ids):
     return experiment_list
 
 
-def _get_experiment_ordered_dict(request):
-
-    seq_experiments_raw_query_set = common.get_seq_experiments(request)
-
-    seq_experiment_ordered_dict = collections.OrderedDict((seq_experiment.id, seq_experiment) for seq_experiment in seq_experiments_raw_query_set)
-
-    return seq_experiment_ordered_dict
-
-
 def _filter_checked_flasks(request, seq_experiment_dict):
 
     seq_experiment_dict = _show_checked_flasks(request, seq_experiment_dict)
@@ -107,13 +96,13 @@ def _get_table_header(seq_experiment_dict):
 
     table_header = HTML_MUTATION_TABLE_HEADER
 
-    experiment_urls = _get_experiment_urls(seq_experiment_dict)
+    experiment_urls = common.get_experiment_urls(seq_experiment_dict)
 
     for seq_experiment_id in seq_experiment_dict:
 
         seq_experiment = seq_experiment_dict[seq_experiment_id]
 
-        sample_name = _get_sample_name(seq_experiment)
+        sample_name = common.get_sample_name(seq_experiment)
 
         mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id],
                                                                        sample_name)
@@ -127,18 +116,9 @@ def _get_table_header(seq_experiment_dict):
     return table_header
 
 
-def _get_sample_name(seq_experiment):
+def _get_experiment_id_idx_mapping(seq_experiment_dict):
 
-    sample_name = seq_experiment.isolate.flask.ale_id.ale_experiment.name
-    sample_name += " "
-    sample_name += seq_experiment.get_isolate_name().replace("_", " ")
-
-    return sample_name
-
-
-def _get_experiment_id_idx_mapping(experiment_mapping):
-
-    experiment_id_idx_mapping = dict((reseq_exp_id, idx) for idx, reseq_exp_id in enumerate(experiment_mapping.keys()))
+    experiment_id_idx_mapping = dict((reseq_exp_id, idx) for idx, reseq_exp_id in enumerate(seq_experiment_dict.keys()))
 
     return experiment_id_idx_mapping
 
@@ -150,7 +130,7 @@ def _get_table_body(seq_experiment_dict, request):
     mutations = Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
     mutation_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
 
-    experiment_urls = _get_experiment_urls(seq_experiment_dict)
+    experiment_urls = common.get_experiment_urls(seq_experiment_dict)
 
     experiment_id_idx_mapping = _get_experiment_id_idx_mapping(seq_experiment_dict)
 
@@ -225,13 +205,6 @@ def _remove_checked_flasks(request, seq_experiment_dict):
                     del seq_experiment_dict[int(checked_experiment_id)]
 
     return seq_experiment_dict
-
-
-def _get_experiment_urls(experiment_mapping):
-
-    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in experiment_mapping.values())
-
-    return experiment_urls
 
 
 def _get_observed_mutations(seq_experiment_dict):
