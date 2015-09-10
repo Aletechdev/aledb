@@ -1,4 +1,5 @@
-from os.path import expanduser, dirname, join, isfile
+import os
+
 from ConfigParser import SafeConfigParser
 
 
@@ -8,19 +9,19 @@ TEMPLATE_DEBUG = DEBUG
 # TODO: change to "ALE Analytics"
 GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
 
-BASE_DIR = dirname(dirname(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 config = SafeConfigParser()
 
-settings_filepath = join(dirname(__file__), "settings.ini")
+settings_file_path = os.path.join(os.path.dirname(__file__), "settings.ini")
 
-config.read(settings_filepath)
+config.read(settings_file_path)
 
 sequencing_path = config.get("OTHER", "sequencing_path")
 sequencing_url = config.get("OTHER", "sequencing_url")
 
 ADMINS = (
-    # ('Your Name', 'your_email@example.com'),
+    ('Patrick Phaneuf', 'pphaneuf@eng.ucsd.com'),
 )
 
 MANAGERS = ADMINS
@@ -72,7 +73,7 @@ MEDIA_URL = ''
 # Don't put anything in this directory yourself; store your static files
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 STATICFILES_DIRS = ()
 
