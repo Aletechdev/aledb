@@ -2,7 +2,7 @@ import os
 
 import sys
 
-import settings     # TODO: have more explicit "settings" import.
+from  aleinfo import settings     # TODO: have more explicit "settings" import.
 
 from sqlalchemy import create_engine, Table, MetaData, Column, ForeignKey, Integer
 
