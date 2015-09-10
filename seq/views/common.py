@@ -40,9 +40,9 @@ def get_seq_experiments(request):
 
     sql_query = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_number_selector)
 
-    experiments = ResequencingExperiment.objects.raw(sql_query)
+    seq_experiments_raw_query_set = ResequencingExperiment.objects.raw(sql_query)
 
-    return experiments
+    return seq_experiments_raw_query_set
 
 
 def _get_ale_experiment_selector(request):
