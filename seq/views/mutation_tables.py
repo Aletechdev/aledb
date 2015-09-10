@@ -40,7 +40,7 @@ else:
 @login_required
 def mutation_table(request):
 
-    ale_experiment_ids = _get_ale_experiment_id(request)
+    ale_experiment_ids = common.get_ale_experiment_id(request)
 
     ale_number = _get_ale_number(request)
 
@@ -64,15 +64,6 @@ def mutation_table(request):
                        "table_header": mark_safe(table_header)})
 
     return HttpResponse(template.render(context))
-
-
-def _get_ale_experiment_id(request):
-
-    # Get the full list of ale experiments for the ale number of interest
-    experiment_ids = request.GET.get(common.REQUEST_ALE_EXPERIMENT_ID)
-    experiment_ids = None if experiment_ids is None or experiment_ids == "all" else int(experiment_ids)
-
-    return experiment_ids
 
 
 def _get_ale_number(request):

@@ -1,7 +1,7 @@
-__author__ = 'pphaneuf'
-
-
 from seq.models import ResequencingExperiment
+
+
+__author__ = 'pphaneuf'
 
 
 DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
@@ -17,8 +17,21 @@ MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%.2f</td>"""
 
 REQUEST_ALL = "all"
 
+SEQ_EXPERIMENT_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
+
+
+def get_ale_experiment_id(request):
+
+    # Get the full list of ale experiments for the ale number of interest
+    experiment_ids = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    experiment_ids = None if experiment_ids is None or experiment_ids == "all" else int(experiment_ids)
+
+    return experiment_ids
+
 
 def get_table_mutation_entry(observed, experiment_urls):
+
+    table_entry = ""
 
     if observed.breseq_present:
         table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % float(observed.frequency)
@@ -38,7 +51,7 @@ def get_seq_experiments(request):
 
     ale_number_selector = _get_ale_number_selector(request)
 
-    sql_query = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_number_selector)
+    sql_query = SEQ_EXPERIMENT_QUERY % (ale_experiment_selector, ale_number_selector)
 
     seq_experiments_raw_query_set = ResequencingExperiment.objects.raw(sql_query)
 
