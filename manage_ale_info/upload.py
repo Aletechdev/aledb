@@ -1,11 +1,15 @@
 from os.path import join
+
 import re
 
 from bs4 import BeautifulSoup
+
 from enum import Enum
 
 from seq.alchemy_orm import *
+
 from gdparse.gdparse import gdparse
+
 
 EXPERIMENT_PARENT_DIR = "breseq/"  # TODO: See if this is necessary.
 
