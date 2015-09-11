@@ -46,7 +46,7 @@ def mutation_table(request):
 
     seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request)
 
-    seq_experiment_ordered_dict = _filter_checked_flasks(request, seq_experiment_ordered_dict)
+    seq_experiment_ordered_dict = common.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
     table_header = _get_table_header(seq_experiment_ordered_dict)
 
@@ -81,15 +81,6 @@ def _get_seq_experiment_list(experiment_ids):
         experiment_list = ResequencingExperiment.objects.all()
 
     return experiment_list
-
-
-def _filter_checked_flasks(request, seq_experiment_dict):
-
-    seq_experiment_dict = _show_checked_flasks(request, seq_experiment_dict)
-
-    seq_experiment_dict = _remove_checked_flasks(request, seq_experiment_dict)
-
-    return seq_experiment_dict
 
 
 def _get_table_header(seq_experiment_dict):
