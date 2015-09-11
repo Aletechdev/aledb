@@ -4,9 +4,9 @@ import os
 
 import seq.alchemy_orm
 
-import seq_db.upload
+import builder.upload
 
-# import seq_db.validatemutations  # TODO: find out what validatemutations does for mutations.
+# import builder.validatemutations  # TODO: find out what validatemutations does for mutations.
 
 from ale.models import AleExperiment
 
@@ -178,7 +178,7 @@ def _create_and_commit_ale_entry(db_session,
 
     db_session.commit()
 
-    seq_db.upload.add_breseq_results(db_session=db_session,
+    builder.upload.add_breseq_results(db_session=db_session,
                               isolate_id=isolate.id,
                               person=person,
                               breseq_folder=breseq_folder,
