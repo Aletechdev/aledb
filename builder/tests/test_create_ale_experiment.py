@@ -3,7 +3,7 @@ __author__ = 'pphaneuf'
 
 import unittest
 
-from seq_db.ale_experiment import _sanitize_path
+from builder.ale_experiment import _sanitize_path
 
 
 class TestUpload(unittest.TestCase):

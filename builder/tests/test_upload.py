@@ -3,15 +3,15 @@ __author__ = 'pphaneuf'
 
 import unittest
 
-from seq_db.upload import _is_sample_clonal_or_popuation
-from seq_db.upload import SAMPLE_TYPE
-from seq_db.upload import _is_missing_coverage_type
+from builder.upload import _is_sample_clonal_or_popuation
+from builder.upload import SAMPLE_TYPE
+from builder.upload import _is_missing_coverage_type
 
 # Use access to protected members till can wrap acceptance testing
 # around workflow using these functions.
-from seq_db.upload import _parse_average_read_length
-from seq_db.upload import _parse_read_count
-from seq_db.upload import _get_mutation_freq
+from builder.upload import _parse_average_read_length
+from builder.upload import _parse_read_count
+from builder.upload import _get_mutation_freq
 
 
 class TestUpload(unittest.TestCase):
