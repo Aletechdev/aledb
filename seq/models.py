@@ -42,6 +42,7 @@ class ResequencingExperiment(models.Model):
         if self.isolate.description is not None:
 
             if len(self.isolate.description) > 0:
+
                 return self.isolate.description
 
         return u"A%d_F%d_I%d" % (self.ale_id,
@@ -122,3 +123,8 @@ class ObservedMutation(models.Model):
     frequency = models.DecimalField(null=True,
                                     max_digits=5,
                                     decimal_places=4)
+
+
+class KeyMutation(models.Model):
+
+    observed_mutation = models.ForeignKey(ObservedMutation)
