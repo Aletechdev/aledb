@@ -7,12 +7,12 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('seq', '0002_auto_20150721_1455'),
+        ('seq', '0002_observedmutation_key_mutation'),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='resequencingexperiment',
-            name='unassigned_missing_coverage_evidence',
+            model_name='observedmutation',
+            name='key_mutation',
         ),
     ]

@@ -45,9 +45,11 @@ def lists(request):
 
 
 def _get_experiment_info_list(experiments):
+
     experiments_info_list = []
 
     for experiment in experiments:
+
         mc_list = UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=experiment.id)
 
         mapped_read_count = int((experiment.percentage_mapped / 100) * experiment.reads)
