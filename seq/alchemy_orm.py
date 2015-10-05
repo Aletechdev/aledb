@@ -81,6 +81,11 @@ class AleExperiment(Base):
     instrument = relationship(Instrument, backref="ale_experiments")
 
 
+# class KeyMutation(Base):
+#     __table__ = Table("ale_keymutation", metadata, autoload=True)
+#     ale_experiment = relationship(AleExperiment)
+
+
 class Media(Base):
     __table__ = Table("ale_media", metadata, autoload=True)
 

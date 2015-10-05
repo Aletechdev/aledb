@@ -102,6 +102,12 @@ class ObservedMutation(models.Model):
 
     sequencing_experiment = models.ForeignKey(ResequencingExperiment)
 
+    key_mutation = models.ForeignKey("ale.KeyMutation",
+                                     null=True,
+                                     blank=True,
+                                     default=None,
+                                     on_delete=models.SET_NULL)
+
     mutation = models.ForeignKey(Mutation)
 
     present = models.NullBooleanField()
@@ -123,8 +129,3 @@ class ObservedMutation(models.Model):
     frequency = models.DecimalField(null=True,
                                     max_digits=5,
                                     decimal_places=4)
-
-
-class KeyMutation(models.Model):
-
-    observed_mutation = models.ForeignKey(ObservedMutation)

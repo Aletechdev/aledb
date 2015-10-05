@@ -16,11 +16,11 @@ class AleExperiment(models.Model):
 
     ale_id = models.AutoField(primary_key=True)
 
-    key_mutations = models.ForeignKey("seq.KeyMutation",
-                                      null=True,
-                                      blank=True,
-                                      default=None,
-                                      on_delete=models.SET_NULL)
+    key_mutation = models.ForeignKey("ale.KeyMutation",
+                                     null=True,
+                                     blank=True,
+                                     default=None,
+                                     on_delete=models.SET_NULL)
 
     name = models.CharField(max_length=40)
 
@@ -47,6 +47,17 @@ class AleExperiment(models.Model):
     class Meta:
 
         verbose_name_plural = "ALE Experiments"
+
+
+
+class KeyMutation(models.Model):
+
+    ale_experiment = models.ForeignKey(AleExperiment,
+                                       on_delete=models.CASCADE)
+
+    mutations = models.ManyToManyField("seq.Mutation",
+                                       through="seq.ObservedMutation")
+
 
 
 class AleId(models.Model):

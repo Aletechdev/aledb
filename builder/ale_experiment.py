@@ -6,6 +6,8 @@ import seq.alchemy_orm
 
 import builder.upload
 
+import builder.key_mutations
+
 # import builder.validatemutations  # TODO: find out what validatemutations does for mutations.
 
 from ale.models import AleExperiment
@@ -56,7 +58,6 @@ def create_ale_experiment(breseq_output_abs_path,
     """
 
     sanitized_breseq_output_abs_path = _sanitize_path(breseq_output_abs_path)
-    sanitized_breseq_output_wild_type_output_abs_path = _sanitize_path(breseq_wild_type_output_abs_path)
 
     db_session = seq.alchemy_orm.Session()
 
@@ -68,7 +69,10 @@ def create_ale_experiment(breseq_output_abs_path,
                            ale_exp_user,
                            ale_exp_name)
 
-    if len(breseq_wild_type_output_abs_path) != 0:
+    if breseq_wild_type_output_abs_path is not None:
+
+        sanitized_breseq_output_wild_type_output_abs_path = _sanitize_path(breseq_wild_type_output_abs_path)
+
         _create_and_commit_wild_type_ale_entry(db_session,
                                                sanitized_breseq_output_wild_type_output_abs_path,
                                                experiment,
@@ -81,7 +85,9 @@ def create_ale_experiment(breseq_output_abs_path,
     for breseq_sample_name in breseq_sample_report_list:
 
         ale_number = _get_ale_number(breseq_sample_name)
+
         flask_number = _get_flask_number(breseq_sample_name)
+
         isolate_number = 1  # TODO: find out why is this set to 1 for all endpoints and make it a constant.
 
         output_path = sanitized_breseq_output_abs_path\
@@ -99,6 +105,12 @@ def create_ale_experiment(breseq_output_abs_path,
                                     media,
                                     freezer_box,
                                     is_wild_type=False)
+
+    # Find all key mutations.
+    # Ensure that I can find and print them first.
+    key_mutations_set = builder.key_mutations.get_key_mutations(experiment.ale_id)
+
+    print(key_mutations_set)
 
 
 def _get_ale_number(breseq_sample_name):

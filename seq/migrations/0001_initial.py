@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
                 ('other_reads', models.IntegerField(null=True)),
                 ('reference_genome_likelihood', models.FloatField(null=True)),
                 ('evidence', models.CharField(max_length=400, null=True, blank=True)),
-                ('frequency', models.CharField(max_length=100, null=True, blank=True)),
+                ('frequency', models.DecimalField(null=True, max_digits=5, decimal_places=4)),
                 ('mutation', models.ForeignKey(to='seq.Mutation')),
             ],
         ),
@@ -51,6 +51,16 @@ class Migration(migrations.Migration):
                 ('percentage_mapped', models.FloatField(null=True, blank=True)),
                 ('isolate', models.ForeignKey(to='ale.Isolate')),
                 ('mutations', models.ManyToManyField(to='seq.Mutation', through='seq.ObservedMutation')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='UnassignedMissingCoverageEvidence',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('seq_id', models.CharField(max_length=100)),
+                ('start', models.IntegerField()),
+                ('end', models.IntegerField()),
+                ('sequencing_experiment', models.ForeignKey(to='seq.ResequencingExperiment')),
             ],
         ),
         migrations.AddField(
