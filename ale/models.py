@@ -16,12 +16,6 @@ class AleExperiment(models.Model):
 
     ale_id = models.AutoField(primary_key=True)
 
-    key_mutation = models.ForeignKey("ale.KeyMutation",
-                                     null=True,
-                                     blank=True,
-                                     default=None,
-                                     on_delete=models.SET_NULL)
-
     name = models.CharField(max_length=40)
 
     person = models.CharField(max_length=200)
@@ -55,8 +49,8 @@ class KeyMutation(models.Model):
     ale_experiment = models.ForeignKey(AleExperiment,
                                        on_delete=models.CASCADE)
 
-    mutations = models.ManyToManyField("seq.Mutation",
-                                       through="seq.ObservedMutation")
+    mutation = models.ForeignKey("seq.Mutation",
+                                 null=True)
 
 
 

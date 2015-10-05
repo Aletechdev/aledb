@@ -106,11 +106,28 @@ def create_ale_experiment(breseq_output_abs_path,
                                     freezer_box,
                                     is_wild_type=False)
 
-    # Find all key mutations.
-    # Ensure that I can find and print them first.
-    key_mutations_set = builder.key_mutations.get_key_mutations(experiment.ale_id)
+    _populate_key_mutations(experiment)
 
-    print(key_mutations_set)
+
+from ale.models import KeyMutation
+
+def _populate_key_mutations(sql_alchemy_experiment):
+
+    """
+    Find all key mutations for ALE experiment and populate database table with them.
+    Using only Django ORM to make commit to database.
+    """
+
+    django_orm_ale_exp = AleExperiment.objects.get(ale_id=sql_alchemy_experiment.ale_id)
+
+    key_mutations_set = builder.key_mutations.get_key_mutations(sql_alchemy_experiment.ale_id)
+    key_mutations_list = list(key_mutations_set)
+
+    for key_mutation in key_mutations_list:
+        km = KeyMutation()
+        km.ale_experiment = django_orm_ale_exp
+        km.mutation = key_mutation
+        km.save()
 
 
 def _get_ale_number(breseq_sample_name):
