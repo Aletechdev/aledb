@@ -102,12 +102,6 @@ class ObservedMutation(models.Model):
 
     sequencing_experiment = models.ForeignKey(ResequencingExperiment)
 
-    key_mutation = models.ForeignKey("ale.KeyMutation",
-                                     null=True,
-                                     blank=True,
-                                     default=None,
-                                     on_delete=models.SET_NULL)
-
     mutation = models.ForeignKey(Mutation)
 
     present = models.NullBooleanField()
