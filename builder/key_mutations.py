@@ -1,10 +1,6 @@
-# from ale.models import AleExperiment
-
 from seq.models import ResequencingExperiment
 
 from seq.models import ObservedMutation
-
-# from seq.models import Mutation
 
 import collections
 
@@ -12,6 +8,19 @@ import collections
 __author__ = 'pphaneuf'
 
 STARTING_STRAIN_ALE_ID = 0
+
+
+def get_key_mutations(ale_experiment_id):
+
+    seq_experiment_dict = _get_seq_experiment_dict(ale_experiment_id)
+
+    common_mutation_set = _get_common_mutation_set(seq_experiment_dict)
+
+    starting_strain_mutation_set = _get_starting_strain_mutation_set(seq_experiment_dict)
+
+    common_mutation_set_no_starting_strain = common_mutation_set - starting_strain_mutation_set
+
+    return common_mutation_set_no_starting_strain
 
 
 def _get_common_mutation_set(seq_experiment_dict):
@@ -56,20 +65,6 @@ def _get_starting_strain_mutation_set(seq_experiment_dict):
     return starting_strain_mutation_set
 
 
-
-def get_key_mutations(ale_experiment_id):
-
-    seq_experiment_dict = _get_seq_experiment_dict(ale_experiment_id)
-
-    common_mutation_set = _get_common_mutation_set(seq_experiment_dict)
-
-    starting_strain_mutation_set = _get_starting_strain_mutation_set(seq_experiment_dict)
-
-    common_mutation_set_no_starting_strain = common_mutation_set - starting_strain_mutation_set
-
-    return common_mutation_set_no_starting_strain
-
-
 def _get_seq_experiment_dict(experiment_id):
 
     ale_experiment_selector = "AND experiment_id = "
@@ -91,9 +86,9 @@ def _get_seq_experiment_mutations_set(seq_experiment_id):
 
     mutations_set = set()
 
-    observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id=seq_experiment_id)
+    observed_mutations_query_set = ObservedMutation.objects.filter(sequencing_experiment_id=seq_experiment_id)
 
-    for observed_mutation in observed_mutations:
+    for observed_mutation in observed_mutations_query_set:
         mutations_set.add(observed_mutation.mutation)
 
     return mutations_set
