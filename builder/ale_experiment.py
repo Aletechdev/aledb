@@ -14,6 +14,8 @@ from ale.models import AleExperiment
 
 from seq.models import Mutation
 
+from ale.models import KeyMutation
+
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -108,8 +110,6 @@ def create_ale_experiment(breseq_output_abs_path,
 
     _populate_key_mutations(experiment)
 
-
-from ale.models import KeyMutation
 
 def _populate_key_mutations(sql_alchemy_experiment):
 
