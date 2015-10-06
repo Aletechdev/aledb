@@ -14,11 +14,7 @@ __author__ = 'pphaneuf'
 STARTING_STRAIN_ALE_ID = 0
 
 
-def get_key_mutations(ale_experiment_id):
-
-    seq_experiment_dict = _get_seq_experiment_dict(ale_experiment_id)
-
-    # 1) get separate mutation set for each seq_experiment
+def _get_common_mutation_set(seq_experiment_dict):
 
     mutation_set_list = []
 
@@ -34,17 +30,16 @@ def get_key_mutations(ale_experiment_id):
 
             mutation_set_list.append(mutations_set)
 
-
-    # 2) AND all separate mutations sets to get common mutation set
-
     common_mutation_set = mutation_set_list[0]
 
     for mutation_set in mutation_set_list:
 
         common_mutation_set = common_mutation_set & mutation_set
 
+    return common_mutation_set
 
-    # 3) get starting strain mutation set
+
+def _get_starting_strain_mutation_set(seq_experiment_dict):
 
     starting_strain_mutation_set = set()
 
@@ -58,23 +53,21 @@ def get_key_mutations(ale_experiment_id):
 
             break;  # Only 1 starting strain, therefore don't need to parse remaining experiments.
 
+    return starting_strain_mutation_set
 
-    # 4) subtract starting strain mutations from common mutation set
+
+
+def get_key_mutations(ale_experiment_id):
+
+    seq_experiment_dict = _get_seq_experiment_dict(ale_experiment_id)
+
+    common_mutation_set = _get_common_mutation_set(seq_experiment_dict)
+
+    starting_strain_mutation_set = _get_starting_strain_mutation_set(seq_experiment_dict)
 
     common_mutation_set_no_starting_strain = common_mutation_set - starting_strain_mutation_set
 
     return common_mutation_set_no_starting_strain
-    
-
-    # seq_experiment_dict = _get_seq_experiment_dict(ale_experiment_id)
-    #
-    # starting_strain_mutations_set = _get_starting_strain_mutations(seq_experiment_dict)
-    #
-    # all_mutations_set = _get_all_mutations(seq_experiment_dict)
-    #
-    # unique_mutations_set = all_mutations_set - starting_strain_mutations_set
-    #
-    # return unique_mutations_set
 
 
 def _get_seq_experiment_dict(experiment_id):
@@ -92,43 +85,6 @@ def _get_seq_experiment_dict(experiment_id):
     seq_experiment_dict = collections.OrderedDict((seq_experiment.id, seq_experiment) for seq_experiment in seq_experiments_raw_query_set)
 
     return seq_experiment_dict
-
-
-def _get_starting_strain_mutations(seq_experiment_dict):
-
-    return _get_mutations(seq_experiment_dict, get_starting_strain_mutations=True)
-
-
-def _get_all_mutations(seq_experiment_dict):
-
-    return _get_mutations(seq_experiment_dict, get_starting_strain_mutations=False)
-
-
-def _get_mutations(seq_experiment_dict, get_starting_strain_mutations=False):
-
-    mutations_set = set()
-
-    for seq_experiment_id in seq_experiment_dict:
-
-        seq_experiment = seq_experiment_dict[seq_experiment_id]
-
-        if get_starting_strain_mutations:
-
-            if seq_experiment.ale_id == STARTING_STRAIN_ALE_ID:
-
-                mutations_set.update(_get_seq_experiment_mutations_set(seq_experiment_id))
-
-                break   # Only 1 starting strain, therefore don't need parse remaining experiments.
-
-        else:
-
-            if seq_experiment.ale_id != STARTING_STRAIN_ALE_ID:
-
-                mutations_set.update(_get_seq_experiment_mutations_set(seq_experiment_id))
-
-    return mutations_set
-
-
 
 
 def _get_seq_experiment_mutations_set(seq_experiment_id):
