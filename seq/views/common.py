@@ -45,19 +45,19 @@ def get_ale_experiment_id(request):
     return experiment_ids
 
 
-def get_table_mutation_entry(observed, experiment_urls):
+def get_table_mutation_entry(observed_mutation, experiment_urls):
 
     table_entry = ""
 
-    if observed.breseq_present:
+    if observed_mutation.breseq_present:
 
-        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % (experiment_urls, float(observed.frequency))
+        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % (experiment_urls, float(observed_mutation.frequency))
 
     # TODO: Figure out what this is supposed to do.
-    elif observed.present is False:
+    elif observed_mutation.present is False:
 
-        table_entry = MUTATION_PRESENT_FALSE_CELL_HTML % (observed.mutated_reads,
-                                                          observed.wt_reads)
+        table_entry = MUTATION_PRESENT_FALSE_CELL_HTML % (observed_mutation.mutated_reads,
+                                                          observed_mutation.wt_reads)
 
     return table_entry
 
