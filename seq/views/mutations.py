@@ -38,11 +38,11 @@ else:
 @login_required
 def mutation_table(request):
 
-    ale_experiment_ids = common.get_ale_experiment_id(request)
+    ale_experiment_id = common.get_ale_experiment_id(request)
 
     ale_number = _get_ale_number(request)
 
-    seq_experiment_list = _get_seq_experiment_list(ale_experiment_ids)
+    seq_experiment_list = _get_seq_experiment_list(ale_experiment_id)
 
     seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request)
 
@@ -56,7 +56,7 @@ def mutation_table(request):
 
     context = Context({"experiments": seq_experiment_list,
                        "ale_no": ale_number,
-                       "experiment_id": ale_experiment_ids,
+                       "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
                        "title": "Mutation table",
                        "table_header": mark_safe(table_header)})
