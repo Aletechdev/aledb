@@ -43,8 +43,6 @@ def key_mutations(request):
 
     ale_number = _get_ale_number(request)
 
-    # Need the seq experiments involved (since it's key mutations, they are all involved except for the starting strain.)
-    # TODO: remove the starting strain seq_experiment
     seq_experiment_queryset = _get_seq_experiment_queryset(ale_experiment_id)
 
     seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request)
@@ -87,7 +85,9 @@ def _get_seq_experiment_queryset(ale_experiment_id):
 
         experiment_queryset = ResequencingExperiment.objects.all()
 
-    return experiment_queryset
+    filtered_experiment_queryset = experiment_queryset.exclude(ale_id=STARTING_STRAIN_ALE_ID)
+
+    return filtered_experiment_queryset
 
 
 def _get_table_header(seq_experiment_dict):
@@ -221,7 +221,7 @@ def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):
     key_mutation_id_list = []
 
     for key_mutation in key_mutation_queryset:
-        
+
         key_mutation_id_list.append(key_mutation.mutation_id)
 
     key_mutation_observed_mutation_queryset = seq_experiment_observed_mutation_queryset.filter(mutation_id__in=key_mutation_id_list)
