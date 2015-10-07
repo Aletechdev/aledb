@@ -38,7 +38,6 @@ STARTING_STRAIN_ALE_ID = 0
 @login_required
 def key_mutations(request):
 
-    # Get the ALE experiment ID.
     ale_experiment_id = common.get_ale_experiment_id(request)
 
     ale_number = _get_ale_number(request)
@@ -46,6 +45,8 @@ def key_mutations(request):
     seq_experiment_queryset = _get_seq_experiment_queryset(ale_experiment_id)
 
     seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request)
+
+    seq_experiment_ordered_dict = _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
 
     seq_experiment_ordered_dict = common.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
@@ -63,6 +64,19 @@ def key_mutations(request):
                        "table_header": mark_safe(table_header)})
 
     return HttpResponse(template.render(context))
+
+
+def _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
+
+    for key, value in seq_experiment_ordered_dict.iteritems():
+
+        if value.ale_id == STARTING_STRAIN_ALE_ID:
+
+            key_to_delete = key
+
+    del seq_experiment_ordered_dict[key_to_delete]
+
+    return seq_experiment_ordered_dict
 
 
 def _get_ale_number(request):
