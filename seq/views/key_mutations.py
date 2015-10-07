@@ -35,6 +35,8 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 STARTING_STRAIN_ALE_ID = 0
 
 
+# TODO: this implementation shares much with mutations.py; refactored shared implementations into common.py
+
 @login_required
 def key_mutations(request):
 
@@ -140,7 +142,6 @@ def _get_table_body(seq_experiment_dict, request):
     ale_experiment_id = common.get_ale_experiment_id(request)
     key_mutation_queryset = KeyMutation.objects.filter(ale_experiment_id=ale_experiment_id)
 
-    # TODO: The observed_mutations_query_set that only contains observed mutations from key_mutation set.
     observed_mutations_query_set = _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset)
 
     mutations = Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
