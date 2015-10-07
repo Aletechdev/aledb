@@ -7,6 +7,8 @@ from django.template import Context, loader
 from django.utils.safestring import mark_safe
 
 from ale.models import AleExperiment
+from ale.models import KeyMutation
+
 from seq.models import ResequencingExperiment
 from seq.models import Mutation
 from seq.models import ObservedMutation
@@ -30,6 +32,8 @@ HTML_EMPTY_MUTATION_CELL = """<td class="false"></td>"""
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
+STARTING_STRAIN_ALE_ID = 0
+
 
 @login_required
 def key_mutations(request):
@@ -41,7 +45,7 @@ def key_mutations(request):
 
     # Need the seq experiments involved (since it's key mutations, they are all involved except for the starting strain.)
     # TODO: remove the starting strain seq_experiment
-    seq_experiment_list = _get_seq_experiment_list(ale_experiment_id)
+    seq_experiment_queryset = _get_seq_experiment_queryset(ale_experiment_id)
 
     seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request)
 
@@ -49,12 +53,11 @@ def key_mutations(request):
 
     table_header = _get_table_header(seq_experiment_ordered_dict)
 
-    table_body = ""
-    # table_body = _get_table_body(seq_experiment_ordered_dict, request)
+    table_body = _get_table_body(seq_experiment_ordered_dict, request)
 
     template = loader.get_template("table_template.html")
 
-    context = Context({"experiments": seq_experiment_list,
+    context = Context({"experiments": seq_experiment_queryset,
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
@@ -72,15 +75,19 @@ def _get_ale_number(request):
     return ale_number
 
 
-def _get_seq_experiment_list(experiment_ids):
+def _get_seq_experiment_queryset(ale_experiment_id):
 
-    if experiment_ids is not None:
-        experiment = AleExperiment.objects.get(ale_id=experiment_ids)
-        experiment_list = experiment.aleid_set.only("ale_id")
+    if ale_experiment_id is not None:
+
+        experiment = AleExperiment.objects.get(ale_id=ale_experiment_id)
+
+        experiment_queryset = experiment.aleid_set.only("ale_id")
+
     else:
-        experiment_list = ResequencingExperiment.objects.all()
 
-    return experiment_list
+        experiment_queryset = ResequencingExperiment.objects.all()
+
+    return experiment_queryset
 
 
 def _get_table_header(seq_experiment_dict):
@@ -114,65 +121,64 @@ def _get_experiment_id_idx_mapping(seq_experiment_dict):
     return experiment_id_idx_mapping
 
 
-# def _get_table_body(seq_experiment_dict, request):
-#
-#     # Don't need this since I can pull the mutations from the key_mutation table.
-#     #observed_mutations_query_set = _get_observed_mutations(seq_experiment_dict)
-#
-#     #get mutations from key_mutations table that contain the ale_experiment_id
-#     ale_experiment_id = common.get_ale_experiment_id(request)
-#     key_mutations_query_set =
-#
-#     mutations = Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
-#     mutation_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
-#
-#     experiment_urls = common.get_experiment_urls(seq_experiment_dict)
-#
-#     experiment_id_idx_mapping = _get_experiment_id_idx_mapping(seq_experiment_dict)
-#
-#     # TODO: figure out what this is.
-#     extra_validation = False if request.GET.get("novalid") else True
-#
-#     # Initialize all sample mutation table cells as empty.
-#     table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for idx in range(len(mutations))]
-#
-#     # Populating table_entries
-#     for observed_mutation in observed_mutations_query_set:
-#
-#         # TODO: figure out what this is.
-#         # sometimes we do not want the extra validation
-#         if not extra_validation and not observed_mutation.breseq_present:
-#             continue
-#
-#         new_entry = common.get_table_mutation_entry(observed_mutation, experiment_urls)
-#
-#         if new_entry is not None:
-#             table_entries[mutation_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
-#
-#     #Populating table body
-#     table_body = ""
-#
-#     for mutation in mutations:
-#
-#         table_row = "<tr>"
-#
-#         if mutation.reference_error:    # TODO: what is going on here? What is 'reference_error'?
-#             # table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
-#             continue
-#
-#         else:
-#             table_row += HTML_MUTATION_TABLE_ROW % (
-#                 mutation.position,
-#                 mutation.sequence_change)
-#
-#         table_row += "<td>%s</td>" % mutation.gene
-#         table_row += "<td>%s</td>" % mutation.protein_change
-#         table_row += "".join(table_entries[mutation_dict[mutation.id]])
-#         table_row += "</tr>"
-#
-#         table_body += table_row + "\n"
-#
-#     return table_body
+def _get_table_body(seq_experiment_dict, request):
+
+    ale_experiment_id = common.get_ale_experiment_id(request)
+    key_mutation_queryset = KeyMutation.objects.filter(ale_experiment_id=ale_experiment_id)
+
+    # TODO: The observed_mutations_query_set that only contains observed mutations from key_mutation set.
+    observed_mutations_query_set = _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset)
+
+    mutations = Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
+    mutation_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
+
+    experiment_urls = common.get_experiment_urls(seq_experiment_dict)
+
+    experiment_id_idx_mapping = _get_experiment_id_idx_mapping(seq_experiment_dict)
+
+    # TODO: figure out what this is.
+    extra_validation = False if request.GET.get("novalid") else True
+
+    # Initialize all sample mutation table cells as empty.
+    table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for idx in range(len(mutations))]
+
+    # Populating table_entries
+    for observed_mutation in observed_mutations_query_set:
+
+        # TODO: figure out what this is.
+        # sometimes we do not want the extra validation
+        if not extra_validation and not observed_mutation.breseq_present:
+            continue
+
+        new_entry = common.get_table_mutation_entry(observed_mutation, experiment_urls)
+
+        if new_entry is not None:
+            table_entries[mutation_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+
+    #Populating table body
+    table_body = ""
+
+    for mutation in mutations:
+
+        table_row = "<tr>"
+
+        if mutation.reference_error:    # TODO: what is going on here? What is 'reference_error'?
+            # table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
+            continue
+
+        else:
+            table_row += HTML_MUTATION_TABLE_ROW % (
+                mutation.position,
+                mutation.sequence_change)
+
+        table_row += "<td>%s</td>" % mutation.gene
+        table_row += "<td>%s</td>" % mutation.protein_change
+        table_row += "".join(table_entries[mutation_dict[mutation.id]])
+        table_row += "</tr>"
+
+        table_body += table_row + "\n"
+
+    return table_body
 
 
 def _show_checked_flasks(request, seq_experiment_dict):
@@ -203,8 +209,21 @@ def _remove_checked_flasks(request, seq_experiment_dict):
     return seq_experiment_dict
 
 
-def _get_observed_mutations(seq_experiment_dict):
+def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):
 
-    observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
+    # 2 filters for the queryset:
+    # 1) get observed_mutations that are contained within the seq_experiment_dict,
+    # 2) get observed_mutations that reference to the key_mutation_queryset
+    # TODO: refactor
 
-    return observed_mutations
+    seq_experiment_observed_mutation_queryset = ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
+
+    key_mutation_id_list = []
+
+    for key_mutation in key_mutation_queryset:
+        
+        key_mutation_id_list.append(key_mutation.mutation_id)
+
+    key_mutation_observed_mutation_queryset = seq_experiment_observed_mutation_queryset.filter(mutation_id__in=key_mutation_id_list)
+
+    return key_mutation_observed_mutation_queryset
