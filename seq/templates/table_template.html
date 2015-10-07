@@ -132,16 +132,25 @@
 <body>
 {% if experiment_id %}
 <form action="" method="get">
+
+    <!-- ALE selection drop-down -->
     <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+
     <select name="ale_no" class="ui">
+
         <option value="all">All ales</option>
         {% for experiment in experiments %}
+
         <option {%if ale_no == experiment.ale_id %}selected="selected" {% endif %} value="{{ experiment.ale_id }}">
             {{ experiment.ale_id }}
+
         </option>
         {% endfor %}
+
     </select>
+
     <input type="submit" value="Go" class="ui"/>
+
 </form>
 {% endif %}
 <form action="" method="get">
