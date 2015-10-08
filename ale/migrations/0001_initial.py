@@ -30,7 +30,6 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('ale_id', models.IntegerField()),
                 ('description', models.CharField(max_length=300, null=True, blank=True)),
-                ('ale_experiment', models.ForeignKey(to='ale.AleExperiment')),
             ],
             options={
                 'verbose_name_plural': 'ALEs',
@@ -42,7 +41,6 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('flask_number', models.IntegerField(null=True, blank=True)),
                 ('comments', models.CharField(max_length=200, null=True, blank=True)),
-                ('ale_id', models.ForeignKey(to='ale.AleId')),
             ],
             options={
                 'verbose_name_plural': 'Flasks',
@@ -76,9 +74,13 @@ class Migration(migrations.Migration):
                 ('is_population', models.BooleanField()),
                 ('description', models.CharField(max_length=300, null=True, blank=True)),
                 ('person', models.CharField(max_length=200, null=True, blank=True)),
-                ('flask', models.ForeignKey(to='ale.Flask')),
-                ('freezer_box', models.ForeignKey(to='ale.FreezerBox')),
-                ('parent_isolate', models.ForeignKey(blank=True, to='ale.Isolate', null=True)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='KeyMutation',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('ale_experiment', models.ForeignKey(to='ale.AleExperiment')),
             ],
         ),
         migrations.CreateModel(
@@ -94,32 +96,5 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name_plural': 'Media',
             },
-        ),
-        migrations.AddField(
-            model_name='flask',
-            name='media',
-            field=models.ForeignKey(to='ale.Media'),
-        ),
-        migrations.AddField(
-            model_name='aleid',
-            name='starting_strain',
-            field=models.ForeignKey(default=None, blank=True, to='ale.Isolate', null=True),
-        ),
-        migrations.AddField(
-            model_name='aleexperiment',
-            name='instrument',
-            field=models.ForeignKey(to='ale.Instrument'),
-        ),
-        migrations.AlterUniqueTogether(
-            name='isolate',
-            unique_together=set([('flask', 'isolate_number')]),
-        ),
-        migrations.AlterUniqueTogether(
-            name='flask',
-            unique_together=set([('ale_id', 'flask_number')]),
-        ),
-        migrations.AlterUniqueTogether(
-            name='aleid',
-            unique_together=set([('ale_experiment', 'ale_id')]),
         ),
     ]
