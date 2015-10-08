@@ -16,7 +16,7 @@ REQUEST_ALE_NUMBER = "ale_no"
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
 MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
-MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true"><a href=%s>%.2f</td>"""
+MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%.2f</td>"""
 
 REQUEST_ALL = "all"
 
@@ -51,7 +51,7 @@ def get_table_mutation_entry(observed_mutation, experiment_urls):
 
     if observed_mutation.breseq_present:
 
-        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % (experiment_urls, float(observed_mutation.frequency))
+        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % float(observed_mutation.frequency)
 
     # TODO: Figure out what this is supposed to do.
     elif observed_mutation.present is False:
