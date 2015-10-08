@@ -70,13 +70,19 @@ def key_mutations(request):
 
 def _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
 
+    key_to_delete_found = False
+
     for key, value in seq_experiment_ordered_dict.iteritems():
 
         if value.ale_id == STARTING_STRAIN_ALE_ID:
 
             key_to_delete = key
 
-    del seq_experiment_ordered_dict[key_to_delete]
+            key_to_delete_found = True
+
+    if key_to_delete_found:
+
+        del seq_experiment_ordered_dict[key_to_delete]
 
     return seq_experiment_ordered_dict
 
