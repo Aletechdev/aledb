@@ -32,6 +32,7 @@ HTML_EMPTY_MUTATION_CELL = """<td class="false"></td>"""
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
+# TODO: this constant also defined in builder/key_mutations. Needs to be defined once and accessible by all apps.
 STARTING_STRAIN_ALE_ID = 0
 
 
