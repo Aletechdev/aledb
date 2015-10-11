@@ -7,6 +7,8 @@ import collections
 
 __author__ = 'pphaneuf'
 
+
+# TODO: this constant also defined in seq/views/key_mutations. Needs to be defined once and accessible by all apps.
 STARTING_STRAIN_ALE_ID = 0
 
 
@@ -39,7 +41,9 @@ def _get_common_mutation_set(seq_experiment_dict):
 
             mutation_set_list.append(mutations_set)
 
-    common_mutation_set = mutation_set_list[0]
+    arbitrary_starting_mutation_set = mutation_set_list[0]
+
+    common_mutation_set = arbitrary_starting_mutation_set
 
     for mutation_set in mutation_set_list:
 
