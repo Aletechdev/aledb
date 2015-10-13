@@ -12,6 +12,4 @@ urlpatterns = patterns('',
                        url('^mutations$', mutations.mutation_table, name="mutation_table"),
                        url('^key_mutations$', key_mutations.key_mutations, name="key_mutations"),
                        url('^lists$', experiments.lists, name="lists"),
-                       url('^summary$', views.mutation_summary, name="mutation_summary"),
-                       # url('^lineage$', views.lineage_table, name="lineage_table"),
                        )
