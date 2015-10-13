@@ -1,56 +1,64 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
+        "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Ale Experiments</title>
-        <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script> 
-        <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
-        <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css" media="print, projection, screen" />
-        <script type="text/javascript">
-            var asInitVals = new Array();
-            $(document).ready($(function() {
-                oTable = $("#runs").tablesorter({widgets: ['zebra']});
+<head>
+    <meta charset="utf-8">
+    <title>Ale Experiments</title>
+    <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
+    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
+          media="print, projection, screen"/>
+    <script type="text/javascript">
+        var asInitVals = new Array();
+        $(document).ready($(function () {
+            oTable = $("#runs").tablesorter({widgets: ['zebra']});
 
-            }));
-        </script>
-    </head>
-    <body>
+        }));
+    </script>
 
-    <table id="all mutations" class="tablesorter">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+</head>
+<body>
+
+<table id="all mutations" class="tablesorter">
+    <thead>
+    <tr>
+        <th>All Mutations</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td><a href="mutations?ale_experiment_id=all">link</a></td>
+    </tbody>
+
+    <!--<table id="runs" class="tablesorter">-->
+    <table id="runs" class="tablesorter">
         <thead>
         <tr>
-            <th>All Mutations</th>
+            <th>ALE Experiment</th>
+            <th>Sample Resequencing List</th>
+            <th>Mutation Table</th>
+            <th>Key Mutations</th>
+            <!--<th>Mutation Table by Experiment</th>-->
+            <!--<th>Isolates</th>-->
+            <!--<th>Lineage Table</th>-->
         </tr>
         </thead>
         <tbody>
+        {% for experiment in experiments %}
         <tr>
-            <td><a href="mutations?ale_experiment_id=all">link</a></td>
+            <td>{{experiment.name}}</td>
+            <td><a href="lists?ale_experiment_id={{experiment.ale_id}}">link</a></td>
+            <td><a href="mutations?ale_experiment_id={{experiment.ale_id}}">link</a></td>
+            <td><a href="key_mutations?ale_experiment_id={{experiment.ale_id}}">link</a></td>
+            <!--<td><a href="experiments?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
+            <!--<td><a href="isolates?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
+            <!--<td><a href="lineage?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
+            {% endfor %}
         </tbody>
-
-        <table id="runs" class="tablesorter">
-            <thead>
-            <tr>
-                <th>ALE Experiment</th>
-                <th>Sample Resequencing List</th>
-                <th>Mutation Table</th>
-                <th>Key Mutations</th>
-                <!--<th>Mutation Table by Experiment</th>-->
-                <!--<th>Isolates</th>-->
-                <!--<th>Lineage Table</th>-->
-            </tr>
-            </thead>
-            <tbody>
-            {% for experiment in experiments %}
-            <tr>
-                <td>{{experiment.name}}</td>
-                <td><a href="lists?ale_experiment_id={{experiment.ale_id}}">link</a></td>
-                <td><a href="mutations?ale_experiment_id={{experiment.ale_id}}">link</a></td>
-                <td><a href="key_mutations?ale_experiment_id={{experiment.ale_id}}">link</a></td>
-                <!--<td><a href="experiments?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
-                <!--<td><a href="isolates?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
-                <!--<td><a href="lineage?ale_experiment_id={{experiment.ale_id}}">link</a></td>-->
-                {% endfor %}
-            </tbody>
-    </body>
+    </table>
+</table>
+</body>
 </html>

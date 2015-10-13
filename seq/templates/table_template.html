@@ -6,7 +6,11 @@
     <meta charset="utf-8">
     <title>{{title}}</title>
     <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
+
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
     <style type="text/css" title="currentStyle">
         @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
         .FixedHeader_Cloned th {
@@ -49,7 +53,7 @@
 
     </script>
     <script>
-	    $(document).ready(function () {	        
+	    $(document).ready(function () {
 	        var filter_offset = $("#data_filter").offset();
 	        $(window).resize(function () {
 	            filter_offset = $("#data_filter").offset();
@@ -70,7 +74,7 @@
 
     </script>
     <script>
-	    $(document).ready(function () {	    
+	    $(document).ready(function () {
 	        $("tr td:first-child").each(function () {
 	            $(this).hover(
 	                function () {
@@ -95,14 +99,14 @@
     <script>
 	    var filterFlask = function (filter_type) {
 	        var url = location.href.split("&remove=")[0].split("&show=")[0];
-	        
+
 	        checked_flasks = [];
 	        $("tr td").children(".cb").each(function () {
 	            if (this.checked) {
 	                checked_flasks.push(this.name);
 	            };
 	        });
-		
+
 		var removed_flask_ids,kept_flask_ids;
 	        location.href.split("&").forEach(function (s) {
 	            if (s.indexOf("remove") >= 0) {
@@ -112,7 +116,7 @@
 	                kept_flask_ids = s.split("=")[1];
 	            }
 	        });
-	        
+
 	        if (filter_type == "remove") {
 	            query_string = typeof kept_flask_ids != "undefined" ? "&show=" + kept_flask_ids:"";
 	            query_string += typeof removed_flask_ids != "undefined" ? "&remove=" + removed_flask_ids.replace("}",""):"&remove={";
