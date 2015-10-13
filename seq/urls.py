@@ -3,7 +3,6 @@ from django.conf.urls import patterns, url
 from seq.views import index
 from seq.views import mutations
 from seq.views import experiments
-from seq.views import views
 from seq.views import key_mutations
 
 
