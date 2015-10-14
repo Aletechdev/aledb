@@ -17,8 +17,6 @@ import aleinfo.settings as settings
 
 from seq.views import common
 
-from builder.key_mutations import get_key_mutations
-
 
 __author__ = 'pphaneuf'
 
