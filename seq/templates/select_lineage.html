@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf8">
+    <title>Lineage Table</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+    <script type="text/javascript" src="/static/jquery1.9.1.min.js"></script>
+    <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
+    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
+          media="print, projection, screen"/>
+    <script type="text/javascript">
+        var asInitVals = new Array();
+        $(document).ready($(function () {
+            oTable = $("#lineages").tablesorter({widgets: ['zebra']});
+
+        }));
+    </script>
+</head>
+<body>
+<table id="lineages" class="tablesorter">
+    <thead>
+    <tr>
+        <th>Lineage</th>
+        <th># Flasks</th>
+        <th># Isolates</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{ table_body }}
+    </tbody>
+</body>
+</html>
