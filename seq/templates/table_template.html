@@ -137,15 +137,31 @@
 <style>
 
     body {
-        padding-top: 25px;
+        padding-top: 70px;
         padding-right: 50px;
         padding-bottom: 25px;
         padding-left: 50px;
     }
 
+    .navbar .container {
+        width: auto;
+    }
+
 </style>
 
 <body>
+
+<!-- Fixed navbar -->
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="http://aquaticus.ucsd.edu/ale_analytics">ALE Analytics</a>
+            <a class="navbar-brand">/</a>
+            <a class="navbar-brand">Mutation Table</a>
+        </div>
+    </div>
+</nav>
+
 {% if experiment_id %}
 <form action="" method="get">
 
