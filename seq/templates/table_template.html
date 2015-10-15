@@ -137,30 +137,19 @@
 <style>
 
     body {
-        padding-top: 70px;
         padding-right: 50px;
         padding-bottom: 25px;
         padding-left: 50px;
-    }
-
-    .navbar .container {
-        width: auto;
     }
 
 </style>
 
 <body>
 
-<!-- Fixed navbar -->
-<nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="http://aquaticus.ucsd.edu/ale_analytics">ALE Analytics</a>
-            <a class="navbar-brand">/</a>
-            <a class="navbar-brand">Mutation Table</a>
-        </div>
-    </div>
-</nav>
+<div class="page-header">
+{#    Use something like the following Django template language to insert project/sample name {{title}}#}
+  <h2>ALE Analytics / Mutation Table</h2>
+</div>
 
 {% if experiment_id %}
 <form action="" method="get">
