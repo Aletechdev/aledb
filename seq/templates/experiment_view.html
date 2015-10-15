@@ -58,15 +58,43 @@
     </tbody>
 
     <script type="text/javascript">
-        var all_mc_count_cells = document.getElementsByClassName("missing_coverage_count");
-        for (var i = 0, max = all_mc_count_cells.length; i < max; i++) {
-            var node = all_mc_count_cells[i];
+        var cells = document.getElementsByClassName("missing_coverage_count");
+        for (var i = 0, max = cells.length; i < max; i++) {
+            var node = cells[i];
 
             //get the text from the first child node - which should be a text node
             var currentText = node.childNodes[0].nodeValue;
 
             //check for 'one' and assign this table cell's background color accordingly
             if (currentText > 5)
+                node.style.backgroundColor = "pink";
+        }
+    </script>
+
+    <script type="text/javascript">
+        var cells = document.getElementsByClassName("mean_coverage");
+        for (var i = 0, max = cells.length; i < max; i++) {
+            var node = cells[i];
+
+            //get the text from the first child node - which should be a text node
+            var currentText = node.childNodes[0].nodeValue;
+
+            //check for 'one' and assign this table cell's background color accordingly
+            if (currentText < 75)
+                node.style.backgroundColor = "pink";
+        }
+    </script>
+
+    <script type="text/javascript">
+        var cells = document.getElementsByClassName("mapped_read_count");
+        for (var i = 0, max = cells.length; i < max; i++) {
+            var node = cells[i];
+
+            //get the text from the first child node - which should be a text node
+            var currentText = node.childNodes[0].nodeValue;
+
+            //check for 'one' and assign this table cell's background color accordingly
+            if (currentText < 1250000)
                 node.style.backgroundColor = "pink";
         }
     </script>
