@@ -1,6 +1,3 @@
-__author__ = 'pphaneuf'
-
-
 from django.http import HttpResponse
 
 from django.template import Context, loader
@@ -12,6 +9,11 @@ from django.contrib.auth.decorators import login_required
 import aleinfo.settings as settings
 
 from seq.views import common
+
+
+__author__ = 'pphaneuf'
+
+INDEX_TEMPLATE = "index.html"
 
 
 if hasattr(settings, common.SETTINGS_SEQUENCING_URL):
@@ -26,7 +28,7 @@ def index(request):
 
     experiments = AleExperiment.objects.all()
 
-    template = loader.get_template("index.html")
+    template = loader.get_template(INDEX_TEMPLATE)
 
     context = Context({"experiments": experiments,
                        "seq_url": reseqencing_report_url})
