@@ -1,52 +1,117 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
+        "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-    <head>
-        <meta charset="utf-8">
-        <title>Resequencing Runs</title>
+<head>
+    <meta charset="utf-8">
+    <title>Resequencing Runs</title>
 
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
-        <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script> 
-        <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
+    <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
 
-        <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css" media="print, projection, screen" />
+    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
+          media="print, projection, screen"/>
 
-        <script type="text/javascript">
-            var asInitVals = new Array();
-            $(document).ready($(function() {
-                oTable = $("#runs").tablesorter({widgets: ['zebra']});
+    <script type="text/javascript">
 
-            }));
-        </script>
-    </head>
-    <body>
-    <table id="runs" class="tablesorter">
-        <thead><tr>
-            <th>Run Name</th>
-            <th># Predicted Mutations</th>
-            <th>Unassigned Missing Coverage Evidence</th>
-            <th>Mean Coverage</th>
-            <th>Total Reads</th>
-            <th>Percent Mapped</th>
-            <th>Mapped Reads</th>
-            <th>Average Read Length</th>
+        var asInitVals = new Array();
+        $(document).ready($(function () {
+            oTable = $("#runs").tablesorter({widgets: ['zebra']});
 
-        </tr></thead>
+        }));
+    </script>
+
+</head>
+<body>
+<table id="runs" class="tablesorter">
+    <thead>
+    <tr>
+        <th>Run Name</th>
+        <th># Predicted Mutations</th>
+        <th>Unassigned Missing Coverage Evidence</th>
+        <th>Mean Coverage</th>
+        <th>Total Reads</th>
+        <th>Percent Mapped</th>
+        <th>Mapped Reads</th>
+        <th>Average Read Length</th>
+
+    </tr>
+    </thead>
     <tbody>
     {% for experiment_info_tuple in experiments_info_list %}
-        <tr>
-            <td><a href="{{resequencing_report_url}}{{experiment_info_tuple.0.location}}">{{experiment_info_tuple.0.get_isolate_name}}</a></td>
-            <td>{{experiment_info_tuple.0.mutations.count}}</td>
-            <td>{{experiment_info_tuple.1 | length}}</td>
-            <td>{{experiment_info_tuple.0.mean_coverage}}</td>
-            <td>{{experiment_info_tuple.0.reads}}</td>
-            <td>{{experiment_info_tuple.0.percentage_mapped}}%</td>
-            <td>{{experiment_info_tuple.2}}</td>
-            <td>{{experiment_info_tuple.0.average_read_length}}</td>
+        <tr class="experiment_stats">
+            <td class="sample_name"><a href="
+                    {{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.get_isolate_name }}</a>
+            </td>
+            <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
+            <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
+            <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
+            <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
+            <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
+            <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
+            <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
         </tr>
+
     {% endfor %}
     </tbody>
-    </body>
+
+    <script type="text/javascript">
+
+        var mc_cells = document.getElementsByClassName("missing_coverage_count");
+        var sample_name_cells = document.getElementsByClassName("sample_name");
+
+        for (var i = 0, max = mc_cells.length; i < max; i++) {
+            var node = mc_cells[i];
+
+            //get the text from the first child node - which should be a text node
+            var currentText = node.childNodes[0].nodeValue;
+
+            if (currentText > 5) {
+                node.style.backgroundColor = "pink";
+                sample_name_cells[i].style.backgroundColor = "pink";
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+
+        var mean_coverage_cells = document.getElementsByClassName("mean_coverage");
+        var sample_name_cells = document.getElementsByClassName("sample_name");
+
+        for (var i = 0, max = mean_coverage_cells.length; i < max; i++) {
+            var node = mean_coverage_cells[i];
+
+            //get the text from the first child node - which should be a text node
+            var currentText = node.childNodes[0].nodeValue;
+
+            if (currentText < 75) {
+                node.style.backgroundColor = "pink";
+                sample_name_cells[i].style.backgroundColor = "pink";
+            }
+        }
+    </script>
+
+    <script type="text/javascript">
+
+        var cells = document.getElementsByClassName("mapped_read_count");
+        var sample_name_cells = document.getElementsByClassName("sample_name");
+
+        for (var i = 0, max = cells.length; i < max; i++) {
+            var node = cells[i];
+
+            //get the text from the first child node - which should be a text node
+            var currentText = node.childNodes[0].nodeValue;
+
+            if (currentText < 1250000) {
+                node.style.backgroundColor = "pink";
+                sample_name_cells[i].style.backgroundColor = "pink";
+            }
+
+        }
+    </script>
+
+</table>
+</body>
 </html>
