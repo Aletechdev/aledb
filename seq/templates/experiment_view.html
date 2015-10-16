@@ -69,8 +69,7 @@
     <tbody>
     {% for experiment_info_tuple in experiments_info_list %}
         <tr class="experiment_stats">
-            <td class="sample_name"><a href="
-                    {{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.get_isolate_name }}</a>
+            <td class="sample_name"><a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.get_isolate_name }}</a>
             </td>
             <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
             <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>

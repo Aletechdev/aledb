@@ -20,9 +20,6 @@ __author__ = 'pphaneuf'
 
 
 HTML_MUTATION_TABLE_ROW = """<td>%d %s<a href="javascript:void(0)" class="shut" style="float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
-HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
-HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
-HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
 HTML_EMPTY_MUTATION_CELL = """<td class="false"></td>"""
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
@@ -40,15 +37,15 @@ def mutation_table(request):
 
     ale_experiment_id = common.get_ale_experiment_id(request)
 
-    ale_number = _get_ale_number(request)
+    ale_number = common.get_ale_number(request)
 
-    seq_experiment_list = _get_seq_experiment_list(ale_experiment_id)
+    seq_experiment_list = common.get_seq_experiment_queryset(ale_experiment_id)
 
     seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request)
 
     seq_experiment_ordered_dict = common.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
-    table_header = _get_table_header(seq_experiment_ordered_dict)
+    table_header = common.get_table_header(seq_experiment_ordered_dict)
 
     table_body = _get_table_body(seq_experiment_ordered_dict, request)
 
@@ -62,49 +59,6 @@ def mutation_table(request):
                        "table_header": mark_safe(table_header)})
 
     return HttpResponse(template.render(context))
-
-
-def _get_ale_number(request):
-
-    ale_number = request.GET.get(common.REQUEST_ALE_NUMBER)
-    ale_number = None if ale_number is None or ale_number == "all" else int(ale_number)
-
-    return ale_number
-
-
-def _get_seq_experiment_list(experiment_ids):
-
-    if experiment_ids is not None:
-        experiment = AleExperiment.objects.get(ale_id=experiment_ids)
-        experiment_list = experiment.aleid_set.only("ale_id")
-    else:
-        experiment_list = ResequencingExperiment.objects.all()
-
-    return experiment_list
-
-
-def _get_table_header(seq_experiment_dict):
-
-    table_header = HTML_MUTATION_TABLE_HEADER
-
-    experiment_urls = common.get_experiment_urls(seq_experiment_dict)
-
-    for seq_experiment_id in seq_experiment_dict:
-
-        seq_experiment = seq_experiment_dict[seq_experiment_id]
-
-        sample_name = common.get_sample_name(seq_experiment)
-
-        mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id],
-                                                                       sample_name)
-
-        table_header += HTML_CHECKBOX % (
-            seq_experiment.id,
-            mutation_identifier)
-
-    table_header += "</tr>"
-
-    return table_header
 
 
 def _get_experiment_id_idx_mapping(seq_experiment_dict):
