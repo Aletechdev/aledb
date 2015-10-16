@@ -2,6 +2,7 @@ import collections
 
 from seq.models import ResequencingExperiment
 from ale.models import AleExperiment
+from seq.models import Mutation
 
 import aleinfo.settings as settings
 
@@ -22,6 +23,8 @@ HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>""
 
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%.2f</td>"""
+HTML_MUTATION_TABLE_ROW = """<td>%d %s<a href="javascript:void(0)" class="shut" style="float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
+HTML_EMPTY_MUTATION_CELL = """<td class="false"></td>"""
 
 REQUEST_ALL = "all"
 
@@ -40,6 +43,70 @@ if hasattr(settings, SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.sequencing_url
 else:
     reseqencing_report_url = DEFAULT_RESEQ_REPORT_URL
+
+
+# TODO: figure out which functions are only called within common.py and prefix with "_".
+
+
+def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
+
+    mutations = Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
+    mutation_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
+
+    experiment_urls = get_experiment_urls(seq_experiment_dict)
+
+    experiment_id_idx_mapping = _get_experiment_id_idx_mapping(seq_experiment_dict)
+
+    # TODO: figure out what this is.
+    extra_validation = False if request.GET.get("novalid") else True
+
+    # Initialize all sample mutation table cells as empty.
+    table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for idx in range(len(mutations))]
+
+    # Populating table_entries
+    for observed_mutation in observed_mutations_query_set:
+
+        # TODO: figure out what this is.
+        # sometimes we do not want the extra validation
+        if not extra_validation and not observed_mutation.breseq_present:
+            continue
+
+        new_entry = get_table_mutation_entry(observed_mutation, experiment_urls)
+
+        if new_entry is not None:
+            table_entries[mutation_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+
+    #Populating table body
+    table_body = ""
+
+    for mutation in mutations:
+
+        table_row = "<tr>"
+
+        if mutation.reference_error:    # TODO: what is going on here? What is 'reference_error'?
+            # table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
+            continue
+
+        else:
+            table_row += HTML_MUTATION_TABLE_ROW % (
+                mutation.position,
+                mutation.sequence_change)
+
+        table_row += "<td>%s</td>" % mutation.gene
+        table_row += "<td>%s</td>" % mutation.protein_change
+        table_row += "".join(table_entries[mutation_dict[mutation.id]])
+        table_row += "</tr>"
+
+        table_body += table_row + "\n"
+
+    return table_body
+
+
+def _get_experiment_id_idx_mapping(seq_experiment_dict):
+
+    experiment_id_idx_mapping = dict((reseq_exp_id, idx) for idx, reseq_exp_id in enumerate(seq_experiment_dict.keys()))
+
+    return experiment_id_idx_mapping
 
 
 def get_seq_experiment_queryset(experiment_ids, exclude_starting_strain=False):
