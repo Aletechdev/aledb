@@ -5,7 +5,6 @@
 *~
 .ropeproject/
 .idea/
-static/
 .htpasswd
 nohup.out
 aleinfo/settings.ini
