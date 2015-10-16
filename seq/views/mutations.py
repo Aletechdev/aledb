@@ -6,8 +6,6 @@ from django.template import Context, loader
 
 from django.utils.safestring import mark_safe
 
-from seq.models import ObservedMutation
-
 import aleinfo.settings as settings
 
 from seq.views import common
@@ -57,13 +55,6 @@ def mutation_table(request):
 
 def _get_table_body(seq_experiment_dict, request):
 
-    observed_mutations_query_set = _get_observed_mutations(seq_experiment_dict)
+    observed_mutations_query_set = common.get_observed_mutations(seq_experiment_dict)
 
     return common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request)
-
-
-def _get_observed_mutations(seq_experiment_dict):
-
-    observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
-
-    return observed_mutations

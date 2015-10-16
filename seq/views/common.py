@@ -1,8 +1,12 @@
 import collections
 
-from seq.models import ResequencingExperiment
 from ale.models import AleExperiment
+
+from seq.models import ResequencingExperiment
+
 from seq.models import Mutation
+
+from seq.models import ObservedMutation
 
 import aleinfo.settings as settings
 
@@ -53,7 +57,7 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
     mutations = Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
     mutation_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
 
-    experiment_urls = get_experiment_urls(seq_experiment_dict)
+    experiment_urls = _get_experiment_urls(seq_experiment_dict)
 
     experiment_id_idx_mapping = _get_experiment_id_idx_mapping(seq_experiment_dict)
 
@@ -71,7 +75,7 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
         if not extra_validation and not observed_mutation.breseq_present:
             continue
 
-        new_entry = get_table_mutation_entry(observed_mutation, experiment_urls)
+        new_entry = _get_table_mutation_entry(observed_mutation, experiment_urls)
 
         if new_entry is not None:
             table_entries[mutation_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
@@ -132,13 +136,13 @@ def get_table_header(seq_experiment_dict):
 
     table_header = HTML_MUTATION_TABLE_HEADER
 
-    experiment_urls = get_experiment_urls(seq_experiment_dict)
+    experiment_urls = _get_experiment_urls(seq_experiment_dict)
 
     for seq_experiment_id in seq_experiment_dict:
 
         seq_experiment = seq_experiment_dict[seq_experiment_id]
 
-        sample_name = get_sample_name(seq_experiment)
+        sample_name = _get_sample_name(seq_experiment)
 
         mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id],
                                                                        sample_name)
@@ -170,7 +174,7 @@ def get_ale_experiment_id(request):
     return experiment_ids
 
 
-def get_table_mutation_entry(observed_mutation, experiment_urls):
+def _get_table_mutation_entry(observed_mutation, experiment_urls):
 
     table_entry = ""
 
@@ -240,14 +244,14 @@ def get_experiment_ordered_dict(request):
     return seq_experiment_ordered_dict
 
 
-def get_experiment_urls(seq_experiment_dict):
+def _get_experiment_urls(seq_experiment_dict):
 
     experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in seq_experiment_dict.values())
 
     return experiment_urls
 
 
-def get_sample_name(seq_experiment):
+def _get_sample_name(seq_experiment):
 
     sample_name = seq_experiment.isolate.flask.ale_id.ale_experiment.name
 
@@ -307,3 +311,10 @@ def _remove_checked_flasks(request, seq_experiment_dict):
                     del seq_experiment_dict[int(checked_experiment_id)]
 
     return seq_experiment_dict
+
+
+def get_observed_mutations(seq_experiment_dict):
+
+    observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
+
+    return observed_mutations
