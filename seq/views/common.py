@@ -1,6 +1,7 @@
 import collections
 
 from seq.models import ResequencingExperiment
+from ale.models import AleExperiment
 
 import aleinfo.settings as settings
 
@@ -15,8 +16,12 @@ REQUEST_ALE_NUMBER = "ale_no"
 
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
-MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
-MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%.2f</td>"""
+HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
+HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
+HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
+
+HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
+HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%.2f</td>"""
 
 REQUEST_ALL = "all"
 
@@ -28,11 +33,64 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 SEQ_EXPERIMENT_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
 
+STARTING_STRAIN_ALE_ID = 0
+
 
 if hasattr(settings, SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.sequencing_url
 else:
     reseqencing_report_url = DEFAULT_RESEQ_REPORT_URL
+
+
+def get_seq_experiment_queryset(experiment_ids, exclude_starting_strain=False):
+
+    if experiment_ids is not None:
+
+        experiment = AleExperiment.objects.get(ale_id=experiment_ids)
+
+        experiment_queryset = experiment.aleid_set.only("ale_id")
+
+    else:
+
+        experiment_queryset = ResequencingExperiment.objects.all()
+
+    if exclude_starting_strain:
+
+        experiment_queryset = experiment_queryset.exclude(ale_id=STARTING_STRAIN_ALE_ID)
+
+    return experiment_queryset
+
+
+def get_table_header(seq_experiment_dict):
+
+    table_header = HTML_MUTATION_TABLE_HEADER
+
+    experiment_urls = get_experiment_urls(seq_experiment_dict)
+
+    for seq_experiment_id in seq_experiment_dict:
+
+        seq_experiment = seq_experiment_dict[seq_experiment_id]
+
+        sample_name = get_sample_name(seq_experiment)
+
+        mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id],
+                                                                       sample_name)
+
+        table_header += HTML_CHECKBOX % (
+            seq_experiment.id,
+            mutation_identifier)
+
+    table_header += "</tr>"
+
+    return table_header
+
+
+def get_ale_number(request):
+
+    ale_number = request.GET.get(REQUEST_ALE_NUMBER)
+    ale_number = None if ale_number is None or ale_number == "all" else int(ale_number)
+
+    return ale_number
 
 
 def get_ale_experiment_id(request):
@@ -51,12 +109,12 @@ def get_table_mutation_entry(observed_mutation, experiment_urls):
 
     if observed_mutation.breseq_present:
 
-        table_entry = MUTATION_PRESENT_TRUE_CELL_HTML % float(observed_mutation.frequency)
+        table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % float(observed_mutation.frequency)
 
     # TODO: Figure out what this is supposed to do.
     elif observed_mutation.present is False:
 
-        table_entry = MUTATION_PRESENT_FALSE_CELL_HTML % (observed_mutation.mutated_reads,
+        table_entry = HTML_MUTATION_PRESENT_FALSE_CELL_HTML % (observed_mutation.mutated_reads,
                                                           observed_mutation.wt_reads)
 
     return table_entry
