@@ -188,9 +188,7 @@ def _get_table_mutation_entry(observed_mutation, experiment_urls):
     return table_entry
 
 
-def _get_ale_experiment_selector(request):
-
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+def _get_ale_experiment_selector(ale_experiment_id):
 
     if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
 
@@ -203,17 +201,15 @@ def _get_ale_experiment_selector(request):
     return ale_experiment_selector
 
 
-def _get_ale_number_selector(request):
+def _get_ale_number_selector(ale_id):
 
-    ale_no = request.GET.get(REQUEST_ALE_NUMBER)
-
-    if ale_no is None or ale_no == REQUEST_ALL:
+    if ale_id is None or ale_id == REQUEST_ALL:
 
         ale_no_selector = ""
 
     else:
 
-        ale_no_selector = ALE_NUMBER_SELECTOR_QUERY % int(ale_no)
+        ale_no_selector = ALE_NUMBER_SELECTOR_QUERY % int(ale_id)
 
     return ale_no_selector
 
@@ -229,7 +225,7 @@ def get_experiment_ordered_dict(request, include_starting_straing=False):
         for seq_experiment in starting_strain_raw_queryset:
             seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
 
-    seq_experiments_raw_queryset = get_seq_experiments_raw_queryset(request)
+    seq_experiments_raw_queryset = get_seq_experiment_raw_queryset(request)
 
     for seq_experiment in seq_experiments_raw_queryset:
         seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
@@ -237,27 +233,29 @@ def get_experiment_ordered_dict(request, include_starting_straing=False):
     return seq_experiment_ordered_dict
 
 
+def get_seq_experiment_raw_queryset(request):
+
+    ale_id = request.GET.get(REQUEST_ALE_NUMBER)
+
+    return _get_seq_experiment_raw_queryset(request, ale_id)
+
+
 def _get_starting_string_mutation_queryset(request):
 
-    ale_experiment_selector = _get_ale_experiment_selector(request)
+    ale_id = STARTING_STRAIN_ALE_ID
 
-    ale_number_selector = "AND ale_no = " + str(STARTING_STRAIN_ALE_ID)
-
-    starting_strain_sql_query = SEQ_EXPERIMENT_QUERY % (ale_experiment_selector, ale_number_selector)
-
-    starting_strain_raw_queryset = ResequencingExperiment.objects.raw(starting_strain_sql_query)
-
-    return starting_strain_raw_queryset
+    return _get_seq_experiment_raw_queryset(request, ale_id)
 
 
-def get_seq_experiments_raw_queryset(request):
-    """return a list of seq experiments for a given ALE"""
+def _get_seq_experiment_raw_queryset(request, ale_id):
 
-    ale_experiment_selector = _get_ale_experiment_selector(request)
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
 
-    ale_number_selector = _get_ale_number_selector(request)
+    ale_experiment_selector = _get_ale_experiment_selector(ale_experiment_id)
 
-    sql_query = SEQ_EXPERIMENT_QUERY % (ale_experiment_selector, ale_number_selector)
+    ale_id_selector = _get_ale_number_selector(ale_id)
+
+    sql_query = SEQ_EXPERIMENT_QUERY % (ale_experiment_selector, ale_id_selector)
 
     seq_experiments_raw_queryset = ResequencingExperiment.objects.raw(sql_query)
 
