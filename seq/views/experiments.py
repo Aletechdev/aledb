@@ -28,7 +28,7 @@ else:
 def lists(request):
     """return a list of resequencing experiments"""
 
-    experiments = common.get_seq_experiments_raw_queryset(request)
+    experiments = common.get_seq_experiment_raw_queryset(request)
 
     # Would rather want to use something like a dictionary since an experiment is
     # unique, though an experiment is currently a structure and an integral type

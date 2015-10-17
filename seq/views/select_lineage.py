@@ -17,7 +17,7 @@ __author__ = 'pphaneuf'
 @login_required
 def select_lineage(request):
 
-    seq_experiments_raw_queryset = common.get_seq_experiments_raw_queryset(request)
+    seq_experiments_raw_queryset = common.get_seq_experiment_raw_queryset(request)
 
     ale_experiment_id = int(request.GET.get(common.REQUEST_ALE_EXPERIMENT_ID))
 
