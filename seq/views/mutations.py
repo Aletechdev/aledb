@@ -31,9 +31,9 @@ def mutation_table(request):
 
     ale_number = common.get_ale_number(request)
 
-    seq_experiment_list = common.get_seq_experiment_queryset(ale_experiment_id)
+    seq_experiment_queryset = common.get_seq_experiment_queryset(ale_experiment_id)
 
-    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request)
+    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_straing=True)
 
     seq_experiment_ordered_dict = common.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
@@ -43,7 +43,7 @@ def mutation_table(request):
 
     template = loader.get_template("table_template.html")
 
-    context = Context({"experiments": seq_experiment_list,
+    context = Context({"experiments": seq_experiment_queryset,
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),

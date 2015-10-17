@@ -17,13 +17,24 @@ __author__ = 'pphaneuf'
 @login_required
 def select_lineage(request):
 
-    experiments = common.get_seq_experiments(request)
+    seq_experiments_raw_queryset = common.get_seq_experiments_raw_queryset(request)
 
     ale_experiment_id = int(request.GET.get(common.REQUEST_ALE_EXPERIMENT_ID))
 
-    table_body = ""
+    experiment_set = dict((e.ale_id, set()) for e in seq_experiments_raw_queryset)
 
-    experiment_set = dict((e.ale_id, set()) for e in experiments)
+    table_body = _get_table_body(experiment_set, seq_experiments_raw_queryset, ale_experiment_id)
+
+    template = loader.get_template("select_lineage.html")
+
+    context = Context({"table_body": mark_safe(table_body)})
+
+    return HttpResponse(template.render(context))
+
+
+def _get_table_body(experiment_set, experiments, ale_experiment_id):
+
+    table_body = ""
 
     for i in experiment_set:
 
@@ -52,8 +63,4 @@ def select_lineage(request):
 
         table_body += table_row + "\n"
 
-    template = loader.get_template("select_lineage.html")
-
-    context = Context({"table_body": mark_safe(table_body)})
-
-    return HttpResponse(template.render(context))
+    return table_body
