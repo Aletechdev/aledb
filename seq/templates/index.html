@@ -54,6 +54,7 @@
         <thead>
         <tr>
             <th>ALE Experiment</th>
+            <th>Experiment Executor</th>
             <th>Sample Resequencing List</th>
             <th>Mutations</th>
             <th>Key Mutations</th>
@@ -65,6 +66,7 @@
         {% for experiment in experiments %}
         <tr>
             <td>{{experiment.name}}</td>
+            <td>{{experiment.person}}</td>
             <td><a href="lists?ale_experiment_id={{experiment.ale_id}}">link</a></td>
             <td><a href="mutations?ale_experiment_id={{experiment.ale_id}}">link</a></td>
             <td><a href="key_mutations?ale_experiment_id={{experiment.ale_id}}">link</a></td>
