@@ -61,7 +61,9 @@ class AleId(models.Model):
 
     ale_experiment = models.ForeignKey(AleExperiment)
 
-    starting_strain = models.ForeignKey("Isolate", default=None, **blank_field)
+    starting_strain = models.ForeignKey("Isolate",
+                                        default=None,
+                                        **blank_field)
 
     def __unicode__(self):
 
@@ -84,9 +86,14 @@ class Media(models.Model):
     volume = models.FloatField(default=25,
                                help_text="Volume of culture in each flask (mL)")
 
-    stirring_speed = models.FloatField(default=1123, help_text="RPM")
+    stirring_speed = models.FloatField(default=1123,
+                                       help_text="RPM")
 
     description = models.CharField(max_length=200)
+
+    substrate = models.CharField(max_length=200,
+                                 default=None,
+                                 **blank_field)
 
     other = models.TextField(**blank_field)
 
@@ -164,7 +171,8 @@ class Flask(models.Model):
 
     class Meta:
 
-        unique_together = (("ale_id", "flask_number"),)
+        unique_together = (("ale_id",
+                            "flask_number"),)
 
         verbose_name_plural = "Flasks"
 

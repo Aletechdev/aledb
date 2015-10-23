@@ -62,13 +62,16 @@ def _get_experiment_info_list(experiments):
 
         media_description = experiment.isolate.flask.media.description
 
+        substrate = experiment.isolate.flask.media.substrate
+
         # Using tuple because immutable; mc_list must remain associated with particular experiment.
         experiment_info_tuple = (experiment,
                                  mc_list,
                                  mapped_read_count,
                                  clonal_or_population,
                                  media_temperature,
-                                 media_description)
+                                 media_description,
+                                 substrate)
 
         experiments_info_list.append(experiment_info_tuple)
 
