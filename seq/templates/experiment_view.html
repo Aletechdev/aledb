@@ -55,8 +55,9 @@
 <table id="runs" class="tablesorter">
     <thead>
     <tr>
-        <th>Run Name</th>
-        <th># Predicted Mutations</th>
+        <th>ALE, Flask, Isolate</th>
+        <th>Clonal/Population</th>
+        <th>Predicted Mutations</th>
         <th>Unassigned Missing Coverage Evidence</th>
         <th>Mean Coverage</th>
         <th>Total Reads</th>
@@ -71,6 +72,7 @@
         <tr class="experiment_stats">
             <td class="sample_name"><a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.get_isolate_name }}</a>
             </td>
+            <td class="clonal_or_population">{{ experiment_info_tuple.3 }}</td>
             <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
             <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
             <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
@@ -86,6 +88,7 @@
     <script type="text/javascript">
 
         var missing_coverage_count_cells = document.getElementsByClassName("missing_coverage_count");
+        var clonal_or_population_cells = document.getElementsByClassName("clonal_or_population");
         var sample_name_cells = document.getElementsByClassName("sample_name");
         var mutation_count_cells = document.getElementsByClassName("mutation_count");
         var mean_coverage_cells = document.getElementsByClassName("mean_coverage");
@@ -152,6 +155,7 @@
 
             if (bad_data_row) {
                 sample_name_cells[i].style.backgroundColor = "pink";
+                clonal_or_population_cells[i].style.backgroundColor = "pink";
                 mutation_count_cells[i].style.backgroundColor = "pink";
                 total_reads_cells[i].style.backgroundColor = "pink";
                 percent_reads_mapped_cells[i].style.backgroundColor = "pink";

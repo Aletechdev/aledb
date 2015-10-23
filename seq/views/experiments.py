@@ -54,8 +54,12 @@ def _get_experiment_info_list(experiments):
 
         mapped_read_count = int((experiment.percentage_mapped / 100) * experiment.reads)
 
+        clonal_or_population = "clonal"
+        if experiment.isolate.is_population:
+            clonal_or_population = "population"
+
         # Using tuple because immutable; mc_list must remain associated with particular experiment.
-        experiment_info_tuple = (experiment, mc_list, mapped_read_count)
+        experiment_info_tuple = (experiment, mc_list, mapped_read_count, clonal_or_population)
 
         experiments_info_list.append(experiment_info_tuple)
 
