@@ -232,20 +232,21 @@ def _get_project_orm(db_session,
                                                  name=ale_exp_name,
                                                  instrument=instrument,
                                                  person=ale_exp_user,
-                                                 date=datetime.date(2013, 1, 1), # TODO: find out what to put.
+                                                 date=datetime.date(2013, 1, 1),
                                                  simulation=False)
 
     media = seq.alchemy_orm.query_or_create(db_session,
                                             seq.alchemy_orm.Media,
-                                            description="Glycerol M9 media",  # TODO: find out what to put.
-                                            temperature=30,   # TODO: find out what to put.
-                                            volume=15,    # TODO: find out what to put.
-                                            stirring_speed=1100)    # TODO: find out what to put.
+                                            description="M9",
+                                            substrate="Glycerol",
+                                            temperature=30,
+                                            volume=15,
+                                            stirring_speed=1100)
 
     freezer_box = seq.alchemy_orm.query_or_create(db_session,
                                                   seq.alchemy_orm.FreezerBox,
-                                                  name="ale box",   # TODO: find out what to put.
-                                                  number=1)  # TODO: find out what to put.
+                                                  name="ALE box",
+                                                  number=1)
 
     # TODO: find a better way to return these, so that don't have to worry about return order.
     return experiment, media, freezer_box
