@@ -58,14 +58,17 @@ def _get_experiment_info_list(experiments):
         if experiment.isolate.is_population:
             clonal_or_population = "population"
 
-        temperature = experiment.isolate.flask.media.temperature
+        media_temperature = experiment.isolate.flask.media.temperature
+
+        media_description = experiment.isolate.flask.media.description
 
         # Using tuple because immutable; mc_list must remain associated with particular experiment.
         experiment_info_tuple = (experiment,
                                  mc_list,
                                  mapped_read_count,
                                  clonal_or_population,
-                                 temperature)
+                                 media_temperature,
+                                 media_description)
 
         experiments_info_list.append(experiment_info_tuple)
 
