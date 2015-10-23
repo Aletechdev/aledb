@@ -38,8 +38,11 @@ def lists(request):
 
     template = loader.get_template(EXPERIMENT_LIST_TEMPLATE)
 
+    ale_experiment_name = common.get_ale_experiment_name(request)
+
     context = Context({"experiments_info_list": experiments_info_list,
-                       "resequencing_report_url": reseqencing_report_url})
+                       "resequencing_report_url": reseqencing_report_url,
+                       "ale_experiment_name": ale_experiment_name})
 
     return HttpResponse(template.render(context))
 
