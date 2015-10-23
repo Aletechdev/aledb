@@ -233,6 +233,16 @@ def get_experiment_ordered_dict(request, include_starting_straing=False):
     return seq_experiment_ordered_dict
 
 
+def get_ale_experiment_name(request):
+
+    ale_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+
+    ale_experiment = AleExperiment.objects.filter(ale_id=ale_id)
+
+    # TODO: should only ever be returning 1 experiment. Implement error handling for more than one returned.
+    return ale_experiment[0].name
+
+
 def get_seq_experiment_raw_queryset(request):
 
     ale_id = request.GET.get(REQUEST_ALE_NUMBER)

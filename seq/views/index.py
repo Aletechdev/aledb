@@ -26,11 +26,11 @@ else:
 def index(request):
     """display a list of ales with links to the resequencing"""
 
-    experiments = AleExperiment.objects.all()
+    ale_experiments = AleExperiment.objects.all()
 
     template = loader.get_template(INDEX_TEMPLATE)
 
-    context = Context({"experiments": experiments,
+    context = Context({"experiments": ale_experiments,
                        "seq_url": reseqencing_report_url})
 
     return HttpResponse(template.render(context))
