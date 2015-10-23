@@ -56,7 +56,8 @@
     <thead>
     <tr>
         <th>ALE, Flask, Isolate</th>
-        <th>Clonal/Population</th>
+        <th>Clonal or Population</th>
+        <th>Media</th>
         <th>Temperature</th>
         <th>Predicted Mutations</th>
         <th>Unassigned Missing Coverage Evidence</th>
@@ -74,6 +75,7 @@
             <td class="sample_name"><a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.get_isolate_name }}</a>
             </td>
             <td class="clonal_or_population">{{ experiment_info_tuple.3 }}</td>
+            <td class="media_description">{{ experiment_info_tuple.5 }}</td>
             <td class="temperature">{{ experiment_info_tuple.4 }}</td>
             <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
             <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
@@ -91,6 +93,7 @@
 
         var missing_coverage_count_cells = document.getElementsByClassName("missing_coverage_count");
         var clonal_or_population_cells = document.getElementsByClassName("clonal_or_population");
+        var media_description_cells = document.getElementsByClassName("media_description");
         var temperature_cells = document.getElementsByClassName("temperature");
         var sample_name_cells = document.getElementsByClassName("sample_name");
         var mutation_count_cells = document.getElementsByClassName("mutation_count");
@@ -158,6 +161,7 @@
 
             if (bad_data_row) {
                 sample_name_cells[i].style.backgroundColor = "pink";
+                media_description_cells[i].style.backgroundColor = "pink";
                 temperature_cells[i].style.backgroundColor = "pink";
                 clonal_or_population_cells[i].style.backgroundColor = "pink";
                 mutation_count_cells[i].style.backgroundColor = "pink";
