@@ -17,6 +17,8 @@ def lineage(request):
 
     ale_experiment_id = common.get_ale_experiment_id(request)
 
+    ale_experiment_name = common.get_ale_experiment_name(request)
+
     ale_number = common.get_ale_number(request)
 
     seq_experiment_queryset = common.get_seq_experiment_queryset(ale_experiment_id)
@@ -31,7 +33,8 @@ def lineage(request):
 
     template = loader.get_template("table_template.html")
 
-    context = Context({"experiments": seq_experiment_queryset,
+    context = Context({"ale_experiment_name": ale_experiment_name,
+                       "experiments": seq_experiment_queryset,
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),

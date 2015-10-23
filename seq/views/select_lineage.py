@@ -19,6 +19,8 @@ def select_lineage(request):
 
     seq_experiments_raw_queryset = common.get_seq_experiment_raw_queryset(request)
 
+    ale_experiment_name = common.get_ale_experiment_name(request)
+
     ale_experiment_id = int(request.GET.get(common.REQUEST_ALE_EXPERIMENT_ID))
 
     experiment_set = dict((e.ale_id, set()) for e in seq_experiments_raw_queryset)
@@ -27,7 +29,8 @@ def select_lineage(request):
 
     template = loader.get_template("select_lineage.html")
 
-    context = Context({"table_body": mark_safe(table_body)})
+    context = Context({"table_body": mark_safe(table_body),
+                       "ale_experiment_name": ale_experiment_name})
 
     return HttpResponse(template.render(context))
 
