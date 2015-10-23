@@ -43,7 +43,6 @@ class AleExperiment(models.Model):
         verbose_name_plural = "ALE Experiments"
 
 
-
 class KeyMutation(models.Model):
 
     ale_experiment = models.ForeignKey(AleExperiment,
@@ -51,7 +50,6 @@ class KeyMutation(models.Model):
 
     mutation = models.ForeignKey("seq.Mutation",
                                  null=True)
-
 
 
 class AleId(models.Model):
@@ -97,7 +95,10 @@ class Media(models.Model):
     def __unicode__(self):
 
         return "%s (%.1f C, %.1f mL, %.1f RPM)" % \
-               (self.description, self.temperature, self.volume, self.stirring_speed)
+               (self.description,
+                self.temperature,
+                self.volume,
+                self.stirring_speed)
 
     class Meta:
 
@@ -107,7 +108,7 @@ class Media(models.Model):
 class FreezerBox(models.Model):
 
     name = models.CharField(max_length=500,
-                            help_text="A unique name that identifies the box form other boxes")
+                            help_text="A unique name that identifies the box from other boxes")
 
     number = models.IntegerField(default=1,
                                  help_text="Start with 1. If another box with the same name is needed label it with 2, 3 etc... Make sure this box number appears on the label")
@@ -122,7 +123,8 @@ class FreezerBox(models.Model):
                                              help_text="Date when location was last updated")
 
     def __unicode__(self):
-        return "Box #%i - %s" % (self.number, self.name)
+        return "Box #%i - %s" % (self.number,
+                                 self.name)
 
     class Meta:
         verbose_name_plural = "Freezer Boxes"
@@ -148,11 +150,13 @@ class Flask(models.Model):
 
             else:
 
-                return "Flask#%d < %s" % (self.flask_number, self.ale_id)
+                return "Flask#%d < %s" % (self.flask_number,
+                                          self.ale_id)
 
         else:
 
-            return "Flask#%d < %s" % (self.flask_number, self.ale_id)
+            return "Flask#%d < %s" % (self.flask_number,
+                                      self.ale_id)
 
     def ale_experiment(self):
 
@@ -195,19 +199,23 @@ class Isolate(models.Model):
 
             else:
 
-                p_c = "POP" if self.is_population else "COL"
+                population_or_clonal = "POP" if self.is_population else "COL"
 
                 parent = self.parent_isolate if self.parent_isolate else self.flask
 
-                return "#%d %s < %s" % (self.isolate_number, p_c, parent)
+                return "#%d %s < %s" % (self.isolate_number,
+                                        population_or_clonal,
+                                        parent)
 
         else:
 
-            p_c = "POP" if self.is_population else "COL"
+            population_or_clonal = "POP" if self.is_population else "COL"
 
             parent = self.parent_isolate if self.parent_isolate else self.flask
 
-            return "#%d %s < %s" % (self.isolate_number, p_c, parent)
+            return "#%d %s < %s" % (self.isolate_number,
+                                    population_or_clonal,
+                                    parent)
 
     class Meta:
 
