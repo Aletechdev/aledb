@@ -19,9 +19,9 @@ EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
 
 # TODO: used by multiple views. Also implemented within views.py; implement in one location.
 if hasattr(settings, "sequencing_url"):
-    reseqencing_report_url = settings.sequencing_url
+    resequencing_report_url = settings.sequencing_url
 else:
-    reseqencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
+    resequencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
 @login_required
@@ -41,7 +41,7 @@ def lists(request):
     ale_experiment_name = common.get_ale_experiment_name(request)
 
     context = Context({"experiments_info_list": experiments_info_list,
-                       "resequencing_report_url": reseqencing_report_url,
+                       "resequencing_report_url": resequencing_report_url,
                        "ale_experiment_name": ale_experiment_name})
 
     return HttpResponse(template.render(context))
@@ -56,6 +56,8 @@ def _get_experiment_info_list(experiments):
         mc_list = UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=experiment.id)
 
         mapped_read_count = int((experiment.percentage_mapped / 100) * experiment.reads)
+
+        ale_description = experiment.isolate.flask.ale_id.description
 
         clonal_or_population = "clonal"
         if experiment.isolate.is_population:
@@ -74,7 +76,8 @@ def _get_experiment_info_list(experiments):
                                  clonal_or_population,
                                  media_temperature,
                                  media_description,
-                                 substrate)
+                                 substrate,
+                                 ale_description,)
 
         experiments_info_list.append(experiment_info_tuple)
 
