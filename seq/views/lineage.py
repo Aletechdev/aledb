@@ -39,7 +39,8 @@ def lineage(request):
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
                        "title": "Mutation table",
-                       "table_header": mark_safe(table_header)})
+                       "table_header": mark_safe(table_header),
+                       "template_header": "Lineage Mutations"})
 
     return HttpResponse(template.render(context))
 
