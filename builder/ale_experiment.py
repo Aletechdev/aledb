@@ -30,7 +30,7 @@ BRESEQ_OUTPUT_REPORT_FILE = "index.html"
 
 def remove_ale():
 
-    print("to be implemented")
+
 
     _delete_all_orphaned_mutations()
 
@@ -120,11 +120,11 @@ def create_ale_experiment(breseq_output_abs_path,
     _populate_key_mutations(experiment)
 
 
-def insert_ale(breseq_output_abs_path,
-               ale_exp_user,
-               ale_exp_name,
-               ale_number,
-               flask_number):
+def insert_flask(breseq_output_abs_path,
+                 ale_exp_user,
+                 ale_exp_name,
+                 ale_number,
+                 flask_number):
 
     sanitized_breseq_output_abs_path = util.sanitize_path(breseq_output_abs_path)
 
