@@ -120,45 +120,43 @@ def create_ale_experiment(breseq_output_abs_path,
     _populate_key_mutations(experiment)
 
 
-# def _get_isolate_name()
+def insert_ale(breseq_output_abs_path,
+               ale_exp_user,
+               ale_exp_name,
+               ale_number,
+               flask_number):
 
+    sanitized_breseq_output_abs_path = util.sanitize_path(breseq_output_abs_path)
 
-# def insert_ale(breseq_output_abs_path,
-#                ale_exp_user,
-#                ale_exp_name,
-#                ale_number,
-#                flask_number,
-#                isolate_number):
-#
-#     sanitized_breseq_output_abs_path = _sanitize_path(breseq_output_abs_path)
-#
-#     db_session = seq.alchemy_orm.Session()
-#
-#     # TODO: shouldn't be returning multiple objects, because you remember return order; bad practice.
-#     experiment,\
-#     media,\
-#     freezer_box\
-#         = _get_project_orm(db_session,
-#                            ale_exp_user,
-#                            ale_exp_name)
-#
-#     output_path = sanitized_breseq_output_abs_path\
-#                       + breseq_sample_name\
-#                       + "/"\
-#                       + BRESEQ_OUTPUT_REPORT_DIR
-#
-#     isolate_number = 1  # TODO: find out why is this set to 1 for all endpoints and make it a constant.
-#
-#     _create_and_commit_ale_entry(db_session,
-#                                     ale_exp_user,
-#                                     output_path,
-#                                     ale_number,
-#                                     flask_number,
-#                                     isolate_number,
-#                                     experiment,
-#                                     media,
-#                                     freezer_box,
-#                                     is_wild_type=False)
+    db_session = seq.alchemy_orm.Session()
+
+    # TODO: shouldn't be returning multiple objects, because you remember return order; bad practice.
+    experiment,\
+    media,\
+    freezer_box\
+        = _get_project_orm(db_session,
+                           ale_exp_user,
+                           ale_exp_name)
+
+    breseq_sample_name = util.get_ale_name(ale_number, flask_number)
+
+    output_path = sanitized_breseq_output_abs_path\
+                      + breseq_sample_name\
+                      + "/"\
+                      + BRESEQ_OUTPUT_REPORT_DIR
+
+    isolate_number = 1  # TODO: find out why is this set to 1 for all endpoints and make it a constant.
+
+    _create_and_commit_ale_entry(db_session,
+                                 ale_exp_user,
+                                 output_path,
+                                 ale_number,
+                                 flask_number,
+                                 isolate_number,
+                                 experiment,
+                                 media,
+                                 freezer_box,
+                                 is_wild_type=False)
 
 
 def _populate_key_mutations(sql_alchemy_experiment):
