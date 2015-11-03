@@ -18,6 +18,8 @@ from seq.models import Mutation
 
 from ale.models import KeyMutation
 
+from ale.models import Flask
+
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -28,9 +30,11 @@ BRESEQ_OUTPUT_REPORT_DIR = "output/"
 BRESEQ_OUTPUT_REPORT_FILE = "index.html"
 
 
-def remove_ale():
+def remove_flask(flask_primary_key):
 
+    flask_to_delete = Flask.objects.get(pk=flask_primary_key)
 
+    flask_to_delete.delete()
 
     _delete_all_orphaned_mutations()
 
