@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
             name='FreezerBox',
             fields=[
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
-                ('name', models.CharField(help_text=b'A unique name that identifies the box form other boxes', max_length=500)),
+                ('name', models.CharField(help_text=b'A unique name that identifies the box from other boxes', max_length=500)),
                 ('number', models.IntegerField(default=1, help_text=b'Start with 1. If another box with the same name is needed label it with 2, 3 etc... Make sure this box number appears on the label')),
                 ('location', models.CharField(default=b'None', max_length=500, null=True, help_text=b'Where is the box located')),
                 ('location_last_updated', models.DateField(help_text=b'Date when location was last updated', auto_now=True, null=True)),
@@ -91,6 +91,7 @@ class Migration(migrations.Migration):
                 ('volume', models.FloatField(default=25, help_text=b'Volume of culture in each flask (mL)')),
                 ('stirring_speed', models.FloatField(default=1123, help_text=b'RPM')),
                 ('description', models.CharField(max_length=200)),
+                ('substrate', models.CharField(default=None, max_length=200, null=True, blank=True)),
                 ('other', models.TextField(null=True, blank=True)),
             ],
             options={

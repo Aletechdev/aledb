@@ -8,6 +8,8 @@ import builder.upload
 
 import builder.key_mutations
 
+from builder import util
+
 # import builder.validatemutations  # TODO: find out what validatemutations does for mutations.
 
 from ale.models import AleExperiment
@@ -15,6 +17,8 @@ from ale.models import AleExperiment
 from seq.models import Mutation
 
 from ale.models import KeyMutation
+
+from ale.models import Flask
 
 
 WILD_TYPE_ALE_NUMBER = 0
@@ -24,6 +28,15 @@ WILD_TYPE_USER_NAME = "BOP27"
 
 BRESEQ_OUTPUT_REPORT_DIR = "output/"
 BRESEQ_OUTPUT_REPORT_FILE = "index.html"
+
+
+def remove_flask(flask_primary_key):
+
+    flask_to_delete = Flask.objects.get(pk=flask_primary_key)
+
+    flask_to_delete.delete()
+
+    _delete_all_orphaned_mutations()
 
 
 def delete_ale_experiment(ale_experiment_primary_key):
@@ -59,7 +72,7 @@ def create_ale_experiment(breseq_output_abs_path,
     Meant to be executed from Django ipython shell.
     """
 
-    sanitized_breseq_output_abs_path = _sanitize_path(breseq_output_abs_path)
+    sanitized_breseq_output_abs_path = util.sanitize_path(breseq_output_abs_path)
 
     db_session = seq.alchemy_orm.Session()
 
@@ -73,7 +86,7 @@ def create_ale_experiment(breseq_output_abs_path,
 
     if breseq_wild_type_output_abs_path is not None:
 
-        sanitized_breseq_output_wild_type_output_abs_path = _sanitize_path(breseq_wild_type_output_abs_path)
+        sanitized_breseq_output_wild_type_output_abs_path = util.sanitize_path(breseq_wild_type_output_abs_path)
 
         _create_and_commit_wild_type_ale_entry(db_session,
                                                sanitized_breseq_output_wild_type_output_abs_path,
@@ -84,16 +97,16 @@ def create_ale_experiment(breseq_output_abs_path,
     # Might need to explicitly sort this list in the future.
     breseq_sample_report_list = _get_sample_report_list(sanitized_breseq_output_abs_path)
 
-    for breseq_sample_name in breseq_sample_report_list:
+    for ale_isolate_name in breseq_sample_report_list:
 
-        ale_number = _get_ale_number(breseq_sample_name)
+        ale_number = util.parse_ale_name(ale_isolate_name, util.AleName.Ale)
 
-        flask_number = _get_flask_number(breseq_sample_name)
+        flask_number = util.parse_ale_name(ale_isolate_name, util.AleName.Flask)
 
         isolate_number = 1  # TODO: find out why is this set to 1 for all endpoints and make it a constant.
 
         output_path = sanitized_breseq_output_abs_path\
-                      + breseq_sample_name\
+                      + ale_isolate_name\
                       + "/"\
                       + BRESEQ_OUTPUT_REPORT_DIR
 
@@ -109,6 +122,45 @@ def create_ale_experiment(breseq_output_abs_path,
                                     is_wild_type=False)
 
     _populate_key_mutations(experiment)
+
+
+def insert_flask(breseq_output_abs_path,
+                 ale_exp_user,
+                 ale_exp_name,
+                 ale_number,
+                 flask_number):
+
+    sanitized_breseq_output_abs_path = util.sanitize_path(breseq_output_abs_path)
+
+    db_session = seq.alchemy_orm.Session()
+
+    # TODO: shouldn't be returning multiple objects, because you remember return order; bad practice.
+    experiment,\
+    media,\
+    freezer_box\
+        = _get_project_orm(db_session,
+                           ale_exp_user,
+                           ale_exp_name)
+
+    breseq_sample_name = util.get_ale_name(ale_number, flask_number)
+
+    output_path = sanitized_breseq_output_abs_path\
+                      + breseq_sample_name\
+                      + "/"\
+                      + BRESEQ_OUTPUT_REPORT_DIR
+
+    isolate_number = 1  # TODO: find out why is this set to 1 for all endpoints and make it a constant.
+
+    _create_and_commit_ale_entry(db_session,
+                                 ale_exp_user,
+                                 output_path,
+                                 ale_number,
+                                 flask_number,
+                                 isolate_number,
+                                 experiment,
+                                 media,
+                                 freezer_box,
+                                 is_wild_type=False)
 
 
 def _populate_key_mutations(sql_alchemy_experiment):
@@ -130,24 +182,6 @@ def _populate_key_mutations(sql_alchemy_experiment):
         km.save()
 
 
-def _get_ale_number(breseq_sample_name):
-
-    split = breseq_sample_name.split("-")
-
-    ale_number = int(split[0])
-
-    return ale_number
-
-
-def _get_flask_number(breseq_sample_name):
-
-    split = breseq_sample_name.split("-")
-
-    flask_number = int(split[1])
-
-    return flask_number
-
-
 def _create_and_commit_wild_type_ale_entry(db_session,
                                            breseq_wild_type_abs_path,
                                            experiment,
@@ -165,14 +199,6 @@ def _create_and_commit_wild_type_ale_entry(db_session,
                                  freezer_box,
                                  # is_wild_type=True
                                  is_wild_type=False)  # This is in fact the wild type, though setting this to false hides the mutations in the mutation table.
-
-
-def _sanitize_path(path):
-
-    if path[-1] != '/':
-        path += '/'
-
-    return path
 
 
 def _create_and_commit_ale_entry(db_session,
