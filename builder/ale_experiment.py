@@ -189,6 +189,13 @@ def _create_and_commit_wild_type_ale_entry(db_session,
                                            media,
                                            freezer_box):
 
+    # Setting the "is_wild_type" flag to true hides the mutation information.
+    # This was implemented because originally, the implementers didn't want to
+    # view the wild type mutations along with the actual mutations.
+    # This is not the case for us, where we want to see the wild type mutations
+    # along with the sample mutations since we're using the wild type mutations
+    # for filtering with key mutations.
+
     _create_and_commit_ale_entry(db_session,
                                  WILD_TYPE_USER_NAME,
                                  breseq_wild_type_abs_path,
@@ -199,7 +206,7 @@ def _create_and_commit_wild_type_ale_entry(db_session,
                                  media,
                                  freezer_box,
                                  # is_wild_type=True
-                                 is_wild_type=False)  # This is in fact the wild type, though setting this to false hides the mutations in the mutation table.
+                                 is_wild_type=False)
 
 
 def _create_and_commit_ale_entry(db_session,
