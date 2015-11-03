@@ -63,10 +63,11 @@ def _delete_all_orphaned_mutations():
             mutation.delete()
 
 
-def create_ale_experiment(breseq_output_abs_path,
-                          ale_exp_user,
-                          ale_exp_name,
-                          breseq_wild_type_output_abs_path=None):
+# TODO: separate adding wild type into another function.
+def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
+                                           ale_exp_user,
+                                           ale_exp_name,
+                                           breseq_wild_type_output_abs_path=None):
 
     """
     Meant to be executed from Django ipython shell.
