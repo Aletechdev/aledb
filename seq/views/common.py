@@ -156,6 +156,7 @@ def get_table_header(seq_experiment_dict):
 def get_ale_number(request):
 
     ale_number = request.GET.get(REQUEST_ALE_NUMBER)
+
     ale_number = None if ale_number is None or ale_number == "all" else int(ale_number)
 
     return ale_number
@@ -169,6 +170,22 @@ def get_ale_experiment_id(request):
     experiment_ids = None if experiment_ids is None or experiment_ids == "all" else int(experiment_ids)
 
     return experiment_ids
+
+
+def get_ale_experiment_name(request):
+
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+
+    ale_experiment_name = "All ALE Experiment"
+
+    if ale_experiment_id is not None and ale_experiment_id != "all":
+
+        ale_experiment = AleExperiment.objects.filter(ale_id=ale_experiment_id)
+
+        # TODO: should only ever be returning 1 experiment. Implement error handling for more than one returned.
+        ale_experiment_name = ale_experiment[0].name
+
+    return ale_experiment_name
 
 
 def _get_table_mutation_entry(observed_mutation, experiment_urls):
@@ -231,16 +248,6 @@ def get_experiment_ordered_dict(request, include_starting_straing=False):
         seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
 
     return seq_experiment_ordered_dict
-
-
-def get_ale_experiment_name(request):
-
-    ale_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-
-    ale_experiment = AleExperiment.objects.filter(ale_id=ale_id)
-
-    # TODO: should only ever be returning 1 experiment. Implement error handling for more than one returned.
-    return ale_experiment[0].name
 
 
 def get_seq_experiment_raw_queryset(request):
