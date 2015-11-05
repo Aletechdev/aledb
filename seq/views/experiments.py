@@ -57,10 +57,16 @@ def _get_experiment_info_list(experiments):
 
         mapped_read_count = int((experiment.percentage_mapped / 100) * experiment.reads)
 
-        ale_description = experiment.isolate.flask.ale_id.description
+        species = experiment.isolate.flask.ale_id.species
+
+        strain = experiment.isolate.flask.ale_id.strain
+
+        knockouts = experiment.isolate.flask.ale_id.knockouts
 
         clonal_or_population = "clonal"
+
         if experiment.isolate.is_population:
+
             clonal_or_population = "population"
 
         media_temperature = experiment.isolate.flask.media.temperature
@@ -77,7 +83,9 @@ def _get_experiment_info_list(experiments):
                                  media_temperature,
                                  media_description,
                                  substrate,
-                                 ale_description,)
+                                 species,
+                                 strain,
+                                 knockouts)
 
         experiments_info_list.append(experiment_info_tuple)
 
