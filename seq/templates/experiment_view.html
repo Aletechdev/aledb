@@ -56,8 +56,10 @@
     <thead>
     <tr>
         <th>ALE, Flask, Isolate</th>
-        <th>Description</th>
         <th>Clonal or Population</th>
+        <th>Species</th>
+        <th>Strain</th>
+        <th>Knockouts</th>
         <th>Media</th>
         <th>Substrate</th>
         <th>Temperature</th>
@@ -76,7 +78,9 @@
         <tr class="experiment_stats">
             <td class="sample_name"><a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.get_isolate_name }}</a>
             </td>
-            <td class="ale_description">{{ experiment_info_tuple.7 }}</td>
+            <td class="species">{{ experiment_info_tuple.7 }}</td>
+            <td class="strain">{{ experiment_info_tuple.8 }}</td>
+            <td class="knockouts">{{ experiment_info_tuple.9 }}</td>
             <td class="clonal_or_population">{{ experiment_info_tuple.3 }}</td>
             <td class="media_description">{{ experiment_info_tuple.5 }}</td>
             <td class="substrate">{{ experiment_info_tuple.6 }}</td>
@@ -107,7 +111,9 @@
         var percent_reads_mapped_cells = document.getElementsByClassName("percent_reads_mapped");
         var mapped_read_count_cells = document.getElementsByClassName("mapped_read_count");
         var average_read_length_cells = document.getElementsByClassName("average_read_length");
-        var ale_description_cells = document.getElementsByClassName("ale_description");
+        var species_cells = document.getElementsByClassName("species");
+        var strain_cells = document.getElementsByClassName("strain");
+        var knockouts_cells = document.getElementsByClassName("knockouts");
 
         for (var i = 0, max = missing_coverage_count_cells.length; i < max; i++) {
 
@@ -175,7 +181,6 @@
                 total_reads_cells[i].style.backgroundColor = "pink";
                 percent_reads_mapped_cells[i].style.backgroundColor = "pink";
                 average_read_length_cells[i].style.backgroundColor = "pink";
-                ale_description_cells[i].style.backgroundColor = "pink";
             }
         }
     </script>
