@@ -20,11 +20,17 @@ from ale.models import Flask
 
 
 WILD_TYPE_ALE_NUMBER = 0
+
 WILD_TYPE_FLASK_NUMBER = 0
-WILD_TYPE_ISOLATE_NUMBER = 0
+
 WILD_TYPE_USER_NAME = "BOP27"
 
+CLONAL_ISOLATE_NUMBER = 0
+
+POPULATION_ISOLATE_NUMBER = 1
+
 BRESEQ_OUTPUT_REPORT_DIR = "output/"
+
 BRESEQ_OUTPUT_REPORT_FILE = "index.html"
 
 
@@ -102,8 +108,6 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
         flask_number = util.parse_ale_name(ale_isolate_name, util.AleName.Flask)
 
-        isolate_number = 1  # TODO: find out why is this set to 1 for all endpoints and make it a constant.
-
         output_path = sanitized_breseq_output_abs_path\
                       + ale_isolate_name\
                       + "/"\
@@ -114,7 +118,6 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                     output_path,
                                     ale_number,
                                     flask_number,
-                                    isolate_number,
                                     experiment,
                                     media,
                                     freezer_box,
@@ -148,14 +151,11 @@ def insert_flask(breseq_output_abs_path,
                       + "/"\
                       + BRESEQ_OUTPUT_REPORT_DIR
 
-    isolate_number = 1  # TODO: find out why is this set to 1 for all endpoints and make it a constant.
-
     _create_and_commit_ale_entry(db_session,
                                  ale_exp_user,
                                  output_path,
                                  ale_number,
                                  flask_number,
-                                 isolate_number,
                                  experiment,
                                  media,
                                  freezer_box,
@@ -199,7 +199,6 @@ def _create_and_commit_wild_type_ale_entry(db_session,
                                  breseq_wild_type_abs_path,
                                  WILD_TYPE_ALE_NUMBER,
                                  WILD_TYPE_FLASK_NUMBER,
-                                 WILD_TYPE_ISOLATE_NUMBER,
                                  experiment,
                                  media,
                                  freezer_box,
@@ -208,42 +207,58 @@ def _create_and_commit_wild_type_ale_entry(db_session,
 
 
 def _create_and_commit_ale_entry(db_session,
-                                person,
-                                breseq_folder,
-                                ale_number,
-                                flask_number,
-                                isolate_number,
-                                experiment,
-                                media,
-                                freezer_box,
-                                is_wild_type):
+                                 person,
+                                 breseq_folder,
+                                 ale_number,
+                                 flask_number,
+                                 experiment,
+                                 media,
+                                 freezer_box,
+                                 is_wild_type):
 
     ale_id = seq.alchemy_orm.query_or_create(db_session,
-                                         seq.alchemy_orm.AleId,
-                                         ale_experiment=experiment,
-                                         ale_id=ale_number)
+                                             seq.alchemy_orm.AleId,
+                                             ale_experiment=experiment,
+                                             ale_id=ale_number)
 
     flask = seq.alchemy_orm.query_or_create(db_session,
-                                        seq.alchemy_orm.Flask,
-                                        flask_number=flask_number,
-                                        ale_id=ale_id,
-                                        media=media)
+                                            seq.alchemy_orm.Flask,
+                                            flask_number=flask_number,
+                                            ale_id=ale_id,
+                                            media=media)
+
+    # Figure out isolate_number according to population/clonal.
+    # Currently managing clonal/population with two variables, including Isolate number.
+    # TODO: Shouldn't be associating clonal/population with Isolate number.
+    breseq_log_file_path = breseq_folder + util.BRESEQ_LOG_FILE
+
+    sample_type = util.is_sample_clonal_or_popuation(breseq_log_file_path)
+
+    isolate_number = CLONAL_ISOLATE_NUMBER
+
+    is_population = False
+
+    if sample_type == util.SAMPLE_TYPE.population:
+
+        isolate_number = POPULATION_ISOLATE_NUMBER
+
+        is_population = True
 
     isolate = seq.alchemy_orm.query_or_create(db_session,
-                                          seq.alchemy_orm.Isolate,
-                                          flask=flask,
-                                          isolate_number=isolate_number,
-                                          is_population=False,
-                                          freezer_box=freezer_box,
-                                          person=person)
+                                              seq.alchemy_orm.Isolate,
+                                              flask=flask,
+                                              isolate_number=isolate_number,
+                                              is_population=is_population,
+                                              freezer_box=freezer_box,
+                                              person=person)
 
     db_session.commit()
 
     builder.upload.add_breseq_results(db_session=db_session,
-                              isolate_id=isolate.id,
-                              person=person,
-                              breseq_folder=breseq_folder,
-                              is_wild_type=is_wild_type)
+                                      isolate_id=isolate.id,
+                                      person=person,
+                                      breseq_folder=breseq_folder,
+                                      is_wild_type=is_wild_type)
 
     db_session.commit()
 

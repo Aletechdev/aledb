@@ -4,20 +4,14 @@ import re
 
 from bs4 import BeautifulSoup
 
-from enum import Enum
-
 from seq.alchemy_orm import *
 
 from gdparse.gdparse import gdparse
 
+import util
+
 
 EXPERIMENT_PARENT_DIR = "breseq/"  # TODO: See if this is necessary.
-
-BRESEQ_LOG_FILE = "log.txt"
-
-SAMPLE_TYPE = Enum('SAMPLE_TYPE', 'clonal population')
-
-BRESEQ_ANALYSIS_POPULATION_FLAG = " -p "
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
 HTML_MUTATION_FILE_NAME = "index.html"
@@ -50,9 +44,9 @@ def add_breseq_results(db_session,
     sample was processed as a population.
     """
 
-    breseq_log_file_path = breseq_folder + BRESEQ_LOG_FILE
+    breseq_log_file_path = breseq_folder + util.BRESEQ_LOG_FILE
 
-    sample_type = _is_sample_clonal_or_popuation(breseq_log_file_path)
+    sample_type = util.is_sample_clonal_or_popuation(breseq_log_file_path)
 
     seq_experiment = _get_reseq_experiment_with_stats(db_session,
                                                       breseq_folder,
@@ -75,17 +69,6 @@ def add_breseq_results(db_session,
     _process_unassigned_missing_coverage(db_session,
                                          seq_experiment,
                                          experiment_evidence_dict)
-
-
-def _is_sample_clonal_or_popuation(breseq_log_file_path):
-    sample_type = SAMPLE_TYPE.clonal
-
-    # If Breseq's log.txt file become very large, the following will be a memory hog.
-    # For now, it's quite short.
-    if BRESEQ_ANALYSIS_POPULATION_FLAG in open(breseq_log_file_path).read():
-        return SAMPLE_TYPE.population
-
-    return sample_type
 
 
 def _get_beautifulsoup_html(output_folder, html_file_name):
@@ -228,7 +211,7 @@ def _process_mutations(sample_type,
 
         if mutation.protein_change is None:
 
-            if sample_type == SAMPLE_TYPE.clonal:
+            if sample_type == util.SAMPLE_TYPE.clonal:
                 protein_change_index = CLONAL_PROTEIN_CHANGE_INDEX
             else:
                 protein_change_index = POPULATION_PROTEIN_CHANGE_INDEX
@@ -257,10 +240,15 @@ def _get_mutation_freq(mutation_dict):
 
 
 def _get_mutations_rows(mutations_html, sample_type):
+
     # parse the mutation html file to find the correct table
-    if sample_type == SAMPLE_TYPE.clonal:
+
+    if sample_type == util.SAMPLE_TYPE.clonal:
+
         html_class_to_parse = CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
+
     else:
+
         html_class_to_parse = POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
 
     mutation_table = mutations_html.find("th",
