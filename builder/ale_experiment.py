@@ -10,8 +10,6 @@ import builder.key_mutations
 
 from builder import util
 
-# import builder.validatemutations  # TODO: find out what validatemutations does for mutations.
-
 from ale.models import AleExperiment
 
 from seq.models import Mutation
