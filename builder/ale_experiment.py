@@ -25,9 +25,9 @@ WILD_TYPE_FLASK_NUMBER = 0
 
 WILD_TYPE_USER_NAME = "BOP27"
 
-CLONAL_ISOLATE_NUMBER = 0
+CLONAL_ISOLATE_NUMBER = 1
 
-POPULATION_ISOLATE_NUMBER = 1
+POPULATION_ISOLATE_NUMBER = 0
 
 BRESEQ_OUTPUT_REPORT_DIR = "output/"
 
@@ -46,7 +46,7 @@ def remove_flask(flask_primary_key):
 def delete_ale_experiment(ale_experiment_primary_key):
 
     """
-    Meant to be executed from Django ipython shell.
+    Executed from Django ipython shell.
     """
 
     ale_experiment_to_delete = AleExperiment.objects.get(pk=ale_experiment_primary_key)
@@ -74,7 +74,7 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                            breseq_wild_type_output_abs_path=None):
 
     """
-    Meant to be executed from Django ipython shell.
+    Executed from Django ipython shell.
     """
 
     sanitized_breseq_output_abs_path = util.sanitize_path(breseq_output_abs_path)
