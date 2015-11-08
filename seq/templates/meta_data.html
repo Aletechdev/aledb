@@ -1,0 +1,77 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Resequencing Runs</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+    <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
+
+    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
+          media="print, projection, screen"/>
+
+    <script type="text/javascript">
+
+        var asInitVals = new Array();
+        $(document).ready($(function () {
+            oTable = $("#runs").tablesorter({widgets: ['zebra']});
+
+        }));
+    </script>
+
+</head>
+
+<style>
+
+    body {
+        padding-right: 50px;
+        padding-bottom: 25px;
+        padding-left: 50px;
+    }
+
+</style>
+
+<body>
+
+<div class="page-header">
+  <h2>ALE Analytics / <b>{{ ale_experiment_name }}</b> Sample Meta Data</h2>
+</div>
+
+<table id="runs" class="tablesorter">
+    <thead>
+    <tr>
+        <th>ALE, Flask, Isolate</th>
+        <th>Clonal or Population</th>
+        <th>Species</th>
+        <th>Strain</th>
+        <th>Knockouts</th>
+        <th>Media</th>
+        <th>Substrate</th>
+        <th>Temperature</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    {% for experiment_info_tuple in experiments_info_list %}
+        <tr class="experiment_stats">
+            <td class="sample_name"><a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.get_isolate_name }}</a>
+            </td>
+            <td class="clonal_or_population">{{ experiment_info_tuple.1 }}</td>
+            <td class="species">{{ experiment_info_tuple.5 }}</td>
+            <td class="strain">{{ experiment_info_tuple.6 }}</td>
+            <td class="knockouts">{{ experiment_info_tuple.7 }}</td>
+            <td class="media_description">{{ experiment_info_tuple.3 }}</td>
+            <td class="substrate">{{ experiment_info_tuple.4 }}</td>
+            <td class="temperature">{{ experiment_info_tuple.2 }}</td>
+        </tr>
+
+    {% endfor %}
+    </tbody>
+
+</table>
+</body>
+</html>

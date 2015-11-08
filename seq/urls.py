@@ -6,6 +6,7 @@ from seq.views import experiments
 from seq.views import key_mutations
 from seq.views import select_lineage
 from seq.views import lineage
+from seq.views import meta_data
 
 
 urlpatterns = patterns('',
@@ -15,4 +16,5 @@ urlpatterns = patterns('',
                        url('^lists$', experiments.lists, name="lists"),
                        url('^select_lineage', select_lineage.select_lineage, name="select_lineage"),
                        url('^lineage', lineage.lineage, name="lineage"),
+                       url('^meta_data', meta_data.meta_data, name="lineage"),
                        )
