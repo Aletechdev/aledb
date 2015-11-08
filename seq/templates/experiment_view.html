@@ -38,7 +38,7 @@
 <body>
 
 <div class="page-header">
-  <h2>ALE Analytics / <b>{{ ale_experiment_name }}</b> Resequencing Samples</h2>
+  <h2>ALE Analytics / <b>{{ ale_experiment_name }}</b> Seq/Reseq Performance</h2>
 </div>
 
 <div class="panel panel-default">
@@ -56,13 +56,6 @@
     <thead>
     <tr>
         <th>ALE, Flask, Isolate</th>
-        <th>Clonal or Population</th>
-        <th>Species</th>
-        <th>Strain</th>
-        <th>Knockouts</th>
-        <th>Media</th>
-        <th>Substrate</th>
-        <th>Temperature</th>
         <th>Predicted Mutations</th>
         <th>Unassigned Missing Coverage Evidence</th>
         <th>Mean Coverage</th>
@@ -78,13 +71,6 @@
         <tr class="experiment_stats">
             <td class="sample_name"><a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.get_isolate_name }}</a>
             </td>
-            <td class="clonal_or_population">{{ experiment_info_tuple.3 }}</td>
-            <td class="species">{{ experiment_info_tuple.7 }}</td>
-            <td class="strain">{{ experiment_info_tuple.8 }}</td>
-            <td class="knockouts">{{ experiment_info_tuple.9 }}</td>
-            <td class="media_description">{{ experiment_info_tuple.5 }}</td>
-            <td class="substrate">{{ experiment_info_tuple.6 }}</td>
-            <td class="temperature">{{ experiment_info_tuple.4 }}</td>
             <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
             <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
             <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
@@ -100,10 +86,6 @@
     <script type="text/javascript">
 
         var missing_coverage_count_cells = document.getElementsByClassName("missing_coverage_count");
-        var clonal_or_population_cells = document.getElementsByClassName("clonal_or_population");
-        var media_description_cells = document.getElementsByClassName("media_description");
-        var substrate_cells = document.getElementsByClassName("substrate");
-        var temperature_cells = document.getElementsByClassName("temperature");
         var sample_name_cells = document.getElementsByClassName("sample_name");
         var mutation_count_cells = document.getElementsByClassName("mutation_count");
         var mean_coverage_cells = document.getElementsByClassName("mean_coverage");
@@ -111,9 +93,6 @@
         var percent_reads_mapped_cells = document.getElementsByClassName("percent_reads_mapped");
         var mapped_read_count_cells = document.getElementsByClassName("mapped_read_count");
         var average_read_length_cells = document.getElementsByClassName("average_read_length");
-        var species_cells = document.getElementsByClassName("species");
-        var strain_cells = document.getElementsByClassName("strain");
-        var knockouts_cells = document.getElementsByClassName("knockouts");
 
         for (var i = 0, max = missing_coverage_count_cells.length; i < max; i++) {
 
@@ -172,14 +151,7 @@
             }
 
             if (bad_data_row) {
-                species_cells[i].style.backgroundColor = "pink";
-                strain_cells[i].style.backgroundColor = "pink";
-                knockouts_cells[i].style.backgroundColor = "pink";
                 sample_name_cells[i].style.backgroundColor = "pink";
-                media_description_cells[i].style.backgroundColor = "pink";
-                substrate_cells[i].style.backgroundColor = "pink";
-                temperature_cells[i].style.backgroundColor = "pink";
-                clonal_or_population_cells[i].style.backgroundColor = "pink";
                 mutation_count_cells[i].style.backgroundColor = "pink";
                 total_reads_cells[i].style.backgroundColor = "pink";
                 percent_reads_mapped_cells[i].style.backgroundColor = "pink";
