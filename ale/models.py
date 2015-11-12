@@ -199,6 +199,10 @@ class Isolate(models.Model):
 
     person = models.CharField(max_length=200, **blank_field)
 
+    reseq_reference = models.CharField(max_length=200, **blank_field)
+
+    library_prep = models.CharField(max_length=200, **blank_field)
+
     def seq_location(self):
 
         return self.resequencingexperiment_set.values_list("location")[0][0]
