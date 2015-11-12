@@ -52,6 +52,8 @@
         <th>Media</th>
         <th>Substrate</th>
         <th>Temperature</th>
+        <th>Reference</th>
+        <th>Library Prep</th>
 
     </tr>
     </thead>
@@ -67,6 +69,8 @@
             <td class="media_description">{{ experiment_info_tuple.3 }}</td>
             <td class="substrate">{{ experiment_info_tuple.4 }}</td>
             <td class="temperature">{{ experiment_info_tuple.2 }}</td>
+            <td class="reseq_reference">{{ experiment_info_tuple.8 }}</td>
+            <td class="library_prep">{{ experiment_info_tuple.9 }}</td>
         </tr>
 
     {% endfor %}
