@@ -99,10 +99,6 @@ class Mutation(models.Model):
         return u"%d %s" % (self.position,
                            self.sequence_change)
 
-    class Meta:
-        unique_together = (("position",
-                            "sequence_change"),)
-
 
 class ObservedMutation(models.Model):
 
