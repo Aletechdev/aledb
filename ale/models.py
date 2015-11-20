@@ -201,6 +201,8 @@ class Isolate(models.Model):
 
     reseq_reference = models.CharField(max_length=200, **blank_field)
 
+    breseq_version =  models.CharField(max_length=200, **blank_field)
+
     library_prep = models.CharField(max_length=200, **blank_field)
 
     def seq_location(self):
