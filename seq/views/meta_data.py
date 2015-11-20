@@ -68,6 +68,7 @@ def _get_experiment_info_list(experiments):
                                  experiment.isolate.flask.ale_id.strain,
                                  experiment.isolate.flask.ale_id.knockouts,
                                  experiment.isolate.reseq_reference,
+                                 experiment.isolate.breseq_version,
                                  experiment.isolate.library_prep)
 
         experiments_info_list.append(experiment_info_tuple)

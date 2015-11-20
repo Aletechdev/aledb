@@ -53,6 +53,7 @@
         <th>Substrate</th>
         <th>Temperature</th>
         <th>Reference</th>
+        <th>Breseq Version</th>
         <th>Library Prep</th>
 
     </tr>
@@ -70,7 +71,8 @@
             <td class="substrate">{{ experiment_info_tuple.4 }}</td>
             <td class="temperature">{{ experiment_info_tuple.2 }}</td>
             <td class="reseq_reference">{{ experiment_info_tuple.8 }}</td>
-            <td class="library_prep">{{ experiment_info_tuple.9 }}</td>
+            <td class="breseq_version">{{ experiment_info_tuple.9 }}</td>
+            <td class="library_prep">{{ experiment_info_tuple.10 }}</td>
         </tr>
 
     {% endfor %}
