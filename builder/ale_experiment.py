@@ -237,11 +237,6 @@ def _create_and_commit_ale_entry(db_session,
                                             ale_id=ale_id,
                                             media=media)
 
-    # Figure out isolate_number according to population/clonal.
-    # Currently managing clonal/population with two variables, including Isolate number.
-    # TODO: Shouldn't be associating clonal/population with Isolate number.
-    # sample_type = util.is_sample_clonal_or_population(breseq_log_file_path)
-
     with open(os.path.join(breseq_folder_path, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
 
         mutation_gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
@@ -267,6 +262,9 @@ def _create_and_commit_ale_entry(db_session,
         sample_reseq_type = _legacy_get_sample_reseq_type(breseq_folder_path)
 
         mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY] = sample_reseq_type
+
+    # Currently managing clonal/population with two variables, including Isolate number.
+    # TODO: Shouldn't be associating clonal/population with Isolate number.
 
     isolate_number = CLONAL_ISOLATE_NUMBER
 
