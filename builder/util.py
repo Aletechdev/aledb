@@ -1,4 +1,4 @@
-from enum import Enum
+from gdparse.gdparse import gdparse
 
 
 __author__ = 'Patrick Phaneuf'
@@ -48,7 +48,7 @@ def get_ale_name(ale_number, flask_number):
 
 # def is_sample_clonal_or_population(breseq_log_file_path):
 #
-#     sample_type = SAMPLE_TYPE.clonal
+#     sample_type = gdparse.SampleType.CLONAL
 #
 #     if BRESEQ_ANALYSIS_POPULATION_FLAG in open(breseq_log_file_path).read():
 #

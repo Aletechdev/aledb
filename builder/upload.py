@@ -143,6 +143,7 @@ def _parse_read_count(read_row_input):
 
 
 def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, person):
+
     seq_experiment = query_or_create(db_session,
                                      ResequencingExperiment,
                                      location=breseq_folder[breseq_folder.find(EXPERIMENT_PARENT_DIR)
