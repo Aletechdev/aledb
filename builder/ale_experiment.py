@@ -35,6 +35,8 @@ BRESEQ_OUTPUT_REPORT_DIR = "output/"
 
 BRESEQ_OUTPUT_REPORT_FILE = "index.html"
 
+BRESEQ_LOG_FILE = "log.txt"
+
 OUTPUT_GENOMIC_DIFF_FILE_NAME = 'output.gd'
 
 ANNOTATION_GENOMIC_DIFF_FILE_NAME = 'annotated.gd'
@@ -216,7 +218,7 @@ def _create_and_commit_wild_type_ale_entry(db_session,
 
 def _create_and_commit_ale_entry(db_session,
                                  person,
-                                 breseq_folder,
+                                 breseq_folder_path,
                                  ale_number,
                                  flask_number,
                                  experiment,
@@ -238,24 +240,37 @@ def _create_and_commit_ale_entry(db_session,
     # Figure out isolate_number according to population/clonal.
     # Currently managing clonal/population with two variables, including Isolate number.
     # TODO: Shouldn't be associating clonal/population with Isolate number.
-    # breseq_log_file_path = breseq_folder + util.BRESEQ_LOG_FILE
     # sample_type = util.is_sample_clonal_or_population(breseq_log_file_path)
 
-    with open(os.path.join(breseq_folder, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
+    with open(os.path.join(breseq_folder_path, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
 
         mutation_gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
 
-    annotated_output_file_dir = breseq_folder + ANNOTATION_GENOMIC_DIFF_FILE_DIR
+    annotated_output_file_dir = breseq_folder_path + ANNOTATION_GENOMIC_DIFF_FILE_DIR
 
     with open(os.path.join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
 
         annotation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
+    reseq_reference = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_SEQ_REF_KEY]
+
+    reseq_date = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_CREATED_KEY]
+
+    breseq_version = mutation_gd_parser.meta_data[gdparse.BRESEQ_VERSION_KEY]
+
+    if gdparse.RESEQ_TYPE_KEY in mutation_gd_parser.meta_data.keys():
+
+        sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
+
+    else:  # Breseq version 0.26.0 doesn't have the #=COMMAND meta-data.
+
+        sample_reseq_type = _legacy_get_sample_reseq_type(breseq_folder_path)
+
+        mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY] = sample_reseq_type
+
     isolate_number = CLONAL_ISOLATE_NUMBER
 
     is_population = False
-
-    sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
 
     if sample_reseq_type == gdparse.SampleType.POPULATION:
 
@@ -268,6 +283,9 @@ def _create_and_commit_ale_entry(db_session,
                                               flask=flask,
                                               isolate_number=isolate_number,
                                               is_population=is_population,
+                                              reseq_reference=reseq_reference,
+                                              reseq_date=reseq_date,
+                                              breseq_version=breseq_version,
                                               freezer_box=freezer_box,
                                               person=person)
 
@@ -276,12 +294,25 @@ def _create_and_commit_ale_entry(db_session,
     builder.upload.add_breseq_results(db_session=db_session,
                                       isolate_id=isolate.id,
                                       person=person,
-                                      breseq_folder=breseq_folder,
+                                      breseq_folder=breseq_folder_path,
                                       mutation_gd_parser=mutation_gd_parser,
                                       annotation_gd_parser=annotation_gd_parser,
                                       is_wild_type=is_wild_type)
 
     db_session.commit()
+
+
+def _legacy_get_sample_reseq_type(breseq_folder_path):
+
+    sample_reseq_type = gdparse.SampleType.CLONAL
+
+    breseq_log_file_path = breseq_folder_path + BRESEQ_LOG_FILE
+
+    if gdparse.BRESEQ_POPULATION_OPTION in open(breseq_log_file_path).read():
+
+        sample_reseq_type = gdparse.SampleType.POPULATION
+
+    return sample_reseq_type
 
 
 # TODO: make all default values used within this script as constants or in a config file.
