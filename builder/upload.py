@@ -8,8 +8,6 @@ from seq.alchemy_orm import *
 
 from gdparse.gdparse import gdparse
 
-import util
-
 
 EXPERIMENT_PARENT_DIR = "breseq/"  # TODO: See if this is necessary.
 
@@ -27,15 +25,13 @@ POPULATION_MUTATION_FREQUENCY_INDEX = 3
 AVERAGE_READ_LENGTH_INDEX = 5
 READ_COUNT_INDEX = 2
 
-OUTPUT_GENOMIC_DIFF_FILE_NAME = 'output.gd'
-ANNOTATION_GENOMIC_DIFF_FILE_NAME = 'annotated.gd'
-ANNOTATION_GENOMIC_DIFF_FILE_DIR = '/evidence/'
-
 
 def add_breseq_results(db_session,
                        isolate_id,
                        person,
                        breseq_folder,
+                       mutation_gd_parser,
+                       annotation_gd_parser,
                        is_wild_type=False):
     """
     Figures out if the sample is clonal or population,
@@ -54,29 +50,35 @@ def add_breseq_results(db_session,
     #     experiment_evidence_dict,\
     #     sample_meta_data_dict = _get_genomic_diff_sample_info(breseq_folder)
 
-    with open(join(breseq_folder, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
-
-        gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
-
-        sample_mutation_dict = gd_parser.data[gdparse.MUTATION_KEY]
-
-        sample_evidence_dict = gd_parser.data[gdparse.EVIDENCE_KEY]
-
-        sample_reseq_type = gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
-
-    annotated_output_file_dir = breseq_folder + ANNOTATION_GENOMIC_DIFF_FILE_DIR
-
-    with open(join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
-
-        gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
-
-        sample_mutation_annotation_dict = gd_parser.data[gdparse.MUTATION_KEY]
+    # with open(join(breseq_folder, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
+    #
+    #     gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
+    #
+    #     sample_mutation_dict = gd_parser.data[gdparse.MUTATION_KEY]
+    #
+    #     sample_evidence_dict = gd_parser.data[gdparse.EVIDENCE_KEY]
+    #
+    #     sample_reseq_type = gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
+    #
+    # annotated_output_file_dir = breseq_folder + ANNOTATION_GENOMIC_DIFF_FILE_DIR
+    #
+    # with open(join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
+    #
+    #     gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
+    #
+    #     sample_mutation_annotation_dict = gd_parser.data[gdparse.MUTATION_KEY]
 
     seq_experiment = _get_reseq_experiment_with_stats(db_session,
                                                       breseq_folder,
                                                       isolate_id,
                                                       person)
     db_session.add(seq_experiment)
+
+    sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
+
+    sample_mutation_dict = mutation_gd_parser.data[gdparse.MUTATION_KEY]
+
+    sample_mutation_annotation_dict = annotation_gd_parser.data[gdparse.MUTATION_KEY]
 
     _process_mutations(sample_reseq_type,
                        breseq_folder,
@@ -85,6 +87,8 @@ def add_breseq_results(db_session,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
                        is_wild_type)
+
+    sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
 
     _process_unassigned_missing_coverage(db_session,
                                          seq_experiment,
@@ -103,8 +107,8 @@ def _get_beautifulsoup_html(output_folder, html_file_name):
 def _is_missing_coverage_type(evidence_dict):
     is_missing_coverage = False
 
-    if evidence_dict[gdparse.EVIDENCE_TYPE_KEY] \
-            == gdparse.MISSING_COVERAGE_EVIDENCE_TYPE:
+    if evidence_dict[gdparse.EVIDENCE_TYPE_KEY] == gdparse.MISSING_COVERAGE_EVIDENCE_TYPE:
+
         is_missing_coverage = True
 
     return is_missing_coverage
@@ -208,8 +212,8 @@ def _process_mutations(sample_type,
                        breseq_folder,
                        db_session,
                        seq_experiment,
-                       experiment_mutation_dict,
-                       experiment_mutation_annotation_dict,
+                       sample_mutation_dict,
+                       sample_mutation_annotation_dict,
                        is_wild_type):
 
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
@@ -223,12 +227,12 @@ def _process_mutations(sample_type,
         attrs = row.findChildren("td")
         mutation = query_or_create(db_session,
                                    Mutation,
-                                   position=experiment_mutation_dict[mutation_num][GD_MUT_POS_ATTR_KEY],
-                                   gene=experiment_mutation_annotation_dict[mutation_num][GD_MUT_GENE_NAME_ATTR_KEY],
+                                   position=sample_mutation_dict[mutation_num][GD_MUT_POS_ATTR_KEY],
+                                   gene=sample_mutation_annotation_dict[mutation_num][GD_MUT_GENE_NAME_ATTR_KEY],
                                    # mutations are in the same order in the html and output.gd
                                    # files so we can index the ids with row_num
                                    sequence_change=attrs[2].text,
-                                   mutation_type=experiment_mutation_dict[mutation_num][GD_MUT_TYPE_ATTR_KEY])
+                                   mutation_type=sample_mutation_dict[mutation_num][GD_MUT_TYPE_ATTR_KEY])
 
         '''
         TODO: find out why this is used. I'm avoiding using it for now, since the mutation table won't the mutations
@@ -255,7 +259,7 @@ def _process_mutations(sample_type,
         observed_mutation.mutation = mutation
         observed_mutation.breseq_present = True
         observed_mutation.evidence = attrs[0].renderContents()
-        observed_mutation.frequency = _get_mutation_freq(experiment_mutation_dict[mutation_num])
+        observed_mutation.frequency = _get_mutation_freq(sample_mutation_dict[mutation_num])
 
         db_session.add(observed_mutation)
 
