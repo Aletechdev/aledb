@@ -10,6 +10,8 @@ import builder.key_mutations
 
 from builder import util
 
+from gdparse.gdparse import gdparse
+
 from ale.models import AleExperiment
 
 from seq.models import Mutation
@@ -32,6 +34,12 @@ POPULATION_ISOLATE_NUMBER = 0
 BRESEQ_OUTPUT_REPORT_DIR = "output/"
 
 BRESEQ_OUTPUT_REPORT_FILE = "index.html"
+
+OUTPUT_GENOMIC_DIFF_FILE_NAME = 'output.gd'
+
+ANNOTATION_GENOMIC_DIFF_FILE_NAME = 'annotated.gd'
+
+ANNOTATION_GENOMIC_DIFF_FILE_DIR = '/evidence/'
 
 
 def remove_flask(flask_primary_key):
@@ -82,9 +90,9 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
     db_session = seq.alchemy_orm.Session()
 
     # TODO: shouldn't be returning multiple objects, because you remember return order; bad practice.
-    experiment,\
-    media,\
-    freezer_box\
+    experiment, \
+    media, \
+    freezer_box \
         = _get_project_orm(db_session,
                            ale_exp_user,
                            ale_exp_name)
@@ -108,20 +116,20 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
         flask_number = util.parse_ale_name(ale_isolate_name, util.AleName.Flask)
 
-        output_path = sanitized_breseq_output_abs_path\
-                      + ale_isolate_name\
-                      + "/"\
+        output_path = sanitized_breseq_output_abs_path \
+                      + ale_isolate_name \
+                      + "/" \
                       + BRESEQ_OUTPUT_REPORT_DIR
 
         _create_and_commit_ale_entry(db_session,
-                                    ale_exp_user,
-                                    output_path,
-                                    ale_number,
-                                    flask_number,
-                                    experiment,
-                                    media,
-                                    freezer_box,
-                                    is_wild_type=False)
+                                     ale_exp_user,
+                                     output_path,
+                                     ale_number,
+                                     flask_number,
+                                     experiment,
+                                     media,
+                                     freezer_box,
+                                     is_wild_type=False)
 
     _populate_key_mutations(experiment)
 
@@ -233,11 +241,23 @@ def _create_and_commit_ale_entry(db_session,
     # breseq_log_file_path = breseq_folder + util.BRESEQ_LOG_FILE
     # sample_type = util.is_sample_clonal_or_population(breseq_log_file_path)
 
+    with open(os.path.join(breseq_folder, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
+
+        mutation_gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
+
+    annotated_output_file_dir = breseq_folder + ANNOTATION_GENOMIC_DIFF_FILE_DIR
+
+    with open(os.path.join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
+
+        annotation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
+
     isolate_number = CLONAL_ISOLATE_NUMBER
 
     is_population = False
 
-    if sample_type == util.SAMPLE_TYPE.population:
+    sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
+
+    if sample_reseq_type == gdparse.SampleType.POPULATION:
 
         isolate_number = POPULATION_ISOLATE_NUMBER
 
@@ -257,6 +277,8 @@ def _create_and_commit_ale_entry(db_session,
                                       isolate_id=isolate.id,
                                       person=person,
                                       breseq_folder=breseq_folder,
+                                      mutation_gd_parser=mutation_gd_parser,
+                                      annotation_gd_parser=annotation_gd_parser,
                                       is_wild_type=is_wild_type)
 
     db_session.commit()
