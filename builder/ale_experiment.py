@@ -230,9 +230,8 @@ def _create_and_commit_ale_entry(db_session,
     # Figure out isolate_number according to population/clonal.
     # Currently managing clonal/population with two variables, including Isolate number.
     # TODO: Shouldn't be associating clonal/population with Isolate number.
-    breseq_log_file_path = breseq_folder + util.BRESEQ_LOG_FILE
-
-    sample_type = util.is_sample_clonal_or_popuation(breseq_log_file_path)
+    # breseq_log_file_path = breseq_folder + util.BRESEQ_LOG_FILE
+    # sample_type = util.is_sample_clonal_or_population(breseq_log_file_path)
 
     isolate_number = CLONAL_ISOLATE_NUMBER
 
