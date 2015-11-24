@@ -12,18 +12,32 @@ from gdparse.gdparse import gdparse
 EXPERIMENT_PARENT_DIR = "breseq/"  # TODO: See if this is necessary.
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
+
 HTML_MUTATION_FILE_NAME = "index.html"
 
 CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row"]
+
 POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row", "polymorphism_table_row"]
 
 CLONAL_PROTEIN_CHANGE_INDEX = 3
+
 POPULATION_PROTEIN_CHANGE_INDEX = 4
 
 POPULATION_MUTATION_FREQUENCY_INDEX = 3
 
 AVERAGE_READ_LENGTH_INDEX = 5
+
 READ_COUNT_INDEX = 2
+
+GD_MUT_POS_ATTR_KEY = 'position'
+
+GD_MUT_GENE_NAME_ATTR_KEY = 'gene_name'
+
+GD_MUT_TYPE_ATTR_KEY = 'type'
+
+GD_MUT_FREQ_ATTR_KEY = 'frequency'
+
+CLONAL_ASSUMED_FREQ = 1
 
 
 def add_breseq_results(db_session,
@@ -39,34 +53,6 @@ def add_breseq_results(db_session,
     Read the output/log.txt file for " -p " option, which indicates that
     sample was processed as a population.
     """
-
-    # breseq_log_file_path = breseq_folder + util.BRESEQ_LOG_FILE
-
-    # sample_type = util.is_sample_clonal_or_population(breseq_log_file_path)
-
-    #TODO: this should return whether sample is population or clonal.
-    # experiment_mutation_dict, \
-    #     experiment_mutation_annotation_dict, \
-    #     experiment_evidence_dict,\
-    #     sample_meta_data_dict = _get_genomic_diff_sample_info(breseq_folder)
-
-    # with open(join(breseq_folder, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
-    #
-    #     gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
-    #
-    #     sample_mutation_dict = gd_parser.data[gdparse.MUTATION_KEY]
-    #
-    #     sample_evidence_dict = gd_parser.data[gdparse.EVIDENCE_KEY]
-    #
-    #     sample_reseq_type = gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
-    #
-    # annotated_output_file_dir = breseq_folder + ANNOTATION_GENOMIC_DIFF_FILE_DIR
-    #
-    # with open(join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
-    #
-    #     gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
-    #
-    #     sample_mutation_annotation_dict = gd_parser.data[gdparse.MUTATION_KEY]
 
     seq_experiment = _get_reseq_experiment_with_stats(db_session,
                                                       breseq_folder,
@@ -133,12 +119,14 @@ def _process_unassigned_missing_coverage(db_session, seq_experiment, evidence_di
 
 
 def _parse_average_read_length(read_row_input):
+
     output = re.findall("\d+.\d+", read_row_input)[0]
 
     return output
 
 
 def _parse_read_count(read_row_input):
+
     return int(read_row_input.replace(",", ""))
 
 
@@ -176,37 +164,6 @@ def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, pers
     seq_experiment.mean_coverage = mean_coverage
 
     return seq_experiment
-
-
-# def _get_genomic_diff_sample_info(output_file_dir):
-#
-#     with open(join(output_file_dir, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
-#
-#         gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
-#
-#         sample_mutation_dict = gd_parser.data[gdparse.MUTATION_KEY]
-#
-#         sample_evidence_dict = gd_parser.data[gdparse.EVIDENCE_KEY]
-#
-#         sample_meta_data_dict = gd_parser.meta_data
-#
-#     annotated_output_file_dir = output_file_dir + ANNOTATION_GENOMIC_DIFF_FILE_DIR
-#
-#     with open(join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
-#
-#         gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
-#
-#         sample_mutation_annotation_dict = gd_parser.data[gdparse.MUTATION_KEY]
-#
-#     return sample_mutation_dict, sample_mutation_annotation_dict, sample_evidence_dict, sample_meta_data_dict
-
-
-GD_MUT_POS_ATTR_KEY = 'position'
-GD_MUT_GENE_NAME_ATTR_KEY = 'gene_name'
-GD_MUT_TYPE_ATTR_KEY = 'type'
-GD_MUT_FREQ_ATTR_KEY = 'frequency'
-
-CLONAL_ASSUMED_FREQ = 1
 
 
 def _process_mutations(sample_type,
@@ -270,6 +227,7 @@ def _get_mutation_freq(mutation_dict):
     frequency = CLONAL_ASSUMED_FREQ
 
     if GD_MUT_FREQ_ATTR_KEY in mutation_dict:
+
         frequency = mutation_dict[GD_MUT_FREQ_ATTR_KEY]
 
     return frequency
