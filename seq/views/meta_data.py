@@ -58,7 +58,6 @@ def _get_experiment_info_list(experiments):
 
             clonal_or_population = "population"
 
-        # Using tuple because immutable;
         experiment_info_tuple = (experiment,
                                  clonal_or_population,
                                  experiment.isolate.flask.media.temperature,
@@ -67,9 +66,10 @@ def _get_experiment_info_list(experiments):
                                  experiment.isolate.flask.ale_id.species,
                                  experiment.isolate.flask.ale_id.strain,
                                  experiment.isolate.flask.ale_id.knockouts,
+                                 experiment.isolate.library_prep,
                                  experiment.isolate.reseq_reference,
                                  experiment.isolate.breseq_version,
-                                 experiment.isolate.library_prep)
+                                 experiment.isolate.reseq_date)
 
         experiments_info_list.append(experiment_info_tuple)
 

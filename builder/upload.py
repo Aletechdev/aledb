@@ -44,9 +44,33 @@ def add_breseq_results(db_session,
     sample was processed as a population.
     """
 
-    breseq_log_file_path = breseq_folder + util.BRESEQ_LOG_FILE
+    # breseq_log_file_path = breseq_folder + util.BRESEQ_LOG_FILE
 
-    sample_type = util.is_sample_clonal_or_popuation(breseq_log_file_path)
+    # sample_type = util.is_sample_clonal_or_population(breseq_log_file_path)
+
+    #TODO: this should return whether sample is population or clonal.
+    # experiment_mutation_dict, \
+    #     experiment_mutation_annotation_dict, \
+    #     experiment_evidence_dict,\
+    #     sample_meta_data_dict = _get_genomic_diff_sample_info(breseq_folder)
+
+    with open(join(breseq_folder, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
+
+        gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
+
+        sample_mutation_dict = gd_parser.data[gdparse.MUTATION_KEY]
+
+        sample_evidence_dict = gd_parser.data[gdparse.EVIDENCE_KEY]
+
+        sample_reseq_type = gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
+
+    annotated_output_file_dir = breseq_folder + ANNOTATION_GENOMIC_DIFF_FILE_DIR
+
+    with open(join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
+
+        gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
+
+        sample_mutation_annotation_dict = gd_parser.data[gdparse.MUTATION_KEY]
 
     seq_experiment = _get_reseq_experiment_with_stats(db_session,
                                                       breseq_folder,
@@ -54,21 +78,17 @@ def add_breseq_results(db_session,
                                                       person)
     db_session.add(seq_experiment)
 
-    experiment_mutation_dict, \
-    experiment_mutation_annotation_dict, \
-    experiment_evidence_dict = _get_genomic_diff_experiment_info(breseq_folder)
-
-    _process_mutations(sample_type,
+    _process_mutations(sample_reseq_type,
                        breseq_folder,
                        db_session,
                        seq_experiment,
-                       experiment_mutation_dict,
-                       experiment_mutation_annotation_dict,
+                       sample_mutation_dict,
+                       sample_mutation_annotation_dict,
                        is_wild_type)
 
     _process_unassigned_missing_coverage(db_session,
                                          seq_experiment,
-                                         experiment_evidence_dict)
+                                         sample_evidence_dict)
 
 
 def _get_beautifulsoup_html(output_folder, html_file_name):
@@ -83,8 +103,8 @@ def _get_beautifulsoup_html(output_folder, html_file_name):
 def _is_missing_coverage_type(evidence_dict):
     is_missing_coverage = False
 
-    if evidence_dict[gdparse.GDParser.EVIDENCE_TYPE_KEY] \
-            == gdparse.GDParser.MISSING_COVERAGE_EVIDENCE_TYPE:
+    if evidence_dict[gdparse.EVIDENCE_TYPE_KEY] \
+            == gdparse.MISSING_COVERAGE_EVIDENCE_TYPE:
         is_missing_coverage = True
 
     return is_missing_coverage
@@ -153,20 +173,27 @@ def _get_reseq_experiment_with_stats(db_session, breseq_folder, isolate_id, pers
     return seq_experiment
 
 
-def _get_genomic_diff_experiment_info(output_file_dir):
-    # TODO: 'evidence' and 'mutation' should be constant members of GDParser
-    with open(join(output_file_dir, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
-        gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
-        experiment_mutation_dict = gd_parser.data['mutation']
-        experiment_evidence_dict = gd_parser.data['evidence']
-
-    annotated_output_file_dir = output_file_dir + ANNOTATION_GENOMIC_DIFF_FILE_DIR
-
-    with open(join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as anotation_genomic_diff_file:
-        gd_parser = gdparse.GDParser(file_handle=anotation_genomic_diff_file)
-        experiment_mutation_annotation_dict = gd_parser.data['mutation']
-
-    return experiment_mutation_dict, experiment_mutation_annotation_dict, experiment_evidence_dict
+# def _get_genomic_diff_sample_info(output_file_dir):
+#
+#     with open(join(output_file_dir, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
+#
+#         gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
+#
+#         sample_mutation_dict = gd_parser.data[gdparse.MUTATION_KEY]
+#
+#         sample_evidence_dict = gd_parser.data[gdparse.EVIDENCE_KEY]
+#
+#         sample_meta_data_dict = gd_parser.meta_data
+#
+#     annotated_output_file_dir = output_file_dir + ANNOTATION_GENOMIC_DIFF_FILE_DIR
+#
+#     with open(join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
+#
+#         gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
+#
+#         sample_mutation_annotation_dict = gd_parser.data[gdparse.MUTATION_KEY]
+#
+#     return sample_mutation_dict, sample_mutation_annotation_dict, sample_evidence_dict, sample_meta_data_dict
 
 
 GD_MUT_POS_ATTR_KEY = 'position'
@@ -175,6 +202,7 @@ GD_MUT_TYPE_ATTR_KEY = 'type'
 GD_MUT_FREQ_ATTR_KEY = 'frequency'
 
 CLONAL_ASSUMED_FREQ = 1
+
 
 def _process_mutations(sample_type,
                        breseq_folder,
@@ -211,9 +239,12 @@ def _process_mutations(sample_type,
 
         if mutation.protein_change is None:
 
-            if sample_type == util.SAMPLE_TYPE.clonal:
+            if sample_type == gdparse.SampleType.CLONAL:
+
                 protein_change_index = CLONAL_PROTEIN_CHANGE_INDEX
+
             else:
+
                 protein_change_index = POPULATION_PROTEIN_CHANGE_INDEX
 
             change = attrs[protein_change_index].renderContents()
@@ -243,7 +274,7 @@ def _get_mutations_rows(mutations_html, sample_type):
 
     # parse the mutation html file to find the correct table
 
-    if sample_type == util.SAMPLE_TYPE.clonal:
+    if sample_type == gdparse.SampleType.CLONAL:
 
         html_class_to_parse = CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
 
