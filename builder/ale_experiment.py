@@ -226,6 +226,21 @@ def _create_and_commit_ale_entry(db_session,
                                  freezer_box,
                                  is_wild_type):
 
+    """
+    is_wild_type was implemented because initially, we wanted to ignore
+    mutations that were already thought to be in the wild type strain,
+    yet not included in the reference. For instance,
+    if a mutation existed in BW25311, which is a derivative of MG1655,
+    though we have to use the reference for MG1655 in resequencing,
+    we can set particular mutations to is_wild_type = true,
+    which won't show the mutation in the tables.
+
+    The case for wild type mutations is that now we want to keep them
+    in the mutation tables because they serve as QC mechanisms for
+    seeing which starting strain mutations have persisted and which
+    have changed.
+    """
+
     ale_id = seq.alchemy_orm.query_or_create(db_session,
                                              seq.alchemy_orm.AleId,
                                              ale_experiment=experiment,
