@@ -1,15 +1,11 @@
-from seq.models import ResequencingExperiment
+import ale.common
 
-from seq.models import ObservedMutation
+import seq.models
 
 import collections
 
 
-__author__ = 'pphaneuf'
-
-
-# TODO: this constant also defined in seq/views/key_mutations. Needs to be defined once and accessible by all apps.
-STARTING_STRAIN_ALE_ID = 0
+__author__ = "Patrick Phaneuf"
 
 
 def get_key_mutations(ale_experiment_id):
@@ -35,7 +31,7 @@ def _get_common_mutation_set(seq_experiment_dict):
 
         seq_experiment = seq_experiment_dict[seq_experiment_id]
 
-        if seq_experiment.ale_id != STARTING_STRAIN_ALE_ID:
+        if seq_experiment.ale_id != ale.common.STARTING_STRAIN_ALE_ID:
 
             mutations_set.update(_get_seq_experiment_mutations_set(seq_experiment_id))
 
@@ -60,11 +56,11 @@ def _get_starting_strain_mutation_set(seq_experiment_dict):
 
         seq_experiment = seq_experiment_dict[seq_experiment_id]
 
-        if seq_experiment.ale_id == STARTING_STRAIN_ALE_ID:
+        if seq_experiment.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
 
             starting_strain_mutation_set.update(_get_seq_experiment_mutations_set(seq_experiment_id))
 
-            break;  # Only 1 starting strain, therefore don't need to parse remaining experiments.
+            break  # Only 1 starting strain, therefore don't need to parse remaining experiments.
 
     return starting_strain_mutation_set
 
@@ -79,7 +75,7 @@ def _get_seq_experiment_dict(experiment_id):
 
     sql_query = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_number_selector)
 
-    seq_experiments_raw_query_set = ResequencingExperiment.objects.raw(sql_query)
+    seq_experiments_raw_query_set = seq.models.ResequencingExperiment.objects.raw(sql_query)
 
     seq_experiment_dict = collections.OrderedDict((seq_experiment.id, seq_experiment) for seq_experiment in seq_experiments_raw_query_set)
 
@@ -90,9 +86,10 @@ def _get_seq_experiment_mutations_set(seq_experiment_id):
 
     mutations_set = set()
 
-    observed_mutations_query_set = ObservedMutation.objects.filter(sequencing_experiment_id=seq_experiment_id)
+    observed_mutations_query_set = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id=seq_experiment_id)
 
     for observed_mutation in observed_mutations_query_set:
+
         mutations_set.add(observed_mutation.mutation)
 
     return mutations_set

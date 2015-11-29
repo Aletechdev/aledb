@@ -88,7 +88,7 @@ class Mutation(models.Model):
                             blank=True,
                             null=True)
 
-    # This was created to indicate mutations that are generated only because
+    # "reference_error" was created to indicate mutations that are generated only because
     # the reference isn't realistic and not because the organism is actually
     # different from the original strain. This is why setting this value to
     # true ignores enables further analysis to ignore these mutations.

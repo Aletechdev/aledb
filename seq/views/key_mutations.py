@@ -6,38 +6,41 @@ from django.template import Context, loader
 
 from django.utils.safestring import mark_safe
 
+import ale.common
+
 from ale.models import KeyMutation
 
 from seq.models import ObservedMutation
 
-from seq.views import common
+import seq.views.common
 
 
-__author__ = 'pphaneuf'
+__author__ = 'Patrick Phaneuf'
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 # TODO: this implementation shares much with mutations.py; refactored shared implementations into common.py
 
+
 @login_required
 def key_mutations(request):
 
-    ale_experiment_id = common.get_ale_experiment_id(request)
+    ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
-    ale_experiment_name = common.get_ale_experiment_name(request)
+    ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
 
-    ale_number = common.get_ale_number(request)
+    ale_number = seq.views.common.get_ale_number(request)
 
-    seq_experiment_queryset = common.get_seq_experiment_queryset(ale_experiment_id)
+    seq_experiment_queryset = seq.views.common.get_seq_experiment_queryset(ale_experiment_id)
 
-    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request)
+    seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request)
 
     seq_experiment_ordered_dict = _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
 
-    seq_experiment_ordered_dict = common.filter_checked_flasks(request, seq_experiment_ordered_dict)
+    seq_experiment_ordered_dict = seq.views.common.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
-    table_header = common.get_table_header(seq_experiment_ordered_dict)
+    table_header = seq.views.common.get_table_header(seq_experiment_ordered_dict)
 
     table_body = _get_table_body(seq_experiment_ordered_dict, request)
 
@@ -59,15 +62,17 @@ def _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
 
     key_to_delete_found = False
 
+    key_to_delete = None
+
     for key, value in seq_experiment_ordered_dict.iteritems():
 
-        if value.ale_id == common.STARTING_STRAIN_ALE_ID:
+        if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
 
             key_to_delete = key
 
             key_to_delete_found = True
 
-    if key_to_delete_found:
+    if key_to_delete_found and key_to_delete:
 
         del seq_experiment_ordered_dict[key_to_delete]
 
@@ -76,12 +81,12 @@ def _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
 
 def _get_table_body(seq_experiment_dict, request):
 
-    ale_experiment_id = common.get_ale_experiment_id(request)
+    ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
     key_mutation_queryset = KeyMutation.objects.filter(ale_experiment_id=ale_experiment_id)
 
     observed_mutations_query_set = _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset)
 
-    return common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request)
+    return seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request)
 
 
 def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):

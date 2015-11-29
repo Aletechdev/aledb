@@ -1,5 +1,7 @@
 import collections
 
+import ale.common
+
 from ale.models import AleExperiment
 
 from seq.models import ResequencingExperiment
@@ -11,7 +13,7 @@ from seq.models import ObservedMutation
 import aleinfo.settings as settings
 
 
-__author__ = 'pphaneuf'
+__author__ = 'Patrick Phaneuf'
 
 DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
 
@@ -39,8 +41,6 @@ EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 SEQ_EXPERIMENT_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
-
-STARTING_STRAIN_ALE_ID = 0
 
 
 if hasattr(settings, SETTINGS_SEQUENCING_URL):
@@ -124,7 +124,7 @@ def get_seq_experiment_queryset(experiment_ids, exclude_starting_strain=False):
 
     if exclude_starting_strain:
 
-        experiment_queryset = experiment_queryset.exclude(ale_id=STARTING_STRAIN_ALE_ID)
+        experiment_queryset = experiment_queryset.exclude(ale_id=ale.common.STARTING_STRAIN_ALE_ID)
 
     return experiment_queryset
 
@@ -259,7 +259,7 @@ def get_seq_experiment_raw_queryset(request):
 
 def _get_starting_string_mutation_queryset(request):
 
-    ale_id = STARTING_STRAIN_ALE_ID
+    ale_id = ale.common.STARTING_STRAIN_ALE_ID
 
     return _get_seq_experiment_raw_queryset(request, ale_id)
 
