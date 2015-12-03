@@ -4,21 +4,17 @@ import os
 
 import seq.alchemy_orm
 
+import ale.models
+
+import seq.models
+
+import builder.util
+
 import builder.upload
 
 import builder.key_mutations
 
-from builder import util
-
 from gdparse.gdparse import gdparse
-
-from ale.models import AleExperiment
-
-from seq.models import Mutation
-
-from ale.models import KeyMutation
-
-from ale.models import Flask
 
 
 WILD_TYPE_ALE_NUMBER = 0
@@ -46,7 +42,7 @@ ANNOTATION_GENOMIC_DIFF_FILE_DIR = '/evidence/'
 
 def remove_flask(flask_primary_key):
 
-    flask_to_delete = Flask.objects.get(pk=flask_primary_key)
+    flask_to_delete = ale.models.Flask.objects.get(pk=flask_primary_key)
 
     flask_to_delete.delete()
 
@@ -59,7 +55,7 @@ def delete_ale_experiment(ale_experiment_primary_key):
     Executed from Django ipython shell.
     """
 
-    ale_experiment_to_delete = AleExperiment.objects.get(pk=ale_experiment_primary_key)
+    ale_experiment_to_delete = ale.models.AleExperiment.objects.get(pk=ale_experiment_primary_key)
 
     ale_experiment_to_delete.delete()
 
@@ -68,7 +64,7 @@ def delete_ale_experiment(ale_experiment_primary_key):
 
 def _delete_all_orphaned_mutations():
 
-    all_mutations = Mutation.objects.all()
+    all_mutations = seq.models.Mutation.objects.all()
 
     for mutation in all_mutations:
 
@@ -87,21 +83,21 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
     Executed from Django ipython shell.
     """
 
-    sanitized_breseq_output_abs_path = util.sanitize_path(breseq_output_abs_path)
+    sanitized_breseq_output_abs_path = builder.util.sanitize_path(breseq_output_abs_path)
 
     db_session = seq.alchemy_orm.Session()
 
     # TODO: shouldn't be returning multiple objects, because you remember return order; bad practice.
     experiment, \
-    media, \
-    freezer_box \
-        = _get_project_orm(db_session,
-                           ale_exp_user,
-                           ale_exp_name)
+        media, \
+        freezer_box \
+            = _get_project_orm(db_session,
+                               ale_exp_user,
+                               ale_exp_name)
 
     if breseq_wild_type_output_abs_path is not None:
 
-        sanitized_breseq_output_wild_type_output_abs_path = util.sanitize_path(breseq_wild_type_output_abs_path)
+        sanitized_breseq_output_wild_type_output_abs_path = builder.util.sanitize_path(breseq_wild_type_output_abs_path)
 
         _create_and_commit_wild_type_ale_entry(db_session,
                                                sanitized_breseq_output_wild_type_output_abs_path,
@@ -114,9 +110,9 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     for ale_isolate_name in breseq_sample_report_list:
 
-        ale_number = util.parse_ale_name(ale_isolate_name, util.AleName.Ale)
+        ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
 
-        flask_number = util.parse_ale_name(ale_isolate_name, util.AleName.Flask)
+        flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
 
         output_path = sanitized_breseq_output_abs_path \
                       + ale_isolate_name \
@@ -142,19 +138,18 @@ def insert_flask(breseq_output_abs_path,
                  ale_number,
                  flask_number):
 
-    sanitized_breseq_output_abs_path = util.sanitize_path(breseq_output_abs_path)
+    sanitized_breseq_output_abs_path = builder.util.sanitize_path(breseq_output_abs_path)
 
     db_session = seq.alchemy_orm.Session()
 
     # TODO: shouldn't be returning multiple objects, because you remember return order; bad practice.
     experiment,\
-    media,\
-    freezer_box\
-        = _get_project_orm(db_session,
-                           ale_exp_user,
-                           ale_exp_name)
+        media,\
+        freezer_box = _get_project_orm(db_session,
+                                       ale_exp_user,
+                                       ale_exp_name)
 
-    breseq_sample_name = util.get_ale_name(ale_number, flask_number)
+    breseq_sample_name = builder.util.get_ale_name(ale_number, flask_number)
 
     output_path = sanitized_breseq_output_abs_path\
                       + breseq_sample_name\
@@ -179,13 +174,12 @@ def _populate_key_mutations(sql_alchemy_experiment):
     Using only Django ORM to make commit to database.
     """
 
-    django_orm_ale_exp = AleExperiment.objects.get(ale_id=sql_alchemy_experiment.ale_id)
+    django_orm_ale_exp = ale.models.AleExperiment.objects.get(ale_id=sql_alchemy_experiment.ale_id)
 
-    key_mutations_set = builder.key_mutations.get_key_mutations(sql_alchemy_experiment.ale_id)
-    key_mutations_list = list(key_mutations_set)
+    key_mutations_list = builder.key_mutations.get_key_mutation_list_single_experiment(sql_alchemy_experiment.ale_id)
 
     for key_mutation in key_mutations_list:
-        km = KeyMutation()
+        km = ale.models.KeyMutation()
         km.ale_experiment = django_orm_ale_exp
         km.mutation = key_mutation
         km.save()

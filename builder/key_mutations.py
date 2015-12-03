@@ -8,61 +8,55 @@ import collections
 __author__ = "Patrick Phaneuf"
 
 
-def get_key_mutations(ale_experiment_id):
+def get_key_mutation_list_single_experiment(ale_experiment_id):
 
     seq_experiment_dict = _get_seq_experiment_dict(ale_experiment_id)
 
-    common_mutation_set = _get_common_mutation_set(seq_experiment_dict)
+    experiment_mutation_list = _get_experiment_mutation_list(seq_experiment_dict)
 
-    starting_strain_mutation_set = _get_starting_strain_mutation_set(seq_experiment_dict)
+    mutation_gene_count_dict = collections.defaultdict(int)
 
-    common_mutation_set_no_starting_strain = common_mutation_set - starting_strain_mutation_set
+    key_mutation_list = []
 
-    return common_mutation_set_no_starting_strain
+    for mutation_list in experiment_mutation_list:
+
+        for mutation in mutation_list:
+
+            mutation_gene_count_dict[mutation.gene] += 1
+
+            if mutation_gene_count_dict[mutation.gene] > 1:
+
+                key_mutation_list.append(mutation)
+
+    return key_mutation_list
 
 
-def _get_common_mutation_set(seq_experiment_dict):
+def _get_experiment_mutation_list(seq_experiment_dict):
 
-    mutation_set_list = []
+    mutation_list = []
 
     for seq_experiment_id in seq_experiment_dict:
-
-        mutations_set = set()
 
         seq_experiment = seq_experiment_dict[seq_experiment_id]
 
         if seq_experiment.ale_id != ale.common.STARTING_STRAIN_ALE_ID:
 
-            mutations_set.update(_get_seq_experiment_mutations_set(seq_experiment_id))
+            mutation_list.append(_get_seq_experiment_mutations_list(seq_experiment_id))
 
-            mutation_set_list.append(mutations_set)
-
-    arbitrary_starting_mutation_set = mutation_set_list[0]
-
-    common_mutation_set = arbitrary_starting_mutation_set
-
-    for mutation_set in mutation_set_list:
-
-        common_mutation_set = common_mutation_set & mutation_set
-
-    return common_mutation_set
+    return mutation_list
 
 
-def _get_starting_strain_mutation_set(seq_experiment_dict):
+def _get_seq_experiment_mutations_list(seq_experiment_id):
 
-    starting_strain_mutation_set = set()
+    mutations_list = []
 
-    for seq_experiment_id in seq_experiment_dict:
+    observed_mutations_query_set = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id=seq_experiment_id)
 
-        seq_experiment = seq_experiment_dict[seq_experiment_id]
+    for observed_mutation in observed_mutations_query_set:
 
-        if seq_experiment.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
+        mutations_list.append(observed_mutation.mutation)
 
-            starting_strain_mutation_set.update(_get_seq_experiment_mutations_set(seq_experiment_id))
-
-            break  # Only 1 starting strain, therefore don't need to parse remaining experiments.
-
-    return starting_strain_mutation_set
+    return mutations_list
 
 
 def _get_seq_experiment_dict(experiment_id):
@@ -80,16 +74,3 @@ def _get_seq_experiment_dict(experiment_id):
     seq_experiment_dict = collections.OrderedDict((seq_experiment.id, seq_experiment) for seq_experiment in seq_experiments_raw_query_set)
 
     return seq_experiment_dict
-
-
-def _get_seq_experiment_mutations_set(seq_experiment_id):
-
-    mutations_set = set()
-
-    observed_mutations_query_set = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id=seq_experiment_id)
-
-    for observed_mutation in observed_mutations_query_set:
-
-        mutations_set.add(observed_mutation.mutation)
-
-    return mutations_set
