@@ -91,9 +91,9 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
     experiment, \
         media, \
         freezer_box \
-            = _get_project_orm(db_session,
-                               ale_exp_user,
-                               ale_exp_name)
+        = _get_project_orm(db_session,
+                           ale_exp_user,
+                           ale_exp_name)
 
     if breseq_wild_type_output_abs_path is not None:
 
@@ -130,41 +130,6 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                      is_wild_type=False)
 
     _populate_key_mutations(experiment)
-
-
-def insert_flask(breseq_output_abs_path,
-                 ale_exp_user,
-                 ale_exp_name,
-                 ale_number,
-                 flask_number):
-
-    sanitized_breseq_output_abs_path = builder.util.sanitize_path(breseq_output_abs_path)
-
-    db_session = seq.alchemy_orm.Session()
-
-    # TODO: shouldn't be returning multiple objects, because you remember return order; bad practice.
-    experiment,\
-        media,\
-        freezer_box = _get_project_orm(db_session,
-                                       ale_exp_user,
-                                       ale_exp_name)
-
-    breseq_sample_name = builder.util.get_ale_name(ale_number, flask_number)
-
-    output_path = sanitized_breseq_output_abs_path\
-                      + breseq_sample_name\
-                      + "/"\
-                      + BRESEQ_OUTPUT_REPORT_DIR
-
-    _create_and_commit_ale_entry(db_session,
-                                 ale_exp_user,
-                                 output_path,
-                                 ale_number,
-                                 flask_number,
-                                 experiment,
-                                 media,
-                                 freezer_box,
-                                 is_wild_type=False)
 
 
 def _populate_key_mutations(sql_alchemy_experiment):
