@@ -39,6 +39,28 @@ ANNOTATION_GENOMIC_DIFF_FILE_NAME = 'annotated.gd'
 
 ANNOTATION_GENOMIC_DIFF_FILE_DIR = '/evidence/'
 
+# TODO: Don't use defaults any longer.
+
+DEFAULT_INSTRUMENT_NAME = "UCSD1"
+
+DEFAULT_DATE = datetime.date(2013, 1, 1)
+
+DEFAULT_IS_SIMULATION = False
+
+DEFAULT_MEDIA_DESCRIPTION = "M9"
+
+DEFAULT_MEDIA_SUBSTRATE = "Glycerol"
+
+DEFAULT_TEMPERATURE = 30
+
+DEFAULT_VOLUME = 15
+
+DEFAULT_STIRRING_SPEED = 1100
+
+DEFAULT_FREEZER_BOX_NAME = "ALE box"
+
+DEFAULT_FREEZER_BOX_NUMBER = 1
+
 
 def remove_flask(flask_primary_key):
 
@@ -87,13 +109,30 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     db_session = seq.alchemy_orm.Session()
 
-    # TODO: shouldn't be returning multiple objects, because you remember return order; bad practice.
-    experiment, \
-        media, \
-        freezer_box \
-        = _get_project_orm(db_session,
-                           ale_exp_user,
-                           ale_exp_name)
+    instrument_orm = seq.alchemy_orm.query_or_create(db_session,
+                                                     seq.alchemy_orm.Instrument,
+                                                     name=DEFAULT_INSTRUMENT_NAME)
+
+    experiment_orm = seq.alchemy_orm.query_or_create(db_session,
+                                                     seq.alchemy_orm.AleExperiment,
+                                                     name=ale_exp_name,
+                                                     instrument=instrument_orm,
+                                                     person=ale_exp_user,
+                                                     date=DEFAULT_DATE,
+                                                     simulation=DEFAULT_IS_SIMULATION)
+
+    media_orm = seq.alchemy_orm.query_or_create(db_session,
+                                                seq.alchemy_orm.Media,
+                                                description=DEFAULT_MEDIA_DESCRIPTION,
+                                                substrate=DEFAULT_MEDIA_SUBSTRATE,
+                                                temperature=DEFAULT_TEMPERATURE,
+                                                volume=DEFAULT_VOLUME,
+                                                stirring_speed=DEFAULT_STIRRING_SPEED)
+
+    freezer_box_orm = seq.alchemy_orm.query_or_create(db_session,
+                                                      seq.alchemy_orm.FreezerBox,
+                                                      name=DEFAULT_FREEZER_BOX_NAME,
+                                                      number=DEFAULT_FREEZER_BOX_NUMBER)
 
     if breseq_wild_type_output_abs_path is not None:
 
@@ -101,9 +140,9 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
         _create_and_commit_wild_type_ale_entry(db_session,
                                                sanitized_breseq_output_wild_type_output_abs_path,
-                                               experiment,
-                                               media,
-                                               freezer_box)
+                                               experiment_orm,
+                                               media_orm,
+                                               freezer_box_orm)
 
     # Might need to explicitly sort this list in the future.
     breseq_sample_report_list = _get_sample_report_list(sanitized_breseq_output_abs_path)
@@ -124,30 +163,53 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                      output_path,
                                      ale_number,
                                      flask_number,
-                                     experiment,
-                                     media,
-                                     freezer_box,
+                                     experiment_orm,
+                                     media_orm,
+                                     freezer_box_orm,
                                      is_wild_type=False)
 
-    _populate_key_mutations(experiment)
+    # clear_key_mutations(ale_exp_name,
+    #                     ale_exp_user)
+
+    populate_key_mutations(ale_exp_name,
+                           ale_exp_user)
 
 
-def _populate_key_mutations(sql_alchemy_experiment):
+# def clear_key_mutations(ale_exp_name,
+#                         ale_exp_user):
+
+
+def populate_key_mutations(ale_exp_name,
+                           ale_exp_user):
 
     """
     Find all key mutations for ALE experiment and populate database table with them.
     Using only Django ORM to make commit to database.
     """
 
-    django_orm_ale_exp = ale.models.AleExperiment.objects.get(ale_id=sql_alchemy_experiment.ale_id)
+    db_session = seq.alchemy_orm.Session()
 
-    key_mutations_list = builder.key_mutations.get_key_mutation_list_single_experiment(sql_alchemy_experiment.ale_id)
+    sqlalchemy_orm_instrument = seq.alchemy_orm.query_or_create(db_session,
+                                                                seq.alchemy_orm.Instrument,
+                                                                name=DEFAULT_INSTRUMENT_NAME)
+
+    sqlalchemy_orm_experiment = seq.alchemy_orm.query_or_create(db_session,
+                                                                seq.alchemy_orm.AleExperiment,
+                                                                name=ale_exp_name,
+                                                                instrument=sqlalchemy_orm_instrument,
+                                                                person=ale_exp_user,
+                                                                date=DEFAULT_DATE,
+                                                                simulation=DEFAULT_IS_SIMULATION)
+
+    django_orm_ale_exp = ale.models.AleExperiment.objects.get(ale_id=sqlalchemy_orm_experiment.ale_id)
+
+    key_mutations_list = builder.key_mutations.get_key_mutation_list_single_experiment(sqlalchemy_orm_experiment.ale_id)
 
     for key_mutation in key_mutations_list:
-        km = ale.models.KeyMutation()
-        km.ale_experiment = django_orm_ale_exp
-        km.mutation = key_mutation
-        km.save()
+        django_orm_key_mutation = ale.models.KeyMutation()
+        django_orm_key_mutation.ale_experiment = django_orm_ale_exp
+        django_orm_key_mutation.mutation = key_mutation
+        django_orm_key_mutation.save()
 
 
 def _create_and_commit_wild_type_ale_entry(db_session,
@@ -285,42 +347,6 @@ def _legacy_get_sample_reseq_type(breseq_folder_path):
         sample_reseq_type = gdparse.SampleType.POPULATION
 
     return sample_reseq_type
-
-
-# TODO: make all default values used within this script as constants or in a config file.
-# TODO: add more parameters to function for inputs set as literals.
-def _get_project_orm(db_session,
-                     ale_exp_user,
-                     ale_exp_name):
-
-    # create the instrument, experiment, etc. to the isolates for the strains
-    instrument = seq.alchemy_orm.query_or_create(db_session,
-                                                 seq.alchemy_orm.Instrument,
-                                                 name="UCSD1")
-
-    experiment = seq.alchemy_orm.query_or_create(db_session,
-                                                 seq.alchemy_orm.AleExperiment,
-                                                 name=ale_exp_name,
-                                                 instrument=instrument,
-                                                 person=ale_exp_user,
-                                                 date=datetime.date(2013, 1, 1),
-                                                 simulation=False)
-
-    media = seq.alchemy_orm.query_or_create(db_session,
-                                            seq.alchemy_orm.Media,
-                                            description="M9",
-                                            substrate="Glycerol",
-                                            temperature=30,
-                                            volume=15,
-                                            stirring_speed=1100)
-
-    freezer_box = seq.alchemy_orm.query_or_create(db_session,
-                                                  seq.alchemy_orm.FreezerBox,
-                                                  name="ALE box",
-                                                  number=1)
-
-    # TODO: find a better way to return these, so that don't have to worry about return order.
-    return experiment, media, freezer_box
 
 
 def _get_sample_report_list(experiment_breseq_output_path):
