@@ -168,42 +168,26 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                      freezer_box_orm,
                                      is_wild_type=False)
 
-    # clear_key_mutations(ale_exp_name,
-    #                     ale_exp_user)
+    delete_key_mutations(experiment_orm.ale_id)
 
-    populate_key_mutations(ale_exp_name,
-                           ale_exp_user)
+    create_key_mutations(experiment_orm.ale_id)
 
 
-# def clear_key_mutations(ale_exp_name,
-#                         ale_exp_user):
+def delete_key_mutations(ale_experiment_id):
+
+    ale.models.KeyMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
 
 
-def populate_key_mutations(ale_exp_name,
-                           ale_exp_user):
+def create_key_mutations(ale_experiment_id):
 
     """
     Find all key mutations for ALE experiment and populate database table with them.
     Using only Django ORM to make commit to database.
     """
 
-    db_session = seq.alchemy_orm.Session()
+    django_orm_ale_exp = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
 
-    sqlalchemy_orm_instrument = seq.alchemy_orm.query_or_create(db_session,
-                                                                seq.alchemy_orm.Instrument,
-                                                                name=DEFAULT_INSTRUMENT_NAME)
-
-    sqlalchemy_orm_experiment = seq.alchemy_orm.query_or_create(db_session,
-                                                                seq.alchemy_orm.AleExperiment,
-                                                                name=ale_exp_name,
-                                                                instrument=sqlalchemy_orm_instrument,
-                                                                person=ale_exp_user,
-                                                                date=DEFAULT_DATE,
-                                                                simulation=DEFAULT_IS_SIMULATION)
-
-    django_orm_ale_exp = ale.models.AleExperiment.objects.get(ale_id=sqlalchemy_orm_experiment.ale_id)
-
-    key_mutations_list = builder.key_mutations.get_key_mutation_list_single_experiment(sqlalchemy_orm_experiment.ale_id)
+    key_mutations_list = builder.key_mutations.get_key_mutation_list_single_experiment(ale_experiment_id)
 
     for key_mutation in key_mutations_list:
         django_orm_key_mutation = ale.models.KeyMutation()
