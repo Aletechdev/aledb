@@ -168,17 +168,22 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                      freezer_box_orm,
                                      is_wild_type=False)
 
-    delete_key_mutations(experiment_orm.ale_id)
-
-    create_key_mutations(experiment_orm.ale_id)
+    rebuild_key_mutations(experiment_orm.ale_id)
 
 
-def delete_key_mutations(ale_experiment_id):
+def rebuild_key_mutations(ale_experiment_id):
+
+    _delete_key_mutations(ale_experiment_id)
+
+    _create_key_mutations(ale_experiment_id)
+
+
+def _delete_key_mutations(ale_experiment_id):
 
     ale.models.KeyMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
 
 
-def create_key_mutations(ale_experiment_id):
+def _create_key_mutations(ale_experiment_id):
 
     """
     Find all key mutations for ALE experiment and populate database table with them.
