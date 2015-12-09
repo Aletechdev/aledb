@@ -16,13 +16,17 @@ def get_key_mutation_list_single_experiment(ale_experiment_id):
 
     mutation_gene_count_dict = collections.defaultdict(int)
 
-    key_mutation_list = []
+    for ale_mutation_list in experiment_mutation_list:
 
-    for mutation_list in experiment_mutation_list:
-
-        for mutation in mutation_list:
+        for mutation in ale_mutation_list:
 
             mutation_gene_count_dict[mutation.gene] += 1
+
+    key_mutation_list = []
+
+    for ale_mutation_list in experiment_mutation_list:
+
+        for mutation in ale_mutation_list:
 
             if mutation_gene_count_dict[mutation.gene] > 1:
 
