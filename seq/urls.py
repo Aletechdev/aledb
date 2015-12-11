@@ -1,20 +1,24 @@
 from django.conf.urls import patterns, url
 
-from seq.views import index
-from seq.views import mutations
-from seq.views import experiments
-from seq.views import key_mutations
-from seq.views import select_lineage
-from seq.views import lineage
-from seq.views import meta_data
+from django.contrib.auth.decorators import login_required
+
+import seq.views.index
+import seq.views.mutations
+import seq.views.experiments
+import seq.views.key_mutations
+import seq.views.select_lineage
+import seq.views.lineage
+import seq.views.meta_data
+import seq.views.search
 
 
 urlpatterns = patterns('',
-                       url('^$', index.index, name="index"),
-                       url('^mutations$', mutations.mutation_table, name="mutation_table"),
-                       url('^key_mutations$', key_mutations.key_mutations, name="key_mutations"),
-                       url('^lists$', experiments.lists, name="lists"),
-                       url('^select_lineage', select_lineage.select_lineage, name="select_lineage"),
-                       url('^lineage', lineage.lineage, name="lineage"),
-                       url('^meta_data', meta_data.meta_data, name="lineage"),
+                       url('^$', seq.views.index.index, name="index"),
+                       url('^mutations$', seq.views.mutations.mutation_table, name="mutation_table"),
+                       url('^key_mutations$', seq.views.key_mutations.key_mutations, name="key_mutations"),
+                       url('^lists$', seq.views.experiments.lists, name="lists"),
+                       url('^select_lineage', seq.views.select_lineage.select_lineage, name="select_lineage"),
+                       url('^lineage', seq.views.lineage.lineage, name="lineage"),
+                       url('^meta_data', seq.views.meta_data.meta_data, name="lineage"),
+                       url('^search', login_required(seq.views.search.SearchView.as_view()), name="search"),
                        )
