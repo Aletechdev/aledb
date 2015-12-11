@@ -1,6 +1,6 @@
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
 from django.conf.urls import patterns, include, url
-#from aleinfo import views
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -8,7 +8,9 @@ admin.autodiscover()
 
 
 urlpatterns = patterns('',
+
                        (r'^accounts/login/$', 'django.contrib.auth.views.login'),
+
                        url(r'^grappelli/', include('grappelli.urls')),
 
                        # Uncomment the admin/doc line below to enable admin documentation:
