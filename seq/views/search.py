@@ -22,8 +22,7 @@ def search(request):
 
         gene_query = request.GET['q']
 
-        # TODO: refactor to _is_query_empty(query)
-        if not gene_query:
+        if _is_query_empty(gene_query):
 
             error = True
 
@@ -44,6 +43,17 @@ def search(request):
             return HttpResponse(template.render(context))
 
     return render(request, 'search_form.html', {'error': error})
+
+
+def _is_query_empty(query):
+
+    is_query_empty = False
+
+    if not query:
+
+        is_query_empty = True
+
+    return is_query_empty
 
 
 def _get_seq_exp(mutated_gene):
