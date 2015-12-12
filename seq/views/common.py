@@ -2,15 +2,11 @@ import collections
 
 import ale.common
 
-from ale.models import AleExperiment
+import ale.models
 
-from seq.models import ResequencingExperiment
+import seq.models
 
-from seq.models import Mutation
-
-from seq.models import ObservedMutation
-
-import aleinfo.settings as settings
+import aleinfo.settings
 
 
 __author__ = 'Patrick Phaneuf'
@@ -43,15 +39,15 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 SEQ_EXPERIMENT_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
 
 
-if hasattr(settings, SETTINGS_SEQUENCING_URL):
-    reseqencing_report_url = settings.sequencing_url
+if hasattr(aleinfo.settings, SETTINGS_SEQUENCING_URL):
+    reseqencing_report_url = aleinfo.settings.sequencing_url
 else:
     reseqencing_report_url = DEFAULT_RESEQ_REPORT_URL
 
 
 def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
 
-    mutations = Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
+    mutations = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
     mutation_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
 
     experiment_urls = _get_experiment_urls(seq_experiment_dict)
@@ -114,13 +110,13 @@ def get_seq_experiment_queryset(experiment_ids, exclude_starting_strain=False):
 
     if experiment_ids is not None:
 
-        experiment = AleExperiment.objects.get(ale_id=experiment_ids)
+        experiment = ale.models.AleExperiment.objects.get(ale_id=experiment_ids)
 
         experiment_queryset = experiment.aleid_set.only("ale_id")
 
     else:
 
-        experiment_queryset = ResequencingExperiment.objects.all()
+        experiment_queryset = seq.models.ResequencingExperiment.objects.all()
 
     if exclude_starting_strain:
 
@@ -180,7 +176,7 @@ def get_ale_experiment_name(request):
 
     if ale_experiment_id is not None and ale_experiment_id != "all":
 
-        ale_experiment = AleExperiment.objects.filter(ale_id=ale_experiment_id)
+        ale_experiment = ale.models.AleExperiment.objects.filter(ale_id=ale_experiment_id)
 
         # TODO: should only ever be returning 1 experiment. Implement error handling for more than one returned.
         ale_experiment_name = ale_experiment[0].name
@@ -231,11 +227,26 @@ def _get_ale_number_selector(ale_id):
     return ale_no_selector
 
 
-def get_experiment_ordered_dict(request, include_starting_straing=False):
+def get_seq_exp(mutated_gene):
+
+    mutations_with_gene = seq.models.Mutation.objects.filter(gene=mutated_gene)
+
+    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation=mutations_with_gene)
+
+    seq_experiment_dict = {}
+
+    for observed_mutation in observed_mutations_with_gene:
+
+        seq_experiment_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
+
+    return seq_experiment_dict
+
+
+def get_experiment_ordered_dict(request, include_starting_strain=False):
 
     seq_experiment_ordered_dict = collections.OrderedDict()
 
-    if include_starting_straing:
+    if include_starting_strain:
 
         starting_strain_raw_queryset = _get_starting_string_mutation_queryset(request)
 
@@ -245,6 +256,7 @@ def get_experiment_ordered_dict(request, include_starting_straing=False):
     seq_experiments_raw_queryset = get_seq_experiment_raw_queryset(request)
 
     for seq_experiment in seq_experiments_raw_queryset:
+
         seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
 
     return seq_experiment_ordered_dict
@@ -274,7 +286,7 @@ def _get_seq_experiment_raw_queryset(request, ale_id):
 
     sql_query = SEQ_EXPERIMENT_QUERY % (ale_experiment_selector, ale_id_selector)
 
-    seq_experiments_raw_queryset = ResequencingExperiment.objects.raw(sql_query)
+    seq_experiments_raw_queryset = seq.models.ResequencingExperiment.objects.raw(sql_query)
 
     return seq_experiments_raw_queryset
 
@@ -350,6 +362,6 @@ def _remove_checked_flasks(request, seq_experiment_dict):
 
 def get_observed_mutations(seq_experiment_dict):
 
-    observed_mutations = ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
+    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
 
     return observed_mutations
