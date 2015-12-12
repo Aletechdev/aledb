@@ -1,7 +1,5 @@
 from django.conf.urls import patterns, url
 
-from django.contrib.auth.decorators import login_required
-
 import seq.views.index
 import seq.views.mutations
 import seq.views.experiments
@@ -20,5 +18,6 @@ urlpatterns = patterns('',
                        url('^select_lineage', seq.views.select_lineage.select_lineage, name="select_lineage"),
                        url('^lineage', seq.views.lineage.lineage, name="lineage"),
                        url('^meta_data', seq.views.meta_data.meta_data, name="lineage"),
-                       url('^search', login_required(seq.views.search.SearchView.as_view()), name="search"),
+                       url('^search_form', seq.views.search.search_form, name="search_form"),
+                       url('^search_view', seq.views.search.search, name="search_view"),
                        )

@@ -227,21 +227,6 @@ def _get_ale_number_selector(ale_id):
     return ale_no_selector
 
 
-def get_seq_exp(mutated_gene):
-
-    mutations_with_gene = seq.models.Mutation.objects.filter(gene=mutated_gene)
-
-    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation=mutations_with_gene)
-
-    seq_experiment_dict = {}
-
-    for observed_mutation in observed_mutations_with_gene:
-
-        seq_experiment_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
-
-    return seq_experiment_dict
-
-
 def get_experiment_ordered_dict(request, include_starting_strain=False):
 
     seq_experiment_ordered_dict = collections.OrderedDict()
