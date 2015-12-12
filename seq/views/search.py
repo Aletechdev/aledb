@@ -6,45 +6,44 @@ from django.contrib.auth.decorators import login_required
 
 from django.template import Context, loader
 
+from django.shortcuts import render
+
 import seq.models
 
 import seq.views.common
 
 
 @login_required
-def search_form(request):
-
-    template = loader.get_template("search_form.html")
-
-    return HttpResponse(template.render())
-
-
-@login_required
 def search(request):
 
-    if 'q' in request.GET and request.GET['q']:
+    error = False
+
+    if 'q' in request.GET:
 
         gene_query = request.GET['q']
 
-        # message = 'You searched for: %r' % request.GET['q']
+        # TODO: refactor to _is_query_empty(query)
+        if not gene_query:
 
-        seq_experiment_dict, observed_mutations_with_gene = _get_seq_exp(gene_query)
+            error = True
 
-        table_header = seq.views.common.get_table_header(seq_experiment_dict)
+        else:
 
-        table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene, request)
+            seq_experiment_dict, observed_mutations_with_gene = _get_seq_exp(gene_query)
 
-        template = loader.get_template("search_results.html")
+            table_header = seq.views.common.get_table_header(seq_experiment_dict)
 
-        context = Context({"table_body": mark_safe(table_body),
-                           "title": "Search Results",
-                           "table_header": mark_safe(table_header)})
+            table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene, request)
 
-        return HttpResponse(template.render(context))
+            template = loader.get_template("search_results.html")
 
-    else:
+            context = Context({"table_body": mark_safe(table_body),
+                               "title": "Search Results",
+                               "table_header": mark_safe(table_header)})
 
-        return HttpResponse('Please submit a search term.')
+            return HttpResponse(template.render(context))
+
+    return render(request, 'search_form.html', {'error': error})
 
 
 def _get_seq_exp(mutated_gene):
