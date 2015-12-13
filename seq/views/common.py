@@ -45,6 +45,9 @@ else:
     reseqencing_report_url = DEFAULT_RESEQ_REPORT_URL
 
 
+# TODO: Refactor. The observed mutations argument may
+# reference to a seq_experiment that doesn't exist due to checkbox filtering.
+# This makes this function very confusing.
 def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
 
     mutations = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
@@ -70,7 +73,7 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
 
         new_entry = _get_table_mutation_entry(observed_mutation, experiment_urls)
 
-        if new_entry is not None:
+        if new_entry is not None and observed_mutation.sequencing_experiment_id in seq_experiment_dict.keys():
             table_entries[mutation_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
 
     #Populating table body

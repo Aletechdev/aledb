@@ -28,11 +28,11 @@ def search(request):
 
         else:
 
-            seq_experiment_dict, observed_mutations_with_gene = _get_seq_exp(gene_query)
+            seq_experiment_dict, observed_mutations_with_gene_query_set = _get_seq_exp(request, gene_query)
 
             table_header = seq.views.common.get_table_header(seq_experiment_dict)
 
-            table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene, request)
+            table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set, request)
 
             template = loader.get_template("search.html")
 
@@ -57,7 +57,19 @@ def _is_query_empty(query):
 
 
 # TODO: Refactor. seq.views.common.py probably also need to be refactored along with this.
-def _get_seq_exp(mutated_gene):
+def _get_seq_exp(request, mutated_gene):
+
+    isolates_to_remove_id_list = []
+    isolates_to_remove_string = request.GET.get(seq.views.common.EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG)
+    if isolates_to_remove_string is not None:
+        isolates_to_remove_ids = isolates_to_remove_string.encode('latin_1').replace("{", "").replace("}", "")
+        isolates_to_remove_id_list = [int(i) for i in isolates_to_remove_ids.split(",") if i != ""]
+
+    isolates_to_show_id_list = []
+    isolates_to_show_string = request.GET.get(seq.views.common.EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG)
+    if isolates_to_show_string is not None:
+        isolates_to_show_ids = isolates_to_show_string.encode('latin_1').replace("{", "").replace("}", "")
+        isolates_to_show_id_list = [int(i) for i in isolates_to_show_ids.split(",") if i != ""]
 
     mutations_with_gene = seq.models.Mutation.objects.filter(gene=mutated_gene)
 
@@ -67,6 +79,10 @@ def _get_seq_exp(mutated_gene):
 
     for observed_mutation in observed_mutations_with_gene:
 
-        seq_experiment_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
+        if observed_mutation.sequencing_experiment.id not in isolates_to_remove_id_list\
+            or observed_mutation.sequencing_experiment.id in isolates_to_remove_id_list\
+                and observed_mutation.sequencing_experiment.id in isolates_to_show_id_list:
+
+            seq_experiment_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
 
     return seq_experiment_dict, observed_mutations_with_gene
