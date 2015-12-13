@@ -151,6 +151,15 @@
   <h2>ALE Analytics / Mutation Search</h2>
 </div>
 
+{% if error %}
+    <p style="color: red;">Please submit a search term.</p>
+{% endif %}
+<form action="/ale_analytics/search/" method="get">
+    <input type="text" name="q" placeholder="gene">
+    <input type="submit" value="Search">
+</form>
+
+{% if table_body %}
 <form action="" method="get">
     <table id="data">
         <input type="button" value="Remove checked flasks" class="ui" onclick="filterFlask('remove')"/>
@@ -163,5 +172,6 @@
         </tbody>
     </table>
 </form>
+{% endif %}
 </body>
 </html>

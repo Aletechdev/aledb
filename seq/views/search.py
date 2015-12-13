@@ -34,7 +34,7 @@ def search(request):
 
             table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene, request)
 
-            template = loader.get_template("search_results.html")
+            template = loader.get_template("search.html")
 
             context = Context({"table_body": mark_safe(table_body),
                                "title": "Search Results",
@@ -42,7 +42,7 @@ def search(request):
 
             return HttpResponse(template.render(context))
 
-    return render(request, 'search_form.html', {'error': error})
+    return render(request, 'search.html', {'error': error})
 
 
 def _is_query_empty(query):
@@ -56,6 +56,7 @@ def _is_query_empty(query):
     return is_query_empty
 
 
+# TODO: Refactor. seq.views.common.py probably also need to be refactored along with this.
 def _get_seq_exp(mutated_gene):
 
     mutations_with_gene = seq.models.Mutation.objects.filter(gene=mutated_gene)
