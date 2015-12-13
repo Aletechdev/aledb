@@ -35,7 +35,7 @@ def mutation_table(request):
 
     seq_experiment_queryset = common.get_seq_experiment_queryset(ale_experiment_id)
 
-    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_straing=True)
+    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
 
     seq_experiment_ordered_dict = common.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
