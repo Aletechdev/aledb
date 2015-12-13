@@ -154,11 +154,12 @@
 {% if error %}
     <p style="color: red;">Please submit a search term.</p>
 {% endif %}
+<p>
 <form action="/ale_analytics/search/" method="get">
     <input type="text" name="q" placeholder="gene">
     <input type="submit" value="Search">
 </form>
-
+</p>
 {% if table_body %}
 <form action="" method="get">
     <table id="data">
