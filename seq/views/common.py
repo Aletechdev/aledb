@@ -19,7 +19,7 @@ REQUEST_ALE_NUMBER = "ale_no"
 
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
-HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
+HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td><td>Mutation Type</td>"""
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
 
@@ -63,8 +63,32 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
     # Initialize all sample mutation table cells as empty.
     table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for idx in range(len(mutations))]
 
+    del_count = 0
+    snp_count = 0
+    mob_count = 0
+    sub_count = 0
+    ins_count = 0
+    amp_count = 0
+
     # Populating table_entries
     for observed_mutation in observed_mutations_query_set:
+
+        print(observed_mutation.mutation.position)
+
+        if observed_mutation.mutation.mutation_type == 'DEL':
+            del_count += 1
+        if observed_mutation.mutation.mutation_type == 'SNP':
+            snp_count += 1
+        if observed_mutation.mutation.mutation_type == 'MOB':
+            mob_count += 1
+        if observed_mutation.mutation.mutation_type == 'SUB':
+            sub_count += 1
+        if observed_mutation.mutation.mutation_type == 'INS':
+            ins_count += 1
+        if observed_mutation.mutation.mutation_type == 'AMP':
+            amp_count += 1
+
+        # print(mutation_dict[observed_mutation.mutation_id])
 
         # TODO: figure out what this is.
         # sometimes we do not want the extra validation
@@ -75,6 +99,13 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
 
         if new_entry is not None and observed_mutation.sequencing_experiment_id in seq_experiment_dict.keys():
             table_entries[mutation_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+
+    print("del_count " + str(del_count))
+    print("snp_count " + str(snp_count))
+    print("mob_count " + str(mob_count))
+    print("sub_count " + str(sub_count))
+    print("ins_count " + str(ins_count))
+    print("amp_count " + str(amp_count))
 
     #Populating table body
     table_body = ""
@@ -94,6 +125,7 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
 
         table_row += "<td>%s</td>" % mutation.gene
         table_row += "<td>%s</td>" % mutation.protein_change
+        table_row += "<td>%s</td>" % mutation.mutation_type
         table_row += "".join(table_entries[mutation_dict[mutation.id]])
         table_row += "</tr>"
 
