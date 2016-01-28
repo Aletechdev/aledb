@@ -63,30 +63,56 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
     # Initialize all sample mutation table cells as empty.
     table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for idx in range(len(mutations))]
 
-    del_count = 0
-    snp_count = 0
-    mob_count = 0
-    sub_count = 0
-    ins_count = 0
-    amp_count = 0
+    clonal_del_count = 0
+    clonal_snp_count = 0
+    clonal_mob_count = 0
+    clonal_sub_count = 0
+    clonal_ins_count = 0
+    clonal_amp_count = 0
+
+    population_del_count = 0
+    population_snp_count = 0
+    population_mob_count = 0
+    population_sub_count = 0
+    population_ins_count = 0
+    population_amp_count = 0
 
     # Populating table_entries
     for observed_mutation in observed_mutations_query_set:
 
-        print(observed_mutation.mutation.position)
+        # print(observed_mutation.sequencing_experiment.isolate.isolate_number)
 
-        if observed_mutation.mutation.mutation_type == 'DEL':
-            del_count += 1
-        if observed_mutation.mutation.mutation_type == 'SNP':
-            snp_count += 1
-        if observed_mutation.mutation.mutation_type == 'MOB':
-            mob_count += 1
-        if observed_mutation.mutation.mutation_type == 'SUB':
-            sub_count += 1
-        if observed_mutation.mutation.mutation_type == 'INS':
-            ins_count += 1
-        if observed_mutation.mutation.mutation_type == 'AMP':
-            amp_count += 1
+        # print(observed_mutation.mutation.position)
+
+        if observed_mutation.sequencing_experiment.isolate.isolate_number > 0:
+
+            if observed_mutation.mutation.mutation_type == 'DEL':
+                clonal_del_count += 1
+            if observed_mutation.mutation.mutation_type == 'SNP':
+                clonal_snp_count += 1
+            if observed_mutation.mutation.mutation_type == 'MOB':
+                clonal_mob_count += 1
+            if observed_mutation.mutation.mutation_type == 'SUB':
+                clonal_sub_count += 1
+            if observed_mutation.mutation.mutation_type == 'INS':
+                clonal_ins_count += 1
+            if observed_mutation.mutation.mutation_type == 'AMP':
+                clonal_amp_count += 1
+
+        if observed_mutation.sequencing_experiment.isolate.isolate_number == 0:
+
+            if observed_mutation.mutation.mutation_type == 'DEL':
+                population_del_count += 1
+            if observed_mutation.mutation.mutation_type == 'SNP':
+                population_snp_count += 1
+            if observed_mutation.mutation.mutation_type == 'MOB':
+                population_mob_count += 1
+            if observed_mutation.mutation.mutation_type == 'SUB':
+                population_sub_count += 1
+            if observed_mutation.mutation.mutation_type == 'INS':
+                population_ins_count += 1
+            if observed_mutation.mutation.mutation_type == 'AMP':
+                population_amp_count += 1
 
         # print(mutation_dict[observed_mutation.mutation_id])
 
@@ -99,13 +125,22 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
 
         if new_entry is not None and observed_mutation.sequencing_experiment_id in seq_experiment_dict.keys():
             table_entries[mutation_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+            
+    # print(str(clonal_del_count))
+    # print(str(clonal_snp_count))
+    # print(str(clonal_mob_count))
+    # print(str(clonal_sub_count))
+    # print(str(clonal_ins_count))
+    # print(str(clonal_amp_count))
+    print(str(clonal_del_count + clonal_snp_count + clonal_mob_count + clonal_sub_count + clonal_ins_count + clonal_amp_count))
 
-    print("del_count " + str(del_count))
-    print("snp_count " + str(snp_count))
-    print("mob_count " + str(mob_count))
-    print("sub_count " + str(sub_count))
-    print("ins_count " + str(ins_count))
-    print("amp_count " + str(amp_count))
+    # print(str(population_del_count))
+    # print(str(population_snp_count))
+    # print(str(population_mob_count))
+    # print(str(population_sub_count))
+    # print(str(population_ins_count))
+    # print(str(population_amp_count))
+    print(str(population_del_count + population_snp_count + population_mob_count + population_sub_count + population_ins_count + population_amp_count))
 
     #Populating table body
     table_body = ""
