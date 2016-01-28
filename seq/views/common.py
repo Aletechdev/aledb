@@ -19,7 +19,7 @@ REQUEST_ALE_NUMBER = "ale_no"
 
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
-HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td><td>Mutation Type</td>"""
+HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation Type</td><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
 
@@ -63,58 +63,8 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
     # Initialize all sample mutation table cells as empty.
     table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for idx in range(len(mutations))]
 
-    clonal_del_count = 0
-    clonal_snp_count = 0
-    clonal_mob_count = 0
-    clonal_sub_count = 0
-    clonal_ins_count = 0
-    clonal_amp_count = 0
-
-    population_del_count = 0
-    population_snp_count = 0
-    population_mob_count = 0
-    population_sub_count = 0
-    population_ins_count = 0
-    population_amp_count = 0
-
     # Populating table_entries
     for observed_mutation in observed_mutations_query_set:
-
-        # print(observed_mutation.sequencing_experiment.isolate.isolate_number)
-
-        # print(observed_mutation.mutation.position)
-
-        if observed_mutation.sequencing_experiment.isolate.isolate_number > 0:
-
-            if observed_mutation.mutation.mutation_type == 'DEL':
-                clonal_del_count += 1
-            if observed_mutation.mutation.mutation_type == 'SNP':
-                clonal_snp_count += 1
-            if observed_mutation.mutation.mutation_type == 'MOB':
-                clonal_mob_count += 1
-            if observed_mutation.mutation.mutation_type == 'SUB':
-                clonal_sub_count += 1
-            if observed_mutation.mutation.mutation_type == 'INS':
-                clonal_ins_count += 1
-            if observed_mutation.mutation.mutation_type == 'AMP':
-                clonal_amp_count += 1
-
-        if observed_mutation.sequencing_experiment.isolate.isolate_number == 0:
-
-            if observed_mutation.mutation.mutation_type == 'DEL':
-                population_del_count += 1
-            if observed_mutation.mutation.mutation_type == 'SNP':
-                population_snp_count += 1
-            if observed_mutation.mutation.mutation_type == 'MOB':
-                population_mob_count += 1
-            if observed_mutation.mutation.mutation_type == 'SUB':
-                population_sub_count += 1
-            if observed_mutation.mutation.mutation_type == 'INS':
-                population_ins_count += 1
-            if observed_mutation.mutation.mutation_type == 'AMP':
-                population_amp_count += 1
-
-        # print(mutation_dict[observed_mutation.mutation_id])
 
         # TODO: figure out what this is.
         # sometimes we do not want the extra validation
@@ -125,22 +75,6 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
 
         if new_entry is not None and observed_mutation.sequencing_experiment_id in seq_experiment_dict.keys():
             table_entries[mutation_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
-            
-    # print(str(clonal_del_count))
-    # print(str(clonal_snp_count))
-    # print(str(clonal_mob_count))
-    # print(str(clonal_sub_count))
-    # print(str(clonal_ins_count))
-    # print(str(clonal_amp_count))
-    print(str(clonal_del_count + clonal_snp_count + clonal_mob_count + clonal_sub_count + clonal_ins_count + clonal_amp_count))
-
-    # print(str(population_del_count))
-    # print(str(population_snp_count))
-    # print(str(population_mob_count))
-    # print(str(population_sub_count))
-    # print(str(population_ins_count))
-    # print(str(population_amp_count))
-    print(str(population_del_count + population_snp_count + population_mob_count + population_sub_count + population_ins_count + population_amp_count))
 
     #Populating table body
     table_body = ""
@@ -154,13 +88,13 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
             continue
 
         else:
+            table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += HTML_MUTATION_TABLE_ROW % (
                 mutation.position,
                 mutation.sequence_change)
 
         table_row += "<td>%s</td>" % mutation.gene
         table_row += "<td>%s</td>" % mutation.protein_change
-        table_row += "<td>%s</td>" % mutation.mutation_type
         table_row += "".join(table_entries[mutation_dict[mutation.id]])
         table_row += "</tr>"
 
