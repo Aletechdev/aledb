@@ -19,7 +19,7 @@ REQUEST_ALE_NUMBER = "ale_no"
 
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
-HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation Type</td><td>Mutation</td><td>Gene</td><td>Protein change</td>"""
+HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td><td>Mutation Type</td>"""
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
 
@@ -88,13 +88,13 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
             continue
 
         else:
-            table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += HTML_MUTATION_TABLE_ROW % (
                 mutation.position,
                 mutation.sequence_change)
 
         table_row += "<td>%s</td>" % mutation.gene
         table_row += "<td>%s</td>" % mutation.protein_change
+        table_row += "<td>%s</td>" % mutation.mutation_type
         table_row += "".join(table_entries[mutation_dict[mutation.id]])
         table_row += "</tr>"
 
