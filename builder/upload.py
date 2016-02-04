@@ -183,14 +183,15 @@ def _process_mutations(sample_type,
         mutation_num = row_num + 1  # row_num is 0 based, mutation_num is 1 based.
 
         attrs = row.findChildren("td")
+
         mutation = query_or_create(db_session,
                                    Mutation,
-                                   position=sample_mutation_dict[mutation_num][GD_MUT_POS_ATTR_KEY],
-                                   gene=sample_mutation_annotation_dict[mutation_num][GD_MUT_GENE_NAME_ATTR_KEY],
+                                   position=sample_mutation_dict[mutation_num].get(GD_MUT_POS_ATTR_KEY),
+                                   gene=sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY),
                                    # mutations are in the same order in the html and output.gd
                                    # files so we can index the ids with row_num
                                    sequence_change=attrs[2].text,
-                                   mutation_type=sample_mutation_dict[mutation_num][GD_MUT_TYPE_ATTR_KEY])
+                                   mutation_type=sample_mutation_dict[mutation_num].get(GD_MUT_TYPE_ATTR_KEY))
 
         '''
         TODO: find out why this is used. I'm avoiding using it for now, since the mutation table won't the mutations
