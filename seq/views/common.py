@@ -19,13 +19,13 @@ REQUEST_ALE_NUMBER = "ale_no"
 
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
-HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Gene</td><td>Protein change</td><td>Mutation Type</td>"""
+HTML_MUTATION_TABLE_HEADER = """<tr><td>Mutation</td><td>Sequence Change</td><td>Gene</td><td>Protein change</td><td>Mutation Type</td>"""
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
 
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%.2f</td>"""
-HTML_MUTATION_TABLE_ROW = """<td>%d %s<a href="javascript:void(0)" class="shut" style="float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
+HTML_MUTATION_TABLE_ROW = """<td>%d<a href="javascript:void(0)" class="shut" style="float:right;display:none;" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
 HTML_EMPTY_MUTATION_CELL = """<td class="false"></td>"""
 
 REQUEST_ALL = "all"
@@ -88,10 +88,9 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
             continue
 
         else:
-            table_row += HTML_MUTATION_TABLE_ROW % (
-                mutation.position,
-                mutation.sequence_change)
+            table_row += HTML_MUTATION_TABLE_ROW % mutation.position
 
+        table_row += "<td>%s</td>" % mutation.sequence_change
         table_row += "<td>%s</td>" % mutation.gene
         table_row += "<td>%s</td>" % mutation.protein_change
         table_row += "<td>%s</td>" % mutation.mutation_type
