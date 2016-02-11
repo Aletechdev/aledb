@@ -8,6 +8,8 @@ from seq.alchemy_orm import *
 
 from gdparse.gdparse import gdparse
 
+import collections
+
 
 EXPERIMENT_PARENT_DIR = "breseq/"  # TODO: See if this is necessary.
 
@@ -176,6 +178,8 @@ def _process_mutations(sample_type,
 
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
 
+    column_type_index_dict = _get_mutation_header_dict(mutations_html)
+
     mutation_rows = _get_mutations_rows(mutations_html, sample_type)
 
     for row_num, row in enumerate(mutation_rows):
@@ -234,9 +238,27 @@ def _get_mutation_freq(mutation_dict):
     return frequency
 
 
+def _get_mutation_header_dict(mutations_html):
+
+    mutation_table = mutations_html.find("th", attrs={"class": "mutation_header_row"}).parent.parent
+
+    table_header_rows = mutation_table.findChildren("th")
+
+    header_dict = collections.defaultdict()
+
+    for row_idx in range(1, len(table_header_rows)):
+
+        column_name = table_header_rows[row_idx].getText()
+        header_dict[column_name] = row_idx
+
+    return table_header_rows
+
+
 def _get_mutations_rows(mutations_html, sample_type):
 
     # parse the mutation html file to find the correct table
+
+    mutation_table = mutations_html.find("th", attrs={"class": "mutation_header_row"}).parent.parent
 
     if sample_type == gdparse.SampleType.CLONAL:
 
@@ -245,9 +267,6 @@ def _get_mutations_rows(mutations_html, sample_type):
     else:
 
         html_class_to_parse = POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
-
-    mutation_table = mutations_html.find("th",
-                                         attrs={"class": "mutation_header_row"}).parent.parent
 
     mutation_rows = mutation_table.findChildren("tr", attrs={"class": html_class_to_parse})
 
