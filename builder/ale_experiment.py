@@ -136,10 +136,10 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     if breseq_wild_type_output_abs_path is not None:
 
-        sanitized_breseq_output_wild_type_output_abs_path = builder.util.sanitize_path(breseq_wild_type_output_abs_path)
+        sanitized_breseq_output_wild_type_abs_path = builder.util.sanitize_path(breseq_wild_type_output_abs_path)
 
         _create_and_commit_wild_type_ale_entry(db_session,
-                                               sanitized_breseq_output_wild_type_output_abs_path,
+                                               sanitized_breseq_output_wild_type_abs_path,
                                                experiment_orm,
                                                media_orm,
                                                freezer_box_orm)
