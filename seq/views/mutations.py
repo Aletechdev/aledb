@@ -50,7 +50,7 @@ def mutation_table(request):
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
-                       "title": "Mutation table",
+                       "title": "Mutation Table",
                        "table_header": mark_safe(table_header),
                        "template_header": "Mutations"})
 
