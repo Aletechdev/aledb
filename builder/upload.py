@@ -21,12 +21,6 @@ CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row"]
 
 POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row", "polymorphism_table_row"]
 
-CLONAL_PROTEIN_CHANGE_INDEX = 3
-
-POPULATION_PROTEIN_CHANGE_INDEX = 4
-
-POPULATION_MUTATION_FREQUENCY_INDEX = 3
-
 AVERAGE_READ_LENGTH_INDEX = 5
 
 READ_COUNT_INDEX = 2
@@ -40,6 +34,18 @@ GD_MUT_TYPE_ATTR_KEY = 'type'
 GD_MUT_FREQ_ATTR_KEY = 'frequency'
 
 CLONAL_ASSUMED_FREQ = 1
+
+BRESEQ_REPORT_COLUMN_KEY_EVIDENCE = "evidence"
+
+BRESEQ_REPORT_COLUMN_KEY_POSITION = "position"
+
+BRESEQ_REPORT_COLUMN_KEY_MUTATION = "mutation"
+
+BRESEQ_REPORT_COLUMN_KEY_MUTATION_FREQUENCY = "freq"
+
+BRESEQ_REPORT_COLUMN_KEY_ANNOTATION = "annotation"
+
+BRESEQ_REPORT_COLUMN_KEY_GENE = "gene"
 
 
 def add_breseq_results(db_session,
@@ -194,7 +200,7 @@ def _process_mutations(sample_type,
                                    gene=sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY),
                                    # mutations are in the same order in the html and output.gd
                                    # files so we can index the ids with row_num
-                                   sequence_change=attrs[2].text,
+                                   sequence_change=attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_MUTATION]].text,
                                    mutation_type=sample_mutation_dict[mutation_num].get(GD_MUT_TYPE_ATTR_KEY))
 
         '''
@@ -206,22 +212,14 @@ def _process_mutations(sample_type,
 
         if mutation.protein_change is None:
 
-            if sample_type == gdparse.SampleType.CLONAL:
-
-                protein_change_index = CLONAL_PROTEIN_CHANGE_INDEX
-
-            else:
-
-                protein_change_index = POPULATION_PROTEIN_CHANGE_INDEX
-
-            change = attrs[protein_change_index].renderContents()
+            change = attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_ANNOTATION]].renderContents()
             mutation.protein_change = change
 
         observed_mutation = ObservedMutation()
         observed_mutation.experiment = seq_experiment
         observed_mutation.mutation = mutation
         observed_mutation.breseq_present = True
-        observed_mutation.evidence = attrs[0].renderContents()
+        observed_mutation.evidence = attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents()
         observed_mutation.frequency = _get_mutation_freq(sample_mutation_dict[mutation_num])
 
         db_session.add(observed_mutation)
@@ -249,9 +247,9 @@ def _get_mutation_header_dict(mutations_html):
     for row_idx in range(1, len(table_header_rows)):
 
         column_name = table_header_rows[row_idx].getText()
-        header_dict[column_name] = row_idx
+        header_dict[column_name] = row_idx - 1
 
-    return table_header_rows
+    return header_dict
 
 
 def _get_mutations_rows(mutations_html, sample_type):
