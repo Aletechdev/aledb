@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Filter</title>
+</head>
+
+
+<style>
+
+    body {
+    padding-right: 50px;
+    padding-bottom: 25px;
+    padding-left: 50px;
+    }
+
+</style>
+
+<body>
+<div class="page-header">
+    <h1>Filter <b>{{ ale_experiment_name }}</b></h1>
+</div>
+<form action="" method="get">
+    {% csrf_token %}
+    {{form}}
+    <input type="submit" value="Set">
+</form>
+
+</body>
+</html>
