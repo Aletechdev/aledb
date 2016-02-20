@@ -14,6 +14,8 @@ from seq.models import ObservedMutation
 
 import seq.views.common
 
+import filter
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -43,6 +45,8 @@ def key_mutations(request):
     table_header = seq.views.common.get_table_header(seq_experiment_ordered_dict)
 
     table_body = _get_table_body(seq_experiment_ordered_dict, request)
+
+    table_body = filter.filter_table(table_body)
 
     template = loader.get_template("table_template.html")
 
