@@ -32,7 +32,7 @@ class TestUtil(unittest.TestCase):
 
     def test_parse_ale_name_ale(self):
 
-        ale_name = "1-2"
+        ale_name = "1-2-3"
 
         returned_ale_value = parse_ale_name(ale_name, AleName.Ale)
 
@@ -42,11 +42,21 @@ class TestUtil(unittest.TestCase):
 
     def test_parse_ale_name_flask(self):
 
-        ale_name = "1-2"
+        ale_name = "1-2-3"
 
         returned_ale_value = parse_ale_name(ale_name, AleName.Flask)
 
         expected_ale_value = 2
+
+        self.assertEqual(returned_ale_value, expected_ale_value)
+
+    def test_parse_ale_name_flask(self):
+
+        ale_name = "1-2-3"
+
+        returned_ale_value = parse_ale_name(ale_name, AleName.Isolate)
+
+        expected_ale_value = 3
 
         self.assertEqual(returned_ale_value, expected_ale_value)
 
