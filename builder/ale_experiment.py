@@ -21,6 +21,8 @@ WILD_TYPE_ALE_NUMBER = 0
 
 WILD_TYPE_FLASK_NUMBER = 0
 
+WILD_TYPE_ISOLATE_NUMBER = 1
+
 WILD_TYPE_USER_NAME = "BOP27"
 
 CLONAL_ISOLATE_NUMBER = 1
@@ -153,6 +155,8 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
         flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
 
+        isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
+
         output_path = sanitized_breseq_output_abs_path \
                       + ale_isolate_name \
                       + "/" \
@@ -163,6 +167,7 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                      output_path,
                                      ale_number,
                                      flask_number,
+                                     isolate_number,
                                      experiment_orm,
                                      media_orm,
                                      freezer_box_orm,
@@ -219,6 +224,7 @@ def _create_and_commit_wild_type_ale_entry(db_session,
                                  breseq_wild_type_abs_path,
                                  WILD_TYPE_ALE_NUMBER,
                                  WILD_TYPE_FLASK_NUMBER,
+                                 WILD_TYPE_ISOLATE_NUMBER,
                                  experiment,
                                  media,
                                  freezer_box,
@@ -231,6 +237,7 @@ def _create_and_commit_ale_entry(db_session,
                                  breseq_folder_path,
                                  ale_number,
                                  flask_number,
+                                 isolate_number,
                                  experiment,
                                  media,
                                  freezer_box,
@@ -292,16 +299,9 @@ def _create_and_commit_ale_entry(db_session,
 
         mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY] = sample_reseq_type
 
-    # Currently managing clonal/population with two variables, including Isolate number.
-    # TODO: Shouldn't be associating clonal/population with Isolate number.
-
-    isolate_number = CLONAL_ISOLATE_NUMBER
-
     is_population = False
 
     if sample_reseq_type == gdparse.SampleType.POPULATION:
-
-        isolate_number = POPULATION_ISOLATE_NUMBER
 
         is_population = True
 
