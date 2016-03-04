@@ -22,8 +22,17 @@
 </div>
 <form action="" method="get">
     {% csrf_token %}
-    {{form}}
+    {{minform}}
     <input type="submit" value="Set">
+    <br>
+    {{maxform}}
+    <input type="submit" value="Set">
+    <br>
+    {{gene_form}}
+    <input type="submit" value="Set">
+    <br>
+    {{ignored_genes}}
+
 </form>
 
 </body>
