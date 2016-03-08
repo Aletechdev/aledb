@@ -1,5 +1,7 @@
 from django.db import models
 
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 blank_field = {"blank": True, "null": True}
 
 
@@ -244,3 +246,18 @@ class Isolate(models.Model):
         unique_together = (("flask", "isolate_number"),)
 
         # TODO - encode experiments done on the isolate
+
+
+class Filter(models.Model):
+    min_cutoff = models.PositiveSmallIntegerField(default=0)
+    max_cutoff = models.PositiveSmallIntegerField(default=0)
+    one = models.CharField(max_length=20, default='', blank=True)
+    two = models.CharField(max_length=20, default='', blank=True)
+    three = models.CharField(max_length=20, default='', blank=True)
+    four = models.CharField(max_length=20, default='', blank=True)
+    five = models.CharField(max_length=20, default='', blank=True)
+    six = models.CharField(max_length=20, default='', blank=True)
+    seven = models.CharField(max_length=20, default='', blank=True)
+    eight = models.CharField(max_length=20, default='', blank=True)
+    nine = models.CharField(max_length=20, default='', blank=True)
+    ten = models.CharField(max_length=20, default='', blank=True)
