@@ -21,5 +21,5 @@ urlpatterns = patterns('',
                        url('^lineage', seq.views.lineage.lineage, name="lineage"),
                        url('^meta_data', seq.views.meta_data.meta_data, name="lineage"),
                        url('^search', seq.views.search.search, name="search"),
-                       url('^filter', seq.views.filter.filter, name="filter"),
+                       url('^filter', seq.views.filter.create_filter, name="filter"),
                        )
