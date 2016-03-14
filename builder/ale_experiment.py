@@ -278,13 +278,10 @@ def _create_and_commit_ale_entry(db_session,
     reseq_reference = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_SEQ_REF_KEY]
 
     reseq_date = ""
-    # print(mutation_gd_parser.meta_data.keys())
-    # if len(mutation_gd_parser.meta_data) > gdparse.GENOMIC_DIFF_CREATED_KEY:
     if gdparse.GENOMIC_DIFF_CREATED_KEY in mutation_gd_parser.meta_data.keys():
         reseq_date = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_CREATED_KEY]
 
     breseq_version = ""
-    # if len(mutation_gd_parser.meta_data) > gdparse.BRESEQ_VERSION_KEY:
     if gdparse.BRESEQ_VERSION_KEY in mutation_gd_parser.meta_data.keys():
         breseq_version = mutation_gd_parser.meta_data[gdparse.BRESEQ_VERSION_KEY]
 
