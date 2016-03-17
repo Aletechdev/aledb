@@ -33,3 +33,18 @@ def get_ale_name(ale_number, flask_number):
     ale_name = str(ale_number) + "-" + str(flask_number)
 
     return ale_name
+
+
+def get_ale_isolate_name_from_path(breseq_report_path):
+
+    ale_isolate_name_start_index = breseq_report_path.rfind('/')
+
+    if ale_isolate_name_start_index >= len(breseq_report_path) - 1:
+
+        ale_isolate_name_start_index = breseq_report_path[:-2].rfind('/')
+
+    ale_isolate_name = breseq_report_path[ale_isolate_name_start_index:]
+
+    ale_isolate_name = ale_isolate_name.strip('/')
+
+    return ale_isolate_name
