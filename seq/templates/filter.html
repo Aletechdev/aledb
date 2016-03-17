@@ -18,39 +18,21 @@
 
 <body>
 <div class="page-header">
-    <h2><a href="http://localhost:8000/ale_analytics/"  style="color:black; text-decoration:none" >ALE Analytics </a> / <b> {{ ale_experiment_name }} </b> Filter </h2>
+    <h2><a href="http://aquaticus.ucsd.edu:8080/ale_analytics/"  style="color:black; text-decoration:none" >ALE Analytics </a> / <b> {{ ale_experiment_name }} </b> Filter </h2>
 </div>
 <form action="" method="POST">
 
-    Minimum Cutoff:  {{form.min_cutoff}} %
+    Minimum Cutoff:  {{data.min_cutoff}} % {{form.min_cutoff}}
     <br>
-    Maximum Cutoff: {{form.max_cutoff}} %
+    Maximum Cutoff:  {{data.max_cutoff}} % {{form.max_cutoff}}
     <br>
     Ignored Genes:
     <br>
     <br>
-    {{form.one}}
-    <br>
-    {{form.two}}
-    <br>
-    {{form.three}}
-    <br>
-    {{form.four}}
-    <br>
-    {{form.five}}
-    <br>
-    {{form.six}}
-    <br>
-    {{form.seven}}
-    <br>
-    {{form.eight}}
-    <br>
-    {{form.nine}}
-    <br>
-    {{form.ten}}
+    {{form.ignored_genes}}
     <br>
     <br>
-    <input type="submit" value="Edit" name="go_to_edit_page">
+    <input type="submit" value="Save" name="save">
 
 
 </form>

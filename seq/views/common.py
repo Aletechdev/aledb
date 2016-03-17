@@ -372,6 +372,6 @@ def get_experiment_max_cutoff(id):
 
 def get_experiment_ignored_genes(id):
     filt = ale.models.Filter.objects.get(pk=id)
-    ignored_genes = [str(filt.one), str(filt.two), str(filt.three), str(filt.four), str(filt.five), str(filt.six), str(filt.seven), str(filt.eight), str(filt.nine), str(filt.ten)]
+    ignored_genes = [str(filt.ignored_genes)]
     ignored_genes = filter(None, ignored_genes)
     return ignored_genes

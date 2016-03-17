@@ -249,15 +249,7 @@ class Isolate(models.Model):
 
 
 class Filter(models.Model):
-    min_cutoff = models.PositiveSmallIntegerField(default=0)
-    max_cutoff = models.PositiveSmallIntegerField(default=0)
-    one = models.CharField(max_length=20, default='', blank=True)
-    two = models.CharField(max_length=20, default='', blank=True)
-    three = models.CharField(max_length=20, default='', blank=True)
-    four = models.CharField(max_length=20, default='', blank=True)
-    five = models.CharField(max_length=20, default='', blank=True)
-    six = models.CharField(max_length=20, default='', blank=True)
-    seven = models.CharField(max_length=20, default='', blank=True)
-    eight = models.CharField(max_length=20, default='', blank=True)
-    nine = models.CharField(max_length=20, default='', blank=True)
-    ten = models.CharField(max_length=20, default='', blank=True)
+    min_cutoff = models.PositiveSmallIntegerField(default=20)
+    max_cutoff = models.PositiveSmallIntegerField(default=100)
+    ignored_genes = models.CharField(max_length=500, default='', blank=True)
+
