@@ -93,7 +93,66 @@ def _delete_all_orphaned_mutations():
             mutation.delete()
 
 
-# TODO: separate adding wild type into another function.
+def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_abs_path):
+    """
+    Executed from Django ipython shell.
+    """
+
+    db_session = seq.alchemy_orm.Session()
+
+    instrument_orm = seq.alchemy_orm.query_or_create(db_session,
+                                                     seq.alchemy_orm.Instrument,
+                                                     name=DEFAULT_INSTRUMENT_NAME)
+
+    experiment_orm = seq.alchemy_orm.query_or_create(db_session,
+                                                     seq.alchemy_orm.AleExperiment,
+                                                     name=ale_exp_name,
+                                                     instrument=instrument_orm,
+                                                     person=ale_exp_user,
+                                                     date=DEFAULT_DATE,
+                                                     simulation=DEFAULT_IS_SIMULATION)
+
+    media_orm = seq.alchemy_orm.query_or_create(db_session,
+                                                seq.alchemy_orm.Media,
+                                                description=DEFAULT_MEDIA_DESCRIPTION,
+                                                substrate=DEFAULT_MEDIA_SUBSTRATE,
+                                                temperature=DEFAULT_TEMPERATURE,
+                                                volume=DEFAULT_VOLUME,
+                                                stirring_speed=DEFAULT_STIRRING_SPEED)
+
+    freezer_box_orm = seq.alchemy_orm.query_or_create(db_session,
+                                                      seq.alchemy_orm.FreezerBox,
+                                                      name=DEFAULT_FREEZER_BOX_NAME,
+                                                      number=DEFAULT_FREEZER_BOX_NUMBER)
+
+    _insert_wild_type_flask(ale_exp_user,
+                            ale_exp_name,
+                            breseq_wild_type_output_abs_path,
+                            db_session,
+                            experiment_orm,
+                            media_orm,
+                            freezer_box_orm)
+
+    rebuild_key_mutations(experiment_orm.ale_id)
+
+
+def _insert_wild_type_flask(ale_exp_user,
+                            ale_exp_name,
+                            breseq_wild_type_output_abs_path,
+                            db_session,
+                            experiment_orm,
+                            media_orm,
+                            freezer_box_orm):
+
+    sanitized_breseq_output_wild_type_abs_path = builder.util.sanitize_path(breseq_wild_type_output_abs_path)
+
+    _create_and_commit_wild_type_ale_entry(db_session,
+                                           sanitized_breseq_output_wild_type_abs_path,
+                                           experiment_orm,
+                                           media_orm,
+                                           freezer_box_orm)
+
+
 def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                            ale_exp_user,
                                            ale_exp_name,
@@ -134,13 +193,13 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     if breseq_wild_type_output_abs_path is not None:
 
-        sanitized_breseq_output_wild_type_abs_path = builder.util.sanitize_path(breseq_wild_type_output_abs_path)
-
-        _create_and_commit_wild_type_ale_entry(db_session,
-                                               sanitized_breseq_output_wild_type_abs_path,
-                                               experiment_orm,
-                                               media_orm,
-                                               freezer_box_orm)
+        _insert_wild_type_flask(ale_exp_user,
+                                ale_exp_name,
+                                breseq_wild_type_output_abs_path,
+                                db_session,
+                                experiment_orm,
+                                media_orm,
+                                freezer_box_orm)
 
     # Might need to explicitly sort this list in the future.
     breseq_sample_report_list = _get_sample_report_list(sanitized_breseq_output_abs_path)
