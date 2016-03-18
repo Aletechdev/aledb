@@ -14,6 +14,8 @@ from seq.models import ObservedMutation
 
 import seq.views.common
 
+import filter
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -43,6 +45,14 @@ def key_mutations(request):
     table_header = seq.views.common.get_table_header(seq_experiment_ordered_dict)
 
     table_body = _get_table_body(seq_experiment_ordered_dict, request)
+
+    min_cut = seq.views.common.get_experiment_min_cutoff(ale_experiment_id) / 100.0
+    max_cut = seq.views.common.get_experiment_max_cutoff(ale_experiment_id) / 100.0
+    ignored_gene_list = seq.views.common.get_experiment_ignored_genes(ale_experiment_id)
+    print "Gene list:"
+    print ignored_gene_list
+
+    table_body = filter.filter_table(table_body, min_cutoff=min_cut, max_cutoff=max_cut, ignore_gene_list=ignored_gene_list)
 
     template = loader.get_template("table_template.html")
 
