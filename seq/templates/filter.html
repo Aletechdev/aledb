@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Filter</title>
+</head>
+
+
+<style>
+
+    body {
+    padding-right: 50px;
+    padding-bottom: 25px;
+    padding-left: 50px;
+    }
+
+</style>
+
+<body>
+<div class="page-header">
+    <h2><a href="http://aquaticus.ucsd.edu:8080/ale_analytics/"  style="color:black; text-decoration:none" >ALE Analytics </a> / <b> {{ ale_experiment_name }} </b> Filter </h2>
+</div>
+<form action="" method="POST">
+
+    Minimum Cutoff:  {{data.min_cutoff}} % {{form.min_cutoff}}
+    <br>
+    Maximum Cutoff:  {{data.max_cutoff}} % {{form.max_cutoff}}
+    <br>
+    Ignored Genes:
+    <br>
+    <br>
+    {{form.ignored_genes}}
+    <br>
+    <br>
+    <input type="submit" value="Save" name="save">
+
+
+</form>
+
+</body>
+</html>
