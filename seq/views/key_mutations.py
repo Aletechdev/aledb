@@ -49,8 +49,8 @@ def key_mutations(request):
     min_cut = seq.views.common.get_experiment_min_cutoff(ale_experiment_id) / 100.0
     max_cut = seq.views.common.get_experiment_max_cutoff(ale_experiment_id) / 100.0
     ignored_gene_list = seq.views.common.get_experiment_ignored_genes(ale_experiment_id)
-    print "Gene list:"
-    print ignored_gene_list
+    print("Gene list:")
+    print(ignored_gene_list)
 
     table_body = filter.filter_table(table_body, min_cutoff=min_cut, max_cutoff=max_cut, ignore_gene_list=ignored_gene_list)
 

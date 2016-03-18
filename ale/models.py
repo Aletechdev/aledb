@@ -246,10 +246,3 @@ class Isolate(models.Model):
         unique_together = (("flask", "isolate_number"),)
 
         # TODO - encode experiments done on the isolate
-
-
-class Filter(models.Model):
-    min_cutoff = models.PositiveSmallIntegerField(default=20)
-    max_cutoff = models.PositiveSmallIntegerField(default=100)
-    ignored_genes = models.CharField(max_length=500, default='', blank=True)
-
