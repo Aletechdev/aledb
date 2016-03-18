@@ -209,6 +209,8 @@ def insert_flask(breseq_output_abs_path,
                                  freezer_box_orm,
                                  is_wild_type=False)
 
+    rebuild_key_mutations(experiment_orm.ale_id)
+
 
 def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                            ale_exp_user,
