@@ -261,9 +261,6 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
     # Might need to explicitly sort this list in the future.
     breseq_sample_report_list = _get_sample_report_list(sanitized_breseq_output_abs_path)
 
-    print(breseq_output_abs_path)
-    print(breseq_sample_report_list)
-
     for ale_isolate_name in breseq_sample_report_list:
 
         ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)

@@ -125,3 +125,8 @@ class ObservedMutation(models.Model):
     frequency = models.DecimalField(null=True,
                                     max_digits=5,
                                     decimal_places=4)
+
+class Filter(models.Model):
+    min_cutoff = models.PositiveSmallIntegerField(default=20)
+    max_cutoff = models.PositiveSmallIntegerField(default=100)
+    ignored_genes = models.CharField(max_length=500, default='', blank=True)

@@ -90,7 +90,6 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
         else:
             table_row += HTML_MUTATION_TABLE_ROW
 
-        # print(mutation.sequence_change)
 
         table_row += "<td>%s</td>" % mutation.position
         table_row += "<td>%s</td>" % mutation.mutation_type
@@ -359,19 +358,19 @@ def get_observed_mutations(seq_experiment_dict):
 
 
 def get_experiment_min_cutoff(id):
-    filt = ale.models.Filter.objects.get(pk=id)
+    filt = seq.models.Filter.objects.get(pk=id)
     min_cutoff = filt.min_cutoff
     return min_cutoff
 
 
 def get_experiment_max_cutoff(id):
-    filt = ale.models.Filter.objects.get(pk=id)
+    filt = seq.models.Filter.objects.get(pk=id)
     max_cutoff = filt.max_cutoff
     return max_cutoff
 
 
 def get_experiment_ignored_genes(id):
-    filt = ale.models.Filter.objects.get(pk=id)
+    filt = seq.models.Filter.objects.get(pk=id)
     ignored_genes = [str(filt.ignored_genes)]
     ignored_genes = filter(None, ignored_genes)
     return ignored_genes

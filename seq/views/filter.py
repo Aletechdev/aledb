@@ -12,7 +12,8 @@ from seq.views import common
 
 from django import forms
 
-from ale.models import Filter
+# from ale.models import Filter
+from seq.models import Filter
 
 from bs4 import BeautifulSoup as soup
 
