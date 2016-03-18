@@ -7,7 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('seq', '0002_auto_20151114_2131'),
+        ('ale', '0006_isolate_reseq_date'),
     ]
 
     operations = [
