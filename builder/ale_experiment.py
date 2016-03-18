@@ -154,11 +154,9 @@ def _insert_wild_type_flask(ale_exp_user,
 
 
 # TODO: What I do here should also be used in insert_wild_type_flask()
-def insert_flask(breseq_output_abs_path,
-                 ale_exp_user,
-                 ale_exp_name, ):
-
-    sanitized_breseq_output_abs_path = builder.util.sanitize_path(breseq_output_abs_path)
+def insert_flasks(sample_breseq_abs_paths_list,
+                  ale_exp_user,
+                  ale_exp_name):
 
     db_session = seq.alchemy_orm.Session()
 
@@ -187,31 +185,37 @@ def insert_flask(breseq_output_abs_path,
                                                       name=DEFAULT_FREEZER_BOX_NAME,
                                                       number=DEFAULT_FREEZER_BOX_NUMBER)
 
-    ale_isolate_name = builder.util.get_ale_isolate_name_from_path(breseq_output_abs_path)
+    for sample_breseq_abs_paths in sample_breseq_abs_paths_list:
 
-    ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
+        sanitized_breseq_output_abs_path = builder.util.sanitize_path(sample_breseq_abs_paths)
 
-    flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
+        ale_isolate_name = builder.util.get_ale_isolate_name_from_path(sanitized_breseq_output_abs_path)
 
-    isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
+        ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
 
-    output_path = sanitized_breseq_output_abs_path \
-                  + BRESEQ_OUTPUT_REPORT_DIR
+        flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
 
-    _create_and_commit_ale_entry(db_session,
-                                 ale_exp_user,
-                                 output_path,
-                                 ale_number,
-                                 flask_number,
-                                 isolate_number,
-                                 experiment_orm,
-                                 media_orm,
-                                 freezer_box_orm,
-                                 is_wild_type=False)
+        isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
+
+        output_path = sanitized_breseq_output_abs_path \
+                      + BRESEQ_OUTPUT_REPORT_DIR
+
+        _create_and_commit_ale_entry(db_session,
+                                     ale_exp_user,
+                                     output_path,
+                                     ale_number,
+                                     flask_number,
+                                     isolate_number,
+                                     experiment_orm,
+                                     media_orm,
+                                     freezer_box_orm,
+                                     is_wild_type=False)
 
     rebuild_key_mutations(experiment_orm.ale_id)
 
 
+# For wild_type, expecting directory with output.gd in it.
+# TODO: this needs to change.
 def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                            ale_exp_user,
                                            ale_exp_name,
@@ -262,9 +266,6 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     # Might need to explicitly sort this list in the future.
     breseq_sample_report_list = _get_sample_report_list(sanitized_breseq_output_abs_path)
-
-    print(breseq_output_abs_path)
-    print(breseq_sample_report_list)
 
     for ale_isolate_name in breseq_sample_report_list:
 
