@@ -355,22 +355,3 @@ def get_observed_mutations(seq_experiment_dict):
     observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
 
     return observed_mutations
-
-
-def get_experiment_min_cutoff(id):
-    filt = seq.models.Filter.objects.get(pk=id)
-    min_cutoff = filt.min_cutoff
-    return min_cutoff
-
-
-def get_experiment_max_cutoff(id):
-    filt = seq.models.Filter.objects.get(pk=id)
-    max_cutoff = filt.max_cutoff
-    return max_cutoff
-
-
-def get_experiment_ignored_genes(id):
-    filt = seq.models.Filter.objects.get(pk=id)
-    ignored_genes = [str(filt.ignored_genes)]
-    ignored_genes = filter(None, ignored_genes)
-    return ignored_genes
