@@ -1,5 +1,3 @@
-__author__ = 'dgosting'
-
 from django.http import HttpResponse
 
 from django.template import Context, loader
@@ -10,13 +8,16 @@ import aleinfo.settings as settings
 
 from seq.views import common
 
-from django import forms
-
-from ale.models import Filter
-
 from bs4 import BeautifulSoup as soup
 
 import seq
+
+import ale.models
+
+import seq.forms.filter
+
+
+__author__ = 'dgosting'
 
 INDEX_TEMPLATE = "filter.html"
 INDEX_TEMPLATE_EDIT = "filter_edit_page.html"
@@ -28,68 +29,42 @@ else:
     reseqencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
-class FilterForm(forms.ModelForm):
-    min_cutoff = forms.IntegerField(min_value=0, max_value=100, required=False, initial=20)
-    max_cutoff = forms.IntegerField(min_value=0, max_value=100, required=False, initial=100)
-
-    def has_changed(self):
-        return True
-
-    class Meta:
-        model = Filter
-        fields = ["min_cutoff", "max_cutoff"]
-
-
+# TODO: make 20 and 100 constants  to be referred to within some other global file.
 @login_required
 def create_filter(request):
     ale_experiment_name = common.get_ale_experiment_name(request)
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-
     template = loader.get_template(INDEX_TEMPLATE)
+
+    default_filter_form_model = {'ale_experiment_id': ale_experiment_id,
+                                 'min_cutoff': 20,
+                                 'max_cutoff': 100,
+                                 'ignored_genes': ""}
 
     if request.method == 'POST':
 
-        # print "Saving"
-        f = FilterForm(request.POST)
-        if f.is_valid():
-            # print "Is Valid"
-            save_it = f.save(commit=False)
-            save_it.pk = ale_experiment_id
-            save_it.save()
-            # f = Filter.objects.get(pk=ale_experiment_id)
+        filter_form = seq.forms.filter.FilterForm(request.POST)
+
+        if filter_form.is_valid():
+            filter_form_model, created = ale.models.Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
+                                                                      defaults=default_filter_form_model)
+
+            filter_form_model.min_cutoff = request.POST.get("min_cutoff", 20)
+            filter_form_model.max_cutoff = request.POST.get("max_cutoff", 100)
+            filter_form_model.save()
         else:
-            print f.errors
+            print filter_form.errors
 
-        request.method = 'GET'
-        return create_filter(request)
-
-    else:
-        # print "Getting"
-        try:
-            f = Filter.objects.get(pk=ale_experiment_id)
-            min_cut = seq.views.common.get_experiment_min_cutoff(ale_experiment_id)
-            max_cut = seq.views.common.get_experiment_max_cutoff(ale_experiment_id)
-            ignored_gene_list = seq.views.common.get_experiment_ignored_genes(ale_experiment_id)
-            initial_data = {"min_cutoff": min_cut, "max_cutoff": max_cut, "ignored_genes": ignored_gene_list}
-            new_entry = FilterForm(initial=initial_data)
-            if f is not None:
-                print "Got the filter: ", f
-            else:
-                print "F is None"
-
-        except:
-            print "Failed to get"
-
-            f = FilterForm()
-            new_entry = FilterForm()
-            save_it = f.save(commit=False)
-            save_it.pk = ale_experiment_id
-            save_it.save()
-            f = Filter.objects.get(pk=ale_experiment_id)
+    else:  # request.method == 'GET'
+        filter_form_model, created = ale.models.Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
+                                                                  defaults=default_filter_form_model)
+        initial_filter_form_data = {"min_cutoff": filter_form_model.min_cutoff,
+                            "max_cutoff": filter_form_model.max_cutoff,
+                            "ignored_genes": filter_form_model.ignored_genes}
+        filter_form = seq.forms.filter.FilterForm(initial=initial_filter_form_data)
 
     context = Context({
-        "form": new_entry,
-        "data": f,
+        "form": filter_form,
         "ale_experiment_id": ale_experiment_id,
         "ale_experiment_name": ale_experiment_name
     })

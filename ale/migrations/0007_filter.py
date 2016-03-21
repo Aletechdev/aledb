@@ -18,6 +18,7 @@ class Migration(migrations.Migration):
                 ('min_cutoff', models.PositiveSmallIntegerField(default=20)),
                 ('max_cutoff', models.PositiveSmallIntegerField(default=100)),
                 ('ignored_genes', models.CharField(default=b'', max_length=500, blank=True)),
+                ('ale_experiment', models.ForeignKey(to='ale.AleExperiment')),
             ],
         ),
     ]
