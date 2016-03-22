@@ -8,9 +8,9 @@ from django.utils.safestring import mark_safe
 
 import ale.common
 
-from ale.models import KeyMutation
+import ale.models
 
-from seq.models import ObservedMutation
+import seq.models
 
 import seq.views.common
 
@@ -82,11 +82,14 @@ def _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
 def _get_table_body(seq_experiment_dict, request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-    key_mutation_queryset = KeyMutation.objects.filter(ale_experiment_id=ale_experiment_id)
+
+    filter_settings = seq.views.common.get_filter_settings(ale_experiment_id)
+
+    key_mutation_queryset = ale.models.KeyMutation.objects.filter(ale_experiment_id=ale_experiment_id)
 
     observed_mutations_query_set = _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset)
 
-    return seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request)
+    return seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings)
 
 
 def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):
@@ -96,7 +99,7 @@ def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):
     # 2) get observed_mutations that reference to the key_mutation_queryset
     # TODO: refactor
 
-    seq_experiment_observed_mutation_queryset = ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
+    seq_experiment_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
 
     key_mutation_id_list = []
 

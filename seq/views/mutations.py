@@ -61,4 +61,8 @@ def _get_table_body(seq_experiment_dict, request):
 
     observed_mutations_query_set = common.get_observed_mutations(seq_experiment_dict)
 
-    return common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request)
+    ale_experiment_id = common.get_ale_experiment_id(request)
+
+    filter_settings = common.get_filter_settings(ale_experiment_id)
+
+    return common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings)

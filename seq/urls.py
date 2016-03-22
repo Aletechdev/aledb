@@ -8,6 +8,7 @@ import seq.views.select_lineage
 import seq.views.lineage
 import seq.views.meta_data
 import seq.views.search
+import seq.views.filter
 
 
 # TODO: Understand if '-' is better than "-" within a URL.
@@ -20,4 +21,5 @@ urlpatterns = patterns('',
                        url('^lineage', seq.views.lineage.lineage, name="lineage"),
                        url('^meta_data', seq.views.meta_data.meta_data, name="lineage"),
                        url('^search', seq.views.search.search, name="search"),
+                       url('^filter', seq.views.filter.create_filter, name="filter"),
                        )
