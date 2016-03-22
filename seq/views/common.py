@@ -48,10 +48,10 @@ else:
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
-def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
+def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings):
 
     mutations = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
-    mutation_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
+    mutation_index_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
 
     experiment_urls = _get_experiment_urls(seq_experiment_dict)
 
@@ -61,7 +61,10 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
     extra_validation = False if request.GET.get("novalid") else True
 
     # Initialize all sample mutation table cells as empty.
-    table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for idx in range(len(mutations))]
+    table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
+
+    minimum_mutation_frequency = float(filter_settings.min_cutoff) / 100
+    maximum_mutation_frequency = float(filter_settings.max_cutoff) / 100
 
     # Populating table_entries
     for observed_mutation in observed_mutations_query_set:
@@ -71,37 +74,51 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request):
         if not extra_validation and not observed_mutation.breseq_present:
             continue
 
-        new_entry = _get_table_mutation_entry(observed_mutation, experiment_urls)
+        if minimum_mutation_frequency <= observed_mutation.frequency <= maximum_mutation_frequency:
 
-        if new_entry is not None and observed_mutation.sequencing_experiment_id in seq_experiment_dict.keys():
-            table_entries[mutation_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+            new_entry = _get_table_mutation_entry(observed_mutation, experiment_urls)
+
+            if new_entry is not None and observed_mutation.sequencing_experiment_id in seq_experiment_dict.keys():
+                table_entries[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
 
     #Populating table body
     table_body = ""
 
     for mutation in mutations:
 
-        table_row = "<tr>"
+        if _contains_mutation(table_entries[mutation_index_dict[mutation.id]]):
 
-        if mutation.reference_error:    # TODO: what is going on here? What is 'reference_error'?
-            # table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
-            continue
+            table_row = "<tr>"
 
-        else:
-            table_row += HTML_MUTATION_TABLE_ROW
+            if mutation.reference_error:    # TODO: what is going on here? What is 'reference_error'?
+                # table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
+                continue
 
+            else:
+                table_row += HTML_MUTATION_TABLE_ROW
 
-        table_row += "<td>%s</td>" % mutation.position
-        table_row += "<td>%s</td>" % mutation.mutation_type
-        table_row += "<td>%s</td>" % mutation.sequence_change
-        table_row += "<td>%s</td>" % mutation.gene
-        table_row += "<td>%s</td>" % mutation.protein_change
-        table_row += "".join(table_entries[mutation_dict[mutation.id]])
-        table_row += "</tr>"
+            table_row += "<td>%s</td>" % mutation.position
+            table_row += "<td>%s</td>" % mutation.mutation_type
+            table_row += "<td>%s</td>" % mutation.sequence_change
+            table_row += "<td>%s</td>" % mutation.gene
+            table_row += "<td>%s</td>" % mutation.protein_change
+            table_row += "".join(table_entries[mutation_index_dict[mutation.id]])
+            table_row += "</tr>"
 
-        table_body += table_row + "\n"
+            table_body += table_row + "\n"
 
     return table_body
+
+
+def _contains_mutation(filtered_observed_mutations_row):
+
+    contains_mutation = False
+
+    for observed_mutation_entry in filtered_observed_mutations_row:
+        if "true" in observed_mutation_entry:
+            contains_mutation = True
+
+    return contains_mutation
 
 
 def _get_experiment_id_idx_mapping(seq_experiment_dict):
@@ -355,3 +372,12 @@ def get_observed_mutations(seq_experiment_dict):
     observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
 
     return observed_mutations
+
+
+def get_filter_settings(ale_experiment_id):
+
+    filter_queryset = ale.models.Filter.objects.filter(ale_experiment_id=ale_experiment_id)
+
+    filter_settings = filter_queryset[0]  # Since there's only one filter setting per experiment.
+
+    return filter_settings
