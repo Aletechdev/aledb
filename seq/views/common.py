@@ -48,7 +48,7 @@ else:
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
-def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings):
+def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings=None):
 
     mutations = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
     mutation_index_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
@@ -63,8 +63,12 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, f
     # Initialize all sample mutation table cells as empty.
     table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
 
-    minimum_mutation_frequency = float(filter_settings.min_cutoff) / 100
-    maximum_mutation_frequency = float(filter_settings.max_cutoff) / 100
+    if filter_settings is not None:
+        minimum_mutation_frequency = float(filter_settings.min_cutoff) / 100
+        maximum_mutation_frequency = float(filter_settings.max_cutoff) / 100
+    else:
+        minimum_mutation_frequency = 0.0
+        maximum_mutation_frequency = 1.0
 
     # Populating table_entries
     for observed_mutation in observed_mutations_query_set:
