@@ -17,10 +17,6 @@ __author__ = 'pphaneuf'
 
 INDEX_TEMPLATE = "index.html"
 
-MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV']
-
-PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogenes', 'snp_type_synonymous', 'snp_type_nonsynonymous']
-
 
 if hasattr(settings, common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.sequencing_url
@@ -32,12 +28,12 @@ else:
 def index(request):
 
     mutation_type_count_dict = {}
-    for mutation_type in MUTATION_TYPE_LIST:
+    for mutation_type in common.MUTATION_TYPE_LIST:
         mutation_type_count = seq.models.Mutation.objects.filter(mutation_type=mutation_type).count()
         mutation_type_count_dict[mutation_type] = mutation_type_count
 
     protein_change_type_count_dict = {}
-    for protein_change_type in PROTEIN_CHANGE_TYPE_LIST:
+    for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST:
         protein_change_count = seq.models.Mutation.objects.filter(protein_change__contains=protein_change_type).count()
         protein_change_type_count_dict[protein_change_type] = protein_change_count
 

@@ -43,6 +43,27 @@
 
 <div class="panel panel-default">
     <div class="panel-heading">
+        <h3 class="panel-title">ALE Experiment Unique Mutation Stats</h3>
+    </div>
+    <div class="panel-body">
+        <p><b>Single Base Substitutions = </b>{{ mutation_type_count_dict.SNP }}</p>
+        <p><b>Multiple Base Substitutions = </b>{{ mutation_type_count_dict.SUB }}</p>
+        <p><b>Deletions = </b>{{ mutation_type_count_dict.DEL }}</p>
+        <p><b>Insertions = </b>{{ mutation_type_count_dict.INS }}</p>
+        <p><b>Mobile Element Insertions = </b>{{ mutation_type_count_dict.MOB }}</p>
+        <p><b>Amplifications = </b>{{ mutation_type_count_dict.AMP }}</p>
+        <p><b>Gene Conversions = </b>{{ mutation_type_count_dict.CON }}</p>
+        <p><b>Inversions = </b>{{ mutation_type_count_dict.INV }}</p>
+        <p><b>Intergenic = </b>{{ protein_change_type_count_dict.intergenic }}</p>
+        <p><b>Intragenic = </b>{{ protein_change_type_count_dict.noncoding }}</p>
+        <p><b>Pseudogenes = </b>{{ protein_change_type_count_dict.pseudogenes }}</p>
+        <p><b>Synonymous = </b>{{ protein_change_type_count_dict.snp_type_synonymous }}</p>
+        <p><b>Nonsynonymous = </b>{{ protein_change_type_count_dict.snp_type_nonsynonymous }}</p>
+    </div>
+</div>
+
+<div class="panel panel-default">
+    <div class="panel-heading">
         <h3 class="panel-title">Sample QA Thresholds</h3>
     </div>
     <div class="panel-body">
