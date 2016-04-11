@@ -38,6 +38,10 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 SEQ_EXPERIMENT_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
 
+MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV']
+
+PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogenes', 'snp_type_synonymous', 'snp_type_nonsynonymous']
+
 
 if hasattr(aleinfo.settings, SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = aleinfo.settings.sequencing_url

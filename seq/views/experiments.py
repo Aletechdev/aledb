@@ -36,15 +36,54 @@ def lists(request):
 
     experiments_info_list = _get_experiment_info_list(experiments)
 
+    mutation_query_set = _get_mutation_query_set(request)
+
+    mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
+
+    protein_change_type_count_dict = _get_protein_change_type_count_dict(mutation_query_set)
+
     template = loader.get_template(EXPERIMENT_LIST_TEMPLATE)
 
     ale_experiment_name = common.get_ale_experiment_name(request)
 
-    context = Context({"experiments_info_list": experiments_info_list,
+    context = Context({"protein_change_type_count_dict": protein_change_type_count_dict,
+                       "mutation_type_count_dict": mutation_type_count_dict,
+                       "experiments_info_list": experiments_info_list,
                        "resequencing_report_url": resequencing_report_url,
                        "ale_experiment_name": ale_experiment_name})
 
     return HttpResponse(template.render(context))
+
+
+def _get_mutation_query_set(request):
+
+    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
+
+    observed_mutations_query_set = common.get_observed_mutations(seq_experiment_ordered_dict)
+    mutation_query_set = Mutation.objects.filter(
+        pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
+
+    return mutation_query_set
+
+
+def _get_protein_change_type_count_dict(mutation_query_set):
+
+    protein_change_type_count_dict = {}
+    for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST:
+        protein_change_count = mutation_query_set.filter(protein_change__contains=protein_change_type).count()
+        protein_change_type_count_dict[protein_change_type] = protein_change_count
+
+    return protein_change_type_count_dict
+
+
+def _get_mutation_type_count_dict(mutation_query_set):
+
+    mutation_type_count_dict = {}
+    for mutation_type in common.MUTATION_TYPE_LIST:
+        mutation_type_count = mutation_query_set.filter(mutation_type=mutation_type).count()
+        mutation_type_count_dict[mutation_type] = mutation_type_count
+
+    return mutation_type_count_dict
 
 
 def _get_experiment_info_list(experiments):
