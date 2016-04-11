@@ -45,16 +45,48 @@
             <div class="panel-heading">
                 <h3 class="panel-title">ALE Analytics Unique Mutation Stats</h3>
             </div>
-            <div class="panel-body">
-                <p><b>Single Base Substitutions = </b>{{ mutation_type_count_dict.SNP }}</p>
-                <p><b>Multiple Base Substitutions = </b>{{ mutation_type_count_dict.SUB }}</p>
-                <p><b>Deletions = </b>{{ mutation_type_count_dict.DEL }}</p>
-                <p><b>Insertions = </b>{{ mutation_type_count_dict.INS }}</p>
-                <p><b>Mobile Element Insertions = </b>{{ mutation_type_count_dict.MOB }}</p>
-                <p><b>Amplifications = </b>{{ mutation_type_count_dict.AMP }}</p>
-                <p><b>Gene Conversions = </b>{{ mutation_type_count_dict.CON }}</p>
-                <p><b>Inversions = </b>{{ mutation_type_count_dict.INV }}</p>
-            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mutation Type</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Single Base Substitutions</td>
+                        <td>{{ mutation_type_count_dict.SNP }}</td>
+                    </tr>
+                    <tr>
+                        <td>Multiple Base Substitutions</td>
+                        <td>{{ mutation_type_count_dict.SUB }}</td>
+                    </tr>
+                    <tr>
+                        <td>Deletions</td>
+                        <td>{{ mutation_type_count_dict.DEL }}</td>
+                    </tr>
+                    <tr>
+                        <td>Insertions</td>
+                        <td>{{ mutation_type_count_dict.INS }}</td>
+                    </tr>
+                    <tr>
+                        <td>Mobile Element Insertions</td>
+                        <td>{{ mutation_type_count_dict.MOB }}</td>
+                    </tr>
+                    <tr>
+                        <td>Amplifications</td>
+                        <td>{{ mutation_type_count_dict.AMP }}</td>
+                    </tr>
+                    <tr>
+                        <td>Gene Conversions</td>
+                        <td>{{ mutation_type_count_dict.CON }}</td>
+                    </tr>
+                    <tr>
+                        <td>Inversions</td>
+                        <td>{{ mutation_type_count_dict.INV }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
     <div class="col-sm-6 col-md-4">
@@ -62,13 +94,37 @@
             <div class="panel-heading">
                 <h3 class="panel-title">ALE Analytics Unique Functional Change Stats</h3>
             </div>
-            <div class="panel-body">
-                <p><b>Intergenic = </b>{{ protein_change_type_count_dict.intergenic }}</p>
-                <p><b>Intragenic = </b>{{ protein_change_type_count_dict.noncoding }}</p>
-                <p><b>Pseudogenes = </b>{{ protein_change_type_count_dict.pseudogenes }}</p>
-                <p><b>Synonymous = </b>{{ protein_change_type_count_dict.snp_type_synonymous }}</p>
-                <p><b>Nonsynonymous = </b>{{ protein_change_type_count_dict.snp_type_nonsynonymous }}</p>
-            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Functional Change Type</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Intergenic</td>
+                        <td>{{ protein_change_type_count_dict.intergenic }}</td>
+                    </tr>
+                    <tr>
+                        <td>Intragenic</td>
+                        <td>{{ protein_change_type_count_dict.noncoding }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pseudogenes</td>
+                        <td>{{ protein_change_type_count_dict.pseudogenes }}</td>
+                    </tr>
+                    <tr>
+                        <td>Synonymous</td>
+                        <td>{{ protein_change_type_count_dict.snp_type_synonymous }}</td>
+                    </tr>
+                    <tr>
+                        <td>Nonsynonymous</td>
+                        <td>{{ protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
