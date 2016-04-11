@@ -39,7 +39,24 @@
     <h1>ALE Analytics</h1>
 </div>
 
-<table id="search mutations" class="tablesorter">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">ALE Analytics Unique Mutation Stats</h3>
+    </div>
+    <div class="panel-body">
+        <p><b>Single Base Substitutions = </b>{{ mutation_type_count_dict.SNP }}</p>
+        <p><b>Multiple Base Substitutions = </b>{{ mutation_type_count_dict.SUB }}</p>
+        <p><b>Deletions = </b>{{ mutation_type_count_dict.DEL }}</p>
+        <p><b>Insertions = </b>{{ mutation_type_count_dict.INS }}</p>
+        <p><b>Mobile Element Insertions = </b>{{ mutation_type_count_dict.MOB }}</p>
+        <p><b>Amplifications = </b>{{ mutation_type_count_dict.AMP }}</p>
+        <p><b>Gene Conversions = </b>{{ mutation_type_count_dict.CON }}</p>
+        <p><b>Inversions = </b>{{ mutation_type_count_dict.INV }}</p>
+    </div>
+</div>
+
+<table id="ale_analytics_info" class="tablesorter">
+
     <thead>
     <tr>
         <th>Search Mutations</th>
@@ -55,7 +72,7 @@
         <tr>
             <th>ALE Experiment</th>
             <th>Experiment Executor</th>
-            <th>Seq/Reseq Performance</th>
+            <th>Experiment Stats</th>
             <th>Meta Data</th>
             <th>Mutations</th>
             <th>Key Mutations</th>
