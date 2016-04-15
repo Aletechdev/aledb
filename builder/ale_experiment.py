@@ -157,6 +157,12 @@ def _insert_wild_type_flask(ale_exp_user,
 def insert_flasks(sample_breseq_abs_paths_list,
                   ale_exp_user,
                   ale_exp_name):
+    """
+    Args:
+        sample_breseq_abs_paths_list (list): A string list of the absolution path of the root of a each breseq report.
+        ale_exp_user (string): A string for the user name associated with the target ALE experiment.
+        ale_exp_name (string): A string for the target ALE experiment name.
+    """
 
     db_session = seq.alchemy_orm.Session()
 
