@@ -96,6 +96,11 @@ def _delete_all_orphaned_mutations():
 def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_abs_path):
     """
     Executed from Django ipython shell.
+	
+    Args:
+        breseq_wild_type_output_abs_path (list): A string list of the absolution path of the output directory of a breseq report.
+        ale_exp_user (string): A string for the user name associated with the target ALE experiment.
+        ale_exp_name (string): A string for the target ALE experiment name.
     """
 
     db_session = seq.alchemy_orm.Session()
