@@ -121,15 +121,12 @@ def _filter_mutation(filter_settings, observed_mutation):
 def _is_filter_on_gene(filter_settings, observed_mutation):
     is_filter_on_gene = False
 
-    # Creating up defaults.
     if filter_settings is not None:
 
-        filtered_genes = filter_settings.ignored_genes
+        filtered_gene_list = filter_settings.ignored_genes.split(', ')
 
-        if filtered_genes != "" and filtered_genes == observed_mutation.mutation.gene:
+        if observed_mutation.mutation.gene in filtered_gene_list:
             is_filter_on_gene = True
-
-    print(is_filter_on_gene)
 
     return is_filter_on_gene
 
