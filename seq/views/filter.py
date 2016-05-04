@@ -51,6 +51,7 @@ def create_filter(request):
 
             filter_form_model.min_cutoff = request.POST.get("min_cutoff", 20)
             filter_form_model.max_cutoff = request.POST.get("max_cutoff", 100)
+            filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
             filter_form_model.save()
         else:
             print filter_form.errors
