@@ -67,13 +67,6 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, f
     # Initialize all sample mutation table cells as empty.
     table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
 
-    if filter_settings is not None:
-        minimum_mutation_frequency = float(filter_settings.min_cutoff) / 100
-        maximum_mutation_frequency = float(filter_settings.max_cutoff) / 100
-    else:
-        minimum_mutation_frequency = 0.0
-        maximum_mutation_frequency = 1.0
-
     # Populating table_entries
     for observed_mutation in observed_mutations_query_set:
 
@@ -82,7 +75,7 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, f
         if not extra_validation and not observed_mutation.breseq_present:
             continue
 
-        if minimum_mutation_frequency <= observed_mutation.frequency <= maximum_mutation_frequency:
+        if not _filter_mutation(filter_settings, observed_mutation):
 
             new_entry = _get_table_mutation_entry(observed_mutation, experiment_urls)
 
@@ -116,6 +109,44 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, f
             table_body += table_row + "\n"
 
     return table_body
+
+
+def _filter_mutation(filter_settings, observed_mutation):
+
+    filter_mutation = _is_filter_on_gene(filter_settings, observed_mutation) or _is_filter_on_freq(filter_settings, observed_mutation)
+
+    return filter_mutation
+
+
+def _is_filter_on_gene(filter_settings, observed_mutation):
+    is_filter_on_gene = False
+
+    if filter_settings is not None:
+
+        filtered_gene_list = filter_settings.ignored_genes.replace(" ", "").split(',')
+        print(filtered_gene_list)
+
+        if observed_mutation.mutation.gene in filtered_gene_list:
+            is_filter_on_gene = True
+
+    return is_filter_on_gene
+
+
+def _is_filter_on_freq(filter_settings, observed_mutation):
+    is_filter_on_freq = True
+
+    # Creating up defaults.
+    if filter_settings is not None:
+        minimum_mutation_frequency = float(filter_settings.min_cutoff) / 100
+        maximum_mutation_frequency = float(filter_settings.max_cutoff) / 100
+    else:
+        minimum_mutation_frequency = 0.0
+        maximum_mutation_frequency = 1.0
+
+    if minimum_mutation_frequency <= observed_mutation.frequency <= maximum_mutation_frequency:
+        is_filter_on_freq = False
+
+    return is_filter_on_freq
 
 
 def _contains_mutation(filtered_observed_mutations_row):
