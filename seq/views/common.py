@@ -124,7 +124,6 @@ def _is_filter_on_gene(filter_settings, observed_mutation):
     if filter_settings is not None:
 
         filtered_gene_list = filter_settings.ignored_genes.replace(" ", "").split(',')
-        print(filtered_gene_list)
 
         if observed_mutation.mutation.gene in filtered_gene_list:
             is_filter_on_gene = True
