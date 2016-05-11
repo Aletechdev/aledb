@@ -37,8 +37,6 @@ def index(request):
         protein_change_count = seq.models.Mutation.objects.filter(protein_change__contains=protein_change_type).count()
         protein_change_type_count_dict[protein_change_type] = protein_change_count
 
-    print(protein_change_type_count_dict)
-
     ale_experiments = AleExperiment.objects.all()
 
     template = loader.get_template(INDEX_TEMPLATE)
