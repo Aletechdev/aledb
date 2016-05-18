@@ -124,7 +124,6 @@ def _is_filter_on_gene(filter_settings, observed_mutation):
     if filter_settings is not None:
 
         filtered_gene_list = filter_settings.ignored_genes.replace(" ", "").split(',')
-        print(filtered_gene_list)
 
         if observed_mutation.mutation.gene in filtered_gene_list:
             is_filter_on_gene = True
@@ -262,7 +261,7 @@ def _get_table_mutation_entry(observed_mutation, experiment_urls):
     return table_entry
 
 
-def _get_ale_experiment_selector(ale_experiment_id):
+def get_ale_experiment_selector(ale_experiment_id):
 
     if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
 
@@ -275,7 +274,7 @@ def _get_ale_experiment_selector(ale_experiment_id):
     return ale_experiment_selector
 
 
-def _get_ale_number_selector(ale_id):
+def get_ale_number_selector(ale_id):
 
     if ale_id is None or ale_id == REQUEST_ALL:
 
@@ -326,9 +325,9 @@ def _get_seq_experiment_raw_queryset(request, ale_id):
 
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
 
-    ale_experiment_selector = _get_ale_experiment_selector(ale_experiment_id)
+    ale_experiment_selector = get_ale_experiment_selector(ale_experiment_id)
 
-    ale_id_selector = _get_ale_number_selector(ale_id)
+    ale_id_selector = get_ale_number_selector(ale_id)
 
     sql_query = SEQ_EXPERIMENT_QUERY % (ale_experiment_selector, ale_id_selector)
 
