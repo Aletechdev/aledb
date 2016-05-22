@@ -9,9 +9,10 @@ import seq.views.lineage
 import seq.views.meta_data
 import seq.views.search
 import seq.views.filter
+import seq.views.gene
 
 
-# TODO: Understand if '-' is better than "-" within a URL.
+# TODO: Understand if '-' is better than "_" within a URL.
 urlpatterns = patterns('',
                        url('^$', seq.views.index.index, name="index"),
                        url('^mutations$', seq.views.mutations.mutation_table, name="mutation_table"),
@@ -22,4 +23,5 @@ urlpatterns = patterns('',
                        url('^meta_data', seq.views.meta_data.meta_data, name="lineage"),
                        url('^search', seq.views.search.search, name="search"),
                        url('^filter', seq.views.filter.create_filter, name="filter"),
+                       url('^gene', seq.views.gene.gene, name="gene")
                        )
