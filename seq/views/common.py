@@ -232,7 +232,7 @@ def get_ale_experiment_name(request):
 
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
 
-    ale_experiment_name = "All ALE Experiment"
+    ale_experiment_name = "All ALE Experiments"
 
     if ale_experiment_id is not None and ale_experiment_id != "all":
 
