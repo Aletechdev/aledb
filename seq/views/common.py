@@ -101,7 +101,7 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, f
             table_row += "<td>%s</td>" % mutation.position
             table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += "<td>%s</td>" % mutation.sequence_change
-            table_row += "<td>%s</td>" % mutation.gene
+            table_row += "<td><a href=gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
             table_row += "<td>%s</td>" % mutation.protein_change
             table_row += "".join(table_entries[mutation_index_dict[mutation.id]])
             table_row += "</tr>"
