@@ -23,9 +23,10 @@ def gene(request):
 
     table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set, request)
 
-    template = loader.get_template("search.html")
+    template = loader.get_template("gene.html")
 
-    context = Context({"table_body": mark_safe(table_body),
+    context = Context({"gene_name": gene_query,
+                       "table_body": mark_safe(table_body),
                        "title": "Search Results",
                        "table_header": mark_safe(table_header)})
 
