@@ -27,7 +27,7 @@ def gene(request):
 
     context = Context({"gene_name": gene_query,
                        "table_body": mark_safe(table_body),
-                       "title": "Search Results",
+                       "title": gene_query + " gene",
                        "table_header": mark_safe(table_header)})
 
     return HttpResponse(template.render(context))
