@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from seq.alchemy_orm import *
 
-from gdparse.gdparse import gdparse
+from builder.gdparse.gdparse import gdparse
 
 import collections
 
@@ -232,10 +232,11 @@ def _get_mutation_freq(mutation_dict):
     if GD_MUT_FREQ_ATTR_KEY in mutation_dict:
 
         frequency = mutation_dict[GD_MUT_FREQ_ATTR_KEY]
-	
-	# TODO: Clarify how to better handle this.
-	if frequency == 'NA':
-		frequency = 0
+
+    # TODO: Clarify how to better handle this.
+    if frequency == 'NA':
+
+        frequency = 0
 
     return frequency
 

@@ -91,9 +91,8 @@
     </script>
     <script>
 	    var deleteRow = function () {
-	        var td = $(this).parent();
-	        var tr = td.parent();
-	        tr.remove();
+	        var row = $(this).closest("tr").get(0);
+            $('.dataTable').dataTable().fnDeleteRow(row);
 	    }
 
     </script>

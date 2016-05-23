@@ -54,7 +54,7 @@ def create_filter(request):
             filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
             filter_form_model.save()
         else:
-            print filter_form.errors
+            print (filter_form.errors)
 
     else:  # request.method == 'GET'
         filter_form_model, created = ale.models.Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,

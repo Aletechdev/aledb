@@ -14,7 +14,7 @@ import builder.upload
 
 import builder.key_mutations
 
-from gdparse.gdparse import gdparse
+from builder.gdparse.gdparse import gdparse
 
 
 WILD_TYPE_ALE_NUMBER = 0

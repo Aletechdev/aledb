@@ -3,7 +3,8 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.utils.html import mark_safe
 
-def add_link_field(target_model = None, field = '', link_text = unicode):
+
+def add_link_field(target_model = None, field = '', link_text = str):
     def add_link(cls):
         reverse_name = target_model or cls.model.__name__.lower()
         def link(self, instance):
