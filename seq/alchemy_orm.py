@@ -123,7 +123,7 @@ def query_or_create(session, class_type, **kwargs):
     result = session.query(class_type).filter_by(**kwargs).first()
     if result is None:
         result = class_type()
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             setattr(result, key, value)
         session.add(result)
     return result

@@ -64,7 +64,7 @@ def _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
 
     key_to_delete = None
 
-    for key, value in seq_experiment_ordered_dict.iteritems():
+    for key, value in seq_experiment_ordered_dict.items():
 
         if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
 
