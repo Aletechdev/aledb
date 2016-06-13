@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ALE Analytics Mutation Filtering Options</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+</head>
+
+
+<style>
+
+    body {
+        padding-right: 50px;
+        padding-bottom: 25px;
+        padding-left: 50px;
+    }
+
+</style>
+
+<body>
+<div class="page-header">
+    <h2><a href="http://aquaticus.ucsd.edu/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a>
+        / <b> {{ ale_experiment_name }} </b> Duplications </h2>
+</div>
+
+<table id="runs" class="tablesorter">
+    <thead>
+    <tr>
+        <th>ALE, Flask, Isolate</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    {% for experiment_url, experiment_name in experiemnt_links %}
+        <tr class="experiment_stats">
+            <td class="sample_name"><a href="{{ experiment_url }}">{{ experiment_name }}</a></td>
+
+        </tr>
+
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>
