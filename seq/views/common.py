@@ -8,6 +8,16 @@ import seq.models
 
 import aleinfo.settings
 
+import requests
+
+import csv
+
+from bs4 import BeautifulSoup, SoupStrainer
+
+import os
+
+import operator
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -52,7 +62,7 @@ else:
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
-def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings=None):
+def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings=None, starting_strain=None):
 
     mutations = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
     mutation_index_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
@@ -104,6 +114,67 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, f
             table_row += "<td><a href=gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
             table_row += "<td>%s</td>" % mutation.protein_change
             table_row += "".join(table_entries[mutation_index_dict[mutation.id]])
+            table_row += "</tr>"
+
+            table_body += table_row + "\n"
+
+    experiment_url = os.path.dirname(os.path.dirname(os.path.dirname(next(iter(experiment_urls.values()))))) + "/dups/"
+
+    sorted_experiment_url_indices = sorted(experiment_id_idx_mapping.items(), key=operator.itemgetter(1))
+
+    response = requests.get(experiment_url, auth=requests.auth.HTTPBasicAuth('ale', 'olalemutats'))
+
+    decoded_content = response.content.decode("utf-8")
+
+    afis = get_links(decoded_content)
+
+    if starting_strain is None:
+        afis.pop(0)
+
+    duplications = []
+
+    for afi in afis:
+
+        url = experiment_url + afi + "/" + afi + "_genes.csv"
+
+        response = requests.get(url, auth=requests.auth.HTTPBasicAuth('ale', 'olalemutats'))
+
+        decoded_content = response.content.decode("utf-8")
+
+        cr = csv.reader(decoded_content.splitlines(), delimiter=',')
+
+        dups = list(cr)
+
+        iterdups = iter(dups)
+
+        next(iterdups)
+
+        for dup in iterdups:
+            table_row = "<tr>"
+            table_row += HTML_MUTATION_TABLE_ROW
+            table_row += "<td>%s</td>" % dup[0]
+            table_row += "<td>%s</td>" % "DUP"
+            table_row += "<td>%s</td>" % ("\u0394" + dup[2] + " bp")
+
+            content = csv.reader(dup[7].splitlines(), delimiter=',')
+
+            genes = list(content)
+            genes = genes[0]
+
+            if len(genes) <= 1:
+                table_row += "<td>%s</td>" % find_between(genes[0], "\'", "\'")
+            else:
+                gene_pair = [find_between(genes[0], "\'", "\'"), find_between(genes[-1], "\'", "\'")]
+                table_row += "<td>%s</td>" % (gene_pair[0] + "-" + gene_pair[1])
+            table_row += "<td>%s</td>" % "Duplication"
+
+            for experiment_url_index in sorted_experiment_url_indices:
+
+                if afi in experiment_urls[experiment_url_index[0]] and not starting_strain:
+                    table_row += HTML_MUTATION_PRESENT_TRUE_CELL_HTML % 1.00
+                else:
+                    table_row += HTML_EMPTY_MUTATION_CELL
+
             table_row += "</tr>"
 
             table_body += table_row + "\n"
@@ -419,3 +490,24 @@ def get_filter_settings(ale_experiment_id):
     filter_settings = filter_queryset[0]  # Since there's only one filter setting per experiment.
 
     return filter_settings
+
+
+def find_between( s, first, last ):
+    try:
+        start = s.index( first ) + len( first )
+        end = s.index( last, start )
+        return s[start:end]
+    except ValueError:
+        return ""
+
+
+def get_links(decoded_content):
+    afis = []
+    for link in BeautifulSoup(decoded_content, parseOnlyThese=SoupStrainer('a')):
+        if link.has_attr('href'):
+            # print (link['href'])
+            ref = link['href']
+            if ".." in ref:
+                continue
+            afis.append(ref[:-1])
+    return afis

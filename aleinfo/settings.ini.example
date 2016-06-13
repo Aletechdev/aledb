@@ -1,11 +1,11 @@
 [DATABASE]
 host = localhost
 port = 3306
-user = root
-database = ale_db
-password = denny
+user = ale
+database = ale_db_python3
+password = bridgetreelabcarbon
 engine = mysql
 
 [OTHER]
-sequencing_url = url
-sequencing_path = path
+sequencing_url = https://aquaticus.ucsd.edu/sequencing/
+sequencing_path = sequencing/

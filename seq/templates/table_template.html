@@ -75,6 +75,11 @@
 
     </script>
     <script>
+        $(document).ready(function() {
+            $('.dataTable').dataTable().fnSort([[1, 'asc']])
+        });
+    </script>
+    <script>
 	    $(document).ready(function () {
 	        $("tr td:first-child").each(function () {
 	            $(this).hover(
