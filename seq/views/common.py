@@ -62,7 +62,7 @@ else:
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
-def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings=None, starting_strain=None, include_duplications=True):
+def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings=None, starting_strain=None, included_duplications=True):
 
     mutations = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
     mutation_index_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
@@ -118,7 +118,7 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, f
 
             table_body += table_row + "\n"
 
-    if include_duplications is True:
+    if included_duplications is True:
 
         table_body += add_duplications(experiment_urls, experiment_id_idx_mapping, starting_strain)
 
@@ -521,7 +521,7 @@ def add_duplications(experiment_urls, experiment_id_idx_mapping, starting_strain
         table_row += "<td>%s</td>" % dup[0][0]
         table_row += "<td>%s</td>" % "DUP"
         table_row += "<td>%s</td>" % ("\u0394" + format(int(dup[0][1]), ",d") + " bp")
-        table_row += "<td>%s</td>" % dup[0][2]
+        table_row += "<td><a href=gene?g=%s>%s</a></td>" % (dup[0][2], dup[0][2])
         table_row += "<td>%s</td>" % "Duplication"
 
         dup.pop(0)
