@@ -10,6 +10,8 @@ from builder.gdparse.gdparse import gdparse
 
 import collections
 
+import csv
+
 
 EXPERIMENT_PARENT_DIR = "breseq/"  # TODO: See if this is necessary.
 
@@ -82,11 +84,62 @@ def add_breseq_results(db_session,
                        sample_mutation_annotation_dict,
                        is_wild_type)
 
+    _process_duplications(db_session,
+                          breseq_folder,
+                          seq_experiment,
+                          is_wild_type)
+
     sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
 
     _process_unassigned_missing_coverage(db_session,
                                          seq_experiment,
                                          sample_evidence_dict)
+
+
+def _process_duplications(db_session, breseq_folder, seq_experiment, is_wild_type):
+
+    afi = os.path.basename(os.path.dirname(os.path.dirname(breseq_folder)))
+
+    # TODO: afi.startswith is not a valid approach. Need to find a way to determine wildtype if none is given
+    if is_wild_type or afi.startswith('0'):
+        return
+
+    breseq_output_path = os.path.dirname(os.path.dirname(os.path.dirname(breseq_folder)))
+
+    dup_path = breseq_output_path + "/dups/" + afi + "/" + afi + "_genes.csv"
+
+    with open(dup_path, 'rt') as csvfile:
+
+        duplications = list(csv.reader(csvfile, delimiter=','))
+
+        if len(duplications) > 1:
+            duplications.pop(0)
+            for dup in duplications:
+
+                genes = list(csv.reader(dup[7].splitlines(), delimiter=','))[0]
+
+                if len(genes) <= 1:
+                    gene_entry = _find_between(genes[0], "\'", "\'")
+                else:
+                    gene_pair = [_find_between(genes[0], "\'", "\'"), _find_between(genes[-1], "\'", "\'")]
+                    gene_entry = gene_pair[0] + "-" + gene_pair[1]
+
+                mutation = query_or_create(db_session,
+                                           Mutation,
+                                           position=dup[0],
+                                           gene=gene_entry,
+                                           sequence_change=("\u0394" + format(int(dup[2]), ",d") + " bp"),
+                                           mutation_type="DUP")
+
+                mutation.protein_change = "Duplication"
+
+                observed_mutation = ObservedMutation()
+                observed_mutation.experiment = seq_experiment
+                observed_mutation.mutation = mutation
+                observed_mutation.breseq_present = True
+                observed_mutation.frequency = 1.00
+
+                db_session.add(observed_mutation)
 
 
 def _get_beautifulsoup_html(output_folder, html_file_name):
@@ -274,3 +327,12 @@ def _get_mutations_rows(mutations_html, sample_type):
     mutation_rows = mutation_table.findChildren("tr", attrs={"class": html_class_to_parse})
 
     return mutation_rows
+
+
+def _find_between( s, first, last ):
+    try:
+        start = s.index( first ) + len( first )
+        end = s.index( last, start )
+        return s[start:end]
+    except ValueError:
+        return ""
