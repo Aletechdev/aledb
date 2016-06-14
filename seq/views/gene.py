@@ -6,8 +6,6 @@ from django.contrib.auth.decorators import login_required
 
 from django.template import Context, loader
 
-from django.shortcuts import render
-
 import seq.models
 
 import seq.views.common
@@ -21,7 +19,7 @@ def gene(request):
 
     table_header = seq.views.common.get_table_header(seq_experiment_dict)
 
-    table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set, request, include_duplications=False)
+    table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set, request, included_duplications=False)
 
     template = loader.get_template("gene.html")
 
