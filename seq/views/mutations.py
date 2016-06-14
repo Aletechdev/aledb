@@ -41,7 +41,7 @@ def mutation_table(request):
 
     table_header = common.get_table_header(seq_experiment_ordered_dict)
 
-    table_body = _get_table_body(seq_experiment_ordered_dict, request, starting_strain=None)
+    table_body = _get_table_body(seq_experiment_ordered_dict, request)
 
     template = loader.get_template("table_template.html")
 
@@ -57,7 +57,7 @@ def mutation_table(request):
     return HttpResponse(template.render(context))
 
 
-def _get_table_body(seq_experiment_dict, request, starting_strain=None):
+def _get_table_body(seq_experiment_dict, request):
 
     observed_mutations_query_set = common.get_observed_mutations(seq_experiment_dict)
 
@@ -65,4 +65,4 @@ def _get_table_body(seq_experiment_dict, request, starting_strain=None):
 
     filter_settings = common.get_filter_settings(ale_experiment_id)
 
-    return common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings, starting_strain=starting_strain)
+    return common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings)
