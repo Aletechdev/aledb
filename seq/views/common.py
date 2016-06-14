@@ -62,7 +62,7 @@ else:
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
-def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings=None, starting_strain=None):
+def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings=None, starting_strain=None, include_duplications=True):
 
     mutations = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
     mutation_index_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
@@ -118,66 +118,9 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, f
 
             table_body += table_row + "\n"
 
-    experiment_url = os.path.dirname(os.path.dirname(os.path.dirname(next(iter(experiment_urls.values()))))) + "/dups/"
+    if include_duplications is True:
 
-    sorted_experiment_url_indices = sorted(experiment_id_idx_mapping.items(), key=operator.itemgetter(1))
-
-    response = requests.get(experiment_url, auth=requests.auth.HTTPBasicAuth('ale', 'olalemutats'))
-
-    decoded_content = response.content.decode("utf-8")
-
-    afis = get_links(decoded_content)
-
-    if starting_strain is None:
-        afis.pop(0)
-
-    duplications = []
-
-    for afi in afis:
-
-        url = experiment_url + afi + "/" + afi + "_genes.csv"
-
-        response = requests.get(url, auth=requests.auth.HTTPBasicAuth('ale', 'olalemutats'))
-
-        decoded_content = response.content.decode("utf-8")
-
-        cr = csv.reader(decoded_content.splitlines(), delimiter=',')
-
-        dups = list(cr)
-
-        iterdups = iter(dups)
-
-        next(iterdups)
-
-        for dup in iterdups:
-            table_row = "<tr>"
-            table_row += HTML_MUTATION_TABLE_ROW
-            table_row += "<td>%s</td>" % dup[0]
-            table_row += "<td>%s</td>" % "DUP"
-            table_row += "<td>%s</td>" % ("\u0394" + dup[2] + " bp")
-
-            content = csv.reader(dup[7].splitlines(), delimiter=',')
-
-            genes = list(content)
-            genes = genes[0]
-
-            if len(genes) <= 1:
-                table_row += "<td>%s</td>" % find_between(genes[0], "\'", "\'")
-            else:
-                gene_pair = [find_between(genes[0], "\'", "\'"), find_between(genes[-1], "\'", "\'")]
-                table_row += "<td>%s</td>" % (gene_pair[0] + "-" + gene_pair[1])
-            table_row += "<td>%s</td>" % "Duplication"
-
-            for experiment_url_index in sorted_experiment_url_indices:
-
-                if afi in experiment_urls[experiment_url_index[0]] and not starting_strain:
-                    table_row += HTML_MUTATION_PRESENT_TRUE_CELL_HTML % 1.00
-                else:
-                    table_row += HTML_EMPTY_MUTATION_CELL
-
-            table_row += "</tr>"
-
-            table_body += table_row + "\n"
+        table_body += add_duplications(experiment_urls, experiment_id_idx_mapping, starting_strain)
 
     return table_body
 
@@ -511,3 +454,98 @@ def get_links(decoded_content):
                 continue
             afis.append(ref[:-1])
     return afis
+
+
+def add_duplications(experiment_urls, experiment_id_idx_mapping, starting_strain):
+
+    experiment_url = os.path.dirname(
+        os.path.dirname(os.path.dirname(next(iter(experiment_urls.values()))))) + "/dups/"
+
+    sorted_experiment_url_indices = sorted(experiment_id_idx_mapping.items(), key=operator.itemgetter(1))
+
+    response = requests.get(experiment_url, auth=requests.auth.HTTPBasicAuth('ale', 'olalemutats'))
+
+    # If experiment does not have a dups folder return blank
+    if response.status_code != 200:
+        return ""
+
+    afis = get_links(response.content.decode("utf-8"))
+
+    if starting_strain is None:
+        afis.pop(0)
+
+    duplications = []
+
+    for afi in afis:
+
+        url = experiment_url + afi + "/" + afi + "_genes.csv"
+
+        response = requests.get(url, auth=requests.auth.HTTPBasicAuth('ale', 'olalemutats'))
+
+        decoded_content = response.content.decode("utf-8")
+
+        dups = list(csv.reader(decoded_content.splitlines(), delimiter=','))
+
+        if len(dups) > 1:
+            dups.pop(0)
+            for dup in dups:
+                dup = list(dup)
+
+                genes = list(csv.reader(dup[7].splitlines(), delimiter=','))[0]
+
+                if len(genes) <= 1:
+                    gene_entry = find_between(genes[0], "\'", "\'")
+                else:
+                    gene_pair = [find_between(genes[0], "\'", "\'"), find_between(genes[-1], "\'", "\'")]
+                    gene_entry = gene_pair[0] + "-" + gene_pair[1]
+
+                temp = [dup[0], dup[2], gene_entry]
+
+                match = list([i for i, v in enumerate(duplications) if v[0] == temp])
+
+                if len(match) >= 1:
+                    list_pop = list(duplications.pop(match[0]))
+                    list_pop.append(afi)
+                    duplications.insert(match[0], list_pop)
+
+                else:
+                    entry = [temp, afi]
+                    duplications.append(entry)
+
+    duplication_table_body = ""
+
+    for dup in iter(duplications):
+        has_entry = False
+        table_row = "<tr>"
+        table_row += HTML_MUTATION_TABLE_ROW
+        table_row += "<td>%s</td>" % dup[0][0]
+        table_row += "<td>%s</td>" % "DUP"
+        table_row += "<td>%s</td>" % ("\u0394" + format(int(dup[0][1]), ",d") + " bp")
+        table_row += "<td>%s</td>" % dup[0][2]
+        table_row += "<td>%s</td>" % "Duplication"
+
+        dup.pop(0)
+
+        afis = list(dup)
+
+        for experiment_url_index in sorted_experiment_url_indices:
+
+            experiment_name = os.path.basename(
+                os.path.dirname(os.path.dirname(experiment_urls[experiment_url_index[0]])))
+
+            if experiment_name in afis and not starting_strain:
+                table_row += HTML_MUTATION_PRESENT_TRUE_CELL_HTML % 1.00
+                has_entry = True
+            else:
+                table_row += HTML_EMPTY_MUTATION_CELL
+
+        table_row += "</tr>"
+
+        # if there is a duplication without a AFI then do not add it as a row
+        if has_entry is False:
+            continue
+
+        duplication_table_body += table_row + "\n"
+
+    return duplication_table_body
+

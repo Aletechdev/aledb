@@ -16,6 +16,8 @@ import operator
 
 import os
 
+import requests
+
 
 INDEX_TEMPLATE = "duplication.html"
 
@@ -56,9 +58,14 @@ def duplication(request):
 
         url = temp + "/dups/" + basename + "/" + basename + ".html"
 
-        experiemnt_links.append((url, basename))
+        response = requests.get(url, auth=('ale', 'olalemutats'))
+        if response.status_code == 200:
+            experiemnt_links.append((url, basename))
+        else:
+            experiemnt_links.append((False, basename))
 
-    print(experiemnt_links)
+
+
 
     context = Context({
         "experiemnt_links": experiemnt_links,
