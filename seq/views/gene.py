@@ -21,7 +21,7 @@ def gene(request):
 
     table_header = seq.views.common.get_table_header(seq_experiment_dict)
 
-    table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set, request)
+    table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set, request, include_duplications=False)
 
     template = loader.get_template("gene.html")
 

@@ -34,7 +34,12 @@
     <tbody>
     {% for experiment_url, experiment_name in experiemnt_links %}
         <tr class="experiment_stats">
-            <td class="sample_name"><a href="{{ experiment_url }}">{{ experiment_name }}</a></td>
+
+            {% if experiment_url != False %}
+                <td class="sample_name"><a href="{{ experiment_url }}">{{ experiment_name }}</a></td>
+            {% else %}
+                <td class="sample_name">{{ experiment_name }}</td>
+            {% endif %}
 
         </tr>
 
