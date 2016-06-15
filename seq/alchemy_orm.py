@@ -12,6 +12,8 @@ from sqlalchemy.ext.declarative import declarative_base
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from warnings import filterwarnings
+
 
 # add aleinfo directory to the path
 ale_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -120,6 +122,7 @@ def query_or_create(session, class_type, **kwargs):
     """query an object using filter_by on the kwargs. If no such object
     is found in the database, a new one will be created which satisfies
     these constraints, and added to the session"""
+    filterwarnings('ignore', message='^Data truncated for column*')
     result = session.query(class_type).filter_by(**kwargs).first()
     if result is None:
         result = class_type()

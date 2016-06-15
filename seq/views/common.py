@@ -369,7 +369,7 @@ def _show_checked_flasks(request, seq_experiment_dict):
 
     if query_string is not None:
 
-        checked_experiment_ids = query_string.encode('latin_1').replace("{", "").replace("}", "")
+        checked_experiment_ids = str(query_string).replace("{", "").replace("}", "")
 
         if checked_experiment_ids != "":
 
@@ -392,7 +392,7 @@ def _remove_checked_flasks(request, seq_experiment_dict):
 
     if query_string is not None:
 
-        checked_experiment_ids = query_string.encode('latin_1').replace("{", "").replace("}", "")
+        checked_experiment_ids = str(query_string).replace("{", "").replace("}", "")
 
         if checked_experiment_ids != "":
 
