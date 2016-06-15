@@ -8,16 +8,6 @@ import seq.models
 
 import aleinfo.settings
 
-import requests
-
-import csv
-
-from bs4 import BeautifulSoup, SoupStrainer
-
-import os
-
-import operator
-
 
 __author__ = 'Patrick Phaneuf'
 
@@ -48,7 +38,7 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 SEQ_EXPERIMENT_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
 
-MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV']
+MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'DUP']
 
 PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogenes', 'snp_type_synonymous', 'snp_type_nonsynonymous']
 
@@ -425,6 +415,9 @@ def get_observed_mutations(seq_experiment_dict):
 def get_filter_settings(ale_experiment_id):
 
     filter_queryset = ale.models.Filter.objects.filter(ale_experiment_id=ale_experiment_id)
+
+    if len(filter_queryset) is 0:
+        return ale.models.Filter()
 
     filter_settings = filter_queryset[0]  # Since there's only one filter setting per experiment.
 
