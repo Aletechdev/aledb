@@ -108,38 +108,41 @@ def _process_duplications(db_session, breseq_folder, seq_experiment, is_wild_typ
 
     dup_path = breseq_output_path + "/dups/" + afi + "/" + afi + "_genes.csv"
 
-    with open(dup_path, 'rt') as csvfile:
+    try:
+        with open(dup_path, 'rt') as csvfile:
 
-        duplications = list(csv.reader(csvfile, delimiter=','))
+            duplications = list(csv.reader(csvfile, delimiter=','))
 
-        if len(duplications) > 1:
-            duplications.pop(0)
-            for dup in duplications:
+            if len(duplications) > 1:
+                duplications.pop(0)
+                for dup in duplications:
 
-                genes = list(csv.reader(dup[7].splitlines(), delimiter=','))[0]
+                    genes = list(csv.reader(dup[7].splitlines(), delimiter=','))[0]
 
-                if len(genes) <= 1:
-                    gene_entry = _find_between(genes[0], "\'", "\'")
-                else:
-                    gene_pair = [_find_between(genes[0], "\'", "\'"), _find_between(genes[-1], "\'", "\'")]
-                    gene_entry = gene_pair[0] + "-" + gene_pair[1]
+                    if len(genes) <= 1:
+                        gene_entry = _find_between(genes[0], "\'", "\'")
+                    else:
+                        gene_pair = [_find_between(genes[0], "\'", "\'"), _find_between(genes[-1], "\'", "\'")]
+                        gene_entry = gene_pair[0] + "-" + gene_pair[1]
 
-                mutation = query_or_create(db_session,
-                                           Mutation,
-                                           position=dup[0],
-                                           gene=gene_entry,
-                                           sequence_change=("\u0394" + format(int(dup[2]), ",d") + " bp"),
-                                           mutation_type="DUP")
+                    mutation = query_or_create(db_session,
+                                               Mutation,
+                                               position=dup[0],
+                                               gene=gene_entry,
+                                               sequence_change=("\u0394" + format(int(dup[2]), ",d") + " bp"),
+                                               mutation_type="DUP")
 
-                mutation.protein_change = "Duplication"
+                    mutation.protein_change = "Duplication"
 
-                observed_mutation = ObservedMutation()
-                observed_mutation.experiment = seq_experiment
-                observed_mutation.mutation = mutation
-                observed_mutation.breseq_present = True
-                observed_mutation.frequency = 1.00
+                    observed_mutation = ObservedMutation()
+                    observed_mutation.experiment = seq_experiment
+                    observed_mutation.mutation = mutation
+                    observed_mutation.breseq_present = True
+                    observed_mutation.frequency = 1.00
 
-                db_session.add(observed_mutation)
+                    db_session.add(observed_mutation)
+    except IOError:
+        return
 
 
 def _get_beautifulsoup_html(output_folder, html_file_name):
