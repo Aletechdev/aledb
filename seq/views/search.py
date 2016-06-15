@@ -71,14 +71,12 @@ def _get_seq_exp(request, mutated_gene):
         isolates_to_show_ids = isolates_to_show_string.encode('latin_1').replace("{", "").replace("}", "")
         isolates_to_show_id_list = [int(i) for i in isolates_to_show_ids.split(",") if i != ""]
 
-    if str(mutated_gene).endswith("*") and str(mutated_gene).startswith("*"):
-        mutations_with_gene = seq.models.Mutation.objects.filter(gene__contains=str(mutated_gene)[1:-1])
-    elif str(mutated_gene).endswith("*"):
+    if str(mutated_gene).endswith("*"):
         mutations_with_gene = seq.models.Mutation.objects.filter(gene__startswith=str(mutated_gene)[:-1])
     elif str(mutated_gene).startswith("*"):
         mutations_with_gene = seq.models.Mutation.objects.filter(gene__endswith=str(mutated_gene)[1:])
     else:
-        mutations_with_gene = seq.models.Mutation.objects.filter(gene=mutated_gene)
+        mutations_with_gene = seq.models.Mutation.objects.filter(gene__contains=mutated_gene)
 
     observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation=mutations_with_gene)
 
