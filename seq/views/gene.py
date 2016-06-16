@@ -6,8 +6,6 @@ from django.contrib.auth.decorators import login_required
 
 from django.template import Context, loader
 
-from django.shortcuts import render
-
 import seq.models
 
 import seq.views.common

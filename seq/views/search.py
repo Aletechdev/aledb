@@ -62,16 +62,21 @@ def _get_seq_exp(request, mutated_gene):
     isolates_to_remove_id_list = []
     isolates_to_remove_string = request.GET.get(seq.views.common.EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG)
     if isolates_to_remove_string is not None:
-        isolates_to_remove_ids = isolates_to_remove_string.encode('latin_1').replace("{", "").replace("}", "")
+        isolates_to_remove_ids = str(isolates_to_remove_string).replace("{", "").replace("}", "")
         isolates_to_remove_id_list = [int(i) for i in isolates_to_remove_ids.split(",") if i != ""]
 
     isolates_to_show_id_list = []
     isolates_to_show_string = request.GET.get(seq.views.common.EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG)
     if isolates_to_show_string is not None:
-        isolates_to_show_ids = isolates_to_show_string.encode('latin_1').replace("{", "").replace("}", "")
+        isolates_to_show_ids = str(isolates_to_show_string).replace("{", "").replace("}", "")
         isolates_to_show_id_list = [int(i) for i in isolates_to_show_ids.split(",") if i != ""]
 
-    mutations_with_gene = seq.models.Mutation.objects.filter(gene=mutated_gene)
+    if str(mutated_gene).endswith("*"):
+        mutations_with_gene = seq.models.Mutation.objects.filter(gene__startswith=str(mutated_gene)[:-1])
+    elif str(mutated_gene).startswith("*"):
+        mutations_with_gene = seq.models.Mutation.objects.filter(gene__endswith=str(mutated_gene)[1:])
+    else:
+        mutations_with_gene = seq.models.Mutation.objects.filter(gene__contains=mutated_gene)
 
     observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation=mutations_with_gene)
 
