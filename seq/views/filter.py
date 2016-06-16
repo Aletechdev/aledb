@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 
 from django.template import Context, loader
 
@@ -53,6 +53,7 @@ def create_filter(request):
             filter_form_model.max_cutoff = request.POST.get("max_cutoff", 100)
             filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
             filter_form_model.save()
+            return HttpResponseRedirect("http://aquaticus.ucsd.edu/ale_analytics/")
         else:
             print (filter_form.errors)
 
