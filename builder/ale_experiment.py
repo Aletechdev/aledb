@@ -93,6 +93,18 @@ def _delete_all_orphaned_mutations():
             mutation.delete()
 
 
+def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate_number):
+
+    isolate_to_delete = ale.models.Isolate.objects.filter(isolate_number=isolate_number)
+
+    for isolate in isolate_to_delete:
+        if isolate.flask.ale_id.ale_experiment_id == ale_experiment_primary_key and isolate.flask.ale_id.ale_id == ale_number and isolate.flask.flask_number == flask_number:
+            isolate.delete()
+            print ("Successfully removed: ", ale_number, flask_number, isolate_number)
+
+    _delete_all_orphaned_mutations()
+
+
 def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_abs_path):
     """
     Executed from Django ipython shell.
