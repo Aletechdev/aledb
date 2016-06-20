@@ -37,6 +37,8 @@
             border-bottom: 1px solid #CCCCCC;
             border-left: 1px solid #CCCCCC;
         }
+        #true {background-color: rgba(0, 255, 0, 0.1)}
+        #empty {background-color: rgba(255, 0, 0, 0.1)}
     </style>
 
     <script type="text/javascript" charset="utf8" src="/static/DataTables/media/js/jquery.dataTables.js"></script>
@@ -47,26 +49,19 @@
     <script type="text/javascript" charset="utf8"
             src="/static/DataTables/extras/TableTools/media/js/TableTools.min.js"></script>
     <script type="text/javascript">
-            $(document).ready(function() {
-                /* set true and false cell colors */
-                $(".true").css("background-color", "rgba(0, 255, 0, 0.1)");
-                $(".false").css("background-color", "rgba(255, 0, 0, 0.1)");
-                var oTable = $("#data").dataTable({
-                    "bPaginate": false,
-                    "bInfo": false,
-                    //"sDom": 'RC<"clear">lfrtip',
-                    /*"oTableTools": {
-                        "sSwfPath": "/static/DataTables/extras/TableTools/media/swf/copy_csv_xls_pdf.swf",
-                        "aButtons": [ "copy", "print" ]
-                    }*/
-                });
-                //new FixedHeader(oTable);
-            });
-
-    </script>
-    <script>
-	    $(document).ready(function () {
-	        var filter_offset = $("#data_filter").offset();
+        $(document).ready(function() {
+            var oTable = $("#data").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[1, 'asc']]);
+            $("tr td:first-child").each(function () {
+	            $(this).hover(
+	                function () {
+	                    $(this).children(".shut").css("display","block");
+	                },
+	                function () {
+	                    $(this).children(".shut").css("display","none");
+	                }
+	            );
+	        });
+            var filter_offset = $("#data_filter").offset();
 	        $(window).resize(function () {
 	            filter_offset = $("#data_filter").offset();
 	        });
@@ -82,43 +77,26 @@
 	                $(this).offset({left:ui_offset[i++]+scrollLeft});
 	            });
 	        });
-	    });
-
+        });
     </script>
     <script>
-	    $(document).ready(function () {
-	        $("tr td:first-child").each(function () {
-	            $(this).hover(
-	                function () {
-	                    $(this).children(".shut").css("display","block");
-	                },
-	                function () {
-	                    $(this).children(".shut").css("display","none");
-	                }
-	            );
-	        });
-	    });
-
+        $(function() {
+            $("input[name='q']").focus();
+        });
     </script>
     <script>
 	    var deleteRow = function () {
-	        var td = $(this).parent();
-	        var tr = td.parent();
-	        tr.remove();
-	    }
-
-    </script>
-    <script>
+	        var row = $(this).closest("tr").get(0);
+            $('.dataTable').dataTable().fnDeleteRow(row);
+	    };
 	    var filterFlask = function (filter_type) {
 	        var url = location.href.split("&remove=")[0].split("&show=")[0];
-
 	        checked_flasks = [];
 	        $("tr td").children(".cb").each(function () {
 	            if (this.checked) {
 	                checked_flasks.push(this.name);
-	            };
+	            }
 	        });
-
 		var removed_flask_ids,kept_flask_ids;
 	        location.href.split("&").forEach(function (s) {
 	            if (s.indexOf("remove") >= 0) {
@@ -127,28 +105,20 @@
 	            else if (s.indexOf("show") >= 0) {
 	                kept_flask_ids = s.split("=")[1];
 	            }
-	        });
-
+            });
 	        if (filter_type == "remove") {
 	            query_string = typeof kept_flask_ids != "undefined" ? "&show=" + kept_flask_ids:"";
 	            query_string += typeof removed_flask_ids != "undefined" ? "&remove=" + removed_flask_ids.replace("}",""):"&remove={";
 	        }
 	        else if (filter_type == "show") {
 	            query_string = "&show={";
-	        };
+	        }
 	        checked_flasks.forEach(function (id) {
 	            query_string += id + ",";
 	        });
 	        query_string += "}";
 	        window.location.replace(url + query_string);
 	    }
-
-    </script>
-
-    <script>
-        $(function() {
-            $("input[name='q']").focus();
-        });
     </script>
     <script type='text/javascript'>
         $(document).ready(function () {
