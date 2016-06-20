@@ -9,3 +9,5 @@ engine = mysql
 [OTHER]
 sequencing_url = https://aquaticus.ucsd.edu/sequencing/
 sequencing_path = sequencing/
+username = ale
+password = olalemutats

@@ -129,7 +129,7 @@ def _process_duplications(db_session, breseq_folder, seq_experiment, is_wild_typ
                                                Mutation,
                                                position=dup[0],
                                                gene=gene_entry,
-                                               sequence_change=("\u0394" + format(int(dup[2]), ",d") + " bp"),
+                                               sequence_change=(format(int(dup[2]), ",d") + " bp x" + dup[4]),
                                                mutation_type="DUP")
 
                     mutation.protein_change = "Duplication"
