@@ -23,8 +23,12 @@ INDEX_TEMPLATE = "duplication.html"
 
 if hasattr(settings, common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.sequencing_url
+    username = settings.config.get("OTHER", "username")
+    password = settings.config.get("OTHER", "password")
 else:
     reseqencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
+    username = ""
+    password = ""
 
 
 @login_required
@@ -46,7 +50,8 @@ def duplication(request):
 
     sorted_experiment_url_indices = sorted(experiment_id_idx_mapping.items(), key=operator.itemgetter(1))
 
-    experiemnt_links = []
+    experiment_links = []
+
 
     for experiment_url_index in sorted_experiment_url_indices:
 
@@ -58,17 +63,14 @@ def duplication(request):
 
         url = temp + "/dups/" + basename + "/" + basename + ".html"
 
-        response = requests.get(url, auth=('ale', 'olalemutats'))
+        response = requests.get(url, auth=(username, password))
         if response.status_code == 200:
-            experiemnt_links.append((url, basename))
+            experiment_links.append((url, basename))
         else:
-            experiemnt_links.append((False, basename))
-
-
-
+            experiment_links.append((False, basename))
 
     context = Context({
-        "experiemnt_links": experiemnt_links,
+        "experiment_links": experiment_links,
         "reseqencing_report_url": reseqencing_report_url,
         "ale_experiment_id": ale_experiment_id,
         "ale_experiment_name": ale_experiment_name

@@ -1,6 +1,6 @@
 import os
 
-from configparser import SafeConfigParser
+from configparser import ConfigParser
 
 
 DEBUG = True
@@ -11,9 +11,9 @@ GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-config = SafeConfigParser()
+config = ConfigParser()
 
-settings_file_path = os.path.join(os.path.dirname(__file__), "settings.ini")
+settings_file_path = os.path.join(os.path.dirname(__file__), "settings.ini.example")
 config.read(settings_file_path)
 
 sequencing_path = config.get("OTHER", "sequencing_path")

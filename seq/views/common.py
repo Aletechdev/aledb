@@ -8,6 +8,8 @@ import seq.models
 
 import aleinfo.settings
 
+import os
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -24,9 +26,9 @@ HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
 
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
-HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<td class="true">%.2f</td>"""
+HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<td id="true">%.2f</td>"""
 HTML_MUTATION_TABLE_ROW = """<td><a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
-HTML_EMPTY_MUTATION_CELL = """<td class="false"></td>"""
+HTML_EMPTY_MUTATION_CELL = """<td id="empty"></td>"""
 
 REQUEST_ALL = "all"
 
@@ -250,7 +252,20 @@ def _get_table_mutation_entry(observed_mutation, experiment_urls):
 
     if observed_mutation.breseq_present:
 
-        table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % float(observed_mutation.frequency)
+        if observed_mutation.mutation.mutation_type == "DUP":
+
+            url = experiment_urls[observed_mutation.sequencing_experiment_id]
+
+            base_name = os.path.basename(os.path.dirname(os.path.dirname(url)))
+
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(url)))
+
+            dup_url = base_dir + "/dups/" + base_name + "/" + base_name + ".html"
+
+            table_entry = "<td id=\"true\"><a href=\"" + dup_url + "\">%.2f</a></td>" % float(observed_mutation.frequency)
+
+        else:
+            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % float(observed_mutation.frequency)
 
     # TODO: Figure out what this is supposed to do.
     elif observed_mutation.present is False:
