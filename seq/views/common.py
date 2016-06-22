@@ -26,7 +26,7 @@ HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
 
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
-HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<td id="true">%.2f</td>"""
+HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<td id="true"><a href="%s">%.2f</a></td>"""
 HTML_MUTATION_TABLE_ROW = """<td><a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
 HTML_EMPTY_MUTATION_CELL = """<td id="empty"></td>"""
 
@@ -103,7 +103,7 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, f
             table_row += "<td>%s</td>" % mutation.position
             table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += "<td>%s</td>" % mutation.sequence_change
-            table_row += "<td><a href=gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
+            table_row += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
             table_row += "<td>%s</td>" % mutation.protein_change
             table_row += "".join(table_entries[mutation_index_dict[mutation.id]])
             table_row += "</tr>"
@@ -252,9 +252,9 @@ def _get_table_mutation_entry(observed_mutation, experiment_urls):
 
     if observed_mutation.breseq_present:
 
-        if observed_mutation.mutation.mutation_type == "DUP":
+        url = experiment_urls[observed_mutation.sequencing_experiment_id]
 
-            url = experiment_urls[observed_mutation.sequencing_experiment_id]
+        if observed_mutation.mutation.mutation_type == "DUP":
 
             base_name = os.path.basename(os.path.dirname(os.path.dirname(url)))
 
@@ -262,10 +262,11 @@ def _get_table_mutation_entry(observed_mutation, experiment_urls):
 
             dup_url = base_dir + "/dups/" + base_name + "/" + base_name + ".html"
 
-            table_entry = "<td id=\"true\"><a href=\"" + dup_url + "\">%.2f</a></td>" % float(observed_mutation.frequency)
+            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (dup_url, float(observed_mutation.frequency))
 
         else:
-            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % float(observed_mutation.frequency)
+            evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
+            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency))
 
     # TODO: Figure out what this is supposed to do.
     elif observed_mutation.present is False:
@@ -439,3 +440,10 @@ def get_filter_settings(ale_experiment_id):
     return filter_settings
 
 
+def _find_between(s, first, last):
+    try:
+        start = s.index(first) + len(first)
+        end = s.index(last, start)
+        return s[start:end]
+    except ValueError:
+        return ""
