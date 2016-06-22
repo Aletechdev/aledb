@@ -11,6 +11,7 @@ import seq.views.search
 import seq.views.filter
 import seq.views.gene
 import seq.views.duplication
+import seq.views.dashboard
 
 
 # TODO: Understand if '-' is better than "_" within a URL.
@@ -25,5 +26,6 @@ urlpatterns = patterns('',
                        url('^search', seq.views.search.search, name="search"),
                        url('^filter', seq.views.filter.create_filter, name="filter"),
                        url('^gene', seq.views.gene.gene, name="gene"),
-                       url('^duplication', seq.views.duplication.duplication, name="duplication")
+                       url('^duplication', seq.views.duplication.duplication, name="duplication"),
+                       url('^dashboard', seq.views.dashboard.dashboard, name="dashboard")
                        )
