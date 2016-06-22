@@ -250,7 +250,7 @@ def _get_table_mutation_entry(observed_mutation, experiment_urls):
 
     table_entry = ""
 
-    if observed_mutation.breseq_present:
+    if observed_mutation.breseq_present and observed_mutation.sequencing_experiment_id in experiment_urls:
 
         url = experiment_urls[observed_mutation.sequencing_experiment_id]
 
