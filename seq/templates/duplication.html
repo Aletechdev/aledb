@@ -20,15 +20,17 @@
 
 <body>
 
-<div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-<h1><a href="http://aquaticus.ucsd.edu/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a>
+<div class="page-header">
+    <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
+    <h1><a href="http://aquaticus.ucsd.edu/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a>
     / <b> {{ ale_experiment_name }} </b> Duplications </h1>
-<ul class="nav nav-tabs">
+</div>
+<ul class="nav nav-pills">
     <li role="presentation" class="active"><a href="https://aquaticus.ucsd.edu/ale_analytics">ALE Experiments</a></li>
     <li role="presentation"><a href="dashboard">Dashboard</a></li>
     <li role="presentation"><a href="search">Search</a></li>
 </ul>
-<br>
+<br><br>
 
 <table id="runs" class="tablesorter">
     <thead>
