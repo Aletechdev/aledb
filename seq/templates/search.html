@@ -40,6 +40,7 @@
             src="/static/DataTables/extras/ColReorder/media/js/ColReorder.js"></script>
     <script type="text/javascript" charset="utf8"
             src="/static/DataTables/extras/TableTools/media/js/TableTools.min.js"></script>
+        {% if table_body %}
     <script type="text/javascript">
         $(document).ready(function() {
             var oTable = $("#data").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[1, 'asc']]);
@@ -71,6 +72,7 @@
 	        });
         });
     </script>
+        {% endif %}
     <script>
 	    var deleteRow = function () {
 	        var row = $(this).closest("tr").get(0);
@@ -200,7 +202,7 @@
 <form action="/ale_analytics/search/" method="get">
     <input type="text" name="q" placeholder="mutation gene annotation" autofocus>
     <input type="submit" value="Search">
-    <a href="#" id ="export" class="button" style="text-decoration: none">Export Search as CSV</a>
+    {% if table_body %}<a href="#" id ="export" class="button" style="text-decoration: none">Export Search as CSV</a>{% endif %}
 </form>
 </p>
 {% if table_body %}
