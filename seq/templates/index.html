@@ -1,14 +1,8 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-        "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>ALE Analytics</title>
+{% extends 'dashboard_base.html' %}
 
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-
-    <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
+    {% block title %}<title>ALE Analytics</title>{% endblock %}
+    {% block scripts_and_style %}
+<script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
     <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
           media="print, projection, screen"/>
@@ -37,19 +31,11 @@
     }
 
 </style>
-
-<body>
-
-<div class="page-header">
-    <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-    <h1><a href="/ale_analytics" style="color:black; text-decoration:none">ALE Analytics </a></h1>
-</div>
-<ul class="nav nav-pills">
-    <li role="presentation" class="active"><a href="/ale_analytics">ALE Experiments</a></li>
-    <li role="presentation"><a href="dashboard">Dashboard</a></li>
-    <li role="presentation"><a href="search">Search</a></li>
-</ul>
-<br>
+{% endblock %}
+{% block ale %}class="active"{% endblock %}
+{% block dash %}{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
 
 <table id="ale_analytics_info" class="tablesorter">
 
@@ -83,6 +69,4 @@
         </tbody>
     </table>
 </table>
-
-</body>
-</html>
+{% endblock %}
