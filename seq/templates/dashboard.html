@@ -1,13 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-</head>
-
-{#TODO: put CSS, common to almost all pages in a separate file that can be reference#}
+{% extends 'dashboard_base.html' %}
+    {% block title %}<title>Dashboard</title>{% endblock %}
+    {% block scripts_and_style %}
 
 <style>
 
@@ -18,21 +11,12 @@
     }
 
 </style>
-
-<body>
-
-<div class="page-header">
-    <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-    <h1><a href="/ale_analytics" style="color:black; text-decoration:none">ALE
-        Analytics </a> / Dashboard</h1>
-</div>
-<ul class="nav nav-pills">
-    <li role="presentation"><a href="/ale_analytics">ALE Experiments</a></li>
-    <li role="presentation" class="active"><a href="dashboard">Dashboard</a></li>
-    <li role="presentation"><a href="search">Search</a></li>
-</ul>
-<br><br>
-
+{% endblock %}
+<br>
+{% block ale %}{% endblock %}
+{% block dash %}class="active"{% endblock %}
+{% block search %}{% endblock %}
+{% block content %}
 <div class="row">
     <div class="col-sm-6 col-md-4">
         <div class="panel panel-default">
@@ -126,6 +110,4 @@
         </div>
     </div>
 </div>
-
-</body>
-</html>
+{% endblock %}
