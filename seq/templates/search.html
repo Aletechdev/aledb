@@ -29,8 +29,13 @@
             border-bottom: 1px solid #CCCCCC;
             border-left: 1px solid #CCCCCC;
         }
+        input {
+            margin-bottom: 5px;
+            margin-right: 5px;
+        }
         #true {background-color: rgba(0, 255, 0, 0.1)}
         #empty {background-color: rgba(255, 0, 0, 0.1)}
+
     </style>
 
     <script type="text/javascript" charset="utf8" src="/static/DataTables/media/js/jquery.dataTables.js"></script>
@@ -177,6 +182,17 @@
             });
         });
     </script>
+        <script type="text/javascript">
+            function clear_search() {
+                document.getElementById('q').value = '';
+                document.getElementById('min').value = '';
+                document.getElementById('max').value = '';
+                document.getElementById('mut').value = '';
+                document.getElementById('seq').value = '';
+                document.getElementById('prot').value = '';
+                document.getElementById('ale').value = '';
+            }
+        </script>
 
 </head>
 
@@ -200,16 +216,22 @@
 {% endif %}
 <p>
 <form action="/ale_analytics/search/" method="get">
-    <input type="text" name="q" placeholder="mutation gene annotation" autofocus>
-    <input type="submit" value="Search">
-    {% if table_body %}<a href="#" id ="export" class="button" style="text-decoration: none">Export Search as CSV</a>{% endif %}
+    <input type="text" id="q"    value="{{ last_search.q }}"    name="q" placeholder="mutation gene annotation" autofocus>
+    <input type="submit"         value="Search"><input type="button" value="Clear" onclick="clear_search()"><br>
+    <input type="text" id="min"  value="{{ last_search.min }}"  name="min" placeholder="start position">
+    <input type="text" id="max"  value="{{ last_search.max }}"  name="max" placeholder="end position"><br>
+    <input type="text" id="mut"  value="{{ last_search.mut }}"  name="mut" placeholder="mutation type"><br>
+    <input type="text" id="seq"  value="{{ last_search.seq }}"  name="seq" placeholder="sequence change"><br>
+    <input type="text" id="prot" value="{{ last_search.prot }}" name="prot" placeholder="protein change"><br>
+    <input type="text" id="ale"  value="{{ last_search.ale }}"  name="ale" placeholder="ALE Experiment">
 </form>
 </p>
 {% if table_body %}
 <form action="" method="get">
     <table id="data">
         <input type="button" value="Remove checked flasks" class="ui" onclick="filterFlask('remove')"/>
-        <input type="button" value="Show checked flasks" class="ui" onclick="filterFlask('show')"/>
+        <input type="button" value="Show checked flasks" class="ui" onclick="filterFlask('show')"/><br>
+        <a href="#" id ="export" class="button" style="text-decoration: none">Export Search as CSV</a>
         <thead>
         {{table_header}}
         </thead>
