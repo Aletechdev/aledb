@@ -22,26 +22,40 @@ from functools import reduce
 @login_required
 def search(request):
 
-    seq_experiment_dict, observed_mutations_with_gene_query_set = _get_seq_exp(request)
+    error = False
 
-    if seq_experiment_dict is None or observed_mutations_with_gene_query_set is None:
-        return render(request, 'search.html', {'error': True})
+    if 'q' in request.GET:
 
-    table_header = seq.views.common.get_table_header(seq_experiment_dict)
+        gene_query = request.GET['q']
 
-    table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set,
+        if _is_query_empty(gene_query):
+
+            error = True
+            
+        else:
+
+            seq_experiment_dict, observed_mutations_with_gene_query_set = _get_seq_exp(request)
+
+            if seq_experiment_dict is None or observed_mutations_with_gene_query_set is None:
+                return render(request, 'search.html', {'error': True})
+
+            table_header = seq.views.common.get_table_header(seq_experiment_dict)
+
+            table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set,
                                                  request)
 
-    last_search = _get_last_search(request)
+            last_search = _get_last_search(request)
 
-    template = loader.get_template("search.html")
+            template = loader.get_template("search.html")
 
-    context = Context({"table_body": mark_safe(table_body),
-                       "title": "Search Results",
-                       "table_header": mark_safe(table_header),
-                       "last_search": last_search})
+            context = Context({"table_body": mark_safe(table_body),
+                               "title": "Search Results",
+                               "table_header": mark_safe(table_header),
+                               "last_search": last_search})
 
-    return HttpResponse(template.render(context))
+            return HttpResponse(template.render(context))
+
+    return render(request, 'search.html', {'error': error})
 
 
 def _is_query_empty(query):
