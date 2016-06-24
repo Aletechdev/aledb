@@ -12,37 +12,36 @@ import seq.models
 
 import seq.views.common
 
+from django.db.models import Q
+
+import operator
+
+from functools import reduce
+
 
 @login_required
 def search(request):
 
-    error = False
+    seq_experiment_dict, observed_mutations_with_gene_query_set = _get_seq_exp(request)
 
-    if 'q' in request.GET:
+    if seq_experiment_dict is None or observed_mutations_with_gene_query_set is None:
+        return render(request, 'search.html', {'error': True})
 
-        gene_query = request.GET['q']
+    table_header = seq.views.common.get_table_header(seq_experiment_dict)
 
-        if _is_query_empty(gene_query):
+    table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set,
+                                                 request)
 
-            error = True
+    last_search = _get_last_search(request)
 
-        else:
+    template = loader.get_template("search.html")
 
-            seq_experiment_dict, observed_mutations_with_gene_query_set = _get_seq_exp(request, gene_query)
+    context = Context({"table_body": mark_safe(table_body),
+                       "title": "Search Results",
+                       "table_header": mark_safe(table_header),
+                       "last_search": last_search})
 
-            table_header = seq.views.common.get_table_header(seq_experiment_dict)
-
-            table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set, request)
-
-            template = loader.get_template("search.html")
-
-            context = Context({"table_body": mark_safe(table_body),
-                               "title": "Search Results",
-                               "table_header": mark_safe(table_header)})
-
-            return HttpResponse(template.render(context))
-
-    return render(request, 'search.html', {'error': error})
+    return HttpResponse(template.render(context))
 
 
 def _is_query_empty(query):
@@ -57,7 +56,7 @@ def _is_query_empty(query):
 
 
 # TODO: Refactor. seq.views.common.py probably also need to be refactored along with this.
-def _get_seq_exp(request, mutated_gene):
+def _get_seq_exp(request):
 
     isolates_to_remove_id_list = []
     isolates_to_remove_string = request.GET.get(seq.views.common.EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG)
@@ -71,18 +70,117 @@ def _get_seq_exp(request, mutated_gene):
         isolates_to_show_ids = str(isolates_to_show_string).replace("{", "").replace("}", "")
         isolates_to_show_id_list = [int(i) for i in isolates_to_show_ids.split(",") if i != ""]
 
-    if str(mutated_gene).endswith("*"):
-        mutations_with_gene = seq.models.Mutation.objects.filter(gene__startswith=str(mutated_gene)[:-1])
-    elif str(mutated_gene).startswith("*"):
-        mutations_with_gene = seq.models.Mutation.objects.filter(gene__endswith=str(mutated_gene)[1:])
+    include_argument_list = []
+    exclude_argument_list = []
+
+    if request.GET['q']:
+
+        gene_list = request.GET['q'].replace(" ", "").split(',')
+
+        for mutated_gene in gene_list:
+            if str(mutated_gene).startswith("-"):
+                if str(mutated_gene).endswith("*"):
+                    exclude_argument_list.append(Q(**{'gene__startswith': str(mutated_gene)[1:-1]}))
+
+                elif str(mutated_gene)[1:].startswith("*"):
+                    exclude_argument_list.append(Q(**{'gene__endswith': str(mutated_gene)[2:]}))
+
+                else:
+                    exclude_argument_list.append(Q(**{'gene__contains': str(mutated_gene)}))
+            else:
+                if str(mutated_gene).endswith("*"):
+                    include_argument_list.append(Q(**{'gene__startswith': str(mutated_gene)[:-1]}))
+
+                elif str(mutated_gene).startswith("*"):
+                    include_argument_list.append(Q(**{'gene__endswith': str(mutated_gene)[1:]}))
+
+                else:
+                    include_argument_list.append(Q(**{'gene__contains': str(mutated_gene)}))
+
+    if request.GET['min']:
+        include_argument_list.append(Q(**{'position__gte': request.GET['min']}))
+
+    if request.GET['max']:
+        include_argument_list.append(Q(**{'position__lte': request.GET['max']}))
+
+    if request.GET['mut']:
+        mutation_type_list = request.GET['mut'].replace(" ", "").split(',')
+        for mutation in mutation_type_list:
+            if str(mutation).startswith("-"):
+                exclude_argument_list.append(Q(**{'mutation_type': str(mutation)[1:].upper()}))
+            else:
+                include_argument_list.append(Q(**{'mutation_type': str(mutation).upper()}))
+
+    if request.GET['seq']:
+        sequence_change_list = request.GET['seq'].replace(" ", "").split(',')
+        sequence_change_include = []
+        sequence_change_exclude = []
+        for sequence_change in sequence_change_list:
+            if str(sequence_change).startswith("-"):
+                sequence_change_exclude.append(Q(**{'sequence_change__contains': str(sequence_change)[1:]}))
+            else:
+                sequence_change_include.append(Q(**{'sequence_change__contains': str(sequence_change)}))
+
+        if len(sequence_change_include) > 0:
+            include_argument_list.append(reduce(operator.or_, sequence_change_include))
+
+        if len(sequence_change_exclude) > 0:
+            exclude_argument_list.append(reduce(operator.or_, sequence_change_exclude))
+
+    if request.GET['prot']:
+        protein_change_list = request.GET['prot'].replace(" ", "").split(',')
+        protein_change_include = []
+        protein_change_exclude = []
+        for protein_change in protein_change_list:
+            if str(protein_change).startswith("-"):
+                protein_change_exclude.append(Q(**{'protein_change__contains': str(protein_change)[1:]}))
+            else:
+                protein_change_include.append(Q(**{'protein_change__contains': str(protein_change)}))
+
+        if len(protein_change_include) > 0:
+            include_argument_list.append(reduce(operator.or_, protein_change_include))
+
+        if len(protein_change_exclude) > 0:
+            exclude_argument_list.append(reduce(operator.or_, protein_change_exclude))
+
+    ale_experiment_include = []
+    ale_experiment_exclude = []
+    if request.GET['ale']:
+        ale_experiment_list = request.GET['ale'].replace(" ", "").split(',')
+        for ale_experiment in ale_experiment_list:
+            if str(ale_experiment).startswith("-"):
+                ale_experiment_exclude.append(str(ale_experiment)[1:])
+            else:
+                ale_experiment_include.append(str(ale_experiment))
+
+    if len(include_argument_list) > 0:
+        include_argument_list = reduce(operator.and_, include_argument_list)
     else:
-        mutations_with_gene = seq.models.Mutation.objects.filter(gene__contains=mutated_gene)
+        return None, None
+
+    if len(exclude_argument_list) > 0:
+        print ("has exclusions")
+        mutations_with_gene = seq.models.Mutation.objects.filter(include_argument_list).exclude(reduce(operator.or_, exclude_argument_list))
+    else:
+        print ("no exclusions")
+        mutations_with_gene = seq.models.Mutation.objects.filter(include_argument_list)
 
     observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation=mutations_with_gene)
 
     seq_experiment_dict = {}
 
     for observed_mutation in observed_mutations_with_gene:
+
+        # TODO: Should find a way to put checking experiment name in the filter query instead of checking the list after a query
+        observed_mutation_name = observed_mutation.sequencing_experiment.isolate.flask.ale_id.ale_experiment.name
+
+        if ale_experiment_include:
+            if observed_mutation_name not in ale_experiment_include:
+                continue
+
+        if ale_experiment_exclude:
+            if observed_mutation_name in ale_experiment_exclude:
+                continue
 
         if observed_mutation.sequencing_experiment.id not in isolates_to_remove_id_list\
             or observed_mutation.sequencing_experiment.id in isolates_to_remove_id_list\
@@ -91,3 +189,19 @@ def _get_seq_exp(request, mutated_gene):
             seq_experiment_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
 
     return seq_experiment_dict, observed_mutations_with_gene
+
+
+def _get_last_search(request):
+
+    last_search = {
+
+        'q': request.GET['q'],
+        'min': request.GET['min'],
+        'max': request.GET['max'],
+        'mut': request.GET['mut'],
+        'seq': request.GET['seq'],
+        'prot': request.GET['prot'],
+        'ale': request.GET['ale']
+    }
+
+    return last_search
