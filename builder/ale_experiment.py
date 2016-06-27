@@ -62,6 +62,10 @@ DEFAULT_FREEZER_BOX_NUMBER = 1
 
 def remove_flask(flask_primary_key):
 
+    """
+    Executed from Django ipython shell
+    """
+
     flask_to_delete = ale.models.Flask.objects.get(pk=flask_primary_key)
 
     flask_to_delete.delete()
