@@ -53,8 +53,6 @@ def _get_ale_experiment_mutation_list(seq_experiment_dict):
 
             ale_experiment_mutation_list.append(_get_seq_experiment_mutations_list(seq_experiment_id))
 
-    print(mutations_to_remove_list)
-
     filtered_ale_experiment_mutation_list = []
 
     for seq_experiment_mutation_list in ale_experiment_mutation_list:
