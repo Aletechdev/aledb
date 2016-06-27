@@ -13,6 +13,14 @@ from seq.models import *    # TODO: only import necessary models.
 
 from seq.views import common
 
+from django.core import serializers
+
+from django.utils.safestring import mark_safe
+
+import json
+
+from django.core.serializers.json import DjangoJSONEncoder
+
 
 EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
 
@@ -46,11 +54,23 @@ def lists(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
 
+    # data = serializers.serialize('json', list(mutation_query_set), fields=('position', 'mutation_type'))
+
+    data = mutation_query_set.values('position', 'mutation_type')
+    for d in data:
+        d['coord'] = str(d.pop('position'))
+        d['category'] = d.pop('mutation_type')
+        d['value'] = 1
+
+    # data_json = json.dumps(list(data), cls=DjangoJSONEncoder)
+
     context = Context({"protein_change_type_count_dict": protein_change_type_count_dict,
                        "mutation_type_count_dict": mutation_type_count_dict,
                        "experiments_info_list": experiments_info_list,
                        "resequencing_report_url": resequencing_report_url,
-                       "ale_experiment_name": ale_experiment_name})
+                       "ale_experiment_name": ale_experiment_name,
+                       "muts_needle_plot": loader.get_template("muts_needle_plot.html"),
+                       "data": mark_safe(list(data))})
 
     return HttpResponse(template.render(context))
 
