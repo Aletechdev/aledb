@@ -139,7 +139,7 @@
         <b>{{ ale_experiment_name }}</b> {{ template_header }}</h1>
 </div>
 <ul class="nav nav-pills">
-    <li role="presentation" class="active"><a href="https://aquaticus.ucsd.edu/ale_analytics">ALE Experiments</a></li>
+    <li role="presentation" class="active"><a href="/ale_analytics">ALE Experiments</a></li>
     <li role="presentation"><a href="dashboard">Dashboard</a></li>
     <li role="presentation"><a href="search">Search</a></li>
 </ul>
@@ -155,7 +155,8 @@
                         value="{{ experiment.ale_id }}">{{ experiment.ale_id }}</option>
             {% endfor %}
         </select>
-        <input type="submit" value="Apply" class="ui"/>
+        <input type="checkbox" class="ui"/> WT Filter
+        <p><input type="submit" value="Apply" class="ui"/></p>
     </form>
 {% endif %}
 <form action="" method="get">
