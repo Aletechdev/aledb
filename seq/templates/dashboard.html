@@ -1,7 +1,6 @@
 {% extends 'dashboard_base.html' %}
     {% block title %}<title>Dashboard</title>{% endblock %}
     {% block scripts_and_style %}
-
 <style>
 
     body {
@@ -9,8 +8,26 @@
         padding-bottom: 25px;
         padding-left: 50px;
     }
-
+   .chart div {
+       font: 15px sans-serif;
+       background-color: steelblue;
+       text-align: right;
+       padding: 5px;
+       margin: 1px;
+       color: white;
+   }
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: black;
+        shape-rendering: crispEdges;
+    }
+    .axis text {
+        font-family: sans-serif;
+        font-size: 12px;
+    }
 </style>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
 {% endblock %}
 <br>
 {% block ale %}{% endblock %}
@@ -110,4 +127,120 @@
         </div>
     </div>
 </div>
+    <form action="/ale_analytics/dashboard/" method="get">
+        <input type="number" name="number_of_top_genes" min="1" max="50" value="20"> Top Genes
+        <input type="submit" value="Show" >
+    </form>
+    <br>
+    <div class="chart"></div>
+<script src="//d3js.org/d3.v3.min.js"></script>
+    <table>
+    <td>
+<script>
+
+       var gene_data = {{ genes }};
+
+       var barHeight = 30;
+       var height = (barHeight + 10) * gene_data.length;
+       var width = 500;
+       var padding = 100;
+
+       var x = d3.scale.linear().domain([0, gene_data.length]).range([0, height]);
+       var y = d3.scale.linear().domain([0, d3.max(gene_data, function(datum) { return datum.the_count; })]).
+       rangeRound([0, width]);
+
+       // add the canvas to the DOM
+       var gene_bar = d3.select(".chart").
+       append("svg:svg").
+       attr("height", height).
+       attr("width", width + padding);
+
+       gene_bar.selectAll("rect").
+       data(gene_data).
+       enter().
+       append("svg:rect").
+       attr("y", function(datum, index) { return x(index); }).
+       attr("x", padding).
+       attr("width", function(datum) { return y(datum.the_count); }).
+       attr("height", barHeight).
+       attr("fill", "#2d578b");
+
+       gene_bar.selectAll("text").
+       data(gene_data).
+       enter().
+       append("svg:text").
+       attr("y", function(datum, index) { return x(index) + barHeight + 5; }).
+       attr("x", function(datum) { return y(datum.the_count) + 80; }).
+       attr("dy", -barHeight/2).
+       attr("dx", "1.2em").
+       attr("text-anchor", "end").
+       text(function(datum) { return datum.the_count;}).
+       attr("fill", "white");
+
+       gene_bar.selectAll("text.yAxis").
+       data(gene_data).
+       enter().append("svg:text").
+       attr("y", function(datum, index) { return x(index) + barHeight + 5; }).
+       attr("x", padding - 5).
+       attr("dy", -barHeight/2).
+       attr("text-anchor", "end").
+       attr("style", "font-size: 14; font-family: Helvetica, sans-serif; font-weight: bold").
+       text(function(datum) { return datum.mutation__gene;}).
+       attr("class", "yAxis").
+       attr("fill", "black");
+
+</script></td>
+    <td><script>
+        var seq_data = {{ sequence_changes }};
+
+        var barHeight = 30;
+       var height = (barHeight + 10) * gene_data.length;
+       var width = 500;
+       var padding = 100;
+
+       var x_seq = d3.scale.linear().domain([0, seq_data.length]).range([0, height]);
+       var y_seq = d3.scale.linear().domain([0, d3.max(seq_data, function(datum) { return datum.the_count; })]).
+       rangeRound([0, width]);
+
+       // add the canvas to the DOM
+       var seq_bar = d3.select(".chart").
+       append("svg:svg").
+       attr("height", height).
+       attr("width", width + padding + padding);
+
+       seq_bar.selectAll("rect").
+       data(seq_data).
+       enter().
+       append("svg:rect").
+       attr("y", function(datum, index) { return x_seq(index); }).
+       attr("x", padding + padding).
+       attr("width", function(datum) { return y_seq(datum.the_count); }).
+       attr("height", barHeight).
+       attr("fill", "#2d578b");
+
+       seq_bar.selectAll("text").
+       data(seq_data).
+       enter().
+       append("svg:text").
+       attr("y", function(datum, index) { return x_seq(index) + barHeight + 5; }).
+       attr("x", function(datum) { return y_seq(datum.the_count) + 80 + padding; }).
+       attr("dy", -barHeight/2).
+       attr("dx", "1.2em").
+       attr("text-anchor", "end").
+       text(function(datum) { return datum.the_count;}).
+       attr("fill", "white");
+
+       seq_bar.selectAll("text.yAxis").
+       data(seq_data).
+       enter().append("svg:text").
+       attr("y", function(datum, index) { return x_seq(index) + barHeight + 5; }).
+       attr("x", padding - 5 + padding).
+       attr("dy", -barHeight/2).
+       attr("text-anchor", "end").
+       attr("style", "font-size: 14; font-family: Helvetica, sans-serif; font-weight: bold").
+       text(function(datum) { return datum.mutation__gene + " " + datum.mutation__sequence_change;}).
+       attr("class", "yAxis").
+       attr("fill", "black");
+    </script>
+    </td></table>
 {% endblock %}
