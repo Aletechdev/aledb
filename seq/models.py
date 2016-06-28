@@ -37,7 +37,7 @@ class ResequencingExperiment(models.Model):
 
         return self.isolate.flask.flask_number
 
-    # TODO: "isolate_name" isn't appropriate.
+    # TODO: change back to "isolate_name" to match other properties above.
     def get_isolate_name(self):
 
         if self.isolate.description is not None:

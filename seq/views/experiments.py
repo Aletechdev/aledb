@@ -79,7 +79,7 @@ def _get_mutation_query_set(request):
 
     seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
 
-    observed_mutations_query_set = common.get_observed_mutations(seq_experiment_ordered_dict)
+    observed_mutations_query_set = common.get_observed_mutations(list(seq_experiment_ordered_dict.keys()))
     mutation_query_set = Mutation.objects.filter(
         pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
 
