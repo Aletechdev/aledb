@@ -17,7 +17,7 @@ DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
 
 SETTINGS_SEQUENCING_URL = "sequencing_url"
 
-REQUEST_ALE_NUMBER = "ale_no"
+REQUEST_ALE_ID = "ale_no"
 
 REQUEST_WT_FILTER = "wtfilt"
 
@@ -56,7 +56,11 @@ else:
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
-def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings=None):
+def get_table_body(seq_experiment_dict,
+                   observed_mutations_query_set,
+                   request,
+                   filter_settings=None,
+                   filter_mutation_id_list=None):
 
     mutations = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
     mutation_index_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
@@ -65,18 +69,13 @@ def get_table_body(seq_experiment_dict, observed_mutations_query_set, request, f
 
     experiment_id_idx_mapping = _get_experiment_id_idx_mapping(seq_experiment_dict)
 
-    # TODO: figure out what this is.
-    extra_validation = False if request.GET.get("novalid") else True
-
     # Initialize all sample mutation table cells as empty.
     table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
 
     # Populating table_entries
     for observed_mutation in observed_mutations_query_set:
 
-        # TODO: figure out what this is.
-        # sometimes we do not want the extra validation
-        if not extra_validation and not observed_mutation.breseq_present:
+        if filter_mutation_id_list != None and observed_mutation.mutation.id in filter_mutation_id_list:
             continue
 
         if not _filter_mutation(filter_settings, observed_mutation):
@@ -225,7 +224,7 @@ def get_wt_filter(request):
 
 def get_ale_number(request):
 
-    ale_number = request.GET.get(REQUEST_ALE_NUMBER)
+    ale_number = request.GET.get(REQUEST_ALE_ID)
 
     ale_number = None if ale_number is None or ale_number == "all" else int(ale_number)
 
@@ -337,7 +336,7 @@ def get_experiment_ordered_dict(request, include_starting_strain=False):
 
 def get_seq_experiment_raw_queryset(request):
 
-    ale_id = request.GET.get(REQUEST_ALE_NUMBER)
+    ale_id = request.GET.get(REQUEST_ALE_ID)
 
     return _get_seq_experiment_raw_queryset(request, ale_id)
 
@@ -433,9 +432,9 @@ def _remove_checked_flasks(request, seq_experiment_dict):
     return seq_experiment_dict
 
 
-def get_observed_mutations(seq_experiment_dict):
+def get_observed_mutations(seq_experiment_id_list):
 
-    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
+    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_id_list)
 
     return observed_mutations
 
