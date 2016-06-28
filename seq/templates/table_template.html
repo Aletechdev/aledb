@@ -155,7 +155,9 @@
                         value="{{ experiment.ale_id }}">{{ experiment.ale_id }}</option>
             {% endfor %}
         </select>
-        <input type="checkbox" class="ui"/> WT Filter
+        {% if template_header == "Mutations" %}
+            <input type="checkbox" name="wtfilt" class="ui"/> WT Filter
+        {% endif %}
         <p><input type="submit" value="Apply" class="ui"/></p>
     </form>
 {% endif %}
