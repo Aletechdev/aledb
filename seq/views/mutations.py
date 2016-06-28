@@ -13,8 +13,6 @@ import seq.views.common
 import ale.common
 
 
-
-
 __author__ = 'pphaneuf'
 
 
@@ -43,7 +41,12 @@ def mutation_table(request):
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request, include_starting_strain=True)
 
+    wt_id = None
+
     if wt_filter:
+        
+        wt_id = _get_wt_seq_experiment_id(seq_experiment_ordered_dict) 
+
         seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(
             seq_experiment_ordered_dict)
 
@@ -51,7 +54,7 @@ def mutation_table(request):
 
     table_header = seq.views.common.get_table_header(seq_experiment_ordered_dict)
 
-    table_body = _get_table_body(seq_experiment_ordered_dict, request)
+    table_body = _get_table_body(seq_experiment_ordered_dict, request, wt_filter, wt_id)
 
     template = loader.get_template("table_template.html")
 
@@ -68,33 +71,35 @@ def mutation_table(request):
     return HttpResponse(template.render(context))
 
 
-def _get_table_body(seq_experiment_dict, request):
+def _get_table_body(seq_experiment_dict, request, wt_filter, wt_id):
 
-    observed_mutations_query_set = seq.views.common.get_observed_mutations(seq_experiment_dict)
+    observed_mutations_query_set = seq.views.common.get_observed_mutations(list(seq_experiment_dict.keys()))
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
     filter_settings = seq.views.common.get_filter_settings(ale_experiment_id)
 
-    return seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings)
+    filter_mutation_id_list = None
+
+    if wt_filter:
+        filter_mutation_list = seq.views.common.get_observed_mutations([wt_id])
+        filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
+
+    return seq.views.common.get_table_body(seq_experiment_dict,
+                                           observed_mutations_query_set,
+                                           request,
+                                           filter_settings,
+                                           filter_mutation_id_list)
 
 
-def _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
+def _get_wt_seq_experiment_id(seq_experiment_ordered_dict):
 
-    key_to_delete_found = False
-
-    key_to_delete = None
+    wt_id = None
 
     for key, value in seq_experiment_ordered_dict.items():
 
         if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
 
-            key_to_delete = key
+            wt_id = key
 
-            key_to_delete_found = True
-
-    if key_to_delete_found and key_to_delete:
-
-        del seq_experiment_ordered_dict[key_to_delete]
-
-    return seq_experiment_ordered_dict
+    return wt_id
