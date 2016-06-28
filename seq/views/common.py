@@ -69,19 +69,11 @@ def get_table_body(seq_experiment_dict,
 
     experiment_id_idx_mapping = _get_experiment_id_idx_mapping(seq_experiment_dict)
 
-    # TODO: remove this
-    extra_validation = False if request.GET.get("novalid") else True
-
     # Initialize all sample mutation table cells as empty.
     table_entries = [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
 
     # Populating table_entries
     for observed_mutation in observed_mutations_query_set:
-
-        # TODO: remove this
-        # sometimes we do not want the extra validation
-        if not extra_validation and not observed_mutation.breseq_present:
-            continue
 
         if filter_mutation_id_list != None and observed_mutation.mutation.id in filter_mutation_id_list:
             continue
