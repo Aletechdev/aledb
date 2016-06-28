@@ -19,6 +19,8 @@ SETTINGS_SEQUENCING_URL = "sequencing_url"
 
 REQUEST_ALE_NUMBER = "ale_no"
 
+REQUEST_WT_FILTER = "wtfilt"
+
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Protein change</td>"""
@@ -209,6 +211,16 @@ def get_table_header(seq_experiment_dict):
     table_header += "</tr>"
 
     return table_header
+
+
+def get_wt_filter(request):
+
+    ret_val = False
+
+    if request.GET.get(REQUEST_WT_FILTER) is not None:
+        ret_val = True
+
+    return ret_val
 
 
 def get_ale_number(request):
@@ -447,3 +459,24 @@ def _find_between(s, first, last):
         return s[start:end]
     except ValueError:
         return ""
+
+
+def filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
+
+    key_to_delete_found = False
+
+    key_to_delete = None
+
+    for key, value in seq_experiment_ordered_dict.items():
+
+        if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
+
+            key_to_delete = key
+
+            key_to_delete_found = True
+
+    if key_to_delete_found and key_to_delete:
+
+        del seq_experiment_ordered_dict[key_to_delete]
+
+    return seq_experiment_ordered_dict
