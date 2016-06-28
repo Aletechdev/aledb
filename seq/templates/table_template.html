@@ -156,7 +156,7 @@
             {% endfor %}
         </select>
         {% if template_header != "Key Mutations" %}
-            <label class="ui"><input type="checkbox" name="wtfilt"/> WT Filter</label>
+            <label class="ui"><input type="checkbox" name="wtfilt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
         {% endif %}
         <p><input type="submit" value="Apply" class="ui"/></p>
     </form>
