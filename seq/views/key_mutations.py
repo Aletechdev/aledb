@@ -17,8 +17,6 @@ import seq.views.common
 
 __author__ = 'Patrick Phaneuf'
 
-EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
-EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 # TODO: this implementation shares much with mutations.py; refactored shared implementations into common.py
 
@@ -32,11 +30,11 @@ def key_mutations(request):
 
     ale_number = seq.views.common.get_ale_number(request)
 
-    seq_experiment_queryset = seq.views.common.get_seq_experiment_queryset(ale_experiment_id)
+    seq_experiment_queryset = seq.views.common.get_seq_experiment_queryset(ale_experiment_id, True)
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request)
 
-    seq_experiment_ordered_dict = _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
+    seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
 
     seq_experiment_ordered_dict = seq.views.common.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
@@ -56,27 +54,6 @@ def key_mutations(request):
                        "template_header": "Key Mutations"})
 
     return HttpResponse(template.render(context))
-
-
-def _filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
-
-    key_to_delete_found = False
-
-    key_to_delete = None
-
-    for key, value in seq_experiment_ordered_dict.items():
-
-        if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
-
-            key_to_delete = key
-
-            key_to_delete_found = True
-
-    if key_to_delete_found and key_to_delete:
-
-        del seq_experiment_ordered_dict[key_to_delete]
-
-    return seq_experiment_ordered_dict
 
 
 def _get_table_body(seq_experiment_dict, request):

@@ -8,25 +8,25 @@ import collections
 __author__ = "Patrick Phaneuf"
 
 
-def get_key_mutation_list_single_experiment(ale_experiment_id):
+def get_key_mutation_list(ale_experiment_id):
 
     seq_experiment_dict = _get_seq_experiment_dict(ale_experiment_id)
 
-    experiment_mutation_list = _get_experiment_mutation_list(seq_experiment_dict)
+    ale_experiment_mutation_list = _get_ale_experiment_mutation_list(seq_experiment_dict)
 
     mutation_gene_count_dict = collections.defaultdict(int)
 
-    for ale_mutation_list in experiment_mutation_list:
+    for mutation_list in ale_experiment_mutation_list:
 
-        for mutation in ale_mutation_list:
+        for mutation in mutation_list:
 
             mutation_gene_count_dict[mutation.gene] += 1
 
     key_mutation_list = []
 
-    for ale_mutation_list in experiment_mutation_list:
+    for mutation_list in ale_experiment_mutation_list:
 
-        for mutation in ale_mutation_list:
+        for mutation in mutation_list:
 
             if mutation_gene_count_dict[mutation.gene] > 1:
 
@@ -35,19 +35,33 @@ def get_key_mutation_list_single_experiment(ale_experiment_id):
     return key_mutation_list
 
 
-def _get_experiment_mutation_list(seq_experiment_dict):
+def _get_ale_experiment_mutation_list(seq_experiment_dict):
 
-    mutation_list = []
+    ale_experiment_mutation_list = []
+
+    mutations_to_remove_list = []
 
     for seq_experiment_id in seq_experiment_dict:
 
         seq_experiment = seq_experiment_dict[seq_experiment_id]
 
-        if seq_experiment.ale_id != ale.common.STARTING_STRAIN_ALE_ID:
+        if seq_experiment.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
 
-            mutation_list.append(_get_seq_experiment_mutations_list(seq_experiment_id))
+            mutations_to_remove_list = _get_seq_experiment_mutations_list(seq_experiment_id)
 
-    return mutation_list
+        else:
+
+            ale_experiment_mutation_list.append(_get_seq_experiment_mutations_list(seq_experiment_id))
+
+    filtered_ale_experiment_mutation_list = []
+
+    for seq_experiment_mutation_list in ale_experiment_mutation_list:
+
+        filtered_seq_experiment_mutation_list = [mutation for mutation in seq_experiment_mutation_list if mutation not in mutations_to_remove_list]
+
+        filtered_ale_experiment_mutation_list.append(filtered_seq_experiment_mutation_list)
+
+    return filtered_ale_experiment_mutation_list
 
 
 def _get_seq_experiment_mutations_list(seq_experiment_id):

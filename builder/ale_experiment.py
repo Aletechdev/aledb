@@ -62,6 +62,10 @@ DEFAULT_FREEZER_BOX_NUMBER = 1
 
 def remove_flask(flask_primary_key):
 
+    """
+    Executed from Django ipython shell
+    """
+
     flask_to_delete = ale.models.Flask.objects.get(pk=flask_primary_key)
 
     flask_to_delete.delete()
@@ -338,7 +342,7 @@ def _create_key_mutations(ale_experiment_id):
 
     django_orm_ale_exp = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
 
-    key_mutations_list = builder.key_mutations.get_key_mutation_list_single_experiment(ale_experiment_id)
+    key_mutations_list = builder.key_mutations.get_key_mutation_list(ale_experiment_id)
 
     for key_mutation in key_mutations_list:
         django_orm_key_mutation = ale.models.KeyMutation()
