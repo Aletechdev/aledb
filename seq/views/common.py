@@ -42,7 +42,7 @@ SEQ_EXPERIMENT_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id I
 
 MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'DUP']
 
-PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogenes', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication']
+PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication']
 
 
 if hasattr(aleinfo.settings, SETTINGS_SEQUENCING_URL):
