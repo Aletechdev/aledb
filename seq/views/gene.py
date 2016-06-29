@@ -23,10 +23,22 @@ def gene(request):
 
     template = loader.get_template("gene.html")
 
+    pdb_ids = seq.models.GeneToPDB.objects.filter(gene__contains=gene_query).order_by('rank')
+
+    pdb_code = ''
+
+    if len(pdb_ids) > 0:
+        pdb_code = pdb_ids[0].pdb_id
+
+    pdb_file_path = 'http://files.rcsb.org/download/' + pdb_code + '.pdb'
+
+    # urllib.request.urlretrieve('http://files.rcsb.org/download/101M.pdb', '101m.pdb')
+
     context = Context({"gene_name": gene_query,
                        "table_body": mark_safe(table_body),
                        "title": gene_query + " gene",
-                       "table_header": mark_safe(table_header)})
+                       "table_header": mark_safe(table_header),
+                       "pdb_file_path": pdb_file_path})
 
     return HttpResponse(template.render(context))
 
