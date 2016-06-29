@@ -16,6 +16,10 @@ import builder.key_mutations
 
 from builder.gdparse.gdparse import gdparse
 
+import csv
+
+from seq.models import GeneToPDB
+
 
 WILD_TYPE_ALE_NUMBER = 0
 
@@ -503,3 +507,22 @@ def _get_sample_report_list(experiment_breseq_output_path):
             breseq_sample_report_list.append(breseq_sample_names)
 
     return breseq_sample_report_list
+
+
+def create_gene_to_pdb_mappings(file_path):
+
+    _clear_gene_to_pdb_mappings()
+
+    with open(file_path) as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader, None)
+        for row in reader:
+            temp = row
+            if not temp[5]:
+                temp[5] = 100
+            seq.models.GeneToPDB.objects.create_mapping(gene=temp[0], pdb_id=temp[4], rank=int(float(temp[5])))
+
+
+def _clear_gene_to_pdb_mappings():
+
+    seq.models.GeneToPDB.objects.all().delete()

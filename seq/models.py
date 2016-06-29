@@ -125,3 +125,20 @@ class ObservedMutation(models.Model):
     frequency = models.DecimalField(null=True,
                                     max_digits=5,
                                     decimal_places=4)
+
+
+class GeneToPDBManager(models.Manager):
+
+    def create_mapping(self, gene, pdb_id, rank):
+        new_mapping = self.create(gene=gene, pdb_id=pdb_id, rank=rank)
+        return new_mapping
+
+
+class GeneToPDB(models.Model):
+
+    objects = GeneToPDBManager()
+
+    gene = models.CharField(max_length=50)
+    pdb_id = models.CharField(max_length=4, null=True, blank=True)
+    rank = models.IntegerField(null=True, blank=True, default=100)
+
