@@ -9,18 +9,11 @@ from django.template import Context, loader
 
 import aleinfo.settings as settings
 
-from seq.models import *    # TODO: only import necessary models.
+import seq.models   # TODO: only import necessary models.
 
 from seq.views import common
 
-from django.core import serializers
-
 from django.utils.safestring import mark_safe
-
-import json
-
-from django.core.serializers.json import DjangoJSONEncoder
-
 
 EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
 
@@ -42,6 +35,8 @@ def lists(request):
     # unique, though an experiment is currently a structure and an integral type
     # that can be used as a key.
 
+    ale_experiment_id = common.get_ale_experiment_id(request)
+
     experiments_info_list = _get_experiment_info_list(experiments)
 
     mutation_query_set = _get_mutation_query_set(request)
@@ -54,15 +49,12 @@ def lists(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
 
-    # data = serializers.serialize('json', list(mutation_query_set), fields=('position', 'mutation_type'))
+    observed_mutations_query_set = get_observed_mutation_queryser(request)
 
-    data = mutation_query_set.values('position', 'mutation_type')
-    for d in data:
-        d['coord'] = str(d.pop('position'))
-        d['category'] = d.pop('mutation_type')
-        d['value'] = 1
+    needle_plot_data = []
 
-    # data_json = json.dumps(list(data), cls=DjangoJSONEncoder)
+    for observed_mutation in observed_mutations_query_set:
+        needle_plot_data.append({'coord': str(observed_mutation.mutation.position), 'category': observed_mutation.mutation.mutation_type, 'value': 1})
 
     context = Context({"protein_change_type_count_dict": protein_change_type_count_dict,
                        "mutation_type_count_dict": mutation_type_count_dict,
@@ -70,17 +62,14 @@ def lists(request):
                        "resequencing_report_url": resequencing_report_url,
                        "ale_experiment_name": ale_experiment_name,
                        "muts_needle_plot": loader.get_template("muts_needle_plot.html"),
-                       "data": mark_safe(list(data))})
+                       "needle_plot_data": mark_safe(list(needle_plot_data))})
 
     return HttpResponse(template.render(context))
 
 
 def _get_mutation_query_set(request):
-
-    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
-
-    observed_mutations_query_set = common.get_observed_mutations(list(seq_experiment_ordered_dict.keys()))
-    mutation_query_set = Mutation.objects.filter(
+    observed_mutations_query_set = get_observed_mutation_queryser(request)
+    mutation_query_set = seq.models.Mutation.objects.filter(
         pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
 
     return mutation_query_set
@@ -112,7 +101,7 @@ def _get_experiment_info_list(experiments):
 
     for experiment in experiments:
 
-        mc_list = UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=experiment.id)
+        mc_list = seq.models.UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=experiment.id)
 
         mapped_read_count = int((experiment.percentage_mapped / 100) * experiment.reads)
 
@@ -149,3 +138,12 @@ def _get_experiment_info_list(experiments):
         experiments_info_list.append(experiment_info_tuple)
 
     return experiments_info_list
+
+
+def get_observed_mutation_queryser(request):
+    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
+
+    observed_mutations_query_set = common.get_observed_mutations(list(seq_experiment_ordered_dict.keys()))
+
+    return observed_mutations_query_set
+
