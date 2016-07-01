@@ -47,7 +47,7 @@ def lists(request):
     observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_query_set)
 
     protein_change_type_count_dict = _get_protein_change_type_count_dict(mutation_query_set)
-#    observed_protein_change_type_count_dict = _get_protein_change_type_count_dict(observed_mutations_query_set)
+    observed_protein_change_type_count_dict = _get_observed_protein_change_type_count_dict(observed_mutations_query_set)
 
     template = loader.get_template(EXPERIMENT_LIST_TEMPLATE)
 
@@ -59,7 +59,7 @@ def lists(request):
         needle_plot_data.append({'coord': str(observed_mutation.mutation.position), 'category': observed_mutation.mutation.mutation_type, 'value': 1})
 
     context = Context({"protein_change_type_count_dict": protein_change_type_count_dict,
- #                      "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
+                       "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
                        "mutation_type_count_dict": mutation_type_count_dict,
                        "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
                        "experiments_info_list": experiments_info_list,
@@ -85,6 +85,18 @@ def _get_protein_change_type_count_dict(mutation_query_set):
     for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST:
         protein_change_count = mutation_query_set.filter(protein_change__contains=protein_change_type).count()
         protein_change_type_count_dict[protein_change_type] = protein_change_count
+
+    return protein_change_type_count_dict
+
+
+def _get_observed_protein_change_type_count_dict(observed_mutations_query_set):
+
+    protein_change_type_count_dict = {protein_change_type:0 for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST}
+
+    for observed_mutation in observed_mutations_query_set:
+        for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST:
+            if protein_change_type in observed_mutation.mutation.protein_change:
+                protein_change_type_count_dict[protein_change_type] += 1
 
     return protein_change_type_count_dict
 
