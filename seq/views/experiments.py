@@ -42,6 +42,8 @@ def lists(request):
 
     mutation_query_set = _get_mutation_query_set(request)
     observed_mutations_query_set = _get_observed_mutation_queryset(request)
+#    for observed_mutation in observed_mutations_query_set:
+#        print(observed_mutation.mutation.position)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
     observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_query_set)
@@ -72,9 +74,9 @@ def lists(request):
 
 
 def _get_mutation_query_set(request):
+
     observed_mutations_query_set = _get_observed_mutation_queryset(request)
-    mutation_query_set = seq.models.Mutation.objects.filter(
-        pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
+    mutation_query_set = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
 
     return mutation_query_set
 
@@ -166,10 +168,21 @@ def _get_reseq_experiment_info_list(reseq_experiments):
     return reseq_experiments_info_list
 
 
+# TODO: should be transfered to common and have a parameter to filter wt mutations.
 def _get_observed_mutation_queryset(request):
+
     seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
 
-    observed_mutations_query_set = common.get_observed_mutations(list(seq_experiment_ordered_dict.keys()))
+    wt_id = seq.views.common.get_wt_seq_experiment_id(seq_experiment_ordered_dict)
 
-    return observed_mutations_query_set
+    seq_experiment_ordered_dict = common.filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
+
+    filter_mutation_list = seq.views.common.get_observed_mutations([wt_id])
+    filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
+
+    observed_mutation_query_set = common.get_observed_mutations(list(seq_experiment_ordered_dict.keys()))
+
+    filter_observed_mutation_queryset = observed_mutation_query_set.exclude(mutation__in=filter_mutation_id_list)
+
+    return filter_observed_mutation_queryset
 
