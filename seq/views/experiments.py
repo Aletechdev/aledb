@@ -19,9 +19,6 @@ from django.db.models import Count
 
 from seq.forms.ignored_gene import IgnoredGenesForm
 
-import re
-
-
 EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
 
 
@@ -66,65 +63,18 @@ def lists(request):
             {'coord': str(observed_mutation.mutation.position), 'category': observed_mutation.mutation.mutation_type,
              'value': 1})
 
-    # TODO: Much of code below used to generate bar charts is the same as in dashboard.py
-    # TODO: Consider consolidating to one function in common
-    genes = observed_mutations_query_set.values('mutation__gene', 'mutation__mutation_type').annotate(
+    gene_query = observed_mutations_query_set.values('mutation__gene', 'mutation__mutation_type').annotate(
         the_count=Count('mutation__gene')).order_by('-the_count')
-    sequence_changes = observed_mutations_query_set.values('mutation__gene', 'mutation__protein_change').annotate(
+    sequence_change_query = observed_mutations_query_set.values('mutation__gene', 'mutation__protein_change').annotate(
         the_count=Count('mutation__gene')).order_by('-the_count')
 
-    ignored_genes = request.GET.get('ignored_genes')
-    gene_list = None
-    if ignored_genes is not None:
-        ignored_genes = ignored_genes.replace(" ", "").replace('\n', '').replace('\r', '').split(',')
-        gene_list = ', '.join(ignored_genes)
-        if len(ignored_genes) > 0 and ignored_genes[0] is not '':
-            for g in ignored_genes:
-                if str(g).startswith('*'):
-                    genes = genes.exclude(mutation__gene__endswith=str(g)[1:])
-                    sequence_changes = sequence_changes.exclude(mutation__gene__endswith=str(g)[1:])
-                elif str(g).endswith('*'):
-                    genes = genes.exclude(mutation__gene__startswith=str(g)[:-1])
-                    sequence_changes = sequence_changes.exclude(mutation__gene__startswith=str(g)[:-1])
-                else:
-                    genes = genes.exclude(mutation__gene__contains=g)
-                    sequence_changes = sequence_changes.exclude(mutation__gene__contains=g)
+    gene_list, genes, sequence_changes = common.get_ignored_genes(request, gene_query, sequence_change_query)
 
-    for gene in genes:
-        if gene['mutation__mutation_type'] in common.MUTATION_TYPE_LIST:
-            gene['color'] = common.COLORS[common.MUTATION_TYPE_LIST.index(gene['mutation__mutation_type'])]
-        else:
-            gene['color'] = common.DEFAULT_COLOR
+    genes = common.set_gene_bar_chart_colors(genes)
 
-    for seq_change in sequence_changes:
-        has_match = False
-        for protein in common.PROTEIN_CHANGE_TYPE_LIST:
-            if protein in seq_change['mutation__protein_change']:
-                seq_change['color'] = common.COLORS[common.PROTEIN_CHANGE_TYPE_LIST.index(protein)]
-                has_match = True
-                break
-        if has_match is False:
-            seq_change['color'] = common.DEFAULT_COLOR
-        seq_change['mutation__protein_change'] = re.compile(r'<[^>]+>').sub('', seq_change['mutation__protein_change'])
+    sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_changes)
 
-    number_of_genes_to_show = 20
-
-    if 'number_of_top_genes' in request.GET:
-
-        gene_query = request.GET['number_of_top_genes']
-
-        if _is_query_empty(gene_query):
-            genes_to_show = list(genes[:number_of_genes_to_show])
-            sequence_changes_to_show = list(sequence_changes[:number_of_genes_to_show])
-
-        else:
-            number_of_genes_to_show = request.GET['number_of_top_genes']
-            genes_to_show = list(genes[:int(request.GET['number_of_top_genes'])])
-            sequence_changes_to_show = list(sequence_changes[:int(request.GET['number_of_top_genes'])])
-
-    else:
-        genes_to_show = list(genes[:20])
-        sequence_changes_to_show = list(sequence_changes[:20])
+    genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes, sequence_changes)
 
     context = Context({"protein_change_type_count_dict": protein_change_type_count_dict,
                        "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
@@ -260,15 +210,3 @@ def _get_observed_mutation_queryset(request):
     filter_observed_mutation_queryset = observed_mutation_query_set.exclude(mutation__in=filter_mutation_id_list)
 
     return filter_observed_mutation_queryset
-
-
-# TODO: Move this function into common. It is used in a few other views
-def _is_query_empty(query):
-
-    is_query_empty = False
-
-    if not query:
-
-        is_query_empty = True
-
-    return is_query_empty

@@ -10,6 +10,8 @@ import aleinfo.settings
 
 import os
 
+import re
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -504,3 +506,81 @@ def get_wt_seq_experiment_id(seq_experiment_ordered_dict):
             wt_id = key
 
     return wt_id
+
+
+def get_ignored_genes(request, genes, sequence_changes):
+    ignored_genes = request.GET.get('ignored_genes')
+    gene_list = None
+    if ignored_genes is not None:
+        ignored_genes = ignored_genes.replace(" ", "").replace('\n', '').replace('\r', '').split(',')
+        gene_list = ', '.join(ignored_genes)
+        if len(ignored_genes) > 0 and ignored_genes[0] is not '':
+            for g in ignored_genes:
+                if str(g).startswith('*'):
+                    genes = genes.exclude(mutation__gene__endswith=str(g)[1:])
+                    sequence_changes = sequence_changes.exclude(mutation__gene__endswith=str(g)[1:])
+                elif str(g).endswith('*'):
+                    genes = genes.exclude(mutation__gene__startswith=str(g)[:-1])
+                    sequence_changes = sequence_changes.exclude(mutation__gene__startswith=str(g)[:-1])
+                else:
+                    genes = genes.exclude(mutation__gene__contains=g)
+                    sequence_changes = sequence_changes.exclude(mutation__gene__contains=g)
+
+    return gene_list, genes, sequence_changes
+
+
+def set_gene_bar_chart_colors(genes):
+    for gene in genes:
+        if gene['mutation__mutation_type'] in MUTATION_TYPE_LIST:
+            gene['color'] = COLORS[MUTATION_TYPE_LIST.index(gene['mutation__mutation_type'])]
+        else:
+            gene['color'] = DEFAULT_COLOR
+    return genes
+
+
+def set_sequence_change_bar_chart_colors(sequence_changes):
+    for seq_change in sequence_changes:
+        has_match = False
+        for protein in PROTEIN_CHANGE_TYPE_LIST:
+            if protein in seq_change['mutation__protein_change']:
+                seq_change['color'] = COLORS[PROTEIN_CHANGE_TYPE_LIST.index(protein)]
+                has_match = True
+                break
+        if has_match is False:
+            seq_change['color'] = DEFAULT_COLOR
+        seq_change['mutation__protein_change'] = re.compile(r'<[^>]+>').sub('', seq_change['mutation__protein_change'])
+    return sequence_changes
+
+
+def get_genes_to_show(request, genes, sequence_changes):
+    number_of_genes_to_show = 20
+
+    if 'number_of_top_genes' in request.GET:
+
+        number_of_genes = request.GET['number_of_top_genes']
+
+        if _is_query_empty(number_of_genes):
+            genes_to_show = list(genes[:number_of_genes_to_show])
+            sequence_changes_to_show = list(sequence_changes[:number_of_genes_to_show])
+
+        else:
+            number_of_genes_to_show = request.GET['number_of_top_genes']
+            genes_to_show = list(genes[:int(request.GET['number_of_top_genes'])])
+            sequence_changes_to_show = list(sequence_changes[:int(request.GET['number_of_top_genes'])])
+
+    else:
+        genes_to_show = list(genes[:20])
+        sequence_changes_to_show = list(sequence_changes[:20])
+
+    return genes_to_show, sequence_changes_to_show, number_of_genes_to_show
+
+
+def _is_query_empty(query):
+
+    is_query_empty = False
+
+    if not query:
+
+        is_query_empty = True
+
+    return is_query_empty
