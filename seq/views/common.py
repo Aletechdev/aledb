@@ -460,6 +460,7 @@ def _find_between(s, first, last):
         return ""
 
 
+# TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit. 
 def filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
 
     key_to_delete_found = False
@@ -479,3 +480,16 @@ def filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
         del seq_experiment_ordered_dict[key_to_delete]
 
     return seq_experiment_ordered_dict
+
+
+def get_wt_seq_experiment_id(seq_experiment_ordered_dict):
+
+    wt_id = None
+
+    for key, value in seq_experiment_ordered_dict.items():
+
+        if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
+
+            wt_id = key
+
+    return wt_id

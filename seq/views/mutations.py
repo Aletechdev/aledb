@@ -45,7 +45,7 @@ def mutation_table(request):
 
     if wt_filter:
         
-        wt_id = _get_wt_seq_experiment_id(seq_experiment_ordered_dict) 
+        wt_id = seq.views.common.get_wt_seq_experiment_id(seq_experiment_ordered_dict) 
 
         seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(
             seq_experiment_ordered_dict)
@@ -90,16 +90,3 @@ def _get_table_body(seq_experiment_dict, request, wt_filter, wt_id):
                                            request,
                                            filter_settings,
                                            filter_mutation_id_list)
-
-
-def _get_wt_seq_experiment_id(seq_experiment_ordered_dict):
-
-    wt_id = None
-
-    for key, value in seq_experiment_ordered_dict.items():
-
-        if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
-
-            wt_id = key
-
-    return wt_id
