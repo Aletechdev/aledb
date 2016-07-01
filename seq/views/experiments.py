@@ -49,7 +49,7 @@ def lists(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
 
-    observed_mutations_query_set = get_observed_mutation_queryser(request)
+    observed_mutations_query_set = get_observed_mutation_queryset(request)
 
     needle_plot_data = []
 
@@ -68,7 +68,7 @@ def lists(request):
 
 
 def _get_mutation_query_set(request):
-    observed_mutations_query_set = get_observed_mutation_queryser(request)
+    observed_mutations_query_set = get_observed_mutation_queryset(request)
     mutation_query_set = seq.models.Mutation.objects.filter(
         pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
 
@@ -140,7 +140,7 @@ def _get_experiment_info_list(experiments):
     return experiments_info_list
 
 
-def get_observed_mutation_queryser(request):
+def get_observed_mutation_queryset(request):
     seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
 
     observed_mutations_query_set = common.get_observed_mutations(list(seq_experiment_ordered_dict.keys()))
