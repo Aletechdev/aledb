@@ -46,6 +46,17 @@ MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'D
 
 PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication']
 
+COLORS = ['red', 'black', 'blue', 'green', 'orange', 'grey', 'purple', 'olive', 'maroon']
+DEFAULT_COLOR = 'steelblue'
+
+
+def _set_colors(length):
+    temp = COLORS[:length]
+    temp.append(DEFAULT_COLOR)
+    return temp
+
+GENE_COLORS = _set_colors(len(MUTATION_TYPE_LIST))
+SEQ_COLORS = _set_colors(len(PROTEIN_CHANGE_TYPE_LIST))
 
 if hasattr(aleinfo.settings, SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = aleinfo.settings.sequencing_url
