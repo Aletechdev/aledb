@@ -48,8 +48,6 @@ def lists(request):
 
     mutation_query_set = _get_mutation_query_set(request)
     observed_mutations_query_set = _get_observed_mutation_queryset(request)
-#    for observed_mutation in observed_mutations_query_set:
-#        print(observed_mutation.mutation.position)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
     observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_query_set)
