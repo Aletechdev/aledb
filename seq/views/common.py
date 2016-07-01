@@ -44,9 +44,9 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 SEQ_EXPERIMENT_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
 
-MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'DUP']
+MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'DUP', 'Default']
 
-PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication']
+PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication', 'Default']
 
 COLORS = ['red', 'black', 'blue', 'green', 'orange', 'grey', 'purple', 'olive', 'maroon']
 DEFAULT_COLOR = 'steelblue'
@@ -57,8 +57,8 @@ def _set_colors(length):
     temp.append(DEFAULT_COLOR)
     return temp
 
-GENE_COLORS = _set_colors(len(MUTATION_TYPE_LIST))
-SEQ_COLORS = _set_colors(len(PROTEIN_CHANGE_TYPE_LIST))
+GENE_COLORS = _set_colors(len(MUTATION_TYPE_LIST)-1)
+SEQ_COLORS = _set_colors(len(PROTEIN_CHANGE_TYPE_LIST)-1)
 
 if hasattr(aleinfo.settings, SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = aleinfo.settings.sequencing_url
