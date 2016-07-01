@@ -17,6 +17,7 @@ from django.utils.safestring import mark_safe
 
 from seq.forms.ignored_gene import IgnoredGenesForm
 
+
 DASHBOARD_TEMPLATE = "dashboard.html"
 
 

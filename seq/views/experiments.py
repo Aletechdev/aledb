@@ -19,6 +19,7 @@ from django.db.models import Count
 
 from seq.forms.ignored_gene import IgnoredGenesForm
 
+
 EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
 
 
