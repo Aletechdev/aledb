@@ -15,6 +15,7 @@ from seq.views import common
 
 from django.utils.safestring import mark_safe
 
+
 EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
 
 
@@ -40,16 +41,17 @@ def lists(request):
     experiments_info_list = _get_experiment_info_list(experiments)
 
     mutation_query_set = _get_mutation_query_set(request)
+    observed_mutations_query_set = _get_observed_mutation_queryset(request)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
+    observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_query_set)
 
     protein_change_type_count_dict = _get_protein_change_type_count_dict(mutation_query_set)
+#    observed_protein_change_type_count_dict = _get_protein_change_type_count_dict(observed_mutations_query_set)
 
     template = loader.get_template(EXPERIMENT_LIST_TEMPLATE)
 
     ale_experiment_name = common.get_ale_experiment_name(request)
-
-    observed_mutations_query_set = get_observed_mutation_queryset(request)
 
     needle_plot_data = []
 
@@ -57,7 +59,9 @@ def lists(request):
         needle_plot_data.append({'coord': str(observed_mutation.mutation.position), 'category': observed_mutation.mutation.mutation_type, 'value': 1})
 
     context = Context({"protein_change_type_count_dict": protein_change_type_count_dict,
+ #                      "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
                        "mutation_type_count_dict": mutation_type_count_dict,
+                       "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
                        "experiments_info_list": experiments_info_list,
                        "resequencing_report_url": resequencing_report_url,
                        "ale_experiment_name": ale_experiment_name,
@@ -68,7 +72,7 @@ def lists(request):
 
 
 def _get_mutation_query_set(request):
-    observed_mutations_query_set = get_observed_mutation_queryset(request)
+    observed_mutations_query_set = _get_observed_mutation_queryset(request)
     mutation_query_set = seq.models.Mutation.objects.filter(
         pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
 
@@ -91,6 +95,16 @@ def _get_mutation_type_count_dict(mutation_query_set):
     for mutation_type in common.MUTATION_TYPE_LIST:
         mutation_type_count = mutation_query_set.filter(mutation_type=mutation_type).count()
         mutation_type_count_dict[mutation_type] = mutation_type_count
+
+    return mutation_type_count_dict
+
+
+def _get_observed_mutation_type_count_dict(observed_mutation_query_set):
+
+    mutation_type_count_dict = {mutation_type:0 for mutation_type in common.MUTATION_TYPE_LIST}
+
+    for observed_mutation in observed_mutation_query_set:
+        mutation_type_count_dict[observed_mutation.mutation.mutation_type] += 1        
 
     return mutation_type_count_dict
 
@@ -140,7 +154,7 @@ def _get_experiment_info_list(experiments):
     return experiments_info_list
 
 
-def get_observed_mutation_queryset(request):
+def _get_observed_mutation_queryset(request):
     seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
 
     observed_mutations_query_set = common.get_observed_mutations(list(seq_experiment_ordered_dict.keys()))
