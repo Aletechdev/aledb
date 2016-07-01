@@ -7,13 +7,13 @@ from django.http import HttpResponse
 
 from django.template import Context, loader
 
+from django.utils.safestring import mark_safe
+
 import aleinfo.settings as settings
 
 import seq.models   # TODO: only import necessary models.
 
 from seq.views import common
-
-from django.utils.safestring import mark_safe
 
 
 EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
@@ -30,7 +30,7 @@ else:
 def lists(request):
     """return a list of resequencing experiments"""
 
-    experiments = common.get_seq_experiment_raw_queryset(request)
+    reseq_experiments = common.get_seq_experiment_raw_queryset(request)
 
     # Would rather want to use something like a dictionary since an experiment is
     # unique, though an experiment is currently a structure and an integral type
@@ -38,7 +38,7 @@ def lists(request):
 
     ale_experiment_id = common.get_ale_experiment_id(request)
 
-    experiments_info_list = _get_experiment_info_list(experiments)
+    experiments_info_list = _get_reseq_experiment_info_list(reseq_experiments)
 
     mutation_query_set = _get_mutation_query_set(request)
     observed_mutations_query_set = _get_observed_mutation_queryset(request)
@@ -121,36 +121,36 @@ def _get_observed_mutation_type_count_dict(observed_mutation_query_set):
     return mutation_type_count_dict
 
 
-def _get_experiment_info_list(experiments):
+def _get_reseq_experiment_info_list(reseq_experiments):
 
-    experiments_info_list = []
+    reseq_experiments_info_list = []
 
-    for experiment in experiments:
+    for reseq_experiment in reseq_experiments:
 
-        mc_list = seq.models.UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=experiment.id)
+        mc_list = seq.models.UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=reseq_experiment.id)
 
-        mapped_read_count = int((experiment.percentage_mapped / 100) * experiment.reads)
+        mapped_read_count = int((reseq_experiment.percentage_mapped / 100) * reseq_experiment.reads)
 
-        species = experiment.isolate.flask.ale_id.species
+        species = reseq_experiment.isolate.flask.ale_id.species
 
-        strain = experiment.isolate.flask.ale_id.strain
+        strain = reseq_experiment.isolate.flask.ale_id.strain
 
-        knockouts = experiment.isolate.flask.ale_id.knockouts
+        knockouts = reseq_experiment.isolate.flask.ale_id.knockouts
 
         clonal_or_population = "clonal"
 
-        if experiment.isolate.is_population:
+        if reseq_experiment.isolate.is_population:
 
             clonal_or_population = "population"
 
-        media_temperature = experiment.isolate.flask.media.temperature
+        media_temperature = reseq_experiment.isolate.flask.media.temperature
 
-        media_description = experiment.isolate.flask.media.description
+        media_description = reseq_experiment.isolate.flask.media.description
 
-        substrate = experiment.isolate.flask.media.substrate
+        substrate = reseq_experiment.isolate.flask.media.substrate
 
         # Using tuple because immutable; mc_list must remain associated with particular experiment.
-        experiment_info_tuple = (experiment,
+        experiment_info_tuple = (reseq_experiment,
                                  mc_list,
                                  mapped_read_count,
                                  clonal_or_population,
@@ -161,9 +161,9 @@ def _get_experiment_info_list(experiments):
                                  strain,
                                  knockouts)
 
-        experiments_info_list.append(experiment_info_tuple)
+        reseq_experiments_info_list.append(experiment_info_tuple)
 
-    return experiments_info_list
+    return reseq_experiments_info_list
 
 
 def _get_observed_mutation_queryset(request):
