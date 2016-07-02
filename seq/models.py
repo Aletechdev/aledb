@@ -129,8 +129,8 @@ class ObservedMutation(models.Model):
 
 class GeneToPDBManager(models.Manager):
 
-    def create_mapping(self, gene, pdb_id, rank):
-        new_mapping = self.create(gene=gene, pdb_id=pdb_id, rank=rank)
+    def create_mapping(self, creation_list):
+        new_mapping = self.bulk_create(creation_list)
         return new_mapping
 
 
