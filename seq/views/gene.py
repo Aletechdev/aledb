@@ -32,8 +32,6 @@ def gene(request):
 
     pdb_file_path = 'http://files.rcsb.org/download/' + pdb_code + '.pdb'
 
-    # urllib.request.urlretrieve('http://files.rcsb.org/download/101M.pdb', '101m.pdb')
-
     context = Context({"gene_name": gene_query,
                        "table_body": mark_safe(table_body),
                        "title": gene_query + " gene",

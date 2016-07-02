@@ -509,18 +509,29 @@ def _get_sample_report_list(experiment_breseq_output_path):
     return breseq_sample_report_list
 
 
+def count_mappings():
+    print(seq.models.GeneToPDB.objects.all().count())
+
+
 def create_gene_to_pdb_mappings(file_path):
 
     _clear_gene_to_pdb_mappings()
 
+    creation_query_list = []
+
     with open(file_path) as csvfile:
         reader = csv.reader(csvfile)
-        next(reader, None)
         for row in reader:
             temp = row
-            if not temp[5]:
-                temp[5] = 100
-            seq.models.GeneToPDB.objects.create_mapping(gene=temp[0], pdb_id=temp[4], rank=int(float(temp[5])))
+            if not temp[2]:
+                temp[2] = 100
+            genes = str(temp[1]).replace(' ', '').split(',')
+            for gene in genes:
+                if any(char.isdigit() for char in str(gene)):
+                    continue
+                creation_query_list.append(seq.models.GeneToPDB(gene=str(gene), pdb_id=temp[0], rank=int(float(temp[2]))))
+
+    seq.models.GeneToPDB.objects.create_mapping(creation_query_list)
 
 
 def _clear_gene_to_pdb_mappings():
