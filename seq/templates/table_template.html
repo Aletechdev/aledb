@@ -150,9 +150,9 @@
         <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
         <select name="ale_no" class="ui">
             <option value="all">All ales</option>
-            {% for experiment in experiments %}
-                <option {% if ale_no == experiment.ale_id %}selected="selected" {% endif %}
-                        value="{{ experiment.ale_id }}">{{ experiment.ale_id }}</option>
+            {% for ale in ales %}
+                <option {% if ale_no == ale.ale_id %}selected="selected" {% endif %}
+                        value="{{ ale.ale_id }}">{{ ale.ale_id }}</option>
             {% endfor %}
         </select>
         {% if template_header != "Key Mutations" %}

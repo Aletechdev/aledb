@@ -182,7 +182,7 @@ def _get_experiment_id_idx_mapping(seq_experiment_dict):
     return experiment_id_idx_mapping
 
 
-def get_seq_experiment_queryset(experiment_ids, exclude_starting_strain=False):
+def get_ale_queryset(experiment_ids, exclude_starting_strain=False):
 
     if experiment_ids is not None:
 

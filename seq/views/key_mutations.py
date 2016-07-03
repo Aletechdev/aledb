@@ -18,11 +18,8 @@ import seq.views.common
 __author__ = 'Patrick Phaneuf'
 
 
-# TODO: this implementation shares much with mutations.py; refactored shared implementations into common.py
-
-
 @login_required
-def key_mutated_genes(request):
+def key_mutations(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
@@ -30,7 +27,7 @@ def key_mutated_genes(request):
 
     ale_number = seq.views.common.get_ale_number(request)
 
-    seq_experiment_queryset = seq.views.common.get_seq_experiment_queryset(ale_experiment_id, True)
+    ale_queryset = seq.views.common.get_seq_experiment_queryset(ale_experiment_id, True)
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request)
 
@@ -44,7 +41,7 @@ def key_mutated_genes(request):
 
     template = loader.get_template("table_template.html")
 
-    context = Context({"experiments": seq_experiment_queryset,
+    context = Context({"ales": ale_queryset,
                        "ale_experiment_name": ale_experiment_name,
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
