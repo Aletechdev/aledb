@@ -26,10 +26,12 @@ def key_mutations(request):
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
 
     ale_number = seq.views.common.get_ale_number(request)
-
+ 
     ale_queryset = seq.views.common.get_seq_experiment_queryset(ale_experiment_id, True)
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request)
+
+    print(seq_experiment_ordered_dict)
 
     seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
 
