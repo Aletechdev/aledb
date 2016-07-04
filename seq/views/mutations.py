@@ -16,10 +16,6 @@ from seq.views import mutation_table_builder
 __author__ = 'pphaneuf'
 
 
-EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
-EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
-
-
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.sequencing_url
 else:
