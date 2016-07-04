@@ -32,10 +32,10 @@ def key_mutations(request):
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request)
-
     seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
-
     seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
+
+    # sample_name_list = [seq.views.common.get_sample_name(seq_experiment) for seq_experiment in seq_experiment_ordered_dict.values()]
 
     table_header = mutation_table_builder.get_table_header(seq_experiment_ordered_dict)
 
@@ -45,12 +45,13 @@ def key_mutations(request):
 
     context = Context({"ales": ale_queryset,
                        "ale_experiment_name": ale_experiment_name,
+                       # "sample_name_list": sample_name_list,
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
-                       "title": "Key Mutated Genes",
+                       "title": "Key Mutations",
                        "table_header": mark_safe(table_header),
-                       "template_header": "Key Mutated Genes"})
+                       "template_header": "Key Mutations"})
 
     return HttpResponse(template.render(context))
 
@@ -65,7 +66,7 @@ def _get_table_body(seq_experiment_dict, request):
 
     observed_mutations_query_set = _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset)
 
-    return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings)
+    return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set, filter_settings)
 
 
 def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):

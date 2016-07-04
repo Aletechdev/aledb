@@ -316,3 +316,14 @@ def _is_query_empty(query):
         is_query_empty = True
 
     return is_query_empty
+
+
+def get_sample_name(seq_experiment):
+
+    sample_name = seq_experiment.isolate.flask.ale_id.ale_experiment.name
+
+    sample_name += " "
+
+    sample_name += seq_experiment.get_isolate_name().replace("_", " ")
+
+    return sample_name
