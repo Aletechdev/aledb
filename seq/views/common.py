@@ -327,3 +327,8 @@ def get_sample_name(seq_experiment):
     sample_name += seq_experiment.get_isolate_name().replace("_", " ")
 
     return sample_name
+
+
+def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset):
+
+    return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
