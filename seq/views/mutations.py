@@ -10,7 +10,7 @@ import aleinfo.settings as settings
 
 import seq.views.common
 
-import ale.common
+from seq.views import mutation_table_builder
 
 
 __author__ = 'pphaneuf'
@@ -37,7 +37,7 @@ def mutation_table(request):
 
     wt_filter = seq.views.common.get_wt_filter(request)
 
-    seq_experiment_queryset = seq.views.common.get_seq_experiment_queryset(ale_experiment_id, wt_filter)
+    seq_experiment_queryset = seq.views.common.get_ale_queryset(ale_experiment_id, wt_filter)
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request, include_starting_strain=True)
 
@@ -50,9 +50,9 @@ def mutation_table(request):
         seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(
             seq_experiment_ordered_dict)
 
-    seq_experiment_ordered_dict = seq.views.common.filter_checked_flasks(request, seq_experiment_ordered_dict)
+    seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
-    table_header = seq.views.common.get_table_header(seq_experiment_ordered_dict)
+    table_header = mutation_table_builder.get_table_header(seq_experiment_ordered_dict)
 
     table_body = _get_table_body(seq_experiment_ordered_dict, request, wt_filter, wt_id)
 
@@ -85,7 +85,7 @@ def _get_table_body(seq_experiment_dict, request, wt_filter, wt_id):
         filter_mutation_list = seq.views.common.get_observed_mutations([wt_id])
         filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
 
-    return seq.views.common.get_table_body(seq_experiment_dict,
+    return mutation_table_builder.get_table_body(seq_experiment_dict,
                                            observed_mutations_query_set,
                                            request,
                                            filter_settings,
