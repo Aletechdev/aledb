@@ -14,6 +14,8 @@ import seq.models
 
 import seq.views.common
 
+from seq.views import mutation_table_builder
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -27,17 +29,15 @@ def key_mutations(request):
 
     ale_number = seq.views.common.get_ale_number(request)
  
-    ale_queryset = seq.views.common.get_seq_experiment_queryset(ale_experiment_id, True)
+    ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request)
 
-    print(seq_experiment_ordered_dict)
-
     seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
 
-    seq_experiment_ordered_dict = seq.views.common.filter_checked_flasks(request, seq_experiment_ordered_dict)
+    seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
-    table_header = seq.views.common.get_table_header(seq_experiment_ordered_dict)
+    table_header = mutation_table_builder.get_table_header(seq_experiment_ordered_dict)
 
     table_body = _get_table_body(seq_experiment_ordered_dict, request)
 
@@ -65,7 +65,7 @@ def _get_table_body(seq_experiment_dict, request):
 
     observed_mutations_query_set = _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset)
 
-    return seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings)
+    return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings)
 
 
 def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):

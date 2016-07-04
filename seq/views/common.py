@@ -47,7 +47,7 @@ GENE_COLORS = _set_colors(len(MUTATION_TYPE_LIST) - 1)
 SEQ_COLORS = _set_colors(len(PROTEIN_CHANGE_TYPE_LIST) - 1)
 
 
-def get_ale_queryset(experiment_ids, exclude_starting_strain=False):
+def get_ales(experiment_ids, exclude_starting_strain=False):
 
     if experiment_ids is not None:
 
