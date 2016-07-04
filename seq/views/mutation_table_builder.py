@@ -60,37 +60,38 @@ def get_table_header(seq_experiment_dict):
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
 def get_table_body(seq_experiment_dict,
-                   observed_mutations_query_set,
+                   observed_mutations_queryset,
                    filter_settings=None,
                    filter_mutation_id_list=None):
 
-    mutations = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
-    mutation_index_dict = dict((id, i) for i, id in enumerate(mutations.values_list("id", flat=True)))
+    mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
 
-    experiment_urls = _get_experiment_urls(seq_experiment_dict)
+    mutation_index_dict = dict((id, i) for i, id in enumerate(mutation_queryset.values_list("id", flat=True)))
 
-    experiment_id_idx_mapping = _get_experiment_id_idx_mapping(seq_experiment_dict)
+    experiment_url_dict = _get_experiment_urls(seq_experiment_dict)
+
+    experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(seq_experiment_dict)
 
     # Initialize all sample mutation table cells as empty.
-    table_entry_list = _initialize_table(experiment_id_idx_mapping, mutations)
+    table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mutation_queryset)
 
     # Populating table_entry_list
-    for observed_mutation in observed_mutations_query_set:
+    for observed_mutation in observed_mutations_queryset:
 
         if filter_mutation_id_list is not None and observed_mutation.mutation.id in filter_mutation_id_list:
             continue
 
         if not _filter_mutation(filter_settings, observed_mutation):
 
-            new_entry = _get_table_mutation_entry(observed_mutation, experiment_urls)
+            new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
 
             if new_entry is not None and observed_mutation.sequencing_experiment_id in seq_experiment_dict.keys():
-                table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+                table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
 
     #Populating table body
     table_body = ""
 
-    for mutation in mutations:
+    for mutation in mutation_queryset:
 
         if _contains_mutation(table_entry_list[mutation_index_dict[mutation.id]]):
 
@@ -127,7 +128,7 @@ def _get_experiment_urls(seq_experiment_dict):
     return experiment_urls
 
 
-def _get_experiment_id_idx_mapping(seq_experiment_dict):
+def _get_experiment_id_idx_mapping_dict(seq_experiment_dict):
 
     experiment_id_idx_mapping = dict((reseq_exp_id, idx) for idx, reseq_exp_id in enumerate(seq_experiment_dict.keys()))
 
@@ -171,13 +172,13 @@ def _is_filter_on_freq(filter_settings, observed_mutation):
     return is_filter_on_freq
 
 
-def _get_table_mutation_entry(observed_mutation, experiment_urls):
+def _get_table_mutation_entry(observed_mutation, experiment_url_dict):
 
     table_entry = ""
 
-    if observed_mutation.breseq_present and observed_mutation.sequencing_experiment_id in experiment_urls:
+    if observed_mutation.breseq_present and observed_mutation.sequencing_experiment_id in experiment_url_dict:
 
-        url = experiment_urls[observed_mutation.sequencing_experiment_id]
+        url = experiment_url_dict[observed_mutation.sequencing_experiment_id]
 
         if observed_mutation.mutation.mutation_type == "DUP":
 
