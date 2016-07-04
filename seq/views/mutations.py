@@ -43,7 +43,7 @@ def mutation_table(request):
         
         wt_id = seq.views.common.get_wt_seq_experiment_id(seq_experiment_ordered_dict) 
 
-        seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(
+        seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_reseq(
             seq_experiment_ordered_dict)
 
     seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)

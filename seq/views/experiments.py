@@ -201,7 +201,7 @@ def _get_observed_mutation_queryset(request):
 
     wt_id = seq.views.common.get_wt_seq_experiment_id(seq_experiment_ordered_dict)
 
-    seq_experiment_ordered_dict = common.filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
+    seq_experiment_ordered_dict = common.filter_out_starting_strain_reseq(seq_experiment_ordered_dict)
 
     filter_mutation_list = seq.views.common.get_observed_mutations([wt_id])
     filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]

@@ -206,7 +206,7 @@ def get_filter_settings(ale_experiment_id):
 
 
 # TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit. 
-def filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict):
+def filter_out_starting_strain_reseq(seq_experiment_ordered_dict):
 
     key_to_delete_found = False
 
@@ -318,6 +318,7 @@ def _is_query_empty(query):
     return is_query_empty
 
 
+# TODO: don't use this, but rather seq_experiment.get_isolate_name().
 def get_sample_name(seq_experiment):
 
     sample_name = seq_experiment.isolate.flask.ale_id.ale_experiment.name
