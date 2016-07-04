@@ -36,8 +36,6 @@ def key_mutated_genes(request):
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request)
 
-    print(seq_experiment_ordered_dict)
-
     seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
 
     seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
