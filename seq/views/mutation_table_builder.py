@@ -32,15 +32,15 @@ else:
     reseqencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
 
 
-def get_table_header(seq_experiment_dict):
+def get_table_header(reseq_dict):
 
     table_header = HTML_MUTATION_TABLE_HEADER
 
-    experiment_urls = _get_experiment_urls(seq_experiment_dict)
+    experiment_urls = _get_experiment_urls(reseq_dict)
 
-    for seq_experiment_id in seq_experiment_dict:
+    for seq_experiment_id in reseq_dict:
 
-        seq_experiment = seq_experiment_dict[seq_experiment_id]
+        seq_experiment = reseq_dict[seq_experiment_id]
 
         sample_name = seq.views.common.get_sample_name(seq_experiment)
 
@@ -59,7 +59,7 @@ def get_table_header(seq_experiment_dict):
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
-def get_table_body(seq_experiment_dict,
+def get_table_body(reseq_dict,
                    observed_mutations_queryset,
                    filter_settings=None,
                    filter_mutation_id_list=None):
@@ -68,9 +68,9 @@ def get_table_body(seq_experiment_dict,
 
     mutation_index_dict = dict((id, i) for i, id in enumerate(mutation_queryset.values_list("id", flat=True)))
 
-    experiment_url_dict = _get_experiment_urls(seq_experiment_dict)
+    experiment_url_dict = _get_experiment_urls(reseq_dict)
 
-    experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(seq_experiment_dict)
+    experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
 
     # Initialize all sample mutation table cells as empty.
     table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mutation_queryset)
@@ -85,7 +85,7 @@ def get_table_body(seq_experiment_dict,
 
             new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
 
-            if new_entry is not None and observed_mutation.sequencing_experiment_id in seq_experiment_dict.keys():
+            if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
                 table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
 
     #Populating table body

@@ -16,6 +16,9 @@ from seq.views import mutation_table_builder
 __author__ = 'Patrick Phaneuf'
 
 
+REQUEST_PRIMARY_RESEQ_ID = "primary_reseq_id"
+
+
 @login_required
 def key_mutations(request):
 
@@ -25,19 +28,16 @@ def key_mutations(request):
  
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
+    # TODO: filter out starting starting observed mutations.
     ordered_reseq_dict = seq.views.common.get_experiment_ordered_dict(request)
     ordered_reseq_dict = seq.views.common.filter_out_starting_strain_reseq(ordered_reseq_dict)
-
-    # Call this after removing
-    sample_name_list = _get_sample_name_list(ordered_reseq_dict)
-
-    # This should go after the above.
-    # TODO: use the state pattern to explicitly implement the order of initialization.
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
-    # TODO: make control for choosing primary seq experiment.
-    # TODO: filter out starting starting observed mutations.
-    ordered_reseq_dict, observed_mutation_queryset = _get_experiments_and_mutations(ordered_reseq_dict, 1)
+    primary_reseq_id = _get_primary_reseq_id(request)
+    if primary_reseq_id is None:
+        primary_reseq_id = list(ordered_reseq_dict.keys())[0]
+
+    ordered_reseq_dict, observed_mutation_queryset = _get_experiments_and_mutations(ordered_reseq_dict, primary_reseq_id)
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
@@ -45,9 +45,11 @@ def key_mutations(request):
 
     template = loader.get_template("common_mutations.html")
 
+    reseq_list = sorted(ordered_reseq_dict.values(), key=lambda x: x.ale_id)
+
     context = Context({"ales": ale_queryset,
                        "ale_experiment_name": ale_experiment_name,
-                       # "sample_name_list": sample_name_list,
+                       "reseq_list": reseq_list,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
                        "title": "Key Mutations",
@@ -105,12 +107,10 @@ def _get_table_body(reseq_dict, request, observed_mutations_queryset):
                                                  filter_settings)
 
 
-def _get_sample_name_list(reseq_dict):
+def _get_primary_reseq_id(request):
 
-    sample_name_list = []
+    primary_reseq_id = request.GET.get(REQUEST_PRIMARY_RESEQ_ID)
 
-    for reseq in reseq_dict.values():
+    primary_reseq_id = None if primary_reseq_id is None else int(primary_reseq_id)
 
-        sample_name_list.append(reseq.get_isolate_name())
-
-    return sample_name_list
+    return primary_reseq_id

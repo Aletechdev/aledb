@@ -144,6 +144,23 @@
     <li role="presentation"><a href="search">Search</a></li>
 </ul>
 <br><br>
+
+<!-- primary seq experiment selection drop-down -->
+<form action="" method="get">
+    <p>
+        <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+        <select name="primary_reseq_id" class="ui">
+            {% for reseq in reseq_list %}
+                <option value="{{ reseq.id }}">{{ reseq.get_isolate_name }}</option>
+            {% endfor %}
+        </select>
+    </p>
+    <p>
+        <input type="submit" value="Apply" class="ui"/>
+    </p>
+</form>
+
+<!-- Mutation table -->
 <form action="" method="get">
     <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
     <table id="data">
