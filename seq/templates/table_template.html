@@ -144,23 +144,30 @@
     <li role="presentation"><a href="search">Search</a></li>
 </ul>
 <br><br>
+
+<!-- ALE selection drop-down -->
 {% if experiment_id %}
     <form action="" method="get">
-        <!-- ALE selection drop-down -->
-        <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
-        <select name="ale_no" class="ui">
-            <option value="all">All ales</option>
-            {% for ale in ales %}
-                <option {% if ale_no == ale.ale_id %}selected="selected" {% endif %}
-                        value="{{ ale.ale_id }}">{{ ale.ale_id }}</option>
-            {% endfor %}
-        </select>
-        {% if template_header != "Key Mutations" %}
-            <label class="ui"><input type="checkbox" name="wtfilt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
-        {% endif %}
-        <p><input type="submit" value="Apply" class="ui"/></p>
+        <p>
+            <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+            <select name="ale_no" class="ui">
+                <option value="all">All ales</option>
+                {% for ale in ales %}
+                    <option {% if ale_no == ale.ale_id %}selected="selected" {% endif %}
+                            value="{{ ale.ale_id }}">{{ ale.ale_id }}</option>
+                {% endfor %}
+            </select>
+            {% if template_header != "Key Mutations" %}
+                <label class="ui"><input type="checkbox" name="wtfilt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
+            {% endif %}
+        </p>
+        <p>
+            <input type="submit" value="Apply" class="ui"/>
+        </p>
     </form>
 {% endif %}
+
+<!-- Mutation table -->
 <form action="" method="get">
     <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
     {% if ale_no %}
