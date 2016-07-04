@@ -6,19 +6,16 @@ from django.template import Context, loader
 
 from django.utils.safestring import mark_safe
 
-import ale.common
-
-import ale.models
-
-import seq.models
-
 import seq.views.common
+
+from collections import OrderedDict
 
 from seq.views import mutation_table_builder
 
 
 __author__ = 'Patrick Phaneuf'
 
+import pprint
 
 @login_required
 def key_mutations(request):
@@ -35,11 +32,16 @@ def key_mutations(request):
     seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(seq_experiment_ordered_dict)
     seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
-    # sample_name_list = [seq.views.common.get_sample_name(seq_experiment) for seq_experiment in seq_experiment_ordered_dict.values()]
+    new_ordered_dict = _get_experiments_and_mutations(seq_experiment_ordered_dict, 7)
 
-    table_header = mutation_table_builder.get_table_header(seq_experiment_ordered_dict)
+    # print(seq_experiment_ordered_dict[5])
+    # new_ordered_dict = OrderedDict()
 
-    table_body = _get_table_body(seq_experiment_ordered_dict, request)
+    print(seq_experiment_ordered_dict)
+
+    table_header = mutation_table_builder.get_table_header(new_ordered_dict)
+
+    table_body = _get_table_body(new_ordered_dict, request)
 
     template = loader.get_template("common_mutations.html")
 
@@ -56,34 +58,52 @@ def key_mutations(request):
     return HttpResponse(template.render(context))
 
 
+# TODO: need to refactor
+def _get_experiments_and_mutations(seq_experiment_dict, primary_seq_experiment_id):
+
+    primary_observed_mutations_query_set = seq.views.common.get_observed_mutations([primary_seq_experiment_id])
+
+    common_mutation_dict = {}
+
+    seq_experiment_common_mutation_count_list = []
+
+    for seq_experiment_id, seq_experiment in seq_experiment_dict.items():
+
+        if seq_experiment_id != primary_seq_experiment_id:
+
+            observed_mutations_query_set = seq.views.common.get_observed_mutations([seq_experiment_id])
+
+            # To be used to build observed mutation query set.
+            common_observed_mutation_queryset = _get_common_observed_mutation_queryset(primary_observed_mutations_query_set, observed_mutations_query_set)
+
+            seq_experiment_common_mutation_count_list.append((len(common_observed_mutation_queryset), seq_experiment_id))
+
+    sorted_seq_experiment_common_mutation_count_list = sorted(seq_experiment_common_mutation_count_list, reverse=True)
+
+    new_ordered_dict = OrderedDict()
+    new_ordered_dict[primary_seq_experiment_id] = seq_experiment_dict[primary_seq_experiment_id]
+
+    for entry in sorted_seq_experiment_common_mutation_count_list:
+
+        seq_experiment_id = entry[1]
+        new_ordered_dict[seq_experiment_id] = seq_experiment_dict[seq_experiment_id]
+
+    return new_ordered_dict
+
+
+def _get_common_observed_mutation_queryset(primary_observed_mutations_query_set, observed_mutations_query_set):
+
+    return observed_mutations_query_set.filter(mutation__in=primary_observed_mutations_query_set.values_list("mutation", flat=True))
+
+
 def _get_table_body(seq_experiment_dict, request):
+    observed_mutations_query_set = seq.views.common.get_observed_mutations(list(seq_experiment_dict.keys()))
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
     filter_settings = seq.views.common.get_filter_settings(ale_experiment_id)
 
-    key_mutation_queryset = ale.models.KeyMutation.objects.filter(ale_experiment_id=ale_experiment_id)
+    return mutation_table_builder.get_table_body(seq_experiment_dict,
+                                                 observed_mutations_query_set,
+                                                 filter_settings)
 
-    observed_mutations_query_set = _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset)
-
-    return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set, filter_settings)
-
-
-def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):
-
-    # 2 filters for the queryset:
-    # 1) get observed_mutations that are contained within the seq_experiment_dict,
-    # 2) get observed_mutations that reference to the key_mutation_queryset
-    # TODO: refactor
-
-    seq_experiment_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
-
-    key_mutation_id_list = []
-
-    for key_mutation in key_mutation_queryset:
-
-        key_mutation_id_list.append(key_mutation.mutation_id)
-
-    key_mutation_observed_mutation_queryset = seq_experiment_observed_mutation_queryset.filter(mutation_id__in=key_mutation_id_list)
-
-    return key_mutation_observed_mutation_queryset
