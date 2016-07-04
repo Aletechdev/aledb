@@ -72,12 +72,12 @@ def get_table_body(seq_experiment_dict,
     experiment_id_idx_mapping = _get_experiment_id_idx_mapping(seq_experiment_dict)
 
     # Initialize all sample mutation table cells as empty.
-    table_entries = _initialize_table(experiment_id_idx_mapping, mutations)
+    table_entry_list = _initialize_table(experiment_id_idx_mapping, mutations)
 
-    # Populating table_entries
+    # Populating table_entry_list
     for observed_mutation in observed_mutations_query_set:
 
-        if filter_mutation_id_list != None and observed_mutation.mutation.id in filter_mutation_id_list:
+        if filter_mutation_id_list is not None and observed_mutation.mutation.id in filter_mutation_id_list:
             continue
 
         if not _filter_mutation(filter_settings, observed_mutation):
@@ -85,14 +85,14 @@ def get_table_body(seq_experiment_dict,
             new_entry = _get_table_mutation_entry(observed_mutation, experiment_urls)
 
             if new_entry is not None and observed_mutation.sequencing_experiment_id in seq_experiment_dict.keys():
-                table_entries[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
+                table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping[observed_mutation.sequencing_experiment_id]] = new_entry
 
     #Populating table body
     table_body = ""
 
     for mutation in mutations:
 
-        if _contains_mutation(table_entries[mutation_index_dict[mutation.id]]):
+        if _contains_mutation(table_entry_list[mutation_index_dict[mutation.id]]):
 
             table_row = "<tr>"
 
@@ -108,7 +108,7 @@ def get_table_body(seq_experiment_dict,
             table_row += "<td>%s</td>" % mutation.sequence_change
             table_row += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
             table_row += "<td>%s</td>" % mutation.protein_change
-            table_row += "".join(table_entries[mutation_index_dict[mutation.id]])
+            table_row += "".join(table_entry_list[mutation_index_dict[mutation.id]])
             table_row += "</tr>"
 
             table_body += table_row + "\n"
