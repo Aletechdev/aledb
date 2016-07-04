@@ -33,7 +33,7 @@ def mutation_table(request):
 
     wt_filter = seq.views.common.get_wt_filter(request)
 
-    seq_experiment_queryset = seq.views.common.get_ales(ale_experiment_id, wt_filter)
+    ale_queryset = seq.views.common.get_ales(ale_experiment_id, wt_filter)
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request, include_starting_strain=True)
 
@@ -54,7 +54,7 @@ def mutation_table(request):
 
     template = loader.get_template("table_template.html")
 
-    context = Context({"experiments": seq_experiment_queryset,
+    context = Context({"ales": ale_queryset,
                        "ale_experiment_name": ale_experiment_name,
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
