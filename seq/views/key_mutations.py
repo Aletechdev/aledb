@@ -41,7 +41,7 @@ def key_mutations(request):
 
     table_body = _get_table_body(seq_experiment_ordered_dict, request)
 
-    template = loader.get_template("table_template.html")
+    template = loader.get_template("common_mutations.html")
 
     context = Context({"ales": ale_queryset,
                        "ale_experiment_name": ale_experiment_name,
