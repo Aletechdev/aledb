@@ -70,7 +70,7 @@ def _get_table_body(seq_experiment_dict, request):
 
     observed_mutations_query_set = _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset)
 
-    return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings)
+    return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set, filter_settings)
 
 
 def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):

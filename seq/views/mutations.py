@@ -83,6 +83,5 @@ def _get_table_body(seq_experiment_dict, request, wt_filter, wt_id):
 
     return mutation_table_builder.get_table_body(seq_experiment_dict,
                                            observed_mutations_query_set,
-                                           request,
                                            filter_settings,
                                            filter_mutation_id_list)
