@@ -37,7 +37,7 @@ def mutation_table(request):
 
     wt_filter = seq.views.common.get_wt_filter(request)
 
-    seq_experiment_queryset = seq.views.common.get_ale_queryset(ale_experiment_id, wt_filter)
+    seq_experiment_queryset = seq.views.common.get_ales(ale_experiment_id, wt_filter)
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request, include_starting_strain=True)
 

@@ -32,7 +32,7 @@ def key_mutated_genes(request):
 
     ale_number = seq.views.common.get_ale_number(request)
 
-    ale_queryset = seq.views.common.get_ale_queryset(ale_experiment_id, True)
+    ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
     seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request)
 
