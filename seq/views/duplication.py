@@ -42,7 +42,7 @@ def duplication(request):
 
     template = loader.get_template(INDEX_TEMPLATE)
 
-    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
+    seq_experiment_ordered_dict = common.get_ordered_reseq_dict(request, include_starting_strain=True)
 
     seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 

@@ -137,7 +137,7 @@ def get_ale_number_selector(ale_id):
     return ale_no_selector
 
 
-def get_experiment_ordered_dict(request, include_starting_strain=False):
+def get_ordered_reseq_dict(request, include_starting_strain=False):
 
     seq_experiment_ordered_dict = collections.OrderedDict()
 
@@ -206,7 +206,7 @@ def get_filter_settings(ale_experiment_id):
 
 
 # TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit. 
-def filter_out_starting_strain_reseq(seq_experiment_ordered_dict):
+def filter_out_wt_reseq(seq_experiment_ordered_dict):
 
     key_to_delete_found = False
 
@@ -227,7 +227,7 @@ def filter_out_starting_strain_reseq(seq_experiment_ordered_dict):
     return seq_experiment_ordered_dict
 
 
-def get_wt_seq_experiment_id(seq_experiment_ordered_dict):
+def get_wt_reseq_id(seq_experiment_ordered_dict):
 
     wt_id = None
 
