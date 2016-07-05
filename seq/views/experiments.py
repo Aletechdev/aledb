@@ -197,16 +197,16 @@ def _get_reseq_experiment_info_list(reseq_experiments):
 # TODO: should be transfered to common and have a parameter to filter wt mutations.
 def _get_observed_mutation_queryset(request):
 
-    seq_experiment_ordered_dict = common.get_ordered_reseq_dict(request, include_starting_strain=True)
+    ordered_reseq_dict = common.get_ordered_reseq_dict(request, include_starting_strain=True)
 
-    wt_id = seq.views.common.get_wt_seq_experiment_id(seq_experiment_ordered_dict)
+    wt_id = common.get_wt_reseq_id(ordered_reseq_dict)
 
-    seq_experiment_ordered_dict = common.filter_out_wt_reseq(seq_experiment_ordered_dict)
+    ordered_reseq_dict = common.filter_out_wt_reseq(ordered_reseq_dict)
 
-    filter_mutation_list = seq.views.common.get_observed_mutations([wt_id])
+    filter_mutation_list = common.get_observed_mutations([wt_id])
     filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
 
-    observed_mutation_query_set = common.get_observed_mutations(list(seq_experiment_ordered_dict.keys()))
+    observed_mutation_query_set = common.get_observed_mutations(list(ordered_reseq_dict.keys()))
 
     filter_observed_mutation_queryset = observed_mutation_query_set.exclude(mutation__in=filter_mutation_id_list)
 
