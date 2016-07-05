@@ -10,14 +10,10 @@ import aleinfo.settings as settings
 
 import seq.views.common
 
-import ale.common
+from seq.views import mutation_table_builder
 
 
 __author__ = 'pphaneuf'
-
-
-EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
-EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -33,32 +29,31 @@ def mutation_table(request):
 
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
 
-    ale_number = seq.views.common.get_ale_number(request)
+    ale_number = seq.views.common.get_ale_id(request)
 
     wt_filter = seq.views.common.get_wt_filter(request)
 
-    seq_experiment_queryset = seq.views.common.get_seq_experiment_queryset(ale_experiment_id, wt_filter)
+    ale_queryset = seq.views.common.get_ales(ale_experiment_id, wt_filter)
 
-    seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request, include_starting_strain=True)
+    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
 
     wt_id = None
 
     if wt_filter:
         
-        wt_id = _get_wt_seq_experiment_id(seq_experiment_ordered_dict) 
+        wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)
 
-        seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_seq_experiment(
-            seq_experiment_ordered_dict)
+        ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
 
-    seq_experiment_ordered_dict = seq.views.common.filter_checked_flasks(request, seq_experiment_ordered_dict)
+    ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
-    table_header = seq.views.common.get_table_header(seq_experiment_ordered_dict)
+    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    table_body = _get_table_body(seq_experiment_ordered_dict, request, wt_filter, wt_id)
+    table_body = _get_table_body(ordered_reseq_dict, request, wt_filter, wt_id)
 
     template = loader.get_template("table_template.html")
 
-    context = Context({"experiments": seq_experiment_queryset,
+    context = Context({"ales": ale_queryset,
                        "ale_experiment_name": ale_experiment_name,
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
@@ -85,21 +80,7 @@ def _get_table_body(seq_experiment_dict, request, wt_filter, wt_id):
         filter_mutation_list = seq.views.common.get_observed_mutations([wt_id])
         filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
 
-    return seq.views.common.get_table_body(seq_experiment_dict,
-                                           observed_mutations_query_set,
-                                           request,
-                                           filter_settings,
-                                           filter_mutation_id_list)
-
-
-def _get_wt_seq_experiment_id(seq_experiment_ordered_dict):
-
-    wt_id = None
-
-    for key, value in seq_experiment_ordered_dict.items():
-
-        if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
-
-            wt_id = key
-
-    return wt_id
+    return mutation_table_builder.get_table_body(seq_experiment_dict,
+                                                 observed_mutations_query_set,
+                                                 filter_settings,
+                                                 filter_mutation_id_list)

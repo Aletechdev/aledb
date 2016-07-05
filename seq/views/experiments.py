@@ -7,13 +7,17 @@ from django.http import HttpResponse
 
 from django.template import Context, loader
 
+from django.utils.safestring import mark_safe
+
 import aleinfo.settings as settings
 
 import seq.models   # TODO: only import necessary models.
 
 from seq.views import common
 
-from django.utils.safestring import mark_safe
+from django.db.models import Count
+
+from seq.forms.ignored_gene import IgnoredGenesForm
 
 
 EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
@@ -30,7 +34,7 @@ else:
 def lists(request):
     """return a list of resequencing experiments"""
 
-    experiments = common.get_seq_experiment_raw_queryset(request)
+    reseq_experiments = common.get_seq_experiment_raw_queryset(request)
 
     # Would rather want to use something like a dictionary since an experiment is
     # unique, though an experiment is currently a structure and an integral type
@@ -38,7 +42,7 @@ def lists(request):
 
     ale_experiment_id = common.get_ale_experiment_id(request)
 
-    experiments_info_list = _get_experiment_info_list(experiments)
+    experiments_info_list = _get_reseq_experiment_info_list(reseq_experiments)
 
     mutation_query_set = _get_mutation_query_set(request)
     observed_mutations_query_set = _get_observed_mutation_queryset(request)
@@ -56,7 +60,22 @@ def lists(request):
     needle_plot_data = []
 
     for observed_mutation in observed_mutations_query_set:
-        needle_plot_data.append({'coord': str(observed_mutation.mutation.position), 'category': observed_mutation.mutation.mutation_type, 'value': 1})
+        needle_plot_data.append(
+            {'coord': str(observed_mutation.mutation.position), 'category': observed_mutation.mutation.mutation_type,
+             'value': 1})
+
+    gene_query = observed_mutations_query_set.values('mutation__gene', 'mutation__mutation_type').annotate(
+        the_count=Count('mutation__gene')).order_by('-the_count')
+    sequence_change_query = observed_mutations_query_set.values('mutation__gene', 'mutation__protein_change').annotate(
+        the_count=Count('mutation__gene')).order_by('-the_count')
+
+    gene_list, genes, sequence_changes = common.get_ignored_genes(request, gene_query, sequence_change_query)
+
+    genes = common.set_gene_bar_chart_colors(genes)
+
+    sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_changes)
+
+    genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes, sequence_changes)
 
     context = Context({"protein_change_type_count_dict": protein_change_type_count_dict,
                        "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
@@ -66,15 +85,24 @@ def lists(request):
                        "resequencing_report_url": resequencing_report_url,
                        "ale_experiment_name": ale_experiment_name,
                        "muts_needle_plot": loader.get_template("muts_needle_plot.html"),
-                       "needle_plot_data": mark_safe(list(needle_plot_data))})
+                       "needle_plot_data": mark_safe(list(needle_plot_data)),
+                       "genes": mark_safe(genes_to_show),
+                       "sequence_changes": mark_safe(sequence_changes_to_show),
+                       "gene_color_set": mark_safe(common.GENE_COLORS),
+                       "seq_color_set": mark_safe(common.SEQ_COLORS),
+                       "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
+                       "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
+                       "Ignored_Gene_Form": IgnoredGenesForm({"ignored_genes": gene_list}),
+                       "number_of_genes_to_show": number_of_genes_to_show,
+                       "ale_experiment_id": ale_experiment_id})
 
     return HttpResponse(template.render(context))
 
 
 def _get_mutation_query_set(request):
+
     observed_mutations_query_set = _get_observed_mutation_queryset(request)
-    mutation_query_set = seq.models.Mutation.objects.filter(
-        pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
+    mutation_query_set = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
 
     return mutation_query_set
 
@@ -121,36 +149,36 @@ def _get_observed_mutation_type_count_dict(observed_mutation_query_set):
     return mutation_type_count_dict
 
 
-def _get_experiment_info_list(experiments):
+def _get_reseq_experiment_info_list(reseq_experiments):
 
-    experiments_info_list = []
+    reseq_experiments_info_list = []
 
-    for experiment in experiments:
+    for reseq_experiment in reseq_experiments:
 
-        mc_list = seq.models.UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=experiment.id)
+        mc_list = seq.models.UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=reseq_experiment.id)
 
-        mapped_read_count = int((experiment.percentage_mapped / 100) * experiment.reads)
+        mapped_read_count = int((reseq_experiment.percentage_mapped / 100) * reseq_experiment.reads)
 
-        species = experiment.isolate.flask.ale_id.species
+        species = reseq_experiment.isolate.flask.ale_id.species
 
-        strain = experiment.isolate.flask.ale_id.strain
+        strain = reseq_experiment.isolate.flask.ale_id.strain
 
-        knockouts = experiment.isolate.flask.ale_id.knockouts
+        knockouts = reseq_experiment.isolate.flask.ale_id.knockouts
 
         clonal_or_population = "clonal"
 
-        if experiment.isolate.is_population:
+        if reseq_experiment.isolate.is_population:
 
             clonal_or_population = "population"
 
-        media_temperature = experiment.isolate.flask.media.temperature
+        media_temperature = reseq_experiment.isolate.flask.media.temperature
 
-        media_description = experiment.isolate.flask.media.description
+        media_description = reseq_experiment.isolate.flask.media.description
 
-        substrate = experiment.isolate.flask.media.substrate
+        substrate = reseq_experiment.isolate.flask.media.substrate
 
         # Using tuple because immutable; mc_list must remain associated with particular experiment.
-        experiment_info_tuple = (experiment,
+        experiment_info_tuple = (reseq_experiment,
                                  mc_list,
                                  mapped_read_count,
                                  clonal_or_population,
@@ -161,15 +189,25 @@ def _get_experiment_info_list(experiments):
                                  strain,
                                  knockouts)
 
-        experiments_info_list.append(experiment_info_tuple)
+        reseq_experiments_info_list.append(experiment_info_tuple)
 
-    return experiments_info_list
+    return reseq_experiments_info_list
 
 
+# TODO: should be transfered to common and have a parameter to filter wt mutations.
 def _get_observed_mutation_queryset(request):
-    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
 
-    observed_mutations_query_set = common.get_observed_mutations(list(seq_experiment_ordered_dict.keys()))
+    ordered_reseq_dict = common.get_ordered_reseq_dict(request, include_starting_strain=True)
 
-    return observed_mutations_query_set
+    wt_id = common.get_wt_reseq_id(ordered_reseq_dict)
 
+    ordered_reseq_dict = common.filter_out_wt_reseq(ordered_reseq_dict)
+
+    filter_mutation_list = common.get_observed_mutations([wt_id])
+    filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
+
+    observed_mutation_query_set = common.get_observed_mutations(list(ordered_reseq_dict.keys()))
+
+    filter_observed_mutation_queryset = observed_mutation_query_set.exclude(mutation__in=filter_mutation_id_list)
+
+    return filter_observed_mutation_queryset
