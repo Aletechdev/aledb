@@ -23,7 +23,7 @@ def lineage(request):
 
     seq_experiment_queryset = common.get_seq_experiment_queryset(ale_experiment_id)
 
-    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request=request, include_starting_strain=True)
+    seq_experiment_ordered_dict = common.get_ordered_reseq_dict(request=request, include_starting_strain=True)
 
     seq_experiment_ordered_dict = common.filter_checked_flasks(request, seq_experiment_ordered_dict)
 

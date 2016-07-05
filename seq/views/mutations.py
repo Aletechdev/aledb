@@ -35,22 +35,21 @@ def mutation_table(request):
 
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, wt_filter)
 
-    seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request, include_starting_strain=True)
+    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
 
     wt_id = None
 
     if wt_filter:
         
-        wt_id = seq.views.common.get_wt_seq_experiment_id(seq_experiment_ordered_dict) 
+        wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)
 
-        seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_reseq(
-            seq_experiment_ordered_dict)
+        ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
 
-    seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
+    ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
-    table_header = mutation_table_builder.get_table_header(seq_experiment_ordered_dict)
+    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    table_body = _get_table_body(seq_experiment_ordered_dict, request, wt_filter, wt_id)
+    table_body = _get_table_body(ordered_reseq_dict, request, wt_filter, wt_id)
 
     template = loader.get_template("table_template.html")
 
@@ -82,6 +81,6 @@ def _get_table_body(seq_experiment_dict, request, wt_filter, wt_id):
         filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
 
     return mutation_table_builder.get_table_body(seq_experiment_dict,
-                                           observed_mutations_query_set,
-                                           filter_settings,
-                                           filter_mutation_id_list)
+                                                 observed_mutations_query_set,
+                                                 filter_settings,
+                                                 filter_mutation_id_list)

@@ -34,15 +34,15 @@ def key_mutated_genes(request):
 
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
-    seq_experiment_ordered_dict = seq.views.common.get_experiment_ordered_dict(request)
+    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request)
+    ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
+    ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
-    seq_experiment_ordered_dict = seq.views.common.filter_out_starting_strain_reseq(seq_experiment_ordered_dict)
+    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
+    filter_settings = seq.views.common.get_filter_settings(ale_experiment_id)
 
-    table_header = mutation_table_builder.get_table_header(seq_experiment_ordered_dict)
-
-    table_body = _get_table_body(seq_experiment_ordered_dict, request)
+    table_body = _get_table_body(ordered_reseq_dict, filter_settings, request)
 
     template = loader.get_template("table_template.html")
 
@@ -58,11 +58,9 @@ def key_mutated_genes(request):
     return HttpResponse(template.render(context))
 
 
-def _get_table_body(seq_experiment_dict, request):
+def _get_table_body(seq_experiment_dict, filter_settings, request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-
-    filter_settings = seq.views.common.get_filter_settings(ale_experiment_id)
 
     key_mutation_queryset = ale.models.KeyMutation.objects.filter(ale_experiment_id=ale_experiment_id)
 

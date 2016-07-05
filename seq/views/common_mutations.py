@@ -18,9 +18,10 @@ __author__ = 'Patrick Phaneuf'
 
 REQUEST_PRIMARY_RESEQ_ID = "primary_reseq_id"
 
+from pprint import pprint
 
 @login_required
-def key_mutations(request):
+def common_mutations(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
@@ -28,9 +29,9 @@ def key_mutations(request):
  
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
-    # TODO: filter out starting starting observed mutations.
-    ordered_reseq_dict = seq.views.common.get_experiment_ordered_dict(request)
-    ordered_reseq_dict = seq.views.common.filter_out_starting_strain_reseq(ordered_reseq_dict)
+    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request)
+    wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
+    ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
     primary_reseq_id = _get_primary_reseq_id(request)
@@ -41,7 +42,15 @@ def key_mutations(request):
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    table_body = _get_table_body(ordered_reseq_dict, request, observed_mutation_queryset)
+    filter_settings = seq.views.common.get_filter_settings(ale_experiment_id)
+
+    filter_mutation_list = seq.views.common.get_observed_mutations([wt_id])
+    filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
+
+    table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
+                                                       observed_mutation_queryset,
+                                                       filter_settings,
+                                                       filter_mutation_id_list)
 
     template = loader.get_template("common_mutations.html")
 
@@ -94,17 +103,6 @@ def _get_experiments_and_mutations(reseq_dict, primary_reseq_id):
 def _get_common_observed_mutation_queryset(primary_observed_mutations_query_set, observed_mutations_query_set):
 
     return observed_mutations_query_set.filter(mutation__in=primary_observed_mutations_query_set.values_list("mutation", flat=True))
-
-
-def _get_table_body(reseq_dict, request, observed_mutations_queryset):
-
-    ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-
-    filter_settings = seq.views.common.get_filter_settings(ale_experiment_id)
-
-    return mutation_table_builder.get_table_body(reseq_dict,
-                                                 observed_mutations_queryset,
-                                                 filter_settings)
 
 
 def _get_primary_reseq_id(request):
