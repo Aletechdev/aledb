@@ -145,36 +145,25 @@
 </ul>
 <br><br>
 
-<!-- ALE selection drop-down -->
-{% if experiment_id %}
-    <form action="" method="get">
-        <p>
-            <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
-            <select name="ale_no" class="ui">
-                <option value="all">All ales</option>
-                {% for ale in ales %}
-                    <option {% if ale.ale_id == ale_no %}selected="selected" {% endif %}
-                            value="{{ ale.ale_id }}">{{ ale.ale_id }}</option>
-                {% endfor %}
-            </select>
-            {% if template_header != "Key Mutations" %}
-                <label class="ui"><input type="checkbox" name="wtfilt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
-            {% endif %}
-        </p>
-        <p>
-            <input type="submit" value="Apply" class="ui"/>
-        </p>
-    </form>
-{% endif %}
+<!-- primary seq experiment selection drop-down -->
+<form action="" method="get">
+    <p>
+        <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+        <select name="primary_reseq_id" class="ui">
+            {% for reseq in reseq_list %}
+                <option {% if reseq.id == primary_reseq_id %}selected="selected" {% endif %}
+                        value="{{ reseq.id }}">{{ reseq.get_isolate_name }}</option>
+            {% endfor %}
+        </select>
+    </p>
+    <p>
+        <input type="submit" value="Apply" class="ui"/>
+    </p>
+</form>
 
 <!-- Mutation table -->
 <form action="" method="get">
     <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
-    {% if ale_no %}
-        <input type="hidden" name="ale_no" value="{{ ale_no }}"/>
-    {% else %}
-        <input type="hidden" name="ale_no" value="all"/>
-    {% endif %}
     <table id="data">
         <input type="button" value="Remove checked flasks" class="ui" onclick="filterFlask('remove')"/>
         <input type="button" value="Show checked flasks" class="ui" onclick="filterFlask('show')"/>

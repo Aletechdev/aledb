@@ -18,6 +18,8 @@ import os
 
 import requests
 
+from seq.views import mutation_table_builder
+
 
 INDEX_TEMPLATE = "duplication.html"
 
@@ -40,18 +42,17 @@ def duplication(request):
 
     template = loader.get_template(INDEX_TEMPLATE)
 
-    seq_experiment_ordered_dict = common.get_experiment_ordered_dict(request, include_starting_strain=True)
+    seq_experiment_ordered_dict = common.get_ordered_reseq_dict(request, include_starting_strain=True)
 
-    seq_experiment_ordered_dict = common.filter_checked_flasks(request, seq_experiment_ordered_dict)
+    seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
-    experiment_urls = common._get_experiment_urls(seq_experiment_ordered_dict)
+    experiment_urls = mutation_table_builder._get_experiment_urls(seq_experiment_ordered_dict)
 
-    experiment_id_idx_mapping = common._get_experiment_id_idx_mapping(seq_experiment_ordered_dict)
+    experiment_id_idx_mapping = mutation_table_builder._get_experiment_id_idx_mapping_dict(seq_experiment_ordered_dict)
 
     sorted_experiment_url_indices = sorted(experiment_id_idx_mapping.items(), key=operator.itemgetter(1))
 
     experiment_links = []
-
 
     for experiment_url_index in sorted_experiment_url_indices:
 
