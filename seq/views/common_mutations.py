@@ -61,9 +61,10 @@ def common_mutations(request):
                        "reseq_list": reseq_list,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
-                       "title": "Key Mutations",
+                       "title": "Common Mutations",
                        "table_header": mark_safe(table_header),
-                       "template_header": "Key Mutations"})
+                       "primary_reseq_id": primary_reseq_id,
+                       "template_header": "Common Mutations"})
 
     return HttpResponse(template.render(context))
 
