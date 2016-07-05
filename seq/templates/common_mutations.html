@@ -151,7 +151,8 @@
         <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
         <select name="primary_reseq_id" class="ui">
             {% for reseq in reseq_list %}
-                <option value="{{ reseq.id }}">{{ reseq.get_isolate_name }}</option>
+                <option {% if reseq.id == primary_reseq_id %}selected="selected" {% endif %}
+                        value="{{ reseq.id }}">{{ reseq.get_isolate_name }}</option>
             {% endfor %}
         </select>
     </p>
