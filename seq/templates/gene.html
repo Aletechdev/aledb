@@ -149,14 +149,19 @@
     </table>
 </form>
 {% endif %}
-<br>
-<div id='picked-atom-name' style='text-align:center; '>&nbsp;</div>
-<div id="viewer" style='text-align:center;'></div>
+
+<br><br>
+<h4>Gene Protein Structure</h4>
+<p>
+    <div id='picked-atom-name' style='text-align:left; '>&nbsp;</div>
+    <div id="viewer" style='text-align:left;'></div>
+</p>
+
 </body>
 <script type="text/javascript" src="/static/bio-pv.min.js"></script>
 <script>
 var parent = document.getElementById('viewer');
-var viewer = pv.Viewer(parent, { width : 800, height : 600, antialias : true, fog: false, background: '#a6a6a6'});
+var viewer = pv.Viewer(parent, { width : 800, height : 600, antialias : true, fog: false, background: 'white'});
 
 function setColorForAtom(go, atom, color) {
     var view = go.structure().createEmptyView();
