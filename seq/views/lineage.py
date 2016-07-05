@@ -19,7 +19,7 @@ def lineage(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
 
-    ale_number = common.get_ale_number(request)
+    ale_number = common.get_ale_id(request)
 
     seq_experiment_queryset = common.get_seq_experiment_queryset(ale_experiment_id)
 

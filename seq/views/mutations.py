@@ -29,7 +29,7 @@ def mutation_table(request):
 
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
 
-    ale_number = seq.views.common.get_ale_number(request)
+    ale_number = seq.views.common.get_ale_id(request)
 
     wt_filter = seq.views.common.get_wt_filter(request)
 

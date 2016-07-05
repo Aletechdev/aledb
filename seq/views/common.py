@@ -46,6 +46,8 @@ def _set_colors(length):
 GENE_COLORS = _set_colors(len(MUTATION_TYPE_LIST) - 1)
 SEQ_COLORS = _set_colors(len(PROTEIN_CHANGE_TYPE_LIST) - 1)
 
+# TODO: change all instance of 'seq_experiment' to 'reseq'
+
 
 def get_ales(experiment_ids, exclude_starting_strain=False):
 
@@ -76,7 +78,7 @@ def get_wt_filter(request):
     return ret_val
 
 
-def get_ale_number(request):
+def get_ale_id(request):
 
     ale_number = request.GET.get(REQUEST_ALE_ID)
 
