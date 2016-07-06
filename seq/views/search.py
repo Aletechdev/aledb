@@ -85,102 +85,13 @@ def _get_seq_exp(request):
         isolates_to_show_ids = str(isolates_to_show_string).replace("{", "").replace("}", "")
         isolates_to_show_id_list = [int(i) for i in isolates_to_show_ids.split(",") if i != ""]
 
-    include_argument_list = []
-    exclude_argument_list = []
+    include_argument_list, exclude_argument_list = _get_search_query_arguments(request)
 
-    if request.GET['q']:
+    ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
 
-        gene_list = request.GET['q'].replace(" ", "").split(',')
+    mutations_with_gene = _get_django_search_query(include_argument_list, exclude_argument_list)
 
-        for mutated_gene in gene_list:
-            if str(mutated_gene).startswith("-"):
-                if str(mutated_gene).endswith("*"):
-                    exclude_argument_list.append(Q(**{'gene__startswith': str(mutated_gene)[1:-1]}))
-
-                elif str(mutated_gene)[1:].startswith("*"):
-                    exclude_argument_list.append(Q(**{'gene__endswith': str(mutated_gene)[2:]}))
-
-                else:
-                    exclude_argument_list.append(Q(**{'gene__contains': str(mutated_gene)}))
-            else:
-                if str(mutated_gene).endswith("*"):
-                    include_argument_list.append(Q(**{'gene__startswith': str(mutated_gene)[:-1]}))
-
-                elif str(mutated_gene).startswith("*"):
-                    include_argument_list.append(Q(**{'gene__endswith': str(mutated_gene)[1:]}))
-
-                else:
-                    include_argument_list.append(Q(**{'gene__contains': str(mutated_gene)}))
-
-    if request.GET['min']:
-        include_argument_list.append(Q(**{'position__gte': request.GET['min']}))
-
-    if request.GET['max']:
-        include_argument_list.append(Q(**{'position__lte': request.GET['max']}))
-
-    if request.GET['mut']:
-        mutation_type_list = request.GET['mut'].replace(" ", "").split(',')
-        for mutation in mutation_type_list:
-            if str(mutation).startswith("-"):
-                exclude_argument_list.append(Q(**{'mutation_type': str(mutation)[1:].upper()}))
-            else:
-                include_argument_list.append(Q(**{'mutation_type': str(mutation).upper()}))
-
-    if request.GET['seq']:
-        sequence_change_list = request.GET['seq'].replace(" ", "").split(',')
-        sequence_change_include = []
-        sequence_change_exclude = []
-        for sequence_change in sequence_change_list:
-            if str(sequence_change).startswith("-"):
-                sequence_change_exclude.append(Q(**{'sequence_change__contains': str(sequence_change)[1:]}))
-            else:
-                sequence_change_include.append(Q(**{'sequence_change__contains': str(sequence_change)}))
-
-        if len(sequence_change_include) > 0:
-            include_argument_list.append(reduce(operator.or_, sequence_change_include))
-
-        if len(sequence_change_exclude) > 0:
-            exclude_argument_list.append(reduce(operator.or_, sequence_change_exclude))
-
-    if request.GET['prot']:
-        protein_change_list = request.GET['prot'].replace(" ", "").split(',')
-        protein_change_include = []
-        protein_change_exclude = []
-        for protein_change in protein_change_list:
-            if str(protein_change).startswith("-"):
-                protein_change_exclude.append(Q(**{'protein_change__contains': str(protein_change)[1:]}))
-            else:
-                protein_change_include.append(Q(**{'protein_change__contains': str(protein_change)}))
-
-        if len(protein_change_include) > 0:
-            include_argument_list.append(reduce(operator.or_, protein_change_include))
-
-        if len(protein_change_exclude) > 0:
-            exclude_argument_list.append(reduce(operator.or_, protein_change_exclude))
-
-    ale_experiment_include = []
-    ale_experiment_exclude = []
-    if request.GET['ale']:
-        ale_experiment_list = request.GET['ale'].replace(" ", "").split(',')
-        for ale_experiment in ale_experiment_list:
-            if str(ale_experiment).startswith("-"):
-                ale_experiment_exclude.append(str(ale_experiment)[1:])
-            else:
-                ale_experiment_include.append(str(ale_experiment))
-
-    if len(include_argument_list) > 0:
-        include_argument_list = reduce(operator.and_, include_argument_list)
-    else:
-        return None, None
-
-    if len(exclude_argument_list) > 0:
-        print ("has exclusions")
-        mutations_with_gene = seq.models.Mutation.objects.filter(include_argument_list).exclude(reduce(operator.or_, exclude_argument_list))
-    else:
-        print ("no exclusions")
-        mutations_with_gene = seq.models.Mutation.objects.filter(include_argument_list)
-
-    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation=mutations_with_gene)
+    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation__in=mutations_with_gene)
 
     seq_experiment_dict = {}
 
@@ -189,12 +100,12 @@ def _get_seq_exp(request):
         # TODO: Should find a way to put checking experiment name in the filter query instead of checking the list after a query
         observed_mutation_name = observed_mutation.sequencing_experiment.isolate.flask.ale_id.ale_experiment.name
 
-        if ale_experiment_include:
-            if observed_mutation_name not in ale_experiment_include:
+        if ale_experiments_to_include:
+            if observed_mutation_name not in ale_experiments_to_include:
                 continue
 
-        if ale_experiment_exclude:
-            if observed_mutation_name in ale_experiment_exclude:
+        if ale_experiments_to_exclude:
+            if observed_mutation_name in ale_experiments_to_exclude:
                 continue
 
         if observed_mutation.sequencing_experiment.id not in isolates_to_remove_id_list\
@@ -220,3 +131,129 @@ def _get_last_search(request):
     }
 
     return last_search
+
+
+def _get_search_query_arguments(request):
+
+    include_argument_list = []
+    exclude_argument_list = []
+
+    _add_genes_to_query(request, include_argument_list, exclude_argument_list)
+
+    _add_min_and_max_to_query(request, include_argument_list)
+
+    _add_mutation_change_to_query(request, include_argument_list, exclude_argument_list)
+
+    _add_sequence_change_to_query(request, include_argument_list, exclude_argument_list)
+
+    _add_protein_change_to_query(request, include_argument_list, exclude_argument_list)
+
+    return include_argument_list, exclude_argument_list
+
+
+def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
+    if request.GET['q']:
+
+        gene_list = request.GET['q'].replace(" ", "").split(',')
+
+        for mutated_gene in gene_list:
+            if str(mutated_gene).startswith("-"):
+                if str(mutated_gene).endswith("*"):
+                    exclude_argument_list.append(Q(**{'gene__startswith': str(mutated_gene)[1:-1]}))
+
+                elif str(mutated_gene)[1:].startswith("*"):
+                    exclude_argument_list.append(Q(**{'gene__endswith': str(mutated_gene)[2:]}))
+
+                else:
+                    exclude_argument_list.append(Q(**{'gene__contains': str(mutated_gene)}))
+            else:
+                if str(mutated_gene).endswith("*"):
+                    include_argument_list.append(Q(**{'gene__startswith': str(mutated_gene)[:-1]}))
+
+                elif str(mutated_gene).startswith("*"):
+                    include_argument_list.append(Q(**{'gene__endswith': str(mutated_gene)[1:]}))
+
+                else:
+                    include_argument_list.append(Q(**{'gene__contains': str(mutated_gene)}))
+
+
+def _add_min_and_max_to_query(request, include_argument_list):
+    if request.GET['min']:
+        include_argument_list.append(Q(**{'position__gte': request.GET['min']}))
+
+    if request.GET['max']:
+        include_argument_list.append(Q(**{'position__lte': request.GET['max']}))
+
+
+def _add_mutation_change_to_query(request, include_argument_list, exclude_argument_list):
+    if request.GET['mut']:
+        mutation_type_list = request.GET['mut'].replace(" ", "").split(',')
+        for mutation in mutation_type_list:
+            if str(mutation).startswith("-"):
+                exclude_argument_list.append(Q(**{'mutation_type': str(mutation)[1:].upper()}))
+            else:
+                include_argument_list.append(Q(**{'mutation_type': str(mutation).upper()}))
+
+
+def _add_sequence_change_to_query(request, include_argument_list, exclude_argument_list):
+    if request.GET['seq']:
+        sequence_change_list = request.GET['seq'].replace(" ", "").split(',')
+        sequence_change_include = []
+        sequence_change_exclude = []
+        for sequence_change in sequence_change_list:
+            if str(sequence_change).startswith("-"):
+                sequence_change_exclude.append(Q(**{'sequence_change__contains': str(sequence_change)[1:]}))
+            else:
+                sequence_change_include.append(Q(**{'sequence_change__contains': str(sequence_change)}))
+
+        if len(sequence_change_include) > 0:
+            include_argument_list.append(reduce(operator.or_, sequence_change_include))
+
+        if len(sequence_change_exclude) > 0:
+            exclude_argument_list.append(reduce(operator.or_, sequence_change_exclude))
+
+
+def _add_protein_change_to_query(request, include_argument_list, exclude_argument_list):
+    if request.GET['prot']:
+        protein_change_list = request.GET['prot'].replace(" ", "").split(',')
+        protein_change_include = []
+        protein_change_exclude = []
+        for protein_change in protein_change_list:
+            if str(protein_change).startswith("-"):
+                protein_change_exclude.append(Q(**{'protein_change__contains': str(protein_change)[1:]}))
+            else:
+                protein_change_include.append(Q(**{'protein_change__contains': str(protein_change)}))
+
+        if len(protein_change_include) > 0:
+            include_argument_list.append(reduce(operator.or_, protein_change_include))
+
+        if len(protein_change_exclude) > 0:
+            exclude_argument_list.append(reduce(operator.or_, protein_change_exclude))
+
+
+def _get_ale_experiment_arguments(request):
+    ale_experiments_to_include = []
+    ale_experiments_to_exclude = []
+    if request.GET['ale']:
+        ale_experiment_list = request.GET['ale'].replace(" ", "").split(',')
+        for ale_experiment in ale_experiment_list:
+            if str(ale_experiment).startswith("-"):
+                ale_experiments_to_exclude.append(str(ale_experiment)[1:])
+            else:
+                ale_experiments_to_include.append(str(ale_experiment))
+    return ale_experiments_to_include, ale_experiments_to_exclude
+
+
+def _get_django_search_query(include_argument_list, exclude_argument_list):
+    if len(include_argument_list) > 0:
+        include_argument_list = reduce(operator.and_, include_argument_list)
+    else:
+        return None, None
+
+    if len(exclude_argument_list) > 0:
+        mutations_with_gene = seq.models.Mutation.objects.filter(include_argument_list).exclude(
+            reduce(operator.or_, exclude_argument_list))
+    else:
+        mutations_with_gene = seq.models.Mutation.objects.filter(include_argument_list)
+
+    return mutations_with_gene
