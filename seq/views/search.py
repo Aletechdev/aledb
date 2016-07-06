@@ -18,6 +18,8 @@ import operator
 
 from functools import reduce
 
+from seq.views import mutation_table_builder
+
 
 @login_required
 def search(request):
@@ -39,10 +41,9 @@ def search(request):
             if seq_experiment_dict is None or observed_mutations_with_gene_query_set is None:
                 return render(request, 'search.html', {'error': True})
 
-            table_header = seq.views.common.get_table_header(seq_experiment_dict)
+            table_header = mutation_table_builder.get_table_header(seq_experiment_dict)
 
-            table_body = seq.views.common.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set,
-                                                 request)
+            table_body = mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set)
 
             last_search = _get_last_search(request)
 
@@ -73,13 +74,13 @@ def _is_query_empty(query):
 def _get_seq_exp(request):
 
     isolates_to_remove_id_list = []
-    isolates_to_remove_string = request.GET.get(seq.views.common.EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG)
+    isolates_to_remove_string = request.GET.get(mutation_table_builder.EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG)
     if isolates_to_remove_string is not None:
         isolates_to_remove_ids = str(isolates_to_remove_string).replace("{", "").replace("}", "")
         isolates_to_remove_id_list = [int(i) for i in isolates_to_remove_ids.split(",") if i != ""]
 
     isolates_to_show_id_list = []
-    isolates_to_show_string = request.GET.get(seq.views.common.EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG)
+    isolates_to_show_string = request.GET.get(mutation_table_builder.EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG)
     if isolates_to_show_string is not None:
         isolates_to_show_ids = str(isolates_to_show_string).replace("{", "").replace("}", "")
         isolates_to_show_id_list = [int(i) for i in isolates_to_show_ids.split(",") if i != ""]

@@ -8,8 +8,10 @@ from django.http import HttpResponse
 
 from seq.views import common
 
+from seq.views import mutation_table_builder
 
-__author__ = 'Patrick'
+
+__author__ = 'Patrick Phaneuf'
 
 
 @login_required
@@ -21,20 +23,20 @@ def lineage(request):
 
     ale_number = common.get_ale_id(request)
 
-    seq_experiment_queryset = common.get_seq_experiment_queryset(ale_experiment_id)
+    ale_queryset = common.get_ales(ale_experiment_id)
 
     seq_experiment_ordered_dict = common.get_ordered_reseq_dict(request=request, include_starting_strain=True)
 
-    seq_experiment_ordered_dict = common.filter_checked_flasks(request, seq_experiment_ordered_dict)
+    seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
-    table_header = common.get_table_header(seq_experiment_ordered_dict)
+    table_header = mutation_table_builder.get_table_header(seq_experiment_ordered_dict)
 
     table_body = _get_table_body(seq_experiment_ordered_dict, request)
 
     template = loader.get_template("table_template.html")
 
     context = Context({"ale_experiment_name": ale_experiment_name,
-                       "experiments": seq_experiment_queryset,
+                       "ales": ale_queryset,
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
@@ -53,5 +55,5 @@ def _get_table_body(seq_experiment_dict, request):
 
     filter_settings = common.get_filter_settings(ale_experiment_id)
 
-    return common.get_table_body(seq_experiment_dict, observed_mutations_query_set, request, filter_settings)
+    return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set, filter_settings)
 
