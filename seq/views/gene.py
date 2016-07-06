@@ -25,20 +25,13 @@ def gene(request):
 
     template = loader.get_template("gene.html")
 
-    pdb_ids = seq.models.GeneToPDB.objects.filter(gene__contains=gene_query).order_by('rank')
-
-    pdb_code = ''
-
-    if len(pdb_ids) > 0:
-        pdb_code = pdb_ids[0].pdb_id
-
-    pdb_file_path = 'http://files.rcsb.org/download/' + pdb_code + '.pdb'
+    pdb_url = _get_pdb_url(gene_query)
 
     context = Context({"gene_name": gene_query,
                        "table_body": mark_safe(table_body),
                        "title": gene_query + " gene",
                        "table_header": mark_safe(table_header),
-                       "pdb_file_path": pdb_file_path})
+                       "pdb_file_path": pdb_url})
 
     return HttpResponse(template.render(context))
 
@@ -60,7 +53,7 @@ def _get_seq_exp(request, mutated_gene):
 
     mutations_with_gene = seq.models.Mutation.objects.filter(gene=mutated_gene)
 
-    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation=mutations_with_gene)
+    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation__in=mutations_with_gene)
 
     seq_experiment_dict = {}
 
@@ -73,3 +66,16 @@ def _get_seq_exp(request, mutated_gene):
             seq_experiment_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
 
     return seq_experiment_dict, observed_mutations_with_gene
+
+
+def _get_pdb_url(gene_query):
+    pdb_ids = seq.models.GeneToPDB.objects.filter(gene__contains=gene_query).order_by('rank')
+
+    pdb_code = ''
+
+    if len(pdb_ids) > 0:
+        pdb_code = pdb_ids[0].pdb_id
+
+    pdb_url = 'http://files.rcsb.org/download/' + pdb_code + '.pdb'
+
+    return pdb_url
