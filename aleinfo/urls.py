@@ -17,9 +17,11 @@ urlpatterns = patterns('',
                        url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
                        # Uncomment the next line to enable the admin:
-                       url(r'^admin/', include(admin.site.urls)),
+                       url(r'^admin/', include(admin.site.urls)),   # TODO: remove if we're not using the Django site admin functionality.
 
                        url(r'^ale_analytics/', include('seq.urls')),
+
+                       url(r'^filter/', include('filter.urls')),
                        )
 
 urlpatterns += staticfiles_urlpatterns()

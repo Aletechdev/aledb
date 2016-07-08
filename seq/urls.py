@@ -9,7 +9,7 @@ import seq.views.select_lineage
 import seq.views.lineage
 import seq.views.meta_data
 import seq.views.search
-import seq.views.filter
+# import seq.views.filter
 import seq.views.gene
 import seq.views.duplication
 import seq.views.dashboard
@@ -26,7 +26,6 @@ urlpatterns = patterns('',
                        url('^lineage', seq.views.lineage.lineage, name="lineage"),
                        url('^meta_data', seq.views.meta_data.meta_data, name="lineage"),
                        url('^search', seq.views.search.search, name="search"),
-                       url('^filter', seq.views.filter.create_filter, name="filter"),
                        url('^gene', seq.views.gene.gene, name="gene"),
                        url('^duplication', seq.views.duplication.duplication, name="duplication"),
                        url('^dashboard', seq.views.dashboard.dashboard, name="dashboard")
