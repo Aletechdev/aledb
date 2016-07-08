@@ -249,6 +249,7 @@ class Isolate(models.Model):
 
 
 # TODO: make 20 and 100 constants  to be referred to within some other global file.
+# TODO: this model may need to be declared within the filter Django app models.
 class Filter(models.Model):
 
     ale_experiment = models.ForeignKey(AleExperiment, on_delete=models.CASCADE)
