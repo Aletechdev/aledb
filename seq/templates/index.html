@@ -36,9 +36,7 @@
 {% block dash %}{% endblock %}
 {% block search %}{% endblock %}
 {% block content %}
-
-<table id="ale_analytics_info" class="tablesorter">
-
+<body>
     <table id="runs" class="tablesorter">
         <thead>
         <tr>
@@ -48,7 +46,7 @@
             <th>Meta Data</th>
             <th>Mutations</th>
             <th>Key Mutated Genes</th>
-	        <th>Common Mutations</th>
+            <th>Common Mutations</th>
             <th>Lineage</th>
             <th>Filter</th>
             <th>Duplications</th>
@@ -56,19 +54,19 @@
         </thead>
         <tbody>
         {% for experiment in experiments %}
-        <tr>
-            <td>{{experiment.name}}</td>
-            <td>{{experiment.person}}</td>
-            <td><a href="lists?ale_experiment_id={{experiment.ale_id}}">{{experiment.name}}</a></td>
-            <td><a href="meta_data?ale_experiment_id={{experiment.ale_id}}">{{experiment.name}}</a></td>
-            <td><a href="mutations?ale_experiment_id={{experiment.ale_id}}">{{experiment.name}}</a></td>
-            <td><a href="key_mutated_genes?ale_experiment_id={{experiment.ale_id}}">{{experiment.name}}</a></td>
-	        <td><a href="common_mutations?ale_experiment_id={{experiment.ale_id}}">{{experiment.name}}</a></td>
-            <td><a href="select_lineage?ale_experiment_id={{experiment.ale_id}}">{{experiment.name}}</a></td>
-            <td><a href="filter?ale_experiment_id={{experiment.ale_id}}">{{experiment.name}}</a></td>
-            <td><a href="duplication?ale_experiment_id={{experiment.ale_id}}">{{experiment.name}}</a></td>
-            {% endfor %}
+            <tr>
+            <td>{{ experiment.name }}</td>
+            <td>{{ experiment.person }}</td>
+            <td><a href="lists?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
+            <td><a href="meta_data?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
+            <td><a href="mutations?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
+            <td><a href="key_mutated_genes?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
+            <td><a href="common_mutations?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
+            <td><a href="select_lineage?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
+            <td><a href="filter?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
+            <td><a href="duplication?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
+        {% endfor %}
         </tbody>
     </table>
-</table>
+</body>
 {% endblock %}
