@@ -248,7 +248,7 @@ class Isolate(models.Model):
         # TODO - encode experiments done on the isolate
 
 
-# TODO: make 20 and 100 constants  to be referred to within some other global file.
+# TODO: make 20 and 100 constants to be referred to within some other global file.
 # TODO: this model may need to be declared within the filter Django app models.
 class Filter(models.Model):
 
@@ -256,3 +256,4 @@ class Filter(models.Model):
     min_cutoff = models.PositiveSmallIntegerField(default=20)
     max_cutoff = models.PositiveSmallIntegerField(default=100)
     ignored_genes = models.CharField(max_length=500, default='', blank=True)
+    ignored_mutations = models.TextField(default='', blank=True)

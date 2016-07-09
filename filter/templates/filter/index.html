@@ -33,18 +33,19 @@
 <br>
 
 <form action="" method="POST">
-    <br>
+
     <h4>Frequency Filtering Thresholds</h4>
     Minimum Cutoff: {{ form.min_cutoff }}
     <br>
     Maximum Cutoff: {{ form.max_cutoff }}
+
     <br>
     <br>
     <h4>Ignored Genes</h4>
     <p>Enter genes(s) separated by ',' ex: tpoB,folD</p>
-    {{form.ignored_genes}}
-    <br>
-    <br>
+    <p>{{form.ignored_genes}}</p>
+    <h4>Ignored Mutations</h4>
+    <p>{{form.ignored_mutations}}</p>
     <input type="submit" value="Save" name="save">
 </form>
 
