@@ -39,7 +39,8 @@ def filter(request):
     default_filter_form_model = {'ale_experiment_id': ale_experiment_id,
                                  'min_cutoff': 20,
                                  'max_cutoff': 100,
-                                 'ignored_genes': ""}
+                                 'ignored_genes': "",
+                                 'ignored_mutations': ""}
 
     if request.method == 'POST':
 
@@ -52,24 +53,25 @@ def filter(request):
             filter_form_model.min_cutoff = request.POST.get("min_cutoff", 20)
             filter_form_model.max_cutoff = request.POST.get("max_cutoff", 100)
             filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
+            filter_form_model.ignored_mutations = request.POST.get("ignored_mutations", "")
             filter_form_model.save()
-            return HttpResponseRedirect("http://aquaticus.ucsd.edu/ale_analytics/") #TODO: should return to relative instance of ALE Analytics.
         else:
-            print (filter_form.errors)
+            print(filter_form.errors)
 
     else:  # request.method == 'GET'
         filter_form_model, created = ale.models.Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
                                                                              defaults=default_filter_form_model)
         initial_filter_form_data = {"min_cutoff": filter_form_model.min_cutoff,
                                     "max_cutoff": filter_form_model.max_cutoff,
-                                    "ignored_genes": filter_form_model.ignored_genes}
+                                    "ignored_genes": filter_form_model.ignored_genes,
+                                    "ignored_mutations": filter_form_model.ignored_mutations}
 
         filter_form = FilterForm(initial=initial_filter_form_data)
 
     context = Context({
         "form": filter_form,
         "ale_experiment_id": ale_experiment_id,
-        "ale_experiment_name": ale_experiment_name
+        "ale_experiment_name": ale_experiment_name,
     })
 
     return HttpResponse(template.render(context))
