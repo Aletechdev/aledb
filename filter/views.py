@@ -14,6 +14,8 @@ import ale.models
 
 from filter.forms.filter import FilterForm
 
+import json
+
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -53,7 +55,7 @@ def filter(request):
             filter_form_model.min_cutoff = request.POST.get("min_cutoff", 20)
             filter_form_model.max_cutoff = request.POST.get("max_cutoff", 100)
             filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
-            filter_form_model.ignored_mutations = request.POST.get("ignored_mutations", "")
+            filter_form_model.ignored_mutations = json.dumps(request.POST.get("ignored_mutations", ""))
             filter_form_model.save()
         else:
             print(filter_form.errors)
@@ -64,7 +66,7 @@ def filter(request):
         initial_filter_form_data = {"min_cutoff": filter_form_model.min_cutoff,
                                     "max_cutoff": filter_form_model.max_cutoff,
                                     "ignored_genes": filter_form_model.ignored_genes,
-                                    "ignored_mutations": filter_form_model.ignored_mutations}
+                                    "ignored_mutations": str(json.loads(filter_form_model.ignored_mutations))}
 
         filter_form = FilterForm(initial=initial_filter_form_data)
 
