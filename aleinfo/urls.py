@@ -21,7 +21,7 @@ urlpatterns = patterns('',
 
                        url(r'^ale_analytics/', include('seq.urls')),
 
-                       url(r'^filter/', include('filter.urls')),
+                       url(r'^ale_analytics/filter/', include('filter.urls')),
                        )
 
 urlpatterns += staticfiles_urlpatterns()
