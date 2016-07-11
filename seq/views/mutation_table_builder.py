@@ -6,6 +6,8 @@ import os
 
 import seq.views.common
 
+import json
+
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 
@@ -137,9 +139,28 @@ def _get_experiment_id_idx_mapping_dict(seq_experiment_dict):
 
 def _filter_mutation(filter_settings, observed_mutation):
 
-    filter_mutation = _is_filter_on_gene(filter_settings, observed_mutation) or _is_filter_on_freq(filter_settings, observed_mutation)
+    filter_mutation = _is_filter_on_gene(filter_settings, observed_mutation) \
+                      or _is_filter_on_freq(filter_settings, observed_mutation) \
+                      or _is_filter_on_mutation(filter_settings, observed_mutation)
 
     return filter_mutation
+
+
+def _is_filter_on_mutation(filter_settings, observed_mutation):
+
+    is_filter_on_mutation = False
+
+    if filter_settings is not None:
+
+        filter_mutation_list = json.loads(filter_settings.ignored_mutations)
+
+        for filter_mutation in filter_mutation_list:
+
+            if observed_mutation.mutation.position == filter_mutation["position"] or observed_mutation.mutation.sequence_change == filter_mutation["sequence"] and observed_mutation.mutation.mutation_type == filter_mutation["type"]:
+                is_filter_on_mutation = True
+                break
+
+    return is_filter_on_mutation
 
 
 def _is_filter_on_gene(filter_settings, observed_mutation):
