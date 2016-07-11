@@ -32,6 +32,7 @@ else:
 
 
 # TODO: make 20 and 100 constants  to be referred to within some other global file.
+# TODO: change name since shadow's builtin name.
 @login_required
 def filter(request):
     ale_experiment_name = common.get_ale_experiment_name(request)
@@ -55,7 +56,7 @@ def filter(request):
             filter_form_model.min_cutoff = request.POST.get("min_cutoff", 20)
             filter_form_model.max_cutoff = request.POST.get("max_cutoff", 100)
             filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
-            filter_form_model.ignored_mutations = json.dumps(request.POST.get("ignored_mutations", ""))
+            filter_form_model.ignored_mutations = _get_ignored_mutations_json(request)
             filter_form_model.save()
         else:
             print(filter_form.errors)
@@ -63,10 +64,11 @@ def filter(request):
     else:  # request.method == 'GET'
         filter_form_model, created = ale.models.Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
                                                                              defaults=default_filter_form_model)
+
         initial_filter_form_data = {"min_cutoff": filter_form_model.min_cutoff,
                                     "max_cutoff": filter_form_model.max_cutoff,
                                     "ignored_genes": filter_form_model.ignored_genes,
-                                    "ignored_mutations": str(json.loads(filter_form_model.ignored_mutations))}
+                                    "ignored_mutations": json.loads(filter_form_model.ignored_mutations)}
 
         filter_form = FilterForm(initial=initial_filter_form_data)
 
@@ -77,3 +79,9 @@ def filter(request):
     })
 
     return HttpResponse(template.render(context))
+
+
+def _get_ignored_mutations_json(request):
+    ignored_mutations_string = request.POST.get("ignored_mutations", "")
+    ignored_mutations_dict = json.loads(ignored_mutations_string)
+    return json.dumps(ignored_mutations_dict)
