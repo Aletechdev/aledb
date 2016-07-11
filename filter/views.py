@@ -77,7 +77,7 @@ def _handle_POST(request, filter_form_model):
 
 def _handle_GET(request, filter_form_model):
 
-    ignored_mutations_dict = {}
+    ignored_mutations_dict = [{}]
     if filter_form_model.ignored_mutations != "":
         ignored_mutations_dict = json.loads(filter_form_model.ignored_mutations)
 
@@ -93,7 +93,7 @@ def _handle_GET(request, filter_form_model):
 
 def _get_ignored_mutations_json(request):
     ignored_mutations_string = request.POST.get("ignored_mutations", "")
-    ignored_mutations_dict = {}
+    ignored_mutations_json = [{}]
     if ignored_mutations_string != "":
-        ignored_mutations_dict = json.loads(ignored_mutations_string)
-    return json.dumps(ignored_mutations_dict)
+        ignored_mutations_json = json.loads(ignored_mutations_string)
+    return json.dumps(ignored_mutations_json)
