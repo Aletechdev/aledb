@@ -17,8 +17,6 @@ from seq.views import common
 
 from django.db.models import Count
 
-from seq.forms.ignored_gene import IgnoredGenesForm
-
 
 EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
 
@@ -92,7 +90,6 @@ def lists(request):
                        "seq_color_set": mark_safe(common.SEQ_COLORS),
                        "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
                        "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
-                       "Ignored_Gene_Form": IgnoredGenesForm({"ignored_genes": gene_list}),
                        "number_of_genes_to_show": number_of_genes_to_show,
                        "ale_experiment_id": ale_experiment_id})
 
