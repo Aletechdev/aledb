@@ -21,8 +21,6 @@ __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 
 FILTER_TEMPLATE = "filter/index.html"
-INDEX_TEMPLATE_EDIT = "filter_edit_page.html"   #TODO: remove since not being used
-ALE_TEMPLATE = "index.html"                     #TODO: remove since not being used
 
 
 if hasattr(settings, common.SETTINGS_SEQUENCING_URL):
@@ -45,32 +43,13 @@ def filter(request):
                                  'ignored_genes': "",
                                  'ignored_mutations': ""}
 
+    filter_form_model, created = ale.models.Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
+                                                                         defaults=default_filter_form_model)
+
     if request.method == 'POST':
-
-        filter_form = FilterForm(request.POST)
-
-        if filter_form.is_valid():
-            filter_form_model, created = ale.models.Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
-                                                                                 defaults=default_filter_form_model)
-
-            filter_form_model.min_cutoff = request.POST.get("min_cutoff", 20)
-            filter_form_model.max_cutoff = request.POST.get("max_cutoff", 100)
-            filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
-            filter_form_model.ignored_mutations = _get_ignored_mutations_json(request)
-            filter_form_model.save()
-        else:
-            print(filter_form.errors)
-
-    else:  # request.method == 'GET'
-        filter_form_model, created = ale.models.Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
-                                                                             defaults=default_filter_form_model)
-
-        initial_filter_form_data = {"min_cutoff": filter_form_model.min_cutoff,
-                                    "max_cutoff": filter_form_model.max_cutoff,
-                                    "ignored_genes": filter_form_model.ignored_genes,
-                                    "ignored_mutations": json.loads(filter_form_model.ignored_mutations)}
-
-        filter_form = FilterForm(initial=initial_filter_form_data)
+        filter_form = _handle_POST(request, filter_form_model)
+    else:
+        filter_form = _handle_GET(request, filter_form_model)
 
     context = Context({
         "form": filter_form,
@@ -81,7 +60,37 @@ def filter(request):
     return HttpResponse(template.render(context))
 
 
+def _handle_POST(request, filter_form_model):
+
+    filter_form = FilterForm(request.POST)
+
+    if filter_form.is_valid():
+        filter_form_model.min_cutoff = request.POST.get("min_cutoff", 20)
+        filter_form_model.max_cutoff = request.POST.get("max_cutoff", 100)
+        filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
+        filter_form_model.ignored_mutations = _get_ignored_mutations_json(request)
+        filter_form_model.save()
+    else:
+        print(filter_form.errors)
+
+    return filter_form
+
+
+def _handle_GET(request, filter_form_model):
+
+    initial_filter_form_data = {"min_cutoff": filter_form_model.min_cutoff,
+                                "max_cutoff": filter_form_model.max_cutoff,
+                                "ignored_genes": filter_form_model.ignored_genes,
+                                "ignored_mutations": json.loads(filter_form_model.ignored_mutations)}
+
+    filter_form = FilterForm(initial=initial_filter_form_data)
+
+    return filter_form
+
+
 def _get_ignored_mutations_json(request):
     ignored_mutations_string = request.POST.get("ignored_mutations", "")
-    ignored_mutations_dict = json.loads(ignored_mutations_string)
+    ignored_mutations_dict = {}
+    if ignored_mutations_string != "":
+        ignored_mutations_dict = json.loads(ignored_mutations_string)
     return json.dumps(ignored_mutations_dict)
