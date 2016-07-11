@@ -94,13 +94,12 @@ TEMPLATE_LOADERS = (
     #     'django.template.loaders.eggs.Loader',
 )
 
+SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
+FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            '/home/pphaneuf/sbrg/ale_analytics/branches/filtering/ale_analytics/seq/templates',
-            '/home/pphaneuf/sbrg/ale_analytics/branches/filtering/ale_analytics/filter/templates'
-        ],
+        'DIRS': [SEQ_TEMPLATE_PATH, FILTER_TEMPLATE_PATH],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
