@@ -158,7 +158,7 @@ def _is_filter_on_mutation(filter_settings, observed_mutation):
 
             for filter_mutation in filter_mutation_list:
 
-                if observed_mutation.mutation.position == filter_mutation["position"] or observed_mutation.mutation.sequence_change == filter_mutation["sequence"] and observed_mutation.mutation.mutation_type == filter_mutation["type"]:
+                if observed_mutation.mutation.position == filter_mutation["position"] and observed_mutation.mutation.sequence_change == filter_mutation["sequence"] and observed_mutation.mutation.mutation_type == filter_mutation["type"]:
                     is_filter_on_mutation = True
                     break
 
