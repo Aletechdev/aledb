@@ -16,6 +16,8 @@ import seq.views.common
 
 from seq.views import mutation_table_builder
 
+import filter.filter_settings
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -40,7 +42,7 @@ def key_mutations(request):
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    filter_settings = seq.views.common.get_filter_settings(ale_experiment_id)
+    filter_settings = filter.filter_settings.get_filter_settings(ale_experiment_id)
 
     table_body = _get_table_body(ordered_reseq_dict, filter_settings, request)
 

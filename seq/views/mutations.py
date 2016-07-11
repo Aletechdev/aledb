@@ -12,6 +12,8 @@ import seq.views.common
 
 from seq.views import mutation_table_builder
 
+import filter.filter_settings
+
 
 __author__ = 'pphaneuf'
 
@@ -72,7 +74,7 @@ def _get_table_body(seq_experiment_dict, request, wt_filter, wt_id):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
-    filter_settings = seq.views.common.get_filter_settings(ale_experiment_id)
+    filter_settings = filter.filter_settings.get_filter_settings(ale_experiment_id)
 
     filter_mutation_id_list = None
 

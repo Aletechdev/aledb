@@ -195,18 +195,6 @@ def get_observed_mutations(seq_experiment_id_list):
     return observed_mutations
 
 
-def get_filter_settings(ale_experiment_id):
-
-    filter_queryset = ale.models.Filter.objects.filter(ale_experiment_id=ale_experiment_id)
-
-    if len(filter_queryset) is 0:
-        return ale.models.Filter()
-
-    filter_settings = filter_queryset[0]  # Since there's only one filter setting per experiment.
-
-    return filter_settings
-
-
 # TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit. 
 def filter_out_wt_reseq(seq_experiment_ordered_dict):
 
