@@ -24,7 +24,7 @@ __author__ = 'Patrick Phaneuf'
 
 
 @login_required
-def key_mutated_genes(request):
+def key_mutations(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
@@ -51,9 +51,9 @@ def key_mutated_genes(request):
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
-                       "title": "Key Mutated Genes",
+                       "title": "Key Mutations",
                        "table_header": mark_safe(table_header),
-                       "template_header": "Key Mutated Genes"})
+                       "template_header": "Key Mutations"})
 
     return HttpResponse(template.render(context))
 
