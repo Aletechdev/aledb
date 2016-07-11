@@ -30,9 +30,8 @@ else:
 
 
 # TODO: make 20 and 100 constants  to be referred to within some other global file.
-# TODO: change name since shadow's builtin name.
 @login_required
-def filter(request):
+def mutation_filter(request):
     ale_experiment_name = common.get_ale_experiment_name(request)
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
     template = loader.get_template(FILTER_TEMPLATE)
@@ -78,10 +77,14 @@ def _handle_POST(request, filter_form_model):
 
 def _handle_GET(request, filter_form_model):
 
+    ignored_mutations_dict = {}
+    if filter_form_model.ignored_mutations != "":
+        ignored_mutations_dict = json.loads(filter_form_model.ignored_mutations)
+
     initial_filter_form_data = {"min_cutoff": filter_form_model.min_cutoff,
                                 "max_cutoff": filter_form_model.max_cutoff,
                                 "ignored_genes": filter_form_model.ignored_genes,
-                                "ignored_mutations": json.loads(filter_form_model.ignored_mutations)}
+                                "ignored_mutations": ignored_mutations_dict}
 
     filter_form = FilterForm(initial=initial_filter_form_data)
 
