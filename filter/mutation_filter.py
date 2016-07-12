@@ -6,6 +6,9 @@ import json
 __author__ = 'Patrick Phaneuf'
 
 
+NO_BREAK_STRING_CODE = u'\xa0'
+
+
 def is_excluded_on_mutation(mutation, filter_settings):
 
     is_mutation_excluded = False
@@ -21,13 +24,18 @@ def is_excluded_on_mutation(mutation, filter_settings):
             for filter_mutation in filter_mutation_list:
 
                 if mutation.position == filter_mutation["position"] \
-                        and mutation.sequence_change == filter_mutation["sequence"] \
+                        and _normalize_sequence_change_string(mutation.sequence_change) == _normalize_sequence_change_string(filter_mutation["sequence"]) \
                         and mutation.mutation_type == filter_mutation["type"]:
 
                     is_mutation_excluded = True
                     break
 
     return is_mutation_excluded
+
+
+def _normalize_sequence_change_string(sequence_change_string):
+
+    return sequence_change_string.replace(NO_BREAK_STRING_CODE, u' ')
 
 
 def is_excluded_on_gene(mutation, filter_settings):
