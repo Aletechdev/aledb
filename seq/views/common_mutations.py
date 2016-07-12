@@ -12,13 +12,14 @@ from collections import OrderedDict
 
 from seq.views import mutation_table_builder
 
+from filter import mutation_filter
+
 
 __author__ = 'Patrick Phaneuf'
 
 
 REQUEST_PRIMARY_RESEQ_ID = "primary_reseq_id"
 
-from pprint import pprint
 
 @login_required
 def common_mutations(request):
@@ -42,7 +43,7 @@ def common_mutations(request):
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    filter_settings = seq.views.common.get_filter_settings(ale_experiment_id)
+    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
     filter_mutation_list = seq.views.common.get_observed_mutations([wt_id])
     filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
