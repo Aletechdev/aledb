@@ -72,7 +72,7 @@ def _get_ale_experiment_mutation_list(reseq_dict):
 
     ale_experiment_mutation_list = []
 
-    mutations_to_remove_list = []
+    mutations_to_exclude_list = []
 
     for reseq_id in reseq_dict:
 
@@ -80,7 +80,7 @@ def _get_ale_experiment_mutation_list(reseq_dict):
 
         if reseq.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
 
-            mutations_to_remove_list = _get_reseq_mutations_list(reseq_id)
+            mutations_to_exclude_list = _get_reseq_mutations_list(reseq_id)
 
         else:
 
@@ -90,7 +90,7 @@ def _get_ale_experiment_mutation_list(reseq_dict):
 
     for reseq_mutation_list in ale_experiment_mutation_list:
 
-        filtered_reseq_mutation_list = [mutation for mutation in reseq_mutation_list if mutation not in mutations_to_remove_list]
+        filtered_reseq_mutation_list = [mutation for mutation in reseq_mutation_list if mutation not in mutations_to_exclude_list]
 
         filtered_ale_experiment_mutation_list.append(filtered_reseq_mutation_list)
 
