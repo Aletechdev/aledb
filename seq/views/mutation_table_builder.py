@@ -6,7 +6,7 @@ import os
 
 import seq.views.common
 
-import json
+from filter import mutation_filter
 
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
@@ -83,7 +83,10 @@ def get_table_body(reseq_dict,
         if filter_mutation_id_list is not None and observed_mutation.mutation.id in filter_mutation_id_list:
             continue
 
-        if not _filter_mutation(filter_settings, observed_mutation):
+        # if not _exclude_mutation(filter_settings, observed_mutation):
+        if not mutation_filter.is_excluded_on_freq(observed_mutation, filter_settings) \
+                and not mutation_filter.is_excluded_on_gene(observed_mutation.mutation, filter_settings) \
+                and not mutation_filter.is_excluded_on_mutation(observed_mutation.mutation, filter_settings):
 
             new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
 
@@ -135,66 +138,6 @@ def _get_experiment_id_idx_mapping_dict(seq_experiment_dict):
     experiment_id_idx_mapping = dict((reseq_exp_id, idx) for idx, reseq_exp_id in enumerate(seq_experiment_dict.keys()))
 
     return experiment_id_idx_mapping
-
-
-def _filter_mutation(filter_settings, observed_mutation):
-
-    filter_mutation = _is_filter_on_gene(filter_settings, observed_mutation) \
-                      or _is_filter_on_freq(filter_settings, observed_mutation) \
-                      or _is_filter_on_mutation(filter_settings, observed_mutation)
-
-    return filter_mutation
-
-
-def _is_filter_on_mutation(filter_settings, observed_mutation):
-
-    is_filter_on_mutation = False
-
-    if filter_settings is not None:
-
-        default_ignored_mutations_json_string = "[{}]"
-
-        if filter_settings.ignored_mutations != "" and len(filter_settings.ignored_mutations) != len(default_ignored_mutations_json_string):
-
-            filter_mutation_list = json.loads(filter_settings.ignored_mutations)
-
-            for filter_mutation in filter_mutation_list:
-
-                if observed_mutation.mutation.position == filter_mutation["position"] and observed_mutation.mutation.sequence_change == filter_mutation["sequence"] and observed_mutation.mutation.mutation_type == filter_mutation["type"]:
-                    is_filter_on_mutation = True
-                    break
-
-    return is_filter_on_mutation
-
-
-def _is_filter_on_gene(filter_settings, observed_mutation):
-    is_filter_on_gene = False
-
-    if filter_settings is not None:
-
-        filtered_gene_list = filter_settings.ignored_genes.replace(" ", "").split(',')
-
-        if observed_mutation.mutation.gene in filtered_gene_list:
-            is_filter_on_gene = True
-
-    return is_filter_on_gene
-
-
-def _is_filter_on_freq(filter_settings, observed_mutation):
-    is_filter_on_freq = True
-
-    # Creating up defaults.
-    if filter_settings is not None:
-        minimum_mutation_frequency = float(filter_settings.min_cutoff) / 100
-        maximum_mutation_frequency = float(filter_settings.max_cutoff) / 100
-    else:
-        minimum_mutation_frequency = 0.0
-        maximum_mutation_frequency = 1.0
-
-    if minimum_mutation_frequency <= observed_mutation.frequency <= maximum_mutation_frequency:
-        is_filter_on_freq = False
-
-    return is_filter_on_freq
 
 
 def _get_table_mutation_entry(observed_mutation, experiment_url_dict):

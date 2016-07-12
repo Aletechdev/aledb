@@ -12,7 +12,7 @@ import seq.views.common
 
 from seq.views import mutation_table_builder
 
-import filter.filter_settings
+import filter.mutation_filter
 
 
 __author__ = 'pphaneuf'
@@ -68,13 +68,13 @@ def mutation_table(request):
     return HttpResponse(template.render(context))
 
 
-def _get_table_body(seq_experiment_dict, request, wt_filter, wt_id):
+def _get_table_body(reseq_dict, request, wt_filter, wt_id):
 
-    observed_mutations_query_set = seq.views.common.get_observed_mutations(list(seq_experiment_dict.keys()))
+    observed_mutations_query_set = seq.views.common.get_observed_mutations(list(reseq_dict.keys()))
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
-    filter_settings = filter.filter_settings.get_filter_settings(ale_experiment_id)
+    filter_settings = filter.mutation_filter.get_filter_settings(ale_experiment_id)
 
     filter_mutation_id_list = None
 
@@ -82,7 +82,7 @@ def _get_table_body(seq_experiment_dict, request, wt_filter, wt_id):
         filter_mutation_list = seq.views.common.get_observed_mutations([wt_id])
         filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
 
-    return mutation_table_builder.get_table_body(seq_experiment_dict,
+    return mutation_table_builder.get_table_body(reseq_dict,
                                                  observed_mutations_query_set,
                                                  filter_settings,
                                                  filter_mutation_id_list)
