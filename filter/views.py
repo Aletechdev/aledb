@@ -16,6 +16,8 @@ from filter.forms.filter import FilterForm
 
 import json
 
+from builder import ale_experiment
+
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -46,7 +48,7 @@ def mutation_filter(request):
                                                                          defaults=default_filter_form_model)
 
     if request.method == 'POST':
-        filter_form = _handle_POST(request, filter_form_model)
+        filter_form = _handle_POST(request, filter_form_model, ale_experiment_id)
     else:
         filter_form = _handle_GET(request, filter_form_model)
 
@@ -59,7 +61,7 @@ def mutation_filter(request):
     return HttpResponse(template.render(context))
 
 
-def _handle_POST(request, filter_form_model):
+def _handle_POST(request, filter_form_model, ale_experiment_id):
 
     filter_form = FilterForm(request.POST)
 
@@ -69,6 +71,8 @@ def _handle_POST(request, filter_form_model):
         filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
         filter_form_model.ignored_mutations = _get_ignored_mutations_json(request)
         filter_form_model.save()
+
+        ale_experiment.rebuild_key_mutations(ale_experiment_id)
     else:
         print(filter_form.errors)
 
