@@ -16,8 +16,6 @@ from filter.models import Filter
 
 import json
 
-from builder import ale_experiment
-
 from filter.common import DEFAULT_MUTATION_FREQ_MIN
 from filter.common import DEFAULT_MUTATION_FREQ_MAX
 
@@ -73,8 +71,6 @@ def _handle_POST(request, filter_form_model, ale_experiment_id):
         filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
         filter_form_model.ignored_mutations = _get_ignored_mutations_json(request)
         filter_form_model.save()
-
-        ale_experiment.rebuild_key_mutations(ale_experiment_id)
     else:
         print(filter_form.errors)
 
