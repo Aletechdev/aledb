@@ -16,13 +16,8 @@ import seq.views.common
 
 from seq.views import mutation_table_builder
 
-import filter.filter_settings
-
 
 __author__ = 'Patrick Phaneuf'
-
-
-# TODO: this implementation shares much with mutations.py; refactored shared implementations into common.py
 
 
 @login_required
@@ -42,9 +37,7 @@ def key_mutations(request):
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    filter_settings = filter.filter_settings.get_filter_settings(ale_experiment_id)
-
-    table_body = _get_table_body(ordered_reseq_dict, filter_settings, request)
+    table_body = _get_table_body(ordered_reseq_dict, request)
 
     template = loader.get_template("table_template.html")
 
@@ -60,7 +53,7 @@ def key_mutations(request):
     return HttpResponse(template.render(context))
 
 
-def _get_table_body(seq_experiment_dict, filter_settings, request):
+def _get_table_body(seq_experiment_dict, request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
@@ -68,7 +61,7 @@ def _get_table_body(seq_experiment_dict, filter_settings, request):
 
     observed_mutations_query_set = _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset)
 
-    return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set, filter_settings)
+    return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set)
 
 
 def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):
