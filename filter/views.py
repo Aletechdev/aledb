@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 
 from django.template import Context, loader
 
@@ -10,13 +10,16 @@ from seq.views import common
 
 import seq
 
-import ale.models
-
 from filter.forms.filter import FilterForm
+
+from filter.models import Filter
 
 import json
 
 from builder import ale_experiment
+
+from filter.common import DEFAULT_MUTATION_FREQ_MIN
+from filter.common import DEFAULT_MUTATION_FREQ_MAX
 
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
@@ -31,7 +34,6 @@ else:
     reseqencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
-# TODO: make 20 and 100 constants  to be referred to within some other global file.
 @login_required
 def mutation_filter(request):
     ale_experiment_name = common.get_ale_experiment_name(request)
@@ -39,12 +41,12 @@ def mutation_filter(request):
     template = loader.get_template(FILTER_TEMPLATE)
 
     default_filter_form_model = {'ale_experiment_id': ale_experiment_id,
-                                 'min_cutoff': 20,
-                                 'max_cutoff': 100,
+                                 'min_cutoff': DEFAULT_MUTATION_FREQ_MIN,
+                                 'max_cutoff': DEFAULT_MUTATION_FREQ_MAX,
                                  'ignored_genes': "",
                                  'ignored_mutations': ""}
 
-    filter_form_model, created = ale.models.Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
+    filter_form_model, created = Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
                                                                          defaults=default_filter_form_model)
 
     if request.method == 'POST':
@@ -66,8 +68,8 @@ def _handle_POST(request, filter_form_model, ale_experiment_id):
     filter_form = FilterForm(request.POST)
 
     if filter_form.is_valid():
-        filter_form_model.min_cutoff = request.POST.get("min_cutoff", 20)
-        filter_form_model.max_cutoff = request.POST.get("max_cutoff", 100)
+        filter_form_model.min_cutoff = request.POST.get("min_cutoff", DEFAULT_MUTATION_FREQ_MIN)
+        filter_form_model.max_cutoff = request.POST.get("max_cutoff", DEFAULT_MUTATION_FREQ_MAX)
         filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
         filter_form_model.ignored_mutations = _get_ignored_mutations_json(request)
         filter_form_model.save()
