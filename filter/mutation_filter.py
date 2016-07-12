@@ -1,4 +1,4 @@
-from ale.models import Filter
+from filter.models import Filter
 
 import json
 

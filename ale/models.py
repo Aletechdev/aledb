@@ -1,6 +1,6 @@
 from django.db import models
 
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator  #TODO: not being used.
 
 blank_field = {"blank": True, "null": True}
 
@@ -246,14 +246,3 @@ class Isolate(models.Model):
         unique_together = (("flask", "isolate_number"),)
 
         # TODO - encode experiments done on the isolate
-
-
-# TODO: make 20 and 100 constants to be referred to within some other global file.
-# TODO: this model may need to be declared within the filter Django app models.
-class Filter(models.Model):
-
-    ale_experiment = models.ForeignKey(AleExperiment, on_delete=models.CASCADE)
-    min_cutoff = models.PositiveSmallIntegerField(default=20)
-    max_cutoff = models.PositiveSmallIntegerField(default=100)
-    ignored_genes = models.CharField(max_length=500, default='', blank=True)
-    ignored_mutations = models.TextField(default='', blank=True)

@@ -148,6 +148,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'ale',
     'seq',
+    'filter',
 
     #'grappelli',
     # Uncomment the next line to enable the admin:
