@@ -83,7 +83,6 @@ def get_table_body(reseq_dict,
         if filter_mutation_id_list is not None and observed_mutation.mutation.id in filter_mutation_id_list:
             continue
 
-        # if not _exclude_mutation(filter_settings, observed_mutation):
         if not mutation_filter.is_excluded_on_freq(observed_mutation, filter_settings) \
                 and not mutation_filter.is_excluded_on_gene(observed_mutation.mutation, filter_settings) \
                 and not mutation_filter.is_excluded_on_mutation(observed_mutation.mutation, filter_settings):
