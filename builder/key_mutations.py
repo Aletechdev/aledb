@@ -4,7 +4,7 @@ import seq.models
 
 import collections
 
-import filter.mutation_filter
+from filter import mutation_filter
 
 
 __author__ = "Patrick Phaneuf"
@@ -16,7 +16,7 @@ def get_key_mutation_list(ale_experiment_id):
 
     ale_experiment_mutation_list = _get_ale_experiment_mutation_list(seq_experiment_dict)
 
-    filter_settings = filter.mutation_filter.get_filter_settings(ale_experiment_id)
+    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
     mutation_gene_count_dict = _get_mutation_gene_count_dict(ale_experiment_mutation_list, filter_settings)
 
@@ -33,7 +33,7 @@ def _get_mutation_gene_count_dict(ale_experiment_mutation_list, filter_settings)
 
         for mutation in mutation_list:
 
-            if not _exclude_mutation(filter_settings, mutation):
+            if not _is_mutation_excluded(filter_settings, mutation):
 
                 mutation_gene_count_dict[mutation.gene] += 1
 
@@ -48,16 +48,22 @@ def _get_key_mutation_list(ale_experiment_mutation_list, filter_settings, mutati
 
         for mutation in mutation_list:
 
-            if not _exclude_mutation(filter_settings, mutation) and mutation_gene_count_dict[mutation.gene] > 1:
+            if not _is_mutation_excluded(filter_settings, mutation) \
+                    and mutation_gene_count_dict[mutation.gene] > 1:
 
                 key_mutation_list.append(mutation)
 
     return key_mutation_list
 
 
-def _exclude_mutation(filter_settings, observed_mutation):
+def _is_mutation_excluded(filter_settings, mutation):
 
-    filter_mutation = True
+    filter_mutation = False
+
+    if mutation_filter.is_excluded_on_gene(mutation, filter_settings) \
+            or mutation_filter.is_excluded_on_mutation(mutation, filter_settings):
+
+        filter_mutation = True
 
     return filter_mutation
 
