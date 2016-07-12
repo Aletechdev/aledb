@@ -76,6 +76,6 @@ def _get_pdb_url(gene_query):
     if len(pdb_ids) > 0:
         pdb_code = pdb_ids[0].pdb_id
 
-    pdb_url = 'http://files.rcsb.org/download/' + pdb_code + '.pdb'
+    pdb_url = 'https://files.rcsb.org/download/' + pdb_code + '.pdb'
 
     return pdb_url
