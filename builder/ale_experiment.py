@@ -161,6 +161,14 @@ def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_a
     rebuild_key_mutations(experiment_orm.ale_id)
 
 
+def rebuild_all_key_mutations():
+
+    ale_experiment_queryset = ale.models.AleExperiment.objects.all()
+
+    for ale_experiment in ale_experiment_queryset:
+        rebuild_key_mutations(ale_experiment.ale_id)
+
+
 def _insert_wild_type_flask(ale_exp_user,
                             ale_exp_name,
                             breseq_wild_type_output_abs_path,
