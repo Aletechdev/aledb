@@ -12,9 +12,9 @@ __author__ = "Patrick Phaneuf"
 
 def get_key_mutation_list(ale_experiment_id):
 
-    seq_experiment_dict = _get_seq_experiment_dict(ale_experiment_id)
+    reseq_dict = _get_reseq_dict(ale_experiment_id)
 
-    ale_experiment_mutation_list = _get_ale_experiment_mutation_list(seq_experiment_dict)
+    ale_experiment_mutation_list = _get_ale_experiment_mutation_list(reseq_dict)
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
@@ -68,40 +68,40 @@ def _is_mutation_excluded(filter_settings, mutation):
     return filter_mutation
 
 
-def _get_ale_experiment_mutation_list(seq_experiment_dict):
+def _get_ale_experiment_mutation_list(reseq_dict):
 
     ale_experiment_mutation_list = []
 
     mutations_to_remove_list = []
 
-    for seq_experiment_id in seq_experiment_dict:
+    for reseq_id in reseq_dict:
 
-        seq_experiment = seq_experiment_dict[seq_experiment_id]
+        reseq = reseq_dict[reseq_id]
 
-        if seq_experiment.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
+        if reseq.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
 
-            mutations_to_remove_list = _get_seq_experiment_mutations_list(seq_experiment_id)
+            mutations_to_remove_list = _get_reseq_mutations_list(reseq_id)
 
         else:
 
-            ale_experiment_mutation_list.append(_get_seq_experiment_mutations_list(seq_experiment_id))
+            ale_experiment_mutation_list.append(_get_reseq_mutations_list(reseq_id))
 
     filtered_ale_experiment_mutation_list = []
 
-    for seq_experiment_mutation_list in ale_experiment_mutation_list:
+    for reseq_mutation_list in ale_experiment_mutation_list:
 
-        filtered_seq_experiment_mutation_list = [mutation for mutation in seq_experiment_mutation_list if mutation not in mutations_to_remove_list]
+        filtered_reseq_mutation_list = [mutation for mutation in reseq_mutation_list if mutation not in mutations_to_remove_list]
 
-        filtered_ale_experiment_mutation_list.append(filtered_seq_experiment_mutation_list)
+        filtered_ale_experiment_mutation_list.append(filtered_reseq_mutation_list)
 
     return filtered_ale_experiment_mutation_list
 
 
-def _get_seq_experiment_mutations_list(seq_experiment_id):
+def _get_reseq_mutations_list(reseq_id):
 
     mutations_list = []
 
-    observed_mutations_query_set = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id=seq_experiment_id)
+    observed_mutations_query_set = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id=reseq_id)
 
     for observed_mutation in observed_mutations_query_set:
 
@@ -110,7 +110,7 @@ def _get_seq_experiment_mutations_list(seq_experiment_id):
     return mutations_list
 
 
-def _get_seq_experiment_dict(experiment_id):
+def _get_reseq_dict(experiment_id):
 
     ale_experiment_selector = "AND experiment_id = "
 
@@ -120,8 +120,8 @@ def _get_seq_experiment_dict(experiment_id):
 
     sql_query = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_number_selector)
 
-    seq_experiments_raw_query_set = seq.models.ResequencingExperiment.objects.raw(sql_query)
+    reseq_raw_query_set = seq.models.ResequencingExperiment.objects.raw(sql_query)
 
-    seq_experiment_dict = collections.OrderedDict((seq_experiment.id, seq_experiment) for seq_experiment in seq_experiments_raw_query_set)
+    reseq_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_raw_query_set)
 
-    return seq_experiment_dict
+    return reseq_dict
