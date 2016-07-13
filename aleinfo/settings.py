@@ -6,8 +6,6 @@ from configparser import ConfigParser
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-GRAPPELLI_ADMIN_TITLE = "ALE Analytics"
-
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 config = ConfigParser()
@@ -95,10 +93,13 @@ TEMPLATE_LOADERS = (
 
 SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
 FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
+FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [SEQ_TEMPLATE_PATH, FILTER_TEMPLATE_PATH],
+        'DIRS': [SEQ_TEMPLATE_PATH,
+                 FILTER_TEMPLATE_PATH,
+                 FIXATION_TEMPLATE_PATH],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -148,8 +149,8 @@ INSTALLED_APPS = (
     'ale',
     'seq',
     'filter',
+    'fixation',
 
-    #'grappelli',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
