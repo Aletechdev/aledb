@@ -118,6 +118,8 @@ def get_table_body(reseq_dict,
             table_row += "<td>%s</td>" % mutation.sequence_change
             table_row += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
             if table_type is TableType.gene_table:
+                # temp = re.findall(r"[^\W\d_]+|\d+", mutation.protein_change)
+                # print([x for x in temp if x.isdigit()])
                 try:
                     table_row += "<td><a onclick=\"zoomTo(%d)\">%s</a></td>" \
                                  % (int(non_decimal.sub('', mutation.protein_change)), mutation.protein_change)
