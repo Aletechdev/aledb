@@ -6,8 +6,7 @@ from configparser import ConfigParser
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-# TODO: change to "ALE Analytics"
-GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
+GRAPPELLI_ADMIN_TITLE = "ALE Analytics"
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
