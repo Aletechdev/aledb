@@ -8,6 +8,10 @@ import seq.views.common
 
 import json
 
+import re
+
+from enum import Enum
+
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 
@@ -26,6 +30,8 @@ HTML_EMPTY_MUTATION_CELL = """<td id="empty"></td>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
 
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<td id="true"><a href="%s">%.2f</a></td>"""
+
+non_decimal = re.compile(r'[^\d.]+')
 
 
 if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -64,7 +70,8 @@ def get_table_header(reseq_dict):
 def get_table_body(reseq_dict,
                    observed_mutations_queryset,
                    filter_settings=None,
-                   filter_mutation_id_list=None):
+                   filter_mutation_id_list=None,
+                   table_type=None):
 
     mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
 
@@ -110,7 +117,14 @@ def get_table_body(reseq_dict,
             table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += "<td>%s</td>" % mutation.sequence_change
             table_row += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
-            table_row += "<td>%s</td>" % mutation.protein_change
+            if table_type is TableType.gene_table:
+                try:
+                    table_row += "<td><a onclick=\"zoomTo(%d)\">%s</a></td>" \
+                                 % (int(non_decimal.sub('', mutation.protein_change)), mutation.protein_change)
+                except:
+                    table_row += "<td>%s</td>" % mutation.protein_change
+            else:
+                table_row += "<td>%s</td>" % mutation.protein_change
             table_row += "".join(table_entry_list[mutation_index_dict[mutation.id]])
             table_row += "</tr>"
 
@@ -295,3 +309,7 @@ def _remove_checked_flasks(request, seq_experiment_dict):
                     del seq_experiment_dict[int(checked_experiment_id)]
 
     return seq_experiment_dict
+
+
+class TableType(Enum):
+    gene_table = 1

@@ -21,7 +21,9 @@ def gene(request):
 
     table_header = mutation_table_builder.get_table_header(reseq_dict)
 
-    table_body = mutation_table_builder.get_table_body(reseq_dict, observed_mutations_with_gene_queryset)
+    table_body = mutation_table_builder.get_table_body(reseq_dict,
+                                                       observed_mutations_with_gene_queryset,
+                                                       table_type=mutation_table_builder.TableType.gene_table)
 
     template = loader.get_template("gene.html")
 
