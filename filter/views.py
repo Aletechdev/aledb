@@ -4,8 +4,6 @@ from django.template import Context, loader
 
 from django.contrib.auth.decorators import login_required
 
-import aleinfo.settings as settings
-
 from seq.views import common
 
 import seq
@@ -24,12 +22,6 @@ __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 
 FILTER_TEMPLATE = "filter/index.html"
-
-
-if hasattr(settings, common.SETTINGS_SEQUENCING_URL):
-    reseqencing_report_url = settings.sequencing_url
-else:
-    reseqencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
 @login_required
