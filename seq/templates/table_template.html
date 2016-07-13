@@ -178,6 +178,7 @@
     <table id="data">
         <input type="button" value="Remove checked flasks" class="ui" onclick="filterFlask('remove')"/>
         <input type="button" value="Show checked flasks" class="ui" onclick="filterFlask('show')"/>
+        {% include 'export_as_csv.html' %}
         <label style="float:right" class="ui"><input class="ui" id="show_dups" onclick="filter_dups(this)"
                                                      type="checkbox" name="checkbox" value="value"
                                                      style="margin-left: 10px" checked> Show Duplications</label>
