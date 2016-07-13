@@ -276,18 +276,25 @@
     };
     Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
+    function getByValue(arr, value) {
+        for (var key in arr) {
+            if (arr[key].atom._v._dV == value) return arr[key].atom;
+        }
+        return null;
+    }
+
     var previousPickedAtom = null;
     var previousPickedColor = null;
     function zoomTo(atom_number) {
-        var selected_atom = viewer._m[0]._3[0]._cW._m[atom_number].atom;
-        //var selected_atom = viewer._m[0]._M[0]._i._j[0]._q[atom_number - 1];
-        //var selected_atom = viewer._c1._m[atom_number].atom._v;
+        var atom_list = viewer._m[0]._3[0]._cW._m;
+        var selected_atom = getByValue(atom_list, atom_number);
+        if (selected_atom == null) return;
         var color = [0,0,0,0];
         var temp = viewer._m[0]._M[0].getColorForAtom(selected_atom, color);
         if (temp.equals([1, 0, 0, 1]) === false) {
             setColorForAtom(viewer._m[0], selected_atom, 'red');
             if (previousPickedAtom != null) {
-                var prev = viewer._m[0]._3[0]._cW._m[previousPickedAtom].atom;
+                var prev = getByValue(atom_list, previousPickedAtom);
                 setColorForAtom(viewer._m[0], prev, previousPickedColor);
             }
             previousPickedAtom = atom_number;
