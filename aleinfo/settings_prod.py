@@ -96,10 +96,13 @@ TEMPLATE_LOADERS = (
 
 SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
 FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
+FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [SEQ_TEMPLATE_PATH, FILTER_TEMPLATE_PATH],
+        'DIRS': [SEQ_TEMPLATE_PATH,
+                 FILTER_TEMPLATE_PATH,
+                 FIXATION_TEMPLATE_PATH],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -149,6 +152,7 @@ INSTALLED_APPS = (
     'ale',
     'seq',
     'filter',
+    'fixation',
 
     #'grappelli',
     # Uncomment the next line to enable the admin:

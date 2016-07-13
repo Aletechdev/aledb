@@ -20,8 +20,8 @@ urlpatterns = patterns('',
                        url(r'^admin/', include(admin.site.urls)),   # TODO: remove if we're not using the Django site admin functionality.
 
                        url(r'^ale_analytics/', include('seq.urls')),
-
                        url(r'^ale_analytics/filter/', include('filter.urls')),
+                       url(r'^ale_analytics/fixation/', include('fixation.urls')),
                        )
 
 urlpatterns += staticfiles_urlpatterns()
