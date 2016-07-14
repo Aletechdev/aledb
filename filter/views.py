@@ -6,8 +6,6 @@ from django.contrib.auth.decorators import login_required
 
 from seq.views import common
 
-import seq
-
 from filter.forms.filter import FilterForm
 
 from filter.models import Filter
@@ -17,9 +15,7 @@ import json
 from filter.common import DEFAULT_MUTATION_FREQ_MIN
 from filter.common import DEFAULT_MUTATION_FREQ_MAX
 
-
 __author__ = 'Denny Gosting, Patrick Phaneuf'
-
 
 FILTER_TEMPLATE = "filter/index.html"
 
@@ -27,7 +23,7 @@ FILTER_TEMPLATE = "filter/index.html"
 @login_required
 def mutation_filter(request):
     ale_experiment_name = common.get_ale_experiment_name(request)
-    ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
+    ale_experiment_id = common.get_ale_experiment_id(request)
     template = loader.get_template(FILTER_TEMPLATE)
 
     default_filter_form_model = {'ale_experiment_id': ale_experiment_id,
@@ -37,10 +33,10 @@ def mutation_filter(request):
                                  'ignored_mutations': ""}
 
     filter_form_model, created = Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
-                                                                         defaults=default_filter_form_model)
+                                                              defaults=default_filter_form_model)
 
     if request.method == 'POST':
-        filter_form = _handle_POST(request, filter_form_model, ale_experiment_id)
+        filter_form = _handle_POST(request, filter_form_model)
     else:
         filter_form = _handle_GET(request, filter_form_model)
 
@@ -53,8 +49,7 @@ def mutation_filter(request):
     return HttpResponse(template.render(context))
 
 
-def _handle_POST(request, filter_form_model, ale_experiment_id):
-
+def _handle_POST(request, filter_form_model):
     filter_form = FilterForm(request.POST)
 
     if filter_form.is_valid():
@@ -70,7 +65,6 @@ def _handle_POST(request, filter_form_model, ale_experiment_id):
 
 
 def _handle_GET(request, filter_form_model):
-
     ignored_mutations_dict = [{}]
     if filter_form_model.ignored_mutations != "":
         ignored_mutations_dict = json.loads(filter_form_model.ignored_mutations)
