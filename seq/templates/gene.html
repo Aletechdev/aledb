@@ -276,25 +276,42 @@
     };
     Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
-    function getByValue(arr, value) {
+    function getAtomByNumber(arr, value) {
         for (var key in arr) {
             if (arr[key].atom._v._dV == value) return arr[key].atom;
         }
         return null;
     }
 
+    function selectAtomByNumber(atom_number, arr) {
+        if (arr.hasOwnProperty("_j") && arr._j.length > 0 && arr._j[0].hasOwnProperty("_q")) {
+            var ligand_list = arr._j[0]._q;
+            var temp = [];
+            for (var x in ligand_list) {
+                if (ligand_list[x]._v._dV == atom_number) {
+                    temp[temp.length] = ligand_list[x];
+                }
+            }
+            arr._j[0]._q = temp;
+            return arr;
+        } else {
+            return null;
+        }
+    }
     var previousPickedAtom = null;
     var previousPickedColor = null;
+    var previousLigand = null;
     function zoomTo(atom_number) {
         var atom_list = viewer._m[0]._3[0]._cW._m;
-        var selected_atom = getByValue(atom_list, atom_number);
+        var selected_atom = getAtomByNumber(atom_list, atom_number);
         if (selected_atom == null) return;
         var color = [0,0,0,0];
         var temp = viewer._m[0]._M[0].getColorForAtom(selected_atom, color);
+        if (temp == null) temp = [.8, .8, .8, 1];
         if (temp.equals([1, 0, 0, 1]) === false) {
             setColorForAtom(viewer._m[0], selected_atom, 'red');
             if (previousPickedAtom != null) {
-                var prev = getByValue(atom_list, previousPickedAtom);
+                var prev = getAtomByNumber(atom_list, previousPickedAtom);
                 setColorForAtom(viewer._m[0], prev, previousPickedColor);
             }
             previousPickedAtom = atom_number;
@@ -302,6 +319,13 @@
                 previousPickedColor = temp;
             }
         }
+        var ligand_name = selected_atom._v._I;
+        var structure = viewer._m[0]._M[0]._i;
+        temp = structure.select({rnames : [ligand_name]});
+        var test = selectAtomByNumber(atom_number, temp);
+        viewer._m = [viewer._m[0]];
+        if (test != null) viewer.ballsAndSticks('ligand', test);
+        previousLigand = ligand_name;
         viewer.fitTo(selected_atom._v);
         viewer.requestRedraw();
     }
