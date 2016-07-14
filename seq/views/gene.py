@@ -16,6 +16,9 @@ import urllib.request
 
 import json
 
+from xml.dom import minidom
+
+import gzip
 
 @login_required
 def gene(request):
@@ -31,13 +34,14 @@ def gene(request):
 
     template = loader.get_template("gene.html")
 
-    pdb_url = _get_pdb_url(gene_query)
+    pdb_url, residue_mappings = _get_pdb_info(gene_query)
 
     context = Context({"gene_name": gene_query,
                        "table_body": mark_safe(table_body),
                        "title": gene_query + " gene",
                        "table_header": mark_safe(table_header),
-                       "pdb_file_path": pdb_url})
+                       "pdb_file_path": pdb_url,
+                       "residue_mappings": mark_safe(residue_mappings)})
 
     return HttpResponse(template.render(context))
 
@@ -74,6 +78,41 @@ def _get_seq_exp(request, mutated_gene):
     return seq_experiment_dict, observed_mutations_with_gene
 
 
+def _get_pdb_info(gene_query):
+
+    pdb_code = _get_pdb_url(gene_query)
+
+    pdb_url = 'https://files.rcsb.org/download/' + pdb_code + '.pdb'
+
+    residue_mappings = _get_xml_for_pdb(pdb_code)
+
+    return pdb_url, residue_mappings
+
+
+def _get_xml_for_pdb(pdb_code):
+
+    try:
+        with urllib.request.urlopen(
+                                "ftp://ftp.ebi.ac.uk/pub/databases/msd/sifts/xml/" + pdb_code + ".xml.gz") as xmlfile:
+            with gzip.open(xmlfile, 'rt') as f:
+                content = f.read()
+                mappings = {}
+                dom = minidom.parseString(content)
+                for entity in dom.getElementsByTagName('entity'):
+                    for segment in entity.getElementsByTagName('segment'):
+                        for residue in segment.getElementsByTagName('residue'):
+                            residue_number = residue.attributes['dbResNum'].value
+                            cross_ref_db = residue.getElementsByTagName('crossRefDb')[0]
+                            cross_ref_num = cross_ref_db.attributes['dbResNum'].value
+                            cross_ref_chain = cross_ref_db.attributes['dbChainId'].value
+                            key = cross_ref_num + "_" + cross_ref_chain
+                            mappings[key] = residue_number
+
+                return mappings
+    except:
+        return {}
+
+
 def _get_pdb_url(gene_query):
 
     try:
@@ -86,9 +125,6 @@ def _get_pdb_url(gene_query):
                 best = matches[0]
                 pdb_code = best['pdb_id']
 
-                pdb_url = 'https://files.rcsb.org/download/' + pdb_code + '.pdb'
-
-                return pdb_url
+                return pdb_code
     except:
         return ''
-
