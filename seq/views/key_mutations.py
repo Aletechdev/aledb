@@ -53,25 +53,25 @@ def key_mutations(request):
     return HttpResponse(template.render(context))
 
 
-def _get_table_body(seq_experiment_dict, request):
+def _get_table_body(reseq_dict, request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
     key_mutation_queryset = ale.models.KeyMutation.objects.filter(ale_experiment_id=ale_experiment_id)
 
-    observed_mutations_query_set = _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset)
+    observed_mutations_query_set = _get_observed_key_mutations(reseq_dict, key_mutation_queryset)
 
-    return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set)
+    return mutation_table_builder.get_table_body(reseq_dict, observed_mutations_query_set)
 
 
-def _get_observed_key_mutations(seq_experiment_dict, key_mutation_queryset):
+def _get_observed_key_mutations(reseq_dict, key_mutation_queryset):
 
     # 2 filters for the queryset:
     # 1) get observed_mutations that are contained within the seq_experiment_dict,
     # 2) get observed_mutations that reference to the key_mutation_queryset
     # TODO: refactor
 
-    seq_experiment_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_dict.keys())
+    seq_experiment_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_dict.keys())
 
     key_mutation_id_list = []
 
