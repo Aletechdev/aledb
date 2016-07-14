@@ -12,6 +12,10 @@ import seq.views.common
 
 from seq.views import mutation_table_builder
 
+import urllib.request
+
+import json
+
 
 @login_required
 def gene(request):
@@ -71,13 +75,20 @@ def _get_seq_exp(request, mutated_gene):
 
 
 def _get_pdb_url(gene_query):
-    pdb_ids = seq.models.GeneToPDB.objects.filter(gene__contains=gene_query).order_by('rank')
 
-    pdb_code = ''
+    try:
+        with urllib.request.urlopen("http://www.uniprot.org/uniprot/?query=gene:" + gene_query +
+                                    "+AND+organism:83333+AND+reviewed:yes&sort=score&format=list") as uniprot_response:
+            uniprot_id = uniprot_response.read().decode("utf-8").replace("\n", "")
+            with urllib.request.urlopen("https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/" + str(uniprot_id)) \
+                    as pdb_id_response:
+                matches = json.loads(pdb_id_response.read().decode("utf-8"))[uniprot_id]
+                best = matches[0]
+                pdb_code = best['pdb_id']
 
-    if len(pdb_ids) > 0:
-        pdb_code = pdb_ids[0].pdb_id
+                pdb_url = 'https://files.rcsb.org/download/' + pdb_code + '.pdb'
 
-    pdb_url = 'https://files.rcsb.org/download/' + pdb_code + '.pdb'
+                return pdb_url
+    except:
+        return ''
 
-    return pdb_url

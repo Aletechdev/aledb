@@ -33,6 +33,8 @@ HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<td id="true"><a href="%s">%.2f</a></t
 
 non_decimal = re.compile(r'[^\d.]+')
 
+evidence = re.compile(r'[A-Z]\d+[A-Z]')
+
 
 if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = aleinfo.settings.sequencing_url
@@ -86,7 +88,6 @@ def get_table_body(reseq_dict,
 
     # Populating table_entry_list
     for observed_mutation in observed_mutations_queryset:
-
         if filter_mutation_id_list is not None and observed_mutation.mutation.id in filter_mutation_id_list:
             continue
 
@@ -118,12 +119,13 @@ def get_table_body(reseq_dict,
             table_row += "<td>%s</td>" % mutation.sequence_change
             table_row += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
             if table_type is TableType.gene_table:
-                # temp = re.findall(r"[^\W\d_]+|\d+", mutation.protein_change)
-                # print([x for x in temp if x.isdigit()])
-                try:
-                    table_row += "<td><a onclick=\"zoomTo(%d)\">%s</a></td>" \
-                                 % (int(non_decimal.sub('', mutation.protein_change)), mutation.protein_change)
-                except:
+                if evidence.search(mutation.protein_change):
+                    try:
+                        table_row += "<td><a onclick=\"zoomTo(%d)\">%s</a></td>" \
+                                     % (int(non_decimal.sub('', mutation.protein_change)), mutation.protein_change)
+                    except:
+                        table_row += "<td>%s</td>" % mutation.protein_change
+                else:
                     table_row += "<td>%s</td>" % mutation.protein_change
             else:
                 table_row += "<td>%s</td>" % mutation.protein_change
