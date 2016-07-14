@@ -12,6 +12,8 @@ import collections
 
 import csv
 
+import numbers
+
 
 EXPERIMENT_PARENT_DIR = "breseq/"  # TODO: See if this is necessary.
 
@@ -35,7 +37,7 @@ GD_MUT_TYPE_ATTR_KEY = 'type'
 
 GD_MUT_FREQ_ATTR_KEY = 'frequency'
 
-CLONAL_ASSUMED_FREQ = 1
+DEFAULT_FREQ = 0
 
 BRESEQ_REPORT_COLUMN_KEY_EVIDENCE = "evidence"
 
@@ -283,16 +285,12 @@ def _process_mutations(sample_type,
 
 def _get_mutation_freq(mutation_dict):
 
-    frequency = CLONAL_ASSUMED_FREQ
+    frequency = DEFAULT_FREQ
 
     if GD_MUT_FREQ_ATTR_KEY in mutation_dict:
-
-        frequency = mutation_dict[GD_MUT_FREQ_ATTR_KEY]
-
-    # TODO: Clarify how to better handle this.
-    if frequency == 'NA':
-
-        frequency = 0
+        freq = mutation_dict[GD_MUT_FREQ_ATTR_KEY]
+        if isinstance(freq, numbers.Number):
+            frequency = freq
 
     return frequency
 
