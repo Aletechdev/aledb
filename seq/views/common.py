@@ -188,9 +188,10 @@ def _get_seq_experiment_raw_queryset(request, ale_id):
     return seq_experiments_raw_queryset
 
 
-def get_observed_mutations(seq_experiment_id_list):
+# TODO: Refacor: figure out how to get a ResequencingExperiment to return its list of observed mutations.
+def get_observed_mutations(reseq_id_list):
 
-    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=seq_experiment_id_list)
+    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
 
     return observed_mutations
 
@@ -308,14 +309,14 @@ def _is_query_empty(query):
     return is_query_empty
 
 
-# TODO: don't use this, but rather seq_experiment.get_isolate_name().
+# TODO: don't use this, but rather seq_experiment.isolate_name property.
 def get_sample_name(seq_experiment):
 
     sample_name = seq_experiment.isolate.flask.ale_id.ale_experiment.name
 
     sample_name += " "
 
-    sample_name += seq_experiment.get_isolate_name().replace("_", " ")
+    sample_name += seq_experiment.isolate_name
 
     return sample_name
 
