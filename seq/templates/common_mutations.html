@@ -152,7 +152,7 @@
         <select name="primary_reseq_id" class="ui">
             {% for reseq in reseq_list %}
                 <option {% if reseq.id == primary_reseq_id %}selected="selected" {% endif %}
-                        value="{{ reseq.id }}">{{ reseq.isolate_name }}</option>
+                        value="{{ reseq.id }}">{{ reseq.ale_flask_isolate_str}}</option>
             {% endfor %}
         </select>
     </p>

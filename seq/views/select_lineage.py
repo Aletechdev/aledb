@@ -51,7 +51,7 @@ def _get_table_body(experiment_set, experiments, ale_experiment_id):
 
         table_row = "<tr>"
 
-        lineage_name = list(experiment_set.get(ale_no)).__getitem__(0).isolate_name.split(' ')[0];  # lineage name
+        lineage_name = list(experiment_set.get(ale_no)).__getitem__(0).ale_flask_isolate_str.split(' ')[0];  # lineage name
 
         table_row += """<td><a href="lineage?ale_experiment_id=%d&ale_no=%d">%s</a></td>""" % (ale_experiment_id, ale_no, lineage_name)
 
