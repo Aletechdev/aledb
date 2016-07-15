@@ -39,7 +39,7 @@ class ResequencingExperiment(models.Model):
         return self.isolate.flask.flask_number
 
     @property
-    def isolate_name(self):
+    def ale_flask_isolate_str(self):
 
         if self.isolate.description is not None:
 
@@ -54,7 +54,7 @@ class ResequencingExperiment(models.Model):
     @property
     def aleexp_ale_flask_isolate_str(self):
 
-        return self.isolate.flask.ale_id.ale_experiment.name + " " + self.isolate_name
+        return self.isolate.flask.ale_id.ale_experiment.name + " " + self.ale_flask_isolate_str
 
 
 class UnassignedMissingCoverageEvidence(models.Model):
