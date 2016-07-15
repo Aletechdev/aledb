@@ -1,6 +1,7 @@
 from django.db import models
 
 
+# TODO: Refacor: figure out how to get a ResequencingExperiment to return its list of observed mutations and remove functionality from seq.views.common
 class ResequencingExperiment(models.Model):
 
     isolate = models.ForeignKey("ale.Isolate")
@@ -37,8 +38,8 @@ class ResequencingExperiment(models.Model):
 
         return self.isolate.flask.flask_number
 
-    # TODO: change back to "isolate_name" to match other properties above.
-    def get_isolate_name(self):
+    @property
+    def isolate_name(self):
 
         if self.isolate.description is not None:
 
@@ -46,11 +47,9 @@ class ResequencingExperiment(models.Model):
 
                 return self.isolate.description
 
-        return u"A%d_F%d_I%d" % (self.ale_id,
+        return u"A%d F%d I%d" % (self.ale_id,
                                  self.flask_number,
                                  self.isolate.isolate_number)
-
-        # TODO - add more information
 
 
 class UnassignedMissingCoverageEvidence(models.Model):
