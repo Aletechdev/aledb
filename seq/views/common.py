@@ -309,18 +309,6 @@ def _is_query_empty(query):
     return is_query_empty
 
 
-# TODO: don't use this, but rather seq_experiment.isolate_name property.
-def get_sample_name(seq_experiment):
-
-    sample_name = seq_experiment.isolate.flask.ale_id.ale_experiment.name
-
-    sample_name += " "
-
-    sample_name += seq_experiment.isolate_name
-
-    return sample_name
-
-
 def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset):
 
     return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))

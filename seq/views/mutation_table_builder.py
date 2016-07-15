@@ -42,15 +42,15 @@ def get_table_header(reseq_dict):
 
     for seq_experiment_id in reseq_dict:
 
-        seq_experiment = reseq_dict[seq_experiment_id]
+        reseq = reseq_dict[seq_experiment_id]
 
-        sample_name = seq.views.common.get_sample_name(seq_experiment)
+        sample_name = reseq.aleexp_ale_flask_isolate_str
 
         mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id],
                                                                        sample_name)
 
         table_header += HTML_CHECKBOX % (
-            seq_experiment.id,
+            reseq.id,
             mutation_identifier)
 
     table_header += "</tr>"
