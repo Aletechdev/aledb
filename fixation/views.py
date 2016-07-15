@@ -7,9 +7,10 @@ import seq.views.common
 __author__ = 'Patrick Phaneuf'
 
 import pprint
+
+
 @login_required
 def fixation(request):
-
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
@@ -26,9 +27,10 @@ def fixation(request):
         reseq_id = id_reseq_tuple[0]
         flask_number = id_reseq_tuple[1].flask_number
         flask_observed_mutation_dict[flask_number] = seq.views.common.get_observed_mutations([reseq_id])
-    # pprint.pprint(flask_observed_mutation_dict)
 
-    asdf = _get_ale_fixated_mutation_queryset(flask_observed_mutation_dict)
+    fixated_mutation_queryset = _get_ale_fixated_mutation_queryset(flask_observed_mutation_dict)
+    for a in fixated_mutation_queryset:
+        print(a.position)
 
     # DEBUG END
 
@@ -36,34 +38,36 @@ def fixation(request):
 
 
 def _get_ale_fixated_mutation_queryset(flask_observed_mutation_dict):
-
     ordered_flask_number_list = sorted(flask_observed_mutation_dict.keys())
 
     first_flask_number = ordered_flask_number_list[0]
-    fixated_observed_mutation_queryset = flask_observed_mutation_dict[first_flask_number].all()
+    last_flask_number = ordered_flask_number_list[-1]
+    first_flask_observed_mutation_queryset = flask_observed_mutation_dict[first_flask_number]
+    fixated_mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(first_flask_observed_mutation_queryset)
+
     for flask_number in ordered_flask_number_list:
         flask_observed_mutation_queryset = flask_observed_mutation_dict[flask_number]
-        fixated_observed_mutation_queryset = fixated_observed_mutation_queryset.all() | flask_observed_mutation_queryset.all()
-        fixated_observed_mutation_queryset = fixated_observed_mutation_queryset.all() & flask_observed_mutation_queryset.all()
-        print()
-        for a in fixated_observed_mutation_queryset:
-            print(a.mutation.gene)
+        flask_mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(flask_observed_mutation_queryset)
+        if flask_number == last_flask_number:
+            fixated_mutation_queryset = _get_common_mutations(fixated_mutation_queryset, flask_mutation_queryset)
+        else:
+            fixated_mutation_queryset = _get_new_and_fixated_mutation_queryset(fixated_mutation_queryset,flask_mutation_queryset)
 
-    return fixated_observed_mutation_queryset
-
-
-def _get_fixated_mutation_queryset(current_fixated_mutation_queryset, flask_observed_mutation_queryset):
-        new_fixated_observed_mutation_queryset = _get_new_mutations(current_fixated_mutation_queryset, flask_observed_mutation_queryset)
-        new_fixated_observed_mutation_queryset = _remove_non_fixating_mutations(new_fixated_observed_mutation_queryset, flask_observed_mutation_queryset)
-        return new_fixated_observed_mutation_queryset
+    return fixated_mutation_queryset
 
 
-def _get_new_mutations(current_fixated_mutation_queryset, flask_observed_mutation_queryset):
-    return current_fixated_mutation_queryset.all() | flask_observed_mutation_queryset.all()
+def _get_new_and_fixated_mutation_queryset(fixated_mutation_queryset, flask_mutation_queryset):
+    new_observed_mutation_queryset = _get_combined_mutations(fixated_mutation_queryset, flask_mutation_queryset)
+    new_observed_mutation_queryset = _get_common_mutations(new_observed_mutation_queryset, flask_mutation_queryset)
+    return new_observed_mutation_queryset
 
 
-def _remove_non_fixating_mutations(current_fixated_mutation_queryset, flask_observed_mutation_queryset):
-    return current_fixated_mutation_queryset.all() & flask_observed_mutation_queryset.all()
+def _get_combined_mutations(fixated_mutation_queryset, flask_mutation_queryset):
+    return fixated_mutation_queryset | flask_mutation_queryset
+
+
+def _get_common_mutations(fixated_mutation_queryset, flask_mutation_queryset):
+    return fixated_mutation_queryset & flask_mutation_queryset
 
 
 def _get_ale_id_reseq_dict(reseq_dict):
