@@ -49,7 +49,7 @@ def lineage(request):
 
 def _get_table_body(seq_experiment_dict, request):
 
-    observed_mutations_query_set = common.get_observed_mutations(list(seq_experiment_dict.keys()))
+    observed_mutations_query_set = common.get_all_observed_mutations(list(seq_experiment_dict.keys()))
 
     ale_experiment_id = common.get_ale_experiment_id(request)
 

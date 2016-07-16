@@ -188,8 +188,8 @@ def _get_seq_experiment_raw_queryset(request, ale_id):
     return seq_experiments_raw_queryset
 
 
-# TODO: Refacor: figure out how to get a ResequencingExperiment to return its list of observed mutations.
-def get_observed_mutations(reseq_id_list):
+# TODO: Refactor: figure out how to get a ResequencingExperiment to return its list of observed mutations.
+def get_all_observed_mutations(reseq_id_list):
 
     observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
 
