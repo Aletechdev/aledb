@@ -71,14 +71,12 @@ def _get_observed_key_mutations(reseq_dict, key_mutation_queryset):
     # 2) get observed_mutations that reference to the key_mutation_queryset
     # TODO: refactor
 
-    seq_experiment_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_dict.keys())
+    observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_dict.keys())
 
     key_mutation_id_list = []
-
     for key_mutation in key_mutation_queryset:
-
         key_mutation_id_list.append(key_mutation.mutation_id)
 
-    key_mutation_observed_mutation_queryset = seq_experiment_observed_mutation_queryset.filter(mutation_id__in=key_mutation_id_list)
+    key_mutation_observed_mutation_queryset = observed_mutation_queryset.filter(mutation_id__in=key_mutation_id_list)
 
     return key_mutation_observed_mutation_queryset
