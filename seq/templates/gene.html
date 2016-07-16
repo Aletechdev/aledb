@@ -272,9 +272,10 @@
     };
     Object.defineProperty(Array.prototype, "equals", {enumerable: false});
 
-    function getAtomFromList(arr, value) {
-        for (var key in arr) {
-            if (arr[key].atom._v._dV == value) return arr[key].atom;
+    function getAtomFromList(value) {
+        var atom_list = viewer._m[0]._3[0]._cW._m;
+        for (var key in atom_list) {
+            if (atom_list[key].atom._v._dV == value) return atom_list[key].atom;
         }
         return null;
     }
@@ -296,7 +297,6 @@
     }
 
     var residue_mappings = {{ residue_mappings }};
-    //console.log(residue_mappings);
     function get_residue_mapping(atom_number) {
 
         var mapped_atom_number = residue_mappings[atom_number];
@@ -311,13 +311,10 @@
 
     var previousPickedAtom = null;
     var previousPickedColor = null;
-    var previousLigand = null;
     function zoomTo(atom_number) {
 
         atom_number = get_residue_mapping(atom_number);
-
-        var atom_list = viewer._m[0]._3[0]._cW._m;
-        var selected_atom = getAtomFromList(atom_list, atom_number);
+        var selected_atom = getAtomFromList(atom_number);
         if (selected_atom == null) return;
         var color = [0,0,0,0];
         var temp = viewer._m[0]._M[0].getColorForAtom(selected_atom, color);
@@ -325,7 +322,7 @@
         if (temp.equals([1, 0, 0, 1]) === false) {
             setColorForAtom(viewer._m[0], selected_atom, 'red');
             if (previousPickedAtom != null) {
-                var prev = getAtomFromList(atom_list, previousPickedAtom);
+                var prev = getAtomFromList(previousPickedAtom);
                 setColorForAtom(viewer._m[0], prev, previousPickedColor);
             }
             previousPickedAtom = atom_number;
@@ -333,20 +330,12 @@
                 previousPickedColor = temp;
             }
         }
-        var ligand_name = selected_atom._v._I;
-        console.log(ligand_name);
         var structure = viewer._m[0]._M[0]._i;
-        temp = structure.select({rnames : [ligand_name]});
-        console.log(temp);
-        if (temp._j.length > 0) {
-            //TODO Do not splice --> multiple atoms means more than one chain!
-            temp._j.splice(0,1);
-            console.log(temp);
-            var atom = selectAtomByNumber(atom_number, temp);
+        var mutation = structure.select({rnum : atom_number});
+        if(mutation._j.length > 0) {
             viewer._m = [viewer._m[0]];
-            if (atom != null) viewer.ballsAndSticks('ligand', atom);
+            viewer.ballsAndSticks('mutation', mutation);
         }
-        previousLigand = ligand_name;
         viewer.fitTo(selected_atom._v);
         viewer.requestRedraw();
     }
