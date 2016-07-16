@@ -37,7 +37,7 @@ GD_MUT_TYPE_ATTR_KEY = 'type'
 
 GD_MUT_FREQ_ATTR_KEY = 'frequency'
 
-DEFAULT_FREQ = 0
+DEFAULT_CLONAL_FREQ = 1
 
 BRESEQ_REPORT_COLUMN_KEY_EVIDENCE = "evidence"
 
@@ -285,8 +285,9 @@ def _process_mutations(sample_type,
 
 def _get_mutation_freq(mutation_dict):
 
-    frequency = DEFAULT_FREQ
+    frequency = DEFAULT_CLONAL_FREQ
 
+    # This will only execute if the sample is a population.
     if GD_MUT_FREQ_ATTR_KEY in mutation_dict:
         freq = mutation_dict[GD_MUT_FREQ_ATTR_KEY]
         if isinstance(freq, numbers.Number):
@@ -330,10 +331,10 @@ def _get_mutations_rows(mutations_html, sample_type):
     return mutation_rows
 
 
-def _find_between( s, first, last ):
+def _find_between(s, first, last):
     try:
-        start = s.index( first ) + len( first )
-        end = s.index( last, start )
+        start = s.index(first) + len(first)
+        end = s.index(last, start)
         return s[start:end]
     except ValueError:
         return ""
