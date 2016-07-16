@@ -45,13 +45,13 @@ def common_mutations(request):
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
-    filter_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
-    filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
+    ref_strain_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
+    ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
 
     table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
                                                        observed_mutation_queryset,
                                                        filter_settings,
-                                                       filter_mutation_id_list)
+                                                       ref_strain_mutation_id_list)
 
     template = loader.get_template("common_mutations.html")
 
