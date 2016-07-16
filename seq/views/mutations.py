@@ -28,30 +28,23 @@ else:
 def mutation_table(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
-
     ale_number = seq.views.common.get_ale_id(request)
-
-    wt_filter = seq.views.common.get_wt_filter(request)
-
-    ale_queryset = seq.views.common.get_ales(ale_experiment_id, wt_filter)
+    is_ref_strain_filtered = seq.views.common.get_ref_strain_filtered(request)
+    ale_queryset = seq.views.common.get_ales(ale_experiment_id, is_ref_strain_filtered)
 
     ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
 
     wt_id = None
-
-    if wt_filter:
-        
+    if is_ref_strain_filtered:
         wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)
-
         ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
 
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    table_body = _get_table_body(ordered_reseq_dict, request, wt_filter, wt_id)
+    table_body = _get_table_body(ordered_reseq_dict, request, is_ref_strain_filtered, wt_id)
 
     template = loader.get_template("table_template.html")
 
@@ -63,7 +56,7 @@ def mutation_table(request):
                        "title": "Mutation Table",
                        "table_header": mark_safe(table_header),
                        "template_header": "Mutations",
-                       "wt_filter": wt_filter})
+                       "wt_filter": is_ref_strain_filtered})
 
     return HttpResponse(template.render(context))
 
@@ -76,13 +69,13 @@ def _get_table_body(reseq_dict, request, wt_filter, wt_id):
 
     filter_settings = filter.mutation_filter.get_filter_settings(ale_experiment_id)
 
-    filter_mutation_id_list = None
+    ref_strain_mutation_id_list = None
 
     if wt_filter:
-        filter_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
-        filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
+        ref_strain_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
+        ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
 
     return mutation_table_builder.get_table_body(reseq_dict,
                                                  observed_mutations_query_set,
                                                  filter_settings,
-                                                 filter_mutation_id_list)
+                                                 ref_strain_mutation_id_list)
