@@ -157,7 +157,8 @@
                             value="{{ ale.ale_id }}">{{ ale.ale_id }}</option>
                 {% endfor %}
             </select>
-            {% if template_header != "Key Mutations" %}
+{#            Shouldn't used the following if statement. Come up with something better. #}
+            {% if template_header != "Key Mutations" and template_header != "Fixating Mutations"%}
                 <label class="ui"><input type="checkbox" name="wtfilt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
             {% endif %}
         </p>
