@@ -131,18 +131,3 @@ class ObservedMutation(models.Model):
                                     decimal_places=4)
 
 
-class GeneToPDBManager(models.Manager):
-
-    def create_mapping(self, creation_list):
-        new_mapping = self.bulk_create(creation_list)
-        return new_mapping
-
-
-class GeneToPDB(models.Model):
-
-    objects = GeneToPDBManager()
-
-    gene = models.CharField(max_length=50)
-    pdb_id = models.CharField(max_length=4, null=True, blank=True)
-    rank = models.IntegerField(null=True, blank=True, default=100)
-
