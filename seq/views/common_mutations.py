@@ -21,6 +21,7 @@ __author__ = 'Patrick Phaneuf'
 REQUEST_PRIMARY_RESEQ_ID = "primary_reseq_id"
 
 
+# TODO: very similar to fixation mutations page workflow. Should consolidate somehow.
 @login_required
 def common_mutations(request):
 
