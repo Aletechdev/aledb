@@ -68,7 +68,7 @@ def get_ales(experiment_ids, exclude_starting_strain=False):
     return experiment_queryset
 
 
-def get_wt_filter(request):
+def get_ref_strain_filtered(request):
 
     ret_val = False
 
