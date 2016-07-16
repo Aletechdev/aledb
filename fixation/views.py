@@ -18,6 +18,7 @@ __author__ = 'Patrick Phaneuf'
 
 
 # TODO: filter out 1) reference strain mutations 2) excluded mutations from filter.
+# TODO: very similar to common_mutations page workflow. Should consolidate somehow.
 @login_required
 def fixation(request):
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
@@ -29,6 +30,7 @@ def fixation(request):
     ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request)
     wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
+    ordered_reseq_dict = seq.views.mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
     table_header = seq.views.mutation_table_builder.get_table_header(ordered_reseq_dict)
 
