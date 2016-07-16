@@ -1,8 +1,16 @@
+# TODO: All resources being pulled from seq app could possibly be stored in a common dir.
+
 from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
 
+from django.template import Context, loader
+
+from django.utils.safestring import mark_safe
+
 import seq.views.common
+
+import seq.views.mutation_table_builder
 
 import seq.models
 
@@ -15,14 +23,30 @@ import pprint
 def fixation(request):
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
+    ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
+
+    ale_number = seq.views.common.get_ale_id(request)
 
     ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request)
     wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
 
+    table_header = seq.views.mutation_table_builder.get_table_header(ordered_reseq_dict)
+
     ale_experiment_fixated_mutation_queryset = _get_experiment_fixated_mutation_queryset(ordered_reseq_dict)
 
-    return HttpResponse()
+    # TODO: currently pulling this from the seq app. Need to put this template in a centralized location.
+    template = loader.get_template("table_template.html")
+
+    context = Context({"ales": ale_queryset,
+                       "ale_experiment_name": ale_experiment_name,
+                       "ale_no": ale_number,
+                       "experiment_id": ale_experiment_id,
+                       "title": "Fixating Mutations",
+                       "table_header": mark_safe(table_header),
+                       "template_header": "Fixating Mutations"})
+
+    return HttpResponse(template.render(context))
 
 
 def _get_experiment_fixated_mutation_queryset(ordered_reseq_dict):
