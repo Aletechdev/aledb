@@ -14,34 +14,42 @@ import seq.views.mutation_table_builder
 
 import seq.models
 
+from filter import mutation_filter
+
 __author__ = 'Patrick Phaneuf'
 
 
-# TODO: filter out 1) reference strain mutations 2) excluded mutations from filter.
 # TODO: very similar to common_mutations page workflow. Should consolidate somehow.
 @login_required
 def fixation(request):
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
+    ale_number = seq.views.common.get_ale_id(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
-    ale_number = seq.views.common.get_ale_id(request)
+    # TODO: shouldn't have to include param 'include_starting_strain=True', since this is intended to default to
+    # False for pages such as this, where we don't want to see the wild type, though we currently must include it
+    # so as to filter out the mutations when choosing specific ALEs within the experiment. This means that there is
+    # a disconnect between filtering methodologies that needs to be reconciled.
+    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
 
-    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request)
     wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
     ordered_reseq_dict = seq.views.mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
     table_header = seq.views.mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    observed_mutation_queryset = _get_experiment_fixated_observed_mutation_querset(ordered_reseq_dict)
+    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
     ref_strain_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
     ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
 
-    table_body = seq.views.mutation_table_builder.get_table_body(reseq_dict=ordered_reseq_dict,
-                                                                 observed_mutations_queryset=observed_mutation_queryset,
-                                                                 filter_mutation_id_list=ref_strain_mutation_id_list)
+    observed_mutation_queryset = _get_experiment_fixated_observed_mutation_queryset(ordered_reseq_dict)
+
+    table_body = seq.views.mutation_table_builder.get_table_body(ordered_reseq_dict,
+                                                                 observed_mutation_queryset,
+                                                                 filter_settings,
+                                                                 ref_strain_mutation_id_list)
 
     # TODO: currently pulling this from the seq app. Need to put this template in a centralized location.
     template = loader.get_template("table_template.html")
@@ -58,7 +66,7 @@ def fixation(request):
     return HttpResponse(template.render(context))
 
 
-def _get_experiment_fixated_observed_mutation_querset(ordered_reseq_dict):
+def _get_experiment_fixated_observed_mutation_queryset(ordered_reseq_dict):
 
     fixated_mutation_queryset = _get_experiment_fixated_mutation_queryset(ordered_reseq_dict)
 
