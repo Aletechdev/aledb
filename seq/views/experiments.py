@@ -200,10 +200,10 @@ def _get_observed_mutation_queryset(request):
 
     ordered_reseq_dict = common.filter_out_wt_reseq(ordered_reseq_dict)
 
-    filter_mutation_list = common.get_observed_mutations([wt_id])
+    filter_mutation_list = common.get_all_observed_mutations([wt_id])
     filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
 
-    observed_mutation_query_set = common.get_observed_mutations(list(ordered_reseq_dict.keys()))
+    observed_mutation_query_set = common.get_all_observed_mutations(list(ordered_reseq_dict.keys()))
 
     filter_observed_mutation_queryset = observed_mutation_query_set.exclude(mutation__in=filter_mutation_id_list)
 
