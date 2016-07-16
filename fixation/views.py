@@ -16,9 +16,8 @@ import seq.models
 
 __author__ = 'Patrick Phaneuf'
 
-import pprint
 
-
+#TODO: filter out 1) reference strain mutations 2) excluded mutations from filter.
 @login_required
 def fixation(request):
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
@@ -33,7 +32,10 @@ def fixation(request):
 
     table_header = seq.views.mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    ale_experiment_fixated_mutation_queryset = _get_experiment_fixated_mutation_queryset(ordered_reseq_dict)
+    observed_mutation_queryset = _get_experiment_fixated_observed_mutation_querset(ordered_reseq_dict)
+
+    table_body = seq.views.mutation_table_builder.get_table_body(ordered_reseq_dict,
+                                                                 observed_mutation_queryset)
 
     # TODO: currently pulling this from the seq app. Need to put this template in a centralized location.
     template = loader.get_template("table_template.html")
@@ -42,11 +44,27 @@ def fixation(request):
                        "ale_experiment_name": ale_experiment_name,
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
+                       "table_body": mark_safe(table_body),
                        "title": "Fixating Mutations",
                        "table_header": mark_safe(table_header),
                        "template_header": "Fixating Mutations"})
 
     return HttpResponse(template.render(context))
+
+
+def _get_experiment_fixated_observed_mutation_querset(ordered_reseq_dict):
+
+    fixated_mutation_queryset = _get_experiment_fixated_mutation_queryset(ordered_reseq_dict)
+
+    all_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=ordered_reseq_dict.keys())
+
+    fixating_mutation_id_list = []
+    for fixating_mutation in fixated_mutation_queryset:
+        fixating_mutation_id_list.append(fixating_mutation.id)
+
+    fixating_mutation_observed_mutation_queryset = all_observed_mutation_queryset.filter(mutation_id__in=fixating_mutation_id_list)
+
+    return fixating_mutation_observed_mutation_queryset
 
 
 def _get_experiment_fixated_mutation_queryset(ordered_reseq_dict):
