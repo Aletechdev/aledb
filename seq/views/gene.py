@@ -12,6 +12,14 @@ import seq.views.common
 
 from seq.views import mutation_table_builder
 
+import urllib.request
+
+import json
+
+from xml.dom import minidom
+
+import gzip
+
 
 @login_required
 def gene(request):
@@ -21,17 +29,20 @@ def gene(request):
 
     table_header = mutation_table_builder.get_table_header(reseq_dict)
 
-    table_body = mutation_table_builder.get_table_body(reseq_dict, observed_mutations_with_gene_queryset)
+    table_body = mutation_table_builder.get_table_body(reseq_dict,
+                                                       observed_mutations_with_gene_queryset,
+                                                       table_type=mutation_table_builder.TableType.gene_table)
 
     template = loader.get_template("gene.html")
 
-    pdb_url = _get_pdb_url(gene_query)
+    pdb_url, residue_mappings = _get_pdb_info(gene_query)
 
     context = Context({"gene_name": gene_query,
                        "table_body": mark_safe(table_body),
                        "title": gene_query + " gene",
                        "table_header": mark_safe(table_header),
-                       "pdb_file_path": pdb_url})
+                       "pdb_file_path": pdb_url,
+                       "residue_mappings": mark_safe(residue_mappings)})
 
     return HttpResponse(template.render(context))
 
@@ -68,14 +79,54 @@ def _get_seq_exp(request, mutated_gene):
     return seq_experiment_dict, observed_mutations_with_gene
 
 
-def _get_pdb_url(gene_query):
-    pdb_ids = seq.models.GeneToPDB.objects.filter(gene__contains=gene_query).order_by('rank')
+def _get_pdb_info(gene_query):
 
-    pdb_code = ''
-
-    if len(pdb_ids) > 0:
-        pdb_code = pdb_ids[0].pdb_id
+    pdb_code = _get_pdb_url(gene_query)
 
     pdb_url = 'https://files.rcsb.org/download/' + pdb_code + '.pdb'
 
-    return pdb_url
+    residue_mappings = _get_xml_for_pdb(pdb_code)
+
+    return pdb_url, residue_mappings
+
+
+def _get_xml_for_pdb(pdb_code):
+
+    try:
+        with urllib.request.urlopen(
+                                "ftp://ftp.ebi.ac.uk/pub/databases/msd/sifts/xml/" + pdb_code + ".xml.gz") as xmlfile:
+            with gzip.open(xmlfile, 'rt') as f:
+                content = f.read()
+                mappings = {}
+                dom = minidom.parseString(content)
+                for entity in dom.getElementsByTagName('entity'):
+                    for segment in entity.getElementsByTagName('segment'):
+                        for residue in segment.getElementsByTagName('residue'):
+                            residue_number = residue.attributes['dbResNum'].value
+                            cross_ref_db = residue.getElementsByTagName('crossRefDb')[0]
+                            cross_ref_num = cross_ref_db.attributes['dbResNum'].value
+                            cross_ref_chain = cross_ref_db.attributes['dbChainId'].value
+                            key = cross_ref_num + "_" + cross_ref_chain
+                            mappings[key] = residue_number
+
+                return mappings
+    except:
+        return {}
+
+
+def _get_pdb_url(gene_query):
+
+    try:
+        with urllib.request.urlopen("http://www.uniprot.org/uniprot/?query=gene:" + gene_query +
+                                    "+AND+organism:83333+AND+reviewed:yes&sort=score&format=list") as uniprot_response:
+            uniprot_id = uniprot_response.read().decode("utf-8").replace("\n", "")
+            with urllib.request.urlopen("https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/" + str(uniprot_id)) \
+                    as pdb_id_response:
+                matches = json.loads(pdb_id_response.read().decode("utf-8"))[uniprot_id]
+                best = matches[0]
+                pdb_code = best['pdb_id']
+
+                return pdb_code
+    except:
+        return ''
+
