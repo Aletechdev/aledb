@@ -165,7 +165,7 @@ def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
                     exclude_argument_list.append(Q(**{'gene__endswith': str(mutated_gene)[2:]}))
 
                 else:
-                    exclude_argument_list.append(Q(**{'gene__contains': str(mutated_gene)}))
+                    exclude_argument_list.append(Q(**{'gene__contains': str(mutated_gene)[1:]}))
             else:
                 if str(mutated_gene).endswith("*"):
                     include_argument_list.append(Q(**{'gene__startswith': str(mutated_gene)[:-1]}))
