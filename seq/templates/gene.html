@@ -154,14 +154,14 @@
 <h4>Gene Protein Structure</h4>
 <p>
     <div id='picked-atom-name' style='text-align:left; '>&nbsp;</div>
-    <div id="viewer" style='text-align:left;'></div>
+    <div id="viewer" style='width: 100%; height: 800px; text-align:left;'></div>
 </p>
 
 </body>
 <script type="text/javascript" src="/static/bio-pv.min.js"></script>
 <script>
     var parent = document.getElementById('viewer');
-    var viewer = pv.Viewer(parent, { width : 800, height : 600, antialias : true, fog: false, background: 'white', selectionColor: 'red', animateTime: 500});
+    var viewer = pv.Viewer(parent, { width : 'auto', height : 'auto', antialias : true, fog: false, background: 'white', selectionColor: 'red', animateTime: 500});
 
     function setColorForAtom(go, atom, color) {
         var view = go.structure().createEmptyView();
