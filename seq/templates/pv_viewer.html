@@ -1,0 +1,147 @@
+<script type="text/javascript">
+     var parent = document.getElementById('viewer');
+    var viewer = pv.Viewer(parent, { width : 'auto', height : 'auto', antialias : true, fog: false, background: 'white', selectionColor: 'red', animateTime: 500});
+
+    function setColorForAtom(go, atom, color) {
+        var view = go.structure().createEmptyView();
+        view.addAtom(atom);
+        go.colorBy(pv.color.uniform(color), view);
+    }
+
+    var prevPicked = null;
+
+    parent.addEventListener('mousemove', function(event) {
+        var rect = viewer.boundingClientRect();
+        var picked = viewer.pick({ x : event.clientX - rect.left, y : event.clientY - rect.top });
+        if (prevPicked !== null && picked !== null &&
+            picked.target() === prevPicked.atom) {
+        return;
+        }
+        if (prevPicked !== null) {
+            setColorForAtom(prevPicked.node, prevPicked.atom, prevPicked.color);
+        }
+        if (picked !== null) {
+            var atom = picked.target();
+            document.getElementById('picked-atom-name').innerHTML = atom.qualifiedName();
+            var color = [0,0,0,0];
+            picked.node().getColorForAtom(atom, color);
+            prevPicked = { atom : atom, color : color, node : picked.node() };
+
+            setColorForAtom(picked.node(), atom, 'red');
+        } else {
+            document.getElementById('picked-atom-name').innerHTML = '&nbsp;';
+            prevPicked = null;
+        }
+        viewer.requestRedraw();
+    });
+    var game_object = null;
+    pv.io.fetchPdb('{{ pdb_file_path }}', function(structure) {
+        viewer.on('viewerReady', function() {
+            game_object = viewer.cartoon('molecule', structure);
+            viewer.autoZoom();
+        });
+    });
+    document.addEventListener('keypress', function(ev) {
+        if (ev.keyCode === 13) {
+            var allSelections = [];
+            viewer.forEach(function(go) {
+                if (go.selection !== undefined) {
+                    allSelections.push(go.selection());
+                }
+            });
+        viewer.fitTo(allSelections);
+        }
+    });
+
+    viewer.on('click', function(picked, ev) {
+        if (picked === null || picked.target() === null) { return; }
+        if (picked.node().structure === undefined) { return; }
+        var extendSelection = ev.shiftKey;
+        var sel;
+        if (extendSelection) {
+            sel = picked.node().selection();
+        } else {
+            sel = picked.node().structure().createEmptyView();
+        }
+        if (!sel.removeAtom(picked.target(), true)) { sel.addAtom(picked.target()); }
+        picked.node().setSelection(sel);
+        viewer.requestRedraw();
+    });
+
+    Array.prototype.equals = function (array) {
+        if (!array) return false;
+        if (this.length != array.length) return false;
+
+        for (var i = 0, l=this.length; i < l; i++) {
+            if (this[i] instanceof Array && array[i] instanceof Array) {
+                if (!this[i].equals(array[i])) return false;
+            }
+                else if (this[i] != array[i]) {return false;}
+        }
+        return true;
+    };
+    Object.defineProperty(Array.prototype, "equals", {enumerable: false});
+
+    function getAtomFromList(value) {
+        var atom_list = viewer._m[0]._3[0]._cW._m;
+        for (var key in atom_list) {
+            if (atom_list[key].atom._v._dV == value) return atom_list[key].atom;
+        }
+        return null;
+    }
+
+    function selectAtomByNumber(atom_number, arr) {
+        if (arr.hasOwnProperty("_j") && arr._j.length > 0 && arr._j[0].hasOwnProperty("_q")) {
+            var ligand_list = arr._j[0]._q;
+            var temp = [];
+            for (var x in ligand_list) {
+                if (ligand_list[x]._v._dV == atom_number) {
+                    temp[temp.length] = ligand_list[x];
+                }
+            }
+            arr._j[0]._q = temp;
+            return arr;
+        } else {
+            return null;
+        }
+    }
+
+    var residue_mappings = {{ residue_mappings }};
+    function get_residue_mapping(atom_number) {
+        var mapped_atom_number = residue_mappings[atom_number];
+        if (mapped_atom_number != null) {
+            return mapped_atom_number
+        }
+        return atom_number
+    }
+    var previousPickedAtom = null;
+    var previousPickedColor = null;
+    function zoomTo(atom_number) {
+
+        atom_number = get_residue_mapping(atom_number);
+        var selected_atom = getAtomFromList(atom_number);
+        if (selected_atom == null) return;
+        var color = [0,0,0,0];
+        var temp = viewer._m[0]._M[0].getColorForAtom(selected_atom, color);
+        if (temp == null) temp = [.8, .8, .8, 1];
+        if (temp.equals([1, 0, 0, 1]) === false) {
+            setColorForAtom(viewer._m[0], selected_atom, 'red');
+            if (previousPickedAtom != null) {
+                var prev = getAtomFromList(previousPickedAtom);
+                setColorForAtom(viewer._m[0], prev, previousPickedColor);
+            }
+            previousPickedAtom = atom_number;
+            if (temp !== [1, 0, 0, 1]) {
+                previousPickedColor = temp;
+            }
+        }
+        var structure = viewer._m[0]._M[0]._i;
+        var mutation = structure.select({rnum : atom_number});
+        if(mutation._j.length > 0) {
+            viewer._m = [viewer._m[0]];
+            viewer.ballsAndSticks('mutation', mutation);
+        }
+        viewer.fitTo(selected_atom._v);
+        viewer.requestRedraw();
+    }
+</script>
