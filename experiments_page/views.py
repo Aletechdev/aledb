@@ -18,7 +18,7 @@ from seq.views import common
 from django.db.models import Count
 
 
-EXPERIMENT_LIST_TEMPLATE = "experiment_view.html"
+EXPERIMENT_LIST_TEMPLATE = "experiments_page/index.html"
 
 
 # TODO: used by multiple views. Also implemented within views.py; implement in one location.
@@ -141,7 +141,7 @@ def _get_observed_mutation_type_count_dict(observed_mutation_query_set):
     mutation_type_count_dict = {mutation_type:0 for mutation_type in common.MUTATION_TYPE_LIST}
 
     for observed_mutation in observed_mutation_query_set:
-        mutation_type_count_dict[observed_mutation.mutation.mutation_type] += 1        
+        mutation_type_count_dict[observed_mutation.mutation.mutation_type] += 1
 
     return mutation_type_count_dict
 
