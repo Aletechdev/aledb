@@ -2,7 +2,6 @@ from django.conf.urls import patterns, url
 
 import seq.views.index
 import seq.views.mutations
-import seq.views.experiments
 import seq.views.key_mutations
 import seq.views.common_mutations
 import seq.views.select_lineage
@@ -21,7 +20,6 @@ urlpatterns = patterns('',
                        url('^mutations$', seq.views.mutations.mutation_table, name="mutation_table"),
                        url('^key_mutations', seq.views.key_mutations.key_mutations, name="key_mutations"),
                        url('^common_mutations', seq.views.common_mutations.common_mutations, name="common_mutations"),
-                       url('^lists$', seq.views.experiments.lists, name="lists"),
                        url('^select_lineage', seq.views.select_lineage.select_lineage, name="select_lineage"),
                        url('^lineage', seq.views.lineage.lineage, name="lineage"),
                        url('^meta_data', seq.views.meta_data.meta_data, name="lineage"),
