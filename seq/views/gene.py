@@ -35,14 +35,15 @@ def gene(request):
 
     template = loader.get_template("gene.html")
 
-    pdb_url, residue_mappings = _get_pdb_info(gene_query)
+    pdb_url, residue_mappings, has_pdb_file = _get_pdb_info(gene_query)
 
     context = Context({"gene_name": gene_query,
                        "table_body": mark_safe(table_body),
                        "title": gene_query + " gene",
                        "table_header": mark_safe(table_header),
                        "pdb_file_path": pdb_url,
-                       "residue_mappings": mark_safe(residue_mappings)})
+                       "residue_mappings": mark_safe(residue_mappings),
+                       "has_pdb_file": has_pdb_file})
 
     return HttpResponse(template.render(context))
 
@@ -87,7 +88,12 @@ def _get_pdb_info(gene_query):
 
     residue_mappings = _get_xml_for_pdb(pdb_code)
 
-    return pdb_url, residue_mappings
+    try:
+        urllib.request.urlopen(pdb_url)
+        return pdb_url, residue_mappings, True
+
+    except:
+        return pdb_url, residue_mappings, False
 
 
 def _get_xml_for_pdb(pdb_code):
