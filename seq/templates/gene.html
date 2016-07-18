@@ -133,6 +133,13 @@
 <p>
     <a href="http://ecocyc.org/ECOLI/substring-search?object={{ gene_name }}">EcoCyc</a>
 </p>
+{% if has_pdb_file %}
+<h4>Gene Protein Structure</h4>
+<p>
+    <div id='picked-atom-name' style='text-align:left; '>&nbsp;</div>
+    <div id="viewer" style='width: 100%; height: 800px; text-align:left;'></div>
+</p>
+{% endif %}
 <br>
 <h4>ALE Experiments</h4>
 {% if table_body %}
@@ -149,14 +156,6 @@
     </table>
 </form>
 {% endif %}
-
-<br><br>
-<h4>Gene Protein Structure</h4>
-<p>
-    <div id='picked-atom-name' style='text-align:left; '>&nbsp;</div>
-    <div id="viewer" style='width: 100%; height: 800px; text-align:left;'></div>
-</p>
-
 </body>
 <script type="text/javascript" src="/static/bio-pv.min.js"></script>
 <script>
