@@ -236,10 +236,11 @@ def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
 
         if ignored_mutations[0]:
             for ignored_mutation in ignored_mutations:
-                observed_mutation_query_set = \
-                    observed_mutation_query_set.exclude(mutation__position=ignored_mutation['position'],
-                                                        mutation__mutation_type__contains=ignored_mutation['type'],
-                                                        mutation__sequence_change__contains=ignored_mutation[
-                                                            'sequence'])
+                try:
+                    observed_mutation_query_set = \
+                        observed_mutation_query_set.exclude(mutation__gene__contains=ignored_mutation['gene'],
+                                                            mutation__protein_change__contains=ignored_mutation['protein'])
+                except:
+                    pass
 
     return observed_mutation_query_set
