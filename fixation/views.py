@@ -76,14 +76,11 @@ def _get_experiment_fixated_observed_mutation_queryset(ordered_reseq_dict, is_on
 
 
 def _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, reseq_id_list):
-    fixating_observed_mutation_queryset = seq.models.ObservedMutation.objects.none()
-
     fixating_mutation_id_list = [fixating_mutation.id for fixating_mutation in fixating_mutation_queryset]
     all_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
     fixating_observed_mutation_queryset = all_observed_mutation_queryset.filter(mutation_id__in=fixating_mutation_id_list)
 
     return fixating_observed_mutation_queryset
-
 
 
 def _get_experiment_fixated_mutation_queryset(ordered_reseq_dict):
