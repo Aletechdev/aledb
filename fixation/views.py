@@ -44,7 +44,7 @@ def fixation(request):
     ref_strain_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
     ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
 
-    observed_mutation_queryset = _get_experiment_fixated_observed_mutation_queryset(ordered_reseq_dict)
+    observed_mutation_queryset = _get_experiment_fixated_observed_mutation_queryset(ordered_reseq_dict, True)
 
     table_body = seq.views.mutation_table_builder.get_table_body(ordered_reseq_dict,
                                                                  observed_mutation_queryset,
@@ -66,19 +66,24 @@ def fixation(request):
     return HttpResponse(template.render(context))
 
 
-def _get_experiment_fixated_observed_mutation_queryset(ordered_reseq_dict):
+def _get_experiment_fixated_observed_mutation_queryset(ordered_reseq_dict, is_only_ascending=False):
 
-    fixated_mutation_queryset = _get_experiment_fixated_mutation_queryset(ordered_reseq_dict)
+    fixating_mutation_queryset = _get_experiment_fixated_mutation_queryset(ordered_reseq_dict)
 
-    all_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=ordered_reseq_dict.keys())
+    fixating_observed_mutation_queryset = _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, ordered_reseq_dict.keys())
 
-    fixating_mutation_id_list = []
-    for fixating_mutation in fixated_mutation_queryset:
-        fixating_mutation_id_list.append(fixating_mutation.id)
+    return fixating_observed_mutation_queryset
 
-    fixating_mutation_observed_mutation_queryset = all_observed_mutation_queryset.filter(mutation_id__in=fixating_mutation_id_list)
 
-    return fixating_mutation_observed_mutation_queryset
+def _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, reseq_id_list):
+    fixating_observed_mutation_queryset = seq.models.ObservedMutation.objects.none()
+
+    fixating_mutation_id_list = [fixating_mutation.id for fixating_mutation in fixating_mutation_queryset]
+    all_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
+    fixating_observed_mutation_queryset = all_observed_mutation_queryset.filter(mutation_id__in=fixating_mutation_id_list)
+
+    return fixating_observed_mutation_queryset
+
 
 
 def _get_experiment_fixated_mutation_queryset(ordered_reseq_dict):
