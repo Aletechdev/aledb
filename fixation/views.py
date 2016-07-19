@@ -82,35 +82,59 @@ def _get_experiment_fixated_observed_mutation_queryset(ordered_reseq_dict):
 
 
 def _get_experiment_fixated_mutation_queryset(ordered_reseq_dict):
+
     ale_id_reseq_dict = _get_ale_id_reseq_dict(ordered_reseq_dict)
 
     ale_experiment_fixated_mutation_queryset = seq.models.Mutation.objects.none()
 
     for id_reseq_list in ale_id_reseq_dict.values():
 
-        flask_observed_mutation_dict = {}
+        flask_isolate_mutation_dict = {}
         for id_reseq_tuple in id_reseq_list:
             reseq_id = id_reseq_tuple[0]
             flask_number = id_reseq_tuple[1].flask_number
-            flask_observed_mutation_dict[flask_number] = seq.views.common.get_all_observed_mutations([reseq_id])
+            isolate_number = id_reseq_tuple[1].isolate.isolate_number
 
-        ale_fixated_mutation_queryset = _get_ale_fixated_mutation_queryset(flask_observed_mutation_dict)
+            observed_mutation_queryset = seq.views.common.get_all_observed_mutations([reseq_id])
+            mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(observed_mutation_queryset)
+            flask_isolate_mutation_dict[(flask_number, isolate_number)] = mutation_queryset
+
+        flask_mutation_dict = _get_flask_mutation_dict(flask_isolate_mutation_dict)
+
+        ale_fixated_mutation_queryset = _get_ale_fixated_mutation_queryset(flask_mutation_dict)
         ale_experiment_fixated_mutation_queryset = ale_experiment_fixated_mutation_queryset | ale_fixated_mutation_queryset
 
     return ale_experiment_fixated_mutation_queryset
 
 
-def _get_ale_fixated_mutation_queryset(flask_observed_mutation_dict):
-    ordered_flask_number_list = sorted(flask_observed_mutation_dict.keys())
+# Combines all of the isolate mutations of one flask into a single queryset representing the mutations of the flask.
+def _get_flask_mutation_dict(flask_isolate_mutation_dict):
+    flask_mutation_dict = {}
+
+    for flask_isolate_id, mutation_queryset in flask_isolate_mutation_dict.items():
+
+        flask_id = flask_isolate_id[0]
+        if flask_id not in flask_mutation_dict.keys():
+            flask_mutation_dict[flask_id] = mutation_queryset
+        else:
+            flask_mutation_dict[flask_id] = flask_mutation_dict[flask_id] | mutation_queryset
+
+    return flask_mutation_dict
+
+
+def _get_ale_fixated_mutation_queryset(flask_mutation_dict):
+
+    ordered_flask_number_list = sorted(flask_mutation_dict.keys())
 
     first_flask_number = ordered_flask_number_list[0]
     last_flask_number = ordered_flask_number_list[-1]
-    first_flask_observed_mutation_queryset = flask_observed_mutation_dict[first_flask_number]
-    fixated_mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(first_flask_observed_mutation_queryset)
+
+    fixated_mutation_queryset = flask_mutation_dict[first_flask_number]
 
     for flask_number in ordered_flask_number_list:
-        flask_observed_mutation_queryset = flask_observed_mutation_dict[flask_number]
-        flask_mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(flask_observed_mutation_queryset)
+
+        flask_mutation_queryset = flask_mutation_dict[flask_number]
+
         if flask_number == last_flask_number:
             fixated_mutation_queryset = _get_common_mutations(fixated_mutation_queryset, flask_mutation_queryset)
         else:
@@ -120,9 +144,9 @@ def _get_ale_fixated_mutation_queryset(flask_observed_mutation_dict):
 
 
 def _get_new_and_fixated_mutation_queryset(fixated_mutation_queryset, flask_mutation_queryset):
-    new_observed_mutation_queryset = _get_combined_mutations(fixated_mutation_queryset, flask_mutation_queryset)
-    new_observed_mutation_queryset = _get_common_mutations(new_observed_mutation_queryset, flask_mutation_queryset)
-    return new_observed_mutation_queryset
+    new_mutation_queryset = _get_combined_mutations(fixated_mutation_queryset, flask_mutation_queryset)
+    new_mutation_queryset = _get_common_mutations(new_mutation_queryset, flask_mutation_queryset)
+    return new_mutation_queryset
 
 
 def _get_combined_mutations(fixated_mutation_queryset, flask_mutation_queryset):
