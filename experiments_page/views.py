@@ -17,6 +17,10 @@ from seq.views import common
 
 from django.db.models import Count
 
+from filter import mutation_filter
+
+import json
+
 
 EXPERIMENT_LIST_TEMPLATE = "experiments_page/index.html"
 
@@ -42,8 +46,9 @@ def lists(request):
 
     experiments_info_list = _get_reseq_experiment_info_list(reseq_experiments)
 
-    mutation_query_set = _get_mutation_query_set(request)
     observed_mutations_query_set = _get_observed_mutation_queryset(request)
+
+    mutation_query_set = _get_mutation_query_set(request, observed_mutations_query_set)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
     observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_query_set)
@@ -67,11 +72,9 @@ def lists(request):
     sequence_change_query = observed_mutations_query_set.values('mutation__gene', 'mutation__protein_change').annotate(
         the_count=Count('mutation__gene')).order_by('-the_count')
 
-    gene_list, genes, sequence_changes = common.get_ignored_genes(request, gene_query, sequence_change_query)
+    genes = common.set_gene_bar_chart_colors(gene_query)
 
-    genes = common.set_gene_bar_chart_colors(genes)
-
-    sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_changes)
+    sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_change_query)
 
     genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes, sequence_changes)
 
@@ -96,9 +99,8 @@ def lists(request):
     return HttpResponse(template.render(context))
 
 
-def _get_mutation_query_set(request):
+def _get_mutation_query_set(request, observed_mutations_query_set):
 
-    observed_mutations_query_set = _get_observed_mutation_queryset(request)
     mutation_query_set = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
 
     return mutation_query_set
@@ -201,10 +203,39 @@ def _get_observed_mutation_queryset(request):
     ordered_reseq_dict = common.filter_out_wt_reseq(ordered_reseq_dict)
 
     filter_mutation_list = common.get_all_observed_mutations([wt_id])
+
     filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
 
     observed_mutation_query_set = common.get_all_observed_mutations(list(ordered_reseq_dict.keys()))
 
+    observed_mutation_query_set = _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set)
+
     filter_observed_mutation_queryset = observed_mutation_query_set.exclude(mutation__in=filter_mutation_id_list)
 
     return filter_observed_mutation_queryset
+
+
+# TODO: Should move this function into common if it is used on any other pages
+def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
+
+    ale_experiment_id = common.get_ale_experiment_id(request)
+
+    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
+
+    ignored_genes = filter_settings.ignored_genes.replace(" ", "").split(",")
+
+    if ignored_genes[0] is not '':
+
+        for ignored_gene in ignored_genes:
+            observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene__contains=ignored_gene)
+
+    ignored_mutations = json.loads(filter_settings.ignored_mutations)
+
+    if ignored_mutations[0]:
+        for ignored_mutation in ignored_mutations:
+            observed_mutation_query_set = \
+                observed_mutation_query_set.exclude(mutation__position=ignored_mutation['position'],
+                                                    mutation__mutation_type__contains=ignored_mutation['type'],
+                                                    mutation__sequence_change__contains=ignored_mutation['sequence'])
+
+    return observed_mutation_query_set
