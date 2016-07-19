@@ -218,6 +218,8 @@ def _get_observed_mutation_queryset(request):
 # TODO: Should move this function into common if it is used on any other pages
 def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
 
+    observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene='')
+
     ale_experiment_id = common.get_ale_experiment_id(request)
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
@@ -229,13 +231,15 @@ def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
         for ignored_gene in ignored_genes:
             observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene__contains=ignored_gene)
 
-    ignored_mutations = json.loads(filter_settings.ignored_mutations)
+    if filter_settings.ignored_mutations is not '':
+        ignored_mutations = json.loads(filter_settings.ignored_mutations)
 
-    if ignored_mutations[0]:
-        for ignored_mutation in ignored_mutations:
-            observed_mutation_query_set = \
-                observed_mutation_query_set.exclude(mutation__position=ignored_mutation['position'],
-                                                    mutation__mutation_type__contains=ignored_mutation['type'],
-                                                    mutation__sequence_change__contains=ignored_mutation['sequence'])
+        if ignored_mutations[0]:
+            for ignored_mutation in ignored_mutations:
+                observed_mutation_query_set = \
+                    observed_mutation_query_set.exclude(mutation__position=ignored_mutation['position'],
+                                                        mutation__mutation_type__contains=ignored_mutation['type'],
+                                                        mutation__sequence_change__contains=ignored_mutation[
+                                                            'sequence'])
 
     return observed_mutation_query_set
