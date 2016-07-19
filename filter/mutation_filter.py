@@ -23,12 +23,17 @@ def is_excluded_on_mutation(mutation, filter_settings):
 
             for filter_mutation in filter_mutation_list:
 
-                if mutation.position == filter_mutation["position"] \
-                        and _normalize_sequence_change_string(mutation.sequence_change) == _normalize_sequence_change_string(filter_mutation["sequence"]) \
-                        and mutation.mutation_type == filter_mutation["type"]:
+                try:
+                    if mutation.position == filter_mutation["position"] \
+                            and _normalize_sequence_change_string(
+                                mutation.sequence_change) == _normalize_sequence_change_string(
+                                filter_mutation["sequence"]) \
+                            and mutation.mutation_type == filter_mutation["type"]:
 
-                    is_mutation_excluded = True
+                        is_mutation_excluded = True
                     break
+                except:
+                    pass
 
     return is_mutation_excluded
 
