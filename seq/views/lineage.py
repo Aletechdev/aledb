@@ -10,6 +10,8 @@ from seq.views import common
 
 from seq.views import mutation_table_builder
 
+from filter import mutation_filter
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -22,16 +24,13 @@ def lineage(request):
     ale_experiment_name = common.get_ale_experiment_name(request)
 
     ale_number = common.get_ale_id(request)
-
     ale_queryset = common.get_ales(ale_experiment_id)
+    ordered_reseq_dict = common.get_ordered_reseq_dict(request=request, include_starting_strain=True)
+    ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
-    seq_experiment_ordered_dict = common.get_ordered_reseq_dict(request=request, include_starting_strain=True)
+    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
-
-    table_header = mutation_table_builder.get_table_header(seq_experiment_ordered_dict)
-
-    table_body = _get_table_body(seq_experiment_ordered_dict, request)
+    table_body = _get_table_body(ordered_reseq_dict, request)
 
     template = loader.get_template("table_template.html")
 
@@ -53,7 +52,7 @@ def _get_table_body(seq_experiment_dict, request):
 
     ale_experiment_id = common.get_ale_experiment_id(request)
 
-    filter_settings = common.get_filter_settings(ale_experiment_id)
+    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
     return mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_query_set, filter_settings)
 
