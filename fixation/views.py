@@ -18,6 +18,8 @@ from filter import mutation_filter
 
 __author__ = 'Patrick Phaneuf'
 
+REQUEST_ASCENDING_FREQ_FILTER = 'asndflt'
+
 
 # TODO: very similar to common_mutations page workflow. Should consolidate somehow.
 @login_required
@@ -26,6 +28,7 @@ def fixation(request):
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
     ale_number = seq.views.common.get_ale_id(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
+    is_ascending_freq_filter = _is_ascending_freq_filter(request)
 
     # TODO: shouldn't have to include param 'include_starting_strain=True', since this is intended to default to
     # False for pages such as this, where we don't want to see the wild type, though we currently must include it
@@ -44,7 +47,7 @@ def fixation(request):
     ref_strain_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
     ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
 
-    observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(ordered_reseq_dict, True)
+    observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(ordered_reseq_dict, is_ascending_freq_filter)
 
     table_body = seq.views.mutation_table_builder.get_table_body(ordered_reseq_dict,
                                                                  observed_mutation_queryset,
@@ -61,9 +64,20 @@ def fixation(request):
                        "table_body": mark_safe(table_body),
                        "title": "Fixating Mutations",
                        "table_header": mark_safe(table_header),
+                       "is_ascending_freq_filter": is_ascending_freq_filter,
                        "template_header": "Fixating Mutations"})
 
     return HttpResponse(template.render(context))
+
+
+def _is_ascending_freq_filter(request):
+
+    ret_val = False
+
+    if request.GET.get(REQUEST_ASCENDING_FREQ_FILTER) is not None:
+        ret_val = True
+
+    return ret_val
 
 
 def _get_experiment_fixating_observed_mutation_queryset(ordered_reseq_dict, is_only_ascending=False):
@@ -89,7 +103,6 @@ def _filter_for_ascending_freq(fixating_observed_mutation_queryset):
             fixated_mutation_freq_dict[mutation_id] = [observed_mutation]
 
     mutation_id_exclude_list = _get_descending_freq_mutation_id_list(fixated_mutation_freq_dict)
-    print(mutation_id_exclude_list)
 
     fixating_observed_mutation_queryset = fixating_observed_mutation_queryset.exclude(mutation_id__in=mutation_id_exclude_list)
 
@@ -102,9 +115,15 @@ def _get_descending_freq_mutation_id_list(fixated_mutation_freq_dict):
 
     for mutation_id, observed_mutation_list in fixated_mutation_freq_dict.items():
 
-        # TODO: remove all mutations that are from same flask though have lower freqs
+        observed_mutation_list = _filter_mutations_from_same_flask(observed_mutation_list)
+
+        # print(observed_mutation_list[0].mutation.gene, end="\t\t")
+        # for mut in observed_mutation_list:
+        #     print(mut.sequencing_experiment.ale_flask_isolate_str, end="\t\t")
+        # print()
 
         observed_mutation_list.sort(key=lambda x: x.sequencing_experiment.flask_number)
+
         current_observed_mutation_frequency = 0
         for observed_mutation in observed_mutation_list:
             if observed_mutation.frequency >= current_observed_mutation_frequency:
@@ -114,6 +133,37 @@ def _get_descending_freq_mutation_id_list(fixated_mutation_freq_dict):
                 break
 
     return mutation_id_exclude_list
+
+
+# TODO: this can be unit tested.
+def _filter_mutations_from_same_flask(observed_mutation_list):
+
+    filtered_observed_mutation_list = []
+
+    same_flask_observed_mutation_dict = {}
+    for observed_mutation_idx in range(len(observed_mutation_list)):
+        flask_number = observed_mutation_list[observed_mutation_idx].sequencing_experiment.flask_number
+        if flask_number in same_flask_observed_mutation_dict.keys():
+            same_flask_observed_mutation_dict[flask_number].append(observed_mutation_idx)
+        else:
+            same_flask_observed_mutation_dict[flask_number] = [observed_mutation_idx]
+
+    for observed_mutation_idx_list in same_flask_observed_mutation_dict.values():
+
+        if len(observed_mutation_idx_list) == 1:
+            observed_mutation_idx = observed_mutation_idx_list[0]
+            filtered_observed_mutation_list.append(observed_mutation_list[observed_mutation_idx])
+        else:
+            max_freq = observed_mutation_idx_list[0]  # Default
+            max_freq_idx = 0
+            for observed_mutation_idx in observed_mutation_idx_list:
+                current_freq = observed_mutation_list[observed_mutation_idx].frequency
+                if current_freq > max_freq:
+                    max_freq = current_freq
+                    max_freq_idx = observed_mutation_idx
+            filtered_observed_mutation_list.append(observed_mutation_list[max_freq_idx])
+
+    return filtered_observed_mutation_list
 
 
 def _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, reseq_id_list):

@@ -159,7 +159,10 @@
             </select>
 {#            Shouldn't used the following if statement. Come up with something better. #}
             {% if template_header != "Key Mutations" and template_header != "Fixating Mutations"%}
-                <label class="ui"><input type="checkbox" name="wtfilt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
+                <label class="ui"><input type="checkbox" name="wtflt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
+            {% endif %}
+            {% if template_header == "Fixating Mutations" %}
+                <label class="ui"><input type="checkbox" name="asndflt" {% if is_ascending_freq_filter %} checked{% endif %} /> Ascending Frequency Filter</label>
             {% endif %}
         </p>
         <p>

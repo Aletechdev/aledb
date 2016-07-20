@@ -30,7 +30,7 @@ def mutation_table(request):
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
     ale_number = seq.views.common.get_ale_id(request)
-    is_ref_strain_filtered = seq.views.common.get_ref_strain_filtered(request)
+    is_ref_strain_filtered = seq.views.common.is_ref_strain_filtered(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, is_ref_strain_filtered)
 
     ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)

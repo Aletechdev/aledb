@@ -18,7 +18,7 @@ DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
 
 REQUEST_ALE_ID = "ale_no"
 
-REQUEST_WT_FILTER = "wtfilt"
+REQUEST_WT_FILTER = "wtflt"
 
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
@@ -68,7 +68,7 @@ def get_ales(experiment_ids, exclude_starting_strain=False):
     return experiment_queryset
 
 
-def get_ref_strain_filtered(request):
+def is_ref_strain_filtered(request):
 
     ret_val = False
 
