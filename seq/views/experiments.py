@@ -191,7 +191,7 @@ def _get_reseq_experiment_info_list(reseq_experiments):
     return reseq_experiments_info_list
 
 
-# TODO: should be transfered to common and have a parameter to filter wt mutations.
+# TODO: should be transferred to common and have a parameter to filter wt mutations.
 def _get_observed_mutation_queryset(request):
 
     ordered_reseq_dict = common.get_ordered_reseq_dict(request, include_starting_strain=True)
