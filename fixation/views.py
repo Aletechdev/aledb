@@ -117,11 +117,6 @@ def _get_descending_freq_mutation_id_list(fixated_mutation_freq_dict):
 
         observed_mutation_list = _filter_mutations_from_same_flask(observed_mutation_list)
 
-        # print(observed_mutation_list[0].mutation.gene, end="\t\t")
-        # for mut in observed_mutation_list:
-        #     print(mut.sequencing_experiment.ale_flask_isolate_str, end="\t\t")
-        # print()
-
         observed_mutation_list.sort(key=lambda x: x.sequencing_experiment.flask_number)
 
         current_observed_mutation_frequency = 0
@@ -154,8 +149,8 @@ def _filter_mutations_from_same_flask(observed_mutation_list):
             observed_mutation_idx = observed_mutation_idx_list[0]
             filtered_observed_mutation_list.append(observed_mutation_list[observed_mutation_idx])
         else:
-            max_freq = observed_mutation_idx_list[0]  # Default
-            max_freq_idx = 0
+            max_freq_idx = observed_mutation_idx_list[0]  # Default
+            max_freq = 0
             for observed_mutation_idx in observed_mutation_idx_list:
                 current_freq = observed_mutation_list[observed_mutation_idx].frequency
                 if current_freq > max_freq:
