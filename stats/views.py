@@ -22,11 +22,7 @@ __author__ = 'pphaneuf'
 
 STATS_TEMPLATE = "stats/index.html"
 
-
 # TODO: used by multiple views. Also implemented within views.py; implement in one location.
-STATS_TEMPLATE = "stats/index.html"
-
-
 if hasattr(settings, "sequencing_url"):
     resequencing_report_url = settings.sequencing_url
 else:
