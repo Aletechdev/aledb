@@ -150,6 +150,7 @@ INSTALLED_APPS = (
     'seq',
     'filter',
     'fixation',
+    'experiments_page',
 
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
