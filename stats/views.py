@@ -1,6 +1,3 @@
-__author__ = 'pphaneuf'
-
-
 from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
@@ -21,11 +18,15 @@ from filter import mutation_filter
 
 import json
 
+__author__ = 'pphaneuf'
 
-EXPERIMENT_LIST_TEMPLATE = "experiments_page/index.html"
+STATS_TEMPLATE = "stats/index.html"
 
 
 # TODO: used by multiple views. Also implemented within views.py; implement in one location.
+_TEMPLATE = "stats/index.html"
+_TEMPLATE = "stats/index.html"
+_TEMPLATE = "stats/index.html"
 if hasattr(settings, "sequencing_url"):
     resequencing_report_url = settings.sequencing_url
 else:
@@ -56,7 +57,7 @@ def lists(request):
     protein_change_type_count_dict = _get_protein_change_type_count_dict(mutation_query_set)
     observed_protein_change_type_count_dict = _get_observed_protein_change_type_count_dict(observed_mutations_query_set)
 
-    template = loader.get_template(EXPERIMENT_LIST_TEMPLATE)
+    template = loader.get_template(STATS_TEMPLATE)
 
     ale_experiment_name = common.get_ale_experiment_name(request)
 
