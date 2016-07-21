@@ -151,6 +151,7 @@ INSTALLED_APPS = (
     'filter',
     'fixation',
     'stats',
+    'key_mutations',
 
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',

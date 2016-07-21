@@ -154,6 +154,7 @@ INSTALLED_APPS = (
     'filter',
     'fixation',
     'stats',
+    'key_mutations',
 
     #'grappelli',
     # Uncomment the next line to enable the admin:
