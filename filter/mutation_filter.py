@@ -23,12 +23,17 @@ def is_excluded_on_mutation(mutation, filter_settings):
 
             for filter_mutation in filter_mutation_list:
 
-                if mutation.position == filter_mutation["position"] \
-                        and _normalize_sequence_change_string(mutation.sequence_change) == _normalize_sequence_change_string(filter_mutation["sequence"]) \
-                        and mutation.mutation_type == filter_mutation["type"]:
+                try:
+                    if mutation.position == filter_mutation["position"] \
+                            and _normalize_sequence_change_string(
+                                mutation.sequence_change) == _normalize_sequence_change_string(
+                                filter_mutation["sequence"]) \
+                            and mutation.mutation_type == filter_mutation["type"]:
 
-                    is_mutation_excluded = True
+                        is_mutation_excluded = True
                     break
+                except:
+                    pass
 
     return is_mutation_excluded
 
@@ -74,9 +79,9 @@ def get_filter_settings(ale_experiment_id):
 
     filter_queryset = Filter.objects.filter(ale_experiment_id=ale_experiment_id)
 
-    filter_settings = None
-
-    if len(filter_queryset) != 0:
+    if len(filter_queryset) == 0:
+        filter_settings = Filter()
+    else:
         filter_settings = filter_queryset[0]  # Since there's only one filter setting per experiment.
 
     return filter_settings

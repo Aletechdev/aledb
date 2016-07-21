@@ -48,9 +48,7 @@ var barHeight = 30;
        attr("style", "font-size: 14; font-family: Helvetica, sans-serif; font-weight: bold").
        text(function(datum) { return _get_label(datum)}).
        attr("class", "yAxis").
-       attr("fill", "black").
-       style("cursor", "pointer").
-       on("click", function (datum) {document.location.href = "/ale_analytics/gene?g=" + datum.mutation__gene;});
+       attr("fill", "black");
 
         var legend = gene_bar.append("g")
             .attr("class", "legend")
