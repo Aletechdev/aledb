@@ -153,6 +153,7 @@ INSTALLED_APPS = (
     'seq',
     'filter',
     'fixation',
+    'stats',
 
     #'grappelli',
     # Uncomment the next line to enable the admin:
