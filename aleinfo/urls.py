@@ -11,7 +11,7 @@ urlpatterns = patterns('',
 
                        (r'^accounts/login/$', 'django.contrib.auth.views.login'),
 
-                       #url(r'^grappelli/', include('grappelli.urls')),
+                       # url(r'^grappelli/', include('grappelli.urls')),
 
                        # Uncomment the admin/doc line below to enable admin documentation:
                        url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
@@ -22,7 +22,7 @@ urlpatterns = patterns('',
                        url(r'^ale_analytics/', include('seq.urls')),
                        url(r'^ale_analytics/filter/', include('filter.urls')),
                        url(r'^ale_analytics/fixation/', include('fixation.urls')),
-                       url(r'^ale_analytics/lists/', include('experiments_page.urls')),
+                       url(r'^ale_analytics/lists/', include('stats.urls')),
                        )
 
 urlpatterns += staticfiles_urlpatterns()
