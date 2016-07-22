@@ -70,7 +70,6 @@ def _handle_POST(request, filter_form_model):
         filter_form_model.max_cutoff = request.POST.get("max_cutoff", DEFAULT_MUTATION_FREQ_MAX)
         filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
         filter_form_model.ignored_mutations = _save_ignored_mutations(request)
-        print("FORM NEW  ", filter_form_model.ignored_mutations)
         filter_form_model.save()
     else:
         print(filter_form.errors)
@@ -95,7 +94,6 @@ def _get_ignored_mutations(filter_form):
     table_body = ""
     ignored_mutations = []
     try:
-        print("IGNORED MUTATUIS ", filter_form['ignored_mutations'].value())
         ignored_mutation_value = str(filter_form['ignored_mutations'].value()).replace("'", '"')
         ignored_mutations = json.loads(ignored_mutation_value)
         for ignored_mutation in ignored_mutations:
@@ -164,7 +162,5 @@ def _save_ignored_mutations(request):
         ignored_mutation['sequence'] = _get_sequence(ignored_mutation)
         ignored_mutation['gene'] = _get_gene(ignored_mutation)
         ignored_mutation['protein'] = _get_protein(ignored_mutation)
-
-    print("NEW JSON ", ignored_mutations_json)
 
     return str(ignored_mutations_json)
