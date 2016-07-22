@@ -50,8 +50,8 @@
             <th>Fixating Mutations</th>
             <th>Common Mutations</th>
             <th>Lineage</th>
-            <th>Filter</th>
             <th>Duplications</th>
+            <th>Filter</th>
         </tr>
         </thead>
         <tbody>
@@ -66,8 +66,8 @@
             <td><a href="fixation?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
             <td><a href="common_mutations?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
             <td><a href="select_lineage?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
-            <td><a href="/ale_analytics/filter?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
             <td><a href="duplication?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
+            <td><a href="/ale_analytics/filter?ale_experiment_id={{ experiment.ale_id }}">{{ experiment.name }}</a></td>
         {% endfor %}
         </tbody>
     </table>
