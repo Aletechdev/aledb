@@ -9,17 +9,10 @@
     <script type="text/javascript">
         var asInitVals = new Array();
         $(document).ready($(function () {
-            oTable = $("#runs").tablesorter({widgets: ['zebra']});
+            oTable = $("#runs").tablesorter({widgets: ['zebra'], sortList: [[0,0]]});
 
         }));
     </script>
-    <!-- Sorts Table alphabetically by ALE Experiment Name -->
-    <script>
-        $(document).ready(function() {
-            $("#runs").tablesorter({sortList: [[0,0]]});
-        });
-    </script>
-
 </head>
 
 <style>

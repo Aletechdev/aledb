@@ -52,31 +52,6 @@
     <div class="col-sm-6 col-md-4">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">ALE Flask and Isolate Counts</h3>
-            </div>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>ALE Number</th>
-                    <th>Flask Count</th>
-                    <th>Isolate Count</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for ale_flask_isolate_count_tuple in ale_flask_isolate_count_list %}
-                <tr>
-                    <td>{{ ale_flask_isolate_count_tuple.0 }}</td>
-                    <td>{{ ale_flask_isolate_count_tuple.1 }}</td>
-                    <td>{{ ale_flask_isolate_count_tuple.2 }}</td>
-                </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="col-sm-6 col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
                 <h3 class="panel-title">ALE Experiment Mutation Stats</h3>
             </div>
             <table class="table">
