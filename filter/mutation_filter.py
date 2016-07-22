@@ -19,7 +19,7 @@ def is_excluded_on_mutation(mutation, filter_settings):
 
         if filter_settings.ignored_mutations != "" and len(filter_settings.ignored_mutations) != len(default_ignored_mutations_json_string):
 
-            filter_mutation_list = json.loads(filter_settings.ignored_mutations)
+            filter_mutation_list = json.loads(filter_settings.ignored_mutations.replace("'", '"'))
 
             for filter_mutation in filter_mutation_list:
 
