@@ -6,8 +6,6 @@ from django.template import Context, loader
 
 import aleinfo.settings as settings
 
-from seq.models import *    # TODO: only import necessary models.
-
 from seq.views import common
 
 
