@@ -11,7 +11,7 @@ from seq.views import common
 
 __author__ = 'Patrick Phaneuf'
 
-META_DATA_TEMPLATE = "meta_data.html"
+META_DATA_TEMPLATE = "metadata/index.html"
 
 
 # TODO: used by multiple views. Also implemented within views.py; implement in one location.
@@ -63,7 +63,7 @@ def _get_experiment_info_list(experiments):
                                  experiment.isolate.flask.media.substrate,
                                  experiment.isolate.flask.ale_id.species,
                                  experiment.isolate.flask.ale_id.strain,
-                                 experiment.isolate.flask.ale_id.knockouts,
+                                 experiment.isolate.flask.ale_id.description,
                                  experiment.isolate.library_prep,
                                  experiment.isolate.reseq_reference,
                                  experiment.isolate.breseq_version,

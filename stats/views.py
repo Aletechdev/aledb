@@ -159,7 +159,7 @@ def _get_reseq_experiment_info_list(reseq_experiments):
 
         strain = reseq_experiment.isolate.flask.ale_id.strain
 
-        knockouts = reseq_experiment.isolate.flask.ale_id.knockouts
+        knockouts = reseq_experiment.isolate.flask.ale_id.description
 
         clonal_or_population = "clonal"
 

@@ -65,8 +65,6 @@ class AleId(models.Model):
 
     strain = models.CharField(max_length=300, **blank_field)
 
-    knockouts = models.CharField(max_length=300, **blank_field)
-
     ale_experiment = models.ForeignKey(AleExperiment)
 
     starting_strain = models.ForeignKey("Isolate",

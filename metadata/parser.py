@@ -33,7 +33,7 @@ def parse_and_upload_meta_data(meta_data_path, ale_experiment_primary_key):
                                               flask__ale_id__ale_experiment__ale_id=ale_experiment_primary_key)
 
                 isolate.flask.media.temperature = meta_data[TEMPERATURE].replace("C", "")
-                isolate.flask.media.description = meta_data[DESCRIPTION]
+                isolate.flask.ale_id.description = meta_data[DESCRIPTION]
                 isolate.flask.ale_id.strain = meta_data[STRAIN]
                 isolate.library_prep = meta_data[LIBRARY_PREP_KIT_MANUFACTURER] + "/ " + meta_data[LIBRARY_PREP_KIT_CYCLES]
                 isolate.flask.media.description = meta_data[MEDIA]
