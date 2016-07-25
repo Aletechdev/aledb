@@ -16,6 +16,8 @@ ALE_NUMBER = "ALE-number"
 FLASK_NUMBER = "Flask-number"
 ISOLATE_NUMBER = "Isolate-number"
 
+DEFAULT_STRAIN = "E. Coli"
+
 
 def parse_and_upload_meta_data(meta_data_path, ale_experiment_primary_key):
 
@@ -37,6 +39,9 @@ def parse_and_upload_meta_data(meta_data_path, ale_experiment_primary_key):
                 isolate.flask.ale_id.strain = meta_data[STRAIN]
                 isolate.library_prep = meta_data[LIBRARY_PREP_KIT_MANUFACTURER] + "/ " + meta_data[LIBRARY_PREP_KIT_CYCLES]
                 isolate.flask.media.description = meta_data[MEDIA]
+
+                if isolate.flask.ale_id.species is None:
+                    isolate.flask.ale_id.species = DEFAULT_STRAIN
 
                 isolate.save()
                 isolate.flask.media.save()
