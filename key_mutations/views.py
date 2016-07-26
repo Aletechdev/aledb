@@ -47,9 +47,9 @@ def key_mutations(request):
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
-                       "title": "Key Mutations",
+                       "title": "Frequently Mutated Genes",
                        "table_header": mark_safe(table_header),
-                       "template_header": "Key Mutations"})
+                       "template_header": "Frequently Mutated Genes"})
 
     return HttpResponse(template.render(context))
 
