@@ -100,7 +100,7 @@ def get_table_body(reseq_dict,
             if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
                 table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
 
-    #Populating table body
+    # Populating table body
     table_body = ""
 
     for mutation in mutation_queryset:
