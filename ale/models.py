@@ -65,7 +65,7 @@ class AleId(models.Model):
 
     strain = models.CharField(max_length=300, **blank_field)
 
-    knockouts = models.CharField(max_length=300, **blank_field)
+    knockouts = models.CharField(max_length=300, **blank_field)  # TODO: remove; knockouts to be included in AleId.description
 
     ale_experiment = models.ForeignKey(AleExperiment)
 

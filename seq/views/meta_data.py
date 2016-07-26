@@ -6,8 +6,6 @@ from django.template import Context, loader
 
 import aleinfo.settings as settings
 
-from seq.models import *    # TODO: only import necessary models.
-
 from seq.views import common
 
 
@@ -65,7 +63,7 @@ def _get_experiment_info_list(experiments):
                                  experiment.isolate.flask.media.substrate,
                                  experiment.isolate.flask.ale_id.species,
                                  experiment.isolate.flask.ale_id.strain,
-                                 experiment.isolate.flask.ale_id.knockouts,
+                                 experiment.isolate.flask.ale_id.knockouts,  # TODO: switch to ale_id.description.
                                  experiment.isolate.library_prep,
                                  experiment.isolate.reseq_reference,
                                  experiment.isolate.breseq_version,
