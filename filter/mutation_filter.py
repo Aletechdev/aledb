@@ -2,20 +2,26 @@ from filter.models import Filter
 
 import json
 
+from django.utils.html import strip_tags
+
 
 __author__ = 'Patrick Phaneuf'
 
 
 NO_BREAK_STRING_CODE = u'\xa0'
 
+MODEL_TO_FILTER_MAPPINGS = {"protein": "protein_change", "type": "mutation_type", "sequence": "sequence_change", "position": "position", "gene": "gene"}
 
+
+# TODO: Maybe make filtering part of the database query instead of post processing.
+# TODO: Could become an issue for large experiments with many filters
 def is_excluded_on_mutation(mutation, filter_settings):
 
-    is_mutation_excluded = False
+    mutation_dict = dict(mutation.__dict__)
 
     if filter_settings is not None:
 
-        default_ignored_mutations_json_string = "[{}]"
+        default_ignored_mutations_json_string = "[]"
 
         if filter_settings.ignored_mutations != "" and len(filter_settings.ignored_mutations) != len(default_ignored_mutations_json_string):
 
@@ -23,19 +29,29 @@ def is_excluded_on_mutation(mutation, filter_settings):
 
             for filter_mutation in filter_mutation_list:
 
-                try:
-                    if mutation.position == filter_mutation["position"] \
-                            and _normalize_sequence_change_string(
-                                mutation.sequence_change) == _normalize_sequence_change_string(
-                                filter_mutation["sequence"]) \
-                            and mutation.mutation_type == filter_mutation["type"]:
+                for key in filter_mutation:
 
-                        is_mutation_excluded = True
-                    break
-                except:
-                    pass
+                    try:
+                        mutation_data = strip_tags(mutation_dict[MODEL_TO_FILTER_MAPPINGS[key]]).replace(NO_BREAK_STRING_CODE, u'').replace(" ", "")
 
-    return is_mutation_excluded
+                    except:
+                        mutation_data = mutation_dict[MODEL_TO_FILTER_MAPPINGS[key]]
+
+                    if filter_mutation[key] is not '':
+
+                        try:
+                            if filter_mutation[key] not in mutation_data:
+                                break
+                        except:
+                            try:
+                                if int(filter_mutation[key]) != int(mutation_data):
+                                    break
+                            except:
+                                continue
+                else:
+                    return True
+
+    return False
 
 
 def _normalize_sequence_change_string(sequence_change_string):
