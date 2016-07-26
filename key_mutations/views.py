@@ -16,8 +16,9 @@ import seq.views.common
 
 from seq.views import mutation_table_builder
 
-
 __author__ = 'Patrick Phaneuf'
+
+REQUEST_MUTATION_ID = "mutation_id"
 
 
 @login_required
@@ -49,6 +50,34 @@ def key_mutations(request):
                        "title": "Key Mutations",
                        "table_header": mark_safe(table_header),
                        "template_header": "Key Mutations"})
+
+    return HttpResponse(template.render(context))
+
+
+@login_required
+def shared_key_mutations(request):
+
+    mutation_id = request.GET.get(REQUEST_MUTATION_ID)
+
+    key_mutation_queryset = ale.models.KeyMutation.objects.filter(mutation_id=mutation_id)
+    key_mutation = key_mutation_queryset[0]
+
+    table_header = mutation_table_builder.HTML_MUTATION_TABLE_HEADER
+
+    table_body = "<tr>"
+    table_body += mutation_table_builder.HTML_MUTATION_TABLE_ROW
+    table_body += "<td>%s</td>" % key_mutation.mutation.position
+    table_body += "<td>%s</td>" % key_mutation.mutation.mutation_type
+    table_body += "<td>%s</td>" % key_mutation.mutation.sequence_change
+    table_body += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (key_mutation.mutation.gene, key_mutation.mutation.gene)
+    table_body += "<td>%s</td>" % key_mutation.mutation.protein_change
+    table_body += "</tr>"
+
+    template = loader.get_template("key_mutations/index.html")
+
+    context = Context({"title": "Shared Frequently Mutated Genes",
+                       "table_header": mark_safe(table_header),
+                       "table_body": mark_safe(table_body)})
 
     return HttpResponse(template.render(context))
 
