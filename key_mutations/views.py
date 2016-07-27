@@ -16,6 +16,8 @@ import seq.views.common
 
 from seq.views import mutation_table_builder
 
+from seq.views import meta_data
+
 __author__ = 'Patrick Phaneuf'
 
 REQUEST_MUTATION_ID = "mutation_id"
@@ -54,6 +56,7 @@ def key_mutations(request):
     return HttpResponse(template.render(context))
 
 
+# TODO: needs to be refactored
 @login_required
 def shared_key_mutations(request):
 
@@ -90,10 +93,13 @@ def shared_key_mutations(request):
         if observed_mutation.mutation in key_mutataion_list:
             key_mutation_reseq_list.append(observed_mutation.sequencing_experiment)
 
+    reseq_info_list = meta_data.get_reseq_info_list(key_mutation_reseq_list)
+
     template = loader.get_template("key_mutations/index.html")
     context = Context({"title": "Shared Frequently Mutated Genes",
                        "table_header": mark_safe(table_header),
-                       "table_body": mark_safe(table_body)})
+                       "table_body": mark_safe(table_body),
+                       "reseq_info_list": reseq_info_list})
 
     return HttpResponse(template.render(context))
 
