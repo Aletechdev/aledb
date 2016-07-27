@@ -63,9 +63,9 @@ def _get_seq_exp(request, mutated_gene):
         isolates_to_show_ids = isolates_to_show_string.replace("{", "").replace("}", "")
         isolates_to_show_id_list = [int(i) for i in isolates_to_show_ids.split(",") if i != ""]
 
-    mutations_with_gene = seq.models.Mutation.objects.filter(gene=mutated_gene)
+    mutations_with_gene_queryset = seq.models.Mutation.objects.filter(gene=mutated_gene)
 
-    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation__in=mutations_with_gene)
+    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation__in=mutations_with_gene_queryset)
 
     seq_experiment_dict = {}
 
