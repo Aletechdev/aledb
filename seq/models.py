@@ -92,6 +92,14 @@ class Mutation(models.Model):
                             blank=True,
                             null=True)
 
+    product = models.CharField(max_length=500, default="", null=True)
+
+    function = models.CharField(max_length=500, default="", null=True)
+
+    go_process = models.CharField(max_length=300, default="", null=True)
+
+    go_component = models.CharField(max_length=300, default="", null=True)
+
     # "reference_error" was created to indicate mutations that are generated only because
     # the reference isn't realistic and not because the organism is actually
     # different from the original strain. This is why setting this value to

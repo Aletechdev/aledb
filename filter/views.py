@@ -24,7 +24,7 @@ __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 FILTER_TEMPLATE = "filter/index.html"
 
-TABLE_HEADER = HTML_MUTATION_TABLE_HEADER + "</tr>"
+TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Protein Change</td></tr>"
 
 
 @login_required

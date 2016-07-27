@@ -19,7 +19,7 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 HTML_MUTATION_TABLE_ROW = """<td><a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
 
-HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Protein change</td>"""
+HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 
@@ -120,6 +120,10 @@ def get_table_body(reseq_dict,
             table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += "<td>%s</td>" % mutation.sequence_change
             table_row += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
+            table_row += "<td>%s</td>" % ("" if mutation.function is None else mutation.function)
+            table_row += "<td>%s</td>" % ("" if mutation.product is None else mutation.product)
+            table_row += "<td>%s</td>" % ("" if mutation.go_process is None else mutation.go_process)
+            table_row += "<td>%s</td>" % ("" if mutation.go_component is None else mutation.go_component)
             if table_type is TableType.gene_table:
                 if evidence.search(mutation.protein_change):
                     try:

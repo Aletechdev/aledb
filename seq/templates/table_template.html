@@ -79,6 +79,14 @@
             });
         });
     </script>
+    <script type="text/javascript">
+        function fnShowHide( iCol ) {
+            var oTable = $('#data').dataTable();
+
+            var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
+            oTable.fnSetColumnVis( iCol, bVis ? false : true );
+        }
+    </script>
     <script>
         var deleteRow = function () {
             var row = $(this).closest("tr").get(0);
@@ -186,6 +194,19 @@
         <label style="float:right" class="ui"><input class="ui" id="show_dups" onclick="filter_dups(this)"
                                                      type="checkbox" name="checkbox" value="value"
                                                      style="margin-left: 10px" checked> Show Duplications</label>
+        <br><br>
+        <div>
+            Show / Hide Columns:
+            <a class="ui" onclick="fnShowHide(1)">Position</a> -
+            <a class="ui" onclick="fnShowHide(2)">Mutation Type</a> -
+            <a class="ui" onclick="fnShowHide(3)">Sequence Change</a> -
+            <a class="ui" onclick="fnShowHide(4)">Gene</a> -
+            <a class="ui" onclick="fnShowHide(5)">Function</a> -
+            <a class="ui" onclick="fnShowHide(6)">Product</a> -
+            <a class="ui" onclick="fnShowHide(7)">GO Process</a> -
+            <a class="ui" onclick="fnShowHide(8)">GO Component</a> -
+            <a class="ui" onclick="fnShowHide(9)">Protein Change</a>
+        </div>
         <thead>
         {{ table_header }}
         </thead>
