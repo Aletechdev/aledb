@@ -510,3 +510,114 @@ def _get_sample_report_list(experiment_breseq_output_path):
             breseq_sample_report_list.append(breseq_sample_names)
 
     return breseq_sample_report_list
+
+
+def create_functional_annotations(genbank_path, ale_experiment_id):
+
+    gene_dict = _parse_genbank(genbank_path)
+
+    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
+
+    for observed_mutation in observed_mutations:
+
+        mutation = observed_mutation.mutation
+
+        mutation_genes = mutation.gene.replace("[", "").replace("]", "").replace(u"\u2013", "/").replace("-", "/").split("/")
+
+        gene_info = {"product": "", "function": "", "go_process": "", "go_component": ""}
+
+        for gene in mutation_genes:
+
+            gene_info['function'] += "(" + gene_dict[gene]['function'] + ")"
+
+            gene_info['product'] += "(" + gene_dict[gene]['product'] + ")"
+
+            gene_info['go_component'] += "(" + gene_dict[gene]['go_component'] + ")"
+
+            gene_info['go_process'] += "(" + gene_dict[gene]['go_process'] + ")"
+
+        mutation.function = gene_info['function']
+
+        mutation.product = gene_info['product']
+
+        mutation.go_component = gene_info['go_component']
+
+        mutation.go_process = gene_info['go_process']
+
+        mutation.save()
+
+    return
+
+
+def _parse_genbank(genbank_path):
+
+    gene_info_start = {"product": "", "function": "", "go_process": "", "go_component": ""}
+
+    gene_dict = {}
+
+    current_gene = ""
+
+    with open(genbank_path, "rt") as genbank:
+
+        record = False
+
+        gene_info = gene_info_start
+
+        for line in genbank:
+
+            line = line.strip()
+
+            if line.startswith("CDS ") or line.startswith("tRNA ") or line.startswith("rRNA"):
+
+                record = True
+
+            elif line.startswith("gene "):
+
+                gene_dict[current_gene] = gene_info
+
+                record = False
+
+                gene_info = gene_info_start
+
+            elif line.startswith("ORIGIN"):
+
+                if record is True:
+
+                    gene_dict[current_gene] = gene_info
+
+                break
+
+            else:
+
+                if record is not False:
+
+                    if line.startswith("/gene="):
+
+                        current_gene = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/product="):
+
+                        gene_info['product'] = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/function="):
+
+                        gene_info['function'] = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/GO_process="):
+
+                        gene_info['go_process'] = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/GO_component="):
+
+                        gene_info['go_component'] = _find_between(line, "\"", "\"")
+
+    return gene_dict
+
+
+def _find_between(s, first, last):
+    try:
+        start = s.index(first) + len(first)
+        end = s.index(last, start)
+        return s[start:end]
+    except ValueError:
+        return ""
