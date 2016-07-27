@@ -116,35 +116,35 @@ def _get_ignored_mutations(filter_form):
 def _get_position(ignored_mutation):
 
     try:
-        return str(ignored_mutation['position'])
+        return str(ignored_mutation['position']).replace(" ", "")
     except:
         return ""
 
 
 def _get_type(ignored_mutation):
     try:
-        return str(ignored_mutation['type'])
+        return str(ignored_mutation['type']).replace(" ", "")
     except:
         return ""
 
 
 def _get_sequence(ignored_mutation):
     try:
-        return str(ignored_mutation['sequence'])
+        return str(ignored_mutation['sequence']).replace(" ", "")
     except:
         return ""
 
 
 def _get_gene(ignored_mutation):
     try:
-        return str(ignored_mutation['gene'])
+        return str(ignored_mutation['gene']).replace(" ", "")
     except:
         return ""
 
 
 def _get_protein(ignored_mutation):
     try:
-        return str(ignored_mutation['protein'])
+        return str(ignored_mutation['protein']).replace(" ", "")
     except:
         return ""
 

@@ -23,11 +23,13 @@
     <script type="text/javascript">
 
         function addIgnoredMutation() {
-            var pos = document.getElementById("position").value;
-            var mut = document.getElementById("type").value;
-            var seq = document.getElementById("sequence").value;
-            var gene = document.getElementById("gene").value;
-            var prot = document.getElementById("protein").value;
+            var pos = document.getElementById("position").value.replace(/\s/g, "");
+            var mut = document.getElementById("type").value.replace(/\s/g, "");
+            var seq = document.getElementById("sequence").value.replace(/\s/g, "");
+            var gene = document.getElementById("gene").value.replace(/\s/g, "");
+            var prot = document.getElementById("protein").value.replace(/\s/g, "");
+
+            console.log(prot);
 
             var ignored_mutations = JSON.parse(document.getElementById('id_ignored_mutations').value.replace(/&quot;/g,'"'));
 
