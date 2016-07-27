@@ -60,21 +60,37 @@ def shared_key_mutations(request):
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
 
     key_mutation_queryset = ale.models.KeyMutation.objects.filter(mutation_id=mutation_id)
-    key_mutation = key_mutation_queryset[0]
+    mutation_id_list = [key_mutation.mutation_id for key_mutation in key_mutation_queryset]
+    # mutation_queryset = seq.models.Mutation.objects.filter(id__in=mutation_id_list)
+    key_mutataion_list = [key_mutation.mutation for key_mutation in key_mutation_queryset]
 
     table_header = mutation_table_builder.HTML_MUTATION_TABLE_HEADER
-
+    key_mutation = key_mutataion_list[0]  # Should only be 1 key mutation
     table_body = "<tr>"
     table_body += mutation_table_builder.HTML_MUTATION_TABLE_ROW
-    table_body += "<td>%s</td>" % key_mutation.mutation.position
-    table_body += "<td>%s</td>" % key_mutation.mutation.mutation_type
-    table_body += "<td>%s</td>" % key_mutation.mutation.sequence_change
-    table_body += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (key_mutation.mutation.gene, key_mutation.mutation.gene)
-    table_body += "<td>%s</td>" % key_mutation.mutation.protein_change
+    table_body += "<td>%s</td>" % key_mutation.position
+    table_body += "<td>%s</td>" % key_mutation.mutation_type
+    table_body += "<td>%s</td>" % key_mutation.sequence_change
+    table_body += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (key_mutation.gene, key_mutation.gene)
+    table_body += "<td>%s</td>" % key_mutation.protein_change
     table_body += "</tr>"
 
-    template = loader.get_template("key_mutations/index.html")
+    # Get the reseq's that are part of the ALE experiments from the key_mutation_queryset
+    key_mutation_ale_exp_list = [key_mutation.ale_experiment for key_mutation in key_mutation_queryset]
+    all_reseq_queryset = seq.models.ResequencingExperiment.objects.all()
+    ale_experiment_reseq_list = []
+    for reseq in all_reseq_queryset:
+        if reseq.ale_experiment in key_mutation_ale_exp_list:
+            ale_experiment_reseq_list.append(reseq)
 
+    # filter reseq for only those that contain key mutation
+    observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment__in=ale_experiment_reseq_list)
+    key_mutation_reseq_list = []
+    for observed_mutation in observed_mutation_queryset:
+        if observed_mutation.mutation in key_mutataion_list:
+            key_mutation_reseq_list.append(observed_mutation.sequencing_experiment)
+
+    template = loader.get_template("key_mutations/index.html")
     context = Context({"title": "Shared Frequently Mutated Genes",
                        "table_header": mark_safe(table_header),
                        "table_body": mark_safe(table_body)})
