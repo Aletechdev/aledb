@@ -18,6 +18,8 @@ ISOLATE_NUMBER = "Isolate-number"
 
 DEFAULT_STRAIN = "E. Coli"
 DEFAULT_TEMPERATURE = 37
+DEFAULT_DESCRIPTION = ""
+
 
 def parse_and_upload_meta_data(meta_data_path, ale_experiment_primary_key):
 
@@ -48,24 +50,24 @@ def parse_and_upload_meta_data(meta_data_path, ale_experiment_primary_key):
                 try:
                     ale_id_description = meta_data[DESCRIPTION]
                 except:
-                    ale_id_description = ""
+                    ale_id_description = DEFAULT_DESCRIPTION
 
                 try:
                     strain = meta_data[STRAIN]
                 except:
-                    strain = ""
+                    strain = DEFAULT_DESCRIPTION
 
                 try:
                     library_prep = meta_data[LIBRARY_PREP_KIT_MANUFACTURER] + "/ " + meta_data[LIBRARY_PREP_KIT_CYCLES]
                     if library_prep is "/ ":
-                        library_prep = ""
+                        library_prep = DEFAULT_DESCRIPTION
                 except:
-                    library_prep = ""
+                    library_prep = DEFAULT_DESCRIPTION
 
                 try:
                     media_description = meta_data[MEDIA]
                 except:
-                    media_description = ""
+                    media_description = DEFAULT_DESCRIPTION
 
                 isolate.flask.media.temperature = temp
                 isolate.flask.ale_id.description = ale_id_description
