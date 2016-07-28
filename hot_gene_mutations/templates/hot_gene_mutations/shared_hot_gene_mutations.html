@@ -88,7 +88,7 @@
             });
         });
     </script>
-    <script>
+    <script type="text/javascript">
         var deleteRow = function () {
             var row = $(this).closest("tr").get(0);
             $('.dataTable').dataTable().fnDeleteRow(row);
@@ -124,26 +124,18 @@
             window.location.replace(url + query_string);
         }
     </script>
-    <script>
-        function filter_dups() {
-            if ($('#show_dups').is(":checked")) {
-                $('.dataTable').dataTable().fnFilter('');
-            } else {
-                $('.dataTable').dataTable().fnFilter("^(.(?!DUP))*$", null, true, false);
-            }
-        }
-    </script>
 </head>
 <body>
 <div class="page-header">
     <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-    <h1><a href="/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a></h1>
+    <h1><a href="/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a> / {{ title }}</h1>
 </div>
 <ul class="nav nav-pills">
     <li role="presentation" class="active"><a href="/ale_analytics">ALE Experiments</a></li>
     <li role="presentation"><a href="dashboard">Dashboard</a></li>
     <li role="presentation"><a href="search">Search</a></li>
 </ul>
+
 <br><br>
 
 <table id="data" class="tablesorter">
@@ -179,7 +171,6 @@
     {% for reseq_info_tuple in reseq_info_list %}
         <tr class="reseq_stats">
             <td class="sample_name"><a href="
-
                     {{ reseq_report_url }}{{ reseq_info_tuple.0.location }}">{{ reseq_info_tuple.0.aleexp_ale_flask_isolate_str }}</a>
             </td>
             <td class="clonal_or_population">{{ reseq_info_tuple.1 }}</td>
