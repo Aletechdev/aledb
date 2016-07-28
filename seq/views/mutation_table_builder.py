@@ -20,6 +20,8 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 HTML_MUTATION_TABLE_ROW = """<td><a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Protein change</td>"""
+# Difference with mutation_table_builder is the additional column.
+HTML_SHARED_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Protein change</td>"""
 
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 
@@ -36,17 +38,26 @@ non_decimal = re.compile(r'[^\d.]+')
 evidence = re.compile(r'[A-Z]\d+[A-Z]')
 
 
+class TableType(Enum):
+    GENE_TABLE = 1
+    SHARED_HOT_GENE_MUTATIONS = 2
+
+
 if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = aleinfo.settings.sequencing_url
 else:
     reseqencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
 
 
-def get_table_header(reseq_dict):
+def get_table_header(reseq_dict, table_type=None):
 
-    table_header = HTML_MUTATION_TABLE_HEADER
+    table_header = ""
+    if table_type == TableType.SHARED_HOT_GENE_MUTATIONS:
+        table_header = HTML_SHARED_MUTATION_TABLE_HEADER
+    else:
+        table_header = HTML_MUTATION_TABLE_HEADER
 
-    experiment_urls = _get_experiment_urls(reseq_dict)
+    experiment_urls = get_experiment_urls(reseq_dict)
 
     for seq_experiment_id in reseq_dict:
 
@@ -77,9 +88,9 @@ def get_table_body(reseq_dict,
 
     mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
 
-    mutation_index_dict = dict((id, i) for i, id in enumerate(mutation_queryset.values_list("id", flat=True)))
+    mutation_index_dict = dict((mutation_id, i) for i, mutation_id in enumerate(mutation_queryset.values_list("id", flat=True)))
 
-    experiment_url_dict = _get_experiment_urls(reseq_dict)
+    experiment_url_dict = get_experiment_urls(reseq_dict)
 
     experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
 
@@ -108,19 +119,16 @@ def get_table_body(reseq_dict,
         if _contains_mutation(table_entry_list[mutation_index_dict[mutation.id]]):
 
             table_row = "<tr>"
+            table_row += HTML_MUTATION_TABLE_ROW
 
-            if mutation.reference_error:    # TODO: what is going on here? What is 'reference_error'?
-                # table_row += """<td class="reference_error">%d %s</td>""" % (mutation.position, mutation.sequence_change)
-                continue
-
-            else:
-                table_row += HTML_MUTATION_TABLE_ROW
+            if table_type == TableType.SHARED_HOT_GENE_MUTATIONS:
+                table_row += "<td><a href=/ale_analytics/freq_mutated_genes/shared?mutation_id=%s>shared</a></td>" % mutation.id
 
             table_row += "<td>%s</td>" % mutation.position
             table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += "<td>%s</td>" % mutation.sequence_change
             table_row += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
-            if table_type is TableType.gene_table:
+            if table_type is TableType.GENE_TABLE:
                 if evidence.search(mutation.protein_change):
                     try:
                         table_row += "<td><a onclick=\"zoomTo(%d)\">%s</a></td>" \
@@ -143,7 +151,7 @@ def _initialize_table(experiment_id_idx_mapping, mutations):
     return [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
 
 
-def _get_experiment_urls(seq_experiment_dict):
+def get_experiment_urls(seq_experiment_dict):
 
     experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in seq_experiment_dict.values())
 
@@ -257,7 +265,3 @@ def _remove_checked_flasks(request, seq_experiment_dict):
                     del seq_experiment_dict[int(checked_experiment_id)]
 
     return seq_experiment_dict
-
-
-class TableType(Enum):
-    gene_table = 1
