@@ -8,6 +8,8 @@ import ale.models
 
 import hot_gene_mutations.models
 
+import fixation.models
+
 import seq.models
 
 import builder.util
@@ -15,6 +17,8 @@ import builder.util
 import builder.upload
 
 import builder.hot_gene_mutations
+
+import builder.fixated_mutations
 
 from builder.gdparse.gdparse import gdparse
 
@@ -329,11 +333,38 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     rebuild_hot_gene_mutations(experiment_orm.ale_id)
 
+    rebuild_fixated_mutations(experiment_orm.ale_id)
+
+
+def rebuild_fixated_mutations(ale_experiment_id):
+    _delete_fixated_mutations(ale_experiment_id)
+    _create_fixated_mutations(ale_experiment_id)
+
+
+def _delete_fixated_mutations(ale_experiment_id):
+    fixation.models.FixatedMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
+
+
+def _create_fixated_mutations(ale_experiment_id):
+
+    """
+    Find all fixated mutations for an ALE experiment and populate database table with them.
+    Using only Django ORM to make commit to database.
+    """
+
+    ale_experiment_orm = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
+
+    fixated_mutation_list = builder.hot_gene_mutations.get_hot_gene_mutation_list(ale_experiment_id)
+
+    for fixated_mutation in fixated_mutation_list:
+        fixated_mutation_queryset = fixation.models.FixatedMutation()
+        fixated_mutation_queryset.ale_experiment = ale_experiment_orm
+        fixated_mutation_queryset.mutation = fixated_mutation
+        fixated_mutation_queryset.save()
+
 
 def rebuild_hot_gene_mutations(ale_experiment_id):
-
     _delete_hot_gene_mutations(ale_experiment_id)
-
     _create_hot_gene_mutations(ale_experiment_id)
 
 
@@ -344,7 +375,7 @@ def _delete_hot_gene_mutations(ale_experiment_id):
 def _create_hot_gene_mutations(ale_experiment_id):
 
     """
-    Find all key mutations for ALE experiment and populate database table with them.
+    Find all enriched/(hot gene) mutations for ALE experiment and populate database table with them.
     Using only Django ORM to make commit to database.
     """
 
@@ -381,7 +412,6 @@ def _create_and_commit_wild_type_ale_entry(db_session,
                                  experiment,
                                  media,
                                  freezer_box,
-                                 # is_wild_type=True
                                  is_wild_type=False)
 
 
