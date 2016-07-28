@@ -28,6 +28,12 @@
         #true {background-color: rgba(0, 255, 0, 0.1)}
         #empty {background-color: rgba(255, 0, 0, 0.1)}
         #picked-atom-name {font-weight: bold}
+
+        body {
+            padding-right: 50px;
+            padding-bottom: 25px;
+            padding-left: 50px;
+        }
     </style>
 
     <script type="text/javascript" charset="utf8" src="/static/DataTables/media/js/jquery.dataTables.js"></script>
@@ -105,17 +111,6 @@
 	    }
     </script>
 </head>
-
-<style>
-
-    body {
-        padding-right: 50px;
-        padding-bottom: 25px;
-        padding-left: 50px;
-    }
-
-</style>
-
 <body>
 
 <div class="page-header">
@@ -123,9 +118,9 @@
     <h1><a href="/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a> / <b>{{ gene_name }}</b> gene</h1>
 </div>
 <ul class="nav nav-pills">
-    <li role="presentation" class="active"><a href="https://aquaticus.ucsd.edu/ale_analytics">ALE Experiments</a></li>
-    <li role="presentation"><a href="dashboard">Dashboard</a></li>
-    <li role="presentation"><a href="search">Search</a></li>
+    <li role="presentation" class="active"><a href="/ale_analytics">ALE Experiments</a></li>
+    <li role="presentation"><a href="/ale_analytics/dashboard">Dashboard</a></li>
+    <li role="presentation"><a href="/ale_analytics/search">Search</a></li>
 </ul>
 <br><br>
 
@@ -147,6 +142,7 @@
     <table id="data">
         <input type="button" value="Remove checked flasks" class="ui" onclick="filterFlask('remove')"/>
         <input type="button" value="Show checked flasks" class="ui" onclick="filterFlask('show')"/>
+        {% include 'export_as_csv.html' %}
         <thead>
         {{table_header}}
         </thead>

@@ -67,21 +67,22 @@
     </tr>
     </thead>
     <tbody>
-    {% for experiment_info_tuple in experiments_info_list %}
+    {% for reseq_info_tuple in reseq_info_list %}
         <tr class="experiment_stats">
-            <td class="sample_name"><a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
+            <td class="sample_name"><a href="
+                    {{ reseq_report_url }}{{ reseq_info_tuple.0.location }}">{{ reseq_info_tuple.0.ale_flask_isolate_str }}</a>
             </td>
-            <td class="clonal_or_population">{{ experiment_info_tuple.1 }}</td>
-            <td class="species">{{ experiment_info_tuple.5 }}</td>
-            <td class="strain">{{ experiment_info_tuple.6 }}</td>
-            <td class="knockouts">{{ experiment_info_tuple.7 }}</td>
-            <td class="media_description">{{ experiment_info_tuple.3 }}</td>
-            <td class="substrate">{{ experiment_info_tuple.4 }}</td>
-            <td class="temperature">{{ experiment_info_tuple.2 }}</td>
-            <td class="library_prep">{{ experiment_info_tuple.8 }}</td>
-            <td class="reseq_reference">{{ experiment_info_tuple.9 }}</td>
-            <td class="breseq_version">{{ experiment_info_tuple.10 }}</td>
-            <td class="reseq_date">{{ experiment_info_tuple.11 }}</td>
+            <td class="clonal_or_population">{{ reseq_info_tuple.1 }}</td>
+            <td class="species">{{ reseq_info_tuple.5 }}</td>
+            <td class="strain">{{ reseq_info_tuple.6 }}</td>
+            <td class="knockouts">{{ reseq_info_tuple.7 }}</td>
+            <td class="media_description">{{ reseq_info_tuple.3 }}</td>
+            <td class="substrate">{{ reseq_info_tuple.4 }}</td>
+            <td class="temperature">{{ reseq_info_tuple.2 }}</td>
+            <td class="library_prep">{{ reseq_info_tuple.8 }}</td>
+            <td class="reseq_reference">{{ reseq_info_tuple.9 }}</td>
+            <td class="breseq_version">{{ reseq_info_tuple.10 }}</td>
+            <td class="reseq_date">{{ reseq_info_tuple.11 }}</td>
         </tr>
 
     {% endfor %}

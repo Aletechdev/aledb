@@ -22,6 +22,7 @@ __author__ = 'pphaneuf'
 
 STATS_TEMPLATE = "stats/index.html"
 
+
 # TODO: used by multiple views. Also implemented within views.py; implement in one location.
 if hasattr(settings, "sequencing_url"):
     resequencing_report_url = settings.sequencing_url
@@ -56,7 +57,7 @@ def _get_ale_flask_isolate_count_list(reseq_queryset):
 def stats(request):
     """return a list of resequencing experiments"""
 
-    reseq_queryset = common.get_seq_experiment_raw_queryset(request)
+    reseq_queryset = common.get_reseq_queryset(request)
 
     ale_flask_isolate_count_list = _get_ale_flask_isolate_count_list(reseq_queryset)
 
