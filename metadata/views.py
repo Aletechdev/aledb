@@ -61,7 +61,6 @@ def get_reseq_info_list(reseq_queryset):
                                  reseq.isolate.flask.media.substrate,
                                  reseq.isolate.flask.ale_id.species,
                                  reseq.isolate.flask.ale_id.strain,
-                                 reseq.isolate.flask.ale_id.knockouts,  # TODO: switch to ale_id.description.
                                  reseq.isolate.library_prep,
                                  reseq.isolate.reseq_reference,
                                  reseq.isolate.breseq_version,
