@@ -14,9 +14,11 @@ import seq.models
 
 import seq.views.common
 
+# TODO: The mutation table build should use the factory pattern.
 from seq.views import mutation_table_builder
 
 from seq.views import meta_data
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -24,7 +26,7 @@ REQUEST_MUTATION_ID = "mutation_id"
 
 
 @login_required
-def key_mutations(request):
+def hot_gene_mutations(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
@@ -38,7 +40,8 @@ def key_mutations(request):
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
-    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
+    table_header = mutation_table_builder.get_table_header(reseq_dict=ordered_reseq_dict,
+                                                           table_type=mutation_table_builder.TableType.SHARED_HOT_GENE_MUTATIONS)
 
     table_body = _get_table_body(ordered_reseq_dict, request)
 
@@ -55,19 +58,19 @@ def key_mutations(request):
     return HttpResponse(template.render(context))
 
 
-# TODO: needs to be refactored
+# TODO: needs to be refactored. Currently has poor performance. Should use queryset to filter instead of for loops.
 @login_required
 def shared_hot_gene_mutations(request):
 
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
 
     key_mutation_queryset = ale.models.KeyMutation.objects.filter(mutation_id=mutation_id)
-    mutation_id_list = [key_mutation.mutation_id for key_mutation in key_mutation_queryset]
+    # mutation_id_list = [key_mutation.mutation_id for key_mutation in key_mutation_queryset]
     # mutation_queryset = seq.models.Mutation.objects.filter(id__in=mutation_id_list)
-    key_mutataion_list = [key_mutation.mutation for key_mutation in key_mutation_queryset]
+    key_mutation_list = [key_mutation.mutation for key_mutation in key_mutation_queryset]
 
     table_header = mutation_table_builder.HTML_MUTATION_TABLE_HEADER
-    key_mutation = key_mutataion_list[0]  # Should only be 1 key mutation
+    key_mutation = key_mutation_list[0]  # Should only be 1 key mutation
     table_body = "<tr>"
     table_body += mutation_table_builder.HTML_MUTATION_TABLE_ROW
     table_body += "<td>%s</td>" % key_mutation.position
@@ -89,7 +92,7 @@ def shared_hot_gene_mutations(request):
     observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment__in=ale_experiment_reseq_list)
     key_mutation_reseq_list = []
     for observed_mutation in observed_mutation_queryset:
-        if observed_mutation.mutation in key_mutataion_list:
+        if observed_mutation.mutation in key_mutation_list:
             key_mutation_reseq_list.append(observed_mutation.sequencing_experiment)
 
     reseq_info_list = meta_data.get_reseq_info_list(key_mutation_reseq_list)
@@ -109,17 +112,19 @@ def _get_table_body(reseq_dict, request):
 
     key_mutation_queryset = ale.models.KeyMutation.objects.filter(ale_experiment_id=ale_experiment_id)
 
-    observed_mutations_query_set = _get_observed_key_mutations(reseq_dict, key_mutation_queryset)
+    observed_mutations_queryset = _get_observed_key_mutations(reseq_dict, key_mutation_queryset)
 
-    return mutation_table_builder.get_table_body(reseq_dict, observed_mutations_query_set)
+    return mutation_table_builder.get_table_body(reseq_dict=reseq_dict,
+                                                 observed_mutations_queryset=observed_mutations_queryset,
+                                                 table_type=mutation_table_builder.TableType.SHARED_HOT_GENE_MUTATIONS)
 
 
+# TODO: refactor
 def _get_observed_key_mutations(reseq_dict, key_mutation_queryset):
 
     # 2 filters for the queryset:
     # 1) get observed_mutations that are contained within the seq_experiment_dict,
     # 2) get observed_mutations that reference to the key_mutation_queryset
-    # TODO: refactor
 
     observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_dict.keys())
 
