@@ -1,27 +1,18 @@
 import ale.common
-
 import seq.models
-
 import collections
-
 from filter import mutation_filter
-
+from common.db_util import get_reseq_dict
 
 __author__ = "Patrick Phaneuf"
 
 
 def get_hot_gene_mutation_list(ale_experiment_id):
-
-    reseq_dict = _get_reseq_dict(ale_experiment_id)
-
+    reseq_dict = get_reseq_dict(ale_experiment_id)
     ale_experiment_reseq_mutation_lists = _get_ale_experiment_reseq_mutation_lists(reseq_dict)
-
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
-
     mutation_gene_count_dict = _get_mutation_gene_count_dict(ale_experiment_reseq_mutation_lists, filter_settings)
-
     hot_gene_mutation_list = _get_hot_gene_mutation_list(ale_experiment_reseq_mutation_lists, filter_settings, mutation_gene_count_dict)
-
     return hot_gene_mutation_list
 
 
@@ -100,30 +91,8 @@ def _get_ale_experiment_reseq_mutation_lists(reseq_dict):
 
 
 def _get_reseq_mutations_list(reseq_id):
-
     mutations_list = []
-
     observed_mutations_query_set = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id=reseq_id)
-
     for observed_mutation in observed_mutations_query_set:
-
         mutations_list.append(observed_mutation.mutation)
-
     return mutations_list
-
-
-def _get_reseq_dict(experiment_id):
-
-    ale_experiment_selector = "AND experiment_id = "
-
-    ale_experiment_selector += str(experiment_id)
-
-    ale_number_selector = ""
-
-    sql_query = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_number_selector)
-
-    reseq_raw_query_set = seq.models.ResequencingExperiment.objects.raw(sql_query)
-
-    reseq_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_raw_query_set)
-
-    return reseq_dict

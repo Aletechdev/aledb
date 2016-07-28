@@ -29,7 +29,7 @@ def hot_gene_mutations(request):
 
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
 
-    ale_number = seq.views.common.get_ale_id(request)
+    ale_number = seq.views.common.get_ale_number(request)
 
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 

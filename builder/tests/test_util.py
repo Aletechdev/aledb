@@ -3,7 +3,6 @@ import unittest
 from builder.util import sanitize_path
 from builder.util import AleName
 from builder.util import parse_ale_name
-from builder.util import get_ale_name
 from builder.util import get_ale_isolate_name_from_path
 
 __author__ = 'Patrick Phaneuf'
@@ -41,7 +40,7 @@ class TestUtil(unittest.TestCase):
 
         self.assertEqual(returned_ale_value, expected_ale_value)
 
-    def test_parse_ale_name_flask(self):
+    def test_parse_sample_flask(self):
 
         ale_name = "1-2-3"
 
@@ -51,7 +50,7 @@ class TestUtil(unittest.TestCase):
 
         self.assertEqual(returned_ale_value, expected_ale_value)
 
-    def test_parse_ale_name_flask(self):
+    def test_parse_sample_isolate(self):
 
         ale_name = "1-2-3"
 
@@ -61,13 +60,6 @@ class TestUtil(unittest.TestCase):
 
         self.assertEqual(returned_ale_value, expected_ale_value)
 
-    def test_get_ale_name(self):
-
-        returned_ale_name = get_ale_name(1, 2)
-
-        expected_ale_name = "A1-F2"
-
-        self.assertEqual(returned_ale_name, expected_ale_name)
 
     def test_get_ale_isolate_name_from_path(self):
 
