@@ -15,13 +15,13 @@ urlpatterns = patterns('',
                        url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
 
                        # Uncomment the next line to enable the admin:
-                       url(r'^admin/', include(admin.site.urls)),   # TODO: remove if we're not using the Django site admin functionality.
+                       url(r'^admin/', include(admin.site.urls)),  # TODO: remove if we're not using the Django site admin functionality.
 
                        url(r'^ale_analytics/', include('seq.urls')),
                        url(r'^ale_analytics/filter/', include('filter.urls')),
                        url(r'^ale_analytics/fixation/', include('fixation.urls')),
                        url(r'^ale_analytics/stats/', include('stats.urls')),
-                       url(r'^ale_analytics/key_mutations/', include('key_mutations.urls')),
+                       url(r'^ale_analytics/freq_mutated_genes/', include('hot_gene_mutations.urls')),
                        )
 
 urlpatterns += staticfiles_urlpatterns()

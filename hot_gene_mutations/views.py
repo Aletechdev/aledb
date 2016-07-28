@@ -42,8 +42,7 @@ def key_mutations(request):
 
     table_body = _get_table_body(ordered_reseq_dict, request)
 
-    template = loader.get_template("table_template.html")
-
+    template = loader.get_template("hot_gene_mutations/hot_gene_mutations.html")
     context = Context({"ales": ale_queryset,
                        "ale_experiment_name": ale_experiment_name,
                        "ale_no": ale_number,
@@ -58,7 +57,7 @@ def key_mutations(request):
 
 # TODO: needs to be refactored
 @login_required
-def shared_key_mutations(request):
+def shared_hot_gene_mutations(request):
 
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
 
@@ -95,7 +94,7 @@ def shared_key_mutations(request):
 
     reseq_info_list = meta_data.get_reseq_info_list(key_mutation_reseq_list)
 
-    template = loader.get_template("key_mutations/index.html")
+    template = loader.get_template("hot_gene_mutations/shared_hot_gene_mutations.html")
     context = Context({"title": "Shared Frequently Mutated Genes",
                        "table_header": mark_safe(table_header),
                        "table_body": mark_safe(table_body),
