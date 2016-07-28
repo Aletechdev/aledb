@@ -17,7 +17,7 @@ import seq.views.common
 # TODO: The mutation table build should use the factory pattern.
 from seq.views import mutation_table_builder
 
-from seq.views import meta_data
+import metadata.views
 
 
 __author__ = 'Patrick Phaneuf'
@@ -95,7 +95,7 @@ def shared_hot_gene_mutations(request):
         if observed_mutation.mutation in key_mutation_list:
             key_mutation_reseq_list.append(observed_mutation.sequencing_experiment)
 
-    reseq_info_list = meta_data.get_reseq_info_list(key_mutation_reseq_list)
+    reseq_info_list = metadata.views.get_reseq_info_list(key_mutation_reseq_list)
 
     template = loader.get_template("hot_gene_mutations/shared_hot_gene_mutations.html")
     context = Context({"title": "Shared Frequently Mutated Genes",
