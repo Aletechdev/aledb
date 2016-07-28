@@ -45,6 +45,7 @@ class AleExperiment(models.Model):
         verbose_name_plural = "ALE Experiments"
 
 
+# TODO: move to hot_gene_mutations.models.py
 class KeyMutation(models.Model):
 
     ale_experiment = models.ForeignKey(AleExperiment,

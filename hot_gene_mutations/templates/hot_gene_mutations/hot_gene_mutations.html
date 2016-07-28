@@ -1,6 +1,8 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
         "http://www.w3.org/TR/html4/strict.dtd">
 
+{#TODO: This page is a copy-paste of table_template. Should refactor so that table_template and this page share common functions.#}
+
 <html>
 <head>
     <meta charset="utf-8">
@@ -85,7 +87,7 @@
             });
         });
     </script>
-    <script>
+    <script type="text/javascript">
         var deleteRow = function () {
             var row = $(this).closest("tr").get(0);
             $('.dataTable').dataTable().fnDeleteRow(row);
@@ -121,7 +123,7 @@
             window.location.replace(url + query_string);
         }
     </script>
-    <script>
+    <script type="text/javascript">
         function filter_dups() {
             if ($('#show_dups').is(":checked")) {
                 $('.dataTable').dataTable().fnFilter('');
@@ -156,13 +158,6 @@
                             value="{{ ale.ale_id }}">{{ ale.ale_id }}</option>
                 {% endfor %}
             </select>
-{#            Shouldn't use the following if statement. Come up with something better. #}
-            {% if template_header != "Key Mutations" and template_header != "Fixating Mutations"%}
-                <label class="ui"><input type="checkbox" name="wtflt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
-            {% endif %}
-            {% if template_header == "Fixating Mutations" %}
-                <label class="ui"><input type="checkbox" name="asndflt" {% if is_ascending_freq_filter %} checked{% endif %} /> Ascending Frequency Filter</label>
-            {% endif %}
         </p>
         <p>
             <input type="submit" value="Apply" class="ui"/>
