@@ -1,7 +1,5 @@
 from django.db import models
 
-from django.core.validators import MaxValueValidator, MinValueValidator  #TODO: not being used.
-
 blank_field = {"blank": True, "null": True}
 
 
@@ -43,15 +41,6 @@ class AleExperiment(models.Model):
     class Meta:
 
         verbose_name_plural = "ALE Experiments"
-
-
-class KeyMutation(models.Model):
-
-    ale_experiment = models.ForeignKey(AleExperiment,
-                                       on_delete=models.CASCADE)
-
-    mutation = models.ForeignKey("seq.Mutation",
-                                 null=True)
 
 
 class AleId(models.Model):

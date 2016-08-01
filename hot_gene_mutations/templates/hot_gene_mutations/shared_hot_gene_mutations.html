@@ -11,6 +11,9 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
+    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
+          media="print, projection, screen"/>
+
     <style type="text/css" title="currentStyle">
         @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
 
@@ -86,14 +89,6 @@
         });
     </script>
     <script type="text/javascript">
-        function fnShowHide( iCol ) {
-            var oTable = $('#data').dataTable();
-
-            var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
-            oTable.fnSetColumnVis( iCol, bVis ? false : true );
-        }
-    </script>
-    <script>
         var deleteRow = function () {
             var row = $(this).closest("tr").get(0);
             $('.dataTable').dataTable().fnDeleteRow(row);
@@ -129,110 +124,72 @@
             window.location.replace(url + query_string);
         }
     </script>
-    <script>
-        function filter_dups() {
-            if ($('#show_dups').is(":checked")) {
-                $('.dataTable').dataTable().fnFilter('');
-            } else {
-                $('.dataTable').dataTable().fnFilter("^(.(?!DUP))*$", null, true, false);
-            }
-        }
-    </script>
 </head>
 <body>
 <div class="page-header">
     <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-    <h1><a href="/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a> /
-        <b>{{ ale_experiment_name }}</b> {{ template_header }}</h1>
+    <h1><a href="/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a> / {{ title }}</h1>
 </div>
 <ul class="nav nav-pills">
     <li role="presentation" class="active"><a href="/ale_analytics">ALE Experiments</a></li>
     <li role="presentation"><a href="dashboard">Dashboard</a></li>
     <li role="presentation"><a href="search">Search</a></li>
 </ul>
+
 <br><br>
 
-<!-- ALE selection drop-down -->
-{% if experiment_id %}
-    <form action="" method="get">
-        <p>
-            <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
-            <select name="ale_no" class="ui">
-                <option value="all">All ales</option>
-                {% for ale in ales %}
-                    <option {% if ale.ale_id == ale_no %}selected="selected" {% endif %}
-                            value="{{ ale.ale_id }}">{{ ale.ale_id }}</option>
-                {% endfor %}
-            </select>
-{#            Shouldn't use the following if statement. Come up with something better. #}
-            {% if template_header != "Key Mutations" and template_header != "Fixating Mutations"%}
-                <label class="ui"><input type="checkbox" name="wtflt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
-            {% endif %}
-            {% if template_header == "Fixating Mutations" %}
-                <label class="ui"><input type="checkbox" name="asndflt" {% if is_ascending_freq_filter %} checked{% endif %} /> Ascending Frequency Filter</label>
-            {% endif %}
-        </p>
-        <p>
-            <input type="submit" value="Apply" class="ui"/>
-        </p>
-    </form>
-{% endif %}
+<table id="data" class="tablesorter">
+    <thead>
+    {{ table_header }}
+    </thead>
+    <tbody>
+    {{ table_body }}
+    </tbody>
+</table>
 
-<!-- Mutation table -->
-<form action="" method="get">
-    <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
-    {% if ale_no %}
-        <input type="hidden" name="ale_no" value="{{ ale_no }}"/>
-    {% else %}
-        <input type="hidden" name="ale_no" value="all"/>
-    {% endif %}
-    <table id="data">
-        <input type="button" value="Remove checked flasks" class="ui" onclick="filterFlask('remove')"/>
-        <input type="button" value="Show checked flasks" class="ui" onclick="filterFlask('show')"/>
-        {% include 'export_as_csv.html' %}
-        <label style="float:right" class="ui"><input class="ui" id="show_dups" onclick="filter_dups(this)"
-                                                     type="checkbox" name="checkbox" value="value"
-                                                     style="margin-left: 10px" checked> Show Duplications</label>
-        <br><br>
-        <div class="ui">
-            Show / Hide Columns:
-            <a onclick="fnShowHide(1)">Position</a>  -
-            <a onclick="fnShowHide(2)">Mutation Type</a> -
-            <a onclick="fnShowHide(3)">Sequence Change</a> -
-            <a onclick="fnShowHide(4)">Gene</a> -
-            <a onclick="fnShowHide(5)">Function</a> -
-            <a onclick="fnShowHide(6)">Product</a> -
-            <a onclick="fnShowHide(7)">GO Process</a> -
-            <a onclick="fnShowHide(8)">GO Component</a> -
-            <a onclick="fnShowHide(9)">Protein Change</a>
-        </div>
-        <thead>
-        {{ table_header }}
-        </thead>
-        <tbody>
-        {{ table_body }}
-        </tbody>
-    </table>
-</form>
+<br><br>
+
+<table id="runs" class="tablesorter">
+    <thead>
+    <tr>
+        <th>Experiment, ALE, Flask, Isolate</th>
+        <th>Clonal or Population</th>
+        <th>Species</th>
+        <th>Strain</th>
+        <th>Description</th>
+        <th>Media</th>
+        <th>Substrate</th>
+        <th>Temperature</th>
+        <th>Library Prep</th>
+        <th>Reference</th>
+        <th>Breseq Version</th>
+        <th>Reseq Date</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    {% for reseq_info_tuple in reseq_info_list %}
+        <tr class="reseq_stats">
+            <td class="sample_name"><a href="
+                    {{ reseq_report_url }}{{ reseq_info_tuple.0.location }}">{{ reseq_info_tuple.0.aleexp_ale_flask_isolate_str }}</a>
+            </td>
+            <td class="clonal_or_population">{{ reseq_info_tuple.1 }}</td>
+            <td class="species">{{ reseq_info_tuple.5 }}</td>
+            <td class="strain">{{ reseq_info_tuple.6 }}</td>
+            <td class="knockouts">{{ reseq_info_tuple.7 }}</td>
+            <td class="media_description">{{ reseq_info_tuple.3 }}</td>
+            <td class="substrate">{{ reseq_info_tuple.4 }}</td>
+            <td class="temperature">{{ reseq_info_tuple.2 }}</td>
+            <td class="library_prep">{{ reseq_info_tuple.8 }}</td>
+            <td class="reseq_reference">{{ reseq_info_tuple.9 }}</td>
+            <td class="breseq_version">{{ reseq_info_tuple.10 }}</td>
+            <td class="reseq_date">{{ reseq_info_tuple.11 }}</td>
+        </tr>
+
+    {% endfor %}
+    </tbody>
+
+</table>
+
 </body>
 </html>
-
-<!--
-<div class="dropdown">
-            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                Show / Hide Columns
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                <li><a class="ui" onclick="fnShowHide(1)">Position</a></li>
-                <li><a class="ui" onclick="fnShowHide(2)">Mutation Type</a></li>
-                <li><a class="ui" onclick="fnShowHide(3)">Sequence Change</a></li>
-                <li><a class="ui" onclick="fnShowHide(4)">Gene</a></li>
-                <li><a class="ui" onclick="fnShowHide(5)">Function</a></li>
-                <li><a class="ui" onclick="fnShowHide(6)">Product</a></li>
-                <li><a class="ui" onclick="fnShowHide(7)">GO Process</a></li>
-                <li><a class="ui" onclick="fnShowHide(8)">GO Component</a></li>
-                <li><a class="ui" onclick="fnShowHide(9)">Protein Change</a></li>
-            </ul>
-        </div>
--->
