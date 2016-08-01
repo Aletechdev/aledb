@@ -31,9 +31,9 @@ def dashboard(request):
         protein_change_count = seq.models.Mutation.objects.filter(protein_change__contains=protein_change_type).count()
         protein_change_type_count_dict[protein_change_type] = protein_change_count
 
-    gene_query = seq.models.ObservedMutation.objects.values('mutation__gene', 'mutation__mutation_type')\
+    gene_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='').values('mutation__gene', 'mutation__mutation_type')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
-    sequence_change_query = seq.models.ObservedMutation.objects.values('mutation__gene', 'mutation__protein_change')\
+    sequence_change_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='').values('mutation__gene', 'mutation__protein_change')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
 
     gene_list, genes, sequence_changes = common.get_ignored_genes(request, gene_query, sequence_change_query)

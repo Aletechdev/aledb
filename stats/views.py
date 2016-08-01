@@ -45,7 +45,7 @@ def stats(request):
 
     observed_mutations_query_set = _get_observed_mutation_queryset(request)
 
-    mutation_query_set = _get_mutation_query_set(request, observed_mutations_query_set)
+    mutation_query_set = common.get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_query_set)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
     observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_query_set)
@@ -94,13 +94,6 @@ def stats(request):
                        "ale_experiment_id": ale_experiment_id})
 
     return HttpResponse(template.render(context))
-
-
-def _get_mutation_query_set(request, observed_mutations_query_set):
-
-    mutation_query_set = seq.models.Mutation.objects.filter(pk__in=observed_mutations_query_set.values_list("mutation", flat=True))
-
-    return mutation_query_set
 
 
 def _get_protein_change_type_count_dict(mutation_query_set):
