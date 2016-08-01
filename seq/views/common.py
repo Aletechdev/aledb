@@ -313,8 +313,9 @@ def _is_query_empty(query):
 
 def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset):
 
-    reseq_reference = observed_mutations_queryset[0].mutation.reseq_reference
+    reseq_references = [observed_mutation.mutation.reseq_reference for observed_mutation in observed_mutations_queryset]
 
-    print(reseq_reference)
+    reseq_references = list(set(reseq_references))
 
-    return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True), reseq_reference=reseq_reference)
+    return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True),
+                                              reseq_reference__in=reseq_references)
