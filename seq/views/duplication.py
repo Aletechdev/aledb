@@ -46,7 +46,7 @@ def duplication(request):
 
     seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
-    experiment_urls = mutation_table_builder._get_experiment_urls(seq_experiment_ordered_dict)
+    experiment_urls = mutation_table_builder.get_experiment_urls(seq_experiment_ordered_dict)
 
     experiment_id_idx_mapping = mutation_table_builder._get_experiment_id_idx_mapping_dict(seq_experiment_ordered_dict)
 

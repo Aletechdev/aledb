@@ -22,6 +22,7 @@ __author__ = 'pphaneuf'
 
 STATS_TEMPLATE = "stats/index.html"
 
+
 # TODO: used by multiple views. Also implemented within views.py; implement in one location.
 if hasattr(settings, "sequencing_url"):
     resequencing_report_url = settings.sequencing_url
@@ -29,11 +30,36 @@ else:
     resequencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
+def _get_ale_flask_isolate_count_list(reseq_queryset):
+    ale_flask_isolate_count_dict = {}
+    for reseq in reseq_queryset:
+        if reseq.ale_id not in ale_flask_isolate_count_dict.keys():
+            ale_flask_isolate_count_dict[reseq.ale_id] = {reseq.flask_number: 1}
+        else:
+            if reseq.flask_number not in ale_flask_isolate_count_dict[reseq.ale_id].keys():
+                ale_flask_isolate_count_dict[reseq.ale_id][reseq.flask_number] = 1
+            else:
+                ale_flask_isolate_count_dict[reseq.ale_id][reseq.flask_number] += 1
+
+    ale_flask_isolate_count_list = []
+    for ale_id, flask_isolate_count_dict in ale_flask_isolate_count_dict.items():
+        ale_flask_count = 0
+        ale_isolate_count = 0
+        for flask_isolate_count in flask_isolate_count_dict.values():
+            ale_flask_count += 1
+            ale_isolate_count += flask_isolate_count
+        ale_flask_isolate_count_list.append((ale_id, ale_flask_count, ale_isolate_count))
+
+    return ale_flask_isolate_count_list
+
+
 @login_required
 def stats(request):
     """return a list of resequencing experiments"""
 
-    reseq_experiments = common.get_seq_experiment_raw_queryset(request)
+    reseq_queryset = common.get_reseq_queryset(request)
+
+    ale_flask_isolate_count_list = _get_ale_flask_isolate_count_list(reseq_queryset)
 
     # Would rather want to use something like a dictionary since an experiment is
     # unique, though an experiment is currently a structure and an integral type
@@ -41,7 +67,7 @@ def stats(request):
 
     ale_experiment_id = common.get_ale_experiment_id(request)
 
-    experiments_info_list = _get_reseq_experiment_info_list(reseq_experiments)
+    experiments_info_list = _get_reseq_experiment_info_list(reseq_queryset)
 
     observed_mutations_query_set = _get_observed_mutation_queryset(request)
 
@@ -91,7 +117,8 @@ def stats(request):
                        "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
                        "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
                        "number_of_genes_to_show": number_of_genes_to_show,
-                       "ale_experiment_id": ale_experiment_id})
+                       "ale_experiment_id": ale_experiment_id,
+                       "ale_flask_isolate_count_list": ale_flask_isolate_count_list})
 
     return HttpResponse(template.render(context))
 
