@@ -58,6 +58,7 @@ def add_breseq_results(db_session,
                        breseq_folder,
                        mutation_gd_parser,
                        annotation_gd_parser,
+                       reseq_reference,
                        is_wild_type=False):
     """
     Figures out if the sample is clonal or population,
@@ -84,11 +85,13 @@ def add_breseq_results(db_session,
                        seq_experiment,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
+                       reseq_reference,
                        is_wild_type)
 
     _process_duplications(db_session,
                           breseq_folder,
                           seq_experiment,
+                          reseq_reference,
                           is_wild_type)
 
     sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
@@ -98,7 +101,7 @@ def add_breseq_results(db_session,
                                          sample_evidence_dict)
 
 
-def _process_duplications(db_session, breseq_folder, seq_experiment, is_wild_type):
+def _process_duplications(db_session, breseq_folder, seq_experiment, reseq_reference, is_wild_type):
 
     afi = os.path.basename(os.path.dirname(os.path.dirname(breseq_folder)))
 
@@ -132,7 +135,8 @@ def _process_duplications(db_session, breseq_folder, seq_experiment, is_wild_typ
                                                position=dup[0],
                                                gene=gene_entry,
                                                sequence_change=(format(int(dup[2]), ",d") + " bp x" + dup[4]),
-                                               mutation_type="DUP")
+                                               mutation_type="DUP",
+                                               reseq_reference=reseq_reference)
 
                     mutation.protein_change = "Duplication"
 
@@ -238,6 +242,7 @@ def _process_mutations(sample_type,
                        seq_experiment,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
+                       reseq_reference,
                        is_wild_type):
 
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
@@ -259,7 +264,8 @@ def _process_mutations(sample_type,
                                    # mutations are in the same order in the html and output.gd
                                    # files so we can index the ids with row_num
                                    sequence_change=attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_MUTATION]].text,
-                                   mutation_type=sample_mutation_dict[mutation_num].get(GD_MUT_TYPE_ATTR_KEY))
+                                   mutation_type=sample_mutation_dict[mutation_num].get(GD_MUT_TYPE_ATTR_KEY),
+                                   reseq_reference=reseq_reference)
 
         '''
         TODO: find out why this is used. I'm avoiding using it for now, since the mutation table won't the mutations

@@ -476,7 +476,8 @@ def _create_and_commit_ale_entry(db_session,
                                       breseq_folder=breseq_folder_path,
                                       mutation_gd_parser=mutation_gd_parser,
                                       annotation_gd_parser=annotation_gd_parser,
-                                      is_wild_type=is_wild_type)
+                                      reseq_reference=reseq_reference,
+                                      is_wild_type=is_wild_type,)
 
     db_session.commit()
 

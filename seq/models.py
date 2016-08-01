@@ -1,5 +1,7 @@
 from django.db import models
 
+blank_field = {"blank": True, "null": True}
+
 
 # TODO: Refacor: figure out how to get a ResequencingExperiment to return its list of observed mutations and remove functionality from seq.views.common
 class ResequencingExperiment(models.Model):
@@ -99,6 +101,8 @@ class Mutation(models.Model):
     go_process = models.CharField(max_length=300, default="", null=True)
 
     go_component = models.CharField(max_length=300, default="", null=True)
+
+    reseq_reference = models.CharField(max_length=200, **blank_field)
 
     # "reference_error" was created to indicate mutations that are generated only because
     # the reference isn't realistic and not because the organism is actually
