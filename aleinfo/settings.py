@@ -4,7 +4,6 @@ from configparser import ConfigParser
 
 
 DEBUG = True
-# TEMPLATE_DEBUG = DEBUG
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -107,7 +106,7 @@ TEMPLATES = [
             ],
             'debug': DEBUG,
             'loaders': ['django.template.loaders.filesystem.Loader',
-                        'django.template.loaders.app_directories.Loader',],
+                        'django.template.loaders.app_directories.Loader'],
         },
     },
 ]
