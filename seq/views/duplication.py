@@ -2,7 +2,7 @@ __author__ = 'dgosting'
 
 from django.http import HttpResponse
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.contrib.auth.decorators import login_required
 
@@ -70,12 +70,11 @@ def duplication(request):
         else:
             experiment_links.append((False, basename))
 
-    context = Context({
-        "experiment_links": experiment_links,
-        "reseqencing_report_url": reseqencing_report_url,
-        "ale_experiment_id": ale_experiment_id,
-        "ale_experiment_name": ale_experiment_name
-    })
+    context = {"experiment_links": experiment_links,
+               "reseqencing_report_url": reseqencing_report_url,
+               "ale_experiment_id": ale_experiment_id,
+               "ale_experiment_name": ale_experiment_name
+              }
 
     return HttpResponse(template.render(context))
 

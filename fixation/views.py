@@ -4,7 +4,7 @@ from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.utils.safestring import mark_safe
 
@@ -57,15 +57,15 @@ def fixation(request):
     # TODO: currently pulling this from the seq app. Need to put this template in a centralized location.
     template = loader.get_template("table_template.html")
 
-    context = Context({"ales": ale_queryset,
-                       "ale_experiment_name": ale_experiment_name,
-                       "ale_no": ale_number,
-                       "experiment_id": ale_experiment_id,
-                       "table_body": mark_safe(table_body),
-                       "title": "Fixating Mutations",
-                       "table_header": mark_safe(table_header),
-                       "is_ascending_freq_filter": is_ascending_freq_filter,
-                       "template_header": "Fixating Mutations"})
+    context = {"ales": ale_queryset,
+               "ale_experiment_name": ale_experiment_name,
+               "ale_no": ale_number,
+               "experiment_id": ale_experiment_id,
+               "table_body": mark_safe(table_body),
+               "title": "Fixating Mutations",
+               "table_header": mark_safe(table_header),
+               "is_ascending_freq_filter": is_ascending_freq_filter,
+               "template_header": "Fixating Mutations"}
 
     return HttpResponse(template.render(context))
 

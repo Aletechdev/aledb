@@ -3,7 +3,7 @@ __author__ = 'pphaneuf'
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.http import HttpResponse
 
@@ -44,15 +44,15 @@ def dashboard(request):
 
     genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes,
                                                                                                 sequence_changes)
-    context = Context({"protein_change_type_count_dict": protein_change_type_count_dict,
-                       "mutation_type_count_dict": mutation_type_count_dict,
-                       "genes": mark_safe(genes_to_show),
-                       "sequence_changes": mark_safe(sequence_changes_to_show),
-                       "gene_color_set": mark_safe(common.GENE_COLORS),
-                       "seq_color_set": mark_safe(common.SEQ_COLORS),
-                       "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
-                       "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
-                       "number_of_genes_to_show": number_of_genes_to_show})
+    context = {"protein_change_type_count_dict": protein_change_type_count_dict,
+               "mutation_type_count_dict": mutation_type_count_dict,
+               "genes": mark_safe(genes_to_show),
+               "sequence_changes": mark_safe(sequence_changes_to_show),
+               "gene_color_set": mark_safe(common.GENE_COLORS),
+               "seq_color_set": mark_safe(common.SEQ_COLORS),
+               "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
+               "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
+               "number_of_genes_to_show": number_of_genes_to_show}
 
     template = loader.get_template(DASHBOARD_TEMPLATE)
 

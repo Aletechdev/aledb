@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from django.template import Context, loader
+from django.template import loader
 
 import aleinfo.settings as settings
 
@@ -35,9 +35,9 @@ def meta_data(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
 
-    context = Context({"reseq_info_list": reseq_info_list,
-                       "reseq_report_url": reseq_report_url,
-                       "ale_experiment_name": ale_experiment_name})
+    context = {"reseq_info_list": reseq_info_list,
+               "reseq_report_url": reseq_report_url,
+               "ale_experiment_name": ale_experiment_name}
 
     return HttpResponse(template.render(context))
 

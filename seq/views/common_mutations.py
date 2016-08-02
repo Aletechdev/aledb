@@ -2,7 +2,7 @@ from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.utils.safestring import mark_safe
 
@@ -58,15 +58,15 @@ def common_mutations(request):
 
     reseq_list = sorted(ordered_reseq_dict.values(), key=lambda x: x.ale_id)
 
-    context = Context({"ales": ale_queryset,
-                       "ale_experiment_name": ale_experiment_name,
-                       "reseq_list": reseq_list,
-                       "experiment_id": ale_experiment_id,
-                       "table_body": mark_safe(table_body),
-                       "title": "Common Mutations",
-                       "table_header": mark_safe(table_header),
-                       "primary_reseq_id": primary_reseq_id,
-                       "template_header": "Common Mutations"})
+    context = {"ales": ale_queryset,
+               "ale_experiment_name": ale_experiment_name,
+               "reseq_list": reseq_list,
+               "experiment_id": ale_experiment_id,
+               "table_body": mark_safe(table_body),
+               "title": "Common Mutations",
+               "table_header": mark_safe(table_header),
+               "primary_reseq_id": primary_reseq_id,
+               "template_header": "Common Mutations"}
 
     return HttpResponse(template.render(context))
 

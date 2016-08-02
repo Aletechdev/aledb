@@ -2,7 +2,7 @@ from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.utils.safestring import mark_safe
 
@@ -43,14 +43,14 @@ def hot_gene_mutations(request):
     table_body = _get_table_body(ordered_reseq_dict, request)
 
     template = loader.get_template("hot_gene_mutations/hot_gene_mutations.html")
-    context = Context({"ales": ale_queryset,
-                       "ale_experiment_name": ale_experiment_name,
-                       "ale_no": ale_number,
-                       "experiment_id": ale_experiment_id,
-                       "table_body": mark_safe(table_body),
-                       "title": "Frequently Mutated Genes",
-                       "table_header": mark_safe(table_header),
-                       "template_header": "Frequently Mutated Genes"})
+    context = {"ales": ale_queryset,
+               "ale_experiment_name": ale_experiment_name,
+               "ale_no": ale_number,
+               "experiment_id": ale_experiment_id,
+               "table_body": mark_safe(table_body),
+               "title": "Frequently Mutated Genes",
+               "table_header": mark_safe(table_header),
+               "template_header": "Frequently Mutated Genes"}
 
     return HttpResponse(template.render(context))
 
@@ -99,10 +99,10 @@ def shared_hot_gene_mutations(request):
     reseq_info_list = metadata.views.get_reseq_info_list(hot_gene_mutation_reseq_list)
 
     template = loader.get_template("hot_gene_mutations/shared_hot_gene_mutations.html")
-    context = Context({"title": "Shared Frequently Mutated Genes",
-                       "table_header": mark_safe(table_header),
-                       "table_body": mark_safe(table_body),
-                       "reseq_info_list": reseq_info_list})
+    context = {"title": "Shared Frequently Mutated Genes",
+               "table_header": mark_safe(table_header),
+               "table_body": mark_safe(table_body),
+               "reseq_info_list": reseq_info_list}
 
     return HttpResponse(template.render(context))
 

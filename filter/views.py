@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.contrib.auth.decorators import login_required
 
@@ -49,14 +49,13 @@ def mutation_filter(request):
 
     ignored_mutations, table_body = _get_ignored_mutations(filter_form)
 
-    context = Context({
-        "form": filter_form,
-        "ale_experiment_id": ale_experiment_id,
-        "ale_experiment_name": ale_experiment_name,
-        "table_body": mark_safe(table_body),
-        "table_header": mark_safe(TABLE_HEADER),
-        "ignored_mutations": ignored_mutations
-    })
+    context = {"form": filter_form,
+               "ale_experiment_id": ale_experiment_id,
+               "ale_experiment_name": ale_experiment_name,
+               "table_body": mark_safe(table_body),
+               "table_header": mark_safe(TABLE_HEADER),
+               "ignored_mutations": ignored_mutations
+    }
 
     return HttpResponse(template.render(context))
 

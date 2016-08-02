@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.utils.safestring import mark_safe
 
@@ -101,24 +101,24 @@ def stats(request):
 
     genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes, sequence_changes)
 
-    context = Context({"protein_change_type_count_dict": protein_change_type_count_dict,
-                       "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
-                       "mutation_type_count_dict": mutation_type_count_dict,
-                       "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
-                       "experiments_info_list": experiments_info_list,
-                       "resequencing_report_url": resequencing_report_url,
-                       "ale_experiment_name": ale_experiment_name,
-                       "muts_needle_plot": loader.get_template("muts_needle_plot.html"),
-                       "needle_plot_data": mark_safe(list(needle_plot_data)),
-                       "genes": mark_safe(genes_to_show),
-                       "sequence_changes": mark_safe(sequence_changes_to_show),
-                       "gene_color_set": mark_safe(common.GENE_COLORS),
-                       "seq_color_set": mark_safe(common.SEQ_COLORS),
-                       "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
-                       "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
-                       "number_of_genes_to_show": number_of_genes_to_show,
-                       "ale_experiment_id": ale_experiment_id,
-                       "ale_flask_isolate_count_list": ale_flask_isolate_count_list})
+    context = {"protein_change_type_count_dict": protein_change_type_count_dict,
+               "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
+               "mutation_type_count_dict": mutation_type_count_dict,
+               "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
+               "experiments_info_list": experiments_info_list,
+               "resequencing_report_url": resequencing_report_url,
+               "ale_experiment_name": ale_experiment_name,
+               "muts_needle_plot": loader.get_template("muts_needle_plot.html"),
+               "needle_plot_data": mark_safe(list(needle_plot_data)),
+               "genes": mark_safe(genes_to_show),
+               "sequence_changes": mark_safe(sequence_changes_to_show),
+               "gene_color_set": mark_safe(common.GENE_COLORS),
+               "seq_color_set": mark_safe(common.SEQ_COLORS),
+               "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
+               "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
+               "number_of_genes_to_show": number_of_genes_to_show,
+               "ale_experiment_id": ale_experiment_id,
+               "ale_flask_isolate_count_list": ale_flask_isolate_count_list}
 
     return HttpResponse(template.render(context))
 

@@ -2,7 +2,7 @@ from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.utils.safestring import mark_safe
 
@@ -48,15 +48,15 @@ def mutation_table(request):
 
     template = loader.get_template("table_template.html")
 
-    context = Context({"ales": ale_queryset,
-                       "ale_experiment_name": ale_experiment_name,
-                       "ale_no": ale_number,
-                       "experiment_id": ale_experiment_id,
-                       "table_body": mark_safe(table_body),
-                       "title": "Mutation Table",
-                       "table_header": mark_safe(table_header),
-                       "template_header": "Mutations",
-                       "wt_filter": is_ref_strain_filtered})
+    context = {"ales": ale_queryset,
+               "ale_experiment_name": ale_experiment_name,
+               "ale_no": ale_number,
+               "experiment_id": ale_experiment_id,
+               "table_body": mark_safe(table_body),
+               "title": "Mutation Table",
+               "table_header": mark_safe(table_header),
+               "template_header": "Mutations",
+               "wt_filter": is_ref_strain_filtered}
 
     return HttpResponse(template.render(context))
 
