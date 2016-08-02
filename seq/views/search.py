@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.shortcuts import render
 
@@ -49,10 +49,10 @@ def search(request):
 
             template = loader.get_template("search.html")
 
-            context = Context({"table_body": mark_safe(table_body),
-                               "title": "Search Results",
-                               "table_header": mark_safe(table_header),
-                               "last_search": last_search})
+            context = {"table_body": mark_safe(table_body),
+                       "title": "Search Results",
+                       "table_header": mark_safe(table_header),
+                       "last_search": last_search}
 
             return HttpResponse(template.render(context))
 

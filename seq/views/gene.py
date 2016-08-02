@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 import seq.models
 
@@ -37,13 +37,13 @@ def gene(request):
 
     pdb_url, residue_mappings, has_pdb_file = _get_pdb_info(gene_query)
 
-    context = Context({"gene_name": gene_query,
-                       "table_body": mark_safe(table_body),
-                       "title": gene_query + " gene",
-                       "table_header": mark_safe(table_header),
-                       "pdb_file_path": pdb_url,
-                       "residue_mappings": mark_safe(residue_mappings),
-                       "has_pdb_file": has_pdb_file})
+    context = {"gene_name": gene_query,
+               "table_body": mark_safe(table_body),
+               "title": gene_query + " gene",
+               "table_header": mark_safe(table_header),
+               "pdb_file_path": pdb_url,
+               "residue_mappings": mark_safe(residue_mappings),
+               "has_pdb_file": has_pdb_file}
 
     return HttpResponse(template.render(context))
 
