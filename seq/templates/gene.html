@@ -126,8 +126,8 @@
                 $("#second_button").val($(this).text());
             });
          });
+         var re = /\d+/;
         function calculate_distance() {
-            var re = /\d+/;
             var first_button = $("#first_button").text();
             var second_button = $("#second_button").text();
             var first_atom_number = first_button.match(re)[0];
@@ -142,6 +142,11 @@
                 if (protein_changes[prop].includes(value)) {
                     return prop
                 }
+            }
+        }
+        function select_all() {
+            for( var prop in protein_changes ) {
+                highlight_mutation(protein_changes[prop].match(re)[0], prop);
             }
         }
     </script>
@@ -228,6 +233,7 @@
         <input type="button" value="Show checked flasks" class="ui" onclick="filterFlask('show')"/>
         {% include 'export_as_csv.html' %}
         <input type="button" value="Zoom to Selected" class="ui" onclick="zoom_to_selected()">
+        <input type="button" value="Select All" class="ui" onclick="select_all()">
         <thead>
         {{table_header}}
         </thead>
