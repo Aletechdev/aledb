@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ title }}</title>
-    <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
 
     <style type="text/css" title="currentStyle">
         @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
@@ -143,6 +146,7 @@
         <input type="button" value="Remove checked flasks" class="ui" onclick="filterFlask('remove')"/>
         <input type="button" value="Show checked flasks" class="ui" onclick="filterFlask('show')"/>
         {% include 'export_as_csv.html' %}
+        <input type="button" value="Zoom to Selected" class="ui" onclick="zoom_to_selected()">
         <thead>
         {{table_header}}
         </thead>
