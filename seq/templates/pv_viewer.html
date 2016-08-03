@@ -161,7 +161,15 @@
         if(index != null) {
             anchor.style.color = '#337ab7';  //default chrome link color
             selected_atoms.splice(index, 1);
-            setColorForAtom(viewer._m[0], prev, starting_colors[atom_number]);
+            var selected_atom_nums = [];
+            for(var j=0; j < selected_atoms.length; j++) {
+                selected_atom_nums.push(selected_atoms[j][0])
+            }
+            if (selected_atom_nums.includes(atom_number)) {
+
+            } else  {
+                setColorForAtom(viewer._m[0], prev, starting_colors[atom_number]);
+            }
         } else {
             anchor.style.color = 'green';
             selected_atoms.push([atom_number, mutation_id]);
