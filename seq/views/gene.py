@@ -29,9 +29,9 @@ def gene(request):
 
     table_header = mutation_table_builder.get_table_header(reseq_dict)
 
-    table_body = mutation_table_builder.get_table_body(reseq_dict,
-                                                       observed_mutations_with_gene_queryset,
-                                                       table_type=mutation_table_builder.TableType.GENE_TABLE)
+    table_body, protein_changes = mutation_table_builder.get_table_body(reseq_dict,
+                                                                        observed_mutations_with_gene_queryset,
+                                                                        table_type=mutation_table_builder.TableType.GENE_TABLE)
 
     template = loader.get_template("gene.html")
 
@@ -43,7 +43,8 @@ def gene(request):
                        "table_header": mark_safe(table_header),
                        "pdb_file_path": pdb_url,
                        "residue_mappings": mark_safe(residue_mappings),
-                       "has_pdb_file": has_pdb_file})
+                       "has_pdb_file": has_pdb_file,
+                       "protein_changes": protein_changes})
 
     return HttpResponse(template.render(context))
 
@@ -135,4 +136,3 @@ def _get_pdb_url(gene_query):
                 return pdb_code
     except:
         return ''
-

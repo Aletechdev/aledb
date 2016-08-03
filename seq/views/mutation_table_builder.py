@@ -12,6 +12,8 @@ import re
 
 from enum import Enum
 
+from django.utils.html import strip_tags
+
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 
@@ -111,6 +113,8 @@ def get_table_body(reseq_dict,
             if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
                 table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
 
+    protein_changes = {}  # For calculating distances on the genes page only
+
     # Populating table body
     table_body = ""
 
@@ -133,6 +137,7 @@ def get_table_body(reseq_dict,
                     try:
                         table_row += "<td><a id=\"%d\" onclick=\"zoomTo(%d,%d)\">%s</a></td>" \
                                      % (int(mutation.id), int(non_decimal.sub('', mutation.protein_change)), int(mutation.id), mutation.protein_change)
+                        protein_changes[mutation.id] = strip_tags(mutation.protein_change)
                     except:
                         table_row += "<td>%s</td>" % mutation.protein_change
                 else:
@@ -143,6 +148,9 @@ def get_table_body(reseq_dict,
             table_row += "</tr>"
 
             table_body += table_row + "\n"
+
+    if table_type is TableType.GENE_TABLE:
+        return table_body, protein_changes
 
     return table_body
 
