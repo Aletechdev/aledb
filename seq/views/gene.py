@@ -44,7 +44,8 @@ def gene(request):
                        "pdb_file_path": pdb_url,
                        "residue_mappings": mark_safe(residue_mappings),
                        "has_pdb_file": has_pdb_file,
-                       "protein_changes": protein_changes})
+                       "protein_changes": protein_changes,
+                       "pdb_id": _get_pdb_url(gene_query)})
 
     return HttpResponse(template.render(context))
 
