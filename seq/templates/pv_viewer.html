@@ -104,9 +104,9 @@
      }
 
      function _calculate_distace(first_atom_number, second_atom_number, first_mutation_id, second_mutation_id) {
-         clear_selected_atoms()
-         zoomTo(first_atom_number, first_mutation_id);
-         zoomTo(second_atom_number, second_mutation_id);
+         clear_selected_atoms();
+         highlight_mutation(first_atom_number, first_mutation_id);
+         highlight_mutation(second_atom_number, second_mutation_id);
          var first_atom = getAtomFromList(get_residue_mapping(first_atom_number));
          var second_atom = getAtomFromList(get_residue_mapping(second_atom_number));
          viewer.rm('dist.*');
@@ -141,9 +141,10 @@
              setColorForAtom(viewer._m[0], prev, starting_colors[atom_number]);
          }
          selected_atoms = [];
+         viewer.requestRedraw();
      }
 
-    function zoomTo(atom_number, mutation_id) {
+    function highlight_mutation(atom_number, mutation_id) {
         atom_number = get_residue_mapping(atom_number);
         var selected_atom = getAtomFromList(atom_number);
         if (selected_atom == null) return;
@@ -178,8 +179,8 @@
 
         var structure = viewer._m[0]._M[0]._i;
         var selected_atom_numbers = [];
-        for(var j=0; j < selected_atoms.length; j++) {
-            selected_atom_numbers.push(selected_atoms[j][0])
+        for(var k=0; k < selected_atoms.length; k++) {
+            selected_atom_numbers.push(selected_atoms[k][0])
         }
         var mutation = structure.select({rnums : selected_atom_numbers});
         if(mutation._j.length > 0) {
