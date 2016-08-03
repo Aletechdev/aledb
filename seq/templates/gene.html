@@ -113,6 +113,38 @@
 	        window.location.replace(url + query_string);
 	    }
     </script>
+    <script type="text/javascript">
+         $(function(){
+            $("#first li a").click(function(){
+                $("#first_button").text($(this).text());
+                $("#first_button").val($(this).text());
+            });
+         });
+        $(function(){
+            $("#second li a").click(function(){
+                $("#second_button").text($(this).text());
+                $("#second_button").val($(this).text());
+            });
+         });
+        function calculate_distance() {
+            var re = /\d+/;
+            var first_button = $("#first_button").text();
+            var second_button = $("#second_button").text();
+            var first_atom_number = first_button.match(re)[0];
+            var second_atom_number = second_button.match(re)[0];
+            if (first_atom_number != second_atom_number) {
+                _calculate_distace(first_atom_number, second_atom_number, get_key_by_value(first_atom_number), get_key_by_value(second_atom_number))
+            }
+        }
+        var protein_changes = {{ protein_changes | safe }};
+        function get_key_by_value(value) {
+            for( var prop in protein_changes ) {
+                if (protein_changes[prop].includes(value)) {
+                    return prop
+                }
+            }
+        }
+    </script>
 </head>
 <body>
 
@@ -134,6 +166,33 @@
 {% if has_pdb_file %}
 <h4>Gene Protein Structure</h4>
 <p>
+<div class="btn-toolbar">
+    <div class="btn-group">
+        <button type="button" class="btn btn-default" id="first_button">First Selction</button>
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu" id="first">
+            {% for key, value in protein_changes.items %}
+                <li><a href="#">{{ value }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="btn-group">
+        <button type="button" class="btn btn-default" id="second_button">Second Selction</button>
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu" id="second">
+            {% for key, value in protein_changes.items %}
+                <li><a href="#">{{ value }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <button type="button" class="btn btn-default" onclick="calculate_distance()">Calculate Distance</button>
+</div>
     <div id='picked-atom-name' style='text-align:left; '>&nbsp;</div>
     <div id="viewer" style='width: 100%; height: 800px; text-align:left;'></div>
 </p>
