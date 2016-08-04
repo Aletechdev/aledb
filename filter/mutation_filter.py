@@ -33,12 +33,10 @@ def is_excluded_on_mutation(mutation, filter_settings):
 
                     try:
                         mutation_data = strip_tags(mutation_dict[MODEL_TO_FILTER_MAPPINGS[key]]).replace(NO_BREAK_STRING_CODE, u'').replace(" ", "")
-
                     except:
                         mutation_data = mutation_dict[MODEL_TO_FILTER_MAPPINGS[key]]
 
                     if filter_mutation[key] is not '':
-
                         try:
                             if filter_mutation[key] not in mutation_data:
                                 break
@@ -48,6 +46,8 @@ def is_excluded_on_mutation(mutation, filter_settings):
                                     break
                             except:
                                 continue
+                    else:
+                        return False
                 else:
                     return True
 
