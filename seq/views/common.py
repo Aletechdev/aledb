@@ -8,7 +8,7 @@ import seq.models
 
 import re
 
-import common.db_util.get_reseq_queryset
+import common.db_util
 
 
 __author__ = 'Patrick Phaneuf'
@@ -116,13 +116,13 @@ def get_ordered_reseq_dict(request, include_starting_strain=False):
         starting_strain_raw_queryset = _get_starting_string_mutation_queryset(request)
         for seq_experiment in starting_strain_raw_queryset:
             seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
-    seq_experiments_raw_queryset = get_reseq_queryset(request)
+    seq_experiments_raw_queryset = _get_reseq_queryset(request)
     for seq_experiment in seq_experiments_raw_queryset:
         seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
     return seq_experiment_ordered_dict
 
 
-def get_reseq_queryset(request):
+def _get_reseq_queryset(request):
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ale_id = request.GET.get(REQUEST_ALE_ID)
     return common.db_util.get_reseq_queryset(ale_experiment_id, ale_id)
@@ -139,7 +139,7 @@ def get_all_observed_mutations(reseq_id_list):
     return seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
 
 
-# TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit. 
+# TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit.
 def filter_out_wt_reseq(seq_experiment_ordered_dict):
 
     key_to_delete_found = False
