@@ -137,11 +137,6 @@ def _get_starting_string_mutation_queryset(request):
     return common.db_util.get_reseq_queryset(ale_experiment_id, ale_id)
 
 
-# TODO: Refactor: figure out how to get a ResequencingExperiment to return its list of observed mutations.
-def get_all_observed_mutations(reseq_id_list):
-    return seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
-
-
 # TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit.
 def filter_out_wt_reseq(seq_experiment_ordered_dict):
 
@@ -253,8 +248,3 @@ def _is_query_empty(query):
         is_query_empty = True
 
     return is_query_empty
-
-
-def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset):
-
-    return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
