@@ -112,11 +112,14 @@ def get_ale_experiment_name(request):
 
 def get_ordered_reseq_dict(request, include_starting_strain=False):
     seq_experiment_ordered_dict = collections.OrderedDict()
+
+    # slightly different from common.db_util.
     if include_starting_strain:
         starting_strain_raw_queryset = _get_starting_string_mutation_queryset(request)
         for seq_experiment in starting_strain_raw_queryset:
             seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
     seq_experiments_raw_queryset = _get_reseq_queryset(request)
+
     for seq_experiment in seq_experiments_raw_queryset:
         seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
     return seq_experiment_ordered_dict
