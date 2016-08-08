@@ -24,8 +24,6 @@ class AleExperiment(models.Model):
 
     instrument = models.ForeignKey(Instrument)
 
-    simulation = models.BooleanField()  # TODO: remove this if unnecessary.
-
     notes = models.TextField(**blank_field)
 
     def __unicode__(self):
