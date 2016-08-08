@@ -60,3 +60,12 @@ def get_reseq_mutations_list(reseq_id):
     for observed_mutation in observed_mutations_query_set:
         mutations_list.append(observed_mutation.mutation)
     return mutations_list
+
+
+# TODO: Refactor: figure out how to get a ResequencingExperiment to return its list of observed mutations.
+def get_all_observed_mutations(reseq_id_list):
+    return seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
+
+
+def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset):
+    return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))

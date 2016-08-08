@@ -1,7 +1,6 @@
-from common.db_util import get_ordered_reseq_dict, get_ale_experiment_reseq_mutation_lists
-from filter import mutation_filter
+from common.db_util import get_ordered_reseq_dict
 import seq.models
-import seq.views.common
+from common.db_util import get_all_observed_mutations, get_mutation_queryset_from_observed_mutation_queryset
 
 __author__ = "Patrick Phaneuf"
 
@@ -26,8 +25,8 @@ def get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict):
             flask_number = id_reseq_tuple[1].flask_number
             isolate_number = id_reseq_tuple[1].isolate.isolate_number
 
-            observed_mutation_queryset = seq.views.common.get_all_observed_mutations([reseq_id])
-            mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(observed_mutation_queryset)
+            observed_mutation_queryset = get_all_observed_mutations([reseq_id])
+            mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(observed_mutation_queryset)
             flask_isolate_mutation_dict[(flask_number, isolate_number)] = mutation_queryset
 
         flask_mutation_dict = _get_flask_mutation_dict(flask_isolate_mutation_dict)
@@ -38,8 +37,16 @@ def get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict):
     return ale_experiment_fixated_mutation_queryset
 
 
-# Combines all of the isolate mutations of one flask into a single queryset representing the mutations of the flask.
+
 def _get_flask_mutation_dict(flask_isolate_mutation_dict):
+    """
+    Combines all of the isolate mutations of one flask into a single queryset representing the mutations of the flask.
+    Args:
+        flask_isolate_mutation_dict:
+
+    Returns: flask_mutation_dict
+    """
+
     flask_mutation_dict = {}
 
     for flask_isolate_id, mutation_queryset in flask_isolate_mutation_dict.items():
