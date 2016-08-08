@@ -17,4 +17,3 @@ def get_ale_number_selector(ale_id_str):
     else:
         ale_no_selector = ALE_NUMBER_SELECTOR_QUERY % int(ale_id_str)
     return ale_no_selector
-
