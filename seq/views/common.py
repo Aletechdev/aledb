@@ -138,13 +138,13 @@ def _get_starting_string_mutation_queryset(request):
 
 
 # TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit.
-def filter_out_wt_reseq(seq_experiment_ordered_dict):
+def filter_out_wt_reseq(reseq_ordered_dict):
 
     key_to_delete_found = False
 
     key_to_delete = None
 
-    for key, value in seq_experiment_ordered_dict.items():
+    for key, value in reseq_ordered_dict.items():
 
         if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
 
@@ -154,9 +154,9 @@ def filter_out_wt_reseq(seq_experiment_ordered_dict):
 
     if key_to_delete_found and key_to_delete:
 
-        del seq_experiment_ordered_dict[key_to_delete]
+        del reseq_ordered_dict[key_to_delete]
 
-    return seq_experiment_ordered_dict
+    return reseq_ordered_dict
 
 
 def get_wt_reseq_id(seq_experiment_ordered_dict):

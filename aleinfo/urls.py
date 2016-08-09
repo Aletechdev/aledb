@@ -21,8 +21,8 @@ urlpatterns = patterns('',
                        url(r'^ale_analytics/filter/', include('filter.urls')),
                        url(r'^ale_analytics/fixation/', include('fixation.urls')),
                        url(r'^ale_analytics/stats/', include('stats.urls')),
-                       url(r'^ale_analytics/meta_data/', include('metadata.urls')),
-                       url(r'^ale_analytics/freq_mutated_genes/', include('hot_gene_mutations.urls'))
+                       url(r'^ale_analytics/metadata/', include('metadata.urls')),
+                       url(r'^ale_analytics/enrichment/', include('enrichment.urls'))
                        )
 
 urlpatterns += staticfiles_urlpatterns()

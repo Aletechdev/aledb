@@ -1,12 +1,11 @@
-from common.db_util import get_ordered_reseq_dict
+from common.db_util import get_ordered_reseq_dict, get_all_observed_mutations, get_mutation_queryset_from_observed_mutation_queryset
 import seq.models
-from common.db_util import get_all_observed_mutations, get_mutation_queryset_from_observed_mutation_queryset
 
 __author__ = "Patrick Phaneuf"
 
 
 def get_fixated_mutation_list(ale_experiment_id):
-    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
+    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)  # Want to include WT so as to get mutations to remove.
     fixating_mutation_queryset = get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict)
     return list(fixating_mutation_queryset)
 

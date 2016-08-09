@@ -6,8 +6,8 @@ import builder.upload
 import builder.util
 import fixation.models
 import fixation.util
-import hot_gene_mutations.util
-import hot_gene_mutations.models
+import enrichment.util
+import enrichment.models
 import seq.alchemy_orm
 import seq.models
 from builder.gdparse.gdparse import gdparse
@@ -149,15 +149,15 @@ def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_a
                             media_orm,
                             freezer_box_orm)
 
-    rebuild_hot_gene_mutations(experiment_orm.ale_id)
+    rebuild_enrichment_mutations(experiment_orm.ale_id)
 
 
-def rebuild_all_hot_gene_mutations():
+def rebuild_all_enrichment_mutations():
 
     ale_experiment_queryset = ale.models.AleExperiment.objects.all()
 
     for ale_experiment in ale_experiment_queryset:
-        rebuild_hot_gene_mutations(ale_experiment.ale_id)
+        rebuild_enrichment_mutations(ale_experiment.ale_id)
 
 
 def _insert_wild_type_flask(ale_exp_user,
@@ -241,7 +241,7 @@ def insert_flasks(sample_breseq_abs_paths_list,
                                      freezer_box_orm,
                                      is_wild_type=False)
 
-    rebuild_hot_gene_mutations(experiment_orm.ale_id)
+    rebuild_enrichment_mutations(experiment_orm.ale_id)
 
 
 # For wild_type, expecting directory with output.gd in it.
@@ -321,7 +321,7 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                      freezer_box_orm,
                                      is_wild_type=False)
 
-    rebuild_hot_gene_mutations(experiment_orm.ale_id)
+    rebuild_enrichment_mutations(experiment_orm.ale_id)
     rebuild_fixated_mutations(experiment_orm.ale_id)
 
 
@@ -352,16 +352,16 @@ def _create_fixated_mutations(ale_experiment_id):
         fixated_mutation.save()
 
 
-def rebuild_hot_gene_mutations(ale_experiment_id):
-    _delete_hot_gene_mutations(ale_experiment_id)
-    _create_hot_gene_mutations(ale_experiment_id)
+def rebuild_enrichment_mutations(ale_experiment_id):
+    _delete_enrichment_mutations(ale_experiment_id)
+    _create_enrichment_mutations(ale_experiment_id)
 
 
-def _delete_hot_gene_mutations(ale_experiment_id):
-    hot_gene_mutations.models.HotGeneMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
+def _delete_enrichment_mutations(ale_experiment_id):
+    enrichment.models.EnrichmentMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
 
 
-def _create_hot_gene_mutations(ale_experiment_id):
+def _create_enrichment_mutations(ale_experiment_id):
 
     """
     Find all enriched/(hot gene) mutations for ALE experiment and populate database table with them.
@@ -370,13 +370,13 @@ def _create_hot_gene_mutations(ale_experiment_id):
 
     ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
 
-    hot_gene_mutations_list = hot_gene_mutations.util.get_hot_gene_mutation_list(ale_experiment_id)
+    enrichment_mutations_list = enrichment.util.get_enrichment_mutation_list(ale_experiment_id)
 
-    for mutation in hot_gene_mutations_list:
-        hot_gene_mutation = hot_gene_mutations.models.HotGeneMutation()
-        hot_gene_mutation.ale_experiment = ale_experiment
-        hot_gene_mutation.mutation = mutation
-        hot_gene_mutation.save()
+    for mutation in enrichment_mutations_list:
+        enrichment_mutation = enrichment.models.EnrichmentMutation()
+        enrichment_mutation.ale_experiment = ale_experiment
+        enrichment_mutation.mutation = mutation
+        enrichment_mutation.save()
 
 
 def _create_and_commit_wild_type_ale_entry(db_session,

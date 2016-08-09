@@ -40,7 +40,7 @@ evidence = re.compile(r'[A-Z]\d+[A-Z]')
 
 class TableType(Enum):
     GENE_TABLE = 1
-    SHARED_HOT_GENE_MUTATIONS = 2
+    ENRICHMENT_MUTATIONS = 2
 
 
 if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -52,7 +52,7 @@ else:
 def get_table_header(reseq_dict, table_type=None):
 
     table_header = ""
-    if table_type == TableType.SHARED_HOT_GENE_MUTATIONS:
+    if table_type == TableType.ENRICHMENT_MUTATIONS:
         table_header = HTML_SHARED_MUTATION_TABLE_HEADER
     else:
         table_header = HTML_MUTATION_TABLE_HEADER
@@ -121,7 +121,7 @@ def get_table_body(reseq_dict,
             table_row = "<tr>"
             table_row += HTML_MUTATION_TABLE_ROW
 
-            if table_type == TableType.SHARED_HOT_GENE_MUTATIONS:
+            if table_type == TableType.ENRICHMENT_MUTATIONS:
                 table_row += "<td><a href=/ale_analytics/freq_mutated_genes/shared?mutation_id=%s>shared</a></td>" % mutation.id
 
             table_row += "<td>%s</td>" % mutation.position
