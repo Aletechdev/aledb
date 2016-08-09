@@ -59,8 +59,8 @@ class AleIdList(admin.TabularInline):
 
 class AleExperimentAdmin(admin.ModelAdmin):
     inlines = [AleIdList]
-    list_display = ("__unicode__", "ale_id", "date", "person", "instrument", "simulation", "notes")
-    list_filter = ("simulation","instrument","person")
+    list_display = ("__unicode__", "ale_id", "date", "person", "instrument", "notes")
+    list_filter = ("instrument","person")
     search_fields = ["ale_id"]
 
 

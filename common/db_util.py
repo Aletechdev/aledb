@@ -11,7 +11,7 @@ import seq.models
 __author__ = 'Patrick Phaneuf'
 
 
-def get_reseq_queryset(ale_experiment_id, ale_id):
+def get_reseq_queryset(ale_experiment_id, ale_id=None):
     ale_experiment_selector = get_ale_experiment_selector(ale_experiment_id)
     ale_id_selector = get_ale_number_selector(ale_id)
     sql_query = RESEQ_QUERY % (ale_experiment_selector, ale_id_selector)

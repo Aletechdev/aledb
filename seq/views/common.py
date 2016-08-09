@@ -118,14 +118,14 @@ def get_ordered_reseq_dict(request, include_starting_strain=False):
         starting_strain_raw_queryset = _get_starting_string_mutation_queryset(request)
         for seq_experiment in starting_strain_raw_queryset:
             seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
-    seq_experiments_raw_queryset = _get_reseq_queryset(request)
+    seq_experiments_raw_queryset = get_reseq_queryset(request)
 
     for seq_experiment in seq_experiments_raw_queryset:
         seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
     return seq_experiment_ordered_dict
 
 
-def _get_reseq_queryset(request):
+def get_reseq_queryset(request):
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ale_id = request.GET.get(REQUEST_ALE_ID)
     return common.db_util.get_reseq_queryset(ale_experiment_id, ale_id)

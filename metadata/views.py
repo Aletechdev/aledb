@@ -8,6 +8,8 @@ import aleinfo.settings as settings
 
 from seq.views import common
 
+from seq.views.common import get_reseq_queryset
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -22,8 +24,8 @@ else:
 
 
 @login_required
-def meta_data(request):
-    reseq_queryset = common.get_reseq_queryset(request)
+def metadata(request):
+    reseq_queryset = get_reseq_queryset(request)
 
     # Would rather want to use something like a dictionary since an experiment is
     # unique, though an experiment is currently a structure and an integral type

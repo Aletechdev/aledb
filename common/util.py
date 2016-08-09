@@ -4,6 +4,7 @@ from common.constants import ALE_NUMBER_SELECTOR_QUERY
 
 
 def get_ale_experiment_selector(ale_experiment_id_str):
+    # print(ale_experiment_id_str)
     if ale_experiment_id_str is None or ale_experiment_id_str == REQUEST_ALL:
         ale_experiment_selector = ""
     else:
