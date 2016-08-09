@@ -14,6 +14,8 @@ from seq.views import mutation_table_builder
 
 import filter.mutation_filter
 
+from common.db_util import get_all_observed_mutations
+
 
 __author__ = 'pphaneuf'
 
@@ -63,7 +65,7 @@ def mutation_table(request):
 
 def _get_table_body(reseq_dict, request, wt_filter, wt_id):
 
-    observed_mutations_query_set = seq.views.common.get_all_observed_mutations(list(reseq_dict.keys()))
+    observed_mutations_query_set = get_all_observed_mutations(list(reseq_dict.keys()))
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
@@ -72,7 +74,7 @@ def _get_table_body(reseq_dict, request, wt_filter, wt_id):
     ref_strain_mutation_id_list = None
 
     if wt_filter:
-        ref_strain_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
+        ref_strain_mutation_list = get_all_observed_mutations([wt_id])
         ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
 
     return mutation_table_builder.get_table_body(reseq_dict,
