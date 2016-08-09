@@ -1,5 +1,8 @@
-from common.db_util import get_ordered_reseq_dict, get_all_observed_mutations, get_mutation_queryset_from_observed_mutation_queryset
+from common.db_util import get_ordered_reseq_dict,\
+    get_all_observed_mutations,\
+    get_mutation_queryset_from_observed_mutation_queryset
 import seq.models
+from ale.common import STARTING_STRAIN_ALE_ID
 
 __author__ = "Patrick Phaneuf"
 
@@ -7,7 +10,22 @@ __author__ = "Patrick Phaneuf"
 def get_fixated_mutation_list(ale_experiment_id):
     ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)  # Want to include WT so as to get mutations to remove.
     fixating_mutation_queryset = get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict)
+    fixating_mutation_queryset = _exclude_starting_strain_mutations(fixating_mutation_queryset, ordered_reseq_dict)
     return list(fixating_mutation_queryset)
+
+
+def _exclude_starting_strain_mutations(fixating_mutation_queryset, reseq_dict):
+    ref_reseq_id = None
+    for reseq_id, reseq in reseq_dict.items():
+        if reseq.ale_id == STARTING_STRAIN_ALE_ID:
+            ref_reseq_id = reseq_id
+
+    if ref_reseq_id is not None:
+        ref_observed_mutation_queryset = get_all_observed_mutations([ref_reseq_id])
+        ref_mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(ref_observed_mutation_queryset)
+        fixating_mutation_queryset = fixating_mutation_queryset.exclude(id__in=ref_mutation_queryset)
+
+    return fixating_mutation_queryset
 
 
 def get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict):
