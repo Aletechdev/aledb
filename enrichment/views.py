@@ -117,12 +117,12 @@ def _get_table_body(reseq_dict, request):
 
 
 # TODO: refactor
-def _get_observed_enrichment_mutations(reseq_dict, enrichment_queryset):
+def _get_observed_enrichment_mutations(reseq_dict, enrichment_mutation_queryset):
 
     observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_dict.keys())
 
     enrichment_mutation_id_list = []
-    for enrichment_mutation in enrichment_queryset:
+    for enrichment_mutation in enrichment_mutation_queryset:
         enrichment_mutation_id_list.append(enrichment_mutation.mutation_id)
 
     enrichment_mutation_observed_mutation_queryset = observed_mutation_queryset.filter(mutation_id__in=enrichment_mutation_id_list)
