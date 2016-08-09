@@ -114,16 +114,11 @@ def _get_reseq_mutations_list(reseq_id):
 
 def _get_reseq_dict(experiment_id):
 
-    ale_experiment_selector = "AND experiment_id = "
+    reseq_query = seq.models.ResequencingExperiment.objects.filter(tech_rep__isolate__flask__ale_id__ale_experiment=experiment_id).order_by('tech_rep__isolate__flask__ale_id__ale_id', 'tech_rep__isolate__flask__flask_number', 'tech_rep__isolate__isolate_number')
 
-    ale_experiment_selector += str(experiment_id)
+    reseq_dict = collections.OrderedDict()
 
-    ale_number_selector = ""
-
-    sql_query = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;""" % (ale_experiment_selector, ale_number_selector)
-
-    reseq_raw_query_set = seq.models.ResequencingExperiment.objects.raw(sql_query)
-
-    reseq_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_raw_query_set)
+    for reseq in reseq_query:
+        reseq_dict[reseq.id] = reseq
 
     return reseq_dict

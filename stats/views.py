@@ -182,23 +182,23 @@ def _get_reseq_experiment_info_list(reseq_experiments):
 
         mapped_read_count = int((reseq_experiment.percentage_mapped / 100) * reseq_experiment.reads)
 
-        species = reseq_experiment.isolate.flask.ale_id.species
+        species = reseq_experiment.tech_rep.isolate.flask.ale_id.species
 
-        strain = reseq_experiment.isolate.flask.ale_id.strain
+        strain = reseq_experiment.tech_rep.isolate.flask.ale_id.strain
 
-        knockouts = reseq_experiment.isolate.flask.ale_id.description
+        knockouts = reseq_experiment.tech_rep.isolate.flask.ale_id.description
 
         clonal_or_population = "clonal"
 
-        if reseq_experiment.isolate.is_population:
+        if reseq_experiment.tech_rep.isolate.is_population:
 
             clonal_or_population = "population"
 
-        media_temperature = reseq_experiment.isolate.flask.media.temperature
+        media_temperature = reseq_experiment.tech_rep.isolate.flask.media.temperature
 
-        media_description = reseq_experiment.isolate.flask.media.description
+        media_description = reseq_experiment.tech_rep.isolate.flask.media.description
 
-        substrate = reseq_experiment.isolate.flask.media.substrate
+        substrate = reseq_experiment.tech_rep.isolate.flask.media.substrate
 
         # Using tuple because immutable; mc_list must remain associated with particular experiment.
         experiment_info_tuple = (reseq_experiment,

@@ -27,8 +27,6 @@ REQUEST_ALL = "all"
 ALE_NUMBER_SELECTOR_QUERY = "AND ale_no = %d"
 ALE_EXPERIMENT_SELECTOR_QUERY = "AND experiment_id = %d"
 
-RESEQ_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
-
 MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'DUP', 'Unannotated']
 
 PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication', 'Unannotated']
@@ -115,30 +113,26 @@ def get_ale_experiment_name(request):
     return ale_experiment_name
 
 
-def get_ale_experiment_selector(ale_experiment_id):
+def get_ale_experiment_selector(ale_experiment_id, reseq_query):
 
     if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
 
-        ale_experiment_selector = ""
+        return reseq_query
 
     else:
 
-        ale_experiment_selector = ALE_EXPERIMENT_SELECTOR_QUERY % int(ale_experiment_id)
-
-    return ale_experiment_selector
+        return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
 
 
-def get_ale_number_selector(ale_id):
+def get_ale_number_selector(ale_id, reseq_query):
 
     if ale_id is None or ale_id == REQUEST_ALL:
 
-        ale_no_selector = ""
+        return reseq_query
 
     else:
 
-        ale_no_selector = ALE_NUMBER_SELECTOR_QUERY % int(ale_id)
-
-    return ale_no_selector
+        return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_id=ale_id)
 
 
 def get_ordered_reseq_dict(request, include_starting_strain=False):
@@ -179,15 +173,15 @@ def _get_reseq_queryset(request, ale_id):
 
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
 
-    ale_experiment_selector = get_ale_experiment_selector(ale_experiment_id)
+    reseq_query = seq.models.ResequencingExperiment.objects.all().order_by(
+        'tech_rep__isolate__flask__ale_id__ale_id', 'tech_rep__isolate__flask__flask_number',
+        'tech_rep__isolate__isolate_number')
 
-    ale_id_selector = get_ale_number_selector(ale_id)
+    reseq_query = get_ale_experiment_selector(ale_experiment_id, reseq_query)
 
-    sql_query = RESEQ_QUERY % (ale_experiment_selector, ale_id_selector)
+    reseq_query = get_ale_number_selector(ale_id, reseq_query)
 
-    seq_experiments_raw_queryset = seq.models.ResequencingExperiment.objects.raw(sql_query)
-
-    return seq_experiments_raw_queryset
+    return reseq_query
 
 
 # TODO: Refactor: figure out how to get a ResequencingExperiment to return its list of observed mutations.

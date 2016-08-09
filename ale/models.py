@@ -245,3 +245,12 @@ class Isolate(models.Model):
         unique_together = (("flask", "isolate_number"),)
 
         # TODO - encode experiments done on the isolate
+
+
+class TechnicalReplicate(models.Model):
+
+    tech_rep_number = models.IntegerField(default=1)
+
+    isolate = models.ForeignKey(Isolate)
+
+    description = models.CharField(max_length=500, **blank_field)
