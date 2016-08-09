@@ -36,6 +36,16 @@ def get_ordered_reseq_dict(ale_experiment_id):
 
 
 def get_ale_experiment_reseq_mutation_lists(reseq_dict):
+    """
+    Be aware that this function removes all stating strain mutations.
+
+    Args:
+        reseq_dict:
+
+    Returns:
+
+    """
+
     ale_experiment_mutation_list = []
     mutations_to_exclude_list = []
 
