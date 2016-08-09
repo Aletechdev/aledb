@@ -7,7 +7,7 @@ __author__ = "Patrick Phaneuf"
 
 def get_enrichment_mutation_list(ale_experiment_id):
     reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
-    ale_experiment_reseq_mutation_lists = get_ale_experiment_reseq_mutation_lists(reseq_dict)
+    ale_experiment_reseq_mutation_lists = get_ale_experiment_reseq_mutation_lists(reseq_dict)  # Will remove starting strain mutations.
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)  #TODO: may not matter since the experiment isn't yet establised on the website.
     mutation_gene_count_dict = _get_mutation_gene_count_dict(ale_experiment_reseq_mutation_lists, filter_settings)
     enrichment_mutation_list = _get_enrichment_mutation_list(ale_experiment_reseq_mutation_lists, filter_settings, mutation_gene_count_dict)
@@ -30,7 +30,9 @@ def _get_mutation_gene_count_dict(ale_experiment_mutation_list, filter_settings)
     return mutation_gene_count_dict
 
 
-def _get_enrichment_mutation_list(ale_experiment_reseq_mutation_lists, filter_settings, mutation_gene_count_dict):
+def _get_enrichment_mutation_list(ale_experiment_reseq_mutation_lists,
+                                  filter_settings,
+                                  mutation_gene_count_dict):
 
     enrichment_mutation_list = []
 
