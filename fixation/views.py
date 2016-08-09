@@ -19,6 +19,8 @@ from filter import mutation_filter
 
 from fixation.util import get_ale_experiment_fixated_mutation_queryset
 
+from common.db_util import get_all_observed_mutations
+
 __author__ = 'Patrick Phaneuf'
 
 REQUEST_ASCENDING_FREQ_FILTER = 'asndflt'
@@ -37,22 +39,22 @@ def fixation(request):
     # False for pages such as this, where we don't want to see the wild type, though we currently must include it
     # so as to filter out the mutations when choosing specific ALEs within the experiment. This means that there is
     # a disconnect between filtering methodologies that needs to be reconciled.
-    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
+    reseq_ordered_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
 
-    wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
-    ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
-    ordered_reseq_dict = seq.views.mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
+    wt_id = seq.views.common.get_wt_reseq_id(reseq_ordered_dict)  # Must happen before filtering out wt reseq.
+    reseq_ordered_dict = seq.views.common.filter_out_wt_reseq(reseq_ordered_dict)
+    reseq_ordered_dict = seq.views.mutation_table_builder.filter_checked_flasks(request, reseq_ordered_dict)
 
-    table_header = seq.views.mutation_table_builder.get_table_header(ordered_reseq_dict)
+    table_header = seq.views.mutation_table_builder.get_table_header(reseq_ordered_dict)
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
-    ref_strain_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
+    ref_strain_mutation_list = get_all_observed_mutations([wt_id])
     ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
 
-    observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(ordered_reseq_dict, is_ascending_freq_filter)
+    observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(reseq_ordered_dict, is_ascending_freq_filter)
 
-    table_body = seq.views.mutation_table_builder.get_table_body(ordered_reseq_dict,
+    table_body = seq.views.mutation_table_builder.get_table_body(reseq_ordered_dict,
                                                                  observed_mutation_queryset,
                                                                  filter_settings,
                                                                  ref_strain_mutation_id_list)

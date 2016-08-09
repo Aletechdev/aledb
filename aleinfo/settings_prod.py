@@ -155,7 +155,7 @@ INSTALLED_APPS = (
     'fixation',
     'stats',
     'metadata',
-    'hot_gene_mutations',
+    'enrichment',
 
     #'grappelli',
     # Uncomment the next line to enable the admin:
