@@ -28,12 +28,6 @@ class AleExperiment(models.Model):
 
     def __unicode__(self):
 
-        if self.simulation:
-
-            return "#%d-%s-SIM" % (self.ale_id, self.name)
-
-        else:
-
             return "#%d-%s" % (self.ale_id, self.name)
 
     class Meta:
