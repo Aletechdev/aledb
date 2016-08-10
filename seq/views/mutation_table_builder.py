@@ -124,7 +124,7 @@ def get_table_body(reseq_dict,
             table_row += HTML_MUTATION_TABLE_ROW
 
             if table_type == TableType.ENRICHMENT_MUTATIONS:
-                table_row += "<td><a href=/ale_analytics/freq_mutated_genes/shared?mutation_id=%s>shared</a></td>" % mutation.id
+                table_row += "<td><a href=/ale_analytics/enrichment/shared?mutation_id=%s>shared</a></td>" % mutation.id
 
             table_row += "<td>%s</td>" % mutation.position
             table_row += "<td>%s</td>" % mutation.mutation_type
