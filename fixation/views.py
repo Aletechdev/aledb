@@ -17,9 +17,7 @@ import seq.models
 
 from filter import mutation_filter
 
-from fixation.util import get_ale_experiment_fixated_mutation_queryset
-
-from common.db_util import get_all_observed_mutations
+from fixation.models import FixatedMutation
 
 __author__ = 'Patrick Phaneuf'
 
@@ -49,15 +47,13 @@ def fixation(request):
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
-    ref_strain_mutation_list = get_all_observed_mutations([wt_id])
-    ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
-
-    observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(reseq_ordered_dict, is_ascending_freq_filter)
+    observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id,
+                                                                                     reseq_ordered_dict,
+                                                                                     is_ascending_freq_filter)
 
     table_body = seq.views.mutation_table_builder.get_table_body(reseq_ordered_dict,
                                                                  observed_mutation_queryset,
-                                                                 filter_settings,
-                                                                 ref_strain_mutation_id_list)
+                                                                 filter_settings)
 
     # TODO: currently pulling this from the seq app. Need to put this template in a centralized location.
     template = loader.get_template("table_template.html")
@@ -76,20 +72,18 @@ def fixation(request):
 
 
 def _is_ascending_freq_filter(request):
-
     ret_val = False
-
     if request.GET.get(REQUEST_ASCENDING_FREQ_FILTER) is not None:
         ret_val = True
-
     return ret_val
 
 
-def _get_experiment_fixating_observed_mutation_queryset(ordered_reseq_dict, is_only_ascending=False):
+def _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id, ordered_reseq_dict, is_only_ascending=False):
 
-    fixating_mutation_queryset = get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict)
+    fixating_mutation_queryset = FixatedMutation.objects.filter(ale_experiment_id=ale_experiment_id)
 
-    fixating_observed_mutation_queryset = _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, ordered_reseq_dict.keys())
+    fixating_observed_mutation_queryset = _get_fixating_observed_mutation_queryset(fixating_mutation_queryset,
+                                                                                   ordered_reseq_dict.keys())
 
     if is_only_ascending:
         fixating_observed_mutation_queryset = _filter_for_ascending_freq(fixating_observed_mutation_queryset)
@@ -167,7 +161,7 @@ def _filter_mutations_from_same_flask(observed_mutation_list):
 
 
 def _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, reseq_id_list):
-    fixating_mutation_id_list = [fixating_mutation.id for fixating_mutation in fixating_mutation_queryset]
+    fixating_mutation_id_list = [fixating_mutation.mutation.id for fixating_mutation in fixating_mutation_queryset]
     all_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
     fixating_observed_mutation_queryset = all_observed_mutation_queryset.filter(mutation_id__in=fixating_mutation_id_list)
 
