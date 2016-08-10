@@ -38,8 +38,6 @@ def fixation(request):
     # so as to filter out the mutations when choosing specific ALEs within the experiment. This means that there is
     # a disconnect between filtering methodologies that needs to be reconciled.
     reseq_ordered_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
-
-    wt_id = seq.views.common.get_wt_reseq_id(reseq_ordered_dict)  # Must happen before filtering out wt reseq.
     reseq_ordered_dict = seq.views.common.filter_out_wt_reseq(reseq_ordered_dict)
     reseq_ordered_dict = seq.views.mutation_table_builder.filter_checked_flasks(request, reseq_ordered_dict)
 
