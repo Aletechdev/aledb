@@ -11,13 +11,17 @@ from django.utils.safestring import mark_safe
 #TODO: seq.views.common.get_ordered_reseq_dict could likely be refactored into common.db_util.get_reseq_dict
 import seq.views.common
 
-import seq.views.mutation_table_builder
+from seq.views import mutation_table_builder
 
 import seq.models
 
 from filter import mutation_filter
 
 from fixation.models import FixatedMutation
+
+from common.constants import REQUEST_MUTATION_ID
+
+import metadata.views
 
 __author__ = 'Patrick Phaneuf'
 
@@ -26,7 +30,7 @@ REQUEST_ASCENDING_FREQ_FILTER = 'asndflt'
 
 # TODO: very similar to common_mutations page workflow. Should consolidate somehow.
 @login_required
-def fixation(request):
+def fixating_mutations(request):
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
     ale_number = seq.views.common.get_ale_number(request)
@@ -39,9 +43,9 @@ def fixation(request):
     # a disconnect between filtering methodologies that needs to be reconciled.
     reseq_ordered_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
     reseq_ordered_dict = seq.views.common.filter_out_wt_reseq(reseq_ordered_dict)
-    reseq_ordered_dict = seq.views.mutation_table_builder.filter_checked_flasks(request, reseq_ordered_dict)
+    reseq_ordered_dict = mutation_table_builder.filter_checked_flasks(request, reseq_ordered_dict)
 
-    table_header = seq.views.mutation_table_builder.get_table_header(reseq_ordered_dict)
+    table_header = mutation_table_builder.get_table_header(reseq_ordered_dict)
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
@@ -49,9 +53,9 @@ def fixation(request):
                                                                                      reseq_ordered_dict,
                                                                                      is_ascending_freq_filter)
 
-    table_body = seq.views.mutation_table_builder.get_table_body(reseq_ordered_dict,
-                                                                 observed_mutation_queryset,
-                                                                 filter_settings)
+    table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
+                                                       observed_mutations_queryset=observed_mutation_queryset,
+                                                       table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
     # TODO: currently pulling this from the seq app. Need to put this template in a centralized location.
     template = loader.get_template("table_template.html")
@@ -68,6 +72,48 @@ def fixation(request):
 
     return HttpResponse(template.render(context))
 
+@login_required
+def shared_fixating_mutations(request):
+    mutation_id = request.GET.get(REQUEST_MUTATION_ID)
+    fixating_mutation_queryset = FixatedMutation.objects.filter(mutation_id=mutation_id)
+    fixating_mutation_list = [fixating_mutation.mutation for fixating_mutation in fixating_mutation_queryset]
+    table_header = mutation_table_builder.HTML_MUTATION_TABLE_HEADER
+    fixating_mutation = fixating_mutation_list[0]  # Should only be 1 enrichment mutation
+    table_body = "<tr>"
+    table_body += mutation_table_builder.HTML_MUTATION_TABLE_ROW
+    table_body += "<td>%s</td>" % fixating_mutation.position
+    table_body += "<td>%s</td>" % fixating_mutation.mutation_type
+    table_body += "<td>%s</td>" % fixating_mutation.sequence_change
+    table_body += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (
+    fixating_mutation.gene, fixating_mutation.gene)
+    table_body += "<td>%s</td>" % fixating_mutation.protein_change
+    table_body += "</tr>"
+
+    # Get the reseq's that are part of the ALE experiments from the fixating_mutation_queryset
+    fixating_mutation_ale_exp_list = [fixating_mutation.ale_experiment for fixating_mutation in
+                                        fixating_mutation_queryset]
+    all_reseq_queryset = seq.models.ResequencingExperiment.objects.all()
+    ale_experiment_reseq_list = []
+    for reseq in all_reseq_queryset:
+        if reseq.ale_experiment in fixating_mutation_ale_exp_list:
+            ale_experiment_reseq_list.append(reseq)
+
+    # filter reseq for only those that contain key mutation
+    observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment__in=ale_experiment_reseq_list)
+    fixating_mutation_reseq_list = []
+    for observed_mutation in observed_mutation_queryset:
+        if observed_mutation.mutation in fixating_mutation_list:
+            fixating_mutation_reseq_list.append(observed_mutation.sequencing_experiment)
+
+    reseq_info_list = metadata.views.get_reseq_info_list(fixating_mutation_reseq_list)
+
+    template = loader.get_template("fixation/shared_fixating_mutations.html")
+    context = Context({"title": "Shared Fixating Mutations",
+                       "table_header": mark_safe(table_header),
+                       "table_body": mark_safe(table_body),
+                       "reseq_info_list": reseq_info_list})
+
+    return HttpResponse(template.render(context))
 
 def _is_ascending_freq_filter(request):
     ret_val = False

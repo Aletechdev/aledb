@@ -5,3 +5,4 @@ RESEQ_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NUL
 REQUEST_ALL = "all"
 ALE_EXPERIMENT_SELECTOR_QUERY = "AND experiment_id = %d"
 ALE_NUMBER_SELECTOR_QUERY = "AND ale_no = %d"
+REQUEST_MUTATION_ID = "mutation_id"

@@ -17,9 +17,9 @@ import metadata.views
 
 from enrichment.models import EnrichmentMutation
 
-__author__ = 'Patrick Phaneuf'
+from common.constants import REQUEST_MUTATION_ID
 
-REQUEST_MUTATION_ID = "mutation_id"
+__author__ = 'Patrick Phaneuf'
 
 
 @login_required
@@ -42,7 +42,7 @@ def enrichment_mutations(request):
 
     table_body = _get_table_body(ordered_reseq_dict, request)
 
-    template = loader.get_template("enrichment_mutations/enrichment_mutations.html")
+    template = loader.get_template("enrichment/enrichment_mutations.html")
     context = Context({"ales": ale_queryset,
                        "ale_experiment_name": ale_experiment_name,
                        "ale_no": ale_number,
@@ -67,7 +67,7 @@ def shared_enrichment_mutations(request):
     enrichment_mutation_list = [enrichment_mutation.mutation for enrichment_mutation in enrichment_mutation_queryset]
 
     table_header = mutation_table_builder.HTML_MUTATION_TABLE_HEADER
-    enrichment_gene_mutation = enrichment_mutation_list[0]  # Should only be 1 key mutation
+    enrichment_gene_mutation = enrichment_mutation_list[0]  # Should only be 1 enrichment mutation
     table_body = "<tr>"
     table_body += mutation_table_builder.HTML_MUTATION_TABLE_ROW
     table_body += "<td>%s</td>" % enrichment_gene_mutation.position
@@ -94,8 +94,8 @@ def shared_enrichment_mutations(request):
 
     reseq_info_list = metadata.views.get_reseq_info_list(enrichment_mutation_reseq_list)
 
-    template = loader.get_template("enrichment_mutations/shared_enrichment_mutations.html")
-    context = Context({"title": "Shared Frequently Mutated Genes",
+    template = loader.get_template("enrichment/shared_enrichment_mutations.html")
+    context = Context({"title": "Shared Enrichment Mutations",
                        "table_header": mark_safe(table_header),
                        "table_body": mark_safe(table_body),
                        "reseq_info_list": reseq_info_list})
