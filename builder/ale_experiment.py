@@ -1,5 +1,3 @@
-import datetime
-
 import os
 
 import ale.models
@@ -37,8 +35,6 @@ ANNOTATION_GENOMIC_DIFF_FILE_DIR = '/evidence/'
 # TODO: Don't use defaults any longer.
 
 DEFAULT_INSTRUMENT_NAME = "UCSD1"
-
-DEFAULT_DATE = datetime.date(2013, 1, 1)
 
 DEFAULT_IS_SIMULATION = False
 
@@ -120,7 +116,6 @@ def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_a
     experiment_orm = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                     instrument=instrument_orm,
                                                                     person=ale_exp_user,
-                                                                    date=DEFAULT_DATE,
                                                                     simulation=DEFAULT_IS_SIMULATION)
 
     media_orm = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
@@ -181,7 +176,6 @@ def insert_flasks(sample_breseq_abs_paths_list,
     experiment_orm = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                     instrument=instrument_orm,
                                                                     person=ale_exp_user,
-                                                                    date=DEFAULT_DATE,
                                                                     simulation=DEFAULT_IS_SIMULATION)
 
     media_orm = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
@@ -238,7 +232,6 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
     experiment_orm, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                              instrument=instrument_orm,
                                                                              person=ale_exp_user,
-                                                                             date=DEFAULT_DATE,
                                                                              simulation=DEFAULT_IS_SIMULATION)
 
     media_orm, created = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
