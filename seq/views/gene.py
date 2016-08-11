@@ -20,6 +20,10 @@ from xml.dom import minidom
 
 import gzip
 
+import csv
+
+import json
+
 
 @login_required
 def gene(request):
@@ -35,17 +39,23 @@ def gene(request):
 
     template = loader.get_template("gene.html")
 
-    pdb_url, residue_mappings, has_pdb_file = _get_pdb_info(gene_query)
+    pdb_url, residue_mappings = _get_pdb_info(gene_query)
+
+    homology_url = _get_homology_url(gene_query)
+
+    with open(homology_url, 'r') as homology_pdb:
+
+        homology_url = mark_safe(homology_pdb.read())
 
     context = Context({"gene_name": gene_query,
                        "table_body": mark_safe(table_body),
                        "title": gene_query + " gene",
                        "table_header": mark_safe(table_header),
-                       "pdb_file_path": pdb_url,
+                       "pdb_url": pdb_url,
                        "residue_mappings": mark_safe(residue_mappings),
-                       "has_pdb_file": has_pdb_file,
                        "protein_changes": protein_changes,
-                       "pdb_id": _get_pdb_url(gene_query)})
+                       "pdb_id": _get_pdb_url(gene_query),
+                       "homology_url": homology_url})
 
     return HttpResponse(template.render(context))
 
@@ -90,12 +100,7 @@ def _get_pdb_info(gene_query):
 
     residue_mappings = _get_xml_for_pdb(pdb_code)
 
-    try:
-        urllib.request.urlopen(pdb_url)
-        return pdb_url, residue_mappings, True
-
-    except:
-        return pdb_url, residue_mappings, False
+    return pdb_url, residue_mappings
 
 
 def _get_xml_for_pdb(pdb_code):
@@ -137,3 +142,18 @@ def _get_pdb_url(gene_query):
                 return pdb_code
     except:
         return ''
+
+
+def _get_homology_url(gene_query):
+
+    with open('/home/dgosting/ale_analytics/160804-genes_to_homology_models.csv', 'rt') as csvfile:
+
+        reader = csv.reader(csvfile)
+
+        for row in reader:
+
+            if row[1] == gene_query:
+
+                return 'https://aquaticus.ucsd.edu/sequencing/all_homology_models/' + row[3]
+
+    return ''

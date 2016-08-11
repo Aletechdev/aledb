@@ -35,7 +35,7 @@
         viewer.requestRedraw();
     });
     var game_object = null;
-    pv.io.fetchPdb('{{ pdb_file_path }}', function(structure) {
+    pv.io.fetchPdb('{{ pdb_url }}', function(structure) {
         viewer.on('viewerReady', function() {
             game_object = viewer.cartoon('molecule', structure);
             viewer.autoZoom();
@@ -103,7 +103,7 @@
          }
      }
 
-     function _calculate_distace(first_atom_number, second_atom_number, first_mutation_id, second_mutation_id) {
+     function _calculate_distance(first_atom_number, second_atom_number, first_mutation_id, second_mutation_id) {
          clear_selected_atoms();
          highlight_mutation(first_atom_number, first_mutation_id);
          highlight_mutation(second_atom_number, second_mutation_id);
