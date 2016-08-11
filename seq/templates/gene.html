@@ -217,12 +217,20 @@
                 </div>
                 <div id='picked-atom-name' style='text-align:left; '>&nbsp;</div>
                 <div id="viewer" style='width: 100%; height: 800px; text-align:left;'>
-                    {% include 'pv_viewer.html' %}
+                    {% if has_pdb_file %}
+                        {% include 'pv_viewer.html' %}
+                    {% else %}
+                        There is no pdb file available for this gene.
+                    {% endif %}
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="homology">
-                <div id="h_viewer">
-                    {% include 'homology_viewer.html' %}
+                <div id="h_viewer" style='width: 100%; height: 800px; text-align:left;'>
+                    {% if has_homology_data %}
+                        {% include 'homology_viewer.html' %}
+                    {% else %}
+                        There is no homology data available for this gene.
+                    {% endif %}
                 </div>
 
             </div>
