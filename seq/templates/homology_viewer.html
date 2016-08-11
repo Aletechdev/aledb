@@ -4,12 +4,10 @@
     var height = document.getElementById('viewer').clientHeight;
     var homology_viewer = pv.Viewer(homology_parent, { width : width, height : height, antialias : true, fog: false, background: 'white', selectionColor: 'red', animateTime: 500});
 
-    var game_object = null;
-    pv.io.fetchPdb('{{ homology_url }}', function(structure) {
-        homology_viewer.on('viewerReady', function() {
-            game_object = homology_viewer.cartoon('molecule', structure);
-            homology_viewer.autoZoom();
-        });
+    var structure = pv.io.pdb({{ homology_data }});
+    homology_viewer.on('viewerReady', function() {
+        homology_viewer.cartoon('molecule', structure);
+        homology_viewer.autoZoom();
     });
 
 </script>

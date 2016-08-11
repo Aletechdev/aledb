@@ -14,8 +14,6 @@ from seq.views import mutation_table_builder
 
 import urllib.request
 
-import json
-
 from xml.dom import minidom
 
 import gzip
@@ -23,6 +21,21 @@ import gzip
 import csv
 
 import json
+
+import requests
+
+import aleinfo.settings as settings
+
+INDEX_TEMPLATE = "duplication.html"
+
+if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
+    reseqencing_report_url = settings.sequencing_url
+    username = settings.config.get("OTHER", "username")
+    password = settings.config.get("OTHER", "password")
+else:
+    reseqencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
+    username = ""
+    password = ""
 
 
 @login_required
@@ -39,13 +52,9 @@ def gene(request):
 
     template = loader.get_template("gene.html")
 
-    pdb_url, residue_mappings = _get_pdb_info(gene_query)
+    pdb_url, residue_mappings, has_pdb_file = _get_pdb_info(gene_query)
 
-    homology_url = _get_homology_url(gene_query)
-
-    with open(homology_url, 'r') as homology_pdb:
-
-        homology_url = mark_safe(homology_pdb.read())
+    homology_data, has_homology_data = _get_homology_data(gene_query)
 
     context = Context({"gene_name": gene_query,
                        "table_body": mark_safe(table_body),
@@ -55,7 +64,9 @@ def gene(request):
                        "residue_mappings": mark_safe(residue_mappings),
                        "protein_changes": protein_changes,
                        "pdb_id": _get_pdb_url(gene_query),
-                       "homology_url": homology_url})
+                       "has_pdb_file": has_pdb_file,
+                       "homology_data": mark_safe(json.dumps(homology_data)),
+                       "has_homology_data": has_homology_data})
 
     return HttpResponse(template.render(context))
 
@@ -94,13 +105,13 @@ def _get_seq_exp(request, mutated_gene):
 
 def _get_pdb_info(gene_query):
 
-    pdb_code = _get_pdb_url(gene_query)
+    pdb_code, has_pdb_file = _get_pdb_url(gene_query)
 
     pdb_url = 'https://files.rcsb.org/download/' + pdb_code + '.pdb'
 
     residue_mappings = _get_xml_for_pdb(pdb_code)
 
-    return pdb_url, residue_mappings
+    return pdb_url, residue_mappings, has_pdb_file
 
 
 def _get_xml_for_pdb(pdb_code):
@@ -139,12 +150,12 @@ def _get_pdb_url(gene_query):
                 best = matches[0]
                 pdb_code = best['pdb_id']
 
-                return pdb_code
+                return pdb_code, True
     except:
-        return ''
+        return '', False
 
 
-def _get_homology_url(gene_query):
+def _get_homology_data(gene_query):
 
     with open('/home/dgosting/ale_analytics/160804-genes_to_homology_models.csv', 'rt') as csvfile:
 
@@ -154,6 +165,8 @@ def _get_homology_url(gene_query):
 
             if row[1] == gene_query:
 
-                return 'https://aquaticus.ucsd.edu/sequencing/all_homology_models/' + row[3]
+                homology_url = 'https://aquaticus.ucsd.edu/sequencing/all_homology_models/' + row[3]
 
-    return ''
+                return requests.get(homology_url, auth=(username, password)).text, True
+
+    return '', False
