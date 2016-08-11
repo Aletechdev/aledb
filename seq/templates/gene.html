@@ -46,6 +46,7 @@
             src="/static/DataTables/extras/ColReorder/media/js/ColReorder.js"></script>
     <script type="text/javascript" charset="utf8"
             src="/static/DataTables/extras/TableTools/media/js/TableTools.min.js"></script>
+    <script type="text/javascript" src="/static/bio-pv.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
             var oTable = $("#data").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[1, 'asc']]);
@@ -169,7 +170,6 @@
     <a href="http://ecocyc.org/ECOLI/substring-search?object={{ gene_name }}">EcoCyc</a><br>
     <a href="http://www.rcsb.org/pdb/explore/explore.do?structureId={{ pdb_id }}">Protein Data Bank (PDB)</a>
 </p>
-{% if has_pdb_file %}
 <h4>Gene Protein Structure</h4>
     <script type="text/javascript">
     $('#myTabs a').click(function (e) {
@@ -216,15 +216,19 @@
                     <button type="button" class="btn btn-default" onclick="calculate_distance()">Calculate Distance</button>
                 </div>
                 <div id='picked-atom-name' style='text-align:left; '>&nbsp;</div>
-                <div id="viewer" style='width: 100%; height: 800px; text-align:left;'></div>
+                <div id="viewer" style='width: 100%; height: 800px; text-align:left;'>
+                    {% include 'pv_viewer.html' %}
+                </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="homology">
-                <div style='width: 100%; height: 800px; text-align:left;'>No Homology exists for this gene.</div>
+                <div id="h_viewer">
+                    {% include 'homology_viewer.html' %}
+                </div>
+
             </div>
         </div>
 
     </div>
-{% endif %}
 <br>
 <h4>ALE Experiments</h4>
 {% if table_body %}
@@ -245,7 +249,5 @@
 </form>
 {% endif %}
 </body>
-<script type="text/javascript" src="/static/bio-pv.min.js"></script>
-{% include 'pv_viewer.html' %}
 
 </html>
