@@ -134,7 +134,7 @@
             var first_atom_number = first_button.match(re)[0];
             var second_atom_number = second_button.match(re)[0];
             if (first_atom_number != second_atom_number) {
-                _calculate_distace(first_atom_number, second_atom_number, get_key_by_value(first_atom_number), get_key_by_value(second_atom_number))
+                _calculate_distance(first_atom_number, second_atom_number, get_key_by_value(first_atom_number), get_key_by_value(second_atom_number))
             }
         }
         var protein_changes = {{ protein_changes | safe }};
