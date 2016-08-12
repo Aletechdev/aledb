@@ -2,13 +2,19 @@ import os
 
 import ale.models
 
+import hot_gene_mutations.models
+
+import fixation.models
+
 import seq.models
 
 import builder.util
 
 import builder.upload
 
-import builder.key_mutations
+import builder.hot_gene_mutations
+
+import builder.fixated_mutations
 
 from builder.gdparse.gdparse import gdparse
 
@@ -134,15 +140,15 @@ def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_a
                             media_orm,
                             freezer_box_orm)
 
-    rebuild_key_mutations(experiment_orm.ale_id)
+    rebuild_hot_gene_mutations(experiment_orm.ale_id)
 
 
-def rebuild_all_key_mutations():
+def rebuild_all_hot_gene_mutations():
 
     ale_experiment_queryset = ale.models.AleExperiment.objects.all()
 
     for ale_experiment in ale_experiment_queryset:
-        rebuild_key_mutations(ale_experiment.ale_id)
+        rebuild_hot_gene_mutations(ale_experiment.ale_id)
 
 
 def _insert_wild_type_flask(ale_exp_user,
@@ -211,7 +217,7 @@ def insert_flasks(sample_breseq_abs_paths_list,
                                      freezer_box_orm,
                                      is_wild_type=False)
 
-    rebuild_key_mutations(experiment_orm.ale_id)
+    rebuild_hot_gene_mutations(experiment_orm.ale_id)
 
 
 # For wild_type, expecting directory with output.gd in it.
@@ -278,37 +284,63 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                      freezer_box_orm,
                                      is_wild_type=False)
 
-    rebuild_key_mutations(experiment_orm.ale_id)
+    rebuild_hot_gene_mutations(experiment_orm.ale_id)
+
+    rebuild_fixated_mutations(experiment_orm.ale_id)
 
 
-def rebuild_key_mutations(ale_experiment_id):
-
-    _delete_key_mutations(ale_experiment_id)
-
-    _create_key_mutations(ale_experiment_id)
+def rebuild_fixated_mutations(ale_experiment_id):
+    _delete_fixated_mutations(ale_experiment_id)
+    _create_fixated_mutations(ale_experiment_id)
 
 
-def _delete_key_mutations(ale_experiment_id):
+def _delete_fixated_mutations(ale_experiment_id):
+    fixation.models.FixatedMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
 
-    ale.models.KeyMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
 
-
-def _create_key_mutations(ale_experiment_id):
+def _create_fixated_mutations(ale_experiment_id):
 
     """
-    Find all key mutations for ALE experiment and populate database table with them.
+    Find all fixated mutations for an ALE experiment and populate database table with them.
+    Using only Django ORM to make commit to database.
+    """
+
+    ale_experiment_orm = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
+
+    fixated_mutation_list = builder.hot_gene_mutations.get_hot_gene_mutation_list(ale_experiment_id)
+
+    for fixated_mutation in fixated_mutation_list:
+        fixated_mutation_queryset = fixation.models.FixatedMutation()
+        fixated_mutation_queryset.ale_experiment = ale_experiment_orm
+        fixated_mutation_queryset.mutation = fixated_mutation
+        fixated_mutation_queryset.save()
+
+
+def rebuild_hot_gene_mutations(ale_experiment_id):
+    _delete_hot_gene_mutations(ale_experiment_id)
+    _create_hot_gene_mutations(ale_experiment_id)
+
+
+def _delete_hot_gene_mutations(ale_experiment_id):
+    hot_gene_mutations.models.HotGeneMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
+
+
+def _create_hot_gene_mutations(ale_experiment_id):
+
+    """
+    Find all enriched/(hot gene) mutations for ALE experiment and populate database table with them.
     Using only Django ORM to make commit to database.
     """
 
     django_orm_ale_exp = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
 
-    key_mutations_list = builder.key_mutations.get_key_mutation_list(ale_experiment_id)
+    hot_gene_mutations_list = builder.hot_gene_mutations.get_hot_gene_mutation_list(ale_experiment_id)
 
-    for key_mutation in key_mutations_list:
-        django_orm_key_mutation = ale.models.KeyMutation()
-        django_orm_key_mutation.ale_experiment = django_orm_ale_exp
-        django_orm_key_mutation.mutation = key_mutation
-        django_orm_key_mutation.save()
+    for hot_gene_mutation in hot_gene_mutations_list:
+        django_orm_hot_gene_mutation = hot_gene_mutations.models.HotGeneMutation()
+        django_orm_hot_gene_mutation.ale_experiment = django_orm_ale_exp
+        django_orm_hot_gene_mutation.mutation = hot_gene_mutation
+        django_orm_hot_gene_mutation.save()
 
 
 def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
@@ -331,7 +363,6 @@ def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
                                  experiment,
                                  media,
                                  freezer_box,
-                                 # is_wild_type=True
                                  is_wild_type=False)
 
 
@@ -418,7 +449,8 @@ def _create_and_commit_ale_entry(person,
                                       breseq_folder=breseq_folder_path,
                                       mutation_gd_parser=mutation_gd_parser,
                                       annotation_gd_parser=annotation_gd_parser,
-                                      is_wild_type=is_wild_type)
+                                      reseq_reference=reseq_reference,
+                                      is_wild_type=is_wild_type,)
 
 
 def _legacy_get_sample_reseq_type(breseq_folder_path):
@@ -450,3 +482,114 @@ def _get_sample_report_list(experiment_breseq_output_path):
             breseq_sample_report_list.append(breseq_sample_names)
 
     return breseq_sample_report_list
+
+
+def create_functional_annotations(genbank_path, ale_experiment_id):
+
+    gene_dict = _parse_genbank(genbank_path)
+
+    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
+
+    for observed_mutation in observed_mutations:
+
+        mutation = observed_mutation.mutation
+
+        mutation_genes = mutation.gene.replace("[", "").replace("]", "").replace(u"\u2013", "/").replace("-", "/").split("/")
+
+        gene_info = {"product": "", "function": "", "go_process": "", "go_component": ""}
+
+        for gene in mutation_genes:
+
+            gene_info['function'] += "(" + gene_dict[gene]['function'] + ")"
+
+            gene_info['product'] += "(" + gene_dict[gene]['product'] + ")"
+
+            gene_info['go_component'] += "(" + gene_dict[gene]['go_component'] + ")"
+
+            gene_info['go_process'] += "(" + gene_dict[gene]['go_process'] + ")"
+
+        mutation.function = gene_info['function']
+
+        mutation.product = gene_info['product']
+
+        mutation.go_component = gene_info['go_component']
+
+        mutation.go_process = gene_info['go_process']
+
+        mutation.save()
+
+    return
+
+
+def _parse_genbank(genbank_path):
+
+    gene_info_start = {"product": "", "function": "", "go_process": "", "go_component": ""}
+
+    gene_dict = {}
+
+    current_gene = ""
+
+    with open(genbank_path, "rt") as genbank:
+
+        record = False
+
+        gene_info = gene_info_start
+
+        for line in genbank:
+
+            line = line.strip()
+
+            if line.startswith("CDS ") or line.startswith("tRNA ") or line.startswith("rRNA"):
+
+                record = True
+
+            elif line.startswith("gene "):
+
+                gene_dict[current_gene] = gene_info
+
+                record = False
+
+                gene_info = gene_info_start
+
+            elif line.startswith("ORIGIN"):
+
+                if record is True:
+
+                    gene_dict[current_gene] = gene_info
+
+                break
+
+            else:
+
+                if record is not False:
+
+                    if line.startswith("/gene="):
+
+                        current_gene = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/product="):
+
+                        gene_info['product'] = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/function="):
+
+                        gene_info['function'] = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/GO_process="):
+
+                        gene_info['go_process'] = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/GO_component="):
+
+                        gene_info['go_component'] = _find_between(line, "\"", "\"")
+
+    return gene_dict
+
+
+def _find_between(s, first, last):
+    try:
+        start = s.index(first) + len(first)
+        end = s.index(last, start)
+        return s[start:end]
+    except ValueError:
+        return ""

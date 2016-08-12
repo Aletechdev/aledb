@@ -1,28 +1,18 @@
 import ale.common
-
 import seq.models
-
 import collections
-
 from filter import mutation_filter
-
 
 __author__ = "Patrick Phaneuf"
 
 
-def get_key_mutation_list(ale_experiment_id):
-
+def get_hot_gene_mutation_list(ale_experiment_id):
     reseq_dict = _get_reseq_dict(ale_experiment_id)
-
     ale_experiment_reseq_mutation_lists = _get_ale_experiment_reseq_mutation_lists(reseq_dict)
-
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
-
     mutation_gene_count_dict = _get_mutation_gene_count_dict(ale_experiment_reseq_mutation_lists, filter_settings)
-
-    key_mutation_list = _get_key_mutation_list(ale_experiment_reseq_mutation_lists, filter_settings, mutation_gene_count_dict)
-
-    return key_mutation_list
+    hot_gene_mutation_list = _get_hot_gene_mutation_list(ale_experiment_reseq_mutation_lists, filter_settings, mutation_gene_count_dict)
+    return hot_gene_mutation_list
 
 
 # Expects the mutation lists from each reseq.
@@ -41,9 +31,9 @@ def _get_mutation_gene_count_dict(ale_experiment_mutation_list, filter_settings)
     return mutation_gene_count_dict
 
 
-def _get_key_mutation_list(ale_experiment_reseq_mutation_lists, filter_settings, mutation_gene_count_dict):
+def _get_hot_gene_mutation_list(ale_experiment_reseq_mutation_lists, filter_settings, mutation_gene_count_dict):
 
-    key_mutation_list = []
+    hot_gene_mutation_list = []
 
     for reseq_mutation_list in ale_experiment_reseq_mutation_lists:
 
@@ -51,11 +41,11 @@ def _get_key_mutation_list(ale_experiment_reseq_mutation_lists, filter_settings,
 
             if not _is_mutation_excluded(filter_settings, mutation)\
                     and mutation_gene_count_dict[mutation.gene] > 1\
-                    and mutation not in key_mutation_list:
+                    and mutation not in hot_gene_mutation_list:
 
-                key_mutation_list.append(mutation)
+                hot_gene_mutation_list.append(mutation)
 
-    return key_mutation_list
+    return hot_gene_mutation_list
 
 
 def _is_mutation_excluded(filter_settings, mutation):
@@ -100,15 +90,10 @@ def _get_ale_experiment_reseq_mutation_lists(reseq_dict):
 
 
 def _get_reseq_mutations_list(reseq_id):
-
     mutations_list = []
-
     observed_mutations_query_set = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id=reseq_id)
-
     for observed_mutation in observed_mutations_query_set:
-
         mutations_list.append(observed_mutation.mutation)
-
     return mutations_list
 
 
@@ -122,3 +107,4 @@ def _get_reseq_dict(experiment_id):
         reseq_dict[reseq.id] = reseq
 
     return reseq_dict
+

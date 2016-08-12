@@ -59,6 +59,7 @@ def add_breseq_results(technical_replicate_id,
                        breseq_folder,
                        mutation_gd_parser,
                        annotation_gd_parser,
+                       reseq_reference,
                        is_wild_type=False):
     """
     Figures out if the sample is clonal or population,
@@ -82,10 +83,12 @@ def add_breseq_results(technical_replicate_id,
                        seq_experiment,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
+                       reseq_reference,
                        is_wild_type)
 
     _process_duplications(breseq_folder,
                           seq_experiment,
+                          reseq_reference,
                           is_wild_type)
 
     sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
@@ -94,7 +97,8 @@ def add_breseq_results(technical_replicate_id,
                                          sample_evidence_dict)
 
 
-def _process_duplications(breseq_folder, seq_experiment, is_wild_type):
+def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wild_type):
+
 
     afi = os.path.basename(os.path.dirname(os.path.dirname(breseq_folder)))
 
@@ -232,6 +236,7 @@ def _process_mutations(sample_type,
                        seq_experiment,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
+                       reseq_reference,
                        is_wild_type):
 
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)

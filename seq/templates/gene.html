@@ -74,6 +74,14 @@
 	        });
         });
     </script>
+    <script type="text/javascript">
+        function fnShowHide( iCol ) {
+            var oTable = $('#data').dataTable();
+
+            var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
+            oTable.fnSetColumnVis( iCol, bVis ? false : true );
+        }
+    </script>
     <script>
 	    var deleteRow = function () {
 	        var row = $(this).closest("tr").get(0);
@@ -143,6 +151,19 @@
         <input type="button" value="Remove checked flasks" class="ui" onclick="filterFlask('remove')"/>
         <input type="button" value="Show checked flasks" class="ui" onclick="filterFlask('show')"/>
         {% include 'export_as_csv.html' %}
+        <br><br>
+        <div class="ui">
+            Show / Hide Columns:
+            <a onclick="fnShowHide(1)">Position</a>  -
+            <a onclick="fnShowHide(2)">Mutation Type</a> -
+            <a onclick="fnShowHide(3)">Sequence Change</a> -
+            <a onclick="fnShowHide(4)">Gene</a> -
+            <a onclick="fnShowHide(5)">Function</a> -
+            <a onclick="fnShowHide(6)">Product</a> -
+            <a onclick="fnShowHide(7)">GO Process</a> -
+            <a onclick="fnShowHide(8)">GO Component</a> -
+            <a onclick="fnShowHide(9)">Protein Change</a>
+        </div>
         <thead>
         {{table_header}}
         </thead>

@@ -8,7 +8,6 @@ import seq.models
 
 import re
 
-
 __author__ = 'Patrick Phaneuf'
 
 
@@ -24,13 +23,9 @@ REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
 REQUEST_ALL = "all"
 
-ALE_NUMBER_SELECTOR_QUERY = "AND ale_no = %d"
-ALE_EXPERIMENT_SELECTOR_QUERY = "AND experiment_id = %d"
-
 MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'DUP', 'Unannotated']
 
 PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication', 'Unannotated']
-
 
 COLORS = ['#FF851B', '#2ECC40', '#0074D9', '#FFDC00', '#7FDBFF', '#B10DC9', '#F012BE', '#111111', '#85144b']
 
@@ -78,7 +73,7 @@ def is_ref_strain_filtered(request):
     return ret_val
 
 
-def get_ale_id(request):
+def get_ale_number(request):
 
     ale_number = request.GET.get(REQUEST_ALE_ID)
 
@@ -113,83 +108,9 @@ def get_ale_experiment_name(request):
     return ale_experiment_name
 
 
-def get_ale_experiment_selector(ale_experiment_id, reseq_query):
-
-    if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
-
-        return reseq_query
-
-    else:
-
-        return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
-
-
-def get_ale_number_selector(ale_id, reseq_query):
-
-    if ale_id is None or ale_id == REQUEST_ALL:
-
-        return reseq_query
-
-    else:
-
-        return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_id=ale_id)
-
-
-def get_ordered_reseq_dict(request, include_starting_strain=False):
-
-    seq_experiment_ordered_dict = collections.OrderedDict()
-
-    if include_starting_strain:
-
-        starting_strain_raw_queryset = _get_starting_string_mutation_queryset(request)
-
-        for seq_experiment in starting_strain_raw_queryset:
-            seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
-
-    seq_experiments_raw_queryset = get_reseq_queryset(request)
-
-    for seq_experiment in seq_experiments_raw_queryset:
-
-        seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
-
-    return seq_experiment_ordered_dict
-
-
-def get_reseq_queryset(request):
-
-    ale_id = request.GET.get(REQUEST_ALE_ID)
-
-    return _get_reseq_queryset(request, ale_id)
-
-
-def _get_starting_string_mutation_queryset(request):
-
-    ale_id = ale.common.STARTING_STRAIN_ALE_ID
-
-    return _get_reseq_queryset(request, ale_id)
-
-
-def _get_reseq_queryset(request, ale_id):
-
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-
-    reseq_query = seq.models.ResequencingExperiment.objects.all().order_by(
-        'tech_rep__isolate__flask__ale_id__ale_id', 'tech_rep__isolate__flask__flask_number',
-        'tech_rep__isolate__isolate_number')
-
-    reseq_query = get_ale_experiment_selector(ale_experiment_id, reseq_query)
-
-    reseq_query = get_ale_number_selector(ale_id, reseq_query)
-
-    return reseq_query
-
-
 # TODO: Refactor: figure out how to get a ResequencingExperiment to return its list of observed mutations.
 def get_all_observed_mutations(reseq_id_list):
-
-    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
-
-    return observed_mutations
+    return seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
 
 
 # TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit. 
