@@ -2,11 +2,13 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from django.template import Context, loader
+from django.template import loader
 
 import aleinfo.settings as settings
 
 from seq.views import common
+
+from common.db_util import get_reseq_queryset
 
 
 __author__ = 'Patrick Phaneuf'
@@ -23,7 +25,7 @@ else:
 
 @login_required
 def meta_data(request):
-    reseq_queryset = common.get_reseq_queryset(request)
+    reseq_queryset = get_reseq_queryset(request)
 
     # Would rather want to use something like a dictionary since an experiment is
     # unique, though an experiment is currently a structure and an integral type
@@ -35,9 +37,9 @@ def meta_data(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
 
-    context = Context({"reseq_info_list": reseq_info_list,
-                       "reseq_report_url": reseq_report_url,
-                       "ale_experiment_name": ale_experiment_name})
+    context = {"reseq_info_list": reseq_info_list,
+               "reseq_report_url": reseq_report_url,
+               "ale_experiment_name": ale_experiment_name}
 
     return HttpResponse(template.render(context))
 
@@ -66,6 +68,7 @@ def get_reseq_info_list(reseq_queryset):
                                  reseq.tech_rep.isolate.reseq_reference,
                                  reseq.tech_rep.isolate.breseq_version,
                                  reseq.tech_rep.isolate.reseq_date)
+
 
         reseq_info_list.append(experiment_info_tuple)
 
