@@ -8,6 +8,8 @@ import seq.models
 
 import re
 
+import common.db_util
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -21,13 +23,6 @@ REQUEST_ALE_ID = "ale_no"
 REQUEST_WT_FILTER = "wtflt"
 
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
-
-REQUEST_ALL = "all"
-
-ALE_NUMBER_SELECTOR_QUERY = "AND ale_no = %d"
-ALE_EXPERIMENT_SELECTOR_QUERY = "AND experiment_id = %d"
-
-RESEQ_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
 
 MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'DUP', 'Unannotated']
 
@@ -80,7 +75,7 @@ def is_ref_strain_filtered(request):
     return ret_val
 
 
-def get_ale_id(request):
+def get_ale_number(request):
 
     ale_number = request.GET.get(REQUEST_ALE_ID)
 
@@ -115,97 +110,41 @@ def get_ale_experiment_name(request):
     return ale_experiment_name
 
 
-def get_ale_experiment_selector(ale_experiment_id):
-
-    if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
-
-        ale_experiment_selector = ""
-
-    else:
-
-        ale_experiment_selector = ALE_EXPERIMENT_SELECTOR_QUERY % int(ale_experiment_id)
-
-    return ale_experiment_selector
-
-
-def get_ale_number_selector(ale_id):
-
-    if ale_id is None or ale_id == REQUEST_ALL:
-
-        ale_no_selector = ""
-
-    else:
-
-        ale_no_selector = ALE_NUMBER_SELECTOR_QUERY % int(ale_id)
-
-    return ale_no_selector
-
-
 def get_ordered_reseq_dict(request, include_starting_strain=False):
-
     seq_experiment_ordered_dict = collections.OrderedDict()
 
+    # slightly different from common.db_util.
     if include_starting_strain:
-
         starting_strain_raw_queryset = _get_starting_string_mutation_queryset(request)
-
         for seq_experiment in starting_strain_raw_queryset:
             seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
-
     seq_experiments_raw_queryset = get_reseq_queryset(request)
 
     for seq_experiment in seq_experiments_raw_queryset:
-
         seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
-
     return seq_experiment_ordered_dict
 
 
 def get_reseq_queryset(request):
-
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ale_id = request.GET.get(REQUEST_ALE_ID)
-
-    return _get_reseq_queryset(request, ale_id)
+    return common.db_util.get_reseq_queryset(ale_experiment_id, ale_id)
 
 
 def _get_starting_string_mutation_queryset(request):
-
-    ale_id = ale.common.STARTING_STRAIN_ALE_ID
-
-    return _get_reseq_queryset(request, ale_id)
-
-
-def _get_reseq_queryset(request, ale_id):
-
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-
-    ale_experiment_selector = get_ale_experiment_selector(ale_experiment_id)
-
-    ale_id_selector = get_ale_number_selector(ale_id)
-
-    sql_query = RESEQ_QUERY % (ale_experiment_selector, ale_id_selector)
-
-    seq_experiments_raw_queryset = seq.models.ResequencingExperiment.objects.raw(sql_query)
-
-    return seq_experiments_raw_queryset
+    ale_id = ale.common.STARTING_STRAIN_ALE_ID
+    return common.db_util.get_reseq_queryset(ale_experiment_id, ale_id)
 
 
-# TODO: Refactor: figure out how to get a ResequencingExperiment to return its list of observed mutations.
-def get_all_observed_mutations(reseq_id_list):
-
-    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
-
-    return observed_mutations
-
-
-# TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit. 
-def filter_out_wt_reseq(seq_experiment_ordered_dict):
+# TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit.
+def filter_out_wt_reseq(reseq_ordered_dict):
 
     key_to_delete_found = False
 
     key_to_delete = None
 
-    for key, value in seq_experiment_ordered_dict.items():
+    for key, value in reseq_ordered_dict.items():
 
         if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
 
@@ -215,9 +154,9 @@ def filter_out_wt_reseq(seq_experiment_ordered_dict):
 
     if key_to_delete_found and key_to_delete:
 
-        del seq_experiment_ordered_dict[key_to_delete]
+        del reseq_ordered_dict[key_to_delete]
 
-    return seq_experiment_ordered_dict
+    return reseq_ordered_dict
 
 
 def get_wt_reseq_id(seq_experiment_ordered_dict):
@@ -309,8 +248,3 @@ def _is_query_empty(query):
         is_query_empty = True
 
     return is_query_empty
-
-
-def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset):
-
-    return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))

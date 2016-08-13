@@ -1,8 +1,9 @@
 from django.conf.urls import url
 
-from . import views
+import fixation.views
 
 
 urlpatterns = [
-    url(r'^$', views.fixation, name='fixation'),
+    url('^$', fixation.views.fixating_mutations, name='fixation'),
+    url('^shared', fixation.views.shared_fixating_mutations, name='shared_fixating_mutations'),
 ]
