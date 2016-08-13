@@ -28,7 +28,6 @@ MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'D
 
 PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication', 'Unannotated']
 
-
 COLORS = ['#FF851B', '#2ECC40', '#0074D9', '#FFDC00', '#7FDBFF', '#B10DC9', '#F012BE', '#111111', '#85144b']
 
 DEFAULT_COLOR = '#AAAAAA'

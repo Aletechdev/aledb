@@ -1,6 +1,5 @@
 __author__ = "Patrick Phaneuf"
 
-
 RESEQ_QUERY = """SELECT reseq_id AS id FROM id_mapping WHERE reseq_id IS NOT NULL %s %s ORDER BY ale_no, flask_no, isolate_no ASC;"""
 REQUEST_ALL = "all"
 ALE_EXPERIMENT_SELECTOR_QUERY = "AND experiment_id = %d"

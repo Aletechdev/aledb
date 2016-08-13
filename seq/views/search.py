@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.shortcuts import render
 
@@ -49,10 +49,10 @@ def search(request):
 
             template = loader.get_template("search.html")
 
-            context = Context({"table_body": mark_safe(table_body),
-                               "title": "Search Results",
-                               "table_header": mark_safe(table_header),
-                               "last_search": last_search})
+            context = {"table_body": mark_safe(table_body),
+                       "title": "Search Results",
+                       "table_header": mark_safe(table_header),
+                       "last_search": last_search}
 
             return HttpResponse(template.render(context))
 
@@ -98,7 +98,7 @@ def _get_seq_exp(request):
     for observed_mutation in observed_mutations_with_gene:
 
         # TODO: Should find a way to put checking experiment name in the filter query instead of checking the list after a query
-        observed_mutation_name = observed_mutation.sequencing_experiment.isolate.flask.ale_id.ale_experiment.name
+        observed_mutation_name = observed_mutation.sequencing_experiment.tech_rep.isolate.flask.ale_id.ale_experiment.name
 
         if ale_experiments_to_include:
             if observed_mutation_name not in ale_experiments_to_include:
