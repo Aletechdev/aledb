@@ -1,3 +1,5 @@
+# TODO: We don't want to be using SQL Alchemy but rather the Django ORM. Need to move away from this.
+
 import os
 
 import sys
@@ -81,11 +83,6 @@ class Instrument(Base):
 class AleExperiment(Base):
     __table__ = Table("ale_aleexperiment", metadata, autoload=True)
     instrument = relationship(Instrument, backref="ale_experiments")
-
-
-# class KeyMutation(Base):
-#     __table__ = Table("ale_keymutation", metadata, autoload=True)
-#     ale_experiment = relationship(AleExperiment)
 
 
 class Media(Base):

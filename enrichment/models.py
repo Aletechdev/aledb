@@ -5,7 +5,7 @@ from ale.models import AleExperiment
 from seq.models import Mutation
 
 
-class FixatedMutation(models.Model):
+class EnrichmentMutation(models.Model):
 
     ale_experiment = models.ForeignKey(AleExperiment,
                                        on_delete=models.CASCADE)

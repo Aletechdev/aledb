@@ -6,9 +6,6 @@ from configparser import ConfigParser
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-# TODO: change to "ALE Analytics"
-GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
-
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 config = ConfigParser()
@@ -155,13 +152,7 @@ INSTALLED_APPS = (
     'fixation',
     'stats',
     'metadata',
-    'hot_gene_mutations',
-
-    #'grappelli',
-    # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    'django.contrib.admindocs',
+    'enrichment',
 )
 
 # A sample logging configuration. The only tangible logging

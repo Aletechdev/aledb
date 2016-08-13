@@ -12,6 +12,8 @@ import re
 
 from enum import Enum
 
+from common.db_util import get_mutation_queryset_from_observed_mutation_queryset
+
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 
@@ -40,7 +42,8 @@ evidence = re.compile(r'[A-Z]\d+[A-Z]')
 
 class TableType(Enum):
     GENE_TABLE = 1
-    SHARED_HOT_GENE_MUTATIONS = 2
+    ENRICHMENT_MUTATIONS = 2
+    FIXATING_MUTATIONS = 3
 
 
 if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -52,7 +55,7 @@ else:
 def get_table_header(reseq_dict, table_type=None):
 
     table_header = ""
-    if table_type == TableType.SHARED_HOT_GENE_MUTATIONS:
+    if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.FIXATING_MUTATIONS:
         table_header = HTML_SHARED_MUTATION_TABLE_HEADER
     else:
         table_header = HTML_MUTATION_TABLE_HEADER
@@ -86,7 +89,7 @@ def get_table_body(reseq_dict,
                    filter_mutation_id_list=None,
                    table_type=None):
 
-    mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
+    mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
 
     mutation_index_dict = dict((mutation_id, i) for i, mutation_id in enumerate(mutation_queryset.values_list("id", flat=True)))
 
@@ -121,8 +124,10 @@ def get_table_body(reseq_dict,
             table_row = "<tr>"
             table_row += HTML_MUTATION_TABLE_ROW
 
-            if table_type == TableType.SHARED_HOT_GENE_MUTATIONS:
-                table_row += "<td><a href=/ale_analytics/freq_mutated_genes/shared?mutation_id=%s>shared</a></td>" % mutation.id
+            if table_type == TableType.ENRICHMENT_MUTATIONS:
+                table_row += "<td><a href=/ale_analytics/enrichment/shared?mutation_id=%s>shared</a></td>" % mutation.id
+            elif table_type == TableType.FIXATING_MUTATIONS:
+                table_row += "<td><a href=/ale_analytics/fixation/shared?mutation_id=%s>shared</a></td>" % mutation.id
 
             table_row += "<td>%s</td>" % mutation.position
             table_row += "<td>%s</td>" % mutation.mutation_type
