@@ -4,7 +4,7 @@ from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.utils.safestring import mark_safe
 
@@ -22,6 +22,8 @@ from fixation.models import FixatedMutation
 from common.constants import REQUEST_MUTATION_ID
 
 import metadata.views
+
+from common.db_util import get_ordered_reseq_dict
 
 __author__ = 'Patrick Phaneuf'
 
@@ -41,7 +43,7 @@ def fixating_mutations(request):
     # False for pages such as this, where we don't want to see the wild type, though we currently must include it
     # so as to filter out the mutations when choosing specific ALEs within the experiment. This means that there is
     # a disconnect between filtering methodologies that needs to be reconciled.
-    reseq_ordered_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
+    reseq_ordered_dict = get_ordered_reseq_dict(request, include_starting_strain=True)
     reseq_ordered_dict = seq.views.common.filter_out_wt_reseq(reseq_ordered_dict)
     reseq_ordered_dict = mutation_table_builder.filter_checked_flasks(request, reseq_ordered_dict)
 
@@ -60,15 +62,15 @@ def fixating_mutations(request):
     # TODO: currently pulling this from the seq app. Need to put this template in a centralized location.
     template = loader.get_template("table_template.html")
 
-    context = Context({"ales": ale_queryset,
-                       "ale_experiment_name": ale_experiment_name,
-                       "ale_no": ale_number,
-                       "experiment_id": ale_experiment_id,
-                       "table_body": mark_safe(table_body),
-                       "title": "Fixating Mutations",
-                       "table_header": mark_safe(table_header),
-                       "is_ascending_freq_filter": is_ascending_freq_filter,
-                       "template_header": "Fixating Mutations"})
+    context = {"ales": ale_queryset,
+               "ale_experiment_name": ale_experiment_name,
+               "ale_no": ale_number,
+               "experiment_id": ale_experiment_id,
+               "table_body": mark_safe(table_body),
+               "title": "Fixating Mutations",
+               "table_header": mark_safe(table_header),
+               "is_ascending_freq_filter": is_ascending_freq_filter,
+               "template_header": "Fixating Mutations"}
 
     return HttpResponse(template.render(context))
 

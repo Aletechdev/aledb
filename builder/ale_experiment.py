@@ -1,4 +1,3 @@
-import datetime
 import os
 
 import ale.models
@@ -35,8 +34,6 @@ ANNOTATION_GENOMIC_DIFF_FILE_DIR = '/evidence/'
 # TODO: Don't use defaults any longer.
 
 DEFAULT_INSTRUMENT_NAME = "UCSD1"
-
-DEFAULT_DATE = datetime.date(2013, 1, 1)
 
 DEFAULT_MEDIA_DESCRIPTION = "M9"
 
@@ -97,7 +94,7 @@ def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate
     for isolate in isolate_to_delete:
         if isolate.flask.ale_id.ale_experiment_id == ale_experiment_primary_key and isolate.flask.ale_id.ale_id == ale_number and isolate.flask.flask_number == flask_number:
             isolate.delete()
-            print ("Successfully removed: ", ale_number, flask_number, isolate_number)
+            print("Successfully removed: ", ale_number, flask_number, isolate_number)
 
     _delete_all_orphaned_mutations()
 
@@ -105,43 +102,31 @@ def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate
 def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_abs_path):
     """
     Executed from Django ipython shell.
-	
     Args:
         breseq_wild_type_output_abs_path (list): A string list of the absolution path of the output directory of a breseq report.
         ale_exp_user (string): A string for the user name associated with the target ALE experiment.
         ale_exp_name (string): A string for the target ALE experiment name.
     """
 
-    db_session = seq.alchemy_orm.Session()
+    instrument_orm = ale.models.Instrument.objects.get_or_create(name=DEFAULT_INSTRUMENT_NAME)
 
-    instrument_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                     seq.alchemy_orm.Instrument,
-                                                     name=DEFAULT_INSTRUMENT_NAME)
+    experiment_orm = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
+                                                                    instrument=instrument_orm,
+                                                                    person=ale_exp_user,
+                                                                    simulation=DEFAULT_IS_SIMULATION)
 
-    experiment_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                     seq.alchemy_orm.AleExperiment,
-                                                     name=ale_exp_name,
-                                                     instrument=instrument_orm,
-                                                     person=ale_exp_user,
-                                                     date=DEFAULT_DATE)
+    media_orm = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
+                                                       substrate=DEFAULT_MEDIA_SUBSTRATE,
+                                                       temperature=DEFAULT_TEMPERATURE,
+                                                       volume=DEFAULT_VOLUME,
+                                                       stirring_speed=DEFAULT_STIRRING_SPEED)
 
-    media_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                seq.alchemy_orm.Media,
-                                                description=DEFAULT_MEDIA_DESCRIPTION,
-                                                substrate=DEFAULT_MEDIA_SUBSTRATE,
-                                                temperature=DEFAULT_TEMPERATURE,
-                                                volume=DEFAULT_VOLUME,
-                                                stirring_speed=DEFAULT_STIRRING_SPEED)
-
-    freezer_box_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                      seq.alchemy_orm.FreezerBox,
-                                                      name=DEFAULT_FREEZER_BOX_NAME,
-                                                      number=DEFAULT_FREEZER_BOX_NUMBER)
+    freezer_box_orm = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
+                                                                  number=DEFAULT_FREEZER_BOX_NUMBER)
 
     _insert_wild_type_flask(ale_exp_user,
                             ale_exp_name,
                             breseq_wild_type_output_abs_path,
-                            db_session,
                             experiment_orm,
                             media_orm,
                             freezer_box_orm)
@@ -160,15 +145,13 @@ def rebuild_all_enrichment_mutations():
 def _insert_wild_type_flask(ale_exp_user,
                             ale_exp_name,
                             breseq_wild_type_output_abs_path,
-                            db_session,
                             experiment_orm,
                             media_orm,
                             freezer_box_orm):
 
     sanitized_breseq_output_wild_type_abs_path = builder.util.sanitize_path(breseq_wild_type_output_abs_path)
 
-    _create_and_commit_wild_type_ale_entry(db_session,
-                                           sanitized_breseq_output_wild_type_abs_path,
+    _create_and_commit_wild_type_ale_entry(sanitized_breseq_output_wild_type_abs_path,
                                            experiment_orm,
                                            media_orm,
                                            freezer_box_orm)
@@ -185,31 +168,21 @@ def insert_flasks(sample_breseq_abs_paths_list,
         ale_exp_name (string): A string for the target ALE experiment name.
     """
 
-    db_session = seq.alchemy_orm.Session()
+    instrument_orm = ale.models.Instrument.objects.get_or_create(name=DEFAULT_INSTRUMENT_NAME)
 
-    instrument_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                     seq.alchemy_orm.Instrument,
-                                                     name=DEFAULT_INSTRUMENT_NAME)
+    experiment_orm = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
+                                                                    instrument=instrument_orm,
+                                                                    person=ale_exp_user,
+                                                                    simulation=DEFAULT_IS_SIMULATION)
 
-    experiment_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                     seq.alchemy_orm.AleExperiment,
-                                                     name=ale_exp_name,
-                                                     instrument=instrument_orm,
-                                                     person=ale_exp_user,
-                                                     date=DEFAULT_DATE)
+    media_orm = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
+                                                       substrate=DEFAULT_MEDIA_SUBSTRATE,
+                                                       temperature=DEFAULT_TEMPERATURE,
+                                                       volume=DEFAULT_VOLUME,
+                                                       stirring_speed=DEFAULT_STIRRING_SPEED)
 
-    media_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                seq.alchemy_orm.Media,
-                                                description=DEFAULT_MEDIA_DESCRIPTION,
-                                                substrate=DEFAULT_MEDIA_SUBSTRATE,
-                                                temperature=DEFAULT_TEMPERATURE,
-                                                volume=DEFAULT_VOLUME,
-                                                stirring_speed=DEFAULT_STIRRING_SPEED)
-
-    freezer_box_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                      seq.alchemy_orm.FreezerBox,
-                                                      name=DEFAULT_FREEZER_BOX_NAME,
-                                                      number=DEFAULT_FREEZER_BOX_NUMBER)
+    freezer_box_orm = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
+                                                                  number=DEFAULT_FREEZER_BOX_NUMBER)
 
     for sample_breseq_abs_paths in sample_breseq_abs_paths_list:
 
@@ -223,11 +196,9 @@ def insert_flasks(sample_breseq_abs_paths_list,
 
         isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
 
-        output_path = sanitized_breseq_output_abs_path \
-                      + BRESEQ_OUTPUT_REPORT_DIR
+        output_path = sanitized_breseq_output_abs_path + BRESEQ_OUTPUT_REPORT_DIR
 
-        _create_and_commit_ale_entry(db_session,
-                                     ale_exp_user,
+        _create_and_commit_ale_entry(ale_exp_user,
                                      output_path,
                                      ale_number,
                                      flask_number,
@@ -253,38 +224,27 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     sanitized_breseq_output_abs_path = builder.util.sanitize_path(breseq_output_abs_path)
 
-    db_session = seq.alchemy_orm.Session()
+    instrument_orm, created = ale.models.Instrument.objects.get_or_create(name=DEFAULT_INSTRUMENT_NAME)
 
-    instrument_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                     seq.alchemy_orm.Instrument,
-                                                     name=DEFAULT_INSTRUMENT_NAME)
+    experiment_orm, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
+                                                                             instrument=instrument_orm,
+                                                                             person=ale_exp_user,
+                                                                             simulation=DEFAULT_IS_SIMULATION)
 
-    experiment_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                     seq.alchemy_orm.AleExperiment,
-                                                     name=ale_exp_name,
-                                                     instrument=instrument_orm,
-                                                     person=ale_exp_user,
-                                                     date=DEFAULT_DATE)
+    media_orm, created = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
+                                                                substrate=DEFAULT_MEDIA_SUBSTRATE,
+                                                                temperature=DEFAULT_TEMPERATURE,
+                                                                volume=DEFAULT_VOLUME,
+                                                                stirring_speed=DEFAULT_STIRRING_SPEED)
 
-    media_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                seq.alchemy_orm.Media,
-                                                description=DEFAULT_MEDIA_DESCRIPTION,
-                                                substrate=DEFAULT_MEDIA_SUBSTRATE,
-                                                temperature=DEFAULT_TEMPERATURE,
-                                                volume=DEFAULT_VOLUME,
-                                                stirring_speed=DEFAULT_STIRRING_SPEED)
-
-    freezer_box_orm = seq.alchemy_orm.query_or_create(db_session,
-                                                      seq.alchemy_orm.FreezerBox,
-                                                      name=DEFAULT_FREEZER_BOX_NAME,
-                                                      number=DEFAULT_FREEZER_BOX_NUMBER)
+    freezer_box_orm, created = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
+                                                                           number=DEFAULT_FREEZER_BOX_NUMBER)
 
     if breseq_wild_type_output_abs_path is not None:
 
         _insert_wild_type_flask(ale_exp_user,
                                 ale_exp_name,
                                 breseq_wild_type_output_abs_path,
-                                db_session,
                                 experiment_orm,
                                 media_orm,
                                 freezer_box_orm)
@@ -300,17 +260,16 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
         isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
 
-        output_path = sanitized_breseq_output_abs_path \
-                      + ale_isolate_name \
-                      + "/" \
-                      + BRESEQ_OUTPUT_REPORT_DIR
+        technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.TechnicalReplicate)
 
-        _create_and_commit_ale_entry(db_session,
-                                     ale_exp_user,
+        output_path = sanitized_breseq_output_abs_path + ale_isolate_name + "/" + BRESEQ_OUTPUT_REPORT_DIR
+
+        _create_and_commit_ale_entry(ale_exp_user,
                                      output_path,
                                      ale_number,
                                      flask_number,
                                      isolate_number,
+                                     technical_replicate_number,
                                      experiment_orm,
                                      media_orm,
                                      freezer_box_orm,
@@ -374,8 +333,7 @@ def _create_enrichment_mutations(ale_experiment_id):
         enrichment_mutation.save()
 
 
-def _create_and_commit_wild_type_ale_entry(db_session,
-                                           breseq_wild_type_abs_path,
+def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
                                            experiment,
                                            media,
                                            freezer_box):
@@ -387,8 +345,7 @@ def _create_and_commit_wild_type_ale_entry(db_session,
     # along with the sample mutations since we're using the wild type mutations
     # for filtering with key mutations.
 
-    _create_and_commit_ale_entry(db_session,
-                                 WILD_TYPE_USER_NAME,
+    _create_and_commit_ale_entry(WILD_TYPE_USER_NAME,
                                  breseq_wild_type_abs_path,
                                  WILD_TYPE_ALE_NUMBER,
                                  WILD_TYPE_FLASK_NUMBER,
@@ -399,12 +356,12 @@ def _create_and_commit_wild_type_ale_entry(db_session,
                                  is_wild_type=False)
 
 
-def _create_and_commit_ale_entry(db_session,
-                                 person,
+def _create_and_commit_ale_entry(person,
                                  breseq_folder_path,
                                  ale_number,
                                  flask_number,
                                  isolate_number,
+                                 technical_replicate_number,
                                  experiment,
                                  media,
                                  freezer_box,
@@ -425,16 +382,9 @@ def _create_and_commit_ale_entry(db_session,
     have changed.
     """
 
-    ale_id = seq.alchemy_orm.query_or_create(db_session,
-                                             seq.alchemy_orm.AleId,
-                                             ale_experiment=experiment,
-                                             ale_id=ale_number)
+    ale_id, created = ale.models.AleId.objects.get_or_create(ale_experiment=experiment, ale_id=ale_number)
 
-    flask = seq.alchemy_orm.query_or_create(db_session,
-                                            seq.alchemy_orm.Flask,
-                                            flask_number=flask_number,
-                                            ale_id=ale_id,
-                                            media=media)
+    flask, created = ale.models.Flask.objects.get_or_create(flask_number=flask_number, ale_id=ale_id, media=media)
 
     with open(os.path.join(breseq_folder_path, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
 
@@ -472,28 +422,25 @@ def _create_and_commit_ale_entry(db_session,
 
         is_population = True
 
-    isolate = seq.alchemy_orm.query_or_create(db_session,
-                                              seq.alchemy_orm.Isolate,
-                                              flask=flask,
-                                              isolate_number=isolate_number,
-                                              is_population=is_population,
-                                              reseq_reference=reseq_reference,
-                                              reseq_date=reseq_date,
-                                              breseq_version=breseq_version,
-                                              freezer_box=freezer_box,
-                                              person=person)
+    isolate, created = ale.models.Isolate.objects.get_or_create(flask=flask,
+                                                                isolate_number=isolate_number,
+                                                                is_population=is_population,
+                                                                reseq_reference=reseq_reference,
+                                                                reseq_date=reseq_date,
+                                                                breseq_version=breseq_version,
+                                                                freezer_box=freezer_box,
+                                                                person=person)
 
-    db_session.commit()
+    technical_replicate, created = ale.models.TechnicalReplicate.objects.get_or_create(tech_rep_number=technical_replicate_number,
+                                                                                       isolate=isolate)
 
-    builder.upload.add_breseq_results(db_session=db_session,
-                                      isolate_id=isolate.id,
+    builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
                                       person=person,
                                       breseq_folder=breseq_folder_path,
                                       mutation_gd_parser=mutation_gd_parser,
                                       annotation_gd_parser=annotation_gd_parser,
-                                      is_wild_type=is_wild_type)
-
-    db_session.commit()
+                                      reseq_reference=reseq_reference,
+                                      is_wild_type=is_wild_type,)
 
 
 def _legacy_get_sample_reseq_type(breseq_folder_path):
@@ -525,3 +472,114 @@ def _get_sample_report_list(experiment_breseq_output_path):
             breseq_sample_report_list.append(breseq_sample_names)
 
     return breseq_sample_report_list
+
+
+def create_functional_annotations(genbank_path, ale_experiment_id):
+
+    gene_dict = _parse_genbank(genbank_path)
+
+    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
+
+    for observed_mutation in observed_mutations:
+
+        mutation = observed_mutation.mutation
+
+        mutation_genes = mutation.gene.replace("[", "").replace("]", "").replace(u"\u2013", "/").replace("-", "/").split("/")
+
+        gene_info = {"product": "", "function": "", "go_process": "", "go_component": ""}
+
+        for gene in mutation_genes:
+
+            gene_info['function'] += "(" + gene_dict[gene]['function'] + ")"
+
+            gene_info['product'] += "(" + gene_dict[gene]['product'] + ")"
+
+            gene_info['go_component'] += "(" + gene_dict[gene]['go_component'] + ")"
+
+            gene_info['go_process'] += "(" + gene_dict[gene]['go_process'] + ")"
+
+        mutation.function = gene_info['function']
+
+        mutation.product = gene_info['product']
+
+        mutation.go_component = gene_info['go_component']
+
+        mutation.go_process = gene_info['go_process']
+
+        mutation.save()
+
+    return
+
+
+def _parse_genbank(genbank_path):
+
+    gene_info_start = {"product": "", "function": "", "go_process": "", "go_component": ""}
+
+    gene_dict = {}
+
+    current_gene = ""
+
+    with open(genbank_path, "rt") as genbank:
+
+        record = False
+
+        gene_info = gene_info_start
+
+        for line in genbank:
+
+            line = line.strip()
+
+            if line.startswith("CDS ") or line.startswith("tRNA ") or line.startswith("rRNA"):
+
+                record = True
+
+            elif line.startswith("gene "):
+
+                gene_dict[current_gene] = gene_info
+
+                record = False
+
+                gene_info = gene_info_start
+
+            elif line.startswith("ORIGIN"):
+
+                if record is True:
+
+                    gene_dict[current_gene] = gene_info
+
+                break
+
+            else:
+
+                if record is not False:
+
+                    if line.startswith("/gene="):
+
+                        current_gene = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/product="):
+
+                        gene_info['product'] = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/function="):
+
+                        gene_info['function'] = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/GO_process="):
+
+                        gene_info['go_process'] = _find_between(line, "\"", "\"")
+
+                    elif line.startswith("/GO_component="):
+
+                        gene_info['go_component'] = _find_between(line, "\"", "\"")
+
+    return gene_dict
+
+
+def _find_between(s, first, last):
+    try:
+        start = s.index(first) + len(first)
+        end = s.index(last, start)
+        return s[start:end]
+    except ValueError:
+        return ""

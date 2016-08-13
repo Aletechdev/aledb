@@ -2,13 +2,15 @@ from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.utils.safestring import mark_safe
 
 import seq.models
 
 import seq.views.common
+
+from common.db_util import get_ordered_reseq_dict
 
 # TODO: The mutation table build should use the factory pattern.
 from seq.views import mutation_table_builder
@@ -33,7 +35,7 @@ def enrichment_mutations(request):
 
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
-    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request)
+    ordered_reseq_dict = get_ordered_reseq_dict(request)
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
@@ -43,14 +45,14 @@ def enrichment_mutations(request):
     table_body = _get_table_body(ordered_reseq_dict, request)
 
     template = loader.get_template("enrichment/enrichment_mutations.html")
-    context = Context({"ales": ale_queryset,
+    context = {"ales": ale_queryset,
                        "ale_experiment_name": ale_experiment_name,
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
                        "title": "Frequently Mutated Genes",
                        "table_header": mark_safe(table_header),
-                       "template_header": "Frequently Mutated Genes"})
+                       "template_header": "Frequently Mutated Genes"}
 
     return HttpResponse(template.render(context))
 
@@ -74,6 +76,10 @@ def shared_enrichment_mutations(request):
     table_body += "<td>%s</td>" % enrichment_gene_mutation.mutation_type
     table_body += "<td>%s</td>" % enrichment_gene_mutation.sequence_change
     table_body += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (enrichment_gene_mutation.gene, enrichment_gene_mutation.gene)
+    table_body += "<td>%s</td>" % ("" if enrichment_gene_mutation.function is None else hot_gene_mutation.function)
+    table_body += "<td>%s</td>" % ("" if enrichment_gene_mutation.product is None else hot_gene_mutation.product)
+    table_body += "<td>%s</td>" % ("" if enrichment_gene_mutation.go_process is None else hot_gene_mutation.go_process)
+    table_body += "<td>%s</td>" % ("" if enrichment_gene_mutation.go_component is None else hot_gene_mutation.go_component)
     table_body += "<td>%s</td>" % enrichment_gene_mutation.protein_change
     table_body += "</tr>"
 
@@ -95,10 +101,10 @@ def shared_enrichment_mutations(request):
     reseq_info_list = metadata.views.get_reseq_info_list(enrichment_mutation_reseq_list)
 
     template = loader.get_template("enrichment/shared_enrichment_mutations.html")
-    context = Context({"title": "Shared Enrichment Mutations",
+    context = {"title": "Shared Enrichment Mutations",
                        "table_header": mark_safe(table_header),
                        "table_body": mark_safe(table_body),
-                       "reseq_info_list": reseq_info_list})
+                       "reseq_info_list": reseq_info_list}
 
     return HttpResponse(template.render(context))
 

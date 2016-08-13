@@ -3,7 +3,7 @@ __author__ = 'pphaneuf'
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.http import HttpResponse
 
@@ -31,9 +31,9 @@ def dashboard(request):
         protein_change_count = seq.models.Mutation.objects.filter(protein_change__contains=protein_change_type).count()
         protein_change_type_count_dict[protein_change_type] = protein_change_count
 
-    gene_query = seq.models.ObservedMutation.objects.values('mutation__gene', 'mutation__mutation_type')\
+    gene_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='').values('mutation__gene', 'mutation__mutation_type')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
-    sequence_change_query = seq.models.ObservedMutation.objects.values('mutation__gene', 'mutation__protein_change')\
+    sequence_change_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='').values('mutation__gene', 'mutation__protein_change')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
 
     gene_list, genes, sequence_changes = common.get_ignored_genes(request, gene_query, sequence_change_query)
@@ -44,15 +44,15 @@ def dashboard(request):
 
     genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes,
                                                                                                 sequence_changes)
-    context = Context({"protein_change_type_count_dict": protein_change_type_count_dict,
-                       "mutation_type_count_dict": mutation_type_count_dict,
-                       "genes": mark_safe(genes_to_show),
-                       "sequence_changes": mark_safe(sequence_changes_to_show),
-                       "gene_color_set": mark_safe(common.GENE_COLORS),
-                       "seq_color_set": mark_safe(common.SEQ_COLORS),
-                       "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
-                       "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
-                       "number_of_genes_to_show": number_of_genes_to_show})
+    context = {"protein_change_type_count_dict": protein_change_type_count_dict,
+               "mutation_type_count_dict": mutation_type_count_dict,
+               "genes": mark_safe(genes_to_show),
+               "sequence_changes": mark_safe(sequence_changes_to_show),
+               "gene_color_set": mark_safe(common.GENE_COLORS),
+               "seq_color_set": mark_safe(common.SEQ_COLORS),
+               "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
+               "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
+               "number_of_genes_to_show": number_of_genes_to_show}
 
     template = loader.get_template(DASHBOARD_TEMPLATE)
 
