@@ -2,7 +2,7 @@ __author__ = 'dgosting'
 
 from django.http import HttpResponse
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.contrib.auth.decorators import login_required
 
@@ -19,6 +19,8 @@ import os
 import requests
 
 from seq.views import mutation_table_builder
+
+from common.db_util import get_ordered_reseq_dict
 
 
 INDEX_TEMPLATE = "duplication.html"
@@ -42,7 +44,7 @@ def duplication(request):
 
     template = loader.get_template(INDEX_TEMPLATE)
 
-    seq_experiment_ordered_dict = common.get_ordered_reseq_dict(request, include_starting_strain=True)
+    seq_experiment_ordered_dict = get_ordered_reseq_dict(request, include_starting_strain=True)
 
     seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
@@ -70,12 +72,11 @@ def duplication(request):
         else:
             experiment_links.append((False, basename))
 
-    context = Context({
-        "experiment_links": experiment_links,
-        "reseqencing_report_url": reseqencing_report_url,
-        "ale_experiment_id": ale_experiment_id,
-        "ale_experiment_name": ale_experiment_name
-    })
+    context = {"experiment_links": experiment_links,
+               "reseqencing_report_url": reseqencing_report_url,
+               "ale_experiment_id": ale_experiment_id,
+               "ale_experiment_name": ale_experiment_name
+              }
 
     return HttpResponse(template.render(context))
 

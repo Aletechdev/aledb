@@ -1,20 +1,24 @@
 from common.constants import REQUEST_ALL
-from common.constants import ALE_EXPERIMENT_SELECTOR_QUERY
-from common.constants import ALE_NUMBER_SELECTOR_QUERY
 
 
-def get_ale_experiment_selector(ale_experiment_id_str):
-    # print(ale_experiment_id_str)
-    if ale_experiment_id_str is None or ale_experiment_id_str == REQUEST_ALL:
-        ale_experiment_selector = ""
+def get_ale_experiment_selector(ale_experiment_id, reseq_query):
+
+    if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
+
+        return reseq_query
+
     else:
-        ale_experiment_selector = ALE_EXPERIMENT_SELECTOR_QUERY % int(ale_experiment_id_str)
-    return ale_experiment_selector
+
+        return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
 
 
-def get_ale_number_selector(ale_id_str):
-    if ale_id_str is None or ale_id_str == REQUEST_ALL:
-        ale_no_selector = ""
+def get_ale_number_selector(ale_id, reseq_query):
+
+    if ale_id is None or ale_id == REQUEST_ALL:
+
+        return reseq_query
+
     else:
-        ale_no_selector = ALE_NUMBER_SELECTOR_QUERY % int(ale_id_str)
-    return ale_no_selector
+
+        return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_id=ale_id)
+

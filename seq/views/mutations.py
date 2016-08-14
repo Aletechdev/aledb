@@ -2,7 +2,7 @@ from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.utils.safestring import mark_safe
 
@@ -15,6 +15,8 @@ from seq.views import mutation_table_builder
 import filter.mutation_filter
 
 from common.db_util import get_all_observed_mutations
+
+from common.db_util import get_ordered_reseq_dict
 
 
 __author__ = 'pphaneuf'
@@ -35,7 +37,7 @@ def mutation_table(request):
     is_ref_strain_filtered = seq.views.common.is_ref_strain_filtered(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, is_ref_strain_filtered)
 
-    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
+    ordered_reseq_dict = get_ordered_reseq_dict(request, include_starting_strain=True)
 
     wt_id = None
     if is_ref_strain_filtered:
@@ -50,15 +52,15 @@ def mutation_table(request):
 
     template = loader.get_template("table_template.html")
 
-    context = Context({"ales": ale_queryset,
-                       "ale_experiment_name": ale_experiment_name,
-                       "ale_no": ale_number,
-                       "experiment_id": ale_experiment_id,
-                       "table_body": mark_safe(table_body),
-                       "title": "Mutation Table",
-                       "table_header": mark_safe(table_header),
-                       "template_header": "Mutations",
-                       "wt_filter": is_ref_strain_filtered})
+    context = {"ales": ale_queryset,
+               "ale_experiment_name": ale_experiment_name,
+               "ale_no": ale_number,
+               "experiment_id": ale_experiment_id,
+               "table_body": mark_safe(table_body),
+               "title": "Mutation Table",
+               "table_header": mark_safe(table_header),
+               "template_header": "Mutations",
+               "wt_filter": is_ref_strain_filtered}
 
     return HttpResponse(template.render(context))
 

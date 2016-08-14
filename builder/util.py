@@ -9,6 +9,8 @@ class AleName:
 
     Isolate = 2
 
+    TechnicalReplicate = 3
+
 
 def sanitize_path(path):
 
@@ -23,7 +25,10 @@ def parse_ale_name(ale_isolate_name, ale_name_parameter):
 
     split = ale_isolate_name.split("-")
 
-    ale_parameter = int(split[ale_name_parameter])
+    try:
+        ale_parameter = int(split[ale_name_parameter])
+    except:
+        ale_parameter = 1
 
     return ale_parameter
 
