@@ -1,14 +1,10 @@
-import collections
-
-import ale.common
-
-import ale.models
-
-import seq.models
-
 import re
-
+import collections
+import ale.common
+import ale.models
+import seq.models
 import common.db_util
+from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
 
 __author__ = 'Patrick Phaneuf'
@@ -18,16 +14,11 @@ SETTINGS_SEQUENCING_URL = "sequencing_url"
 
 DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
 
-REQUEST_ALE_ID = "ale_no"
-
 REQUEST_WT_FILTER = "wtflt"
-
-REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 
 MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'DUP', 'Unannotated']
 
 PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication', 'Unannotated']
-
 
 COLORS = ['#FF851B', '#2ECC40', '#0074D9', '#FFDC00', '#7FDBFF', '#B10DC9', '#F012BE', '#111111', '#85144b']
 
@@ -116,19 +107,16 @@ def get_ordered_reseq_dict(request, include_starting_strain=False):
     # slightly different from common.db_util.
     if include_starting_strain:
         starting_strain_raw_queryset = _get_starting_string_mutation_queryset(request)
-        for seq_experiment in starting_strain_raw_queryset:
-            seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
-    seq_experiments_raw_queryset = get_reseq_queryset(request)
+        for reseq in starting_strain_raw_queryset:
+            seq_experiment_ordered_dict[reseq.id] = reseq
 
-    for seq_experiment in seq_experiments_raw_queryset:
-        seq_experiment_ordered_dict[seq_experiment.id] = seq_experiment
-    return seq_experiment_ordered_dict
-
-
-def get_reseq_queryset(request):
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ale_id = request.GET.get(REQUEST_ALE_ID)
-    return common.db_util.get_reseq_queryset(ale_experiment_id, ale_id)
+    reseq_queryset = common.db_util.get_reseq_queryset(ale_experiment_id, ale_id)
+
+    for reseq in reseq_queryset:
+        seq_experiment_ordered_dict[reseq.id] = reseq
+    return seq_experiment_ordered_dict
 
 
 def _get_starting_string_mutation_queryset(request):

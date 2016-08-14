@@ -1,22 +1,31 @@
 # TODO: Had to implement this separate from common.util since can't currently run unit tests on modules that refer to models. Fix this
 
-from common.constants import RESEQ_QUERY
-from seq.models import ResequencingExperiment
-from common.util import get_ale_experiment_selector
-from common.util import get_ale_number_selector
 import collections
 import ale.common
 import seq.models
+from common.util import get_ale_experiment_selector, get_ale_number_selector
+from seq.models import ResequencingExperiment
+from ale.common import STARTING_STRAIN_ALE_ID
 
-__author__ = 'Patrick Phaneuf'
+__author__ = 'Patrick Phaneuf, Denny Gosting'
 
 
 def get_reseq_queryset(ale_experiment_id, ale_id=None):
-    ale_experiment_selector = get_ale_experiment_selector(ale_experiment_id)
-    ale_id_selector = get_ale_number_selector(ale_id)
-    sql_query = RESEQ_QUERY % (ale_experiment_selector, ale_id_selector)
-    reseq_raw_queryset = ResequencingExperiment.objects.raw(sql_query)
-    return reseq_raw_queryset
+    reseq_query = ResequencingExperiment.objects.all().order_by('tech_rep__isolate__flask__ale_id__ale_id',
+                                                                'tech_rep__isolate__flask__flask_number',
+                                                                'tech_rep__isolate__isolate_number')
+
+    reseq_query = get_ale_experiment_selector(ale_experiment_id, reseq_query)
+
+    reseq_query = get_ale_number_selector(ale_id, reseq_query)
+
+    return reseq_query
+
+
+def get_reseq_dict(ale_experiment_id):
+    reseq_queryset = get_reseq_queryset(ale_experiment_id, None)
+    reseq_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
+    return reseq_dict
 
 
 def get_ordered_reseq_dict(ale_experiment_id):
