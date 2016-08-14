@@ -16,7 +16,7 @@ import filter.mutation_filter
 
 from common.db_util import get_all_observed_mutations
 
-from common.db_util import get_ordered_reseq_dict
+import seq.views.common
 
 
 __author__ = 'pphaneuf'
@@ -37,7 +37,7 @@ def mutation_table(request):
     is_ref_strain_filtered = seq.views.common.is_ref_strain_filtered(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, is_ref_strain_filtered)
 
-    ordered_reseq_dict = get_ordered_reseq_dict(request, include_starting_strain=True)
+    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request, include_starting_strain=True)
 
     wt_id = None
     if is_ref_strain_filtered:

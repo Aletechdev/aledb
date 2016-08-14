@@ -1,19 +1,12 @@
 from django.http import HttpResponse
-
 from django.contrib.auth.decorators import login_required
-
 from django.template import loader
-
 from django.utils.safestring import mark_safe
-
 import seq.views.common
-
 from collections import OrderedDict
-
 from seq.views import mutation_table_builder
-
 from filter import mutation_filter
-
+from common.constants import REQUEST_ALE_EXPERIMENT_ID
 from common.db_util import get_ordered_reseq_dict
 
 
@@ -32,8 +25,8 @@ def common_mutations(request):
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
  
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
-
-    ordered_reseq_dict = get_ordered_reseq_dict(request)
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
     wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)

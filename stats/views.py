@@ -62,7 +62,6 @@ def _get_ale_flask_isolate_count_list(reseq_queryset):
 
 @login_required
 def stats(request):
-    """return a list of resequencing experiments"""
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ale_id = request.GET.get(REQUEST_ALE_ID)
     reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_id)
