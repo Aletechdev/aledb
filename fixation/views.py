@@ -1,29 +1,19 @@
 # TODO: All resources being pulled from seq app could possibly be stored in a common dir.
 
 from django.http import HttpResponse
-
 from django.contrib.auth.decorators import login_required
-
 from django.template import loader
-
 from django.utils.safestring import mark_safe
-
 #TODO: seq.views.common.get_ordered_reseq_dict could likely be refactored into common.db_util.get_reseq_dict
 import seq.views.common
-
 from seq.views import mutation_table_builder
-
 import seq.models
-
 from filter import mutation_filter
-
 from fixation.models import FixatedMutation
-
-from common.constants import REQUEST_MUTATION_ID
-
 import metadata.views
-
+from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID
 from common.db_util import get_ordered_reseq_dict
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -43,7 +33,8 @@ def fixating_mutations(request):
     # False for pages such as this, where we don't want to see the wild type, though we currently must include it
     # so as to filter out the mutations when choosing specific ALEs within the experiment. This means that there is
     # a disconnect between filtering methodologies that needs to be reconciled.
-    reseq_ordered_dict = get_ordered_reseq_dict(request, include_starting_strain=True)
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    reseq_ordered_dict = get_ordered_reseq_dict(ale_experiment_id)
     reseq_ordered_dict = seq.views.common.filter_out_wt_reseq(reseq_ordered_dict)
     reseq_ordered_dict = mutation_table_builder.filter_checked_flasks(request, reseq_ordered_dict)
 

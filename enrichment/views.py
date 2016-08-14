@@ -21,6 +21,8 @@ from enrichment.models import EnrichmentMutation
 
 from common.constants import REQUEST_MUTATION_ID
 
+from common.constants import REQUEST_ALE_EXPERIMENT_ID
+
 __author__ = 'Patrick Phaneuf'
 
 
@@ -35,7 +37,8 @@ def enrichment_mutations(request):
 
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
-    ordered_reseq_dict = get_ordered_reseq_dict(request)
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 

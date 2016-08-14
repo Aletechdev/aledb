@@ -10,6 +10,8 @@ from seq.views import common
 
 from common.db_util import get_reseq_queryset
 
+from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -25,7 +27,9 @@ else:
 
 @login_required
 def metadata(request):
-    reseq_queryset = get_reseq_queryset(request)
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    ale_id = request.GET.get(REQUEST_ALE_ID)
+    reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_id)
 
     # Would rather want to use something like a dictionary since an experiment is
     # unique, though an experiment is currently a structure and an integral type
