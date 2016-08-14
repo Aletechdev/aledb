@@ -19,6 +19,8 @@ from seq.views import mutation_table_builder
 
 import metadata.views
 
+import filter.mutation_filter
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -114,9 +116,12 @@ def _get_table_body(reseq_dict, request):
 
     observed_mutations_queryset = _get_observed_key_mutations(reseq_dict, key_mutation_queryset)
 
+    filter_settings = filter.mutation_filter.get_filter_settings(ale_experiment_id)
+
     return mutation_table_builder.get_table_body(reseq_dict=reseq_dict,
                                                  observed_mutations_queryset=observed_mutations_queryset,
-                                                 table_type=mutation_table_builder.TableType.SHARED_HOT_GENE_MUTATIONS)
+                                                 table_type=mutation_table_builder.TableType.SHARED_HOT_GENE_MUTATIONS,
+                                                 filter_settings=filter_settings)
 
 
 # TODO: refactor
