@@ -69,18 +69,18 @@ def shared_enrichment_mutations(request):
     enrichment_mutation_list = [enrichment_mutation.mutation for enrichment_mutation in enrichment_mutation_queryset]
 
     table_header = mutation_table_builder.HTML_MUTATION_TABLE_HEADER
-    enrichment_gene_mutation = enrichment_mutation_list[0]  # Should only be 1 enrichment mutation
+    enrichment_mutation = enrichment_mutation_list[0]  # Should only be 1 enrichment mutation
     table_body = "<tr>"
     table_body += mutation_table_builder.HTML_MUTATION_TABLE_ROW
-    table_body += "<td>%s</td>" % enrichment_gene_mutation.position
-    table_body += "<td>%s</td>" % enrichment_gene_mutation.mutation_type
-    table_body += "<td>%s</td>" % enrichment_gene_mutation.sequence_change
-    table_body += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (enrichment_gene_mutation.gene, enrichment_gene_mutation.gene)
-    table_body += "<td>%s</td>" % ("" if enrichment_gene_mutation.function is None else hot_gene_mutation.function)
-    table_body += "<td>%s</td>" % ("" if enrichment_gene_mutation.product is None else hot_gene_mutation.product)
-    table_body += "<td>%s</td>" % ("" if enrichment_gene_mutation.go_process is None else hot_gene_mutation.go_process)
-    table_body += "<td>%s</td>" % ("" if enrichment_gene_mutation.go_component is None else hot_gene_mutation.go_component)
-    table_body += "<td>%s</td>" % enrichment_gene_mutation.protein_change
+    table_body += "<td>%s</td>" % enrichment_mutation.position
+    table_body += "<td>%s</td>" % enrichment_mutation.mutation_type
+    table_body += "<td>%s</td>" % enrichment_mutation.sequence_change
+    table_body += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (enrichment_mutation.gene, enrichment_mutation.gene)
+    table_body += "<td>%s</td>" % ("" if enrichment_mutation.function is None else enrichment_mutation.function)
+    table_body += "<td>%s</td>" % ("" if enrichment_mutation.product is None else enrichment_mutation.product)
+    table_body += "<td>%s</td>" % ("" if enrichment_mutation.go_process is None else enrichment_mutation.go_process)
+    table_body += "<td>%s</td>" % ("" if enrichment_mutation.go_component is None else enrichment_mutation.go_component)
+    table_body += "<td>%s</td>" % enrichment_mutation.protein_change
     table_body += "</tr>"
 
     # Get the reseq's that are part of the ALE experiments from the enrichment_mutation_queryset

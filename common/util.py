@@ -1,4 +1,4 @@
-from seq.views.common import REQUEST_ALL
+from common.constants import REQUEST_ALL
 
 
 def get_ale_experiment_selector(ale_experiment_id, reseq_query):

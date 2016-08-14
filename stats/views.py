@@ -18,7 +18,12 @@ from filter import mutation_filter
 
 import json
 
-from common.db_util import get_reseq_queryset, get_ordered_reseq_dict
+from common.db_util import get_reseq_queryset,\
+    get_ordered_reseq_dict,\
+    get_mutation_queryset_from_observed_mutation_queryset,\
+    get_all_observed_mutations
+
+from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
 __author__ = 'pphaneuf'
 
@@ -58,8 +63,9 @@ def _get_ale_flask_isolate_count_list(reseq_queryset):
 @login_required
 def stats(request):
     """return a list of resequencing experiments"""
-
-    reseq_queryset = get_reseq_queryset(request)
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    ale_id = request.GET.get(REQUEST_ALE_ID)
+    reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_id)
 
     ale_flask_isolate_count_list = _get_ale_flask_isolate_count_list(reseq_queryset)
 
@@ -73,7 +79,7 @@ def stats(request):
 
     observed_mutations_query_set = _get_observed_mutation_queryset(request)
 
-    mutation_query_set = common.get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_query_set)
+    mutation_query_set = get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_query_set)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
     observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_query_set)
@@ -215,17 +221,17 @@ def _get_reseq_experiment_info_list(reseq_experiments):
 # TODO: should be transferred to common and have a parameter to filter wt mutations.
 def _get_observed_mutation_queryset(request):
 
-    ordered_reseq_dict = get_ordered_reseq_dict(request, include_starting_strain=True)
+    ordered_reseq_dict = get_ordered_reseq_dict(request)
 
     wt_id = common.get_wt_reseq_id(ordered_reseq_dict)
 
     ordered_reseq_dict = common.filter_out_wt_reseq(ordered_reseq_dict)
 
-    filter_mutation_list = common.get_all_observed_mutations([wt_id])
+    filter_mutation_list = get_all_observed_mutations([wt_id])
 
     filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
 
-    observed_mutation_query_set = common.get_all_observed_mutations(list(ordered_reseq_dict.keys()))
+    observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
 
     observed_mutation_query_set = _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set)
 
