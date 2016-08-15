@@ -7,7 +7,6 @@ import fixation.models
 import fixation.util
 import enrichment.util
 import enrichment.models
-import seq.alchemy_orm
 import seq.models
 from builder.gdparse.gdparse import gdparse
 
@@ -112,8 +111,7 @@ def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_a
 
     experiment_orm = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                     instrument=instrument_orm,
-                                                                    person=ale_exp_user,
-                                                                    simulation=DEFAULT_IS_SIMULATION)
+                                                                    person=ale_exp_user)
 
     media_orm = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
                                                        substrate=DEFAULT_MEDIA_SUBSTRATE,
@@ -172,8 +170,7 @@ def insert_flasks(sample_breseq_abs_paths_list,
 
     experiment_orm = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                     instrument=instrument_orm,
-                                                                    person=ale_exp_user,
-                                                                    simulation=DEFAULT_IS_SIMULATION)
+                                                                    person=ale_exp_user)
 
     media_orm = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
                                                        substrate=DEFAULT_MEDIA_SUBSTRATE,
@@ -228,8 +225,7 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     experiment_orm, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                              instrument=instrument_orm,
-                                                                             person=ale_exp_user,
-                                                                             simulation=DEFAULT_IS_SIMULATION)
+                                                                             person=ale_exp_user)
 
     media_orm, created = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
                                                                 substrate=DEFAULT_MEDIA_SUBSTRATE,
@@ -478,7 +474,7 @@ def create_functional_annotations(genbank_path, ale_experiment_id):
 
     gene_dict = _parse_genbank(genbank_path)
 
-    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
+    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
 
     for observed_mutation in observed_mutations:
 
