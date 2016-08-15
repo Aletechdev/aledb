@@ -25,7 +25,7 @@ def parse_and_upload_meta_data(meta_data_path, ale_experiment_primary_key):
 
     for f in os.listdir(meta_data_path):
 
-        if f.endswith(".csv"):
+        if f.endswith(".csv") or f.endswith(".CSV"):
 
             with open(os.path.join(meta_data_path, f), 'rt') as csvfile:
 
