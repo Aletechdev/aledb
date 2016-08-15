@@ -16,6 +16,8 @@ WILD_TYPE_FLASK_NUMBER = 0
 
 WILD_TYPE_ISOLATE_NUMBER = 1
 
+WILD_TYPE_TECH_REP_NUMBER = 1
+
 WILD_TYPE_USER_NAME = "BOP27"
 
 BRESEQ_OUTPUT_REPORT_DIR = "output/"
@@ -346,6 +348,7 @@ def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
                                  WILD_TYPE_ALE_NUMBER,
                                  WILD_TYPE_FLASK_NUMBER,
                                  WILD_TYPE_ISOLATE_NUMBER,
+                                 WILD_TYPE_TECH_REP_NUMBER,
                                  experiment,
                                  media,
                                  freezer_box,
@@ -486,13 +489,18 @@ def create_functional_annotations(genbank_path, ale_experiment_id):
 
         for gene in mutation_genes:
 
-            gene_info['function'] += "(" + gene_dict[gene]['function'] + ")"
+            try:
+                gene_info['function'] += "(" + gene_dict[gene]['function'] + ")"
 
-            gene_info['product'] += "(" + gene_dict[gene]['product'] + ")"
+                gene_info['product'] += "(" + gene_dict[gene]['product'] + ")"
 
-            gene_info['go_component'] += "(" + gene_dict[gene]['go_component'] + ")"
+                gene_info['go_component'] += "(" + gene_dict[gene]['go_component'] + ")"
 
-            gene_info['go_process'] += "(" + gene_dict[gene]['go_process'] + ")"
+                gene_info['go_process'] += "(" + gene_dict[gene]['go_process'] + ")"
+
+            except Exception as e:
+                print(e, " Does not exits in ", os.path.basename(genbank_path))
+                pass
 
         mutation.function = gene_info['function']
 
