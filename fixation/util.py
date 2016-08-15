@@ -40,7 +40,7 @@ def get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict):
         for id_reseq_tuple in id_reseq_list:
             reseq_id = id_reseq_tuple[0]
             flask_number = id_reseq_tuple[1].flask_number
-            isolate_number = id_reseq_tuple[1].isolate.isolate_number
+            isolate_number = id_reseq_tuple[1].tech_rep.isolate.isolate_number
 
             observed_mutation_queryset = get_all_observed_mutations([reseq_id])
             mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(observed_mutation_queryset)
