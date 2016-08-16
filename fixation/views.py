@@ -38,7 +38,8 @@ def fixating_mutations(request):
     reseq_ordered_dict = seq.views.common.filter_out_wt_reseq(reseq_ordered_dict)
     reseq_ordered_dict = mutation_table_builder.filter_checked_flasks(request, reseq_ordered_dict)
 
-    table_header = mutation_table_builder.get_table_header(reseq_ordered_dict)
+    table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
+                                                           mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
@@ -51,7 +52,7 @@ def fixating_mutations(request):
                                                        table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
     # TODO: currently pulling this from the seq app. Need to put this template in a centralized location.
-    template = loader.get_template("table_template.html")
+    template = loader.get_template("fixation/fixation_mutations.html")
 
     context = {"ales": ale_queryset,
                "ale_experiment_name": ale_experiment_name,
@@ -101,10 +102,10 @@ def shared_fixating_mutations(request):
     reseq_info_list = metadata.views.get_reseq_info_list(fixating_mutation_reseq_list)
 
     template = loader.get_template("fixation/shared_fixating_mutations.html")
-    context = Context({"title": "Shared Fixating Mutations",
+    context = {"title": "Shared Fixating Mutations",
                        "table_header": mark_safe(table_header),
                        "table_body": mark_safe(table_body),
-                       "reseq_info_list": reseq_info_list})
+                       "reseq_info_list": reseq_info_list}
 
     return HttpResponse(template.render(context))
 
