@@ -9,7 +9,7 @@ def get_ale_experiment_selector(ale_experiment_id, reseq_query):
 
     else:
 
-        return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
+        return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=ale_experiment_id)
 
 
 def get_ale_number_selector(ale_id, reseq_query):

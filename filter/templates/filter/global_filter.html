@@ -94,18 +94,10 @@
 {% endblock %}
 {% block filter %}class="active"{% endblock %}
 {% block header %}
-    <b> {{ ale_experiment_name }} </b> / Mutation Filtering Options
+    <b> Global </b> / Mutation Filtering Options
 {% endblock %}
 {% block content %}
 <form action="" method="POST">
-
-    <h4>Frequency Filtering Thresholds</h4>
-    Minimum Cutoff: {{ form.min_cutoff }}
-    <br>
-    Maximum Cutoff: {{ form.max_cutoff }}
-
-    <br>
-    <br>
     <h4>Ignored Genes</h4>
     <p>Enter gene(s) separated by ',' ex: tpoB,folD</p>
     <p>{{form.ignored_genes}}</p>

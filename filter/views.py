@@ -8,7 +8,7 @@ from seq.views import common
 
 from filter.forms.filter import FilterForm
 
-from filter.models import Filter
+from filter.models import AleExperimentFilter
 
 import simplejson as json
 
@@ -17,8 +17,9 @@ from filter.common import DEFAULT_MUTATION_FREQ_MAX
 
 from django.utils.safestring import mark_safe
 
-from seq.views.mutation_table_builder import HTML_MUTATION_TABLE_HEADER, HTML_MUTATION_TABLE_ROW
+from seq.views.mutation_table_builder import HTML_MUTATION_TABLE_ROW
 
+from  filter.models import GlobalFilter
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -39,8 +40,8 @@ def mutation_filter(request):
                                  'ignored_genes': "",
                                  'ignored_mutations': ""}
 
-    filter_form_model, created = Filter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
-                                                              defaults=default_filter_form_model)
+    filter_form_model, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
+                                                                           defaults=default_filter_form_model)
 
     if request.method == 'POST':
         filter_form = _handle_POST(request, filter_form_model)
@@ -163,3 +164,25 @@ def _save_ignored_mutations(request):
         ignored_mutation['protein'] = _get_protein(ignored_mutation)
 
     return str(ignored_mutations_json)
+
+
+def global_filter(request):
+
+    template = loader.get_template('filter/global_filter.html')
+
+    filter_form_model, created = GlobalFilter.objects.get_or_create(id=1)
+
+    if request.method == 'POST':
+        filter_form = _handle_POST(request, filter_form_model)
+    else:
+        filter_form = _handle_GET(request, filter_form_model)
+
+    ignored_mutations, table_body = _get_ignored_mutations(filter_form)
+
+    context = {"form": filter_form,
+               "table_body": mark_safe(table_body),
+               "table_header": mark_safe(TABLE_HEADER),
+               "ignored_mutations": ignored_mutations
+               }
+
+    return HttpResponse(template.render(context))

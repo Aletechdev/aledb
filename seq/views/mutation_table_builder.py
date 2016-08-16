@@ -54,7 +54,6 @@ else:
 
 def get_table_header(reseq_dict, table_type=None):
 
-    table_header = ""
     if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.FIXATING_MUTATIONS:
         table_header = HTML_SHARED_MUTATION_TABLE_HEADER
     else:

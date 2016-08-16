@@ -1,6 +1,6 @@
 from django import forms
 
-from filter.models import Filter
+from filter.models import AleExperimentFilter
 
 from filter.common import DEFAULT_MUTATION_FREQ_MIN
 from filter.common import DEFAULT_MUTATION_FREQ_MAX
@@ -19,5 +19,5 @@ class FilterForm(forms.ModelForm):
         return True
 
     class Meta:
-        model = Filter
+        model = AleExperimentFilter
         fields = ["min_cutoff", "max_cutoff", "ignored_genes", "ignored_mutations"]
