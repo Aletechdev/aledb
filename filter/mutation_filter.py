@@ -1,8 +1,10 @@
-from filter.models import Filter
+from filter.models import AleExperimentFilter
 
 import json
 
 from django.utils.html import strip_tags
+
+from  filter.models import GlobalFilter
 
 __author__ = 'Patrick Phaneuf'
 
@@ -46,7 +48,7 @@ def is_excluded_on_mutation(mutation, filter_settings):
                             except:
                                 continue
                     else:
-                        break
+                        continue
                 else:
                     return True
 
@@ -97,11 +99,43 @@ def is_excluded_on_freq(observed_mutation, filter_settings):
 
 
 def get_filter_settings(ale_experiment_id):
-    filter_queryset = Filter.objects.filter(ale_experiment_id=ale_experiment_id)
+    filter_queryset = AleExperimentFilter.objects.filter(ale_experiment_id=ale_experiment_id)
 
     if len(filter_queryset) == 0:
-        filter_settings = Filter()
+        filter_settings = AleExperimentFilter()
     else:
         filter_settings = filter_queryset[0]  # Since there's only one filter setting per experiment.
 
+    filter_settings.ignored_mutations = add_global_ignored_mutations(filter_settings.ignored_mutations)
+
+    filter_settings.ignored_genes = add_global_ignored_genes(filter_settings.ignored_genes)
+
     return filter_settings
+
+
+def add_global_ignored_mutations(ignored_mutations):
+
+    global_filter_settings = GlobalFilter.objects.get_or_create(id=1)[0]
+
+    ignored_mutations = ignored_mutations.replace("]", "")
+
+    global_ignored_mutations = global_filter_settings.ignored_mutations.replace("[", "")
+
+    if ignored_mutations == "[":
+        ignored_mutations += global_ignored_mutations
+    else:
+        ignored_mutations += ", " + global_ignored_mutations
+
+    return ignored_mutations
+
+
+def add_global_ignored_genes(ignored_genes):
+
+    global_filter_settings = GlobalFilter.objects.get_or_create(id=1)[0]
+
+    if ignored_genes == "":
+        ignored_genes = global_filter_settings.ignored_genes
+    else:
+        ignored_genes += ", " + global_filter_settings.ignored_genes
+
+    return ignored_genes

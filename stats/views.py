@@ -76,7 +76,7 @@ def stats(request):
 
     experiments_info_list = _get_reseq_experiment_info_list(reseq_queryset)
 
-    observed_mutations_query_set = _get_observed_mutation_queryset(request)
+    observed_mutations_query_set = _get_observed_mutation_queryset(request, ale_experiment_id)
 
     mutation_query_set = get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_query_set)
 
@@ -218,9 +218,9 @@ def _get_reseq_experiment_info_list(reseq_experiments):
 
 
 # TODO: should be transferred to common and have a parameter to filter wt mutations.
-def _get_observed_mutation_queryset(request):
+def _get_observed_mutation_queryset(request, ale_experiment_id):
 
-    ordered_reseq_dict = get_ordered_reseq_dict(request)
+    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
 
     wt_id = common.get_wt_reseq_id(ordered_reseq_dict)
 
