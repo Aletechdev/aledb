@@ -158,6 +158,7 @@
                             value="{{ ale.ale_id }}">{{ ale.ale_id }}</option>
                 {% endfor %}
             </select>
+            <label class="ui"><input type="checkbox" name="asndflt" {% if is_ascending_freq_filter %} checked{% endif %} /> Ascending Frequency Filter</label>
         </p>
         <p>
             <input type="submit" value="Apply" class="ui"/>
