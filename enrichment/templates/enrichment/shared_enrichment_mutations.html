@@ -93,31 +93,31 @@
             var row = $(this).closest("tr").get(0);
             $('.dataTable').dataTable().fnDeleteRow(row);
         };
-        var filterFlask = function (filter_type) {
+        var filterSample = function (filter_type) {
             var url = location.href.split("&remove=")[0].split("&show=")[0];
-            checked_flasks = [];
+            checked_samples = [];
             $("tr td").children(".cb").each(function () {
                 if (this.checked) {
-                    checked_flasks.push(this.name);
+                    checked_samples.push(this.name);
                 }
             });
-            var removed_flask_ids, kept_flask_ids;
+            var removed_sample_ids, kept_sample_ids;
             location.href.split("&").forEach(function (s) {
                 if (s.indexOf("remove") >= 0) {
-                    removed_flask_ids = s.split("=")[1];
+                    removed_sample_ids = s.split("=")[1];
                 }
                 else if (s.indexOf("show") >= 0) {
-                    kept_flask_ids = s.split("=")[1];
+                    kept_sample_ids = s.split("=")[1];
                 }
             });
             if (filter_type == "remove") {
-                query_string = typeof kept_flask_ids != "undefined" ? "&show=" + kept_flask_ids : "";
-                query_string += typeof removed_flask_ids != "undefined" ? "&remove=" + removed_flask_ids.replace("}", "") : "&remove={";
+                query_string = typeof kept_sample_ids != "undefined" ? "&show=" + kept_sample_ids : "";
+                query_string += typeof removed_sample_ids != "undefined" ? "&remove=" + removed_sample_ids.replace("}", "") : "&remove={";
             }
             else if (filter_type == "show") {
                 query_string = "&show={";
             }
-            checked_flasks.forEach(function (id) {
+            checked_samples.forEach(function (id) {
                 query_string += id + ",";
             });
             query_string += "}";
