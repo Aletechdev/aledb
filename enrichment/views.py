@@ -53,9 +53,9 @@ def enrichment_mutations(request):
                        "ale_no": ale_number,
                        "experiment_id": ale_experiment_id,
                        "table_body": mark_safe(table_body),
-                       "title": "Frequently Mutated Genes",
+                       "title": "Enrichment Mutations",
                        "table_header": mark_safe(table_header),
-                       "template_header": "Frequently Mutated Genes"}
+                       "template_header": "Enrichment Mutations"}
 
     return HttpResponse(template.render(context))
 
