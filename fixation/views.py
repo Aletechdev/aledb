@@ -49,9 +49,9 @@ def fixating_mutations(request):
 
     table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
                                                        observed_mutations_queryset=observed_mutation_queryset,
-                                                       table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS)
+                                                       table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS,
+                                                       filter_settings=filter_settings)
 
-    # TODO: currently pulling this from the seq app. Need to put this template in a centralized location.
     template = loader.get_template("fixation/fixation_mutations.html")
 
     context = {"ales": ale_queryset,
@@ -119,6 +119,8 @@ def _is_ascending_freq_filter(request):
 def _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id, ordered_reseq_dict, is_only_ascending=False):
 
     fixating_mutation_queryset = FixatedMutation.objects.filter(ale_experiment_id=ale_experiment_id)
+
+    #TODO: filter out mutations from samples that were removed from table.
 
     fixating_observed_mutation_queryset = _get_fixating_observed_mutation_queryset(fixating_mutation_queryset,
                                                                                    ordered_reseq_dict.keys())

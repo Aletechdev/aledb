@@ -1,27 +1,17 @@
 from django.http import HttpResponse
-
 from django.contrib.auth.decorators import login_required
-
 from django.template import loader
-
 from django.utils.safestring import mark_safe
-
 import seq.models
-
 import seq.views.common
-
 from common.db_util import get_ordered_reseq_dict
-
 # TODO: The mutation table build should use the factory pattern.
 from seq.views import mutation_table_builder
-
 import metadata.views
-
 from enrichment.models import EnrichmentMutation
-
 from common.constants import REQUEST_MUTATION_ID
-
 from common.constants import REQUEST_ALE_EXPERIMENT_ID
+from filter import mutation_filter
 
 __author__ = 'Patrick Phaneuf'
 
@@ -116,13 +106,16 @@ def _get_table_body(reseq_dict, request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
+    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
+
     enrichment_mutation_queryset = EnrichmentMutation.objects.filter(ale_experiment_id=ale_experiment_id)
 
     observed_mutations_queryset = _get_observed_enrichment_mutations(reseq_dict, enrichment_mutation_queryset)
 
     return mutation_table_builder.get_table_body(reseq_dict=reseq_dict,
                                                  observed_mutations_queryset=observed_mutations_queryset,
-                                                 table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
+                                                 table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS,
+                                                 filter_settings=filter_settings)
 
 
 # TODO: refactor
