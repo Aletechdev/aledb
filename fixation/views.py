@@ -80,6 +80,10 @@ def shared_fixating_mutations(request):
     table_body += "<td>%s</td>" % fixating_mutation.sequence_change
     table_body += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (
     fixating_mutation.gene, fixating_mutation.gene)
+    table_body += "<td>%s</td>" % ("" if fixating_mutation.function is None else fixating_mutation.function)
+    table_body += "<td>%s</td>" % ("" if fixating_mutation.product is None else fixating_mutation.product)
+    table_body += "<td>%s</td>" % ("" if fixating_mutation.go_process is None else fixating_mutation.go_process)
+    table_body += "<td>%s</td>" % ("" if fixating_mutation.go_component is None else fixating_mutation.go_component)
     table_body += "<td>%s</td>" % fixating_mutation.protein_change
     table_body += "</tr>"
 
