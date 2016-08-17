@@ -17,8 +17,5 @@ class AleExperimentFilter(models.Model):
 
 class GlobalFilter(models.Model):
 
-    # TODO: Get rid of min_cutoff and max_cutoff--> are currently here so we can use prebuilt functions
-    min_cutoff = models.PositiveSmallIntegerField(default=DEFAULT_MUTATION_FREQ_MIN)
-    max_cutoff = models.PositiveSmallIntegerField(default=DEFAULT_MUTATION_FREQ_MAX)
     ignored_genes = models.CharField(max_length=500, default='', blank=True)
     ignored_mutations = models.TextField(default='', blank=True)
