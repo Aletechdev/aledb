@@ -117,14 +117,17 @@ def add_global_ignored_mutations(ignored_mutations):
 
     global_filter_settings = GlobalFilter.objects.get_or_create(id=1)[0]
 
+    if global_filter_settings.ignored_mutations == "[]":
+        return ignored_mutations
+
     ignored_mutations = ignored_mutations.replace("]", "")
 
     global_ignored_mutations = global_filter_settings.ignored_mutations.replace("[", "")
 
-    if ignored_mutations == "[":
-        ignored_mutations += global_ignored_mutations
-    else:
-        ignored_mutations += ", " + global_ignored_mutations
+    if ignored_mutations != "[":
+        ignored_mutations += ", "
+
+    ignored_mutations += global_ignored_mutations
 
     return ignored_mutations
 
@@ -132,6 +135,9 @@ def add_global_ignored_mutations(ignored_mutations):
 def add_global_ignored_genes(ignored_genes):
 
     global_filter_settings = GlobalFilter.objects.get_or_create(id=1)[0]
+
+    if global_filter_settings.ignored_genes == "":
+        return ignored_genes
 
     if ignored_genes == "":
         ignored_genes = global_filter_settings.ignored_genes
