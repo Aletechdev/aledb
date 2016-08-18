@@ -68,7 +68,7 @@ def shared_enrichment_mutations(request):
     table_body += "<td>%s</td>" % enrichment_mutation.position
     table_body += "<td>%s</td>" % enrichment_mutation.mutation_type
     table_body += "<td>%s</td>" % enrichment_mutation.sequence_change
-    table_body += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (enrichment_mutation.gene, enrichment_mutation.gene)
+    table_body += "<td><a href=/gene?g=%s>%s</a></td>" % (enrichment_mutation.gene, enrichment_mutation.gene)
     table_body += "<td>%s</td>" % ("" if enrichment_mutation.function is None else enrichment_mutation.function)
     table_body += "<td>%s</td>" % ("" if enrichment_mutation.product is None else enrichment_mutation.product)
     table_body += "<td>%s</td>" % ("" if enrichment_mutation.go_process is None else enrichment_mutation.go_process)

@@ -124,14 +124,14 @@ def get_table_body(reseq_dict,
             table_row += HTML_MUTATION_TABLE_ROW
 
             if table_type == TableType.ENRICHMENT_MUTATIONS:
-                table_row += "<td><a href=/ale_analytics/enrichment/shared?mutation_id=%s>shared</a></td>" % mutation.id
+                table_row += "<td><a href=/enrichment/shared?mutation_id=%s>shared</a></td>" % mutation.id
             elif table_type == TableType.FIXATING_MUTATIONS:
-                table_row += "<td><a href=/ale_analytics/fixation/shared?mutation_id=%s>shared</a></td>" % mutation.id
+                table_row += "<td><a href=/fixation/shared?mutation_id=%s>shared</a></td>" % mutation.id
 
             table_row += "<td>%s</td>" % mutation.position
             table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += "<td>%s</td>" % mutation.sequence_change
-            table_row += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
+            table_row += "<td><a href=/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
             table_row += "<td>%s</td>" % ("" if mutation.function is None else mutation.function)
             table_row += "<td>%s</td>" % ("" if mutation.product is None else mutation.product)
             table_row += "<td>%s</td>" % ("" if mutation.go_process is None else mutation.go_process)
