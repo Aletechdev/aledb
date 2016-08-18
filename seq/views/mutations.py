@@ -18,6 +18,8 @@ from common.db_util import get_all_observed_mutations
 
 import seq.views.common
 
+import json
+
 
 __author__ = 'pphaneuf'
 
@@ -50,6 +52,10 @@ def mutation_table(request):
 
     table_body = _get_table_body(ordered_reseq_dict, request, is_ref_strain_filtered, wt_id)
 
+    print(request.GET.get('hidden_columns'))
+
+    hidden_columns = "5678"
+
     template = loader.get_template("table_template.html")
 
     context = {"ales": ale_queryset,
@@ -60,7 +66,8 @@ def mutation_table(request):
                "title": "Mutation Table",
                "table_header": mark_safe(table_header),
                "template_header": "Mutations",
-               "wt_filter": is_ref_strain_filtered}
+               "wt_filter": is_ref_strain_filtered,
+               "hidden_columns": hidden_columns}
 
     return HttpResponse(template.render(context))
 

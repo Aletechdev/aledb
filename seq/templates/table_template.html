@@ -1,15 +1,9 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-        "http://www.w3.org/TR/html4/strict.dtd">
-
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>{{ title }}</title>
+{% extends 'dashboard_base.html' %}
+{% block title %}<title>{{ title }}</title>{% endblock %}
+{% block scripts_and_style %}
     <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
     <style type="text/css" title="currentStyle">
         @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
@@ -38,12 +32,6 @@
 
         #empty {
             background-color: rgba(255, 0, 0, 0.1)
-        }
-
-        body {
-            padding-right: 50px;
-            padding-bottom: 25px;
-            padding-left: 50px;
         }
     </style>
 
@@ -83,6 +71,10 @@
                     $(this).offset({left: ui_offset[i++] + scrollLeft});
                 });
             });
+            var hidden_cols = document.getElementById('hidden_columns').value;
+            for (var i = 0, len = hidden_cols.length; i < len; i++) {
+                fnShowHide(parseInt(hidden_cols[i]))
+            }
         });
     </script>
     <script type="text/javascript">
@@ -90,7 +82,17 @@
             var oTable = $('#data').dataTable();
 
             var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
-            oTable.fnSetColumnVis( iCol, bVis ? false : true );
+            if(bVis == true) {
+                oTable.fnSetColumnVis( iCol, false );
+                if(!document.getElementById('hidden_columns').value.includes(iCol)) {
+                    document.getElementById('hidden_columns').value = document.getElementById('hidden_columns').value + iCol;
+                }
+            } else {
+                oTable.fnSetColumnVis( iCol, true );
+                if(document.getElementById('hidden_columns').value.includes(iCol)) {
+                    document.getElementById('hidden_columns').value = document.getElementById('hidden_columns').value.replace(iCol, "");
+                }
+            }
         }
     </script>
     <script>
@@ -138,21 +140,10 @@
             }
         }
     </script>
-</head>
-<body>
-<div class="page-header">
-    <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-    <h1><a href="/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a> /
-        <b>{{ ale_experiment_name }}</b> {{ template_header }}</h1>
-</div>
-<ul class="nav nav-pills">
-    <li role="presentation" class="active"><a href="/ale_analytics">ALE Experiments</a></li>
-    <li role="presentation"><a href="/ale_analytics/dashboard">Dashboard</a></li>
-    <li role="presentation"><a href="/ale_analytics/search">Search</a></li>
-    <li role="presentation"><a href="/ale_analytics/filter/global_filter">Filter</a></li>
-</ul>
-<br><br>
-
+{% endblock %}
+{% block header %} / <b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
+{% block ale %}class="active"{% endblock %}
+{% block content %}
 <!-- ALE selection drop-down -->
 {% if experiment_id %}
     <form action="" method="get">
@@ -208,26 +199,6 @@
         {{ table_body }}
         </tbody>
     </table>
+    <input id="hidden_columns" name="hidden_columns" type="hidden" value="{{ hidden_columns }}">
 </form>
-</body>
-</html>
-
-<!--
-<div class="dropdown">
-            <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                Show / Hide Columns
-                <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-                <li><a class="ui" onclick="fnShowHide(1)">Position</a></li>
-                <li><a class="ui" onclick="fnShowHide(2)">Mutation Type</a></li>
-                <li><a class="ui" onclick="fnShowHide(3)">Sequence Change</a></li>
-                <li><a class="ui" onclick="fnShowHide(4)">Gene</a></li>
-                <li><a class="ui" onclick="fnShowHide(5)">Function</a></li>
-                <li><a class="ui" onclick="fnShowHide(6)">Product</a></li>
-                <li><a class="ui" onclick="fnShowHide(7)">GO Process</a></li>
-                <li><a class="ui" onclick="fnShowHide(8)">GO Component</a></li>
-                <li><a class="ui" onclick="fnShowHide(9)">Protein Change</a></li>
-            </ul>
-        </div>
--->
+{% endblock %}

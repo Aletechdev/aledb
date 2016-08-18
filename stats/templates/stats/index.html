@@ -1,12 +1,6 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-        "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Resequencing Performance</title>
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+{% extends 'dashboard_base.html' %}
+{% block title %}<title>Resequencing Performance</title>{% endblock %}
+{% block scripts_and_style %}
 
     <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
@@ -22,32 +16,11 @@
 
         }));
     </script>
-</head>
 
-<style>
-
-    body {
-        padding-right: 50px;
-        padding-bottom: 25px;
-        padding-left: 50px;
-    }
-
-</style>
-
-<body>
-
-<div class="page-header">
-    <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-    <h1><a href="/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a>
-        / <b>{{ ale_experiment_name }}</b> Resequencing Performance</h1>
-</div>
-<ul class="nav nav-pills">
-    <li role="presentation" class="active"><a href="/ale_analytics">ALE Experiments</a></li>
-    <li role="presentation"><a href="/ale_analytics/dashboard">Dashboard</a></li>
-    <li role="presentation"><a href="/ale_analytics/search">Search</a></li>
-    <li role="presentation"><a href="/ale_analytics/filter/global_filter">Filter</a></li>
-</ul>
-<br><br>
+{% endblock %}
+{% block header %} / <b>{{ ale_experiment_name }}</b> Resequencing Performance{% endblock %}
+{% block ale %}class="active"{% endblock %}
+{% block content %}
 
 <div class="row">
   <div class="col-sm-6 col-md-4">
@@ -303,7 +276,6 @@
             }
         }
     </script>
-
 </table>
 
 {% include 'muts_needle_plot.html' %}
@@ -318,7 +290,6 @@
 <table>
     <td>
         <script>
-
             var gene_data = {{ genes }};
             var color_set = {{ gene_color_set }};
             var mutation_types = {{ mutation_types }};
@@ -326,9 +297,7 @@
             function _get_label(datum) {
                 return datum.mutation__gene;
             }
-
             {% include 'bar_chart.js' %}
-
         </script>
     </td>
     <td>
@@ -340,12 +309,8 @@
             function _get_label(datum) {
                 return datum.mutation__gene + " " + datum.mutation__protein_change;
             }
-
             {% include 'bar_chart.js' %}
-
         </script>
     </td>
 </table>
-
-</body>
-</html>
+{% endblock %}
