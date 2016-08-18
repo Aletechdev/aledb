@@ -485,9 +485,13 @@ def create_functional_annotations(genbank_path, ale_experiment_id):
 
         mutation_genes = mutation.gene.replace("[", "").replace("]", "").replace(u"\u2013", "/").replace("-", "/").split("/")
 
-        gene_info = {"product": "", "function": "", "go_process": "", "go_component": ""}
+        gene_info_start = {"product": "", "function": "", "go_process": "", "go_component": ""}
+
+        gene_info = gene_info_start
 
         for gene in mutation_genes:
+
+            gene_info = gene_info_start
 
             try:
                 gene_info['function'] += "(" + gene_dict[gene]['function'] + ")"
@@ -499,7 +503,7 @@ def create_functional_annotations(genbank_path, ale_experiment_id):
                 gene_info['go_process'] += "(" + gene_dict[gene]['go_process'] + ")"
 
             except Exception as e:
-                print(e, " Does not exits in ", os.path.basename(genbank_path))
+                # print(e, " Does not exits in ", os.path.basename(genbank_path))
                 pass
 
         mutation.function = gene_info['function']
@@ -537,9 +541,9 @@ def _parse_genbank(genbank_path):
 
                 record = True
 
-            elif line.startswith("gene "):
+            elif line.startswith("gene ") and current_gene is not "":
 
-                gene_dict[current_gene] = gene_info
+                gene_dict[current_gene] = dict(gene_info)
 
                 record = False
 
