@@ -106,18 +106,19 @@ def get_filter_settings(ale_experiment_id):
     else:
         filter_settings = filter_queryset[0]  # Since there's only one filter setting per experiment.
 
-    filter_settings.ignored_mutations = add_global_ignored_mutations(filter_settings.ignored_mutations)
+    filter_settings.ignored_mutations = _append_global_ignored_mutations_json(filter_settings.ignored_mutations)
 
-    filter_settings.ignored_genes = add_global_ignored_genes(filter_settings.ignored_genes)
+    filter_settings.ignored_genes = _append_global_ignored_genes(filter_settings.ignored_genes)
 
     return filter_settings
 
 
-def add_global_ignored_mutations(ignored_mutations):
+def _append_global_ignored_mutations_json(ignored_mutations):
 
     global_filter_settings = GlobalFilter.objects.get_or_create(id=1)[0]
 
-    if global_filter_settings.ignored_mutations == "[]":
+    if global_filter_settings.ignored_mutations is ''\
+            or global_filter_settings.ignored_mutations == "[]":  # TODO: define what "[]" means in a CONSTANT string up top.
         return ignored_mutations
 
     ignored_mutations = ignored_mutations.replace("]", "")
@@ -132,7 +133,7 @@ def add_global_ignored_mutations(ignored_mutations):
     return ignored_mutations
 
 
-def add_global_ignored_genes(ignored_genes):
+def _append_global_ignored_genes(ignored_genes):
 
     global_filter_settings = GlobalFilter.objects.get_or_create(id=1)[0]
 

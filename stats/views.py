@@ -255,7 +255,7 @@ def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
         for ignored_gene in ignored_genes:
             observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene__contains=ignored_gene)
 
-    if filter_settings.ignored_mutations is not '':
+    if filter_settings.ignored_mutations != '':
         ignored_mutations = json.loads(filter_settings.ignored_mutations.replace("'", '"'))
 
         if ignored_mutations is not None:
