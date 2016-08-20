@@ -160,9 +160,9 @@ def _initialize_table(experiment_id_idx_mapping, mutations):
     return [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
 
 
-def get_experiment_urls(seq_experiment_dict):
+def get_experiment_urls(reseq_dict):
 
-    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in seq_experiment_dict.values())
+    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in reseq_dict.values())
 
     return experiment_urls
 

@@ -8,11 +8,8 @@ DEBUG = True
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 config = ConfigParser()
-
 settings_file_path = os.path.join(os.path.dirname(__file__), "settings.ini")
 config.read(settings_file_path)
-
-sequencing_path = config.get("OTHER", "sequencing_path")
 sequencing_url = config.get("OTHER", "sequencing_url")
 
 ADMINS = (

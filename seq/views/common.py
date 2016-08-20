@@ -12,8 +12,6 @@ __author__ = 'Patrick Phaneuf'
 
 SETTINGS_SEQUENCING_URL = "sequencing_url"
 
-DEFAULT_RESEQ_REPORT_URL = "http://localhost/sequencing/"
-
 REQUEST_WT_FILTER = "wtflt"
 
 MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'DUP', 'Unannotated']
