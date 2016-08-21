@@ -30,7 +30,7 @@ __author__ = 'pphaneuf'
 STATS_TEMPLATE = "stats/index.html"
 
 
-# TODO: used by multiple views. Also implemented within views.py; implement in one location.
+# TODO: used by multiple views. Also implemented within ale_exp_filter.py; implement in one location.
 if hasattr(settings, "sequencing_url"):
     resequencing_report_url = settings.sequencing_url
 
