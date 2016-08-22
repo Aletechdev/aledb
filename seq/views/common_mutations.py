@@ -49,7 +49,7 @@ def common_mutations(request):
                                                        filter_settings,
                                                        ref_strain_mutation_id_list)
 
-    template = loader.get_template("table_template.html")
+    template = loader.get_template("mutation_table_template.html")
 
     reseq_list = sorted(ordered_reseq_dict.values(), key=lambda x: x.ale_id)
 

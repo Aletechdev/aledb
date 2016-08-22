@@ -56,7 +56,7 @@ def mutation_table(request):
 
     hidden_columns = "5678"
 
-    template = loader.get_template("table_template.html")
+    template = loader.get_template("mutation_table_template.html")
 
     context = {"ales": ale_queryset,
                "ale_experiment_name": ale_experiment_name,

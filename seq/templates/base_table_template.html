@@ -44,7 +44,8 @@
             src="/static/DataTables/extras/TableTools/media/js/TableTools.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            var oTable = $("#data").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[1, 'asc']]);
+            var sorted_column = {% block sorted_column %}{% endblock %};
+            var oTable = $("#data").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[sorted_column, 'asc']]);
             $("tr td:first-child").each(function () {
                 $(this).hover(
                         function () {
@@ -144,61 +145,50 @@
 {% block header %} / <b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
 {% block ale %}class="active"{% endblock %}
 {% block content %}
-<!-- ALE selection drop-down -->
-{% if experiment_id %}
-    <form action="" method="get">
-        <p>
-            <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
-            <select name="ale_no" class="ui">
-                <option value="all">All ales</option>
-                {% for ale in ales %}
-                    <option {% if ale.ale_id == ale_no %}selected="selected" {% endif %}
-                            value="{{ ale.ale_id }}">{{ ale.ale_id }}</option>
-                {% endfor %}
-            </select>
-            <label class="ui"><input type="checkbox" name="wtflt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
-        </p>
-        <p>
-            <input type="submit" value="Apply" class="ui"/>
-        </p>
-    </form>
-{% endif %}
-
-<!-- Mutation table -->
-<form action="" method="get">
-    <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
-    {% if ale_no %}
-        <input type="hidden" name="ale_no" value="{{ ale_no }}"/>
-    {% else %}
-        <input type="hidden" name="ale_no" value="all"/>
+    <!-- ALE selection drop-down -->
+    {% if experiment_id %}
+        <form action="" method="get">
+            <p>
+                <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+                <select name="ale_no" class="ui">
+                    <option value="all">All ales</option>
+                    {% for ale in ales %}
+                        <option {% if ale.ale_id == ale_no %}selected="selected" {% endif %}
+                                value="{{ ale.ale_id }}">{{ ale.ale_id }}</option>
+                    {% endfor %}
+                </select>
+                <label class="ui"><input type="checkbox" name="wtflt" {% if wt_filter %} checked{% endif %} /> WT Filter</label>
+            </p>
+            <p>
+                <input type="submit" value="Apply" class="ui"/>
+            </p>
+        </form>
     {% endif %}
-    <table id="data">
-        <input type="button" value="Remove checked samples" class="ui" onclick="filterSample('remove')"/>
-        <input type="button" value="Show checked samples" class="ui" onclick="filterSample('show')"/>
-        {% include 'export_as_csv.html' %}
-        <label style="float:right" class="ui"><input class="ui" id="show_dups" onclick="filter_dups(this)"
-                                                     type="checkbox" name="checkbox" value="value"
-                                                     style="margin-left: 10px" checked> Show Duplications</label>
-        <br><br>
-        <div class="ui">
-            Show / Hide Columns:
-            <a onclick="fnShowHide(1)">Position</a>  -
-            <a onclick="fnShowHide(2)">Mutation Type</a> -
-            <a onclick="fnShowHide(3)">Sequence Change</a> -
-            <a onclick="fnShowHide(4)">Gene</a> -
-            <a onclick="fnShowHide(5)">Function</a> -
-            <a onclick="fnShowHide(6)">Product</a> -
-            <a onclick="fnShowHide(7)">GO Process</a> -
-            <a onclick="fnShowHide(8)">GO Component</a> -
-            <a onclick="fnShowHide(9)">Protein Change</a>
-        </div>
-        <thead>
-        {{ table_header }}
-        </thead>
-        <tbody>
-        {{ table_body }}
-        </tbody>
-    </table>
-    <input id="hidden_columns" name="hidden_columns" type="hidden" value="{{ hidden_columns }}">
-</form>
+
+    <!-- Mutation table -->
+    <form action="" method="get">
+        <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+        {% if ale_no %}
+            <input type="hidden" name="ale_no" value="{{ ale_no }}"/>
+        {% else %}
+            <input type="hidden" name="ale_no" value="all"/>
+        {% endif %}
+        <table id="data">
+            <input type="button" value="Remove checked samples" class="ui" onclick="filterSample('remove')"/>
+            <input type="button" value="Show checked samples" class="ui" onclick="filterSample('show')"/>
+            {% include 'export_as_csv.html' %}
+            <label style="float:right" class="ui"><input class="ui" id="show_dups" onclick="filter_dups(this)"
+                                                         type="checkbox" name="checkbox" value="value"
+                                                         style="margin-left: 10px" checked> Show Duplications</label>
+            <br><br>
+            {% block show_hide_columns %}{% endblock %}
+            <thead>
+            {{ table_header }}
+            </thead>
+            <tbody>
+            {{ table_body }}
+            </tbody>
+        </table>
+        <input id="hidden_columns" name="hidden_columns" type="hidden" value="{{ hidden_columns }}">
+    </form>
 {% endblock %}
