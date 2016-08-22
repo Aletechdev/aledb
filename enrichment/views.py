@@ -37,7 +37,7 @@ def enrichment_mutations(request):
 
     table_body = _get_table_body(ordered_reseq_dict, request)
 
-    template = loader.get_template('table_template.html')
+    template = loader.get_template('shared_table_template.html')
     context = {"ales": ale_queryset,
                        "ale_experiment_name": ale_experiment_name,
                        "ale_no": ale_number,

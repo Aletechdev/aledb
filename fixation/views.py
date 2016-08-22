@@ -52,7 +52,7 @@ def fixating_mutations(request):
                                                        table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS,
                                                        filter_settings=filter_settings)
 
-    template = loader.get_template("table_template.html")
+    template = loader.get_template("shared_table_template.html")
 
     context = {"ales": ale_queryset,
                "ale_experiment_name": ale_experiment_name,
