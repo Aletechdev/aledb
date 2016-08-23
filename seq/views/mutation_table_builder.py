@@ -12,6 +12,8 @@ import re
 
 from enum import Enum
 
+from django.utils.html import strip_tags
+
 from common.db_util import get_mutation_queryset_from_observed_mutation_queryset
 
 
@@ -27,7 +29,7 @@ HTML_SHARED_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td>Position</td><t
 
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 
-HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s /><br>%s</td>"""
+HTML_CHECKBOX = """<td><input type="checkbox" class="cb" name=%s onclick="event.stopPropagation()" /><br>%s</td>"""
 
 HTML_EMPTY_MUTATION_CELL = """<td id="empty"></td>"""
 
@@ -67,8 +69,7 @@ def get_table_header(reseq_dict, table_type=None):
 
         sample_name = reseq.aleexp_ale_flask_isolate_str
 
-        mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id],
-                                                                       sample_name)
+        mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id], sample_name)
 
         table_header += HTML_CHECKBOX % (
             reseq.id,
@@ -113,6 +114,8 @@ def get_table_body(reseq_dict,
             if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
                 table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
 
+    protein_changes = {}  # For calculating distances on the genes page only
+
     # Populating table body
     table_body = ""
 
@@ -124,14 +127,14 @@ def get_table_body(reseq_dict,
             table_row += HTML_MUTATION_TABLE_ROW
 
             if table_type == TableType.ENRICHMENT_MUTATIONS:
-                table_row += "<td><a href=/ale_analytics/enrichment/shared?mutation_id=%s>shared</a></td>" % mutation.id
+                table_row += "<td><a href=/enrichment/shared?mutation_id=%s>shared</a></td>" % mutation.id
             elif table_type == TableType.FIXATING_MUTATIONS:
-                table_row += "<td><a href=/ale_analytics/fixation/shared?mutation_id=%s>shared</a></td>" % mutation.id
+                table_row += "<td><a href=/fixation/shared?mutation_id=%s>shared</a></td>" % mutation.id
 
             table_row += "<td>%s</td>" % mutation.position
             table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += "<td>%s</td>" % mutation.sequence_change
-            table_row += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
+            table_row += "<td><a href=/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
             table_row += "<td>%s</td>" % ("" if mutation.function is None else mutation.function)
             table_row += "<td>%s</td>" % ("" if mutation.product is None else mutation.product)
             table_row += "<td>%s</td>" % ("" if mutation.go_process is None else mutation.go_process)
@@ -140,8 +143,9 @@ def get_table_body(reseq_dict,
             if table_type is TableType.GENE_TABLE:
                 if evidence.search(mutation.protein_change):
                     try:
-                        table_row += "<td><a onclick=\"zoomTo(%d)\">%s</a></td>" \
-                                     % (int(non_decimal.sub('', mutation.protein_change)), mutation.protein_change)
+                        table_row += "<td><a id=\"%d\" onclick=\"highlight_mutation(%d,%d)\">%s</a></td>" \
+                                     % (int(mutation.id), int(non_decimal.sub('', mutation.protein_change)), int(mutation.id), mutation.protein_change)
+                        protein_changes[mutation.id] = strip_tags(mutation.protein_change)
                     except:
                         table_row += "<td>%s</td>" % mutation.protein_change
                 else:
@@ -153,6 +157,9 @@ def get_table_body(reseq_dict,
 
             table_body += table_row + "\n"
 
+    if table_type is TableType.GENE_TABLE:
+        return table_body, protein_changes
+
     return table_body
 
 
@@ -160,9 +167,9 @@ def _initialize_table(experiment_id_idx_mapping, mutations):
     return [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
 
 
-def get_experiment_urls(seq_experiment_dict):
+def get_experiment_urls(reseq_dict):
 
-    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in seq_experiment_dict.values())
+    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in reseq_dict.values())
 
     return experiment_urls
 

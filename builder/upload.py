@@ -1,23 +1,13 @@
 from os.path import join
-
 import re
-
 from bs4 import BeautifulSoup
-
 from builder.gdparse.gdparse import gdparse
-
 import collections
-
 import csv
-
 import numbers
-
 import seq.models
-
 import os
-
-
-EXPERIMENT_PARENT_DIR = "breseq/"  # TODO: See if this is necessary.
+from configparser import ConfigParser
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
 
@@ -52,6 +42,11 @@ BRESEQ_REPORT_COLUMN_KEY_MUTATION_FREQUENCY = "freq"
 BRESEQ_REPORT_COLUMN_KEY_ANNOTATION = "annotation"
 
 BRESEQ_REPORT_COLUMN_KEY_GENE = "gene"
+
+config = ConfigParser()
+settings_file_path = os.path.join(os.path.dirname(__file__), "settings.ini")
+config.read(settings_file_path)
+ale_data_root_dir = config.get("OTHER", "ale_data_root_dir")
 
 
 def add_breseq_results(technical_replicate_id,
@@ -198,7 +193,7 @@ def _parse_read_count(read_row_input):
 
 def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, person):
 
-    seq_experiment, created = seq.models.ResequencingExperiment.objects.get_or_create(location=breseq_folder[breseq_folder.find(EXPERIMENT_PARENT_DIR) + len(EXPERIMENT_PARENT_DIR):],
+    seq_experiment, created = seq.models.ResequencingExperiment.objects.get_or_create(location=breseq_folder[breseq_folder.find(ale_data_root_dir) + len(ale_data_root_dir):],
                                                                                       tech_rep_id=technical_replicate_id,
                                                                                       person=person)
 

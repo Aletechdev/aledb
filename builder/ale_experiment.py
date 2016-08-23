@@ -482,8 +482,8 @@ def create_functional_annotations(genbank_path, ale_experiment_id):
     for observed_mutation in observed_mutations:
 
         mutation = observed_mutation.mutation
-
-        mutation_genes = mutation.gene.replace("[", "").replace("]", "").replace(u"\u2013", "/").replace("-", "/").split("/")
+        if mutation.gene is not None:
+            mutation_genes = mutation.gene.replace("[", "").replace("]", "").replace(u"\u2013", "/").replace("-", "/").split("/")
 
         gene_info_start = {"product": "", "function": "", "go_process": "", "go_component": ""}
 

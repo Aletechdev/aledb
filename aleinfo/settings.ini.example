@@ -1,13 +1,13 @@
 [DATABASE]
 host = localhost
 port = 3306
-database = database_name
 user = database_user_name
+database = database_name
 password = user_password_to_database
 engine = mysql
 
 [OTHER]
-sequencing_url = breseq_reports_url
-sequencing_path = local_breseq_reports_path
+sequencing_url = ale_data_reports_url
+ale_data_root_dir = ale_data_root_dir
 username = other_user_database_name
 password = other_user_database_password

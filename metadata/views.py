@@ -18,7 +18,7 @@ __author__ = 'Patrick Phaneuf'
 META_DATA_TEMPLATE = "metadata/index.html"
 
 
-# TODO: used by multiple views. Also implemented within views.py; implement in one location.
+# TODO: used by multiple views. Also implemented within ale_exp_filter.py; implement in one location.
 if hasattr(settings, "sequencing_url"):
     reseq_report_url = settings.sequencing_url
 else:

@@ -30,11 +30,9 @@ __author__ = 'pphaneuf'
 STATS_TEMPLATE = "stats/index.html"
 
 
-# TODO: used by multiple views. Also implemented within views.py; implement in one location.
+# TODO: used by multiple views. Also implemented within ale_exp_filter.py; implement in one location.
 if hasattr(settings, "sequencing_url"):
     resequencing_report_url = settings.sequencing_url
-else:
-    resequencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
 def _get_ale_flask_isolate_count_list(reseq_queryset):
@@ -255,7 +253,7 @@ def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
         for ignored_gene in ignored_genes:
             observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene__contains=ignored_gene)
 
-    if filter_settings.ignored_mutations is not '':
+    if filter_settings.ignored_mutations != '':
         ignored_mutations = json.loads(filter_settings.ignored_mutations.replace("'", '"'))
 
         if ignored_mutations is not None:

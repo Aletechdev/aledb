@@ -4,14 +4,14 @@ from django.conf.urls import include, url
 
 import django.contrib.auth.views
 
-
-urlpatterns = [url(r'^accounts/login/$', django.contrib.auth.views.login),
-               url(r'^ale_analytics/', include('seq.urls')),
-               url(r'^ale_analytics/filter/', include('filter.urls')),
-               url(r'^ale_analytics/fixation/', include('fixation.urls')),
-               url(r'^ale_analytics/stats/', include('stats.urls')),
-               url(r'^ale_analytics/metadata/', include('metadata.urls')),
-               url(r'^ale_analytics/enrichment/', include('enrichment.urls'))
-               ]
+urlpatterns = [
+    url(r'^accounts/login/$', django.contrib.auth.views.login),
+    url(r'^', include('seq.urls')),
+    url(r'^filter/', include('filter.urls')),
+    url(r'^fixation/', include('fixation.urls')),
+    url(r'^stats', include('stats.urls')),
+    url(r'^metadata', include('metadata.urls')),
+    url(r'^enrichment/', include('enrichment.urls'))
+]
 
 urlpatterns += staticfiles_urlpatterns()
