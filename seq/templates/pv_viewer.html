@@ -1,5 +1,5 @@
 <script type="text/javascript">
-     var parent = document.getElementById('viewer');
+    var parent = document.getElementById('viewer');
     var viewer = pv.Viewer(parent, { width : 'auto', height : 'auto', antialias : true, fog: false, background: 'white', selectionColor: 'red', animateTime: 500});
 
     function setColorForAtom(go, atom, color) {
@@ -35,21 +35,33 @@
         viewer.requestRedraw();
     });
     var game_object = null;
-    pv.io.fetchPdb('{{ pdb_file_path }}', function(structure) {
+    pv.io.fetchPdb('{{ pdb_url }}', function(structure) {
         viewer.on('viewerReady', function() {
             game_object = viewer.cartoon('molecule', structure);
             viewer.autoZoom();
+            set_starting_colors();
         });
     });
     document.addEventListener('keypress', function(ev) {
         if (ev.keyCode === 13) {
             var allSelections = [];
+            clear_selected_atoms();
             viewer.forEach(function(go) {
                 if (go.selection !== undefined) {
                     allSelections.push(go.selection());
                 }
             });
-        viewer.fitTo(allSelections);
+            var selected_atom_numbers = [];
+            allSelections[0]._j[0]._q.forEach(function (item) {
+                selected_atom_numbers.push(get_residue_mapping(item._v._dV))
+            });
+            var structure = viewer._m[0]._M[0]._i;
+            var mutation = structure.select({rnums : selected_atom_numbers});
+            if(mutation._j.length > 0) {
+                viewer._m = [viewer._m[0]];
+                viewer.ballsAndSticks('mutation', mutation);
+            }
+            viewer.fitTo(allSelections);
         }
     });
 
@@ -68,42 +80,12 @@
         viewer.requestRedraw();
     });
 
-    Array.prototype.equals = function (array) {
-        if (!array) return false;
-        if (this.length != array.length) return false;
-
-        for (var i = 0, l=this.length; i < l; i++) {
-            if (this[i] instanceof Array && array[i] instanceof Array) {
-                if (!this[i].equals(array[i])) return false;
-            }
-                else if (this[i] != array[i]) {return false;}
-        }
-        return true;
-    };
-    Object.defineProperty(Array.prototype, "equals", {enumerable: false});
-
     function getAtomFromList(value) {
         var atom_list = viewer._m[0]._3[0]._cW._m;
         for (var key in atom_list) {
             if (atom_list[key].atom._v._dV == value) return atom_list[key].atom;
         }
         return null;
-    }
-
-    function selectAtomByNumber(atom_number, arr) {
-        if (arr.hasOwnProperty("_j") && arr._j.length > 0 && arr._j[0].hasOwnProperty("_q")) {
-            var ligand_list = arr._j[0]._q;
-            var temp = [];
-            for (var x in ligand_list) {
-                if (ligand_list[x]._v._dV == atom_number) {
-                    temp[temp.length] = ligand_list[x];
-                }
-            }
-            arr._j[0]._q = temp;
-            return arr;
-        } else {
-            return null;
-        }
     }
 
     var residue_mappings = {{ residue_mappings }};
@@ -114,34 +96,97 @@
         }
         return atom_number
     }
-    var previousPickedAtom = null;
-    var previousPickedColor = null;
-    function zoomTo(atom_number) {
+     var starting_colors = {};
+     function set_starting_colors() {
+         for (var rm_key in residue_mappings) {
+            starting_colors[residue_mappings[rm_key]] = viewer._m[0]._M[0].getColorForAtom(getAtomFromList(residue_mappings[rm_key]), [0,0,0,0])
+         }
+     }
 
+     function _calculate_distance(first_atom_number, second_atom_number, first_mutation_id, second_mutation_id) {
+         clear_selected_atoms();
+         highlight_mutation(first_atom_number, first_mutation_id);
+         highlight_mutation(second_atom_number, second_mutation_id);
+         var first_atom = getAtomFromList(get_residue_mapping(first_atom_number));
+         var second_atom = getAtomFromList(get_residue_mapping(second_atom_number));
+         viewer.rm('dist.*');
+         var g = viewer.customMesh('dist.line');
+         var midPoint = pv.vec3.clone(first_atom.pos());
+         pv.vec3.add(midPoint, midPoint, second_atom.pos());
+         pv.vec3.scale(midPoint, midPoint, 0.5);
+         g.addTube(first_atom.pos(), second_atom.pos(), 0.1, { cap : true, color : 'white' });
+         var d = pv.vec3.distance(first_atom.pos(), second_atom.pos());
+         var l = viewer.label('dist.label', d.toFixed(2), midPoint);
+         zoom_to_selected();
+     }
+
+    function zoom_to_selected() {
+        var structure = viewer._m[0]._M[0]._i;
+        var selected_atom_numbers = [];
+        for(var j=0; j < selected_atoms.length; j++) {
+            selected_atom_numbers.push(selected_atoms[j][0])
+        }
+        var atoms = structure.select({rnums : selected_atom_numbers});
+        viewer.fitTo(atoms);
+    }
+
+    var selected_atoms = [];
+     function clear_selected_atoms() {
+         for (var i = 0; i < selected_atoms.length; i++) {
+             var mutation_id = selected_atoms[i][1];
+             var atom_number = selected_atoms[i][0];
+             var anchor = document.getElementById(mutation_id);
+             var prev = getAtomFromList(atom_number);
+             anchor.style.color = '#337ab7';  //default chrome link color
+             setColorForAtom(viewer._m[0], prev, starting_colors[atom_number]);
+         }
+         selected_atoms = [];
+         viewer.requestRedraw();
+     }
+
+    function highlight_mutation(atom_number, mutation_id) {
         atom_number = get_residue_mapping(atom_number);
         var selected_atom = getAtomFromList(atom_number);
         if (selected_atom == null) return;
-        var color = [0,0,0,0];
-        var temp = viewer._m[0]._M[0].getColorForAtom(selected_atom, color);
-        if (temp == null) temp = [.8, .8, .8, 1];
-        if (temp.equals([1, 0, 0, 1]) === false) {
-            setColorForAtom(viewer._m[0], selected_atom, 'red');
-            if (previousPickedAtom != null) {
-                var prev = getAtomFromList(previousPickedAtom);
-                setColorForAtom(viewer._m[0], prev, previousPickedColor);
-            }
-            previousPickedAtom = atom_number;
-            if (temp !== [1, 0, 0, 1]) {
-                previousPickedColor = temp;
+        var index = null;
+        for(var i=0; i < selected_atoms.length; i++) {
+            if(selected_atoms[i][1] == mutation_id) {
+                index = i;
+                break;
             }
         }
+
+        var anchor = document.getElementById(mutation_id);
+        var prev = getAtomFromList(atom_number);
+
+        if(index != null) {
+            anchor.style.color = '#337ab7';  //default chrome link color
+            selected_atoms.splice(index, 1);
+            var selected_atom_nums = [];
+            for(var j=0; j < selected_atoms.length; j++) {
+                selected_atom_nums.push(selected_atoms[j][0])
+            }
+            if (selected_atom_nums.includes(atom_number)) {
+
+            } else  {
+                setColorForAtom(viewer._m[0], prev, starting_colors[atom_number]);
+            }
+        } else {
+            anchor.style.color = 'green';
+            selected_atoms.push([atom_number, mutation_id]);
+            setColorForAtom(viewer._m[0], prev, 'red');
+        }
+
         var structure = viewer._m[0]._M[0]._i;
-        var mutation = structure.select({rnum : atom_number});
+        var selected_atom_numbers = [];
+        for(var k=0; k < selected_atoms.length; k++) {
+            selected_atom_numbers.push(selected_atoms[k][0])
+        }
+        var mutation = structure.select({rnums : selected_atom_numbers});
         if(mutation._j.length > 0) {
             viewer._m = [viewer._m[0]];
             viewer.ballsAndSticks('mutation', mutation);
         }
-        viewer.fitTo(selected_atom._v);
         viewer.requestRedraw();
     }
 </script>

@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ title }}</title>
-    <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
 
     <style type="text/css" title="currentStyle">
         @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
@@ -43,6 +46,7 @@
             src="/static/DataTables/extras/ColReorder/media/js/ColReorder.js"></script>
     <script type="text/javascript" charset="utf8"
             src="/static/DataTables/extras/TableTools/media/js/TableTools.min.js"></script>
+    <script type="text/javascript" src="/static/bio-pv.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
             var oTable = $("#data").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[1, 'asc']]);
@@ -118,30 +122,139 @@
 	        window.location.replace(url + query_string);
 	    }
     </script>
+    <script type="text/javascript">
+         $(function(){
+            $("#first li a").click(function(){
+                $("#first_button").text($(this).text());
+                $("#first_button").val($(this).text());
+            });
+         });
+        $(function(){
+            $("#second li a").click(function(){
+                $("#second_button").text($(this).text());
+                $("#second_button").val($(this).text());
+            });
+         });
+         var re = /\d+/;
+        function calculate_distance() {
+            var first_button = $("#first_button").text();
+            var second_button = $("#second_button").text();
+            var first_atom_number = first_button.match(re)[0];
+            var second_atom_number = second_button.match(re)[0];
+            if (first_atom_number != second_atom_number) {
+                _calculate_distance(first_atom_number, second_atom_number, get_key_by_value(first_atom_number), get_key_by_value(second_atom_number))
+            }
+        }
+        var protein_changes = {{ protein_changes | safe }};
+        function get_key_by_value(value) {
+            for( var prop in protein_changes ) {
+                if (protein_changes[prop].includes(value)) {
+                    return prop
+                }
+            }
+        }
+        function select_all() {
+            for( var prop in protein_changes ) {
+                var in_selected_atom_list = false;
+                for(var x in selected_atoms) {
+                    if(protein_changes[prop].match(re)[0] == selected_atoms[x][0] && selected_atoms[x][1] == prop) {
+                        in_selected_atom_list = true;
+                    }
+                }
+                if (in_selected_atom_list == false) {
+                    highlight_mutation(protein_changes[prop].match(re)[0], prop);
+                }
+            }
+        }
+    </script>
 </head>
 <body>
 
 <div class="page-header">
     <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-    <h1><a href="/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a> / <b>{{ gene_name }}</b> gene</h1>
+    <h1><a href="/" style="color:black; text-decoration:none">ALE Analytics </a> / <b>{{ gene_name }}</b> gene</h1>
 </div>
 <ul class="nav nav-pills">
-    <li role="presentation" class="active"><a href="/ale_analytics">ALE Experiments</a></li>
-    <li role="presentation"><a href="/ale_analytics/dashboard">Dashboard</a></li>
-    <li role="presentation"><a href="/ale_analytics/search">Search</a></li>
+    <li role="presentation" class="active"><a href="/">ALE Experiments</a></li>
+    <li role="presentation"><a href="/dashboard">Dashboard</a></li>
+    <li role="presentation"><a href="/search">Search</a></li>
+    <li role="presentation"><a href="/filter/global_filter">Filter</a></li>
 </ul>
 <br><br>
 
 <h4>External Resources</h4>
 <p>
-    <a href="http://ecocyc.org/ECOLI/substring-search?object={{ gene_name }}">EcoCyc</a>
+    <a href="http://ecocyc.org/ECOLI/substring-search?object={{ gene_name }}">EcoCyc</a><br>
+    <a href="http://www.rcsb.org/pdb/explore/explore.do?structureId={{ pdb_id }}">Protein Data Bank (PDB)</a>
 </p>
 {% if has_pdb_file %}
 <h4>Gene Protein Structure</h4>
-<p>
-    <div id='picked-atom-name' style='text-align:left; '>&nbsp;</div>
-    <div id="viewer" style='width: 100%; height: 800px; text-align:left;'></div>
-</p>
+    <script type="text/javascript">
+    $('#myTabs a').click(function (e) {
+        e.preventDefault();
+        $(this).tab('show')
+    })
+    </script>
+    <div>
+        <!-- Nav tabs -->
+        <ul class="nav nav-tabs" role="tablist">
+          <li role="presentation" class="active"><a href="#pdb" aria-controls="pdb" role="tab" data-toggle="tab">PDB Viewer</a></li>
+          <li role="presentation"><a href="#homology" aria-controls="homology" role="tab" data-toggle="tab">Homology</a></li>
+        </ul>
+
+        <!-- Tab panes -->
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="pdb">
+
+                <div class="btn-toolbar">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default" id="first_button">First Selection</button>
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" id="first">
+                            {% for key, value in protein_changes.items %}
+                                <li><a href="#/" id="">{{ value }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default" id="second_button">Second Selction</button>
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu" id="second">
+                            {% for key, value in protein_changes.items %}
+                                <li><a href="#/">{{ value }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <button type="button" class="btn btn-default" onclick="calculate_distance()">Calculate Distance</button>
+                </div>
+                <div id='picked-atom-name' style='text-align:left; '>&nbsp;</div>
+                <div id="viewer" style='width: 100%; height: 900px; text-align:left;'>
+                    {% if has_pdb_file %}
+                        {% include 'pv_viewer.html' %}
+                    {% else %}
+                        There is no pdb file available for this gene.
+                    {% endif %}
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="homology">
+                <div id="h_viewer" style='width: 100%; height: 800px; text-align:left;'>
+                    {% if has_homology_data %}
+                        {% include 'homology_viewer.html' %}
+                    {% else %}
+                        There is no homology data available for this gene.
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+    </div>
 {% endif %}
 <br>
 <h4>ALE Experiments</h4>
@@ -151,6 +264,8 @@
         <input type="button" value="Remove checked samples" class="ui" onclick="filterSample('remove')"/>
         <input type="button" value="Show checked samples" class="ui" onclick="filterSample('show')"/>
         {% include 'export_as_csv.html' %}
+        <input type="button" value="Zoom to Selected" class="ui" onclick="zoom_to_selected()">
+        <input type="button" value="Select All" class="ui" onclick="select_all()">
         <br><br>
         <div class="ui">
             Show / Hide Columns:
@@ -174,7 +289,4 @@
 </form>
 {% endif %}
 </body>
-<script type="text/javascript" src="/static/bio-pv.min.js"></script>
-{% include 'pv_viewer.html' %}
-
 </html>

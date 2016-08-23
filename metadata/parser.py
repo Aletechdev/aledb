@@ -9,7 +9,7 @@ __author__ = 'dgosting'
 STRAIN = "taxonomy-id"
 DESCRIPTION = "strain-description"
 MEDIA = "base-media"
-TEMPERATURE = "environment"
+TEMPERATURE = "temperature"
 LIBRARY_PREP_KIT_MANUFACTURER = "library-prep-kit-manufacturer"
 LIBRARY_PREP_KIT_CYCLES = "library-prep-kit-cycles"
 ALE_NUMBER = "ALE-number"
@@ -17,7 +17,7 @@ FLASK_NUMBER = "Flask-number"
 ISOLATE_NUMBER = "Isolate-number"
 
 DEFAULT_STRAIN = "E. Coli"
-DEFAULT_TEMPERATURE = 20
+DEFAULT_TEMPERATURE = 37
 DEFAULT_DESCRIPTION = ""
 
 
@@ -41,8 +41,8 @@ def parse_and_upload_meta_data(meta_data_path, ale_experiment_primary_key):
                     continue
 
                 try:
-                    temp = meta_data[TEMPERATURE].replace("C", "")
-                    if meta_data[TEMPERATURE] is '':
+                    temp = meta_data[TEMPERATURE]
+                    if temp is '':
                         temp = DEFAULT_TEMPERATURE
                 except:
                     temp = DEFAULT_TEMPERATURE

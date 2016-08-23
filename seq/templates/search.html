@@ -136,7 +136,7 @@
     <p style="color: red;">Please submit a search term.</p>
 {% endif %}
 <p>
-<form action="/ale_analytics/search/" method="get">
+<form action="/search/" method="get">
     <input type="text" id="q"    value="{{ last_search.q }}"    name="q" placeholder="mutation gene annotation" autofocus>
     <input type="submit"         value="Search"><input type="button" value="Clear" onclick="clear_search()"><br>
     <input type="text" id="min"  value="{{ last_search.min }}"  name="min" placeholder="start position">

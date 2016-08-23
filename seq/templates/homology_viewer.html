@@ -1,0 +1,13 @@
+<script type="text/javascript">
+    var homology_parent = document.getElementById('h_viewer');
+    var width = document.getElementById('viewer').clientWidth;
+    var height = document.getElementById('viewer').clientHeight;
+    var homology_viewer = pv.Viewer(homology_parent, { width : width, height : height, antialias : true, fog: false, background: 'white', selectionColor: 'red', animateTime: 500});
+
+    var structure = pv.io.pdb({{ homology_data }});
+    homology_viewer.on('viewerReady', function() {
+        homology_viewer.cartoon('molecule', structure);
+        homology_viewer.autoZoom();
+    });
+
+</script>
