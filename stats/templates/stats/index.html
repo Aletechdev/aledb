@@ -38,13 +38,14 @@
 
 <div class="page-header">
     <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-    <h1><a href="http://aquaticus.ucsd.edu/ale_analytics/" style="color:black; text-decoration:none">ALE Analytics </a>
+    <h1><a href="/" style="color:black; text-decoration:none">ALE Analytics </a>
         / <b>{{ ale_experiment_name }}</b> Resequencing Performance</h1>
 </div>
 <ul class="nav nav-pills">
-    <li role="presentation" class="active"><a href="/ale_analytics">ALE Experiments</a></li>
-    <li role="presentation"><a href="dashboard">Dashboard</a></li>
-    <li role="presentation"><a href="search">Search</a></li>
+    <li role="presentation" class="active"><a href="/">ALE Experiments</a></li>
+    <li role="presentation"><a href="/dashboard">Dashboard</a></li>
+    <li role="presentation"><a href="/search">Search</a></li>
+    <li role="presentation"><a href="/filter/global_filter">Filter</a></li>
 </ul>
 <br><br>
 
@@ -307,7 +308,7 @@
 
 {% include 'muts_needle_plot.html' %}
 
-<form action="/ale_analytics/stats" method="get">
+<form action="/stats" method="get">
     <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id }}">
     <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
     <input type="submit" value="Show"><br>

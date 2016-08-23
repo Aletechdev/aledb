@@ -1,8 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>ALE Analytics Mutation Filtering Options</title>
+{% extends 'dashboard_base.html' %}
+    {% block title %}<title>ALE Analytics Mutation Filtering Options</title>{% endblock %}
+{% block scripts_and_style %}
     <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
@@ -93,20 +91,12 @@
     }
 
 </style>
-
-<body>
-
-<div class="page-header">
-    <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-    <h1><a href="/ale_analytics" style="color:black; text-decoration:none">ALE
-        Analytics </a><b> {{ ale_experiment_name }} </b> / Mutation Filtering Options </h1>
-</div>
-<ul class="nav nav-pills">
-    <li role="presentation" class="active"><a href="/ale_analytics">ALE Experiments</a></li>
-    <li role="presentation"><a href="/ale_analytics/dashboard">Dashboard</a></li>
-    <li role="presentation"><a href="/ale_analytics/search">Search</a></li>
-</ul>
-<br>
+{% endblock %}
+{% block filter %}class="active"{% endblock %}
+{% block header %}
+    <b> {{ ale_experiment_name }} </b> / Mutation Filtering Options
+{% endblock %}
+{% block content %}
 <form action="" method="POST">
 
     <h4>Frequency Filtering Thresholds</h4>
@@ -139,5 +129,4 @@
     <input type="hidden" id="id_ignored_mutations" value="{{ ignored_mutations }}" name="ignored_mutations">
     <input type="submit" value="Save" name="save">
 </form>
-</body>
-</html>
+{% endblock %}

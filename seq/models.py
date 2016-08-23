@@ -1,10 +1,12 @@
 from django.db import models
 
+blank_field = {"blank": True, "null": True}
+
 
 # TODO: Refacor: figure out how to get a ResequencingExperiment to return its list of observed mutations and remove functionality from seq.views.common
 class ResequencingExperiment(models.Model):
 
-    isolate = models.ForeignKey("ale.Isolate")
+    tech_rep = models.ForeignKey("ale.TechnicalReplicate", null=True)
 
     person = models.CharField(max_length=200,
                               blank=True)
@@ -30,28 +32,29 @@ class ResequencingExperiment(models.Model):
 
     @property
     def ale_experiment(self):
-        return self.isolate.flask.ale_id.ale_experiment
+        return self.tech_rep.isolate.flask.ale_id.ale_experiment
 
     @property
     def ale_id(self):
-        return self.isolate.flask.ale_id.ale_id
+        return self.tech_rep.isolate.flask.ale_id.ale_id
 
     @property
     def flask_number(self):
-        return self.isolate.flask.flask_number
+        return self.tech_rep.isolate.flask.flask_number
 
     @property
     def ale_flask_isolate_str(self):
 
-        if self.isolate.description is not None:
+        if self.tech_rep.isolate.description is not None:
 
-            if len(self.isolate.description) > 0:
+            if len(self.tech_rep.isolate.description) > 0:
 
-                return self.isolate.description
+                return self.tech_rep.isolate.description
 
-        return u"A%d F%d I%d" % (self.ale_id,
-                                 self.flask_number,
-                                 self.isolate.isolate_number)
+        return u"A%d F%d I%d R%d" % (self.ale_id,
+                                     self.flask_number,
+                                     self.tech_rep.isolate.isolate_number,
+                                     self.tech_rep.tech_rep_number)
 
     @property
     def aleexp_ale_flask_isolate_str(self):
@@ -92,6 +95,16 @@ class Mutation(models.Model):
     gene = models.CharField(max_length=300,
                             blank=True,
                             null=True)
+
+    product = models.CharField(max_length=500, default="", null=True)
+
+    function = models.CharField(max_length=500, default="", null=True)
+
+    go_process = models.CharField(max_length=300, default="", null=True)
+
+    go_component = models.CharField(max_length=300, default="", null=True)
+
+    reseq_reference = models.CharField(max_length=200, **blank_field)
 
     # "reference_error" was created to indicate mutations that are generated only because
     # the reference isn't realistic and not because the organism is actually

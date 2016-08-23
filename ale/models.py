@@ -1,7 +1,5 @@
 from django.db import models
 
-from django.core.validators import MaxValueValidator, MinValueValidator  #TODO: not being used.
-
 blank_field = {"blank": True, "null": True}
 
 
@@ -26,33 +24,15 @@ class AleExperiment(models.Model):
 
     instrument = models.ForeignKey(Instrument)
 
-    simulation = models.BooleanField()  # TODO: remove this if unnecessary.
-
     notes = models.TextField(**blank_field)
 
     def __unicode__(self):
-
-        if self.simulation:
-
-            return "#%d-%s-SIM" % (self.ale_id, self.name)
-
-        else:
 
             return "#%d-%s" % (self.ale_id, self.name)
 
     class Meta:
 
         verbose_name_plural = "ALE Experiments"
-
-
-# TODO: move to hot_gene_mutations.models.py
-class KeyMutation(models.Model):
-
-    ale_experiment = models.ForeignKey(AleExperiment,
-                                       on_delete=models.CASCADE)
-
-    mutation = models.ForeignKey("seq.Mutation",
-                                 null=True)
 
 
 class AleId(models.Model):
@@ -245,3 +225,12 @@ class Isolate(models.Model):
         unique_together = (("flask", "isolate_number"),)
 
         # TODO - encode experiments done on the isolate
+
+
+class TechnicalReplicate(models.Model):
+
+    tech_rep_number = models.IntegerField(default=1)
+
+    isolate = models.ForeignKey(Isolate)
+
+    description = models.CharField(max_length=500, **blank_field)

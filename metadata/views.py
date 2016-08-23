@@ -2,11 +2,15 @@ from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 
-from django.template import Context, loader
+from django.template import loader
 
 import aleinfo.settings as settings
 
 from seq.views import common
+
+from common.db_util import get_reseq_queryset
+
+from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
 
 __author__ = 'Patrick Phaneuf'
@@ -14,7 +18,7 @@ __author__ = 'Patrick Phaneuf'
 META_DATA_TEMPLATE = "metadata/index.html"
 
 
-# TODO: used by multiple views. Also implemented within views.py; implement in one location.
+# TODO: used by multiple views. Also implemented within ale_exp_filter.py; implement in one location.
 if hasattr(settings, "sequencing_url"):
     reseq_report_url = settings.sequencing_url
 else:
@@ -22,8 +26,10 @@ else:
 
 
 @login_required
-def meta_data(request):
-    reseq_queryset = common.get_reseq_queryset(request)
+def metadata(request):
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    ale_id = request.GET.get(REQUEST_ALE_ID)
+    reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_id)
 
     # Would rather want to use something like a dictionary since an experiment is
     # unique, though an experiment is currently a structure and an integral type
@@ -35,9 +41,9 @@ def meta_data(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
 
-    context = Context({"reseq_info_list": reseq_info_list,
-                       "reseq_report_url": reseq_report_url,
-                       "ale_experiment_name": ale_experiment_name})
+    context = {"reseq_info_list": reseq_info_list,
+               "reseq_report_url": reseq_report_url,
+               "ale_experiment_name": ale_experiment_name}
 
     return HttpResponse(template.render(context))
 
@@ -50,21 +56,23 @@ def get_reseq_info_list(reseq_queryset):
 
         clonal_or_population = "clonal"
 
-        if reseq.isolate.is_population:
+        if reseq.tech_rep.isolate.is_population:
 
             clonal_or_population = "population"
 
         experiment_info_tuple = (reseq,
                                  clonal_or_population,
-                                 reseq.isolate.flask.media.temperature,
-                                 reseq.isolate.flask.media.description,
-                                 reseq.isolate.flask.media.substrate,
-                                 reseq.isolate.flask.ale_id.species,
-                                 reseq.isolate.flask.ale_id.strain,
-                                 reseq.isolate.library_prep,
-                                 reseq.isolate.reseq_reference,
-                                 reseq.isolate.breseq_version,
-                                 reseq.isolate.reseq_date)
+                                 reseq.tech_rep.isolate.flask.media.temperature,
+                                 reseq.tech_rep.isolate.flask.media.description,
+                                 reseq.tech_rep.isolate.flask.media.substrate,
+                                 reseq.tech_rep.isolate.flask.ale_id.species,
+                                 reseq.tech_rep.isolate.flask.ale_id.strain,
+                                 reseq.tech_rep.isolate.flask.ale_id.description,
+                                 reseq.tech_rep.isolate.library_prep,
+                                 reseq.tech_rep.isolate.reseq_reference,
+                                 reseq.tech_rep.isolate.breseq_version,
+                                 reseq.tech_rep.isolate.reseq_date)
+
 
         reseq_info_list.append(experiment_info_tuple)
 
