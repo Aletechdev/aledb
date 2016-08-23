@@ -14,8 +14,6 @@ from seq.views import mutation_table_builder
 
 import urllib.request
 
-import json
-
 from xml.dom import minidom
 
 import gzip
@@ -35,7 +33,7 @@ if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     username = settings.config.get("OTHER", "username")
     password = settings.config.get("OTHER", "password")
 else:
-    reseqencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
+    reseqencing_report_url = ""
     username = ""
     password = ""
 
@@ -58,17 +56,17 @@ def gene(request):
 
     homology_data, has_homology_data = _get_homology_data(gene_query)
 
-    context = Context({"gene_name": gene_query,
-                       "table_body": mark_safe(table_body),
-                       "title": gene_query + " gene",
-                       "table_header": mark_safe(table_header),
-                       "pdb_url": pdb_url,
-                       "residue_mappings": mark_safe(residue_mappings),
-                       "protein_changes": protein_changes,
-                       "pdb_id": _get_pdb_url(gene_query),
-                       "has_pdb_file": has_pdb_file,
-                       "homology_data": mark_safe(json.dumps(homology_data)),
-                       "has_homology_data": has_homology_data})
+    context = {"gene_name": gene_query,
+               "table_body": mark_safe(table_body),
+               "title": gene_query + " gene",
+               "table_header": mark_safe(table_header),
+               "pdb_url": pdb_url,
+               "residue_mappings": mark_safe(residue_mappings),
+               "protein_changes": protein_changes,
+               "pdb_id": _get_pdb_url(gene_query),
+               "has_pdb_file": has_pdb_file,
+               "homology_data": mark_safe(json.dumps(homology_data)),
+               "has_homology_data": has_homology_data}
 
     return HttpResponse(template.render(context))
 
@@ -159,16 +157,17 @@ def _get_pdb_url(gene_query):
 
 def _get_homology_data(gene_query):
 
-    with open('/home/dgosting/ale_analytics/160804-genes_to_homology_models.csv', 'rt') as csvfile:
+    mapping_url = 'https://ale-analytics.ucsd.edu/aledata/homology_models/160804-genes_to_homology_models.csv'
 
-        reader = csv.reader(csvfile)
+    response = requests.get(mapping_url, auth=(username, password))
 
-        for row in reader:
+    reader = csv.reader(response.text.splitlines())
 
-            if row[1] == gene_query:
+    for row in reader:
 
-                homology_url = 'https://aquaticus.ucsd.edu/sequencing/all_homology_models/' + row[3]
+        if row[1] == gene_query:
+            homology_url = 'https://ale-analytics.ucsd.edu/aledata/homology_models/' + row[3]
 
-                return requests.get(homology_url, auth=(username, password)).text, True
+            return requests.get(homology_url, auth=(username, password)).text, True
 
     return '', False

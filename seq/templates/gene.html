@@ -155,7 +155,15 @@
         }
         function select_all() {
             for( var prop in protein_changes ) {
-                highlight_mutation(protein_changes[prop].match(re)[0], prop);
+                var in_selected_atom_list = false;
+                for(var x in selected_atoms) {
+                    if(protein_changes[prop].match(re)[0] == selected_atoms[x][0] && selected_atoms[x][1] == prop) {
+                        in_selected_atom_list = true;
+                    }
+                }
+                if (in_selected_atom_list == false) {
+                    highlight_mutation(protein_changes[prop].match(re)[0], prop);
+                }
             }
         }
     </script>
@@ -170,6 +178,7 @@
     <li role="presentation" class="active"><a href="/">ALE Experiments</a></li>
     <li role="presentation"><a href="/dashboard">Dashboard</a></li>
     <li role="presentation"><a href="/search">Search</a></li>
+    <li role="presentation"><a href="/filter/global_filter">Filter</a></li>
 </ul>
 <br><br>
 
@@ -225,7 +234,7 @@
                     <button type="button" class="btn btn-default" onclick="calculate_distance()">Calculate Distance</button>
                 </div>
                 <div id='picked-atom-name' style='text-align:left; '>&nbsp;</div>
-                <div id="viewer" style='width: 100%; height: 800px; text-align:left;'>
+                <div id="viewer" style='width: 100%; height: 900px; text-align:left;'>
                     {% if has_pdb_file %}
                         {% include 'pv_viewer.html' %}
                     {% else %}
@@ -246,6 +255,7 @@
         </div>
 
     </div>
+{% endif %}
 <br>
 <h4>ALE Experiments</h4>
 {% if table_body %}
@@ -254,6 +264,8 @@
         <input type="button" value="Remove checked samples" class="ui" onclick="filterSample('remove')"/>
         <input type="button" value="Show checked samples" class="ui" onclick="filterSample('show')"/>
         {% include 'export_as_csv.html' %}
+        <input type="button" value="Zoom to Selected" class="ui" onclick="zoom_to_selected()">
+        <input type="button" value="Select All" class="ui" onclick="select_all()">
         <br><br>
         <div class="ui">
             Show / Hide Columns:
@@ -267,8 +279,6 @@
             <a onclick="fnShowHide(8)">GO Component</a> -
             <a onclick="fnShowHide(9)">Protein Change</a>
         </div>
-        <input type="button" value="Zoom to Selected" class="ui" onclick="zoom_to_selected()">
-        <input type="button" value="Select All" class="ui" onclick="select_all()">
         <thead>
         {{table_header}}
         </thead>
@@ -279,7 +289,4 @@
 </form>
 {% endif %}
 </body>
-<script type="text/javascript" src="/static/bio-pv.min.js"></script>
-{% include 'pv_viewer.html' %}
-
 </html>

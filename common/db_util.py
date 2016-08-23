@@ -5,7 +5,6 @@ import ale.common
 import seq.models
 from common.util import get_ale_experiment_selector, get_ale_number_selector
 from seq.models import ResequencingExperiment
-from ale.common import STARTING_STRAIN_ALE_ID
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
