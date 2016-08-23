@@ -92,6 +92,13 @@
             var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
             oTable.fnSetColumnVis( iCol, bVis ? false : true );
         }
+        function stopPropagation(evt) {
+            if (evt.stopPropagation !== undefined) {
+                evt.stopPropagation();
+            } else {
+                evt.cancelBubble = true;
+            }
+        }
     </script>
     <script>
         var deleteRow = function () {
