@@ -63,7 +63,7 @@ def gene(request):
                "pdb_url": pdb_url,
                "residue_mappings": mark_safe(residue_mappings),
                "protein_changes": protein_changes,
-               "pdb_id": _get_pdb_url(gene_query),
+               "pdb_id": _get_pdb_url(gene_query)[0],
                "has_pdb_file": has_pdb_file,
                "homology_data": mark_safe(json.dumps(homology_data)),
                "has_homology_data": has_homology_data}
