@@ -14,6 +14,8 @@ from enum import Enum
 
 from django.utils.html import strip_tags
 
+from common.db_util import get_mutation_queryset_from_observed_mutation_queryset
+
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 
@@ -21,9 +23,9 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 HTML_MUTATION_TABLE_ROW = """<td><a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
 
-HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Protein change</td>"""
+HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 # Difference with mutation_table_builder is the additional column.
-HTML_SHARED_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Protein change</td>"""
+HTML_SHARED_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 
@@ -42,7 +44,8 @@ evidence = re.compile(r'[A-Z]\d+[A-Z]')
 
 class TableType(Enum):
     GENE_TABLE = 1
-    SHARED_HOT_GENE_MUTATIONS = 2
+    ENRICHMENT_MUTATIONS = 2
+    FIXATING_MUTATIONS = 3
 
 
 if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -53,8 +56,7 @@ else:
 
 def get_table_header(reseq_dict, table_type=None):
 
-    table_header = ""
-    if table_type == TableType.SHARED_HOT_GENE_MUTATIONS:
+    if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.FIXATING_MUTATIONS:
         table_header = HTML_SHARED_MUTATION_TABLE_HEADER
     else:
         table_header = HTML_MUTATION_TABLE_HEADER
@@ -88,7 +90,7 @@ def get_table_body(reseq_dict,
                    filter_mutation_id_list=None,
                    table_type=None):
 
-    mutation_queryset = seq.views.common.get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
+    mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
 
     mutation_index_dict = dict((mutation_id, i) for i, mutation_id in enumerate(mutation_queryset.values_list("id", flat=True)))
 
@@ -125,13 +127,20 @@ def get_table_body(reseq_dict,
             table_row = "<tr>"
             table_row += HTML_MUTATION_TABLE_ROW
 
-            if table_type == TableType.SHARED_HOT_GENE_MUTATIONS:
-                table_row += "<td><a href=/ale_analytics/freq_mutated_genes/shared?mutation_id=%s>shared</a></td>" % mutation.id
+            if table_type == TableType.ENRICHMENT_MUTATIONS:
+                table_row += "<td><a href=/enrichment/shared?mutation_id=%s>shared</a></td>" % mutation.id
+            elif table_type == TableType.FIXATING_MUTATIONS:
+                table_row += "<td><a href=/fixation/shared?mutation_id=%s>shared</a></td>" % mutation.id
 
             table_row += "<td>%s</td>" % mutation.position
             table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += "<td>%s</td>" % mutation.sequence_change
-            table_row += "<td><a href=/ale_analytics/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
+            table_row += "<td><a href=/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
+            table_row += "<td>%s</td>" % ("" if mutation.function is None else mutation.function)
+            table_row += "<td>%s</td>" % ("" if mutation.product is None else mutation.product)
+            table_row += "<td>%s</td>" % ("" if mutation.go_process is None else mutation.go_process)
+            table_row += "<td>%s</td>" % ("" if mutation.go_component is None else mutation.go_component)
+
             if table_type is TableType.GENE_TABLE:
                 if evidence.search(mutation.protein_change):
                     try:
@@ -159,9 +168,9 @@ def _initialize_table(experiment_id_idx_mapping, mutations):
     return [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
 
 
-def get_experiment_urls(seq_experiment_dict):
+def get_experiment_urls(reseq_dict):
 
-    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in seq_experiment_dict.values())
+    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in reseq_dict.values())
 
     return experiment_urls
 

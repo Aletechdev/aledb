@@ -1,0 +1,196 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
+          media="print, projection, screen"/>
+
+    <style type="text/css" title="currentStyle">
+        @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
+
+        .FixedHeader_Cloned th {
+            background-color: white;
+            opacity: 0.5;
+        }
+
+        .intergenic {
+            font-style: italic;
+        }
+
+        .mutation_in_codon {
+            color: red;
+            text-decoration: underline;
+        }
+
+        .reference_error {
+            text-decoration: line-through;
+        }
+
+        #true {
+            background-color: rgba(0, 255, 0, 0.1)
+        }
+
+        #empty {
+            background-color: rgba(255, 0, 0, 0.1)
+        }
+
+        body {
+            padding-right: 50px;
+            padding-bottom: 25px;
+            padding-left: 50px;
+        }
+    </style>
+
+    <script type="text/javascript" charset="utf8" src="/static/DataTables/media/js/jquery.dataTables.js"></script>
+    <script type="text/javascript" charset="utf8"
+            src="/static/DataTables/extras/FixedHeader/js/FixedHeader.js"></script>
+    <script type="text/javascript" charset="utf8"
+            src="/static/DataTables/extras/ColReorder/media/js/ColReorder.js"></script>
+    <script type="text/javascript" charset="utf8"
+            src="/static/DataTables/extras/TableTools/media/js/TableTools.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var oTable = $("#data").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[1, 'asc']]);
+            $("tr td:first-child").each(function () {
+                $(this).hover(
+                        function () {
+                            $(this).children(".shut").css("display", "block");
+                        },
+                        function () {
+                            $(this).children(".shut").css("display", "none");
+                        }
+                );
+            });
+            var filter_offset = $("#data_filter").offset();
+            $(window).resize(function () {
+                filter_offset = $("#data_filter").offset();
+            });
+            var ui_offset = [];
+            $(".ui").each(function () {
+                ui_offset.push($(this).offset().left);
+            });
+            $(window).scroll(function () {
+                var scrollLeft = $(window).scrollLeft();
+                $("#data_filter").offset({left: filter_offset.left + scrollLeft});
+                i = 0;
+                $(".ui").each(function () {
+                    $(this).offset({left: ui_offset[i++] + scrollLeft});
+                });
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        var deleteRow = function () {
+            var row = $(this).closest("tr").get(0);
+            $('.dataTable').dataTable().fnDeleteRow(row);
+        };
+        var filterSample = function (filter_type) {
+            var url = location.href.split("&remove=")[0].split("&show=")[0];
+            checked_samples = [];
+            $("tr td").children(".cb").each(function () {
+                if (this.checked) {
+                    checked_samples.push(this.name);
+                }
+            });
+            var removed_sample_ids, kept_sample_ids;
+            location.href.split("&").forEach(function (s) {
+                if (s.indexOf("remove") >= 0) {
+                    removed_sample_ids = s.split("=")[1];
+                }
+                else if (s.indexOf("show") >= 0) {
+                    kept_sample_ids = s.split("=")[1];
+                }
+            });
+            if (filter_type == "remove") {
+                query_string = typeof kept_sample_ids != "undefined" ? "&show=" + kept_sample_ids : "";
+                query_string += typeof removed_sample_ids != "undefined" ? "&remove=" + removed_sample_ids.replace("}", "") : "&remove={";
+            }
+            else if (filter_type == "show") {
+                query_string = "&show={";
+            }
+            checked_samples.forEach(function (id) {
+                query_string += id + ",";
+            });
+            query_string += "}";
+            window.location.replace(url + query_string);
+        }
+    </script>
+</head>
+<body>
+<div class="page-header">
+    <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
+    <h1><a href="/" style="color:black; text-decoration:none">ALE Analytics </a> / {{ title }}</h1>
+</div>
+<ul class="nav nav-pills">
+    <li role="presentation" class="active"><a href="/">ALE Experiments</a></li>
+    <li role="presentation"><a href="/dashboard">Dashboard</a></li>
+    <li role="presentation"><a href="/search">Search</a></li>
+    <li role="presentation"><a href="/filter/global_filter">Filter</a></li>
+</ul>
+
+<br><br>
+
+<table id="data" class="tablesorter">
+    <thead>
+    {{ table_header }}
+    </thead>
+    <tbody>
+    {{ table_body }}
+    </tbody>
+</table>
+
+<br><br>
+
+<table id="runs" class="tablesorter">
+    <thead>
+    <tr>
+        <th>Experiment, ALE, Flask, Isolate</th>
+        <th>Clonal or Population</th>
+        <th>Species</th>
+        <th>Strain</th>
+        <th>Description</th>
+        <th>Media</th>
+        <th>Substrate</th>
+        <th>Temperature</th>
+        <th>Library Prep</th>
+        <th>Reference</th>
+        <th>Breseq Version</th>
+        <th>Reseq Date</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    {% for reseq_info_tuple in reseq_info_list %}
+        <tr class="reseq_stats">
+            <td class="sample_name"><a href="
+                    {{ reseq_report_url }}{{ reseq_info_tuple.0.location }}">{{ reseq_info_tuple.0.aleexp_ale_flask_isolate_str }}</a>
+            </td>
+            <td class="clonal_or_population">{{ reseq_info_tuple.1 }}</td>
+            <td class="species">{{ reseq_info_tuple.5 }}</td>
+            <td class="strain">{{ reseq_info_tuple.6 }}</td>
+            <td class="knockouts">{{ reseq_info_tuple.7 }}</td>
+            <td class="media_description">{{ reseq_info_tuple.3 }}</td>
+            <td class="substrate">{{ reseq_info_tuple.4 }}</td>
+            <td class="temperature">{{ reseq_info_tuple.2 }}</td>
+            <td class="library_prep">{{ reseq_info_tuple.8 }}</td>
+            <td class="reseq_reference">{{ reseq_info_tuple.9 }}</td>
+            <td class="breseq_version">{{ reseq_info_tuple.10 }}</td>
+            <td class="reseq_date">{{ reseq_info_tuple.11 }}</td>
+        </tr>
+
+    {% endfor %}
+    </tbody>
+
+</table>
+
+</body>
+</html>

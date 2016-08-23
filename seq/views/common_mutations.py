@@ -1,18 +1,13 @@
 from django.http import HttpResponse
-
 from django.contrib.auth.decorators import login_required
-
-from django.template import Context, loader
-
+from django.template import loader
 from django.utils.safestring import mark_safe
-
 import seq.views.common
-
 from collections import OrderedDict
-
 from seq.views import mutation_table_builder
-
 from filter import mutation_filter
+from common.constants import REQUEST_ALE_EXPERIMENT_ID
+from common.db_util import get_ordered_reseq_dict, get_all_observed_mutations
 
 
 __author__ = 'Patrick Phaneuf'
@@ -30,8 +25,8 @@ def common_mutations(request):
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
  
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
-
-    ordered_reseq_dict = seq.views.common.get_ordered_reseq_dict(request)
+    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
     wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
@@ -46,7 +41,7 @@ def common_mutations(request):
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
-    ref_strain_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
+    ref_strain_mutation_list = get_all_observed_mutations([wt_id])
     ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
 
     table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
@@ -58,15 +53,15 @@ def common_mutations(request):
 
     reseq_list = sorted(ordered_reseq_dict.values(), key=lambda x: x.ale_id)
 
-    context = Context({"ales": ale_queryset,
-                       "ale_experiment_name": ale_experiment_name,
-                       "reseq_list": reseq_list,
-                       "experiment_id": ale_experiment_id,
-                       "table_body": mark_safe(table_body),
-                       "title": "Common Mutations",
-                       "table_header": mark_safe(table_header),
-                       "primary_reseq_id": primary_reseq_id,
-                       "template_header": "Common Mutations"})
+    context = {"ales": ale_queryset,
+               "ale_experiment_name": ale_experiment_name,
+               "reseq_list": reseq_list,
+               "experiment_id": ale_experiment_id,
+               "table_body": mark_safe(table_body),
+               "title": "Common Mutations",
+               "table_header": mark_safe(table_header),
+               "primary_reseq_id": primary_reseq_id,
+               "template_header": "Common Mutations"}
 
     return HttpResponse(template.render(context))
 
@@ -76,7 +71,7 @@ def common_mutations(request):
 # Will return all seq experiments observed mutations shared with primary seq experiment.
 def _get_experiments_and_mutations(reseq_dict, primary_reseq_id):
 
-    primary_observed_mutations_queryset = seq.views.common.get_all_observed_mutations([primary_reseq_id])
+    primary_observed_mutations_queryset = get_all_observed_mutations([primary_reseq_id])
     total_common_observed_mutations_queryset = primary_observed_mutations_queryset.all()
 
     reseq_common_mutation_count_list = []
@@ -85,7 +80,7 @@ def _get_experiments_and_mutations(reseq_dict, primary_reseq_id):
 
         if reseq_id != primary_reseq_id:
 
-            observed_mutations_query_set = seq.views.common.get_all_observed_mutations([reseq_id])
+            observed_mutations_query_set = get_all_observed_mutations([reseq_id])
             common_observed_mutation_queryset = _get_common_observed_mutation_queryset(primary_observed_mutations_queryset, observed_mutations_query_set)
             total_common_observed_mutations_queryset = total_common_observed_mutations_queryset.all() | common_observed_mutation_queryset.all()
             reseq_common_mutation_count_list.append((len(common_observed_mutation_queryset), reseq_id))

@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 
-from django.template import Context, loader
+from django.template import loader
 
 from ale.models import *    # TODO: only import necessary models.
 
@@ -29,7 +29,7 @@ def index(request):
 
     template = loader.get_template(INDEX_TEMPLATE)
 
-    context = Context({"experiments": ale_experiments,
-                       "seq_url": reseqencing_report_url})
+    context = {"experiments": ale_experiments,
+               "seq_url": reseqencing_report_url}
 
     return HttpResponse(template.render(context))

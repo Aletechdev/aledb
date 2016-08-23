@@ -4,10 +4,6 @@ from configparser import ConfigParser
 
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
-# TODO: change to "ALE Analytics"
-GRAPPELLI_ADMIN_TITLE = "ALE Logistics"
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -15,8 +11,6 @@ config = ConfigParser()
 
 settings_file_path = os.path.join(os.path.dirname(__file__), "settings.ini")
 config.read(settings_file_path)
-
-sequencing_path = config.get("OTHER", "sequencing_path")
 sequencing_url = config.get("OTHER", "sequencing_url")
 
 ADMINS = (
@@ -87,13 +81,6 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '<DJANGO_KEY_REDACTED>'
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    #     'django.template.loaders.eggs.Loader',
-)
-
 SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
 FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
 FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
@@ -103,7 +90,6 @@ TEMPLATES = [
         'DIRS': [SEQ_TEMPLATE_PATH,
                  FILTER_TEMPLATE_PATH,
                  FIXATION_TEMPLATE_PATH],
-        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
@@ -116,6 +102,9 @@ TEMPLATES = [
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'debug': DEBUG,
+            'loaders': ['django.template.loaders.filesystem.Loader',
+                        'django.template.loaders.app_directories.Loader'],
         },
     },
 ]
@@ -135,13 +124,6 @@ ROOT_URLCONF = 'aleinfo.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'aleinfo.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # 'C:/Users/user/Desktop/ALE_Logistics/html'
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-)
-
 INSTALLED_APPS = (
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -155,13 +137,7 @@ INSTALLED_APPS = (
     'fixation',
     'stats',
     'metadata',
-    'hot_gene_mutations',
-
-    #'grappelli',
-    # Uncomment the next line to enable the admin:
-    'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    'django.contrib.admindocs',
+    'enrichment',
 )
 
 # A sample logging configuration. The only tangible logging

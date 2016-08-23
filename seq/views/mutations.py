@@ -2,7 +2,7 @@ from django.http import HttpResponse
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 from django.utils.safestring import mark_safe
 
@@ -13,6 +13,10 @@ import seq.views.common
 from seq.views import mutation_table_builder
 
 import filter.mutation_filter
+
+from common.db_util import get_all_observed_mutations
+
+import seq.views.common
 
 
 __author__ = 'pphaneuf'
@@ -29,7 +33,7 @@ def mutation_table(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
-    ale_number = seq.views.common.get_ale_id(request)
+    ale_number = seq.views.common.get_ale_number(request)
     is_ref_strain_filtered = seq.views.common.is_ref_strain_filtered(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, is_ref_strain_filtered)
 
@@ -48,22 +52,22 @@ def mutation_table(request):
 
     template = loader.get_template("table_template.html")
 
-    context = Context({"ales": ale_queryset,
-                       "ale_experiment_name": ale_experiment_name,
-                       "ale_no": ale_number,
-                       "experiment_id": ale_experiment_id,
-                       "table_body": mark_safe(table_body),
-                       "title": "Mutation Table",
-                       "table_header": mark_safe(table_header),
-                       "template_header": "Mutations",
-                       "wt_filter": is_ref_strain_filtered})
+    context = {"ales": ale_queryset,
+               "ale_experiment_name": ale_experiment_name,
+               "ale_no": ale_number,
+               "experiment_id": ale_experiment_id,
+               "table_body": mark_safe(table_body),
+               "title": "Mutation Table",
+               "table_header": mark_safe(table_header),
+               "template_header": "Mutations",
+               "wt_filter": is_ref_strain_filtered}
 
     return HttpResponse(template.render(context))
 
 
 def _get_table_body(reseq_dict, request, wt_filter, wt_id):
 
-    observed_mutations_query_set = seq.views.common.get_all_observed_mutations(list(reseq_dict.keys()))
+    observed_mutations_query_set = get_all_observed_mutations(list(reseq_dict.keys()))
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
@@ -72,7 +76,7 @@ def _get_table_body(reseq_dict, request, wt_filter, wt_id):
     ref_strain_mutation_id_list = None
 
     if wt_filter:
-        ref_strain_mutation_list = seq.views.common.get_all_observed_mutations([wt_id])
+        ref_strain_mutation_list = get_all_observed_mutations([wt_id])
         ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
 
     return mutation_table_builder.get_table_body(reseq_dict,

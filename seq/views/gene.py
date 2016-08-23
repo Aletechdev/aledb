@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 
 from django.contrib.auth.decorators import login_required
 
-from django.template import Context, loader
+from django.template import loader
 
 import seq.models
 
@@ -13,6 +13,8 @@ import seq.views.common
 from seq.views import mutation_table_builder
 
 import urllib.request
+
+import json
 
 from xml.dom import minidom
 
