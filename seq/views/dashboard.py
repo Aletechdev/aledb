@@ -1,6 +1,3 @@
-__author__ = 'pphaneuf'
-
-
 from django.contrib.auth.decorators import login_required
 
 from django.template import loader
@@ -15,8 +12,13 @@ from django.db.models import Count
 
 from django.utils.safestring import mark_safe
 
+from filter.mutation_filter import filter_ignored_genes_and_mutations
+
+DEFAULT_IGNORED_MUTATIONS = "[]"
 
 DASHBOARD_TEMPLATE = "dashboard.html"
+
+__author__ = 'pphaneuf'
 
 
 @login_required
@@ -36,7 +38,11 @@ def dashboard(request):
     sequence_change_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='').values('mutation__gene', 'mutation__protein_change')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
 
-    gene_list, genes, sequence_changes = common.get_ignored_genes(request, gene_query, sequence_change_query)
+    # genes, sequence_changes = filter_global_ignored_genes_and_mutations(gene_query, sequence_change_query)
+
+    genes = filter_ignored_genes_and_mutations(gene_query, "", DEFAULT_IGNORED_MUTATIONS)
+
+    sequence_changes = filter_ignored_genes_and_mutations(sequence_change_query, "", DEFAULT_IGNORED_MUTATIONS)
 
     genes = common.set_gene_bar_chart_colors(genes)
 

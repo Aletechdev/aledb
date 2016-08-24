@@ -4,7 +4,7 @@ import json
 
 from django.utils.html import strip_tags
 
-from  filter.models import GlobalFilter
+from filter.models import GlobalFilter
 
 __author__ = 'Patrick Phaneuf'
 
@@ -53,6 +53,102 @@ def is_excluded_on_mutation(mutation, filter_settings):
                     return True
 
     return False
+
+
+def filter_ignored_genes_and_mutations(query_set, ignored_genes, ignored_mutations, min_cutoff=0, max_cutoff=1):
+
+    query_set = _filter_ignored_genes(query_set, ignored_genes)
+
+    query_set = _filter_ignored_mutations(query_set, ignored_mutations)
+
+    query_set = _filter_by_frequency(query_set, min_cutoff, max_cutoff)
+
+    return query_set
+
+
+def _filter_ignored_genes(query_set, ignored_genes):
+
+    ignored_genes = ignored_genes.replace(" ", "").replace('\n', '').replace('\r', '').split(',')
+
+    global_ignored_genes = GlobalFilter.objects.get(id=1).ignored_genes.replace(" ", "").replace('\n', '').replace('\r', '').split(',')
+
+    if ignored_genes == ['']:
+        if global_ignored_genes == ['']:
+            ignored_genes = []
+        else:
+            ignored_genes = global_ignored_genes
+    else:
+        ignored_genes.append(global_ignored_genes)
+
+    if ignored_genes:
+
+        if len(ignored_genes) > 0 and ignored_genes[0] is not '':
+            for gene in ignored_genes:
+                if str(gene).startswith('*'):
+                    query_set = query_set.exclude(mutation__gene__endswith=str(gene)[1:])
+                elif str(gene).endswith('*'):
+                    query_set = query_set.exclude(mutation__gene__startswith=str(gene)[:-1])
+                else:
+                    query_set = query_set.exclude(mutation__gene__contains=gene)
+    return query_set
+
+
+def _filter_ignored_mutations(query_set, ignored_mutations):
+
+    global_ignored_mutations = GlobalFilter.objects.get(id=1).ignored_mutations
+
+    global_ignored_mutations = json.loads(global_ignored_mutations.replace("'", '"'))
+
+    ignored_mutations = json.loads(ignored_mutations.replace("'", '"'))
+
+    if not ignored_mutations:
+        if not global_ignored_mutations:
+            ignored_mutations = []
+        else:
+            ignored_mutations = global_ignored_mutations
+    else:
+        for global_mut in global_ignored_mutations:
+            ignored_mutations.append(global_mut)
+
+    if len(ignored_mutations) > 0 and ignored_mutations[0] is not '':
+
+        for mutation in ignored_mutations:
+            kwargs = _get_excluded_mutation_kwargs(mutation)
+            query_set = query_set.exclude(**kwargs)
+
+    return query_set
+
+
+def _filter_by_frequency(query_set, min_cutoff, max_cutoff):
+
+    query_set = query_set.filter(frequency__gte=min_cutoff/100, frequency__lte=max_cutoff/100)
+
+    return query_set
+
+
+def _get_excluded_mutation_kwargs(mutation):
+
+    kwargs = {}
+
+    if not mutation:
+        return kwargs
+
+    if mutation['position'] is not '':
+        kwargs['mutation__position'] = mutation['position']
+
+    if mutation['type'] is not '':
+        kwargs['mutation__mutation_type__contains'] = mutation['type']
+
+    if mutation['sequence'] is not '':
+        kwargs['mutation__sequence_change__contains'] = mutation['sequence']
+
+    if mutation['gene'] is not '':
+        kwargs['mutation__gene__contains'] = mutation['gene']
+
+    if mutation['protein'] is not '':
+        kwargs['mutation__protein_change__contains'] = mutation['protein']
+
+    return kwargs
 
 
 def _get_sanitized_mutation_data(key, mutation_dict):

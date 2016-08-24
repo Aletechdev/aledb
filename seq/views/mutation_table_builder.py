@@ -1,5 +1,3 @@
-import seq.models
-
 import aleinfo.settings
 
 import os
@@ -89,6 +87,12 @@ def get_table_body(reseq_dict,
                    filter_mutation_id_list=None,
                    table_type=None):
 
+    observed_mutations_queryset = mutation_filter.filter_ignored_genes_and_mutations(observed_mutations_queryset,
+                                                                                     filter_settings.ignored_genes,
+                                                                                     filter_settings.ignored_mutations,
+                                                                                     filter_settings.min_cutoff,
+                                                                                     filter_settings.max_cutoff)
+
     mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
 
     mutation_index_dict = dict((mutation_id, i) for i, mutation_id in enumerate(mutation_queryset.values_list("id", flat=True)))
@@ -105,14 +109,10 @@ def get_table_body(reseq_dict,
         if filter_mutation_id_list is not None and observed_mutation.mutation.id in filter_mutation_id_list:
             continue
 
-        if not mutation_filter.is_excluded_on_freq(observed_mutation, filter_settings) \
-                and not mutation_filter.is_excluded_on_gene(observed_mutation.mutation, filter_settings) \
-                and not mutation_filter.is_excluded_on_mutation(observed_mutation.mutation, filter_settings):
+        new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
 
-            new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
-
-            if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
-                table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
+        if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
+            table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
 
     protein_changes = {}  # For calculating distances on the genes page only
 
