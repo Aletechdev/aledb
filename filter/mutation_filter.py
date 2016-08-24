@@ -55,7 +55,7 @@ def is_excluded_on_mutation(mutation, filter_settings):
     return False
 
 
-def filter_ignored_genes_and_mutations(query_set, ignored_genes, ignored_mutations, min_cutoff=0, max_cutoff=1):
+def filter_ignored_genes_and_mutations(query_set, ignored_genes, ignored_mutations, min_cutoff=0, max_cutoff=100):
 
     query_set = _filter_ignored_genes(query_set, ignored_genes)
 

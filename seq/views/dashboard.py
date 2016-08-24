@@ -33,16 +33,20 @@ def dashboard(request):
         protein_change_count = seq.models.Mutation.objects.filter(protein_change__contains=protein_change_type).count()
         protein_change_type_count_dict[protein_change_type] = protein_change_count
 
-    gene_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='').values('mutation__gene', 'mutation__mutation_type')\
-        .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
-    sequence_change_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='').values('mutation__gene', 'mutation__protein_change')\
-        .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
+    gene_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
+    sequence_change_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
 
     # genes, sequence_changes = filter_global_ignored_genes_and_mutations(gene_query, sequence_change_query)
 
     genes = filter_ignored_genes_and_mutations(gene_query, "", DEFAULT_IGNORED_MUTATIONS)
 
+    genes = genes.values('mutation__gene', 'mutation__mutation_type')\
+        .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
+
     sequence_changes = filter_ignored_genes_and_mutations(sequence_change_query, "", DEFAULT_IGNORED_MUTATIONS)
+
+    sequence_changes = sequence_changes.values('mutation__gene', 'mutation__protein_change')\
+        .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
 
     genes = common.set_gene_bar_chart_colors(genes)
 
