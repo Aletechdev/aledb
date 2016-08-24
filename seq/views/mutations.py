@@ -18,11 +18,7 @@ from common.db_util import get_all_observed_mutations
 
 import seq.views.common
 
-import json
-
-
 __author__ = 'pphaneuf'
-
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.sequencing_url
@@ -51,8 +47,6 @@ def mutation_table(request):
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
     table_body = _get_table_body(ordered_reseq_dict, request, is_ref_strain_filtered, wt_id)
-
-    print(request.GET.get('hidden_columns'))
 
     hidden_columns = "5678"
 

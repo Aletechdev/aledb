@@ -1,12 +1,6 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-        "http://www.w3.org/TR/html4/strict.dtd">
-
-{#TODO: This page is a copy-paste of table_template. Should refactor so that table_template and this page share common functions.#}
-
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>{{ title }}</title>
+{% extends 'dashboard_base.html' %}
+{% block title %}<title>{{ title }}</title>{% endblock %}
+{% block scripts_and_style %}
     <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
 
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
