@@ -58,4 +58,6 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
             ale_exp_filter.save()
 
+    print(hidden_columns)
+
     return hidden_columns

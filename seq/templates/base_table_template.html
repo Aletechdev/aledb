@@ -82,8 +82,11 @@
                     $(this).offset({left: ui_offset[i++] + scrollLeft});
                 });
             });
-            var hidden_cols = document.getElementById('hidden_columns').value;
+            var hidden_cols = document.getElementById('hidden_columns').value.split(',');
             for (var i = 0, len = hidden_cols.length; i < len; i++) {
+                if(hidden_cols[i] == "") {
+                    continue
+                }
                 fnShowHide(parseInt(hidden_cols[i]))
             }
         });
@@ -96,7 +99,7 @@
             if(bVis == true) {
                 oTable.fnSetColumnVis( iCol, false );
                 if(!document.getElementById('hidden_columns').value.includes(iCol)) {
-                    document.getElementById('hidden_columns').value = document.getElementById('hidden_columns').value + iCol;
+                    document.getElementById('hidden_columns').value = document.getElementById('hidden_columns').value + "," + iCol;
                 }
             } else {
                 oTable.fnSetColumnVis( iCol, true );
