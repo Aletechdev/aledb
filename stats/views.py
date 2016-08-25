@@ -246,18 +246,6 @@ def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
-    ignored_genes = filter_settings.ignored_genes
-
-    ignored_mutations = filter_settings.ignored_mutations
-
-    min_cutoff = filter_settings.min_cutoff
-
-    max_cutoff = filter_settings.max_cutoff
-
-    observed_mutation_query_set = filter_ignored_genes_and_mutations(observed_mutation_query_set,
-                                                                     ignored_genes,
-                                                                     ignored_mutations,
-                                                                     min_cutoff,
-                                                                     max_cutoff)
+    observed_mutation_query_set = filter_ignored_genes_and_mutations(observed_mutation_query_set, filter_settings)
 
     return observed_mutation_query_set
