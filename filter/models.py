@@ -12,10 +12,10 @@ class AleExperimentFilter(models.Model):
     min_cutoff = models.PositiveSmallIntegerField(default=DEFAULT_MUTATION_FREQ_MIN)
     max_cutoff = models.PositiveSmallIntegerField(default=DEFAULT_MUTATION_FREQ_MAX)
     ignored_genes = models.CharField(max_length=500, default='', blank=True)
-    ignored_mutations = models.TextField(default='', blank=True)
+    ignored_mutations = models.CharField(max_length=500, default='', blank=True)
 
 
 class GlobalFilter(models.Model):
 
     ignored_genes = models.CharField(max_length=500, default='', blank=True)
-    ignored_mutations = models.TextField(default='', blank=True)
+    ignored_mutations = models.CharField(max_length=500, default='', blank=True)

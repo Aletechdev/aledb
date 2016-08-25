@@ -12,6 +12,9 @@ from enrichment.models import EnrichmentMutation
 from common.constants import REQUEST_MUTATION_ID
 from common.constants import REQUEST_ALE_EXPERIMENT_ID
 from filter import mutation_filter
+from common.util import check_hidden_columns_and_filters
+
+HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
 __author__ = 'Patrick Phaneuf'
 
@@ -37,15 +40,18 @@ def enrichment_mutations(request):
 
     table_body = _get_table_body(ordered_reseq_dict, request)
 
+    hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
+
     template = loader.get_template('shared_table_template.html')
     context = {"ales": ale_queryset,
-                       "ale_experiment_name": ale_experiment_name,
-                       "ale_no": ale_number,
-                       "experiment_id": ale_experiment_id,
-                       "table_body": mark_safe(table_body),
-                       "title": "Enrichment Mutations",
-                       "table_header": mark_safe(table_header),
-                       "template_header": "Enrichment Mutations"}
+               "ale_experiment_name": ale_experiment_name,
+               "ale_no": ale_number,
+               "experiment_id": ale_experiment_id,
+               "table_body": mark_safe(table_body),
+               "title": "Enrichment Mutations",
+               "table_header": mark_safe(table_header),
+               "template_header": "Enrichment Mutations",
+               "hidden_columns": hidden_columns}
 
     return HttpResponse(template.render(context))
 
@@ -61,7 +67,7 @@ def shared_enrichment_mutations(request):
     # mutation_queryset = seq.models.Mutation.objects.filter(id__in=mutation_id_list)
     enrichment_mutation_list = [enrichment_mutation.mutation for enrichment_mutation in enrichment_mutation_queryset]
 
-    table_header = mutation_table_builder.HTML_MUTATION_TABLE_HEADER
+    table_header = HTML_MUTATION_TABLE_HEADER
     enrichment_mutation = enrichment_mutation_list[0]  # Should only be 1 enrichment mutation
     table_body = "<tr>"
     table_body += mutation_table_builder.HTML_MUTATION_TABLE_ROW
@@ -114,6 +120,7 @@ def _get_table_body(reseq_dict, request):
 
     return mutation_table_builder.get_table_body(reseq_dict=reseq_dict,
                                                  observed_mutations_queryset=observed_mutations_queryset,
+                                                 ale_experiment_id=ale_experiment_id,
                                                  table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS,
                                                  filter_settings=filter_settings)
 

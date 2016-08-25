@@ -21,9 +21,9 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 HTML_MUTATION_TABLE_ROW = """<td><a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a></td>"""
 
-HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
+HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 # Difference with mutation_table_builder is the additional column.
-HTML_SHARED_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
+HTML_SHARED_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 
@@ -34,6 +34,30 @@ HTML_EMPTY_MUTATION_CELL = """<td id="empty"></td>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<td class="false">%d/%d</td>"""
 
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<td id="true"><a href="%s">%.2f</a></td>"""
+
+SAVE_MUTATION_TO_FILTER_CELL_HTML = """<td>
+<div class="dropdown">
+  <button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <i class="fa fa-filter" aria-hidden="true"></i>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>
+    <li><a onclick="save_to_experiment_filter(%d, %d)" style="cursor:pointer">Save to Experiment Filter</a></li>
+  </ul>
+</div>
+</td>"""
+
+GENE_PAGE_SAVE_MUTATION_TO_GLOBAL_FILTER = """<td>
+<div class="dropdown">
+  <button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <i class="fa fa-filter" aria-hidden="true"></i>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>
+  </ul>
+</div>
+</td>
+"""
 
 non_decimal = re.compile(r'[^\d.]+')
 
@@ -83,15 +107,13 @@ def get_table_header(reseq_dict, table_type=None):
 # This makes this function very confusing.
 def get_table_body(reseq_dict,
                    observed_mutations_queryset,
+                   ale_experiment_id=None,
                    filter_settings=None,
                    filter_mutation_id_list=None,
                    table_type=None):
 
     observed_mutations_queryset = mutation_filter.filter_ignored_genes_and_mutations(observed_mutations_queryset,
-                                                                                     filter_settings.ignored_genes,
-                                                                                     filter_settings.ignored_mutations,
-                                                                                     filter_settings.min_cutoff,
-                                                                                     filter_settings.max_cutoff)
+                                                                                     filter_settings)
 
     mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
 
@@ -125,6 +147,10 @@ def get_table_body(reseq_dict,
 
             table_row = "<tr>"
             table_row += HTML_MUTATION_TABLE_ROW
+            if table_type == TableType.GENE_TABLE:
+                table_row += GENE_PAGE_SAVE_MUTATION_TO_GLOBAL_FILTER % mutation.id
+            else:
+                table_row += SAVE_MUTATION_TO_FILTER_CELL_HTML % (mutation.id, ale_experiment_id, mutation.id)
 
             if table_type == TableType.ENRICHMENT_MUTATIONS:
                 table_row += "<td><a href=/enrichment/shared?mutation_id=%s>shared</a></td>" % mutation.id

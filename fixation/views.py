@@ -13,7 +13,9 @@ from fixation.models import FixatedMutation
 import metadata.views
 from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID
 from common.db_util import get_ordered_reseq_dict
+from common.util import check_hidden_columns_and_filters
 
+HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
 __author__ = 'Patrick Phaneuf'
 
@@ -49,8 +51,11 @@ def fixating_mutations(request):
 
     table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
                                                        observed_mutations_queryset=observed_mutation_queryset,
+                                                       ale_experiment_id=int(ale_experiment_id),
                                                        table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS,
                                                        filter_settings=filter_settings)
+
+    hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
     template = loader.get_template("shared_table_template.html")
 
@@ -62,7 +67,8 @@ def fixating_mutations(request):
                "title": "Fixating Mutations",
                "table_header": mark_safe(table_header),
                "is_ascending_freq_filter": is_ascending_freq_filter,
-               "template_header": "Fixating Mutations"}
+               "template_header": "Fixating Mutations",
+               "hidden_columns": hidden_columns}
 
     return HttpResponse(template.render(context))
 
@@ -71,7 +77,7 @@ def shared_fixating_mutations(request):
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
     fixating_mutation_queryset = FixatedMutation.objects.filter(mutation_id=mutation_id)
     fixating_mutation_list = [fixating_mutation.mutation for fixating_mutation in fixating_mutation_queryset]
-    table_header = mutation_table_builder.HTML_MUTATION_TABLE_HEADER
+    table_header = HTML_MUTATION_TABLE_HEADER
     fixating_mutation = fixating_mutation_list[0]  # Should only be 1 enrichment mutation
     table_body = "<tr>"
     table_body += mutation_table_builder.HTML_MUTATION_TABLE_ROW

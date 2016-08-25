@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ title }}</title>
+{% extends 'dashboard_base.html' %}
+{% block title %}<title>{{ title }}</title>{% endblock %}
+{% block scripts_and_style %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-
-
+    <script src="https://use.fontawesome.com/c56cc57732.js"></script>
     <style type="text/css" title="currentStyle">
         @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
         .FixedHeader_Cloned th {
@@ -32,11 +25,6 @@
         #empty {background-color: rgba(255, 0, 0, 0.1)}
         #picked-atom-name {font-weight: bold}
 
-        body {
-            padding-right: 50px;
-            padding-bottom: 25px;
-            padding-left: 50px;
-        }
     </style>
 
     <script type="text/javascript" charset="utf8" src="/static/DataTables/media/js/jquery.dataTables.js"></script>
@@ -49,7 +37,14 @@
     <script type="text/javascript" src="/static/bio-pv.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
-            var oTable = $("#data").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[1, 'asc']]);
+            var oTable = $("#data").dataTable({
+                "bPaginate": false,
+                "bAutoWidth": false,
+                "aoColumnDefs": [ {
+                    "aTargets": [0, 1],
+                    "bSortable": false
+                    } ]
+            }).fnSort([[2, 'asc']]);
             $("tr td:first-child").each(function () {
 	            $(this).hover(
 	                function () {
@@ -167,21 +162,25 @@
             }
         }
     </script>
-</head>
-<body>
-
-<div class="page-header">
-    <div style="float:right"><img src="/static/header.png" style="width:269px;height:53px"></div>
-    <h1><a href="/" style="color:black; text-decoration:none">ALE Analytics </a> / <b>{{ gene_name }}</b> gene</h1>
-</div>
-<ul class="nav nav-pills">
-    <li role="presentation" class="active"><a href="/">ALE Experiments</a></li>
-    <li role="presentation"><a href="/dashboard">Dashboard</a></li>
-    <li role="presentation"><a href="/search">Search</a></li>
-    <li role="presentation"><a href="/filter/global_filter">Filter</a></li>
-</ul>
-<br><br>
-
+    <script type="text/javascript">
+    function save_to_global_filter(mutation_id) {
+            console.log("SAVING TO GLOBAL");
+            $.ajax({
+                type: "POST",
+                url: "",
+                data: { mut_id: mutation_id,
+                        save_method: "global"
+                },
+                success: function (response) {
+                    console.log("SUCCESS");
+                }
+            })
+        }
+    </script>
+{% endblock %}
+{% block header %} / <b>{{ gene_name }}</b> gene{% endblock %}
+{% block ale %}class="active"{% endblock %}
+{% block content %}
 <h4>External Resources</h4>
 <p>
     <a href="http://ecocyc.org/ECOLI/substring-search?object={{ gene_name }}">EcoCyc</a><br>
@@ -269,15 +268,15 @@
         <br><br>
         <div class="ui">
             Show / Hide Columns:
-            <a onclick="fnShowHide(1)">Position</a>  -
-            <a onclick="fnShowHide(2)">Mutation Type</a> -
-            <a onclick="fnShowHide(3)">Sequence Change</a> -
-            <a onclick="fnShowHide(4)">Gene</a> -
-            <a onclick="fnShowHide(5)">Function</a> -
-            <a onclick="fnShowHide(6)">Product</a> -
-            <a onclick="fnShowHide(7)">GO Process</a> -
-            <a onclick="fnShowHide(8)">GO Component</a> -
-            <a onclick="fnShowHide(9)">Protein Change</a>
+            <a onclick="fnShowHide(2)">Position</a>  -
+            <a onclick="fnShowHide(3)">Mutation Type</a> -
+            <a onclick="fnShowHide(4)">Sequence Change</a> -
+            <a onclick="fnShowHide(5)">Gene</a> -
+            <a onclick="fnShowHide(6)">Function</a> -
+            <a onclick="fnShowHide(7)">Product</a> -
+            <a onclick="fnShowHide(8)">GO Process</a> -
+            <a onclick="fnShowHide(9)">GO Component</a> -
+            <a onclick="fnShowHide(10)">Protein Change</a>
         </div>
         <thead>
         {{table_header}}
@@ -288,5 +287,4 @@
     </table>
 </form>
 {% endif %}
-</body>
-</html>
+{% endblock %}

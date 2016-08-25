@@ -18,6 +18,8 @@ from common.db_util import get_all_observed_mutations
 
 import seq.views.common
 
+from common.util import check_hidden_columns_and_filters
+
 __author__ = 'pphaneuf'
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -48,7 +50,7 @@ def mutation_table(request):
 
     table_body = _get_table_body(ordered_reseq_dict, request, is_ref_strain_filtered, wt_id)
 
-    hidden_columns = "5678"
+    hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
     template = loader.get_template("mutation_table_template.html")
 
@@ -82,5 +84,7 @@ def _get_table_body(reseq_dict, request, wt_filter, wt_id):
 
     return mutation_table_builder.get_table_body(reseq_dict,
                                                  observed_mutations_query_set,
+                                                 ale_experiment_id,
                                                  filter_settings,
                                                  ref_strain_mutation_id_list)
+

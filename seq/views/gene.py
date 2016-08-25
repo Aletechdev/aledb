@@ -26,6 +26,8 @@ import requests
 
 import aleinfo.settings as settings
 
+from common.util import check_hidden_columns_and_filters
+
 INDEX_TEMPLATE = "duplication.html"
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -50,11 +52,13 @@ def gene(request):
                                                                         observed_mutations_with_gene_queryset,
                                                                         table_type=mutation_table_builder.TableType.GENE_TABLE)
 
-    template = loader.get_template("gene.html")
-
     pdb_url, residue_mappings, has_pdb_file = _get_pdb_info(gene_query)
 
     homology_data, has_homology_data = _get_homology_data(gene_query)
+
+    hidden_columns = check_hidden_columns_and_filters(request, None)
+
+    template = loader.get_template("gene.html")
 
     context = {"gene_name": gene_query,
                "table_body": mark_safe(table_body),
@@ -66,7 +70,8 @@ def gene(request):
                "pdb_id": _get_pdb_url(gene_query)[0],
                "has_pdb_file": has_pdb_file,
                "homology_data": mark_safe(json.dumps(homology_data)),
-               "has_homology_data": has_homology_data}
+               "has_homology_data": has_homology_data,
+               "hidden_columns": hidden_columns}
 
     return HttpResponse(template.render(context))
 

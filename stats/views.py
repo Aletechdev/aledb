@@ -16,14 +16,14 @@ from django.db.models import Count
 
 from filter import mutation_filter
 
-import json
-
 from common.db_util import get_reseq_queryset,\
     get_ordered_reseq_dict,\
     get_mutation_queryset_from_observed_mutation_queryset,\
     get_all_observed_mutations
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
+
+from filter.mutation_filter import filter_ignored_genes_and_mutations
 
 __author__ = 'pphaneuf'
 
@@ -246,26 +246,18 @@ def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
-    ignored_genes = filter_settings.ignored_genes.replace(" ", "").split(",")
+    ignored_genes = filter_settings.ignored_genes
 
-    if ignored_genes[0] is not '':
+    ignored_mutations = filter_settings.ignored_mutations
 
-        for ignored_gene in ignored_genes:
-            observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene__contains=ignored_gene)
+    min_cutoff = filter_settings.min_cutoff
 
-    if filter_settings.ignored_mutations != '':
-        ignored_mutations = json.loads(filter_settings.ignored_mutations.replace("'", '"'))
+    max_cutoff = filter_settings.max_cutoff
 
-        if ignored_mutations is not None:
-            for ignored_mutation in ignored_mutations:
-                try:
-                    observed_mutation_query_set = \
-                        observed_mutation_query_set.exclude(mutation__gene=ignored_mutation['gene'],
-                                                            mutation__protein_change=ignored_mutation['protein'],
-                                                            mutation__position=ignored_mutation['position'],
-                                                            mutation__sequence_change=ignored_mutation['sequence'],
-                                                            mutation__mutation_type=ignored_mutation['type'])
-                except:
-                    pass
+    observed_mutation_query_set = filter_ignored_genes_and_mutations(observed_mutation_query_set,
+                                                                     ignored_genes,
+                                                                     ignored_mutations,
+                                                                     min_cutoff,
+                                                                     max_cutoff)
 
     return observed_mutation_query_set
