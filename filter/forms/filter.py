@@ -20,4 +20,4 @@ class FilterForm(forms.ModelForm):
 
     class Meta:
         model = AleExperimentFilter
-        fields = ["min_cutoff", "max_cutoff", "ignored_genes", "ignored_mutations"]
+        fields = ["min_cutoff", "max_cutoff", "ignored_genes"]

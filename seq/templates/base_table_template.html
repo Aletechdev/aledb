@@ -1,8 +1,9 @@
 {% extends 'dashboard_base.html' %}
 {% block title %}<title>{{ title }}</title>{% endblock %}
 {% block scripts_and_style %}
-    <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://use.fontawesome.com/c56cc57732.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
 
     <style type="text/css" title="currentStyle">
@@ -12,24 +13,19 @@
             background-color: white;
             opacity: 0.5;
         }
-
         .intergenic {
             font-style: italic;
         }
-
         .mutation_in_codon {
             color: red;
             text-decoration: underline;
         }
-
         .reference_error {
             text-decoration: line-through;
         }
-
         #true {
             background-color: rgba(0, 255, 0, 0.1)
         }
-
         #empty {
             background-color: rgba(255, 0, 0, 0.1)
         }
@@ -45,7 +41,21 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var sorted_column = {% block sorted_column %}{% endblock %};
-            var oTable = $("#data").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[sorted_column, 'asc']]);
+
+            var non_sortable_columns = [0, 1];
+
+            if(sorted_column == 3) {
+                non_sortable_columns = [0, 1, 2];
+            }
+
+            var oTable = $("#data").dataTable({
+                "bPaginate": false,
+                "bAutoWidth": false,
+                "aoColumnDefs": [ {
+                    "aTargets": non_sortable_columns,
+                    "bSortable": false
+                    } ]
+            }).fnSort([[sorted_column, 'asc']]);
             $("tr td:first-child").each(function () {
                 $(this).hover(
                         function () {
@@ -140,6 +150,35 @@
                 $('.dataTable').dataTable().fnFilter("^(.(?!DUP))*$", null, true, false);
             }
         }
+
+        function save_to_global_filter(mutation_id) {
+            console.log("SAVING TO GLOBAL");
+            $.ajax({
+                type: "POST",
+                url: "",
+                data: { mut_id: mutation_id,
+                        save_method: "global"
+                },
+                success: function (response) {
+                    console.log("SUCCESS");
+                }
+            })
+        }
+
+        function save_to_experiment_filter(ale_experiment_id, mutation_id) {
+            console.log("SAVING TO EXP");
+            $.ajax({
+                type: "POST",
+                url: "",
+                data: { mut_id: mutation_id,
+                        save_method: "experiment"
+                },
+                success: function (response) {
+                    console.log("SUCCESS");
+                }
+            })
+        }
+
     </script>
 {% endblock %}
 {% block header %} / <b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
@@ -150,6 +189,7 @@
         <form action="" method="get">
             <p>
                 <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+                <input type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
                 <select name="ale_no" class="ui">
                     <option value="all">All ales</option>
                     {% for ale in ales %}
@@ -189,6 +229,5 @@
             {{ table_body }}
             </tbody>
         </table>
-        <input id="hidden_columns" name="hidden_columns" type="hidden" value="{{ hidden_columns }}">
     </form>
 {% endblock %}

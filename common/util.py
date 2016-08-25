@@ -1,5 +1,7 @@
 from common.constants import REQUEST_ALL
 
+from filter.models import AleExperimentFilter, GlobalFilter
+
 
 def get_ale_experiment_selector(ale_experiment_id, reseq_query):
 
@@ -22,3 +24,38 @@ def get_ale_number_selector(ale_id, reseq_query):
 
         return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_id=ale_id)
 
+
+def check_hidden_columns_and_filters(request, ale_experiment_id):
+
+    if request.method == "GET":
+        hidden_columns = request.GET.get('hidden_columns', "")
+    else:
+        hidden_columns = ""
+        save_method = request.POST.get('save_method')
+        mut_id = request.POST.get('mut_id')
+
+        if save_method == 'global':
+
+            global_filter = GlobalFilter.objects.get(id=1)
+
+            global_filter_ignored_mutations = global_filter.ignored_mutations
+
+            global_filter_ignored_mutations += "," + mut_id
+
+            global_filter.ignored_mutations = global_filter_ignored_mutations
+
+            global_filter.save()
+
+        elif save_method == 'experiment' and ale_experiment_id is not None:
+
+            ale_exp_filter = AleExperimentFilter.objects.get(ale_experiment_id=ale_experiment_id)
+
+            ignored_mutations = ale_exp_filter.ignored_mutations
+
+            ignored_mutations += "," + mut_id
+
+            ale_exp_filter.ignored_mutations = ignored_mutations
+
+            ale_exp_filter.save()
+
+    return hidden_columns

@@ -8,6 +8,7 @@ from seq.views import mutation_table_builder
 from filter import mutation_filter
 from common.constants import REQUEST_ALE_EXPERIMENT_ID
 from common.db_util import get_ordered_reseq_dict, get_all_observed_mutations
+from common.util import check_hidden_columns_and_filters
 
 
 __author__ = 'Patrick Phaneuf'
@@ -46,8 +47,11 @@ def common_mutations(request):
 
     table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
                                                        observed_mutation_queryset,
+                                                       int(ale_experiment_id),
                                                        filter_settings,
                                                        ref_strain_mutation_id_list)
+
+    hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
     template = loader.get_template("mutation_table_template.html")
 
@@ -61,7 +65,8 @@ def common_mutations(request):
                "title": "Common Mutations",
                "table_header": mark_safe(table_header),
                "primary_reseq_id": primary_reseq_id,
-               "template_header": "Common Mutations"}
+               "template_header": "Common Mutations",
+               "hidden_columns": hidden_columns}
 
     return HttpResponse(template.render(context))
 
