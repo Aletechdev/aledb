@@ -43,7 +43,9 @@ def search(request):
 
             table_header = mutation_table_builder.get_table_header(seq_experiment_dict)
 
-            table_body = mutation_table_builder.get_table_body(seq_experiment_dict, observed_mutations_with_gene_query_set)
+            table_body = mutation_table_builder.get_table_body(seq_experiment_dict,
+                                                               observed_mutations_with_gene_query_set,
+                                                               table_type=mutation_table_builder.TableType.SEARCH)
 
             last_search = _get_last_search(request)
 

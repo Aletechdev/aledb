@@ -47,7 +47,7 @@ SAVE_MUTATION_TO_FILTER_CELL_HTML = """<td>
 </div>
 </td>"""
 
-GENE_PAGE_SAVE_MUTATION_TO_GLOBAL_FILTER = """<td>
+SAVE_TO_GLOBAL_FILTER_ONLY = """<td>
 <div class="dropdown">
   <button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
     <i class="fa fa-filter" aria-hidden="true"></i>
@@ -68,6 +68,7 @@ class TableType(Enum):
     GENE_TABLE = 1
     ENRICHMENT_MUTATIONS = 2
     FIXATING_MUTATIONS = 3
+    SEARCH = 4
 
 
 if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -147,8 +148,8 @@ def get_table_body(reseq_dict,
 
             table_row = "<tr>"
             table_row += HTML_MUTATION_TABLE_ROW
-            if table_type == TableType.GENE_TABLE:
-                table_row += GENE_PAGE_SAVE_MUTATION_TO_GLOBAL_FILTER % mutation.id
+            if table_type == TableType.GENE_TABLE or table_type == TableType.SEARCH:
+                table_row += SAVE_TO_GLOBAL_FILTER_ONLY % mutation.id
             else:
                 table_row += SAVE_MUTATION_TO_FILTER_CELL_HTML % (mutation.id, ale_experiment_id, mutation.id)
 
