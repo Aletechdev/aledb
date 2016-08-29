@@ -44,7 +44,7 @@ BRESEQ_REPORT_COLUMN_KEY_ANNOTATION = "annotation"
 BRESEQ_REPORT_COLUMN_KEY_GENE = "gene"
 
 config = ConfigParser()
-settings_file_path = os.path.join(os.path.dirname(__file__), "settings.ini")
+settings_file_path = os.path.join(os.path.dirname(__file__), "../aleinfo/settings.ini")
 config.read(settings_file_path)
 ale_data_root_dir = config.get("OTHER", "ale_data_root_dir")
 
