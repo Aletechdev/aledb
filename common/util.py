@@ -36,7 +36,7 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
         if save_method == 'global':
 
-            global_filter = GlobalFilter.objects.get(id=1)
+            global_filter, created = GlobalFilter.objects.get_or_create(id=1)
 
             global_filter_ignored_mutations = global_filter.ignored_mutations
 
@@ -48,7 +48,7 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
         elif save_method == 'experiment' and ale_experiment_id is not None:
 
-            ale_exp_filter = AleExperimentFilter.objects.get(ale_experiment_id=ale_experiment_id)
+            ale_exp_filter, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id)
 
             ignored_mutations = ale_exp_filter.ignored_mutations
 
@@ -57,7 +57,5 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
             ale_exp_filter.ignored_mutations = ignored_mutations
 
             ale_exp_filter.save()
-
-    print(hidden_columns)
 
     return hidden_columns
