@@ -1,8 +1,9 @@
 {% extends 'dashboard_base.html' %}
     {% block title %}<title>{{title}}</title>{% endblock %}
     {% block scripts_and_style%}
-    <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css"><script src="https://use.fontawesome.com/c56cc57732.js"></script>
     <style type="text/css" title="currentStyle">
         @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
         .FixedHeader_Cloned th {
@@ -113,19 +114,21 @@
                 document.getElementById('prot').value = '';
                 document.getElementById('ale').value = '';
             }
+
+            function save_to_global_filter(mutation_id) {
+            console.log("SAVING TO GLOBAL");
+            $.ajax({
+                type: "POST",
+                url: "",
+                data: { mut_id: mutation_id,
+                        save_method: "global"
+                },
+                success: function (response) {
+                    console.log("SUCCESS");
+                }
+            })
+        }
         </script>
-
-</head>
-
-<style>
-
-    body {
-        padding-right: 50px;
-        padding-bottom: 25px;
-        padding-left: 50px;
-    }
-
-</style>
 {% endblock %}
 {% block ale %}{% endblock %}
 {% block dash %}{% endblock %}
