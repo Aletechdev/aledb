@@ -20,6 +20,8 @@ from functools import reduce
 
 from seq.views import mutation_table_builder
 
+from common.util import check_hidden_columns_and_filters
+
 
 @login_required
 def search(request):
@@ -48,6 +50,8 @@ def search(request):
                                                                table_type=mutation_table_builder.TableType.SEARCH)
 
             last_search = _get_last_search(request)
+
+            check_hidden_columns_and_filters(request, None)
 
             template = loader.get_template("search.html")
 
