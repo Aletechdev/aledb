@@ -1,6 +1,8 @@
 import collections
-from filter import mutation_filter
+from filter.mutation_filter import get_filter_settings, clean_ignored_mutation_id_list
 from common.db_util import get_ordered_reseq_dict, get_ale_experiment_reseq_mutation_lists
+from filter.models import GlobalFilter, AleExperimentFilter
+
 
 __author__ = "Patrick Phaneuf"
 
@@ -8,14 +10,15 @@ __author__ = "Patrick Phaneuf"
 def get_enrichment_mutation_list(ale_experiment_id):
     reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
     ale_experiment_reseq_mutation_lists = get_ale_experiment_reseq_mutation_lists(reseq_dict)  # Will remove starting strain mutations.
-    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)  #TODO: may not matter since the experiment isn't yet establised on the website.
-    mutation_gene_count_dict = _get_mutation_gene_count_dict(ale_experiment_reseq_mutation_lists, filter_settings)
-    enrichment_mutation_list = _get_enrichment_mutation_list(ale_experiment_reseq_mutation_lists, filter_settings, mutation_gene_count_dict)
+    filter_settings = get_filter_settings(ale_experiment_id)  #TODO: may not matter since the experiment isn't yet establised on the website.
+    ignored_mutation_id_list = _get_ignored_mutaion_id_list(filter_settings)
+    mutation_gene_count_dict = _get_mutation_gene_count_dict(ale_experiment_reseq_mutation_lists, ignored_mutation_id_list)
+    enrichment_mutation_list = _get_enrichment_mutation_list(ale_experiment_reseq_mutation_lists, ignored_mutation_id_list, mutation_gene_count_dict)
     return enrichment_mutation_list
 
 
 # Expects the mutation lists from each reseq.
-def _get_mutation_gene_count_dict(ale_experiment_mutation_list, filter_settings):
+def _get_mutation_gene_count_dict(ale_experiment_mutation_list, ignored_mutation_id_list):
 
     mutation_gene_count_dict = collections.defaultdict(int)
 
@@ -23,7 +26,7 @@ def _get_mutation_gene_count_dict(ale_experiment_mutation_list, filter_settings)
 
         for mutation in mutation_list:
 
-            if not _is_mutation_excluded(filter_settings, mutation):
+            if mutation.id not in ignored_mutation_id_list:
 
                 mutation_gene_count_dict[mutation.gene] += 1
 
@@ -31,7 +34,7 @@ def _get_mutation_gene_count_dict(ale_experiment_mutation_list, filter_settings)
 
 
 def _get_enrichment_mutation_list(ale_experiment_reseq_mutation_lists,
-                                  filter_settings,
+                                  ignored_mutation_id_list,
                                   mutation_gene_count_dict):
 
     enrichment_mutation_list = []
@@ -40,7 +43,7 @@ def _get_enrichment_mutation_list(ale_experiment_reseq_mutation_lists,
 
         for mutation in reseq_mutation_list:
 
-            if not _is_mutation_excluded(filter_settings, mutation)\
+            if mutation.id not in ignored_mutation_id_list\
                     and mutation_gene_count_dict[mutation.gene] > 1\
                     and mutation not in enrichment_mutation_list:
 
@@ -49,13 +52,10 @@ def _get_enrichment_mutation_list(ale_experiment_reseq_mutation_lists,
     return enrichment_mutation_list
 
 
-def _is_mutation_excluded(filter_settings, mutation):
+def _get_ignored_mutaion_id_list(filter_settings):
 
-    filter_mutation = False
+    global_ignored_mutation_ids = clean_ignored_mutation_id_list(GlobalFilter.objects.get(id=1).ignored_mutations)
 
-    if mutation_filter.is_excluded_on_gene(mutation, filter_settings) \
-            or mutation_filter.is_excluded_on_mutation(mutation, filter_settings):
+    experiment_ignored_mutation_ids = clean_ignored_mutation_id_list(filter_settings.ignored_mutations)
 
-        filter_mutation = True
-
-    return filter_mutation
+    return global_ignored_mutation_ids + experiment_ignored_mutation_ids
