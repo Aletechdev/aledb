@@ -12,7 +12,8 @@ from django.db.models import Count
 
 from django.utils.safestring import mark_safe
 
-from filter.mutation_filter import filter_ignored_genes_and_mutations
+from filter.mutation_filter import filter_ignored_genes_and_mutations, dashboard_filter
+
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 
@@ -34,14 +35,15 @@ def dashboard(request):
         protein_change_type_count_dict[protein_change_type] = protein_change_count
 
     gene_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
+
     sequence_change_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
 
-    genes = filter_ignored_genes_and_mutations(gene_query, filter_settings=None)
+    genes = dashboard_filter(gene_query)
 
     genes = genes.values('mutation__gene', 'mutation__mutation_type')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
 
-    sequence_changes = filter_ignored_genes_and_mutations(sequence_change_query, filter_settings=None)
+    sequence_changes = dashboard_filter(sequence_change_query)
 
     sequence_changes = sequence_changes.values('mutation__gene', 'mutation__protein_change')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
