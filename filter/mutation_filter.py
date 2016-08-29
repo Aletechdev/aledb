@@ -4,6 +4,8 @@ from seq.models import Mutation
 
 from django.core.exceptions import ObjectDoesNotExist
 
+from ale.models import AleExperiment
+
 __author__ = 'Patrick Phaneuf'
 
 NO_BREAK_STRING_CODE = u'\xa0'
@@ -43,7 +45,7 @@ def filter_ignored_genes_and_mutations(query_set, filter_settings):
 
 def _filter_ignored_genes(query_set, ignored_genes):
 
-    ignored_genes = ignored_genes.replace(" ", "").replace('\n', '').replace('\r', '').split(',')
+    ignored_genes = _clean_ignored_genes_list(ignored_genes)
 
     global_ignored_genes = GlobalFilter.objects.get(id=1).ignored_genes.replace(" ", "").replace('\n', '').replace('\r', '').split(',')
 
@@ -128,56 +130,16 @@ def _get_excluded_mutation_kwargs(mutation):
 
 
 def get_filter_settings(ale_experiment_id):
-    filter_queryset = AleExperimentFilter.objects.filter(ale_experiment_id=ale_experiment_id)
 
-    if len(filter_queryset) == 0:
-        filter_settings = AleExperimentFilter()
-    else:
-        filter_settings = filter_queryset[0]  # Since there's only one filter setting per experiment.
-
-    filter_settings.ignored_mutations = _append_global_ignored_mutations_json(filter_settings.ignored_mutations)
-
-    filter_settings.ignored_genes = _append_global_ignored_genes(filter_settings.ignored_genes)
+    filter_settings, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id)
 
     return filter_settings
 
 
-def _append_global_ignored_mutations_json(ignored_mutations):
-
-    global_filter_settings = GlobalFilter.objects.get_or_create(id=1)[0]
-
-    if global_filter_settings.ignored_mutations is ''\
-            or global_filter_settings.ignored_mutations == "[]":  # TODO: define what "[]" means in a CONSTANT string up top.
-        return ignored_mutations
-
-    ignored_mutations = ignored_mutations.replace("]", "")
-
-    global_ignored_mutations = global_filter_settings.ignored_mutations.replace("[", "")
-
-    if ignored_mutations != "[":
-        ignored_mutations += ", "
-
-    ignored_mutations += global_ignored_mutations
-
-    return ignored_mutations
-
-
-def _append_global_ignored_genes(ignored_genes):
-
-    global_filter_settings = GlobalFilter.objects.get_or_create(id=1)[0]
-
-    if global_filter_settings.ignored_genes == "":
-        return ignored_genes
-
-    if ignored_genes == "":
-        ignored_genes = global_filter_settings.ignored_genes
-    else:
-        ignored_genes += ", " + global_filter_settings.ignored_genes
-
-    return ignored_genes
-
-
 def clean_ignored_mutation_id_list(ignored_mutation_id_list, deleted_mutation_id=None):
+
+    if not ignored_mutation_id_list:
+        return []
 
     if ignored_mutation_id_list.startswith(','):
         ignored_mutation_id_list = ignored_mutation_id_list[1:]
@@ -188,13 +150,40 @@ def clean_ignored_mutation_id_list(ignored_mutation_id_list, deleted_mutation_id
 
     for mut_id in ignored_mutation_id_list:
 
-        if mut_id in new_list or is_number(mut_id) is False:
+        if mut_id in new_list or is_number(mut_id) is False or not _mutation_exists(mut_id):
             continue
 
         if deleted_mutation_id is None or mut_id != deleted_mutation_id:
             new_list.append(mut_id)
 
     return new_list
+
+
+def _clean_ignored_genes_list(ignored_genes):
+
+    if not ignored_genes:
+        return []
+
+    if ignored_genes.endswith(','):
+
+        ignored_genes = ignored_genes[:-1]
+
+    if ignored_genes.startswith(','):
+
+        ignored_genes = ignored_genes[1:]
+
+    ignored_genes = ignored_genes.replace(" ", "").replace('\n', '').replace('\r', '').split(',')
+
+    cleaned_list = []
+
+    for gene in ignored_genes:
+
+        if gene == '' or not gene:
+            continue
+
+        cleaned_list.append(gene)
+
+    return cleaned_list
 
 
 def get_ignored_mutations(filter_form_model):
@@ -226,3 +215,41 @@ def get_ignored_mutations(filter_form_model):
         table_body += table_row
 
     return table_body, ignored_mutation_id_list
+
+
+def dashboard_filter(queryset):
+
+    global_filter = GlobalFilter.objects.get(id=1)
+
+    all_experiments = AleExperiment.objects.all()
+
+    for exp in all_experiments:
+        filter_settings = get_filter_settings(exp.ale_id)
+
+        ignored_mutations = clean_ignored_mutation_id_list(filter_settings.ignored_mutations + global_filter.ignored_mutations)
+
+        for mut_id in ignored_mutations:
+
+            queryset = queryset.exclude(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id, mutation_id=mut_id)
+
+        ignored_genes = _clean_ignored_genes_list(filter_settings.ignored_genes + "," + global_filter.ignored_genes)
+
+        for gene in ignored_genes:
+
+            if str(gene).startswith('*'):
+                queryset = queryset.exclude(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id, mutation__gene__endswith=str(gene)[1:])
+            elif str(gene).endswith('*'):
+                queryset = queryset.exclude(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id, mutation__gene__startswith=str(gene)[:-1])
+            else:
+                queryset = queryset.exclude(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id, mutation__gene__contains=gene)
+
+    return queryset
+
+
+def _mutation_exists(mut_id):
+
+    try:
+        Mutation.objects.get(id=mut_id)
+        return True
+    except ObjectDoesNotExist:
+        return False
