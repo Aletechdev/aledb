@@ -37,7 +37,7 @@
                             {% endfor %}
                         </ul>
                     </li>
-                    <li class="active"><a href="#"><i class="fa fa-flask fa-fw" aria-hidden="true"></i> ALE Experiments<span class="fa arrow"></span></a>
+                    <li><a href="#"><i class="fa fa-flask fa-fw" aria-hidden="true"></i> ALE Experiments<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level collapse">
                             {% for exp in experiments %}
                                 <li><a href="/stats?ale_experiment_id={{ exp.ale_id }}">{{ exp.name }}</a></li>
