@@ -18,6 +18,22 @@
         .huge {
             font-size: 28px;
         }
+        .panel-magenta {
+            background-color: #b7337a;
+            color: white;
+        }
+        .panel-purple {
+            background-color: #7033b7;
+            color: white;
+        }
+        .panel-orange {
+            background-color: #b77033;
+            color: white;
+        }
+        .panel-cyan {
+            background-color: #4fd5d9;
+            color: white;
+        }
     </style>
 
 {% endblock %}
@@ -113,7 +129,7 @@
     </div>
     <div class="row">
         <div class="col-lg-3 col-md-6">
-            <div class="panel panel-primary">
+            <div class="panel panel-orange">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
@@ -125,7 +141,7 @@
                         </div>
                     </div>
                 </div>
-                <a href="/common_mutations?ale_experiment_id={{ ale_experiment_id }}">
+                <a style="color: #b77033;" href="/common_mutations?ale_experiment_id={{ ale_experiment_id }}">
                     <div class="panel-footer">
                         <span class="pull-left">View Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -135,7 +151,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="panel panel-green">
+            <div class="panel panel-purple">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
@@ -147,7 +163,7 @@
                         </div>
                     </div>
                 </div>
-                <a href="/duplication?ale_experiment_id={{ ale_experiment_id }}">
+                <a style="color: #7033b7" href="/duplication?ale_experiment_id={{ ale_experiment_id }}">
                     <div class="panel-footer">
                         <span class="pull-left">View Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -157,7 +173,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="panel panel-yellow">
+            <div class="panel panel-magenta">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
@@ -169,7 +185,7 @@
                         </div>
                     </div>
                 </div>
-                <a href="/filter?ale_experiment_id={{ ale_experiment_id }}">
+                <a style="color: #b7337a" href="/filter?ale_experiment_id={{ ale_experiment_id }}">
                     <div class="panel-footer">
                         <span class="pull-left">View Details</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -179,7 +195,7 @@
             </div>
         </div>
         <div class="col-lg-3 col-md-6">
-            <div class="panel panel-red">
+            <div class="panel panel-cyan">
                 <div class="panel-heading">
                     <div class="row">
                         <div class="col-xs-3">
@@ -190,7 +206,7 @@
                         </div>
                     </div>
                 </div>
-                <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">
+                <a style="color: #4fd5d9" href="/fixation?ale_experiment_id={{ ale_experiment_id }}">
                     <div class="panel-footer">
                         <span class="pull-left">Fixating Mutations</span>
                         <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -390,6 +406,7 @@
     <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
     <input type="submit" value="Show"><br>
 </form>
+        <br>
 <div class="chart"></div>
 <table>
     <td>
