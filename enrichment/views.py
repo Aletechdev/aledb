@@ -103,9 +103,11 @@ def shared_enrichment_mutations(request):
 
     template = loader.get_template("enrichment/shared_enrichment_mutations.html")
     context = {"title": "Shared Enrichment Mutations",
-                       "table_header": mark_safe(table_header),
-                       "table_body": mark_safe(table_body),
-                       "reseq_info_list": reseq_info_list}
+               "table_header": mark_safe(table_header),
+               "table_body": mark_safe(table_body),
+               "reseq_info_list": reseq_info_list,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments()}
 
     return HttpResponse(template.render(context))
 

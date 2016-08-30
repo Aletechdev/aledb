@@ -115,11 +115,15 @@ def shared_fixating_mutations(request):
 
     template = loader.get_template("fixation/shared_fixating_mutations.html")
     context = {"title": "Shared Fixating Mutations",
-                       "table_header": mark_safe(table_header),
-                       "table_body": mark_safe(table_body),
-                       "reseq_info_list": reseq_info_list}
+               "table_header": mark_safe(table_header),
+               "table_body": mark_safe(table_body),
+               "reseq_info_list": reseq_info_list,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments()
+               }
 
     return HttpResponse(template.render(context))
+
 
 def _is_ascending_freq_filter(request):
     ret_val = False
