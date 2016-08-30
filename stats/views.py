@@ -25,6 +25,8 @@ from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
 from filter.mutation_filter import filter_ignored_genes_and_mutations
 
+from common.db_util import get_all_ale_experiments, get_recent_experiments
+
 __author__ = 'pphaneuf'
 
 STATS_TEMPLATE = "stats/index.html"
@@ -123,7 +125,9 @@ def stats(request):
                "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
                "number_of_genes_to_show": number_of_genes_to_show,
                "ale_experiment_id": ale_experiment_id,
-               "ale_flask_isolate_count_list": ale_flask_isolate_count_list}
+               "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments(ale_experiment_id)}
 
     return HttpResponse(template.render(context))
 

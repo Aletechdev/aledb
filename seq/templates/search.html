@@ -1,7 +1,6 @@
 {% extends 'dashboard_base.html' %}
     {% block title %}<title>{{title}}</title>{% endblock %}
     {% block scripts_and_style%}
-    <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
     <style type="text/css" title="currentStyle">
         @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
@@ -114,52 +113,42 @@
                 document.getElementById('ale').value = '';
             }
         </script>
-
-</head>
-
-<style>
-
-    body {
-        padding-right: 50px;
-        padding-bottom: 25px;
-        padding-left: 50px;
-    }
-
-</style>
 {% endblock %}
 {% block ale %}{% endblock %}
 {% block dash %}{% endblock %}
 {% block search %}class="active"{% endblock %}
+{% block header %}Search{% endblock %}
 {% block content %}
-
-{% if error %}
+<div class="row">
+    {% if error %}
     <p style="color: red;">Please submit a search term.</p>
-{% endif %}
-<p>
-<form action="/search/" method="get">
-    <input type="text" id="q"    value="{{ last_search.q }}"    name="q" placeholder="mutation gene annotation" autofocus>
-    <input type="submit"         value="Search"><input type="button" value="Clear" onclick="clear_search()"><br>
-    <input type="text" id="min"  value="{{ last_search.min }}"  name="min" placeholder="start position">
-    <input type="text" id="max"  value="{{ last_search.max }}"  name="max" placeholder="end position"><br>
-    <input type="text" id="mut"  value="{{ last_search.mut }}"  name="mut" placeholder="mutation type"><br>
-    <input type="text" id="seq"  value="{{ last_search.seq }}"  name="seq" placeholder="sequence change"><br>
-    <input type="text" id="prot" value="{{ last_search.prot }}" name="prot" placeholder="protein change"><br>
-    <input type="text" id="ale"  value="{{ last_search.ale }}"  name="ale" placeholder="ALE Experiment">
-</form>
-</p>
-{% if table_body %}
-<form action="" method="get">
-    <table id="data">
-        <input type="button" value="Remove checked samples" class="ui" onclick="filterSample('remove')"/>
-        <input type="button" value="Show checked samples" class="ui" onclick="filterSample('show')"/><br>
-        {% include 'export_as_csv.html' %}
-        <thead>
-        {{table_header}}
-        </thead>
-        <tbody>
-        {{table_body}}
-        </tbody>
-    </table>
-</form>
-{% endif %}
+    {% endif %}
+    <p>
+    <form action="/search/" method="get">
+        <input type="text" id="q"    value="{{ last_search.q }}"    name="q" placeholder="mutation gene annotation" autofocus>
+        <input type="submit"         value="Search"><input type="button" value="Clear" onclick="clear_search()"><br>
+        <input type="text" id="min"  value="{{ last_search.min }}"  name="min" placeholder="start position">
+        <input type="text" id="max"  value="{{ last_search.max }}"  name="max" placeholder="end position"><br>
+        <input type="text" id="mut"  value="{{ last_search.mut }}"  name="mut" placeholder="mutation type"><br>
+        <input type="text" id="seq"  value="{{ last_search.seq }}"  name="seq" placeholder="sequence change"><br>
+        <input type="text" id="prot" value="{{ last_search.prot }}" name="prot" placeholder="protein change"><br>
+        <input type="text" id="ale"  value="{{ last_search.ale }}"  name="ale" placeholder="ALE Experiment">
+    </form>
+    {% if table_body %}
+    <form action="" method="get">
+        <table id="data">
+            <input type="button" value="Remove checked samples" class="ui" onclick="filterSample('remove')"/>
+            <input type="button" value="Show checked samples" class="ui" onclick="filterSample('show')"/><br>
+            {% include 'export_as_csv.html' %}
+            <thead>
+            {{table_header}}
+            </thead>
+            <tbody>
+            {{table_body}}
+            </tbody>
+        </table>
+    </form>
+    {% endif %}
+</div>
+
 {% endblock %}
