@@ -4,13 +4,12 @@ from django.template import loader
 from django.utils.safestring import mark_safe
 import seq.models
 import seq.views.common
-from common.db_util import get_ordered_reseq_dict
+from common.db_util import get_ordered_reseq_dict, get_all_ale_experiments, get_recent_experiments
 # TODO: The mutation table build should use the factory pattern.
 from seq.views import mutation_table_builder
 import metadata.views
 from enrichment.models import EnrichmentMutation
-from common.constants import REQUEST_MUTATION_ID
-from common.constants import REQUEST_ALE_EXPERIMENT_ID
+from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID
 from filter import mutation_filter
 from common.util import check_hidden_columns_and_filters
 
@@ -51,7 +50,10 @@ def enrichment_mutations(request):
                "title": "Enrichment Mutations",
                "table_header": mark_safe(table_header),
                "template_header": "Enrichment Mutations",
-               "hidden_columns": hidden_columns}
+               "hidden_columns": hidden_columns,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments(int(ale_experiment_id))
+               }
 
     return HttpResponse(template.render(context))
 

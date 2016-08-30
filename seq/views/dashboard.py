@@ -12,7 +12,9 @@ from django.db.models import Count
 
 from django.utils.safestring import mark_safe
 
-from filter.mutation_filter import filter_ignored_genes_and_mutations, dashboard_filter
+from filter.mutation_filter import dashboard_filter
+
+from common.db_util import get_all_ale_experiments, get_recent_experiments
 
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
@@ -62,7 +64,9 @@ def dashboard(request):
                "seq_color_set": mark_safe(common.SEQ_COLORS),
                "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
                "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
-               "number_of_genes_to_show": number_of_genes_to_show}
+               "number_of_genes_to_show": number_of_genes_to_show,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments()}
 
     template = loader.get_template(DASHBOARD_TEMPLATE)
 

@@ -20,7 +20,7 @@ import requests
 
 from seq.views import mutation_table_builder
 
-from common.db_util import get_ordered_reseq_dict
+from common.db_util import get_ordered_reseq_dict, get_all_ale_experiments, get_recent_experiments
 
 
 INDEX_TEMPLATE = "duplication.html"
@@ -75,8 +75,9 @@ def duplication(request):
     context = {"experiment_links": experiment_links,
                "reseqencing_report_url": reseqencing_report_url,
                "ale_experiment_id": ale_experiment_id,
-               "ale_experiment_name": ale_experiment_name
-              }
+               "ale_experiment_name": ale_experiment_name,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments(int(ale_experiment_id))}
 
     return HttpResponse(template.render(context))
 

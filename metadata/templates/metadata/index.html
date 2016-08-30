@@ -15,49 +15,48 @@
         }));
     </script>
 {% endblock %}
-{% block header %} / <b>{{ ale_experiment_name }}</b> Sample Meta Data{% endblock %}
-{% block ale %}class="active"{% endblock %}
+{% block header %}<b>{{ ale_experiment_name }}</b> Sample Meta Data{% endblock %}
 {% block content %}
+<div class="row">
+    <table id="runs" class="tablesorter">
+        <thead>
+        <tr>
+            <th>ALE, Flask, Isolate</th>
+            <th>Clonal or Population</th>
+            <th>Species</th>
+            <th>Strain</th>
+            <th>Description</th>
+            <th>Media</th>
+            <th>Substrate</th>
+            <th>Temperature</th>
+            <th>Library Prep</th>
+            <th>Reference</th>
+            <th>Breseq Version</th>
+            <th>Reseq Date</th>
 
-<table id="runs" class="tablesorter">
-    <thead>
-    <tr>
-        <th>ALE, Flask, Isolate</th>
-        <th>Clonal or Population</th>
-        <th>Species</th>
-        <th>Strain</th>
-        <th>Description</th>
-        <th>Media</th>
-        <th>Substrate</th>
-        <th>Temperature</th>
-        <th>Library Prep</th>
-        <th>Reference</th>
-        <th>Breseq Version</th>
-        <th>Reseq Date</th>
-
-    </tr>
-    </thead>
-    <tbody>
-    {% for reseq_info_tuple in reseq_info_list %}
-        <tr class="experiment_stats">
-            <td class="sample_name"><a href="
-                    {{ reseq_report_url }}{{ reseq_info_tuple.0.location }}">{{ reseq_info_tuple.0.ale_flask_isolate_str }}</a>
-            </td>
-            <td class="clonal_or_population">{{ reseq_info_tuple.1 }}</td>
-            <td class="species">{{ reseq_info_tuple.5 }}</td>
-            <td class="strain">{{ reseq_info_tuple.6 }}</td>
-            <td class="knockouts">{{ reseq_info_tuple.7 }}</td>
-            <td class="media_description">{{ reseq_info_tuple.3 }}</td>
-            <td class="substrate">{{ reseq_info_tuple.4 }}</td>
-            <td class="temperature">{{ reseq_info_tuple.2 }}</td>
-            <td class="library_prep">{{ reseq_info_tuple.8 }}</td>
-            <td class="reseq_reference">{{ reseq_info_tuple.9 }}</td>
-            <td class="breseq_version">{{ reseq_info_tuple.10 }}</td>
-            <td class="reseq_date">{{ reseq_info_tuple.11 }}</td>
         </tr>
+        </thead>
+        <tbody>
+        {% for reseq_info_tuple in reseq_info_list %}
+            <tr class="experiment_stats">
+                <td class="sample_name"><a href="
+                        {{ reseq_report_url }}{{ reseq_info_tuple.0.location }}">{{ reseq_info_tuple.0.ale_flask_isolate_str }}</a>
+                </td>
+                <td class="clonal_or_population">{{ reseq_info_tuple.1 }}</td>
+                <td class="species">{{ reseq_info_tuple.5 }}</td>
+                <td class="strain">{{ reseq_info_tuple.6 }}</td>
+                <td class="knockouts">{{ reseq_info_tuple.7 }}</td>
+                <td class="media_description">{{ reseq_info_tuple.3 }}</td>
+                <td class="substrate">{{ reseq_info_tuple.4 }}</td>
+                <td class="temperature">{{ reseq_info_tuple.2 }}</td>
+                <td class="library_prep">{{ reseq_info_tuple.8 }}</td>
+                <td class="reseq_reference">{{ reseq_info_tuple.9 }}</td>
+                <td class="breseq_version">{{ reseq_info_tuple.10 }}</td>
+                <td class="reseq_date">{{ reseq_info_tuple.11 }}</td>
+            </tr>
 
-    {% endfor %}
-    </tbody>
-
-</table>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

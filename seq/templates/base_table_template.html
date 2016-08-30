@@ -184,10 +184,10 @@
 
     </script>
 {% endblock %}
-{% block header %} / <b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
-{% block ale %}class="active"{% endblock %}
+{% block header %}<b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
 {% block content %}
-    <!-- ALE selection drop-down -->
+<div class="row">
+     <!-- ALE selection drop-down -->
     {% if experiment_id %}
         <form action="" method="get">
             <p>
@@ -233,4 +233,5 @@
             </tbody>
         </table>
     </form>
+</div>
 {% endblock %}

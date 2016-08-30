@@ -1,28 +1,24 @@
 {% extends 'dashboard_base.html' %}
 {% block title %}<title>ALE Analytics Mutation Filtering Options</title>{% endblock %}
 {% block scripts_and_style %}{% endblock %}
-{% block header %} / <b> {{ ale_experiment_name }} </b> Duplications{% endblock %}
+{% block header %}<b> {{ ale_experiment_name }} </b> Duplications{% endblock %}
 {% block ale %}class="active"{% endblock %}
 {% block content %}
 <table id="runs" class="tablesorter">
     <thead>
     <tr>
         <th>ALE, Flask, Isolate</th>
-
     </tr>
     </thead>
     <tbody>
     {% for experiment_url, experiment_name in experiment_links %}
         <tr class="experiment_stats">
-
             {% if experiment_url != False %}
                 <td class="sample_name"><a href="{{ experiment_url }}">{{ experiment_name }}</a></td>
             {% else %}
                 <td class="sample_name">{{ experiment_name }}</td>
             {% endif %}
-
         </tr>
-
     {% endfor %}
     </tbody>
 </table>

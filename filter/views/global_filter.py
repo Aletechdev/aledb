@@ -12,6 +12,8 @@ from filter.models import GlobalFilter
 
 from filter.mutation_filter import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER
 
+from common.db_util import get_all_ale_experiments, get_recent_experiments
+
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 GLOBAL_FILTER_TEMPLATE = "filter/global_filter.html"
@@ -35,7 +37,9 @@ def global_filter(request):
 
     context = {"form": filter_form,
                "table_body": mark_safe(table_body),
-               "table_header": mark_safe(TABLE_HEADER)}
+               "table_header": mark_safe(TABLE_HEADER),
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments()}
 
     return HttpResponse(template.render(context))
 

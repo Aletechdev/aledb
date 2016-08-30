@@ -8,14 +8,15 @@ from seq.views import common
 
 from filter.forms.filter import FilterForm
 
-from filter.models import AleExperimentFilter, GlobalFilter
+from filter.models import AleExperimentFilter
 
-from filter.common import DEFAULT_MUTATION_FREQ_MIN
-from filter.common import DEFAULT_MUTATION_FREQ_MAX
+from filter.common import DEFAULT_MUTATION_FREQ_MIN, DEFAULT_MUTATION_FREQ_MAX
 
 from django.utils.safestring import mark_safe
 
 from filter.mutation_filter import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER
+
+from common.db_util import get_all_ale_experiments, get_recent_experiments
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -50,8 +51,9 @@ def mutation_filter(request):
                "ale_experiment_id": ale_experiment_id,
                "ale_experiment_name": ale_experiment_name,
                "table_body": mark_safe(table_body),
-               "table_header": mark_safe(TABLE_HEADER)
-    }
+               "table_header": mark_safe(TABLE_HEADER),
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments(ale_experiment_id)}
 
     return HttpResponse(template.render(context))
 
