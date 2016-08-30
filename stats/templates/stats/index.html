@@ -409,7 +409,8 @@
         <br>
 <div class="chart"></div>
 <table>
-    <td>
+    <tr>
+        <td>
         <script>
             var gene_data = {{ genes }};
             var color_set = {{ gene_color_set }};
@@ -433,6 +434,7 @@
             {% include 'bar_chart.js' %}
         </script>
     </td>
+    </tr>
 </table>
     </div>
 
