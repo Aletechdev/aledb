@@ -35,7 +35,7 @@ def search(request):
         if _is_query_empty(gene_query):
 
             error = True
-            
+
         else:
 
             seq_experiment_dict, observed_mutations_with_gene_query_set = _get_seq_exp(request)
@@ -50,8 +50,6 @@ def search(request):
                                                                table_type=mutation_table_builder.TableType.SEARCH)
 
             last_search = _get_last_search(request)
-
-            check_hidden_columns_and_filters(request, None)
 
             template = loader.get_template("search.html")
 
