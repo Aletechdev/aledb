@@ -1,10 +1,7 @@
 {% extends 'dashboard_base.html' %}
 {% block title %}<title>{{ title }}</title>{% endblock %}
 {% block scripts_and_style %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script src="https://use.fontawesome.com/c56cc57732.js"></script>
     <style type="text/css" title="currentStyle">
         @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
         .FixedHeader_Cloned th {
@@ -178,7 +175,7 @@
         }
     </script>
 {% endblock %}
-{% block header %} / <b>{{ gene_name }}</b> gene{% endblock %}
+{% block header %}<b>{{ gene_name }}</b> gene{% endblock %}
 {% block ale %}class="active"{% endblock %}
 {% block content %}
 <h4>External Resources</h4>

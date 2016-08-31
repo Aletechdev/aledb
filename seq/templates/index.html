@@ -2,17 +2,6 @@
 
     {% block title %}<title>ALE Analytics</title>{% endblock %}
     {% block scripts_and_style %}
-<script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
-    <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
-    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
-          media="print, projection, screen"/>
-    <script type="text/javascript">
-        var asInitVals = new Array();
-        $(document).ready($(function () {
-            oTable = $("#runs").tablesorter({widgets: ['zebra'], sortList: [[0,0]]});
-
-        }));
-    </script>
 {% endblock %}
 {% block ale %}class="active"{% endblock %}
 {% block dash %}{% endblock %}

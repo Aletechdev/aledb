@@ -1,7 +1,6 @@
 {% extends 'dashboard_base.html' %}
 {% block title %}<title>ALE Analytics Mutation Filtering Options</title>{% endblock %}
 {% block scripts_and_style %}
-    <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
     <script type="text/javascript" charset="utf8" src="/static/DataTables/media/js/jquery.dataTables.js"></script>
     <script type="text/javascript" charset="utf8"
@@ -32,25 +31,25 @@
     </script>
 {% endblock %}
 {% block filter %}class="active"{% endblock %}
-{% block header %}
-    / <b> Global </b> Mutation Filtering Options
-{% endblock %}
+{% block header %}<b> Global </b> Mutation Filtering Options{% endblock %}
 {% block content %}
-<form action="" method="POST">
-    <h4>Ignored Genes</h4>
-    <p>Enter gene(s) separated by ',' ex: tpoB,folD</p>
-    <p>{{form.ignored_genes}}</p>
-    <h4>Ignored Mutations</h4>
-    <table id="data">
-        <thead>
-            {{ table_header }}
-        </thead>
-        <tbody>
-            {{ table_body }}
-        </tbody>
-    </table>
-    <br>
-    <input type="hidden" id="id_ignored_mutations" value="{{ ignored_mutations }}" name="ignored_mutations">
-    <input type="submit" value="Save" name="save">
-</form>
+<div class="row">
+    <form action="" method="POST">
+        <h4>Ignored Genes</h4>
+        <p>Enter gene(s) separated by ',' ex: tpoB,folD</p>
+        <p>{{form.ignored_genes}}</p>
+        <h4>Ignored Mutations</h4>
+        <table id="data">
+            <thead>
+                {{ table_header }}
+            </thead>
+            <tbody>
+                {{ table_body }}
+            </tbody>
+        </table>
+        <br>
+        <input type="hidden" id="id_ignored_mutations" value="{{ ignored_mutations }}" name="ignored_mutations">
+        <input type="submit" value="Save" name="save">
+    </form>
+</div>
 {% endblock %}

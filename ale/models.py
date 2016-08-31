@@ -234,3 +234,16 @@ class TechnicalReplicate(models.Model):
     isolate = models.ForeignKey(Isolate)
 
     description = models.CharField(max_length=500, **blank_field)
+
+
+class RecentExperiments(models.Model):
+
+    first = models.IntegerField(null=True)
+
+    second = models.IntegerField(null=True)
+
+    third = models.IntegerField(null=True)
+
+    fourth = models.IntegerField(null=True)
+
+    fifth = models.IntegerField(null=True)
