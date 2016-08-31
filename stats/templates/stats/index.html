@@ -1,5 +1,5 @@
 {% extends 'dashboard_base.html' %}
-{% block title %}<title>Resequencing Performance</title>{% endblock %}
+{% block title %}<title>{{ ale_experiment_name }} ALE Experiment</title>{% endblock %}
 {% block scripts_and_style %}
     <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
 
@@ -33,7 +33,7 @@
     </style>
 
 {% endblock %}
-{% block header %}<b>{{ ale_experiment_name }}</b> Resequencing Performance{% endblock %}
+{% block header %}<b>{{ ale_experiment_name }}</b> ALE Experiment{% endblock %}
 {% block content %}
     <!-- /.row -->
     <div class="row">
