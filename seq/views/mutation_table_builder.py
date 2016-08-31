@@ -69,6 +69,7 @@ class TableType(Enum):
     ENRICHMENT_MUTATIONS = 2
     FIXATING_MUTATIONS = 3
     SEARCH = 4
+    SHARED = 5
 
 
 if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -148,7 +149,9 @@ def get_table_body(reseq_dict,
 
             table_row = "<tr>"
             table_row += HTML_MUTATION_TABLE_ROW
-            if table_type == TableType.GENE_TABLE or table_type == TableType.SEARCH:
+            if table_type == TableType.GENE_TABLE or \
+                            table_type == TableType.SEARCH or \
+                            table_type == TableType.SHARED:
                 table_row += SAVE_TO_GLOBAL_FILTER_ONLY % mutation.id
             else:
                 table_row += SAVE_MUTATION_TO_FILTER_CELL_HTML % (mutation.id, ale_experiment_id, mutation.id)
