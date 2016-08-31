@@ -1,9 +1,6 @@
 {% extends 'dashboard_base.html' %}
 {% block title %}<title>{{ title }}</title>{% endblock %}
 {% block scripts_and_style %}
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    <script src="https://use.fontawesome.com/c56cc57732.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
 
     <style type="text/css" title="currentStyle">
@@ -184,10 +181,10 @@
 
     </script>
 {% endblock %}
-{% block header %} / <b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
-{% block ale %}class="active"{% endblock %}
+{% block header %}<b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
 {% block content %}
-    <!-- ALE selection drop-down -->
+<div class="row">
+     <!-- ALE selection drop-down -->
     {% if experiment_id %}
         <form action="" method="get">
             <p>
@@ -233,4 +230,5 @@
             </tbody>
         </table>
     </form>
+</div>
 {% endblock %}

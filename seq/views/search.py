@@ -20,7 +20,7 @@ from functools import reduce
 
 from seq.views import mutation_table_builder
 
-from common.util import check_hidden_columns_and_filters
+from common.db_util import get_all_ale_experiments, get_recent_experiments
 
 
 @login_required
@@ -58,11 +58,15 @@ def search(request):
             context = {"table_body": mark_safe(table_body),
                        "title": "Search Results",
                        "table_header": mark_safe(table_header),
-                       "last_search": last_search}
+                       "last_search": last_search,
+                       "experiments": get_all_ale_experiments(),
+                       "recent_experiments": get_recent_experiments()}
 
             return HttpResponse(template.render(context))
 
-    return render(request, 'search.html', {'error': error})
+    return render(request, 'search.html', {'error': error,
+                                           "experiments": get_all_ale_experiments(),
+                                           "recent_experiments": get_recent_experiments()})
 
 
 def _is_query_empty(query):

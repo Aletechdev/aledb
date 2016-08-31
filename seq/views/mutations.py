@@ -20,6 +20,8 @@ import seq.views.common
 
 from common.util import check_hidden_columns_and_filters
 
+from common.db_util import get_all_ale_experiments, get_recent_experiments
+
 __author__ = 'pphaneuf'
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -63,7 +65,10 @@ def mutation_table(request):
                "table_header": mark_safe(table_header),
                "template_header": "Mutations",
                "wt_filter": is_ref_strain_filtered,
-               "hidden_columns": hidden_columns}
+               "hidden_columns": hidden_columns,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments(ale_experiment_id)
+               }
 
     return HttpResponse(template.render(context))
 

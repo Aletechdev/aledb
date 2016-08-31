@@ -28,6 +28,8 @@ import aleinfo.settings as settings
 
 from common.util import check_hidden_columns_and_filters
 
+from common.db_util import get_all_ale_experiments, get_recent_experiments
+
 INDEX_TEMPLATE = "duplication.html"
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -71,7 +73,9 @@ def gene(request):
                "has_pdb_file": has_pdb_file,
                "homology_data": mark_safe(json.dumps(homology_data)),
                "has_homology_data": has_homology_data,
-               "hidden_columns": hidden_columns}
+               "hidden_columns": hidden_columns,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments()}
 
     return HttpResponse(template.render(context))
 

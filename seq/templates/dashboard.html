@@ -25,12 +25,10 @@
         <script src="http://d3js.org/d3.v3.min.js"></script>
 {% endblock %}
 <br>
-{% block ale %}{% endblock %}
-{% block dash %}class="active"{% endblock %}
-{% block search %}{% endblock %}
+{% block header %}Dashboard{% endblock %}
 {% block content %}
 <div class="row">
-    <div class="col-sm-6 col-md-4">
+    <div class="col-lg-6">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">ALE Analytics Unique Mutation Stats</h3>
@@ -83,7 +81,7 @@
             </table>
         </div>
     </div>
-    <div class="col-sm-6 col-md-4">
+    <div class="col-lg-6">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">ALE Analytics Unique Functional Change Stats</h3>
@@ -122,27 +120,29 @@
         </div>
     </div>
 </div>
+    <hr>
+<div class="row">
     <form action="/dashboard/" method="get">
-        <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
-        <input type="submit" value="Show" ><br>
-    </form>
-    <br>
-    <div class="chart"></div>
+    <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
+    <input type="submit" value="Show" ><br>
+</form>
+<br>
+<div class="chart"></div>
 <script src="//d3js.org/d3.v3.min.js"></script>
     <table>
     <td>
 <script>
 
-       var gene_data = {{ genes }};
-       var color_set = {{ gene_color_set }};
-       var mutation_types = {{ mutation_types }};
-       var extra_padding = 0;
-       function _get_label(datum) { return datum.mutation__gene;}
+   var gene_data = {{ genes }};
+   var color_set = {{ gene_color_set }};
+   var mutation_types = {{ mutation_types }};
+   var extra_padding = 0;
+   function _get_label(datum) { return datum.mutation__gene;}
 
-       {% include 'bar_chart.js' %}
+   {% include 'bar_chart.js' %}
 
 </script></td>
-    <td><script>
+        <td><script>
         var gene_data = {{ sequence_changes }};
         var color_set = {{ seq_color_set }};
         var mutation_types = {{ protein_types }};
@@ -153,4 +153,6 @@
 
     </script>
     </td></table>
+    </div>
+
 {% endblock %}

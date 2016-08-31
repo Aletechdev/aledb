@@ -8,7 +8,7 @@ import aleinfo.settings as settings
 
 from seq.views import common
 
-from common.db_util import get_reseq_queryset
+from common.db_util import get_reseq_queryset, get_all_ale_experiments, get_recent_experiments
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
@@ -43,7 +43,9 @@ def metadata(request):
 
     context = {"reseq_info_list": reseq_info_list,
                "reseq_report_url": reseq_report_url,
-               "ale_experiment_name": ale_experiment_name}
+               "ale_experiment_name": ale_experiment_name,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments(int(ale_experiment_id))}
 
     return HttpResponse(template.render(context))
 

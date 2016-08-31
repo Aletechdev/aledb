@@ -12,7 +12,7 @@ from filter import mutation_filter
 from fixation.models import FixatedMutation
 import metadata.views
 from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID
-from common.db_util import get_ordered_reseq_dict
+from common.db_util import get_ordered_reseq_dict, get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
@@ -68,7 +68,9 @@ def fixating_mutations(request):
                "table_header": mark_safe(table_header),
                "is_ascending_freq_filter": is_ascending_freq_filter,
                "template_header": "Fixating Mutations",
-               "hidden_columns": hidden_columns}
+               "hidden_columns": hidden_columns,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments(int(ale_experiment_id))}
 
     return HttpResponse(template.render(context))
 
@@ -113,11 +115,15 @@ def shared_fixating_mutations(request):
 
     template = loader.get_template("fixation/shared_fixating_mutations.html")
     context = {"title": "Shared Fixating Mutations",
-                       "table_header": mark_safe(table_header),
-                       "table_body": mark_safe(table_body),
-                       "reseq_info_list": reseq_info_list}
+               "table_header": mark_safe(table_header),
+               "table_body": mark_safe(table_body),
+               "reseq_info_list": reseq_info_list,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments()
+               }
 
     return HttpResponse(template.render(context))
+
 
 def _is_ascending_freq_filter(request):
     ret_val = False

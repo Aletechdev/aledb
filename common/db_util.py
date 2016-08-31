@@ -5,6 +5,7 @@ import ale.common
 import seq.models
 from common.util import get_ale_experiment_selector, get_ale_number_selector
 from seq.models import ResequencingExperiment
+from ale.models import AleExperiment, RecentExperiments
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
@@ -87,3 +88,51 @@ def get_all_observed_mutations(reseq_id_list):
 
 def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset):
     return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
+
+
+def get_all_ale_experiments():
+
+    return AleExperiment.objects.all().order_by('name')
+
+
+def get_recent_experiments(ale_experiment_id=None):
+
+    recent, created = RecentExperiments.objects.get_or_create(id=1)
+
+    if ale_experiment_id is not None:
+        recent_list = [recent.first, recent.second, recent.third, recent.fourth, recent.fifth]
+
+        if ale_experiment_id not in recent_list:
+            recent.fifth = recent.fourth
+            recent.fourth = recent.third
+            recent.third = recent.second
+            recent.second = recent.first
+            recent.first = ale_experiment_id
+        else:
+            temp = [x for x in recent_list if x != ale_experiment_id]
+            recent.fifth = temp[3]
+            recent.fourth = temp[2]
+            recent.third = temp[1]
+            recent.second = temp[0]
+            recent.first = ale_experiment_id
+
+        recent.save()
+
+    recent_exeriments = []
+
+    if recent.first is not None:
+        recent_exeriments.append(AleExperiment.objects.get(ale_id=recent.first))
+
+    if recent.second is not None:
+        recent_exeriments.append(AleExperiment.objects.get(ale_id=recent.second))
+
+    if recent.third is not None:
+        recent_exeriments.append(AleExperiment.objects.get(ale_id=recent.third))
+
+    if recent.fourth is not None:
+        recent_exeriments.append(AleExperiment.objects.get(ale_id=recent.fourth))
+
+    if recent.fifth is not None:
+        recent_exeriments.append(AleExperiment.objects.get(ale_id=recent.fifth))
+
+    return recent_exeriments
