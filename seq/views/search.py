@@ -38,14 +38,14 @@ def search(request):
 
         else:
 
-            seq_experiment_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request)
+            reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request)
 
-            if seq_experiment_dict is None or observed_mutations_with_gene_queryset is None:
+            if reseq_dict is None or observed_mutations_with_gene_queryset is None:
                 return render(request, 'search.html', {'error': True})
 
-            table_header = mutation_table_builder.get_table_header(seq_experiment_dict)
+            table_header = mutation_table_builder.get_table_header(reseq_dict)
 
-            table_body = mutation_table_builder.get_table_body(seq_experiment_dict,
+            table_body = mutation_table_builder.get_table_body(reseq_dict,
                                                                observed_mutations_with_gene_queryset,
                                                                table_type=mutation_table_builder.TableType.SEARCH)
 
@@ -97,11 +97,11 @@ def _get_seq_exp(request):
 
     ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
 
-    mutations_with_gene = _get_django_search_query(include_argument_list, exclude_argument_list)
+    mutations_with_gene_queryset = _get_django_search_query(include_argument_list, exclude_argument_list)
+    print(mutations_with_gene_queryset)
+    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation__in=mutations_with_gene_queryset)
 
-    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation__in=mutations_with_gene)
-
-    seq_experiment_dict = {}
+    reseq_dict = {}
 
     for observed_mutation in observed_mutations_with_gene:
 
@@ -120,9 +120,9 @@ def _get_seq_exp(request):
             or observed_mutation.sequencing_experiment.id in isolates_to_remove_id_list\
                 and observed_mutation.sequencing_experiment.id in isolates_to_show_id_list:
 
-            seq_experiment_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
+            reseq_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
 
-    return seq_experiment_dict, observed_mutations_with_gene
+    return reseq_dict, observed_mutations_with_gene
 
 
 def _get_last_search(request):
@@ -256,12 +256,12 @@ def _get_django_search_query(include_argument_list, exclude_argument_list):
     if len(include_argument_list) > 0:
         include_argument_list = reduce(operator.and_, include_argument_list)
     else:
-        return None, None
+        return None
 
     if len(exclude_argument_list) > 0:
-        mutations_with_gene = seq.models.Mutation.objects.filter(include_argument_list).exclude(
+        mutations_with_gene_queryset = seq.models.Mutation.objects.filter(include_argument_list).exclude(
             reduce(operator.or_, exclude_argument_list))
     else:
-        mutations_with_gene = seq.models.Mutation.objects.filter(include_argument_list)
+        mutations_with_gene_queryset = seq.models.Mutation.objects.filter(include_argument_list)
 
-    return mutations_with_gene
+    return mutations_with_gene_queryset
