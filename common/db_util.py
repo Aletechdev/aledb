@@ -11,15 +11,15 @@ __author__ = 'Patrick Phaneuf, Denny Gosting'
 
 
 def get_reseq_queryset(ale_experiment_id, ale_id=None):
-    reseq_query = ResequencingExperiment.objects.all().order_by('tech_rep__isolate__flask__ale_id__ale_id',
+    reseq_queryset = ResequencingExperiment.objects.all().order_by('tech_rep__isolate__flask__ale_id__ale_id',
                                                                 'tech_rep__isolate__flask__flask_number',
                                                                 'tech_rep__isolate__isolate_number')
 
-    reseq_query = get_ale_experiment_selector(ale_experiment_id, reseq_query)
+    reseq_queryset = get_ale_experiment_selector(ale_experiment_id, reseq_queryset)
 
-    reseq_query = get_ale_number_selector(ale_id, reseq_query)
+    reseq_queryset = get_ale_number_selector(ale_id, reseq_queryset)
 
-    return reseq_query
+    return reseq_queryset
 
 
 def get_reseq_dict(ale_experiment_id):
@@ -91,7 +91,6 @@ def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_que
 
 
 def get_all_ale_experiments():
-
     return AleExperiment.objects.all().order_by('name')
 
 
