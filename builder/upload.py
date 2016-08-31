@@ -247,11 +247,10 @@ def _process_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_f
                                                                                    gene=html_attrs[6],
                                                                                    description=html_attrs[7])
             except KeyError:
-                seq.models.UnassignedMissingCoverageEvidence(seq_id=evidence_dict[key]['seq_id'],
-                                                             start=evidence_dict[key]['start'],
-                                                             end=evidence_dict[key]['end'],
-                                                             sequencing_experiment=seq_experiment)
-
+                seq.models.UnassignedMissingCoverageEvidence.objects.create(seq_id=evidence_dict[key]['seq_id'],
+                                                                            start=evidence_dict[key]['start'],
+                                                                            end=evidence_dict[key]['end'],
+                                                                            sequencing_experiment=seq_experiment)
 
 
 def _parse_average_read_length(read_row_input):
@@ -404,9 +403,12 @@ def _get_mutations_rows(mutations_html, sample_type):
 
 def _get_unassigned_missing_coverage_rows(mutations_html):
 
-    mutation_table = mutations_html.find("th", attrs={"class": "missing_coverage_header_row"}).parent.parent
+    try:
+        mutation_table = mutations_html.find("th", attrs={"class": "missing_coverage_header_row"}).parent.parent
 
-    mutation_rows = mutation_table.findChildren("tr")
+        mutation_rows = mutation_table.findChildren("tr")
+    except AttributeError:
+        mutation_rows = []
 
     return mutation_rows
 
