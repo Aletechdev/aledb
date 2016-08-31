@@ -8,7 +8,6 @@ import numbers
 import seq.models
 import os
 from configparser import ConfigParser
-from django.core.exceptions import ObjectDoesNotExist
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
 
@@ -92,7 +91,8 @@ def add_breseq_results(technical_replicate_id,
     sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
 
     _process_unassigned_missing_coverage(seq_experiment,
-                                         sample_evidence_dict)
+                                         sample_evidence_dict,
+                                         breseq_folder)
 
 
 def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wild_type):
@@ -170,7 +170,7 @@ def _get_beautifulsoup_html(output_folder, html_file_name):
     output_file_path = join(output_folder, html_file_name)
 
     with open(output_file_path) as infile:
-        bs_html_file = BeautifulSoup(infile)
+        bs_html_file = BeautifulSoup(infile, "html.parser")
 
     return bs_html_file
 
@@ -186,7 +186,43 @@ def _is_missing_coverage_type(evidence_dict):
 
 
 # Should be able to re-use this with populations.
-def _process_unassigned_missing_coverage(seq_experiment, evidence_dict):
+def _process_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_folder):
+
+    mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
+
+    # column_type_index_dict = _get_mutation_header_dict(mutations_html)
+
+    mutation_rows = _get_unassigned_missing_coverage_rows(mutations_html)
+
+    missing_coverage_dict = {}
+
+    for row_num, row in enumerate(mutation_rows):
+
+        attrs = row.findChildren("td")
+
+        if not attrs:
+            continue
+
+        reads_left_url = attrs[0].find("a")['href']
+
+        reads_right_url = attrs[1].find("a")['href']
+
+        coverage = attrs[2].find("a")['href']
+
+        position = attrs[4].get_text()
+
+        size = attrs[6].get_text()
+
+        reads_left = attrs[7].get_text()
+
+        reads_right = attrs[8].get_text()
+
+        gene = attrs[9].get_text()
+
+        description = attrs[10].get_text()
+
+        missing_coverage_dict[position] = [reads_left_url, reads_right_url, coverage, size, reads_left, reads_right, gene, description]
+
     for key in evidence_dict:
 
         if _is_missing_coverage_type(evidence_dict[key]):
@@ -194,11 +230,28 @@ def _process_unassigned_missing_coverage(seq_experiment, evidence_dict):
             # Followed example given by ObservedMutations.
             # Seems like I have to use a mix of both Django and Alchemy ORM members.
             # Shouldn't have to do this.
-            missing_coverage = seq.models.UnassignedMissingCoverageEvidence(seq_id = evidence_dict[key]['seq_id'],
-                                                                            start=evidence_dict[key]['start'],
-                                                                            end=evidence_dict[key]['end'],
-                                                                            sequencing_experiment=seq_experiment)
-            missing_coverage.save()
+
+            # TODO: Keyerrors only exist because the missing_coverage dict does not have the starting strain (wild type) html file
+            try:
+                html_attrs = missing_coverage_dict[str(evidence_dict[key]['start'])]
+                seq.models.UnassignedMissingCoverageEvidence.objects.get_or_create(seq_id=evidence_dict[key]['seq_id'],
+                                                                                   start=evidence_dict[key]['start'],
+                                                                                   end=evidence_dict[key]['end'],
+                                                                                   sequencing_experiment=seq_experiment,
+                                                                                   reads_left_url=html_attrs[0],
+                                                                                   reads_right_url=html_attrs[1],
+                                                                                   coverage=html_attrs[2],
+                                                                                   size=html_attrs[3],
+                                                                                   reads_left=html_attrs[4],
+                                                                                   reads_right=html_attrs[5],
+                                                                                   gene=html_attrs[6],
+                                                                                   description=html_attrs[7])
+            except KeyError:
+                seq.models.UnassignedMissingCoverageEvidence(seq_id=evidence_dict[key]['seq_id'],
+                                                             start=evidence_dict[key]['start'],
+                                                             end=evidence_dict[key]['end'],
+                                                             sequencing_experiment=seq_experiment)
+
 
 
 def _parse_average_read_length(read_row_input):
@@ -345,6 +398,15 @@ def _get_mutations_rows(mutations_html, sample_type):
         html_class_to_parse = POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
 
     mutation_rows = mutation_table.findChildren("tr", attrs={"class": html_class_to_parse})
+
+    return mutation_rows
+
+
+def _get_unassigned_missing_coverage_rows(mutations_html):
+
+    mutation_table = mutations_html.find("th", attrs={"class": "missing_coverage_header_row"}).parent.parent
+
+    mutation_rows = mutation_table.findChildren("tr")
 
     return mutation_rows
 
