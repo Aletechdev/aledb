@@ -97,6 +97,7 @@ def add_breseq_results(technical_replicate_id,
 
 def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wild_type):
 
+
     afi = os.path.basename(os.path.dirname(os.path.dirname(breseq_folder)))
 
     # TODO: afi.startswith is not a valid approach. Need to find a way to determine wildtype if none is given
@@ -125,7 +126,10 @@ def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wil
                         gene_pair = [_find_between(genes[0], "\'", "\'"), _find_between(genes[-1], "\'", "\'")]
                         gene_entry = gene_pair[0] + "-" + gene_pair[1]
 
-                    mutation, exists = get_duplication_mutation(dup, gene_entry)
+                    mutation, created = seq.models.Mutation.objects.get_or_create(position=dup[0],
+                                                                                  gene=gene_entry,
+                                                                                  sequence_change=(format(int(dup[2]), ",d") + " bp x" + dup[4]),
+                                                                                  mutation_type="DUP")
 
                     mutation.protein_change = "Duplication"
 
@@ -143,6 +147,7 @@ def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wil
         return
 
 
+# TODO: Keep this function around: has no current use but can be used to consolidate duplications into 1 mutation
 def get_duplication_mutation(dup, gene_entry):
 
     exists = False
