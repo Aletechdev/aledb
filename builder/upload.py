@@ -8,6 +8,7 @@ import numbers
 import seq.models
 import os
 from configparser import ConfigParser
+from django.core.exceptions import ObjectDoesNotExist
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
 
@@ -47,6 +48,8 @@ config = ConfigParser()
 settings_file_path = os.path.join(os.path.dirname(__file__), "../aleinfo/settings.ini")
 config.read(settings_file_path)
 ale_data_root_dir = config.get("OTHER", "ale_data_root_dir")
+
+DUPLICATION_BP_TOLERANCE = 900
 
 
 def add_breseq_results(technical_replicate_id,
@@ -94,7 +97,6 @@ def add_breseq_results(technical_replicate_id,
 
 def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wild_type):
 
-
     afi = os.path.basename(os.path.dirname(os.path.dirname(breseq_folder)))
 
     # TODO: afi.startswith is not a valid approach. Need to find a way to determine wildtype if none is given
@@ -123,10 +125,7 @@ def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wil
                         gene_pair = [_find_between(genes[0], "\'", "\'"), _find_between(genes[-1], "\'", "\'")]
                         gene_entry = gene_pair[0] + "-" + gene_pair[1]
 
-                    mutation, created = seq.models.Mutation.objects.get_or_create(position=dup[0],
-                                                                                  gene=gene_entry,
-                                                                                  sequence_change=(format(int(dup[2]), ",d") + " bp x" + dup[4]),
-                                                                                  mutation_type="DUP")
+                    mutation, exists = get_duplication_mutation(dup, gene_entry)
 
                     mutation.protein_change = "Duplication"
 
@@ -142,6 +141,29 @@ def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wil
 
     except IOError:
         return
+
+
+def get_duplication_mutation(dup, gene_entry):
+
+    exists = False
+
+    mutations = seq.models.Mutation.objects.filter(position__gt=int(dup[0]) - DUPLICATION_BP_TOLERANCE,
+                                                   position__lt=int(dup[0]) + DUPLICATION_BP_TOLERANCE,
+                                                   gene=gene_entry,
+                                                   mutation_type="DUP")
+
+    # TODO: If count > 1 then should do more comparison to determine best match
+    if mutations.count() > 0:
+        mutation = mutations.first()
+        exists = True
+    else:
+
+        mutation = seq.models.Mutation.objects.create(position=dup[0],
+                                                      gene=gene_entry,
+                                                      sequence_change=(format(int(dup[2]), ",d") + " bp x" + dup[4]),
+                                                      mutation_type="DUP")
+
+    return mutation, exists
 
 
 def _get_beautifulsoup_html(output_folder, html_file_name):
