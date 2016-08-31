@@ -41,9 +41,7 @@ def mutation_filter(request):
     if request.method == 'POST':
         _handle_POST(request, filter_form_model, ale_experiment_id)
 
-    initial_filter_form_data = {"ignored_genes": filter_form_model.ignored_genes}
-
-    filter_form = FilterForm(initial=initial_filter_form_data)
+    filter_form = FilterForm(filter_form_model.__dict__)
 
     table_body, ignored_mutation_id_list = get_ignored_mutations(filter_form_model)
 
