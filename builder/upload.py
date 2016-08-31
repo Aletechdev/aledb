@@ -190,8 +190,6 @@ def _process_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_f
 
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
 
-    # column_type_index_dict = _get_mutation_header_dict(mutations_html)
-
     mutation_rows = _get_unassigned_missing_coverage_rows(mutations_html)
 
     missing_coverage_dict = {}
@@ -203,25 +201,16 @@ def _process_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_f
         if not attrs:
             continue
 
-        reads_left_url = attrs[0].find("a")['href']
-
-        reads_right_url = attrs[1].find("a")['href']
-
-        coverage = attrs[2].find("a")['href']
-
         position = attrs[4].get_text()
 
-        size = attrs[6].get_text()
-
-        reads_left = attrs[7].get_text()
-
-        reads_right = attrs[8].get_text()
-
-        gene = attrs[9].get_text()
-
-        description = attrs[10].get_text()
-
-        missing_coverage_dict[position] = [reads_left_url, reads_right_url, coverage, size, reads_left, reads_right, gene, description]
+        missing_coverage_dict[position] = [attrs[0].find("a")['href'],  # reads_left_url
+                                           attrs[1].find("a")['href'],  # reads_right_url
+                                           attrs[2].find("a")['href'],  # coverage
+                                           attrs[6].get_text(),         # size
+                                           attrs[7].get_text(),         # reads_left
+                                           attrs[8].get_text(),         # reads_right
+                                           attrs[9].get_text(),         # gene
+                                           attrs[10].get_text()]        # description
 
     for key in evidence_dict:
 
