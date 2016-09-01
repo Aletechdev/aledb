@@ -57,9 +57,7 @@ def get_reseq_info_list(reseq_queryset):
     for reseq in reseq_queryset:
 
         clonal_or_population = "clonal"
-
         if reseq.tech_rep.isolate.is_population:
-
             clonal_or_population = "population"
 
         experiment_info_tuple = (reseq,
@@ -74,7 +72,6 @@ def get_reseq_info_list(reseq_queryset):
                                  reseq.tech_rep.isolate.reseq_reference,
                                  reseq.tech_rep.isolate.breseq_version,
                                  reseq.tech_rep.isolate.reseq_date)
-
 
         reseq_info_list.append(experiment_info_tuple)
 
