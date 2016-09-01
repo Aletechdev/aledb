@@ -48,6 +48,8 @@ settings_file_path = os.path.join(os.path.dirname(__file__), "../aleinfo/setting
 config.read(settings_file_path)
 ale_data_root_dir = config.get("OTHER", "ale_data_root_dir")
 
+DUPLICATION_BP_TOLERANCE = 900
+
 
 def add_breseq_results(technical_replicate_id,
                        person,
@@ -89,7 +91,8 @@ def add_breseq_results(technical_replicate_id,
     sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
 
     _process_unassigned_missing_coverage(seq_experiment,
-                                         sample_evidence_dict)
+                                         sample_evidence_dict,
+                                         breseq_folder)
 
 
 def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wild_type):
@@ -144,11 +147,35 @@ def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wil
         return
 
 
+# TODO: Keep this function around: has no current use but can be used to consolidate duplications into 1 mutation
+def get_duplication_mutation(dup, gene_entry):
+
+    exists = False
+
+    mutations = seq.models.Mutation.objects.filter(position__gt=int(dup[0]) - DUPLICATION_BP_TOLERANCE,
+                                                   position__lt=int(dup[0]) + DUPLICATION_BP_TOLERANCE,
+                                                   gene=gene_entry,
+                                                   mutation_type="DUP")
+
+    # TODO: If count > 1 then should do more comparison to determine best match
+    if mutations.count() > 0:
+        mutation = mutations.first()
+        exists = True
+    else:
+
+        mutation = seq.models.Mutation.objects.create(position=dup[0],
+                                                      gene=gene_entry,
+                                                      sequence_change=(format(int(dup[2]), ",d") + " bp x" + dup[4]),
+                                                      mutation_type="DUP")
+
+    return mutation, exists
+
+
 def _get_beautifulsoup_html(output_folder, html_file_name):
     output_file_path = join(output_folder, html_file_name)
 
     with open(output_file_path) as infile:
-        bs_html_file = BeautifulSoup(infile)
+        bs_html_file = BeautifulSoup(infile, "html.parser")
 
     return bs_html_file
 
@@ -164,7 +191,32 @@ def _is_missing_coverage_type(evidence_dict):
 
 
 # Should be able to re-use this with populations.
-def _process_unassigned_missing_coverage(seq_experiment, evidence_dict):
+def _process_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_folder):
+
+    mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
+
+    mutation_rows = _get_unassigned_missing_coverage_rows(mutations_html)
+
+    missing_coverage_dict = {}
+
+    for row_num, row in enumerate(mutation_rows):
+
+        attrs = row.findChildren("td")
+
+        if not attrs:
+            continue
+
+        position = attrs[4].get_text()
+
+        missing_coverage_dict[position] = [attrs[0].find("a")['href'],  # reads_left_url
+                                           attrs[1].find("a")['href'],  # reads_right_url
+                                           attrs[2].find("a")['href'],  # coverage
+                                           attrs[6].get_text(),         # size
+                                           attrs[7].get_text(),         # reads_left
+                                           attrs[8].get_text(),         # reads_right
+                                           attrs[9].get_text(),         # gene
+                                           attrs[10].get_text()]        # description
+
     for key in evidence_dict:
 
         if _is_missing_coverage_type(evidence_dict[key]):
@@ -172,11 +224,27 @@ def _process_unassigned_missing_coverage(seq_experiment, evidence_dict):
             # Followed example given by ObservedMutations.
             # Seems like I have to use a mix of both Django and Alchemy ORM members.
             # Shouldn't have to do this.
-            missing_coverage = seq.models.UnassignedMissingCoverageEvidence(seq_id = evidence_dict[key]['seq_id'],
+
+            # TODO: Keyerrors only exist because the missing_coverage dict does not have the starting strain (wild type) html file
+            try:
+                html_attrs = missing_coverage_dict[str(evidence_dict[key]['start'])]
+                seq.models.UnassignedMissingCoverageEvidence.objects.get_or_create(seq_id=evidence_dict[key]['seq_id'],
+                                                                                   start=evidence_dict[key]['start'],
+                                                                                   end=evidence_dict[key]['end'],
+                                                                                   sequencing_experiment=seq_experiment,
+                                                                                   reads_left_url=html_attrs[0],
+                                                                                   reads_right_url=html_attrs[1],
+                                                                                   coverage=html_attrs[2],
+                                                                                   size=html_attrs[3],
+                                                                                   reads_left=html_attrs[4],
+                                                                                   reads_right=html_attrs[5],
+                                                                                   gene=html_attrs[6],
+                                                                                   description=html_attrs[7])
+            except KeyError:
+                seq.models.UnassignedMissingCoverageEvidence.objects.create(seq_id=evidence_dict[key]['seq_id'],
                                                                             start=evidence_dict[key]['start'],
                                                                             end=evidence_dict[key]['end'],
                                                                             sequencing_experiment=seq_experiment)
-            missing_coverage.save()
 
 
 def _parse_average_read_length(read_row_input):
@@ -323,6 +391,18 @@ def _get_mutations_rows(mutations_html, sample_type):
         html_class_to_parse = POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
 
     mutation_rows = mutation_table.findChildren("tr", attrs={"class": html_class_to_parse})
+
+    return mutation_rows
+
+
+def _get_unassigned_missing_coverage_rows(mutations_html):
+
+    try:
+        mutation_table = mutations_html.find("th", attrs={"class": "missing_coverage_header_row"}).parent.parent
+
+        mutation_rows = mutation_table.findChildren("tr")
+    except AttributeError:
+        mutation_rows = []
 
     return mutation_rows
 
