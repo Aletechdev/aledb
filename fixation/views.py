@@ -77,7 +77,7 @@ def fixating_mutations(request):
     return HttpResponse(template.render(context))
 
 @login_required
-def shared_fixating_mutations(request):
+def shared_fixated_mutations(request):
 
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
     selected_fixating_mutation_queryset = FixatedMutation.objects.filter(mutation_id=mutation_id)
@@ -104,43 +104,8 @@ def shared_fixating_mutations(request):
 
     reseq_info_list = metadata.views.get_reseq_info_list(ordered_reseq_queryset)
 
-    # fixating_mutation_list = [fixating_mutation.mutation for fixating_mutation in fixating_mutation_queryset]
-    # table_header = HTML_MUTATION_TABLE_HEADER
-    # fixating_mutation = fixating_mutation_list[0]  # Should only be 1 enrichment mutation
-    # table_body = "<tr>"
-    # table_body += mutation_table_builder.HTML_MUTATION_TABLE_ROW
-    # table_body += "<td>%s</td>" % fixating_mutation.position
-    # table_body += "<td>%s</td>" % fixating_mutation.mutation_type
-    # table_body += "<td>%s</td>" % fixating_mutation.sequence_change
-    # table_body += "<td><a href=/gene?g=%s>%s</a></td>" % (
-    # fixating_mutation.gene, fixating_mutation.gene)
-    # table_body += "<td>%s</td>" % ("" if fixating_mutation.function is None else fixating_mutation.function)
-    # table_body += "<td>%s</td>" % ("" if fixating_mutation.product is None else fixating_mutation.product)
-    # table_body += "<td>%s</td>" % ("" if fixating_mutation.go_process is None else fixating_mutation.go_process)
-    # table_body += "<td>%s</td>" % ("" if fixating_mutation.go_component is None else fixating_mutation.go_component)
-    # table_body += "<td>%s</td>" % fixating_mutation.protein_change
-    # table_body += "</tr>"
-    #
-    # # Get the reseq's that are part of the ALE experiments from the fixating_mutation_queryset
-    # fixating_mutation_ale_exp_list = [fixating_mutation.ale_experiment for fixating_mutation in
-    #                                     fixating_mutation_queryset]
-    # all_reseq_queryset = seq.models.ResequencingExperiment.objects.all()
-    # ale_experiment_reseq_list = []
-    # for reseq in all_reseq_queryset:
-    #     if reseq.ale_experiment in fixating_mutation_ale_exp_list:
-    #         ale_experiment_reseq_list.append(reseq)
-    #
-    # # filter reseq for only those that contain key mutation
-    # observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment__in=ale_experiment_reseq_list)
-    # fixating_mutation_reseq_list = []
-    # for observed_mutation in observed_mutation_queryset:
-    #     if observed_mutation.mutation in fixating_mutation_list:
-    #         fixating_mutation_reseq_list.append(observed_mutation.sequencing_experiment)
-    #
-    # reseq_info_list = metadata.views.get_reseq_info_list(fixating_mutation_reseq_list)
-
     template = loader.get_template("fixation/shared_fixating_mutations.html")
-    context = {"title": "Shared Fixating Mutations",
+    context = {"title": "Shared Fixated Genes",
                "table_header": mark_safe(table_header),
                "table_body": mark_safe(table_body),
                "reseq_info_list": reseq_info_list,
