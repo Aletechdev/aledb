@@ -66,18 +66,18 @@ def enrichment_mutations(request):
 def shared_enrichment_mutations(request):
 
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
-
-    enrichment_mutation_queryset = EnrichmentMutation.objects.filter(mutation_id=mutation_id)
-    enrichment_mutation = enrichment_mutation_queryset[0]  # There should only be one enrichment mutation per mutation_id
+    selected_enrichment_mutation_queryset = EnrichmentMutation.objects.filter(mutation_id=mutation_id)
+    enrichment_mutation = selected_enrichment_mutation_queryset[0]  # Should only be one enrichment mutation per mutation_id
     enriched_gene = enrichment_mutation.mutation.gene
 
-    enriched_mutation_queryset = EnrichmentMutation.objects.filter(mutation__gene=enriched_gene)
-    observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=enriched_mutation_queryset.values('mutation'))
+    enrichment_mutation_queryset = EnrichmentMutation.objects.filter(mutation__gene=enriched_gene)
+    observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=enrichment_mutation_queryset.values('mutation'))
 
-    ordered_reseq_queryset = ResequencingExperiment.objects.all().order_by('tech_rep__isolate__flask__ale_id__ale_experiment__name',
-                                                                           'tech_rep__isolate__flask__ale_id__ale_id',
-                                                                           'tech_rep__isolate__flask__flask_number',
-                                                                           'tech_rep__isolate__isolate_number')
+    ordered_reseq_queryset = ResequencingExperiment.objects.all().order_by(
+        'tech_rep__isolate__flask__ale_id__ale_experiment__name',
+        'tech_rep__isolate__flask__ale_id__ale_id',
+        'tech_rep__isolate__flask__flask_number',
+        'tech_rep__isolate__isolate_number')
     ordered_reseq_queryset = ordered_reseq_queryset.filter(
         id__in=observed_mutation_queryset.values('sequencing_experiment'))
 
