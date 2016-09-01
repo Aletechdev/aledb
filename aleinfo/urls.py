@@ -3,7 +3,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls import include, url
 
 urlpatterns = [
-    url(r'^accounts/login/$', include('login.urls')),
+    url(r'^accounts/login/', include('login.urls')),
     url(r'^', include('seq.urls')),
     url(r'^filter/', include('filter.urls')),
     url(r'^fixation/', include('fixation.urls')),
