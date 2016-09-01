@@ -63,11 +63,27 @@ class ResequencingExperiment(models.Model):
 
 class UnassignedMissingCoverageEvidence(models.Model):
 
+    reads_left_url = models.CharField(max_length=500, **blank_field)
+
+    reads_right_url = models.CharField(max_length=500, **blank_field)
+
+    coverage = models.CharField(max_length=500, **blank_field)
+
     seq_id = models.CharField(max_length=100)
 
-    start = models.IntegerField()
+    start = models.CharField(max_length=100)
 
-    end = models.IntegerField()
+    end = models.CharField(max_length=100)
+
+    size = models.CharField(max_length=200)
+
+    reads_left = models.CharField(max_length=100, **blank_field)
+
+    reads_right = models.CharField(max_length=100, **blank_field)
+
+    gene = models.CharField(max_length=50, **blank_field)
+
+    description = models.CharField(max_length=500, **blank_field)
 
     sequencing_experiment = models.ForeignKey(ResequencingExperiment,
                                               on_delete=models.CASCADE)
