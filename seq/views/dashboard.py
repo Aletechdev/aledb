@@ -38,16 +38,12 @@ def dashboard(request):
 
     gene_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
 
-    sequence_change_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
+    gene_query = dashboard_filter(gene_query)
 
-    genes = dashboard_filter(gene_query)
-
-    genes = genes.values('mutation__gene', 'mutation__mutation_type')\
+    genes = gene_query.values('mutation__gene', 'mutation__mutation_type')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
 
-    sequence_changes = dashboard_filter(sequence_change_query)
-
-    sequence_changes = sequence_changes.values('mutation__gene', 'mutation__protein_change')\
+    sequence_changes = gene_query.values('mutation__gene', 'mutation__protein_change')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
 
     genes = common.set_gene_bar_chart_colors(genes)

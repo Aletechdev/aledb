@@ -14,11 +14,11 @@ SETTINGS_SEQUENCING_URL = "sequencing_url"
 
 REQUEST_WT_FILTER = "wtflt"
 
-MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV', 'DUP', 'Unannotated']
+MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'DUP', 'AMP', 'CON', 'INV', 'Unannotated']
 
 PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication', 'Unannotated']
 
-COLORS = ['#FF851B', '#2ECC40', '#0074D9', '#FFDC00', '#7FDBFF', '#B10DC9', '#F012BE', '#111111', '#85144b']
+COLORS = ['#FF851B', '#2ECC40', '#0074D9', '#FFDC00', '#7FDBFF', '#B7337A', '#B10DC9', '#111111', '#85144b']
 
 DEFAULT_COLOR = '#AAAAAA'
 
