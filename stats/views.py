@@ -224,21 +224,11 @@ def _get_observed_mutation_queryset(request, ale_experiment_id):
 
     ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
 
-    wt_id = common.get_wt_reseq_id(ordered_reseq_dict)
-
-    ordered_reseq_dict = common.filter_out_wt_reseq(ordered_reseq_dict)
-
-    filter_mutation_list = get_all_observed_mutations([wt_id])
-
-    filter_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in filter_mutation_list]
-
     observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
 
     observed_mutation_query_set = _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set)
 
-    filter_observed_mutation_queryset = observed_mutation_query_set.exclude(mutation__in=filter_mutation_id_list)
-
-    return filter_observed_mutation_queryset
+    return observed_mutation_query_set
 
 
 # TODO: Should move this function into common if it is used on any other pages
