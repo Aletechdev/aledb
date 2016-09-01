@@ -22,11 +22,15 @@ from seq.views import mutation_table_builder
 
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 
+from common.util import check_hidden_columns_and_filters
+
 
 @login_required
 def search(request):
 
     error = False
+
+    check_hidden_columns_and_filters(request, None)
 
     if 'q' in request.GET:
 
