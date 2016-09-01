@@ -6,6 +6,7 @@ import seq.models
 from common.util import get_ale_experiment_selector, get_ale_number_selector
 from seq.models import ResequencingExperiment
 from ale.models import AleExperiment, RecentExperiments
+from django.core.exceptions import ObjectDoesNotExist
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
@@ -118,21 +119,31 @@ def get_recent_experiments(ale_experiment_id=None):
 
         recent.save()
 
-    recent_exeriments = []
+    recent_experiments = []
 
     if recent.first is not None:
-        recent_exeriments.append(AleExperiment.objects.get(ale_id=recent.first))
+        recent_experiments = experiment_exists(recent.first, recent_experiments)
 
     if recent.second is not None:
-        recent_exeriments.append(AleExperiment.objects.get(ale_id=recent.second))
+        recent_experiments = experiment_exists(recent.second, recent_experiments)
 
     if recent.third is not None:
-        recent_exeriments.append(AleExperiment.objects.get(ale_id=recent.third))
+        recent_experiments = experiment_exists(recent.third, recent_experiments)
 
     if recent.fourth is not None:
-        recent_exeriments.append(AleExperiment.objects.get(ale_id=recent.fourth))
+        recent_experiments = experiment_exists(recent.fourth, recent_experiments)
 
     if recent.fifth is not None:
-        recent_exeriments.append(AleExperiment.objects.get(ale_id=recent.fifth))
+        recent_experiments = experiment_exists(recent.fifth, recent_experiments)
 
-    return recent_exeriments
+    return recent_experiments
+
+
+def experiment_exists(ale_id, recent_experiments):
+
+    try:
+        recent_experiments.append(AleExperiment.objects.get(ale_id=ale_id))
+    except ObjectDoesNotExist:
+        pass
+
+    return recent_experiments
