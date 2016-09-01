@@ -26,17 +26,19 @@ def filter_ignored_genes_and_mutations(query_set, filter_settings):
     if filter_settings is None:
         ignored_genes = ""
         ignored_mutations = ""
+        starting_strain_mutations = []
         min_cutoff = 0
         max_cutoff = 100
     else:
         ignored_genes = filter_settings.ignored_genes
         ignored_mutations = filter_settings.ignored_mutations
+        starting_strain_mutations = filter_settings.starting_strain_mutations.split(',')
         min_cutoff = filter_settings.min_cutoff
         max_cutoff = filter_settings.max_cutoff
 
     query_set = _filter_ignored_genes(query_set, ignored_genes)
 
-    query_set = _filter_ignored_mutations(query_set, ignored_mutations)
+    query_set = _filter_ignored_mutations(query_set, ignored_mutations, starting_strain_mutations)
 
     query_set = _filter_by_frequency(query_set, min_cutoff, max_cutoff)
 
@@ -70,7 +72,7 @@ def _filter_ignored_genes(query_set, ignored_genes):
     return query_set
 
 
-def _filter_ignored_mutations(query_set, ignored_mutations):
+def _filter_ignored_mutations(query_set, ignored_mutations, starting_strain_mutations):
 
     global_ignored_mutations = GlobalFilter.objects.get(id=1).ignored_mutations
 
@@ -78,7 +80,7 @@ def _filter_ignored_mutations(query_set, ignored_mutations):
 
     ignored_mutations = clean_ignored_mutation_id_list(ignored_mutations)
 
-    ignored_mutation_list = global_ignored_mutations + ignored_mutations
+    ignored_mutation_list = global_ignored_mutations + ignored_mutations + starting_strain_mutations
 
     for mut_id in ignored_mutation_list:
 

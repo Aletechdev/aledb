@@ -8,6 +8,7 @@ import numbers
 import seq.models
 import os
 from configparser import ConfigParser
+from filter.models import AleExperimentFilter
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
 
@@ -57,6 +58,7 @@ def add_breseq_results(technical_replicate_id,
                        mutation_gd_parser,
                        annotation_gd_parser,
                        reseq_reference,
+                       experiment=None,
                        is_wild_type=False):
     """
     Figures out if the sample is clonal or population,
@@ -81,6 +83,7 @@ def add_breseq_results(technical_replicate_id,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
                        reseq_reference,
+                       experiment,
                        is_wild_type)
 
     _process_duplications(breseq_folder,
@@ -300,6 +303,7 @@ def _process_mutations(sample_type,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
                        reseq_reference,
+                       experiment,
                        is_wild_type):
 
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
@@ -309,6 +313,9 @@ def _process_mutations(sample_type,
     mutation_rows = _get_mutations_rows(mutations_html, sample_type)
 
     observed_mutation_list = []
+
+    # Only used if is_wild_type is True. Doesn't affect functionality otherwise
+    wild_type_mutation_list = []
 
     for row_num, row in enumerate(mutation_rows):
 
@@ -323,19 +330,15 @@ def _process_mutations(sample_type,
                                                                       sequence_change=attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_MUTATION]].text,
                                                                       mutation_type=sample_mutation_dict[mutation_num].get(GD_MUT_TYPE_ATTR_KEY))
 
-        '''
-        TODO: find out why this is used. I'm avoiding using it for now, since the mutation table won't the mutations
-        for those samples which have this set to true.
-        '''
-        if is_wild_type:
-            mutation.reference_error = True
-
         if mutation.protein_change is None:
 
             change = attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_ANNOTATION]].renderContents()
             mutation.protein_change = change
 
         mutation.save()
+
+        if is_wild_type is True:
+            wild_type_mutation_list.append(mutation.id)
 
         observed_mutation = seq.models.ObservedMutation(sequencing_experiment=seq_experiment,
                                                         mutation=mutation,
@@ -345,6 +348,14 @@ def _process_mutations(sample_type,
         observed_mutation_list.append(observed_mutation)
 
     seq.models.ObservedMutation.objects.bulk_create(observed_mutation_list)
+
+    if is_wild_type is True:
+
+        exp_filter, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=experiment.ale_id)
+
+        exp_filter.starting_strain_mutations = ','.join(str(mut) for mut in wild_type_mutation_list)
+
+        exp_filter.save()
 
 
 def _get_mutation_freq(mutation_dict):
