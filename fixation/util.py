@@ -9,7 +9,7 @@ __author__ = "Patrick Phaneuf"
 
 def get_fixated_mutation_list(ale_experiment_id):
     ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)  # Want to include WT so as to get mutations to remove.
-    fixating_mutation_queryset = get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict)
+    fixating_mutation_queryset = _get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict)
     fixating_mutation_queryset = _exclude_starting_strain_mutations(fixating_mutation_queryset, ordered_reseq_dict)
     return list(fixating_mutation_queryset)
 
@@ -28,7 +28,7 @@ def _exclude_starting_strain_mutations(fixating_mutation_queryset, reseq_dict):
     return fixating_mutation_queryset
 
 
-def get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict):
+def _get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict):
 
     ale_id_reseq_dict = _get_ale_id_reseq_dict(ordered_reseq_dict)
 
@@ -87,24 +87,27 @@ def _get_ale_id_reseq_dict(reseq_dict):
     return ale_reseq_dict
 
 
-
 def _get_ale_fixated_mutation_queryset(flask_mutation_dict):
 
     ordered_flask_number_list = sorted(flask_mutation_dict.keys())
 
-    first_flask_number = ordered_flask_number_list[0]
-    last_flask_number = ordered_flask_number_list[-1]
+    fixated_mutation_queryset = seq.models.Mutation.objects.none()
 
-    fixated_mutation_queryset = flask_mutation_dict[first_flask_number]
+    if len(flask_mutation_dict.keys()) > 1:
 
-    for flask_number in ordered_flask_number_list:
+        first_flask_number = ordered_flask_number_list[0]
+        last_flask_number = ordered_flask_number_list[-1]
 
-        flask_mutation_queryset = flask_mutation_dict[flask_number]
+        fixated_mutation_queryset = flask_mutation_dict[first_flask_number]
 
-        if flask_number == last_flask_number:
-            fixated_mutation_queryset = _get_common_mutations(fixated_mutation_queryset, flask_mutation_queryset)
-        else:
-            fixated_mutation_queryset = _get_new_and_fixated_mutation_queryset(fixated_mutation_queryset, flask_mutation_queryset)
+        for flask_number in ordered_flask_number_list:
+
+            flask_mutation_queryset = flask_mutation_dict[flask_number]
+
+            if flask_number == last_flask_number:
+                fixated_mutation_queryset = _get_common_mutations(fixated_mutation_queryset, flask_mutation_queryset)
+            else:
+                fixated_mutation_queryset = _get_new_and_fixated_mutation_queryset(fixated_mutation_queryset, flask_mutation_queryset)
 
     return fixated_mutation_queryset
 
