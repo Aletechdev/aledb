@@ -14,13 +14,17 @@ from filter.common import DEFAULT_MUTATION_FREQ_MIN, DEFAULT_MUTATION_FREQ_MAX
 
 from django.utils.safestring import mark_safe
 
-from filter.mutation_filter import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER
+from filter.mutation_filter import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, is_number
 
 from common.db_util import get_all_ale_experiments, get_recent_experiments
+
+from seq.models import Mutation
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 FILTER_TEMPLATE = "filter/index.html"
+
+STARTING_STRAIN_HEADER = """<tr><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td></tr>"""
 
 
 @login_required
@@ -45,13 +49,17 @@ def mutation_filter(request):
 
     table_body, ignored_mutation_id_list = get_ignored_mutations(filter_form_model)
 
+    starting_strain_body = get_starting_strain_mutations(filter_form_model)
+
     context = {"form": filter_form,
                "ale_experiment_id": ale_experiment_id,
                "ale_experiment_name": ale_experiment_name,
                "table_body": mark_safe(table_body),
                "table_header": mark_safe(TABLE_HEADER),
                "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(ale_experiment_id)}
+               "recent_experiments": get_recent_experiments(ale_experiment_id),
+               "starting_strain_body": mark_safe(starting_strain_body),
+               "starting_strain_header": mark_safe(STARTING_STRAIN_HEADER)}
 
     return HttpResponse(template.render(context))
 
@@ -74,3 +82,33 @@ def _handle_POST(request, filter_form_model, ale_experiment_id):
         print(filter_form.errors)
 
     return
+
+
+def get_starting_strain_mutations(filter_form_model):
+
+    mutation_id_list = filter_form_model.starting_strain_mutations.split(',')
+
+    table_body = ""
+
+    for mut_id in mutation_id_list:
+
+        if is_number(mut_id):
+            mutation = Mutation.objects.get(id=mut_id)
+
+            table_row = "<tr>"
+
+            table_row += "<td>%s</td>" % mutation.position
+            table_row += "<td>%s</td>" % mutation.mutation_type
+            table_row += "<td>%s</td>" % mutation.sequence_change
+            table_row += "<td>%s</td>" % mutation.gene
+            table_row += "<td>%s</td>" % mutation.function
+            table_row += "<td>%s</td>" % mutation.product
+            table_row += "<td>%s</td>" % mutation.go_process
+            table_row += "<td>%s</td>" % mutation.go_component
+            table_row += "<td>%s</td>" % mutation.protein_change
+
+            table_row += "</tr>"
+
+            table_body += table_row + "\n"
+
+    return table_body
