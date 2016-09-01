@@ -27,18 +27,21 @@ __author__ = 'pphaneuf'
 @login_required
 def dashboard(request):
     mutation_type_count_dict = {}
-    for mutation_type in common.MUTATION_TYPE_LIST:
-        mutation_type_count = seq.models.Mutation.objects.filter(mutation_type=mutation_type).count()
-        mutation_type_count_dict[mutation_type] = mutation_type_count
-
-    protein_change_type_count_dict = {}
-    for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST:
-        protein_change_count = seq.models.Mutation.objects.filter(protein_change__contains=protein_change_type).count()
-        protein_change_type_count_dict[protein_change_type] = protein_change_count
 
     gene_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
 
     gene_query = dashboard_filter(gene_query)
+
+    mutation_query_set = get_filtered_mutation_queryset(gene_query)
+
+    for mutation_type in common.MUTATION_TYPE_LIST:
+        mutation_type_count = mutation_query_set.filter(mutation_type=mutation_type).count()
+        mutation_type_count_dict[mutation_type] = mutation_type_count
+
+    protein_change_type_count_dict = {}
+    for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST:
+        protein_change_count = mutation_query_set.filter(protein_change__contains=protein_change_type).count()
+        protein_change_type_count_dict[protein_change_type] = protein_change_count
 
     genes = gene_query.values('mutation__gene', 'mutation__mutation_type')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
@@ -67,3 +70,14 @@ def dashboard(request):
     template = loader.get_template(DASHBOARD_TEMPLATE)
 
     return HttpResponse(template.render(context))
+
+
+def get_filtered_mutation_queryset(gene_query):
+
+    mut_id_list = gene_query.values_list('mutation_id').distinct()
+
+    filtered_mut_id_list = [mut_id[0] for mut_id in mut_id_list]
+
+    mutation_queryset = seq.models.Mutation.objects.filter(id__in=filtered_mut_id_list)
+
+    return mutation_queryset
