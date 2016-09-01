@@ -63,7 +63,7 @@ def enrichment_mutations(request):
 # TODO: remove table tech_rep checkboxes
 # TODO: filter out starting-strain mutations: Denny to implement first on normal mutation tables.
 @login_required
-def shared_enrichment_mutations(request):
+def shared_enriched_genes(request):
 
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
     selected_enrichment_mutation_queryset = EnrichmentMutation.objects.filter(mutation_id=mutation_id)

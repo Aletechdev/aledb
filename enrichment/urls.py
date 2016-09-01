@@ -4,5 +4,5 @@ import enrichment.views
 
 urlpatterns = [
     url('^$', enrichment.views.enrichment_mutations, name="enrichment"),
-    url('^shared', enrichment.views.shared_enrichment_mutations, name="shared_enrichment_mutations")
+    url('^shared', enrichment.views.shared_enriched_genes, name="shared_enrichment_mutations")
 ]
