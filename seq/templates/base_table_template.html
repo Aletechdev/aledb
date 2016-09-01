@@ -152,16 +152,12 @@
         }
 
         function save_to_global_filter(mutation_id) {
-            console.log("SAVING TO GLOBAL");
             $.ajax({
                 type: "POST",
                 url: "",
                 data: { mut_id: mutation_id,
                         save_method: "global"
                 },
-                success: function (response) {
-                    console.log("SUCCESS");
-                }
             })
         }
 

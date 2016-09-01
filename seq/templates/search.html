@@ -112,6 +112,15 @@
                 document.getElementById('prot').value = '';
                 document.getElementById('ale').value = '';
             }
+            function save_to_global_filter(mutation_id) {
+                $.ajax({
+                    type: "POST",
+                    url: "",
+                    data: { mut_id: mutation_id,
+                            save_method: "global"
+                    },
+                })
+            }
         </script>
 {% endblock %}
 {% block header %}Search{% endblock %}
