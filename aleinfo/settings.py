@@ -83,12 +83,14 @@ SECRET_KEY = 'iv3^9^ccmwlfyeyp5q=%#z14p=p^6f1ujyzk8a3p*buzrg^2or'
 SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
 FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
 FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
+LOGIN_TEMPLATE_PATH = os.path.join(BASE_DIR, 'login/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [SEQ_TEMPLATE_PATH,
                  FILTER_TEMPLATE_PATH,
-                 FIXATION_TEMPLATE_PATH],
+                 FIXATION_TEMPLATE_PATH,
+                 LOGIN_TEMPLATE_PATH],
         'OPTIONS': {
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
@@ -137,6 +139,7 @@ INSTALLED_APPS = (
     'stats',
     'metadata',
     'enrichment',
+    'login',
 )
 
 # A sample logging configuration. The only tangible logging
