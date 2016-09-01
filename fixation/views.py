@@ -7,13 +7,15 @@ from django.utils.safestring import mark_safe
 #TODO: seq.views.common.get_ordered_reseq_dict could likely be refactored into common.db_util.get_reseq_dict
 import seq.views.common
 from seq.views import mutation_table_builder
-import seq.models
+from seq.models import ObservedMutation
+from seq.models import ResequencingExperiment
 from filter import mutation_filter
 from fixation.models import FixatedMutation
 import metadata.views
 from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID
 from common.db_util import get_ordered_reseq_dict, get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
+from collections import OrderedDict
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
@@ -75,46 +77,35 @@ def fixating_mutations(request):
     return HttpResponse(template.render(context))
 
 @login_required
-def shared_fixating_mutations(request):
+def shared_fixated_mutations(request):
+
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
-    fixating_mutation_queryset = FixatedMutation.objects.filter(mutation_id=mutation_id)
-    fixating_mutation_list = [fixating_mutation.mutation for fixating_mutation in fixating_mutation_queryset]
-    table_header = HTML_MUTATION_TABLE_HEADER
-    fixating_mutation = fixating_mutation_list[0]  # Should only be 1 enrichment mutation
-    table_body = "<tr>"
-    table_body += mutation_table_builder.HTML_MUTATION_TABLE_ROW
-    table_body += "<td>%s</td>" % fixating_mutation.position
-    table_body += "<td>%s</td>" % fixating_mutation.mutation_type
-    table_body += "<td>%s</td>" % fixating_mutation.sequence_change
-    table_body += "<td><a href=/gene?g=%s>%s</a></td>" % (
-    fixating_mutation.gene, fixating_mutation.gene)
-    table_body += "<td>%s</td>" % ("" if fixating_mutation.function is None else fixating_mutation.function)
-    table_body += "<td>%s</td>" % ("" if fixating_mutation.product is None else fixating_mutation.product)
-    table_body += "<td>%s</td>" % ("" if fixating_mutation.go_process is None else fixating_mutation.go_process)
-    table_body += "<td>%s</td>" % ("" if fixating_mutation.go_component is None else fixating_mutation.go_component)
-    table_body += "<td>%s</td>" % fixating_mutation.protein_change
-    table_body += "</tr>"
+    selected_fixating_mutation_queryset = FixatedMutation.objects.filter(mutation_id=mutation_id)
+    fixating_mutation = selected_fixating_mutation_queryset[0]  # Should only be one fixating mutation per mutation_id
+    fixating_gene = fixating_mutation.mutation.gene
 
-    # Get the reseq's that are part of the ALE experiments from the fixating_mutation_queryset
-    fixating_mutation_ale_exp_list = [fixating_mutation.ale_experiment for fixating_mutation in
-                                        fixating_mutation_queryset]
-    all_reseq_queryset = seq.models.ResequencingExperiment.objects.all()
-    ale_experiment_reseq_list = []
-    for reseq in all_reseq_queryset:
-        if reseq.ale_experiment in fixating_mutation_ale_exp_list:
-            ale_experiment_reseq_list.append(reseq)
+    fixating_mutation_queryset = FixatedMutation.objects.filter(mutation__gene=fixating_gene)
+    observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=fixating_mutation_queryset.values('mutation'))
 
-    # filter reseq for only those that contain key mutation
-    observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment__in=ale_experiment_reseq_list)
-    fixating_mutation_reseq_list = []
-    for observed_mutation in observed_mutation_queryset:
-        if observed_mutation.mutation in fixating_mutation_list:
-            fixating_mutation_reseq_list.append(observed_mutation.sequencing_experiment)
+    ordered_reseq_queryset = ResequencingExperiment.objects.all().order_by(
+        'tech_rep__isolate__flask__ale_id__ale_experiment__name',
+        'tech_rep__isolate__flask__ale_id__ale_id',
+        'tech_rep__isolate__flask__flask_number',
+        'tech_rep__isolate__isolate_number')
+    ordered_reseq_queryset = ordered_reseq_queryset.filter(
+        id__in=observed_mutation_queryset.values('sequencing_experiment'))
 
-    reseq_info_list = metadata.views.get_reseq_info_list(fixating_mutation_reseq_list)
+    ordered_reseq_dict = OrderedDict((reseq.id, reseq) for reseq in ordered_reseq_queryset)
+    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
+
+    table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
+                                                       observed_mutation_queryset,
+                                                       table_type=mutation_table_builder.TableType.SHARED)
+
+    reseq_info_list = metadata.views.get_reseq_info_list(ordered_reseq_queryset)
 
     template = loader.get_template("fixation/shared_fixating_mutations.html")
-    context = {"title": "Shared Fixating Mutations",
+    context = {"title": "Shared Fixated Genes",
                "table_header": mark_safe(table_header),
                "table_body": mark_safe(table_body),
                "reseq_info_list": reseq_info_list,
@@ -218,7 +209,7 @@ def _filter_mutations_from_same_flask(observed_mutation_list):
 
 def _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, reseq_id_list):
     fixating_mutation_id_list = [fixating_mutation.mutation.id for fixating_mutation in fixating_mutation_queryset]
-    all_observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
+    all_observed_mutation_queryset = ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
     fixating_observed_mutation_queryset = all_observed_mutation_queryset.filter(mutation_id__in=fixating_mutation_id_list)
 
     return fixating_observed_mutation_queryset
