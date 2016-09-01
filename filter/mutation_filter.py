@@ -228,7 +228,9 @@ def dashboard_filter(queryset):
     for exp in all_experiments:
         filter_settings = get_filter_settings(exp.ale_id)
 
-        ignored_mutations = clean_ignored_mutation_id_list(filter_settings.ignored_mutations + global_filter.ignored_mutations)
+        ignored_mutations = clean_ignored_mutation_id_list(filter_settings.ignored_mutations +
+                                                           global_filter.ignored_mutations +
+                                                           "," + filter_settings.starting_strain_mutations)
 
         for mut_id in ignored_mutations:
 
