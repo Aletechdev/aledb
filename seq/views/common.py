@@ -1,9 +1,7 @@
 import re
-import collections
 import ale.common
 import ale.models
 import seq.models
-import common.db_util
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
 
@@ -97,30 +95,6 @@ def get_ale_experiment_name(request):
         ale_experiment_name = ale_experiment[0].name
 
     return ale_experiment_name
-
-
-def get_ordered_reseq_dict(request, include_starting_strain=False):
-    seq_experiment_ordered_dict = collections.OrderedDict()
-
-    # slightly different from common.db_util.
-    if include_starting_strain:
-        starting_strain_raw_queryset = _get_starting_string_mutation_queryset(request)
-        for reseq in starting_strain_raw_queryset:
-            seq_experiment_ordered_dict[reseq.id] = reseq
-
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    ale_id = request.GET.get(REQUEST_ALE_ID)
-    reseq_queryset = common.db_util.get_reseq_queryset(ale_experiment_id, ale_id)
-
-    for reseq in reseq_queryset:
-        seq_experiment_ordered_dict[reseq.id] = reseq
-    return seq_experiment_ordered_dict
-
-
-def _get_starting_string_mutation_queryset(request):
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    ale_id = ale.common.STARTING_STRAIN_ALE_ID
-    return common.db_util.get_reseq_queryset(ale_experiment_id, ale_id)
 
 
 # TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit.

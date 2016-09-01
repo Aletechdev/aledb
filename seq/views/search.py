@@ -102,7 +102,6 @@ def _get_seq_exp(request):
     ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
 
     mutations_with_gene_queryset = _get_django_search_query(include_argument_list, exclude_argument_list)
-    print(mutations_with_gene_queryset)
     observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation__in=mutations_with_gene_queryset)
 
     reseq_dict = {}
