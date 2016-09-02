@@ -103,6 +103,8 @@ def shared_fixated_mutations(request):
 
     reseq_info_list = metadata.views.get_reseq_info_list(ordered_reseq_queryset)
 
+    check_hidden_columns_and_filters(request, None)
+
     template = loader.get_template("fixation/shared_fixating_mutations.html")
     context = {"title": "Shared Fixated Genes",
                "table_header": mark_safe(table_header),
