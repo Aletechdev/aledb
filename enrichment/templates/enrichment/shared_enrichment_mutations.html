@@ -1,12 +1,9 @@
 {% extends 'dashboard_base.html' %}
 {% block title %}<title>{{ title }}</title>{% endblock %}
 {% block scripts_and_style %}
-    <script type="text/javascript" src="/static/DataTables/media/js/jquery.js"></script>
-
     <link rel="stylesheet" type="text/css" href="/static/DataTables/media/css/jquery.dataTables.css">
     <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
           media="print, projection, screen"/>
-
     <style type="text/css" title="currentStyle">
         @import "/static/DataTables/extras/TableTools/media/css/TableTools.css";
 
@@ -110,12 +107,23 @@
             });
             query_string += "}";
             window.location.replace(url + query_string);
+        };
+
+        function save_to_global_filter(mutation_id) {
+            $.ajax({
+                type: "POST",
+                url: "",
+                data: { mut_id: mutation_id,
+                        save_method: "global"
+                }
+            })
         }
+
     </script>
 {% endblock %}
 {% block header %}{{ title }}{% endblock %}
 {% block content %}
-<table id="data" class="tablesorter">
+<table id="data">
     <thead>
     {{ table_header }}
     </thead>
@@ -125,7 +133,6 @@
 </table>
 
 <br><br>
-
 <table id="runs" class="tablesorter">
     <thead>
     <tr>
