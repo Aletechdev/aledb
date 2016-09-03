@@ -2,8 +2,7 @@ import collections
 from filter.mutation_filter import get_filter_settings, clean_ignored_mutation_id_list
 from common.db_util import get_ordered_reseq_dict, get_ale_exp_reseq_mutation_lists
 from filter.models import GlobalFilter
-
-INTERGENIC_SPLIT_CHAR = '/'
+from genes.util import get_gene_list
 
 __author__ = "Patrick Phaneuf"
 
@@ -31,10 +30,7 @@ def _get_mutation_gene_count_dict(ale_experiment_mutation_list, ignored_mutation
 
             if mutation.id not in ignored_mutation_id_list:
 
-                if INTERGENIC_SPLIT_CHAR in mutation.gene:
-                    gene_list = mutation.gene.split(INTERGENIC_SPLIT_CHAR)
-                else:
-                    gene_list = [mutation.gene]
+                gene_list = get_gene_list(mutation.gene)
 
                 for gene in gene_list:
                     mutation_gene_count_dict[gene] += 1
@@ -51,10 +47,7 @@ def _get_enrichment_mutation_list(ale_experiment_reseq_mutation_lists,
         for mutation in reseq_mutation_list:
             if mutation.id not in ignored_mutation_id_list:
 
-                if INTERGENIC_SPLIT_CHAR in mutation.gene:
-                    gene_list = mutation.gene.split(INTERGENIC_SPLIT_CHAR)
-                else:
-                    gene_list = [mutation.gene]
+                gene_list = get_gene_list(mutation.gene)
 
                 for gene in gene_list:
                     if mutation_gene_count_dict[gene] > 1 \
