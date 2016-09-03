@@ -3,6 +3,7 @@ from filter.mutation_filter import get_filter_settings, clean_ignored_mutation_i
 from common.db_util import get_ordered_reseq_dict, get_ale_exp_reseq_mutation_lists
 from filter.models import GlobalFilter
 from genes.util import get_gene_list
+from genes.util import get_clean_gene_list
 
 __author__ = "Patrick Phaneuf"
 
@@ -31,8 +32,9 @@ def _get_mutation_gene_count_dict(ale_experiment_mutation_list, ignored_mutation
             if mutation.id not in ignored_mutation_id_list:
 
                 gene_list = get_gene_list(mutation.gene)
+                clean_gene_list = get_clean_gene_list(gene_list)
 
-                for gene in gene_list:
+                for gene in clean_gene_list:
                     mutation_gene_count_dict[gene] += 1
 
     return mutation_gene_count_dict
@@ -48,8 +50,9 @@ def _get_enrichment_mutation_list(ale_experiment_reseq_mutation_lists,
             if mutation.id not in ignored_mutation_id_list:
 
                 gene_list = get_gene_list(mutation.gene)
+                clean_gene_list = get_clean_gene_list(gene_list)
 
-                for gene in gene_list:
+                for gene in clean_gene_list:
                     if mutation_gene_count_dict[gene] > 1 \
                             and mutation not in enrichment_mutation_list:   # This condition will keep intergenic mutations from being added twice since they consider two genes which may both already have a mutation; in the case the intergenic mutation will only be added once.
                         enrichment_mutation_list.append(mutation)
