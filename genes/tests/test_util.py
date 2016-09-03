@@ -1,6 +1,7 @@
 import unittest
 
 from genes.util import get_gene_list
+from genes.util import get_clean_gene_list
 
 __author__ = 'Patrick Phaneuf'
 
@@ -14,7 +15,13 @@ class TestUtil(unittest.TestCase):
         self.assertEquals(returned, expected)
 
     def test_get_gene_list_intragenic(self):
-        mutation_gene_str = "[asdf]"
+        gene_list = ["[asdf]", "qwer"]
+        returned = get_clean_gene_list(gene_list)
+        expected = ["asdf", "qwer"]
+        self.assertEquals(returned, expected)
+
+    def test_get_gene_list_gene_range(self):
+        mutation_gene_str = "[thrA]-thrC"  # Gene range from NC_000913.3
         returned = get_gene_list(mutation_gene_str)
-        expected = ['asdf']
+        expected = ['[thrA]', 'thrB', 'thrC']
         self.assertEquals(returned, expected)
