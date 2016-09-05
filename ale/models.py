@@ -164,6 +164,7 @@ class Flask(models.Model):
         verbose_name_plural = "Flasks"
 
 
+#TODO: Change 'reseq_reference' field to 'reseq_ref_name'
 class Isolate(models.Model):
 
     isolate_number = models.IntegerField()
