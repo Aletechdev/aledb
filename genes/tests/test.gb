@@ -1,0 +1,198 @@
+LOCUS       NC_000913            4641652 bp    DNA     circular CON 16-DEC-2014
+DEFINITION  Escherichia coli str. K-12 substr. MG1655, complete genome.
+ACCESSION   NC_000913
+VERSION     NC_000913.3  GI:556503834
+DBLINK      BioProject: PRJNA57779
+            BioSample: SAMN02604091
+KEYWORDS    RefSeq.
+SOURCE      Escherichia coli str. K-12 substr. MG1655
+  ORGANISM  Escherichia coli str. K-12 substr. MG1655
+            Bacteria; Proteobacteria; Gammaproteobacteria; Enterobacteriales;
+            Enterobacteriaceae; Escherichia.
+REFERENCE   1  (bases 1 to 4641652)
+  AUTHORS   Riley,M., Abe,T., Arnaud,M.B., Berlyn,M.K., Blattner,F.R.,
+            Chaudhuri,R.R., Glasner,J.D., Horiuchi,T., Keseler,I.M., Kosuge,T.,
+            Mori,H., Perna,N.T., Plunkett,G. III, Rudd,K.E., Serres,M.H.,
+            Thomas,G.H., Thomson,N.R., Wishart,D. and Wanner,B.L.
+  TITLE     Escherichia coli K-12: a cooperatively developed annotation
+            snapshot--2005
+  JOURNAL   Nucleic Acids Res. 34 (1), 1-9 (2006)
+   PUBMED   16397293
+  REMARK    Publication Status: Online-Only
+REFERENCE   2  (bases 1 to 4641652)
+  AUTHORS   Hayashi,K., Morooka,N., Yamamoto,Y., Fujita,K., Isono,K., Choi,S.,
+            Ohtsubo,E., Baba,T., Wanner,B.L., Mori,H. and Horiuchi,T.
+  TITLE     Highly accurate genome sequences of Escherichia coli K-12 strains
+            MG1655 and W3110
+  JOURNAL   Mol. Syst. Biol. 2, 2006 (2006)
+   PUBMED   16738553
+REFERENCE   3  (bases 1 to 4641652)
+  AUTHORS   Blattner,F.R., Plunkett,G. III, Bloch,C.A., Perna,N.T., Burland,V.,
+            Riley,M., Collado-Vides,J., Glasner,J.D., Rode,C.K., Mayhew,G.F.,
+            Gregor,J., Davis,N.W., Kirkpatrick,H.A., Goeden,M.A., Rose,D.J.,
+            Mau,B. and Shao,Y.
+COMMENT     REVIEWED REFSEQ: This record has been curated by NCBI staff. The
+            reference sequence is identical to U00096.
+            On Nov 3, 2013 this sequence version replaced gi:49175990.
+            RefSeq Category: Reference Genome
+                        FGS: First Genome sequenced
+                        MOD: Model Organism
+                        PHY: Based on Phylogenetics
+                        UPR: UniProt Genome
+            Current U00096 annotation updates are derived from EcoGene
+            http://ecogene.org. Suggestions for updates can be sent to Dr.
+            Kenneth Rudd (krudd@miami.edu). These updates are being generated
+            from a collaboration that also includes ASAP/ERIC, the Coli Genetic
+            Stock Center, EcoliHub, EcoCyc, RegulonDB and UniProtKB/Swiss-Prot.
+            COMPLETENESS: full length.
+FEATURES             Location/Qualifiers
+     source          1..4641652
+                     /organism="Escherichia coli str. K-12 substr. MG1655"
+                     /mol_type="genomic DNA"
+                     /strain="K-12"
+                     /sub_strain="MG1655"
+                     /db_xref="taxon:511145"
+     gene            190..255
+                     /gene="wrong"
+                     /locus_tag="b0001"
+                     /gene_synonym="ECK0001; JW4367"
+                     /db_xref="EcoGene:EG11277"
+                     /db_xref="GeneID:944742"
+     CDS             190..255
+                     /gene="geneA"
+                     /locus_tag="b0001"
+                     /gene_synonym="ECK0001; JW4367"
+                     /function="leader; Amino acid biosynthesis: Threonine"
+                     /GO_process="GO:0009088 - threonine biosynthetic process"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="thr operon leader peptide"
+                     /protein_id="NP_414542.1"
+                     /db_xref="GI:16127995"
+                     /db_xref="ASAP:ABE-0000006"
+                     /db_xref="UniProtKB/Swiss-Prot:P0AD86"
+                     /db_xref="EcoGene:EG11277"
+                     /db_xref="GeneID:944742"
+                     /translation="MKRISTTITTTITITTGNGAG"
+     gene            337..2799
+                     /gene="wrong"
+                     /locus_tag="b0002"
+                     /gene_synonym="ECK0002; Hs; JW0001; thrA1; thrA2; thrD"
+                     /db_xref="EcoGene:EG10998"
+                     /db_xref="GeneID:945803"
+     CDS             337..2799
+                     /gene="geneB"
+                     /locus_tag="b0002"
+                     /gene_synonym="ECK0002; Hs; JW0001; thrA1; thrA2; thrD"
+                     /EC_number="1.1.1.3"
+                     /EC_number="2.7.2.4"
+                     /function="enzyme; Amino acid biosynthesis: Threonine"
+                     /experiment="N-terminus verified by Edman degradation:
+                     PMID 354697,4562989"
+                     /GO_component="GO:0005737 - cytoplasm"
+                     /GO_process="GO:0009090 - homoserine biosynthetic process;
+                     GO:0009086 - methionine biosynthetic process; GO:0009088 -
+                     threonine biosynthetic process"
+                     /note="bifunctional: aspartokinase I (N-terminal);
+                     homoserine dehydrogenase I (C-terminal)"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="Bifunctional aspartokinase/homoserine
+                     dehydrogenase 1"
+                     /protein_id="NP_414543.1"
+                     /db_xref="GI:16127996"
+                     /db_xref="ASAP:ABE-0000008"
+                     /db_xref="UniProtKB/Swiss-Prot:P00561"
+                     /db_xref="EcoGene:EG10998"
+                     /db_xref="GeneID:945803"
+                     /translation="MRVLKFGGTSVANAERFLRVADILESNARQGQVATVLSAPAKIT
+                     NHLVAMIEKTISGQDALPNISDAERIFAELLTGLAAAQPGFPLAQLKTFVDQEFAQIK
+                     HVLHGISLLGQCPDSINAALICRGEKMSIAIMAGVLEARGHNVTVIDPVEKLLAVGHY
+                     LESTVDIAESTRRIAASRIPADHMVLMAGFTAGNEKGELVVLGRNGSDYSAAVLAACL
+                     RADCCEIWTDVDGVYTCDPRQVPDARLLKSMSYQEAMELSYFGAKVLHPRTITPIAQF
+                     QIPCLIKNTGNPQAPGTLIGASRDEDELPVKGISNLNNMAMFSVSGPGMKGMVGMAAR
+                     VFAAMSRARISVVLITQSSSEYSISFCVPQSDCVRAERAMQEEFYLELKEGLLEPLAV
+                     TERLAIISVVGDGMRTLRGISAKFFAALARANINIVAIAQGSSERSISVVVNNDDATT
+                     GVRVTHQMLFNTDQVIEVFVIGVGGVGGALLEQLKRQQSWLKNKHIDLRVCGVANSKA
+                     LLTNVHGLNLENWQEELAQAKEPFNLGRLIRLVKEYHLLNPVIVDCTSSQAVADQYAD
+                     FLREGFHVVTPNKKANTSSMDYYHQLRYAAEKSRRKFLYDTNVGAGLPVIENLQNLLN
+                     AGDELMKFSGILSGSLSYIFGKLDEGMSFSEATTLAREMGYTEPDPRDDLSGMDVARK
+                     LLILARETGRELELADIEIEPVLPAEFNAEGDVAAFMANLSQLDDLFAARVAKARDEG
+                     KVLRYVGNIDEDGVCRVKIAEVDGNDPLFKVKNGENALAFYSHYYQPLPLVLRGYGAG
+                     NDVTAAGVFADLLRTLSWKLGV"
+     gene            2801..3733
+                     /gene="wrong_geneC"
+                     /locus_tag="b0003"
+                     /gene_synonym="ECK0003; JW0002"
+                     /db_xref="EcoGene:EG10999"
+                     /db_xref="GeneID:947498"
+     CDS             2801..3733
+                     /gene="geneC"
+                     /locus_tag="b0003"
+                     /gene_synonym="ECK0003; JW0002"
+                     /EC_number="2.7.1.39"
+                     /function="enzyme; Amino acid biosynthesis: Threonine"
+                     /GO_component="GO:0005737 - cytoplasm"
+                     /GO_process="GO:0009088 - threonine biosynthetic process"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="homoserine kinase"
+                     /protein_id="NP_414544.1"
+                     /db_xref="GI:16127997"
+                     /db_xref="ASAP:ABE-0000010"
+                     /db_xref="UniProtKB/Swiss-Prot:P00547"
+                     /db_xref="EcoGene:EG10999"
+                     /db_xref="GeneID:947498"
+                     /translation="MVKVYAPASSANMSVGFDVLGAAVTPVDGALLGDVVTVEAAETF
+                     SLNNLGRFADKLPSEPRENIVYQCWERFCQELGKQIPVAMTLEKNMPIGSGLGSSACS
+                     VVAALMAMNEHCGKPLNDTRLLALMGELEGRISGSIHYDNVAPCFLGGMQLMIEENDI
+                     ISQQVPGFDEWLWVLAYPGIKVSTAEARAILPAQYRRQDCIAHGRHLAGFIHACYSRQ
+                     PELAAKLMKDVIAEPYRERLLPGFRQARQAVAEIGAVASGISGSGPTLFALCDKPETA
+                     QRVADWLGKNYLQNQEGFVHICRLDTAGARVLEN"
+     CDS             3734..5020
+                     /gene="geneD"
+                     /locus_tag="b0004"
+                     /gene_synonym="ECK0004; JW0003"
+                     /EC_number="4.2.3.1"
+                     /function="enzyme; Amino acid biosynthesis: Threonine"
+                     /experiment="N-terminus verified by Edman degradation:
+                     PMID 9298646,9600841,9740056"
+                     /GO_component="GO:0005737 - cytoplasm"
+                     /GO_process="GO:0009088 - threonine biosynthetic process"
+                     /codon_start=1
+                     /transl_table=11
+                     /product="L-threonine synthase"
+                     /protein_id="NP_414545.1"
+                     /db_xref="GI:16127998"
+                     /db_xref="ASAP:ABE-0000012"
+                     /db_xref="UniProtKB/Swiss-Prot:P00934"
+                     /db_xref="EcoGene:EG11000"
+                     /db_xref="GeneID:945198"
+                     /translation="MKLYNLKDHNEQVSFAQAVTQGLGKNQGLFFPHDLPEFSLTEID
+                     EMLKLDFVTRSAKILSAFIGDEIPQEILEERVRAAFAFPAPVANVESDVGCLELFHGP
+                     TLAFKDFGGRFMAQMLTHIAGDKPVTILTATSGDTGAAVAHAFYGLPNVKVVILYPRG
+                     KISPLQEKLFCTLGGNIETVAIDGDFDACQALVKQAFDDEELKVALGLNSANSINISR
+                     LLAQICYYFEAVAQLPQETRNQLVVSVPSGNFGDLTAGLLAKSLGLPVKRFIAATNVN
+                     DTVPRFLHDGQWSPKATQATLSNAMDVSQPNNWPRVEELFRRKIWQLKELGYAAVDDE
+                     TTQQTMRELKELGYTSEPHAAVAYRALRDQLNPGEYGLFLGTAHPAKFKESVEAILGE
+                     TLDLPKELAERADLPLLSHNLPADFAALRKLMMNHQ"
+ORIGIN
+        1 agcttttcat tctgactgca acgggcaata tgtctctgtg tggattaaaa aaagagtgtc
+       61 tgatagcagc ttctgaactg gttacctgcc gtgagtaaat taaaatttta ttgacttagg
+      121 tcactaaata ctttaaccaa tataggcata gcgcacagac agataaaaat tacagagtac
+      181 acaacatcca tgaaacgcat tagcaccacc attaccacca ccatcaccat taccacaggt
+      241 aacggtgcgg gctgacgcgt acaggaaaca cagaaaaaag cccgcacctg acagtgcggg
+      301 cttttttttt cgaccaaagg taacgaggta acaaccatgc gagtgttgaa gttcggcggt
+      361 acatcagtgg caaatgcaga acgttttctg cgtgttgccg atattctgga aagcaatgcc
+      421 aggcaggggc aggtggccac cgtcctctct gcccccgcca aaatcaccaa ccacctggtg
+      481 gcgatgattg aaaaaaccat tagcggccag gatgctttac ccaatatcag cgatgccgaa
+      541 cgtatttttg ccgaactttt gacgggactc gccgccgccc agccggggtt cccgctggcg
+      601 caattgaaaa ctttcgtcga tcaggaattt gcccaaataa aacatgtcct gcatggcatt
+      661 agtttgttgg ggcagtgccc ggatagcatc aacgctgcgc tgatttgccg tggcgagaaa
+      721 atgtcgatcg ccattatggc cggcgtatta gaagcgcgcg gtcacaacgt tactgttatc
+      781 gatccggtcg aaaaactgct ggcagtgggg cattacctcg aatctaccgt cgatattgct
+      841 gagtccaccc gccgtattgc ggcaagccgc attccggctg atcacatggt gctgatggca
+      901 ggtttcaccg ccggtaatga aaaaggcgaa ctggtggtgc ttggacgcaa cggttccgac
+      961 tactctgctg cggtgctggc tgcctgttta cgcgccgatt gttgcgagat ttggacggac
+//
+

@@ -1,11 +1,10 @@
 INTERGENIC_SPLIT_CHAR = '/'
 INTRAGENIC_RIGHT_CHAR = '['
 INTRAGENIC_LEFT_CHAR = ']'
+GENE_RANGE_CHAR = '-'
 
 
-# TODO: unit testable
-# TODO: add populating of gene list from a range here. Likely will have to add argument for ref file path.
-def get_gene_list(mutation_gene_str):
+def get_gene_list(mutation_gene_str, ref_gene_list):
     """
     To be used when populating the seq.models.mutation.gene field
     while integrating mutations from static ALE data.
@@ -15,14 +14,25 @@ def get_gene_list(mutation_gene_str):
     if INTERGENIC_SPLIT_CHAR in mutation_gene_str:
         gene_list = mutation_gene_str.split(INTERGENIC_SPLIT_CHAR)
     # TODO: condition to understand if mutation_gene_str indicates a gene range
+    elif GENE_RANGE_CHAR in mutation_gene_str:
+        gene_list = _get_gene_list_from_range(mutation_gene_str, ref_gene_list)
     else:
         gene_list = [mutation_gene_str]
 
     return gene_list
 
-# TODO: Likely will have to add argument for ref file path.
-def _get_gene_list_from_range(mutation_gene_str):
-    return []
+
+def _get_gene_list_from_range(mutation_gene_str, ref_gene_list):
+    mutation_gene_range_list = mutation_gene_str.split(GENE_RANGE_CHAR)
+    cleaned_mutation_gene_range_list = get_clean_gene_list(mutation_gene_range_list)
+    start_gene_index = ref_gene_list.index(cleaned_mutation_gene_range_list[0])
+    end_gene_index = ref_gene_list.index(cleaned_mutation_gene_range_list[1])
+    range_gene_list = ref_gene_list[start_gene_index:end_gene_index + 1]
+    if INTRAGENIC_RIGHT_CHAR in mutation_gene_range_list[0]:
+        range_gene_list[0] = mutation_gene_range_list[0]
+    if INTRAGENIC_RIGHT_CHAR in mutation_gene_range_list[1]:
+        range_gene_list[1] = mutation_gene_range_list[-1]
+    return range_gene_list
 
 
 def get_clean_gene_list(gene_list):
