@@ -360,7 +360,7 @@ def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
                                  experiment,
                                  media,
                                  freezer_box,
-                                 is_wild_type=False)
+                                 is_wild_type=True)
 
 
 def _create_and_commit_ale_entry(person,
@@ -447,6 +447,7 @@ def _create_and_commit_ale_entry(person,
                                       mutation_gd_parser=mutation_gd_parser,
                                       annotation_gd_parser=annotation_gd_parser,
                                       reseq_reference=reseq_reference,
+                                      experiment=experiment,
                                       is_wild_type=is_wild_type,)
 
 
