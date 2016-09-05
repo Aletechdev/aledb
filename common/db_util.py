@@ -47,7 +47,7 @@ def get_ordered_reseq_dict(ale_experiment_id):
     return reseq_dict
 
 
-def get_ale_experiment_reseq_mutation_lists(reseq_dict):
+def get_ale_exp_reseq_mutation_lists(reseq_dict):
     """
     Be aware that this function removes all stating strain mutations.
 
