@@ -9,6 +9,7 @@ import enrichment.util
 import enrichment.models
 import seq.models
 from builder.gdparse.gdparse import gdparse
+from genes.parser import get_ordered_gene_list
 
 WILD_TYPE_ALE_NUMBER = 0
 
@@ -100,7 +101,7 @@ def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate
     _delete_all_orphaned_mutations()
 
 
-def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_abs_path):
+def insert_wild_type_flask(breseq_wild_type_output_abs_path, ref_file_path, ale_exp_user, ale_exp_name):
     """
     Executed from Django ipython shell.
     Args:
@@ -124,9 +125,12 @@ def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_a
     freezer_box_orm = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
                                                                   number=DEFAULT_FREEZER_BOX_NUMBER)
 
-    _insert_wild_type_flask(ale_exp_user,
+    ref_gene_list = get_ordered_gene_list(ref_file_path)
+
+    _insert_wild_type_flask(breseq_wild_type_output_abs_path,
+                            ref_gene_list,
+                            ale_exp_user,
                             ale_exp_name,
-                            breseq_wild_type_output_abs_path,
                             experiment_orm,
                             media_orm,
                             freezer_box_orm)
@@ -150,9 +154,10 @@ def rebuild_all_fixated_mutations():
         rebuild_fixated_mutations(ale_experiment.ale_id)
 
 
-def _insert_wild_type_flask(ale_exp_user,
+def _insert_wild_type_flask(breseq_wild_type_output_abs_path,
+                            ref_gene_list,
+                            ale_exp_user,
                             ale_exp_name,
-                            breseq_wild_type_output_abs_path,
                             experiment_orm,
                             media_orm,
                             freezer_box_orm):
@@ -160,6 +165,7 @@ def _insert_wild_type_flask(ale_exp_user,
     sanitized_breseq_output_wild_type_abs_path = builder.util.sanitize_path(breseq_wild_type_output_abs_path)
 
     _create_and_commit_wild_type_ale_entry(sanitized_breseq_output_wild_type_abs_path,
+                                           ref_gene_list,
                                            experiment_orm,
                                            media_orm,
                                            freezer_box_orm)
@@ -167,6 +173,7 @@ def _insert_wild_type_flask(ale_exp_user,
 
 # TODO: What I do here should also be used in insert_wild_type_flask()
 def insert_flasks(sample_breseq_abs_paths_list,
+                  ref_file_path,
                   ale_exp_user,
                   ale_exp_name):
     """
@@ -205,8 +212,11 @@ def insert_flasks(sample_breseq_abs_paths_list,
 
         output_path = sanitized_breseq_output_abs_path + BRESEQ_OUTPUT_REPORT_DIR
 
+        ref_gene_list = get_ordered_gene_list(ref_file_path)
+
         _create_and_commit_ale_entry(ale_exp_user,
                                      output_path,
+                                     ref_gene_list,
                                      ale_number,
                                      flask_number,
                                      isolate_number,
@@ -219,8 +229,8 @@ def insert_flasks(sample_breseq_abs_paths_list,
 
 
 # For wild_type, expecting directory with output.gd in it.
-# TODO: this needs to change.
 def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
+                                           ref_file_path,
                                            ale_exp_user,
                                            ale_exp_name,
                                            breseq_wild_type_output_abs_path=None):
@@ -246,11 +256,14 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
     freezer_box_orm, created = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
                                                                            number=DEFAULT_FREEZER_BOX_NUMBER)
 
+    ref_gene_list = get_ordered_gene_list(ref_file_path)
+
     if breseq_wild_type_output_abs_path is not None:
 
-        _insert_wild_type_flask(ale_exp_user,
+        _insert_wild_type_flask(breseq_wild_type_output_abs_path,
+                                ref_gene_list,
+                                ale_exp_user,
                                 ale_exp_name,
-                                breseq_wild_type_output_abs_path,
                                 experiment_orm,
                                 media_orm,
                                 freezer_box_orm)
@@ -272,6 +285,7 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
         _create_and_commit_ale_entry(ale_exp_user,
                                      output_path,
+                                     ref_gene_list,
                                      ale_number,
                                      flask_number,
                                      isolate_number,
@@ -340,6 +354,7 @@ def _create_enrichment_mutations(ale_experiment_id):
 
 
 def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
+                                           ref_gene_list,
                                            experiment,
                                            media,
                                            freezer_box):
@@ -353,6 +368,7 @@ def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
 
     _create_and_commit_ale_entry(WILD_TYPE_USER_NAME,
                                  breseq_wild_type_abs_path,
+                                 ref_gene_list,
                                  WILD_TYPE_ALE_NUMBER,
                                  WILD_TYPE_FLASK_NUMBER,
                                  WILD_TYPE_ISOLATE_NUMBER,
@@ -365,6 +381,7 @@ def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
 
 def _create_and_commit_ale_entry(person,
                                  breseq_folder_path,
+                                 ref_gene_list,
                                  ale_number,
                                  flask_number,
                                  isolate_number,
@@ -403,7 +420,7 @@ def _create_and_commit_ale_entry(person,
 
         annotation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
-    reseq_reference = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_SEQ_REF_KEY]
+    reseq_ref_name = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_SEQ_REF_KEY]
 
     reseq_date = ""
     if gdparse.GENOMIC_DIFF_CREATED_KEY in mutation_gd_parser.meta_data.keys():
@@ -432,7 +449,7 @@ def _create_and_commit_ale_entry(person,
     isolate, created = ale.models.Isolate.objects.get_or_create(flask=flask,
                                                                 isolate_number=isolate_number,
                                                                 is_population=is_population,
-                                                                reseq_reference=reseq_reference,
+                                                                reseq_reference=reseq_ref_name,
                                                                 reseq_date=reseq_date,
                                                                 breseq_version=breseq_version,
                                                                 freezer_box=freezer_box,
@@ -444,10 +461,11 @@ def _create_and_commit_ale_entry(person,
     builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
                                       person=person,
                                       breseq_folder=breseq_folder_path,
+                                      ref_gene_list=ref_gene_list,
                                       mutation_gd_parser=mutation_gd_parser,
                                       annotation_gd_parser=annotation_gd_parser,
-                                      reseq_reference=reseq_reference,
-                                      is_wild_type=is_wild_type,)
+                                      reseq_ref_name=reseq_ref_name,
+                                      is_wild_type=is_wild_type, )
 
 
 def _legacy_get_sample_reseq_type(breseq_folder_path):
