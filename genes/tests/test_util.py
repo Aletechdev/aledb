@@ -21,7 +21,8 @@ class TestUtil(unittest.TestCase):
         self.assertEquals(returned, expected)
 
     def test_get_gene_list_gene_range(self):
-        mutation_gene_str = "[thrA]-thrC"  # Gene range from NC_000913.3
-        returned = get_gene_list(mutation_gene_str)
-        expected = ['[thrA]', 'thrB', 'thrC']
+        mutation_gene_str = "[geneA]-geneC"
+        ref_gene_list = ['geneA', 'geneB', 'geneC']
+        returned = get_gene_list(mutation_gene_str, ref_gene_list)
+        expected = ['[geneA]', 'geneB', 'geneC']
         self.assertEquals(returned, expected)
