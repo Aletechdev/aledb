@@ -23,37 +23,31 @@ def compare(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, None)
 
-    if request.method == 'POST':
+    first_exp_name = request.GET.get('first_exp', None)
 
-        first_exp_name = request.POST.get('first_exp', None)
+    second_exp_name = request.GET.get('second_exp', None)
 
-        second_exp_name = request.POST.get('second_exp', None)
+    if not first_exp_name or not second_exp_name:
+        return handle_get_response(all_experiments, hidden_columns)
 
-        if not first_exp_name or not second_exp_name:
-            return handle_get_response(all_experiments, hidden_columns)
+    first_exp = AleExperiment.objects.get(name=first_exp_name)
 
-        first_exp = AleExperiment.objects.get(name=first_exp_name)
+    second_exp = AleExperiment.objects.get(name=second_exp_name)
 
-        second_exp = AleExperiment.objects.get(name=second_exp_name)
+    title = "Comparison of %s and %s" % (first_exp_name, second_exp_name)
 
-        title = "Comparison of %s and %s" % (first_exp_name, second_exp_name)
+    context = {"experiments": all_experiments,
+               "experiment_id": "%s,%s" % (first_exp.ale_id, second_exp.ale_id),
+               "has_comparison": True,
+               "first_exp_name": first_exp_name,
+               "second_exp_name": second_exp_name,
+               "title": title,
+               "header": title,
+               "recent_experiments": get_recent_experiments()}
 
-        context = {"experiments": all_experiments,
-                   "experiment_id": "%s,%s" % (first_exp.ale_id, second_exp.ale_id),
-                   "has_comparison": True,
-                   "first_exp_name": first_exp_name,
-                   "second_exp_name": second_exp_name,
-                   "title": title,
-                   "header": title,
-                   "recent_experiments": get_recent_experiments()}
+    template = loader.get_template(COMPARE_TEMPLATE)
 
-        template = loader.get_template(COMPARE_TEMPLATE)
-
-        return HttpResponse(template.render(context))
-
-    # Else is GET
-
-    return handle_get_response(all_experiments, hidden_columns)
+    return HttpResponse(template.render(context))
 
 
 def handle_get_response(all_experiments, hidden_columns):
