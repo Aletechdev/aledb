@@ -1,6 +1,6 @@
 {% extends 'dashboard_base.html' %}
 
-{% block title %}<title>Compare</title>{% endblock %}
+{% block title %}<title>{{ title }}</title>{% endblock %}
 {% block scripts_and_style %}
     <script type="text/javascript">
         $(function(){
@@ -18,10 +18,28 @@
             });
          });
     </script>
+    <style>
+        .huge {
+            font-size: 28px;
+        }
+        .panel-magenta {
+            background-color: #b7337a;
+            color: white;
+        }
+        .panel-purple {
+            background-color: #7033b7;
+            color: white;
+        }
+        .panel-orange {
+            background-color: #b77033;
+            color: white;
+        }
+    </style>
 {% endblock %}
-{% block header %}Compare{% endblock %}
+{% block header %}{{ header }}{% endblock %}
 {% block content %}
 
+    <div class="row">
     <div class="btn-group">
         <button type="button" class="btn btn-default" id="first_button">First Experiment</button>
         <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -54,4 +72,74 @@
             <input type="hidden" name="second_exp" id="second_exp" value="">
         </form>
     </div>
+    </div>
+    {% if has_comparison %}
+        <br><br>
+    <div class="row">
+        <a href="/compare/metadata?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-info fa-5x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">Meta Data</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="/compare/mutations?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-green">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-tasks fa-5x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">Mutations</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="/compare/enrichment?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-yellow">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-bar-chart-o fa-5x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">Enriched Mutations</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="/compare/fixation?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-red">
+                    <div class="panel-heading">
+                        <div class="row">
+                            <div class="col-xs-3">
+                                <i class="fa fa-signal fa-5x"></i>
+                            </div>
+                            <div class="col-xs-9 text-right">
+                                <div class="huge">Fixating Mutations</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endif %}
 {% endblock %}
