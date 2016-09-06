@@ -1,0 +1,57 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}<title>Compare</title>{% endblock %}
+{% block scripts_and_style %}
+    <script type="text/javascript">
+        $(function(){
+            $("#first li a").click(function(){
+                $("#first_button").text($(this).text());
+                $("#first_button").val($(this).text());
+                document.getElementById('first_exp').value = $(this).text()
+            });
+         });
+        $(function(){
+            $("#second li a").click(function(){
+                $("#second_button").text($(this).text());
+                $("#second_button").val($(this).text());
+                document.getElementById('second_exp').value = $(this).text()
+            });
+         });
+    </script>
+{% endblock %}
+{% block header %}Compare{% endblock %}
+{% block content %}
+
+    <div class="btn-group">
+        <button type="button" class="btn btn-default" id="first_button">First Experiment</button>
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu" id="first">
+            {% for exp in experiments %}
+                <li><a href="#/">{{ exp.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="btn-group">
+        <button type="button" class="btn btn-default" id="second_button">Second Experiment</button>
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+        </button>
+        <ul class="dropdown-menu" id="second">
+            {% for exp in experiments %}
+                <li><a href="#/">{{ exp.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="btn-group">
+        <form action="/compare/" method="post">
+            <input type="submit" class="btn btn-default" id="compare" name="compare" value="Compare">
+            <input type="hidden" name="first_exp" id="first_exp" value="">
+            <input type="hidden" name="second_exp" id="second_exp" value="">
+        </form>
+    </div>
+{% endblock %}

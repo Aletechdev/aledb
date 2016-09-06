@@ -217,11 +217,14 @@ def get_ignored_mutations(filter_form_model):
     return table_body, ignored_mutation_id_list
 
 
-def dashboard_filter(queryset):
+def dashboard_filter(queryset, ale_experiment_list='all'):
 
     global_filter = GlobalFilter.objects.get(id=1)
 
-    all_experiments = AleExperiment.objects.all()
+    if ale_experiment_list == 'all':
+        all_experiments = AleExperiment.objects.all()
+    else:
+        all_experiments = AleExperiment.objects.filter(ale_id__in=ale_experiment_list)
 
     for exp in all_experiments:
         filter_settings = get_filter_settings(exp.ale_id)
