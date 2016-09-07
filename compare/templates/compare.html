@@ -19,6 +19,25 @@
                 document.getElementById('second_exp').value = $(this).text()
             });
          });
+        $(document).ready(function () {
+
+            var first_exp = '{{ first_exp_name }}';
+            var second_exp = '{{ second_exp_name }}';
+
+            var first_button_children = document.getElementById('first').children;
+            var second_button_children = document.getElementById('second').children;
+
+            for(var i = 0; i < first_button_children.length; i++) {
+                if(first_button_children[i].innerText == first_exp) {
+                    first_button_children[i].children[0].click();
+                }
+            }
+            for(var j = 0; j < second_button_children.length; j++) {
+                if(second_button_children[j].innerText == second_exp) {
+                    second_button_children[j].children[0].click();
+                }
+            }
+        })
     </script>
     <style>
         .huge {
