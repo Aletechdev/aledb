@@ -16,6 +16,8 @@ from filter.mutation_filter import dashboard_filter
 
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 
+from django.core.cache import cache
+
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 
@@ -28,11 +30,7 @@ __author__ = 'pphaneuf'
 def dashboard(request):
     mutation_type_count_dict = {}
 
-    gene_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
-
-    gene_query = dashboard_filter(gene_query)
-
-    mutation_query_set = get_filtered_mutation_queryset(gene_query)
+    mutation_query_set, gene_query = _get_cached_dashboard_query()
 
     for mutation_type in common.MUTATION_TYPE_LIST:
         mutation_type_count = mutation_query_set.filter(mutation_type=mutation_type).count()
@@ -81,3 +79,26 @@ def get_filtered_mutation_queryset(gene_query):
     mutation_queryset = seq.models.Mutation.objects.filter(id__in=filtered_mut_id_list)
 
     return mutation_queryset
+
+
+def _get_cached_dashboard_query():
+
+    cached_mutation_queryset = cache.get('dashboard_mutation')
+
+    cached_observed_mutation_queryset = cache.get('dashboard_observed_mutation')
+
+    if cached_mutation_queryset is None or cached_observed_mutation_queryset is None:
+
+        gene_query = dashboard_filter(seq.models.ObservedMutation.objects.exclude(mutation__gene=''))
+
+        mutation_query_set = get_filtered_mutation_queryset(gene_query)
+
+        cache.set('dashboard_mutation', mutation_query_set, None)
+
+        cache.set('dashboard_observed_mutation', gene_query, None)
+
+        return mutation_query_set, gene_query
+
+    else:
+
+        return cached_mutation_queryset, cached_observed_mutation_queryset

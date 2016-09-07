@@ -9,6 +9,7 @@ import enrichment.util
 import enrichment.models
 import seq.models
 from builder.gdparse.gdparse import gdparse
+from common.db_util import clear_dashboard_cache
 
 WILD_TYPE_ALE_NUMBER = 0
 
@@ -57,6 +58,8 @@ def remove_flask(flask_primary_key):
     Executed from Django ipython shell
     """
 
+    clear_dashboard_cache()
+
     flask_to_delete = ale.models.Flask.objects.get(pk=flask_primary_key)
 
     flask_to_delete.delete()
@@ -69,6 +72,8 @@ def delete_ale_experiment(ale_experiment_primary_key):
     """
     Executed from Django ipython shell.
     """
+
+    clear_dashboard_cache()
 
     ale_experiment_to_delete = ale.models.AleExperiment.objects.get(pk=ale_experiment_primary_key)
 
@@ -108,6 +113,8 @@ def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_a
         ale_exp_user (string): A string for the user name associated with the target ALE experiment.
         ale_exp_name (string): A string for the target ALE experiment name.
     """
+
+    clear_dashboard_cache()
 
     instrument_orm = ale.models.Instrument.objects.get_or_create(name=DEFAULT_INSTRUMENT_NAME)
 
@@ -228,6 +235,8 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
     """
     Executed from Django ipython shell.
     """
+
+    clear_dashboard_cache()
 
     sanitized_breseq_output_abs_path = builder.util.sanitize_path(breseq_output_abs_path)
 
