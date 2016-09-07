@@ -42,14 +42,10 @@ def common_mutations(request):
 
     filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
 
-    ref_strain_mutation_list = get_all_observed_mutations([wt_id])
-    ref_strain_mutation_id_list = [observed_mutation.mutation.id for observed_mutation in ref_strain_mutation_list]
-
     table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
                                                        observed_mutation_queryset,
                                                        int(ale_experiment_id),
-                                                       filter_settings,
-                                                       ref_strain_mutation_id_list)
+                                                       filter_settings)
 
     hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
