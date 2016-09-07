@@ -43,7 +43,7 @@ def compared_enrichment_mutations(request):
     table_header = mutation_table_builder.get_table_header(reseq_dict=ordered_reseq_dict,
                                                            table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
 
-    table_body = _get_table_body(ordered_reseq_dict, ale_experiment_list)
+    table_body = _get_table_body(ordered_reseq_dict, ale_experiment_list, queryset)
 
     hidden_columns = check_hidden_columns_and_filters(request, None)
 
@@ -68,11 +68,11 @@ def compared_enrichment_mutations(request):
     return HttpResponse(template.render(context))
 
 
-def _get_table_body(reseq_dict, ale_experiment_list):
+def _get_table_body(reseq_dict, ale_experiment_list, queryset):
 
     enrichment_mutation_queryset = EnrichmentMutation.objects.filter(ale_experiment_id__in=ale_experiment_list)
 
-    observed_mutations_queryset = _get_observed_enrichment_mutations(reseq_dict, enrichment_mutation_queryset)
+    observed_mutations_queryset = _get_observed_enrichment_mutations(enrichment_mutation_queryset, queryset)
 
     return mutation_table_builder.get_table_body(reseq_dict=reseq_dict,
                                                  observed_mutations_queryset=observed_mutations_queryset,
@@ -80,14 +80,12 @@ def _get_table_body(reseq_dict, ale_experiment_list):
 
 
 # TODO: refactor
-def _get_observed_enrichment_mutations(reseq_dict, enrichment_mutation_queryset):
-
-    observed_mutation_queryset = ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_dict.keys())
+def _get_observed_enrichment_mutations(enrichment_mutation_queryset, queryset):
 
     enrichment_mutation_id_list = []
     for enrichment_mutation in enrichment_mutation_queryset:
         enrichment_mutation_id_list.append(enrichment_mutation.mutation_id)
 
-    enrichment_mutation_observed_mutation_queryset = observed_mutation_queryset.filter(mutation_id__in=enrichment_mutation_id_list)
+    enrichment_mutation_observed_mutation_queryset = queryset.filter(mutation_id__in=enrichment_mutation_id_list)
 
     return enrichment_mutation_observed_mutation_queryset
