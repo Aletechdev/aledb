@@ -464,7 +464,7 @@ def _create_and_commit_ale_entry(person,
                                       ref_gene_list=ref_gene_list,
                                       mutation_gd_parser=mutation_gd_parser,
                                       annotation_gd_parser=annotation_gd_parser,
-                                      reseq_reference=reseq_ref_name,
+                                      reseq_ref_name=reseq_ref_name,
                                       experiment=experiment,
                                       is_wild_type=is_wild_type,)
 
