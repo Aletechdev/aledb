@@ -90,6 +90,8 @@ def shared_enriched_genes(request):
 
     reseq_info_list = metadata.views.get_reseq_info_list(ordered_reseq_queryset)
 
+    check_hidden_columns_and_filters(request, None)
+
     template = loader.get_template("enrichment/shared_enrichment_mutations.html")
     context = {"title": "Shared Enriched Genes",
                "table_header": mark_safe(table_header),

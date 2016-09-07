@@ -376,7 +376,7 @@ def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
                                  experiment,
                                  media,
                                  freezer_box,
-                                 is_wild_type=False)
+                                 is_wild_type=True)
 
 
 def _create_and_commit_ale_entry(person,
@@ -464,8 +464,9 @@ def _create_and_commit_ale_entry(person,
                                       ref_gene_list=ref_gene_list,
                                       mutation_gd_parser=mutation_gd_parser,
                                       annotation_gd_parser=annotation_gd_parser,
-                                      reseq_ref_name=reseq_ref_name,
-                                      is_wild_type=is_wild_type, )
+                                      reseq_reference=reseq_ref_name,
+                                      experiment=experiment,
+                                      is_wild_type=is_wild_type,)
 
 
 def _legacy_get_sample_reseq_type(breseq_folder_path):

@@ -13,6 +13,7 @@ class AleExperimentFilter(models.Model):
     max_cutoff = models.PositiveSmallIntegerField(default=DEFAULT_MUTATION_FREQ_MAX)
     ignored_genes = models.CharField(max_length=500, default='', blank=True)
     ignored_mutations = models.CharField(max_length=500, default='', blank=True)
+    starting_strain_mutations = models.CharField(max_length=500, default='', blank=True)
 
 
 class GlobalFilter(models.Model):
