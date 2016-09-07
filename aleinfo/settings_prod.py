@@ -84,13 +84,15 @@ SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
 FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
 FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
 LOGIN_TEMPLATE_PATH = os.path.join(BASE_DIR, 'login/templates')
+EXPORT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'export/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [SEQ_TEMPLATE_PATH,
                  FILTER_TEMPLATE_PATH,
                  FIXATION_TEMPLATE_PATH,
-                 LOGIN_TEMPLATE_PATH],
+                 LOGIN_TEMPLATE_PATH,
+                 EXPORT_TEMPLATE_PATH],
         'OPTIONS': {
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this

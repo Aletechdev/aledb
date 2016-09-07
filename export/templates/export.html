@@ -1,0 +1,134 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}<title>ALE Analytics Export</title>{% endblock %}
+{% block scripts_and_style %}
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sortable/0.9.13/jquery-sortable-min.js"></script>-->
+
+    <script type="text/javascript">
+        var selected_experiments = [];
+        $(function(){
+            $("#experiment_selector li a").click(function(){
+                $("#selector_button").text($(this).text());
+                $("#selector_button").val($(this).text());
+            });
+         });
+        function add_experiment_to_download_list() {
+            var exp_name = document.getElementById('selector_button').innerText;
+            if(exp_name == "Select Experiment") {
+
+            } else if(exp_name == 'All') {
+                for(var i = selected_experiments.length - 1; i >= 0; i--) {
+                    remove_experiment(selected_experiments[i])
+                }
+                add_exp_to_list('All')
+
+            } else if(!selected_experiments.includes(exp_name)) {
+                if(selected_experiments.includes('All')) {
+                    remove_experiment('All');
+                }
+                add_exp_to_list(exp_name)
+            }
+            set_export_experiments_input_field();
+        }
+
+        function add_exp_to_list(exp_name) {
+            var ul = document.getElementById("selected_experiments");
+            var li = document.createElement("li");
+            var exp = document.createElement("div");
+            exp.setAttribute("class", "pull-left");
+            exp.innerText = exp_name;
+            var trash_can = document.createElement("div");
+            trash_can.setAttribute("class", "pull-right");
+            trash_can.innerHTML = '<a href="#/"><i class="fa fa-trash" aria-hidden="true"></i></a>';
+            trash_can.onclick = function () {
+                remove_experiment(exp_name)
+            };
+            var clear_div = document.createElement("div");
+            clear_div.setAttribute("class", "clearfix");
+            li.appendChild(exp);
+            li.appendChild(trash_can);
+            li.appendChild(clear_div);
+            li.setAttribute("class", "list-group-item");
+            li.setAttribute("id", exp_name);
+            ul.appendChild(li);
+            selected_experiments.push(exp_name)
+        }
+
+        function remove_experiment(param) {
+            var elem = document.getElementById(param);
+            var elem_id = elem.id;
+            elem.parentNode.removeChild(elem);
+            var index = selected_experiments.indexOf(elem_id);
+            selected_experiments.splice(index, 1);
+            set_export_experiments_input_field();
+        }
+
+        function set_export_experiments_input_field() {
+            if(selected_experiments.length != 0) {
+                document.getElementById('download_experiments').value = selected_experiments.join(',');
+            }
+        }
+
+        //TODO: Uncomment Section below if you want to enable drag and drop sorting of list elements
+        //TODO: Uncomment jquery sortable script above too
+{#        jQuery(function($) {#}
+{#            var panelList = $('#selected_experiments');#}
+{##}
+{#            panelList.sortable({#}
+{#                // Only make the .panel-heading child elements support dragging.#}
+{#                // Omit this to make then entire <li>...</li> draggable.#}
+{#                update: function() {#}
+{#                    $('.list-group', panelList).each(function(index, elem) {#}
+{#                         var $listItem = $(elem),#}
+{#                             newIndex = $listItem.index();#}
+{#                    });#}
+{#                }#}
+{#            });#}
+{#        });#}
+
+    </script>
+{% endblock %}
+{% block header %}Export{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default" id="selector_button">Select Experiment</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" id="experiment_selector">
+                    <li><a href="#/">All</a></li>
+                    {% for exp in experiments %}
+                        <li><a href="#/">{{ exp.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-success" onclick="add_experiment_to_download_list()">
+                    <i class="fa fa-plus fa-fw" aria-hidden="true"></i> Add Experiment
+                </button>
+            </div>
+        </div>
+    </div>
+    <br><br>
+    <div class="row">
+        <div class="col-lg-4">
+            <ul class="list-group" id="selected_experiments"></ul>
+        </div>
+    </div>
+    <br><br>
+    <div class="row">
+        <div class="col-lg-6">
+            <form action="/export" method="get">
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <button class="btn btn-secondary" type="submit"><i class="fa fa-download fa-fw" id="basic-addon1" aria-hidden="true"></i></button>
+                    </span>
+                    <input type="submit" class="btn btn-default" id="download" name="download" value="Download Mutations as CSV">
+                    <input type="hidden" id="download_experiments" name="download_experiments" value="">
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
