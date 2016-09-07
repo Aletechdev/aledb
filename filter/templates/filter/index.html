@@ -13,7 +13,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var oTable = $("#data").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[1, 'asc']]);
-
+            var oTable = $("#starting_strain").dataTable({"bPaginate": false, "bAutoWidth": false}).fnSort([[0, 'asc']]);
         });
     </script>
     <script type="text/javascript">
@@ -59,4 +59,14 @@
     <input type="hidden" id="id_ignored_mutations" value="{{ ignored_mutations }}" name="ignored_mutations">
     <input type="submit" value="Save" name="save">
 </form>
+<br><br>
+<h4>Starting Strain Mutations</h4>
+<table id="starting_strain">
+    <thead>
+        {{ starting_strain_header }}
+    </thead>
+    <tbody>
+        {{ starting_strain_body }}
+    </tbody>
+</table>
 {% endblock %}

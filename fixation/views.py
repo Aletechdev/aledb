@@ -39,7 +39,6 @@ def fixating_mutations(request):
     # a disconnect between filtering methodologies that needs to be reconciled.
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     reseq_ordered_dict = get_ordered_reseq_dict(ale_experiment_id)
-    reseq_ordered_dict = seq.views.common.filter_out_wt_reseq(reseq_ordered_dict)
     reseq_ordered_dict = mutation_table_builder.filter_checked_flasks(request, reseq_ordered_dict)
 
     table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
@@ -103,6 +102,8 @@ def shared_fixated_mutations(request):
                                                        table_type=mutation_table_builder.TableType.SHARED)
 
     reseq_info_list = metadata.views.get_reseq_info_list(ordered_reseq_queryset)
+
+    check_hidden_columns_and_filters(request, None)
 
     template = loader.get_template("fixation/shared_fixating_mutations.html")
     context = {"title": "Shared Fixated Genes",
