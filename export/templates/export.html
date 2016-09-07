@@ -65,6 +65,8 @@
         function set_export_experiments_input_field() {
             if(selected_experiments.length != 0) {
                 document.getElementById('download_experiments').value = selected_experiments.join(',');
+            } else {
+                document.getElementById('download_experiments').value = "";
             }
         }
 
