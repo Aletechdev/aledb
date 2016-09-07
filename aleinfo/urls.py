@@ -10,7 +10,7 @@ urlpatterns = [
     url(r'^stats', include('stats.urls')),
     url(r'^metadata', include('metadata.urls')),
     url(r'^enrichment/', include('enrichment.urls')),
-    url(r'^export', include('export.urls'))
+    url(r'^export', include('export.urls')),
     url(r'^compare/', include('compare.urls')),
 ]
 

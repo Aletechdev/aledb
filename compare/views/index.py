@@ -26,6 +26,7 @@ from django.db.models import Count
 COMPARE_TEMPLATE = 'compare.html'
 
 
+# TODO: This needs to be refactored: shares quite a bit with the stats page
 @login_required
 def compare(request):
 
