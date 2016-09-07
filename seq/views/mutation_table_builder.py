@@ -70,6 +70,9 @@ class TableType(Enum):
     FIXATING_MUTATIONS = 3
     SEARCH = 4
     SHARED = 5
+    COMPARE = 6
+    COMPARE_ENRICHEMENT_MUTATIONS = 7
+    COMPARE_FIXATION_MUTATIONS = 8
 
 
 if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -148,14 +151,17 @@ def get_table_body(reseq_dict,
             table_row += HTML_MUTATION_TABLE_ROW
             if table_type == TableType.GENE_TABLE or \
                             table_type == TableType.SEARCH or \
-                            table_type == TableType.SHARED:
+                            table_type == TableType.SHARED or \
+                            table_type == TableType.COMPARE or \
+                            table_type == TableType.COMPARE_ENRICHEMENT_MUTATIONS or \
+                            table_type == TableType.COMPARE_FIXATION_MUTATIONS:
                 table_row += SAVE_TO_GLOBAL_FILTER_ONLY % mutation.id
             else:
                 table_row += SAVE_MUTATION_TO_FILTER_CELL_HTML % (mutation.id, ale_experiment_id, mutation.id)
 
-            if table_type == TableType.ENRICHMENT_MUTATIONS:
+            if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.COMPARE_ENRICHEMENT_MUTATIONS:
                 table_row += "<td><a href=/enrichment/shared?mutation_id=%s>shared</a></td>" % mutation.id
-            elif table_type == TableType.FIXATING_MUTATIONS:
+            elif table_type == TableType.FIXATING_MUTATIONS or table_type == TableType.COMPARE_FIXATION_MUTATIONS:
                 table_row += "<td><a href=/fixation/shared?mutation_id=%s>shared</a></td>" % mutation.id
 
             table_row += "<td>%s</td>" % mutation.position
