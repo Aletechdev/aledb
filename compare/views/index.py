@@ -18,6 +18,8 @@ from stats.views import get_reseq_experiment_info_list, get_ale_flask_isolate_co
 
 from seq.views import common
 
+from django.db.models import Count
+
 # Create your views here.
 
 
@@ -67,6 +69,18 @@ def compare(request):
 
     title = "Comparison of %s and %s" % (first_exp_name, second_exp_name)
 
+    gene_query = queryset.values('mutation__gene', 'mutation__mutation_type').annotate(
+        the_count=Count('mutation__gene')).order_by('-the_count')
+    sequence_change_query = queryset.values('mutation__gene', 'mutation__protein_change').annotate(
+        the_count=Count('mutation__gene')).order_by('-the_count')
+
+    genes = common.set_gene_bar_chart_colors(gene_query)
+
+    sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_change_query)
+
+    genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes,
+                                                                                                sequence_changes)
+
     context = {"experiments": all_experiments,
                "experiment_id": "%s,%s" % (first_exp.ale_id, second_exp.ale_id),
                "has_comparison": True,
@@ -74,6 +88,13 @@ def compare(request):
                "second_exp_name": second_exp_name,
                "title": title,
                "header": title,
+               "genes": mark_safe(genes_to_show),
+               "sequence_changes": mark_safe(sequence_changes_to_show),
+               "gene_color_set": mark_safe(common.GENE_COLORS),
+               "seq_color_set": mark_safe(common.SEQ_COLORS),
+               "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
+               "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
+               "number_of_genes_to_show": number_of_genes_to_show,
                "experiments_info_list": experiments_info_list,
                "needle_plot_data": mark_safe(list(needle_plot_data)),
                "protein_change_type_count_dict": protein_change_type_count_dict,
