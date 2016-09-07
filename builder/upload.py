@@ -334,7 +334,7 @@ def _process_mutations(sample_type,
 
         attrs = row.findChildren("td")
 
-        gene_annotation = str(sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY))
+        gene_annotation = sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
         gene_list = get_gene_list(gene_annotation, ref_gene_list)
         gene_list_str = ','.join(gene_list)
 
