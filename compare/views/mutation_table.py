@@ -49,7 +49,7 @@ def compared_mutations(request):
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    title = "Comparison of %s and %s" % (first_exp_name, second_exp_name)
+    title = "%s and %s Mutations" % (first_exp_name, second_exp_name)
 
     context = {"experiments": all_experiments,
                "experiment_id": "%s,%s" % (first_exp.ale_id, second_exp.ale_id),
