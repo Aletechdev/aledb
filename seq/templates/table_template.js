@@ -63,7 +63,7 @@ $(document).ready(function () {
 function column_sort_from_right() {
     var sorting_array = [];
 
-    for (var i = number_of_columns; i > 10; i--) {
+    for (var i = number_of_columns; i > sorted_column + 8; i--) {
         sorting_array.push([i, 'desc'])
     }
 
