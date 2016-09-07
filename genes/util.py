@@ -1,7 +1,7 @@
 INTERGENIC_SPLIT_CHAR = '/'
 INTRAGENIC_RIGHT_CHAR = '['
 INTRAGENIC_LEFT_CHAR = ']'
-GENE_RANGE_CHAR = '-'
+GENE_RANGE_CHAR = '–'
 
 
 def get_gene_list(mutation_gene_str, ref_gene_list):
@@ -13,7 +13,6 @@ def get_gene_list(mutation_gene_str, ref_gene_list):
     """
     if INTERGENIC_SPLIT_CHAR in mutation_gene_str:
         gene_list = mutation_gene_str.split(INTERGENIC_SPLIT_CHAR)
-    # TODO: condition to understand if mutation_gene_str indicates a gene range
     elif GENE_RANGE_CHAR in mutation_gene_str:
         gene_list = _get_gene_list_from_range(mutation_gene_str, ref_gene_list)
     else:

@@ -49,7 +49,7 @@ def _filter_ignored_genes(query_set, ignored_genes):
 
     ignored_genes = _clean_ignored_genes_list(ignored_genes)
 
-    global_filter = _get_global_filter()
+    global_filter = get_global_filter()
 
     global_ignored_genes = global_filter.ignored_genes.replace(" ", "").replace('\n', '').replace('\r', '').split(',')
 
@@ -76,7 +76,7 @@ def _filter_ignored_genes(query_set, ignored_genes):
 
 def _filter_ignored_mutations(query_set, ignored_mutations, starting_strain_mutations):
 
-    global_filter = _get_global_filter()
+    global_filter = get_global_filter()
 
     global_ignored_mutations = global_filter.ignored_mutations
 
@@ -225,7 +225,7 @@ def get_ignored_mutations(filter_form_model):
 
 def dashboard_filter(queryset):
 
-    global_filter = _get_global_filter()
+    global_filter = get_global_filter()
 
     all_experiments = AleExperiment.objects.all()
 
@@ -263,7 +263,7 @@ def _mutation_exists(mut_id):
         return False
 
 
-def _get_global_filter():
+def get_global_filter():
 
     global_filter, created = GlobalFilter.objects.get_or_create(id=1)
 
