@@ -5,7 +5,6 @@ from django.utils.safestring import mark_safe
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
-from seq.models import ObservedMutation
 from enrichment.models import EnrichmentMutation
 from common.util import check_hidden_columns_and_filters
 from ale.models import AleExperiment
