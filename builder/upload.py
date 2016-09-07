@@ -8,6 +8,7 @@ import numbers
 import seq.models
 import os
 from configparser import ConfigParser
+from genes.util import get_gene_list
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
 
@@ -57,7 +58,7 @@ def add_breseq_results(technical_replicate_id,
                        ref_gene_list,
                        mutation_gd_parser,
                        annotation_gd_parser,
-                       reseq_reference,
+                       reseq_ref_name,
                        is_wild_type=False):
     """
     Figures out if the sample is clonal or population,
@@ -82,13 +83,13 @@ def add_breseq_results(technical_replicate_id,
                        seq_experiment,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
-                       reseq_reference,
+                       reseq_ref_name,
                        is_wild_type)
 
     _process_duplications(breseq_folder,
                           ref_gene_list,
                           seq_experiment,
-                          reseq_reference,
+                          reseq_ref_name,
                           is_wild_type)
 
     sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
@@ -98,7 +99,12 @@ def add_breseq_results(technical_replicate_id,
                                          breseq_folder)
 
 
-def _process_duplications(breseq_folder, seq_experiment, reseq_reference, is_wild_type):
+# TODO: remove unused reseq_reference argument.
+def _process_duplications(breseq_folder,
+                          ref_gene_list,
+                          seq_experiment,
+                          reseq_reference,
+                          is_wild_type):
 
 
     afi = os.path.basename(os.path.dirname(os.path.dirname(breseq_folder)))
@@ -296,9 +302,8 @@ def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, pers
 
     return seq_experiment
 
-from genes.util import get_gene_list
 
-
+# TODO: remove reseq_reference argument
 def _process_mutations(sample_type,
                        breseq_folder,
                        ref_gene_list,
@@ -322,7 +327,7 @@ def _process_mutations(sample_type,
 
         attrs = row.findChildren("td")
 
-        gene_annotation = sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
+        gene_annotation = str(sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY))
         gene_list = get_gene_list(gene_annotation, ref_gene_list)
         gene_list_str = ','.join(gene_list)
 
