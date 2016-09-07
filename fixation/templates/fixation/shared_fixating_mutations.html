@@ -110,11 +110,22 @@
             window.location.replace(url + query_string);
         }
     </script>
+    <script type="text/javascript">
+    function save_to_global_filter(mutation_id) {
+            $.ajax({
+                type: "POST",
+                url: "",
+                data: { mut_id: mutation_id,
+                        save_method: "global"
+                },
+            })
+        }
+    </script>
 {% endblock %}
 {% block header %}{{ title }}{% endblock %}
 {% block content %}
 
-<table id="data" class="tablesorter">
+<table id="data">
     <thead>
     {{ table_header }}
     </thead>

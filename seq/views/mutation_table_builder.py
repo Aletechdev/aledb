@@ -114,7 +114,6 @@ def get_table_body(reseq_dict,
                    observed_mutations_queryset,
                    ale_experiment_id=None,
                    filter_settings=None,
-                   filter_mutation_id_list=None,
                    table_type=None):
 
     observed_mutations_queryset = mutation_filter.filter_ignored_genes_and_mutations(observed_mutations_queryset,
@@ -133,8 +132,6 @@ def get_table_body(reseq_dict,
 
     # Populating table_entry_list
     for observed_mutation in observed_mutations_queryset:
-        if filter_mutation_id_list is not None and observed_mutation.mutation.id in filter_mutation_id_list:
-            continue
 
         new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
 
