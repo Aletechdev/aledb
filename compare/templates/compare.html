@@ -90,9 +90,16 @@
                 <input type="submit" class="btn btn-default" id="compare" name="compare" value="Compare">
                 <input type="hidden" name="first_exp" id="first_exp" value="">
                 <input type="hidden" name="second_exp" id="second_exp" value="">
+                <input type="hidden" name="clicked_compare_button" value="True">
             </form>
         </div>
     </div>
+    {% if is_error %}
+        <br>
+        <div class="row">
+            <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+        </div>
+    {% endif %}
     {% if has_comparison %}
         <br><br>
         <div class="row">

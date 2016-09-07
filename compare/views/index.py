@@ -38,7 +38,21 @@ def compare(request):
     second_exp_name = request.GET.get('second_exp', None)
 
     if not first_exp_name or not second_exp_name:
-        return handle_get_response(all_experiments, hidden_columns)
+
+        clicked_compare = request.GET.get('clicked_compare_button', None)
+
+        if clicked_compare == "True":
+
+            error_message = "Error: Must enter 2 experiments to compare"
+
+            return handle_get_response(all_experiments, hidden_columns, True, error_message)
+
+        else:
+            return handle_get_response(all_experiments, hidden_columns, False, "")
+
+    if first_exp_name == second_exp_name:
+        error_message = "Error: Cannot compare same experiment"
+        return handle_get_response(all_experiments, hidden_columns, True, error_message)
 
     first_exp = AleExperiment.objects.get(name=first_exp_name)
 
@@ -109,14 +123,16 @@ def compare(request):
     return HttpResponse(template.render(context))
 
 
-def handle_get_response(all_experiments, hidden_columns):
+def handle_get_response(all_experiments, hidden_columns, is_error, error_message):
 
     context = {"experiments": all_experiments,
                "has_comparison": False,
                "hidden_columns": hidden_columns,
                "recent_experiments": get_recent_experiments(None),
                "title": "Compare",
-               "header": "Compare"}
+               "header": "Compare",
+               "is_error": is_error,
+               "error_message": error_message}
 
     template = loader.get_template(COMPARE_TEMPLATE)
 
