@@ -1,18 +1,43 @@
 {% extends 'dashboard_base.html' %}
-{% block title %}<title>{{ ale_experiment_name }} ALE Experiment</title>{% endblock %}
-{% block scripts_and_style %}
-    <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
 
+{% block title %}<title>{{ title }}</title>{% endblock %}
+{% block scripts_and_style %}
     <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
           media="print, projection, screen"/>
-
     <script type="text/javascript">
+        $(function(){
+            $("#first li a").click(function(){
+                $("#first_button").text($(this).text());
+                $("#first_button").val($(this).text());
+                document.getElementById('first_exp').value = $(this).text()
+            });
+         });
+        $(function(){
+            $("#second li a").click(function(){
+                $("#second_button").text($(this).text());
+                $("#second_button").val($(this).text());
+                document.getElementById('second_exp').value = $(this).text()
+            });
+         });
+        $(document).ready(function () {
 
-        var asInitVals = new Array();
-        $(document).ready($(function () {
-            oTable = $("#runs").tablesorter({widgets: ['zebra']});
+            var first_exp = '{{ first_exp_name }}';
+            var second_exp = '{{ second_exp_name }}';
 
-        }));
+            var first_button_children = document.getElementById('first').children;
+            var second_button_children = document.getElementById('second').children;
+
+            for(var i = 0; i < first_button_children.length; i++) {
+                if(first_button_children[i].innerText == first_exp) {
+                    first_button_children[i].children[0].click();
+                }
+            }
+            for(var j = 0; j < second_button_children.length; j++) {
+                if(second_button_children[j].innerText == second_exp) {
+                    second_button_children[j].children[0].click();
+                }
+            }
+        })
     </script>
     <style>
         .huge {
@@ -31,129 +56,119 @@
             color: white;
         }
     </style>
-
 {% endblock %}
-{% block header %}<b>{{ ale_experiment_name }}</b> ALE Experiment{% endblock %}
+{% block header %}{{ header }}{% endblock %}
 {% block content %}
-    <!-- /.row -->
-    <div class="row">
-        <a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3 col-md-6">
-                <div class="panel panel-primary">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-3">
-                                <i class="fa fa-info fa-5x"></i>
-                            </div>
-                            <div class="col-xs-9 text-right">
-                                <div class="huge">Meta Data</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-        <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3 col-md-6">
-                <div class="panel panel-green">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-3">
-                                <i class="fa fa-tasks fa-5x"></i>
-                            </div>
-                            <div class="col-xs-9 text-right">
-                                <div class="huge">Mutations</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-        <a href="/enrichment?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3 col-md-6">
-                <div class="panel panel-yellow">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-3">
-                                <i class="fa fa-bar-chart-o fa-5x"></i>
-                            </div>
-                            <div class="col-xs-9 text-right">
-                                <div class="huge">Enriched Mutations</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-        <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3 col-md-6">
-                <div class="panel panel-red">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-3">
-                                <i class="fa fa-signal fa-5x"></i>
-                            </div>
-                            <div class="col-xs-9 text-right">
-                                <div class="huge">Fixating Mutations</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="row">
-        <a style="color: #b77033;" href="/common_mutations?ale_experiment_id={{ ale_experiment_id }}">
-             <div class="col-lg-3 col-md-6">
-                 <div class="panel panel-orange">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-3">
-                                <i class="fa fa-share-alt fa-5x"></i>
-                            </div>
-                            <div class="col-xs-9 text-right">
-                                <div class="huge">Common Mutations</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-        <a style="color: #7033b7" href="/duplication?ale_experiment_id={{ ale_experiment_id }}">
-             <div class="col-lg-3 col-md-6">
-                 <div class="panel panel-purple">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-3">
-                                <i class="fa fa-table fa-5x"></i>
-                            </div>
-                            <div class="col-xs-9 text-right">
-                                <div class="huge">Duplications</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-        <a style="color: #b7337a" href="/filter?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3 col-md-6">
-                <div class="panel panel-magenta">
-                    <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-3">
-                                <i class="fa fa-filter fa-5x"></i>
-                            </div>
-                            <div class="col-xs-9 text-right">
-                                <div class="huge">Filter</div>
-                            </div>
-                        </div>
-                    </div>
 
-                </div>
-            </div>
-        </a>
-    </div>
     <div class="row">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default" id="first_button">First Experiment</button>
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="caret"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu" id="first">
+                {% for exp in experiments %}
+                    <li><a href="#/">{{ exp.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-default" id="second_button">Second Experiment</button>
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="caret"></span>
+                <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu" id="second">
+                {% for exp in experiments %}
+                    <li><a href="#/">{{ exp.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="btn-group">
+            <form action="/compare/" method="get">
+                <input type="submit" class="btn btn-default" id="compare" name="compare" value="Compare">
+                <input type="hidden" name="first_exp" id="first_exp" value="">
+                <input type="hidden" name="second_exp" id="second_exp" value="">
+                <input type="hidden" name="clicked_compare_button" value="True">
+            </form>
+        </div>
+    </div>
+    {% if is_error %}
+        <br>
+        <div class="row">
+            <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+        </div>
+    {% endif %}
+    {% if has_comparison %}
+        <br><br>
+        <div class="row">
+            <a href="/compare/metadata?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-info fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">Meta Data</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="/compare/mutations?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-green">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-tasks fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">Mutations</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="/compare/enrichment?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-yellow">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-bar-chart-o fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">Enriched Mutations</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="/compare/fixation?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-red">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-signal fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">Fixating Mutations</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="row">
         <div class="col-sm-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -334,45 +349,48 @@
             <script type="text/javascript">{% include 'runs.js' %}</script>
         </table>
     </div>
-    <hr>
-    <div class="row">
-        {% include 'muts_needle_plot.html' %}
-        <hr>
-        <form action="/ale_analytics/stats" method="get">
-            <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id }}">
-            <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
-            <input type="submit" value="Show"><br>
-        </form>
-                <br>
-        <div class="chart"></div>
-        <table>
-            <tr>
-                <td>
-                <script>
-                    var gene_data = {{ genes }};
-                    var color_set = {{ gene_color_set }};
-                    var mutation_types = {{ mutation_types }};
-                    var extra_padding = 0;
-                    function _get_label(datum) {
-                        return datum.mutation__gene;
-                    }
-                    {% include 'bar_chart.js' %}
-                </script>
-            </td>
-            <td>
-                <script>
-                    var gene_data = {{ sequence_changes }};
-                    var color_set = {{ seq_color_set }};
-                    var mutation_types = {{ protein_types }};
-                    var extra_padding = 100;
-                    function _get_label(datum) {
-                        return datum.mutation__gene + " " + datum.mutation__protein_change;
-                    }
-                    {% include 'bar_chart.js' %}
-                </script>
-            </td>
-            </tr>
-        </table>
-    </div>
+        <div class="row">
+            {% include 'muts_needle_plot.html' %}
+            <hr>
+            <form action="/ale_analytics/stats" method="get">
+                <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id }}">
+                <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
+                <input type="submit" value="Show"><br>
+            </form>
+                    <br>
+            <div class="chart"></div>
 
+        </div>
+        <div class="row">
+            <table>
+                <tr>
+                    <td>
+                    <script>
+                        var gene_data = {{ genes }};
+                        var color_set = {{ gene_color_set }};
+                        var mutation_types = {{ mutation_types }};
+                        var extra_padding = 0;
+                        function _get_label(datum) {
+                            return datum.mutation__gene;
+                        }
+                        {% include 'bar_chart.js' %}
+                    </script>
+                </td>
+                <td>
+                    <script>
+                        var gene_data = {{ sequence_changes }};
+                        var color_set = {{ seq_color_set }};
+                        var mutation_types = {{ protein_types }};
+                        var extra_padding = 100;
+                        function _get_label(datum) {
+                            return datum.mutation__gene + " " + datum.mutation__protein_change;
+                        }
+                        {% include 'bar_chart.js' %}
+                    </script>
+                </td>
+                </tr>
+            </table>
+        </div>
+
+    {% endif %}
 {% endblock %}
