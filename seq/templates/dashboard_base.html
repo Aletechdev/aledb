@@ -16,14 +16,21 @@
 
         var sidebar_hidden = false;
         function toggle_sidebar() {
+            var x = document.getElementsByClassName('row');
             if(sidebar_hidden) {
                 sidebar_hidden = false;
                 $('nav').css('left', '0');
                 document.getElementById('sidebar_arrows').innerText = '«';
+                for(var i = 0; i < x.length; i++) {
+                    $(x[i]).width($(x[i]).width() - 240)
+                }
             } else {
                 sidebar_hidden = true;
                 $('nav').css('left', '-240px');
                 document.getElementById('sidebar_arrows').innerText = '»';
+                for(var j = 0; j < x.length; j++) {
+                    $(x[j]).width($(x[j]).width() + 240)
+                }
             }
         }
 

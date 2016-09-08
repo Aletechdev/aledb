@@ -75,8 +75,13 @@
                 var scrollLeft = $(window).scrollLeft();
                 $("#data_filter").offset({left: filter_offset.left + scrollLeft});
                 i = 0;
+                var sidebar_offset = 0;
+                if(sidebar_hidden == true) {
+                    sidebar_offset = 240;
+                }
+                console.log(sidebar_offset)
                 $(".ui").each(function () {
-                    $(this).offset({left: ui_offset[i++] + scrollLeft});
+                    $(this).offset({left: ui_offset[i++] + scrollLeft - sidebar_offset});
                 });
             });
             var hidden_cols = document.getElementById('hidden_columns').value.split(',');
@@ -157,7 +162,7 @@
                 url: "",
                 data: { mut_id: mutation_id,
                         save_method: "global"
-                },
+                }
             })
         }
 
@@ -209,12 +214,14 @@
             <input type="hidden" name="ale_no" value="all"/>
         {% endif %}
         <table id="data">
-            <input type="button" value="Remove checked samples" class="ui" onclick="filterSample('remove')"/>
-            <input type="button" value="Show checked samples" class="ui" onclick="filterSample('show')"/>
-            {% include 'export_as_csv.html' %}
-            <label style="float:right" class="ui"><input class="ui" id="show_dups" onclick="filter_dups(this)"
-                                                         type="checkbox" name="checkbox" value="value"
-                                                         style="margin-left: 10px" checked> Show Duplications</label>
+            <div class="ui">
+                <input type="button" value="Remove checked samples" onclick="filterSample('remove')"/>
+                <input type="button" value="Show checked samples" onclick="filterSample('show')"/>
+                {% include 'export_as_csv.html' %}
+                <label style="float:right"><input id="show_dups" onclick="filter_dups(this)"
+                                                             type="checkbox" name="checkbox" value="value"
+                                                             style="margin-left: 10px" checked> Show Duplications</label>
+            </div>
             <br><br>
             {% block show_hide_columns %}{% endblock %}
             <thead>
