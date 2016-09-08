@@ -2,7 +2,7 @@ from common.constants import REQUEST_ALL
 
 from filter.models import AleExperimentFilter, GlobalFilter
 
-from common.db_util import clear_dashboard_cache
+import common.db_util
 
 
 def get_ale_experiment_selector(ale_experiment_id, reseq_query):
@@ -38,7 +38,7 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
         if save_method == 'global':
 
-            clear_dashboard_cache()
+            common.db_util.clear_dashboard_cache()
 
             global_filter, created = GlobalFilter.objects.get_or_create(id=1)
 
@@ -52,7 +52,7 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
         elif save_method == 'experiment' and ale_experiment_id is not None:
 
-            clear_dashboard_cache()
+            common.db_util.clear_dashboard_cache()
 
             ale_exp_filter, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id)
 
