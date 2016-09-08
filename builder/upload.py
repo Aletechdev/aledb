@@ -12,38 +12,27 @@ from genes.util import get_gene_list
 from filter.models import AleExperimentFilter
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
-
 HTML_MUTATION_FILE_NAME = "index.html"
-
 CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row"]
-
 POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row", "polymorphism_table_row"]
-
 AVERAGE_READ_LENGTH_INDEX = 5
-
 READ_COUNT_INDEX = 2
-
 GD_MUT_POS_ATTR_KEY = 'position'
-
 GD_MUT_GENE_NAME_ATTR_KEY = 'gene_name'
-
+GD_MUT_GENE_PRODUCT_ATTR_KEY = 'gene_product'  # Will contain list of genes for mutations affecting many.
 GD_MUT_TYPE_ATTR_KEY = 'type'
-
 GD_MUT_FREQ_ATTR_KEY = 'frequency'
-
 DEFAULT_CLONAL_FREQ = 1
-
 BRESEQ_REPORT_COLUMN_KEY_EVIDENCE = "evidence"
-
 BRESEQ_REPORT_COLUMN_KEY_POSITION = "position"
-
 BRESEQ_REPORT_COLUMN_KEY_MUTATION = "mutation"
-
 BRESEQ_REPORT_COLUMN_KEY_MUTATION_FREQUENCY = "freq"
-
 BRESEQ_REPORT_COLUMN_KEY_ANNOTATION = "annotation"
-
 BRESEQ_REPORT_COLUMN_KEY_GENE = "gene"
+DUP_CSV_GENE_LIST_INDEX = 7
+DUP_CSV_START_POSITION_INDEX = 0
+DUP_CSV_WIDTH_INDEX = 2
+DUP_CSV_DEPTH_INDEX = 4
 
 config = ConfigParser()
 settings_file_path = os.path.join(os.path.dirname(__file__), "../aleinfo/settings.ini")
@@ -85,14 +74,12 @@ def add_breseq_results(technical_replicate_id,
                        seq_experiment,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
-                       reseq_ref_name,
                        experiment,
                        is_wild_type)
 
     _process_duplications(breseq_folder,
                           ref_gene_list,
                           seq_experiment,
-                          reseq_ref_name,
                           is_wild_type)
 
     sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
@@ -102,61 +89,40 @@ def add_breseq_results(technical_replicate_id,
                                          breseq_folder)
 
 
-# TODO: remove unused reseq_reference argument.
-def _process_duplications(breseq_folder,
+from duplications.util import Duplications
+# TODO: remove ref_gene_list
+def _process_duplications(breseq_output_dir_path,
                           ref_gene_list,
-                          seq_experiment,
-                          reseq_reference,
+                          reseq,
                           is_wild_type):
+    """
+    Called per breseq folder.
+    """
 
-
-    afi = os.path.basename(os.path.dirname(os.path.dirname(breseq_folder)))
-
-    # TODO: afi.startswith is not a valid approach. Need to find a way to determine wildtype if none is given
-    if is_wild_type or afi.startswith('0'):
+    # TODO: ale_flask_isolate_annotation.startswith is not a valid approach. Need to find a way to determine wildtype if none is given
+    ale_flask_isolate_annotation = os.path.basename(os.path.dirname(os.path.dirname(breseq_output_dir_path)))
+    if is_wild_type or ale_flask_isolate_annotation.startswith('0'):
         return
 
-    breseq_output_path = os.path.dirname(os.path.dirname(os.path.dirname(breseq_folder)))
+    duplications = Duplications(breseq_output_dir_path)
+    observed_mutation_list = []
+    for dup_dict in duplications.dup_list:
+        mutation, created = seq.models.Mutation.objects.get_or_create(
+            position=dup_dict[Duplications.START_POSITION_KEY],
+            gene=dup_dict[Duplications.GENES_KEY],
+            sequence_change=dup_dict[Duplications.SEQUENCE_CHANGE_KEY],
+            protein_change=dup_dict[Duplications.PROTEIN_CHANGE_KEY],
+            mutation_type=dup_dict[Duplications.MUTATION_TYPE_KEY])
 
-    dup_path = breseq_output_path + "/dups/" + afi + "/" + afi + "_genes.csv"
+        mutation.save()  # TODO: Not using bulk_create in case mutation already exists? Why aren't we using bulk_create?
 
-    try:
-        with open(dup_path, 'rt') as csvfile:
+        observed_mutation = seq.models.ObservedMutation(sequencing_experiment=reseq,
+                                                        mutation=mutation,
+                                                        breseq_present=True,
+                                                        frequency=1.00)
+        observed_mutation_list.append(observed_mutation)
 
-            duplications = list(csv.reader(csvfile, delimiter=','))
-
-            if len(duplications) > 1:
-                duplications.pop(0)
-                observed_mutation_list = []
-                for dup in duplications:
-
-                    genes = list(csv.reader(dup[7].splitlines(), delimiter=','))[0]
-
-                    if len(genes) <= 1:
-                        gene_entry = _find_between(genes[0], "\'", "\'")
-                    else:
-                        gene_pair = [_find_between(genes[0], "\'", "\'"), _find_between(genes[-1], "\'", "\'")]
-                        gene_entry = gene_pair[0] + "-" + gene_pair[1]
-
-                    mutation, created = seq.models.Mutation.objects.get_or_create(position=dup[0],
-                                                                                  gene=gene_entry,
-                                                                                  sequence_change=(format(int(dup[2]), ",d") + " bp x" + dup[4]),
-                                                                                  mutation_type="DUP")
-
-                    mutation.protein_change = "Duplication"
-
-                    mutation.save()
-
-                    observed_mutation = seq.models.ObservedMutation(sequencing_experiment=seq_experiment,
-                                                                    mutation=mutation,
-                                                                    breseq_present=True,
-                                                                    frequency=1.00)
-                    observed_mutation_list.append(observed_mutation)
-
-                seq.models.ObservedMutation.objects.bulk_create(observed_mutation_list)
-
-    except IOError:
-        return
+    seq.models.ObservedMutation.objects.bulk_create(observed_mutation_list)
 
 
 # TODO: Keep this function around: has no current use but can be used to consolidate duplications into 1 mutation
@@ -306,14 +272,12 @@ def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, pers
     return seq_experiment
 
 
-# TODO: remove reseq_reference argument
 def _process_mutations(sample_type,
                        breseq_folder,
                        ref_gene_list,
                        seq_experiment,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
-                       reseq_reference,
                        experiment,
                        is_wild_type):
 
@@ -335,8 +299,9 @@ def _process_mutations(sample_type,
         attrs = row.findChildren("td")
 
         gene_annotation = sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
-        gene_list = get_gene_list(gene_annotation, ref_gene_list)
-        gene_list_str = ','.join(gene_list)
+        gene_product_annotation = sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
+        gene_list = get_gene_list(gene_annotation, gene_product_annotation)
+        gene_list_str = ', '.join(gene_list)
 
         mutation, created = seq.models.Mutation.objects.get_or_create(position=sample_mutation_dict[mutation_num].get(GD_MUT_POS_ATTR_KEY),
                                                                       gene=gene_list_str,
