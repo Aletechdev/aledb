@@ -89,15 +89,17 @@ def _get_cached_dashboard_query():
 
     if cached_mutation_queryset is None or cached_observed_mutation_queryset is None:
 
-        gene_query = dashboard_filter(seq.models.ObservedMutation.objects.exclude(mutation__gene=''))
+        initial_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
 
-        mutation_query_set = get_filtered_mutation_queryset(gene_query)
+        observed_mutation_queryset = dashboard_filter(initial_query)
+
+        mutation_query_set = get_filtered_mutation_queryset(observed_mutation_queryset)
 
         cache.set('dashboard_mutation', mutation_query_set, None)
 
-        cache.set('dashboard_observed_mutation', gene_query, None)
+        cache.set('dashboard_observed_mutation', observed_mutation_queryset, None)
 
-        return mutation_query_set, gene_query
+        return mutation_query_set, observed_mutation_queryset
 
     else:
 
