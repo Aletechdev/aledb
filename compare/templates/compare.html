@@ -61,43 +61,47 @@
 {% block content %}
 
     <div class="row">
-        <div class="btn-group">
-            <button type="button" class="btn btn-default" id="first_button">First Experiment</button>
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="caret"></span>
-                <span class="sr-only">Toggle Dropdown</span>
-            </button>
-            <ul class="dropdown-menu" id="first">
-                {% for exp in experiments %}
-                    <li><a href="#/">{{ exp.name }}</a></li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="btn-group">
-            <button type="button" class="btn btn-default" id="second_button">Second Experiment</button>
-            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="caret"></span>
-                <span class="sr-only">Toggle Dropdown</span>
-            </button>
-            <ul class="dropdown-menu" id="second">
-                {% for exp in experiments %}
-                    <li><a href="#/">{{ exp.name }}</a></li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="btn-group">
-            <form action="/compare/" method="get">
-                <input type="submit" class="btn btn-default" id="compare" name="compare" value="Compare">
-                <input type="hidden" name="first_exp" id="first_exp" value="">
-                <input type="hidden" name="second_exp" id="second_exp" value="">
-                <input type="hidden" name="clicked_compare_button" value="True">
-            </form>
+        <div class="col-lg-12">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default" id="first_button">First Experiment</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" id="first">
+                    {% for exp in experiments %}
+                        <li><a href="#/">{{ exp.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-default" id="second_button">Second Experiment</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" id="second">
+                    {% for exp in experiments %}
+                        <li><a href="#/">{{ exp.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="btn-group">
+                <form action="/compare/" method="get">
+                    <input type="submit" class="btn btn-default" id="compare" name="compare" value="Compare">
+                    <input type="hidden" name="first_exp" id="first_exp" value="">
+                    <input type="hidden" name="second_exp" id="second_exp" value="">
+                    <input type="hidden" name="clicked_compare_button" value="True">
+                </form>
+            </div>
         </div>
     </div>
     {% if is_error %}
         <br>
         <div class="row">
-            <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+            <div class="col-lg-12">
+                <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+            </div>
         </div>
     {% endif %}
     {% if has_comparison %}
@@ -303,93 +307,101 @@
         </div>
     </div>
     <div class="row">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Sample QA Thresholds</h3>
-            </div>
-            <div class="panel-body">
-                <p><b>Unassigned Missing Coverage Evidence upper bound = </b>5</p>
-                <p><b>Mean Coverage lower bound = </b>75</p>
-                <p><b>Mapped Reads lower bound = </b>1,250,000</p>
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Sample QA Thresholds</h3>
+                </div>
+                <div class="panel-body">
+                    <p><b>Unassigned Missing Coverage Evidence upper bound = </b>5</p>
+                    <p><b>Mean Coverage lower bound = </b>75</p>
+                    <p><b>Mapped Reads lower bound = </b>1,250,000</p>
+                </div>
             </div>
         </div>
     </div>
     <div class="row">
-        <table id="runs" class="tablesorter">
-            <thead>
-                <tr>
-                    <th>ALE, Flask, Isolate</th>
-                    <th>Predicted Mutations</th>
-                    <th>Unassigned Missing Coverage Evidence</th>
-                    <th>Mean Coverage</th>
-                    <th>Total Reads</th>
-                    <th>Percent Mapped</th>
-                    <th>Mapped Reads</th>
-                    <th>Average Read Length</th>
+        <div class="col-lg-12">
+            <table id="runs" class="tablesorter">
+                <thead>
+                    <tr>
+                        <th>ALE, Flask, Isolate</th>
+                        <th>Predicted Mutations</th>
+                        <th>Unassigned Missing Coverage Evidence</th>
+                        <th>Mean Coverage</th>
+                        <th>Total Reads</th>
+                        <th>Percent Mapped</th>
+                        <th>Mapped Reads</th>
+                        <th>Average Read Length</th>
 
-                </tr>
-            </thead>
-            <tbody>
-            {% for experiment_info_tuple in experiments_info_list %}
-                <tr class="experiment_stats">
-                    <td class="sample_name"><a href="
-                            {{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
-                    </td>
-                    <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
-                    <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
-                    <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
-                    <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
-                    <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
-                    <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
-                    <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
-                </tr>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for experiment_info_tuple in experiments_info_list %}
+                    <tr class="experiment_stats">
+                        <td class="sample_name"><a href="
+                                {{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
+                        </td>
+                        <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
+                        <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
+                        <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
+                        <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
+                        <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
+                        <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
+                        <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
+                    </tr>
 
-            {% endfor %}
-            </tbody>
-            <script type="text/javascript">{% include 'runs.js' %}</script>
-        </table>
+                {% endfor %}
+                </tbody>
+                <script type="text/javascript">{% include 'runs.js' %}</script>
+            </table>
+        </div>
     </div>
         <div class="row">
-            {% include 'muts_needle_plot.html' %}
-            <hr>
-            <form action="/ale_analytics/stats" method="get">
-                <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id }}">
-                <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
-                <input type="submit" value="Show"><br>
-            </form>
-                    <br>
-            <div class="chart"></div>
+            <div class="col-lg-12">
+                {% include 'muts_needle_plot.html' %}
+                <hr>
+                <form action="/ale_analytics/stats" method="get">
+                    <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id }}">
+                    <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
+                    <input type="submit" value="Show"><br>
+                </form>
+                        <br>
+                <div class="chart"></div>
+            </div>
 
         </div>
         <div class="row">
-            <table>
-                <tr>
+            <div class="col-lg-12">
+                <table>
+                    <tr>
+                        <td>
+                        <script>
+                            var gene_data = {{ genes }};
+                            var color_set = {{ gene_color_set }};
+                            var mutation_types = {{ mutation_types }};
+                            var extra_padding = 0;
+                            function _get_label(datum) {
+                                return datum.mutation__gene;
+                            }
+                            {% include 'bar_chart.js' %}
+                        </script>
+                    </td>
                     <td>
-                    <script>
-                        var gene_data = {{ genes }};
-                        var color_set = {{ gene_color_set }};
-                        var mutation_types = {{ mutation_types }};
-                        var extra_padding = 0;
-                        function _get_label(datum) {
-                            return datum.mutation__gene;
-                        }
-                        {% include 'bar_chart.js' %}
-                    </script>
-                </td>
-                <td>
-                    <script>
-                        var gene_data = {{ sequence_changes }};
-                        var color_set = {{ seq_color_set }};
-                        var mutation_types = {{ protein_types }};
-                        var extra_padding = 100;
-                        function _get_label(datum) {
-                            return datum.mutation__gene + " " + datum.mutation__protein_change;
-                        }
-                        {% include 'bar_chart.js' %}
-                    </script>
-                </td>
-                </tr>
-            </table>
+                        <script>
+                            var gene_data = {{ sequence_changes }};
+                            var color_set = {{ seq_color_set }};
+                            var mutation_types = {{ protein_types }};
+                            var extra_padding = 100;
+                            function _get_label(datum) {
+                                return datum.mutation__gene + " " + datum.mutation__protein_change;
+                            }
+                            {% include 'bar_chart.js' %}
+                        </script>
+                    </td>
+                    </tr>
+                </table>
+            </div>
         </div>
 
     {% endif %}

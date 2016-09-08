@@ -129,7 +129,7 @@ def handle_get_response(all_experiments, hidden_columns, is_error, error_message
     context = {"experiments": all_experiments,
                "has_comparison": False,
                "hidden_columns": hidden_columns,
-               "recent_experiments": get_recent_experiments(None),
+               "recent_experiments": get_recent_experiments(),
                "title": "Compare",
                "header": "Compare",
                "is_error": is_error,
