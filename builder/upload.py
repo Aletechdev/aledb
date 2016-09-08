@@ -125,30 +125,6 @@ def _process_duplications(breseq_output_dir_path,
     seq.models.ObservedMutation.objects.bulk_create(observed_mutation_list)
 
 
-# TODO: Keep this function around: has no current use but can be used to consolidate duplications into 1 mutation
-def get_duplication_mutation(dup, gene_entry):
-
-    exists = False
-
-    mutations = seq.models.Mutation.objects.filter(position__gt=int(dup[0]) - DUPLICATION_BP_TOLERANCE,
-                                                   position__lt=int(dup[0]) + DUPLICATION_BP_TOLERANCE,
-                                                   gene=gene_entry,
-                                                   mutation_type="DUP")
-
-    # TODO: If count > 1 then should do more comparison to determine best match
-    if mutations.count() > 0:
-        mutation = mutations.first()
-        exists = True
-    else:
-
-        mutation = seq.models.Mutation.objects.create(position=dup[0],
-                                                      gene=gene_entry,
-                                                      sequence_change=(format(int(dup[2]), ",d") + " bp x" + dup[4]),
-                                                      mutation_type="DUP")
-
-    return mutation, exists
-
-
 def _get_beautifulsoup_html(output_folder, html_file_name):
     output_file_path = join(output_folder, html_file_name)
 
