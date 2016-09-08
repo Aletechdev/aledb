@@ -2,6 +2,8 @@ from common.constants import REQUEST_ALL
 
 from filter.models import AleExperimentFilter, GlobalFilter
 
+from common.db_util import clear_dashboard_cache
+
 
 def get_ale_experiment_selector(ale_experiment_id, reseq_query):
 
@@ -36,6 +38,8 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
         if save_method == 'global':
 
+            clear_dashboard_cache()
+
             global_filter, created = GlobalFilter.objects.get_or_create(id=1)
 
             global_filter_ignored_mutations = global_filter.ignored_mutations
@@ -47,6 +51,8 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
             global_filter.save()
 
         elif save_method == 'experiment' and ale_experiment_id is not None:
+
+            clear_dashboard_cache()
 
             ale_exp_filter, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id)
 
