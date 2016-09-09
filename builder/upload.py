@@ -3,13 +3,13 @@ import re
 from bs4 import BeautifulSoup
 from builder.gdparse.gdparse import gdparse
 import collections
-import csv
 import numbers
 import seq.models
 import os
 from configparser import ConfigParser
-from genes.util import get_gene_list
+from genes.util import get_annotated_gene_list
 from filter.models import AleExperimentFilter
+from duplications.util import Duplications
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
 HTML_MUTATION_FILE_NAME = "index.html"
@@ -45,7 +45,6 @@ DUPLICATION_BP_TOLERANCE = 900
 def add_breseq_results(technical_replicate_id,
                        person,
                        breseq_folder,
-                       ref_gene_list,
                        mutation_gd_parser,
                        annotation_gd_parser,
                        reseq_ref_name,
@@ -58,7 +57,7 @@ def add_breseq_results(technical_replicate_id,
     sample was processed as a population.
     """
 
-    seq_experiment = _get_reseq_experiment_with_stats(breseq_folder,
+    reseq = _get_reseq_experiment_with_stats(breseq_folder,
                                                       technical_replicate_id,
                                                       person)
 
@@ -70,29 +69,24 @@ def add_breseq_results(technical_replicate_id,
 
     _process_mutations(sample_reseq_type,
                        breseq_folder,
-                       ref_gene_list,
-                       seq_experiment,
+                       reseq,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
                        experiment,
                        is_wild_type)
 
     _process_duplications(breseq_folder,
-                          ref_gene_list,
-                          seq_experiment,
+                          reseq,
                           is_wild_type)
 
     sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
 
-    _process_unassigned_missing_coverage(seq_experiment,
+    _process_unassigned_missing_coverage(reseq,
                                          sample_evidence_dict,
                                          breseq_folder)
 
 
-from duplications.util import Duplications
-# TODO: remove ref_gene_list
 def _process_duplications(breseq_output_dir_path,
-                          ref_gene_list,
                           reseq,
                           is_wild_type):
     """
@@ -250,7 +244,6 @@ def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, pers
 
 def _process_mutations(sample_type,
                        breseq_folder,
-                       ref_gene_list,
                        seq_experiment,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
@@ -274,9 +267,9 @@ def _process_mutations(sample_type,
 
         attrs = row.findChildren("td")
 
-        gene_annotation = sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
-        gene_product_annotation = sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
-        gene_list = get_gene_list(gene_annotation, gene_product_annotation)
+        breseq_gene_annotation = sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
+        breseq_gene_product_annotation = sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
+        gene_list = get_annotated_gene_list(breseq_gene_annotation, breseq_gene_product_annotation)
         gene_list_str = ', '.join(gene_list)
 
         mutation, created = seq.models.Mutation.objects.get_or_create(position=sample_mutation_dict[mutation_num].get(GD_MUT_POS_ATTR_KEY),
