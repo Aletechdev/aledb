@@ -6,7 +6,7 @@ __author__ = "Patrick Phaneuf"
 
 # TODO: also ignore genes from global filter.
 class Enrichment:
-    def __init__(self, reseq_mutation_list, ignored_mutation_id_list=None):
+    def __init__(self, reseq_mutation_list, ignored_mutation_id_list=[]):
         self._reseq_mutation_list = reseq_mutation_list
         self._ignored_mutation_id_list = ignored_mutation_id_list
 

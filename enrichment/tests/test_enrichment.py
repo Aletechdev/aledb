@@ -1,25 +1,33 @@
 from django.test import TestCase
 from seq.models import Mutation
+from enrichment.enrichment import Enrichment
 
 __author__ = 'Patrick Phaneuf'
 
 
 class TestEnrichment(TestCase):
 
-    def test_Enrichment(self):
-        mut1 = Mutation.objects.create(mutation_type="SNP",
+    def test_enriched_geneA(self):
+        mut1 = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
-                                      sequence_change="delta776 bp",
+                                      sequence_change="zxcv",
                                       gene="geneA")
         mut1.save()
 
-        mut2 = Mutation.objects.create(mutation_type="qwe",
-                                       position=2,
-                                       sequence_change="asdfasdf",
-                                       gene="geneB")
+        mut2 = Mutation.objects.create(mutation_type="asd",
+                                       position=1,
+                                       sequence_change="gfds",
+                                       gene="geneA")
         mut2.save()
 
+        mut3 = Mutation.objects.create(mutation_type="yui",
+                                       position=1,
+                                       sequence_change="hjkl",
+                                       gene="geneB")
+        mut3.save()
+
         mutation_queryset = Mutation.objects.all()
-        for mutation in mutation_queryset:
-            print(mutation.sequence_change)
-        self.assertTrue(True)
+        enrichment = Enrichment([mutation_queryset])
+        expected_enriched_gene = "geneA"
+        for mutation in enrichment.enrichment_mutation_list:
+            self.assertEquals(expected_enriched_gene, mutation.gene)
