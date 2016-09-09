@@ -1,6 +1,6 @@
 from django.test import TestCase
 from seq.models import Mutation
-from enrichment.enrichment import Enrichment
+from enrichment.util import Enrichment
 
 __author__ = 'Patrick Phaneuf'
 
