@@ -100,7 +100,7 @@ def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate
     _delete_all_orphaned_mutations()
 
 
-def insert_wild_type_flask(breseq_wild_type_output_abs_path, ref_file_path, ale_exp_user, ale_exp_name):
+def insert_wild_type_flask(breseq_wild_type_output_abs_path, ale_exp_user, ale_exp_name):
     """
     Executed from Django ipython shell.
     Args:
@@ -167,7 +167,6 @@ def _insert_wild_type_flask(breseq_wild_type_output_abs_path,
 
 # TODO: What I do here should also be used in insert_wild_type_flask()
 def insert_flasks(sample_breseq_abs_paths_list,
-                  ref_file_path,
                   ale_exp_user,
                   ale_exp_name):
     """
@@ -221,7 +220,6 @@ def insert_flasks(sample_breseq_abs_paths_list,
 
 # For wild_type, expecting directory with output.gd in it.
 def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
-                                           ref_file_path,
                                            ale_exp_user,
                                            ale_exp_name,
                                            breseq_wild_type_output_abs_path=None):
