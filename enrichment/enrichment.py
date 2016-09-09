@@ -41,8 +41,7 @@ class Enrichment:
                     gene_list = get_gene_list(mutation.gene)
 
                     for gene in gene_list:
-                        if self._mutation_gene_count_dict[gene] > 1 \
-                                and mutation not in enrichment_mutation_list:  # This condition will keep intergenic mutations from being added twice since they consider two genes which may both already have a mutation; in the case the intergenic mutation will only be added once.
+                        if self._mutation_gene_count_dict[gene] > 1 and mutation not in enrichment_mutation_list:  # This condition will keep intergenic mutations from being added twice since they consider two genes which may both already have a mutation; in the case the intergenic mutation will only be added once.
                             enrichment_mutation_list.append(mutation)
 
         return enrichment_mutation_list
