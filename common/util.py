@@ -1,3 +1,5 @@
+#TODO now that we can execute unit tests on code that involves django resources, bring all implementations with common.db_util into this file.
+
 from common.constants import REQUEST_ALL
 
 from filter.models import AleExperimentFilter
