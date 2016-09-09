@@ -95,3 +95,27 @@ class TestEnrichment(TestCase):
         expected_enriched_gene = "geneB"
         for mutation in enrichment.enrichment_mutation_list:
             self.assertEquals(expected_enriched_gene, mutation.gene)
+
+    def test_dont_add_same_enriched_mutation_twice(self):
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                       position=1,
+                                       sequence_change="seq_chng1",
+                                       gene="geneA")
+        mut.save()
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="seq_chng2",
+                                      gene="geneA, geneB")
+        mut.save()
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                       position=1,
+                                       sequence_change="seq_chng3",
+                                       gene="geneB")
+        mut.save()
+
+        mutation_queryset = Mutation.objects.all()
+        enrichment = Enrichment([mutation_queryset])
+
+        self.assertEquals(3, len(enrichment.enrichment_mutation_list))
