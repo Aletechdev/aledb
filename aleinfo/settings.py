@@ -31,6 +31,7 @@ DATABASES = {
 }
 
 # Likely has to be after initial DATABASES definition.
+# This is used for unit testing of django code.
 if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 
