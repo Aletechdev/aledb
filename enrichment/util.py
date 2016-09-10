@@ -7,12 +7,14 @@ from genes.util import get_gene_list
 __author__ = "Patrick Phaneuf"
 
 
-# TODO: also ignore genes from global filter.
 class Enrichment:
-    def __init__(self, reseq_mutation_list, ignored_mutation_id_list=[]):
+    def __init__(self,
+                 reseq_mutation_list,
+                 ignored_mutation_id_list=[],
+                 ignored_gene_list=[]):
         self._reseq_mutation_list = reseq_mutation_list
         self._ignored_mutation_id_list = ignored_mutation_id_list
-
+        self._ignored_gene_list = ignored_gene_list
         self._mutation_gene_count_dict = self._populate_mutation_gene_count_dict()
         self.enrichment_mutation_list = self._populate_enrichment_mutation_list()
 
@@ -21,7 +23,7 @@ class Enrichment:
         mutation_gene_count_dict = collections.defaultdict(int)
         for mutation_list in self._reseq_mutation_list:
             for mutation in mutation_list:
-                if mutation.id not in self._ignored_mutation_id_list:
+                if not self._ignore(mutation):
                     mutation_gene_list = get_gene_list(mutation.gene)
                     for gene in mutation_gene_list:
                         mutation_gene_count_dict[gene] += 1
@@ -31,29 +33,33 @@ class Enrichment:
         enrichment_mutation_list = []
         for reseq_mutation_list in self._reseq_mutation_list:
             for mutation in reseq_mutation_list:
-                if mutation.id not in self._ignored_mutation_id_list:
+                if not self._ignore(mutation):
                     gene_list = get_gene_list(mutation.gene)
                     for gene in gene_list:
                         if self._mutation_gene_count_dict[gene] > 1 and mutation not in enrichment_mutation_list:  # This condition will keep intergenic mutations from being added twice since they consider two genes which may both already have a mutation; in the case the intergenic mutation will only be added once.
                             enrichment_mutation_list.append(mutation)
         return enrichment_mutation_list
 
+    def _ignore(self, mutation):
+        if mutation.id in self._ignored_mutation_id_list:
+            return True
+
+        gene_list = get_gene_list(mutation.gene)
+        # Don't want to ignore mutation that contains a list of many genes with an ignore gene within.
+        if len(gene_list) == 1 and gene_list[0] in self._ignored_gene_list:
+            return True
+
 
 def get_enrichment_mutation_list(ale_experiment_id):
     reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
     ale_exp_reseq_mutation_lists = get_ale_exp_reseq_mutation_lists(reseq_dict)  # Will remove starting strain mutations.
-    filter_settings = get_filter_settings(ale_experiment_id)  #TODO: may not matter since the experiment isn't yet established on the website.
+    filter_settings = get_filter_settings(ale_experiment_id)
     ignored_mutation_id_list = _get_ignored_mutation_id_list(filter_settings)
-
     enrichment = Enrichment(ale_exp_reseq_mutation_lists, ignored_mutation_id_list)
-
     return enrichment.enrichment_mutation_list
 
 
 def _get_ignored_mutation_id_list(filter_settings):
-
     global_ignored_mutation_ids = clean_ignored_mutation_id_list(get_global_filter().ignored_mutations)
-
     experiment_ignored_mutation_ids = clean_ignored_mutation_id_list(filter_settings.ignored_mutations)
-
     return global_ignored_mutation_ids + experiment_ignored_mutation_ids

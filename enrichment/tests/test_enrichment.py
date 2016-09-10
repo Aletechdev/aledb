@@ -1,6 +1,7 @@
 from django.test import TestCase
 from seq.models import Mutation
 from enrichment.util import Enrichment
+from filter.mutation_filter import AleExperimentFilter
 
 __author__ = 'Patrick Phaneuf'
 
@@ -44,6 +45,7 @@ class TestEnrichment(TestCase):
                                        gene="geneF")
         mut3.save()
 
+        # Need queryset for this test.
         mutation_pos1_queryset = Mutation.objects.filter(position=1)
         mutation_pos2_queryset = Mutation.objects.filter(position=2)
         enrichment = Enrichment([mutation_pos1_queryset, mutation_pos2_queryset])
@@ -89,6 +91,7 @@ class TestEnrichment(TestCase):
                                        gene="geneB")
         mut3.save()
 
+        # Need queryset for this test.
         mutation_pos1_queryset = Mutation.objects.filter(position=1)
         mutation_pos2_queryset = Mutation.objects.filter(position=2)
         enrichment = Enrichment([mutation_pos1_queryset, mutation_pos2_queryset])
@@ -115,7 +118,76 @@ class TestEnrichment(TestCase):
                                        gene="geneB")
         mut.save()
 
+        # Need queryset for this test.
         mutation_queryset = Mutation.objects.all()
         enrichment = Enrichment([mutation_queryset])
 
         self.assertEquals(3, len(enrichment.enrichment_mutation_list))
+
+
+    def test_ignore_genes(self):
+        # Will ignore this mutation due to singular gene.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        mut.save()
+
+        # Won't ignore this mutation, though won't consider geneA enriched,
+        # therefore no enrichment mutations.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA, geneB")
+        mut.save()
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneC")
+        mut.save()
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneC")
+        mut.save()
+
+        ignored_gene_list = ["geneA"]
+        mutation_queryset = Mutation.objects.all()
+        enrichment = Enrichment(reseq_mutation_list=[mutation_queryset],
+                                ignored_gene_list=ignored_gene_list)
+
+        expected_enriched_gene = "geneC"
+        for returned_enrichment_mutations in enrichment.enrichment_mutation_list:
+            self.assertEquals(returned_enrichment_mutations.gene, expected_enriched_gene)
+
+
+    def test_ignore_genes_with_annotation(self):
+        # Will ignore this mutation due to singular gene.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        mut.save()
+
+        # Won't ignore this mutation, though won't consider geneA enriched,
+        # therefore no enrichment mutations.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="[geneA], geneB")
+        mut.save()
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="[geneA]")
+        mut.save()
+
+        ignored_gene_list = ["geneA"]
+        mutation_queryset = Mutation.objects.all()
+        enrichment = Enrichment(reseq_mutation_list=[mutation_queryset],
+                                ignored_gene_list=ignored_gene_list)
+
+        self.assertEquals(len(enrichment.enrichment_mutation_list), 0)
