@@ -1,7 +1,6 @@
 from django.test import TestCase
 from seq.models import Mutation
 from enrichment.util import Enrichment
-from filter.mutation_filter import AleExperimentFilter
 
 __author__ = 'Patrick Phaneuf'
 
@@ -219,8 +218,6 @@ class TestEnrichment(TestCase):
                                       gene="geneA")
         mut.save()
 
-        # Won't ignore this mutation, though won't consider geneA enriched,
-        # therefore no enrichment mutations.
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
@@ -235,3 +232,80 @@ class TestEnrichment(TestCase):
         self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
         for enrichment_mutation in enrichment.enrichment_mutation_list:
             self.assertTrue("geneA" in enrichment_mutation.gene)
+
+    def test_ignore_mutation_id(self):
+        # This test relies on the fact that the id's given to the mutations
+        # by the DB tech start at 1 and increment by 1.
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        mut.save()
+
+        # This mutation will be given a mutation.id of 2.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        mut.save()
+
+        ignored_mutation_id_list = [2]
+        mutation_queryset = Mutation.objects.all()
+        enrichment = Enrichment(reseq_mutation_list=[mutation_queryset],
+                                ignored_mutation_id_list=ignored_mutation_id_list)
+
+        self.assertTrue(len(enrichment.enrichment_mutation_list) == 0)
+
+    def test_using_both_ignore_mutation_id_and_gene(self):
+        # Will ignore this mutation according to ignore gene list.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        mut.save()
+
+        # Will ignore this mutation according to ignore gene list.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        mut.save()
+
+        # Will ignore this mutation according to ignore mutation id list.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneC")
+        mut.save()
+
+        # geneC won't register as enriched since the other geneC mutation is ignored.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneC")
+        mut.save()
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneD, geneE")
+        mut.save()
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneD")
+        mut.save()
+
+        ignored_gene_list = ["geneA"]
+        ignored_mutation_id_list = [3]
+
+        mutation_queryset = Mutation.objects.all()
+        enrichment = Enrichment(reseq_mutation_list=[mutation_queryset],
+                                ignored_gene_list=ignored_gene_list,
+                                ignored_mutation_id_list=ignored_mutation_id_list)
+        self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
+        for enrichment_mutation in enrichment.enrichment_mutation_list:
+            self.assertTrue("geneD" in enrichment_mutation.gene)
+
+
+    # TODO: what if you have a list of ignore genes and you have a mutation that has the same gene list.
