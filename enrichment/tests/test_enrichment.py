@@ -99,6 +99,26 @@ class TestEnrichment(TestCase):
         for mutation in enrichment.enrichment_mutation_list:
             self.assertEquals(expected_enriched_gene, mutation.gene)
 
+    def test_enrichment_with_diff_gene_annotation(self):
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="seq_chng1",
+                                      gene="geneA")
+        mut.save()
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="seq_chng1",
+                                      gene="[geneA]")
+        mut.save()
+
+        mutation_queryset = Mutation.objects.all()
+        enrichment = Enrichment([mutation_queryset])
+
+        self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
+        for enrichment_mutation in enrichment.enrichment_mutation_list:
+            self.assertTrue("geneA" in enrichment_mutation.gene)
+
     def test_dont_add_same_enriched_mutation_twice(self):
         mut = Mutation.objects.create(mutation_type="qwe",
                                        position=1,
@@ -191,3 +211,27 @@ class TestEnrichment(TestCase):
                                 ignored_gene_list=ignored_gene_list)
 
         self.assertEquals(len(enrichment.enrichment_mutation_list), 0)
+
+    def test_dont_ignore_mutation_with_gene_list(self):
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        mut.save()
+
+        # Won't ignore this mutation, though won't consider geneA enriched,
+        # therefore no enrichment mutations.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA, geneB")
+        mut.save()
+
+        ignored_gene_list = ["geneB"]
+        mutation_queryset = Mutation.objects.all()
+        enrichment = Enrichment(reseq_mutation_list=[mutation_queryset],
+                                ignored_gene_list=ignored_gene_list)
+
+        self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
+        for enrichment_mutation in enrichment.enrichment_mutation_list:
+            self.assertTrue("geneA" in enrichment_mutation.gene)
