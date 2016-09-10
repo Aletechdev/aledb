@@ -40,14 +40,16 @@ class Enrichment:
                             enrichment_mutation_list.append(mutation)
         return enrichment_mutation_list
 
+    # TODO: this ignore mutation logic should be within the filter app; other apps should call on this logic, such as mutation tables.
     def _ignore(self, mutation):
+        ignore_mutation = False
         if mutation.id in self._ignored_mutation_id_list:
-            return True
-
-        gene_list = get_gene_list(mutation.gene)
-        # Don't want to ignore mutation that contains a list of many genes with an ignore gene within.
-        if len(gene_list) == 1 and gene_list[0] in self._ignored_gene_list:
-            return True
+            ignore_mutation = True
+        if not ignore_mutation:
+            gene_list = get_gene_list(mutation.gene)
+            if set(gene_list) == set(self._ignored_gene_list):
+                ignore_mutation = True
+        return ignore_mutation
 
 
 def get_enrichment_mutation_list(ale_experiment_id):
