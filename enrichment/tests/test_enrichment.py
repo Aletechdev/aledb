@@ -309,3 +309,24 @@ class TestEnrichment(TestCase):
 
 
     # TODO: what if you have a list of ignore genes and you have a mutation that has the same gene list.
+    def test_ignore_mutation_gene_list(self):
+        # Will ignore this mutation according to ignore gene list.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneB, geneA")
+        mut.save()
+
+        # Will ignore this mutation according to ignore gene list.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        mut.save()
+
+        ignored_gene_list = ["geneA", "geneB"]
+        mutation_queryset = Mutation.objects.all()
+        enrichment = Enrichment(reseq_mutation_list=[mutation_queryset],
+                                ignored_gene_list=ignored_gene_list)
+
+        self.assertTrue(len(enrichment.enrichment_mutation_list) == 0)
