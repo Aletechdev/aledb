@@ -7,6 +7,7 @@ from genes.util import get_gene_list
 __author__ = "Patrick Phaneuf"
 
 
+# TODO: ignore local mutations according to frequency.
 class Enrichment:
     def __init__(self,
                  reseq_mutation_list,
