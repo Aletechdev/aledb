@@ -266,6 +266,107 @@ class TestEnrichment(TestCase):
 
         self.assertEquals(len(enrichment.enrichment_mutation_list), 0)
 
+    def test_ignore_starting_strain_mutations(self):
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+
+        filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp,
+                                                             starting_strain_mutations="1")
+
+        observed_mutation_queryset = ObservedMutation.objects.all()
+        enrichment = Enrichment(reseq_obs_mut_list=[observed_mutation_queryset], filter_settings=filter_settings)
+
+        self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
+
+        expected_enriched_gene = "geneB"
+        for returned_enrichment_mutations in enrichment.enrichment_mutation_list:
+            self.assertEquals(returned_enrichment_mutations.gene, expected_enriched_gene)
+
+    def test_ignore_multiple_starting_strain_mutations(self):
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneC")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneC")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+
+        filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp,
+                                                             starting_strain_mutations="2,3")
+
+        observed_mutation_queryset = ObservedMutation.objects.all()
+        enrichment = Enrichment(reseq_obs_mut_list=[observed_mutation_queryset], filter_settings=filter_settings)
+
+        self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
+
+        expected_enriched_gene = "geneC"
+        for returned_enrichment_mutations in enrichment.enrichment_mutation_list:
+            self.assertEquals(returned_enrichment_mutations.gene, expected_enriched_gene)
+
     def test_dont_ignore_mutation_with_gene_list(self):
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
@@ -710,6 +811,3 @@ class TestEnrichment(TestCase):
         self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
         for enrichment_mutation in enrichment.enrichment_mutation_list:
             self.assertTrue("geneC" in enrichment_mutation.gene)
-    #
-    #
-    # # TODO: write tests for starting strain filtering.
