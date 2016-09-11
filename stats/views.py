@@ -23,7 +23,7 @@ from common.db_util import get_reseq_queryset,\
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
-from filter.util import filter
+from filter.util import filter_mutations
 
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 
@@ -240,6 +240,6 @@ def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
 
     filter_settings = util.get_filter_settings(ale_experiment_id)
 
-    observed_mutation_query_set = filter(observed_mutation_query_set, filter_settings)
+    observed_mutation_query_set = filter_mutations(observed_mutation_query_set, filter_settings)
 
     return observed_mutation_query_set

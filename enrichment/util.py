@@ -1,5 +1,5 @@
 import collections
-from filter.util import get_filter_settings, filter
+from filter.util import get_filter_settings, filter_mutations
 from common.db_util import get_ordered_reseq_dict, get_ale_exp_reseq_obs_mut_lists
 from genes.util import get_gene_list
 
@@ -16,8 +16,7 @@ class Enrichment:
     def _populate_mutation_gene_count_dict(self):
         mutation_gene_count_dict = collections.defaultdict(int)
         for reseq_obs_mut_queryset in self._reseq_obs_mut_list:
-            if self._filter_settings is not None:  # TODO: shouldn't have to do this; filter_mutations should handle filter_settings=None gracefully
-                reseq_obs_mut_queryset = filter(reseq_obs_mut_queryset, self._filter_settings)
+            reseq_obs_mut_queryset = filter_mutations(reseq_obs_mut_queryset, self._filter_settings)
             for observed_mutation in reseq_obs_mut_queryset:
                 mutation_gene_list = get_gene_list(observed_mutation.mutation.gene)
                 for gene in mutation_gene_list:
@@ -27,8 +26,7 @@ class Enrichment:
     def _populate_enrichment_mutation_list(self):
         enrichment_mutation_list = []
         for reseq_obs_mut_queryset in self._reseq_obs_mut_list:
-            if self._filter_settings is not None:  # TODO: shouldn't have to do this; filter_mutations should handle filter_settings=None gracefully
-                reseq_obs_mut_queryset = filter(reseq_obs_mut_queryset, self._filter_settings)
+            reseq_obs_mut_queryset = filter_mutations(reseq_obs_mut_queryset, self._filter_settings)
             for observed_mutation in reseq_obs_mut_queryset:
                 mutation_gene_list = get_gene_list(observed_mutation.mutation.gene)
                 for gene in mutation_gene_list:
