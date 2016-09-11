@@ -4,6 +4,7 @@ from seq.models import ObservedMutation
 from seq.models import ResequencingExperiment
 from enrichment.util import Enrichment
 from filter.models import AleExperimentFilter
+from filter.models import GlobalFilter
 from ale.models import AleExperiment
 from ale.models import Instrument
 
@@ -129,14 +130,16 @@ class TestEnrichment(TestCase):
                                       sequence_change="seq_chng1",
                                       gene="geneA")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
-                                        mutation=mut)
+                                        mutation=mut,
+                                        frequency=1)
 
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="seq_chng1",
                                       gene="[geneA]")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
-                                        mutation=mut)
+                                        mutation=mut,
+                                        frequency=1)
 
         observed_mutation_queryset = ObservedMutation.objects.all()
         enrichment = Enrichment([observed_mutation_queryset])
@@ -153,21 +156,24 @@ class TestEnrichment(TestCase):
                                        sequence_change="seq_chng1",
                                        gene="geneA")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
-                                        mutation=mut)
+                                        mutation=mut,
+                                        frequency=1)
 
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="seq_chng2",
                                       gene="geneA, geneB")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
-                                        mutation=mut)
+                                        mutation=mut,
+                                        frequency=1)
 
         mut = Mutation.objects.create(mutation_type="qwe",
                                        position=1,
                                        sequence_change="seq_chng3",
                                        gene="geneB")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
-                                        mutation=mut)
+                                        mutation=mut,
+                                        frequency=1)
 
         # Need queryset for this test.
         observed_mutation_queryset = ObservedMutation.objects.all()
@@ -516,6 +522,48 @@ class TestEnrichment(TestCase):
         for enrichment_mutation in enrichment.enrichment_mutation_list:
             self.assertTrue("geneB" in enrichment_mutation.gene)
 
-    # TODO: write tests for starting strain filtering.
-
     # TODO: write tests for global mutation filtering.
+    # def test_ignore_global_gene_only(self):
+    #     mut = Mutation.objects.create(mutation_type="qwe",
+    #                                   position=1,
+    #                                   sequence_change="asdf",
+    #                                   gene="geneA")
+    #     ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+    #                                     mutation=mut,
+    #                                     frequency=1)
+    #
+    #     # Will ignore this mutation according to ignore gene list.
+    #     mut = Mutation.objects.create(mutation_type="qwe",
+    #                                   position=1,
+    #                                   sequence_change="asdf",
+    #                                   gene="geneA")
+    #     ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+    #                                     mutation=mut,
+    #                                     frequency=1)
+    #
+    #     mut = Mutation.objects.create(mutation_type="qwe",
+    #                                   position=1,
+    #                                   sequence_change="asdf",
+    #                                   gene="geneB")
+    #     ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+    #                                     mutation=mut,
+    #                                     frequency=1)
+    #
+    #     mut = Mutation.objects.create(mutation_type="qwe",
+    #                                   position=1,
+    #                                   sequence_change="asdf",
+    #                                   gene="geneB")
+    #     ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+    #                                     mutation=mut,
+    #                                     frequency=1)
+    #
+    #     observed_mutation_queryset = ObservedMutation.objects.all()
+    #     GlobalFilter.objects.create(ignored_genes="geneA")
+    #     enrichment = Enrichment(reseq_obs_mut_list=[observed_mutation_queryset])
+    #
+    #     self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
+    #     for enrichment_mutation in enrichment.enrichment_mutation_list:
+    #         self.assertTrue("geneB" in enrichment_mutation.gene)
+    #
+    #
+    # # TODO: write tests for starting strain filtering.
