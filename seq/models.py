@@ -136,7 +136,7 @@ class Mutation(models.Model):
 
 class ObservedMutation(models.Model):
 
-    sequencing_experiment = models.ForeignKey(ResequencingExperiment)
+    sequencing_experiment = models.ForeignKey(ResequencingExperiment, null=True)
 
     mutation = models.ForeignKey(Mutation)
 

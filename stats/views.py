@@ -14,7 +14,7 @@ from seq.views import common
 
 from django.db.models import Count
 
-from filter import mutation_filter
+from filter import util
 
 from common.db_util import get_reseq_queryset,\
     get_ordered_reseq_dict,\
@@ -23,7 +23,7 @@ from common.db_util import get_reseq_queryset,\
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
-from filter.mutation_filter import filter_ignored_genes_and_mutations
+from filter.util import filter
 
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 
@@ -238,8 +238,8 @@ def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
 
     ale_experiment_id = common.get_ale_experiment_id(request)
 
-    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
+    filter_settings = util.get_filter_settings(ale_experiment_id)
 
-    observed_mutation_query_set = filter_ignored_genes_and_mutations(observed_mutation_query_set, filter_settings)
+    observed_mutation_query_set = filter(observed_mutation_query_set, filter_settings)
 
     return observed_mutation_query_set

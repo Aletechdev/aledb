@@ -1,10 +1,8 @@
 from filter.models import AleExperimentFilter, GlobalFilter
-
 from seq.models import Mutation
-
 from django.core.exceptions import ObjectDoesNotExist
-
 from ale.models import AleExperiment
+from genes.util import get_gene_list
 
 __author__ = 'Patrick Phaneuf'
 
@@ -21,11 +19,11 @@ DELETE_ROW_BOX = """<td><img src="/static/DataTables/media/images/close-icon.gif
 TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td></tr>"
 
 
-def filter_ignored_genes_and_mutations(query_set, filter_settings):
+def filter(observed_mutation_queryset, filter_settings):
 
     if filter_settings is None:
-        ignored_genes = ""
-        ignored_mutations = ""
+        ignored_genes = None
+        ignored_mutations = None
         starting_strain_mutations = []
         min_cutoff = 0
         max_cutoff = 100
@@ -36,42 +34,53 @@ def filter_ignored_genes_and_mutations(query_set, filter_settings):
         min_cutoff = filter_settings.min_cutoff
         max_cutoff = filter_settings.max_cutoff
 
-    query_set = _filter_ignored_genes(query_set, ignored_genes)
+    ignored_genes = _get_complete_ignored_gene_list(ignored_genes)
 
-    query_set = _filter_ignored_mutations(query_set, ignored_mutations, starting_strain_mutations)
+    observed_mutation_queryset = _filter_ignored_genes(observed_mutation_queryset, ignored_genes)
+    observed_mutation_queryset = _filter_ignored_mutations(observed_mutation_queryset, ignored_mutations, starting_strain_mutations)
+    observed_mutation_queryset = _frequency_filter(observed_mutation_queryset, min_cutoff, max_cutoff)
 
-    query_set = _filter_by_frequency(query_set, min_cutoff, max_cutoff)
-
-    return query_set
+    return observed_mutation_queryset
 
 
-def _filter_ignored_genes(query_set, ignored_genes):
-
+def _get_complete_ignored_gene_list(ignored_genes):
     ignored_genes = _clean_ignored_genes_list(ignored_genes)
-
     global_filter = get_global_filter()
-
-    global_ignored_genes = global_filter.ignored_genes.replace(" ", "").replace('\n', '').replace('\r', '').split(',')
+    global_ignored_genes = global_filter.ignored_genes.replace(' ', '').replace('\n', '').replace('\r', '').split(',')
 
     if ignored_genes == ['']:
-        if global_ignored_genes == ['']:
-            ignored_genes = []
-        else:
+        if global_ignored_genes != ['']:
             ignored_genes = global_ignored_genes
+        else:
+            ignored_genes = []
     else:
-        ignored_genes.append(global_ignored_genes)
+        if global_ignored_genes != ['']:
+            ignored_genes += global_ignored_genes
+
+    return ignored_genes
+
+
+def _filter_ignored_genes(observed_mutation_queryset, ignored_genes):
 
     if ignored_genes:
 
         if len(ignored_genes) > 0 and ignored_genes[0] is not '':
-            for gene in ignored_genes:
-                if str(gene).startswith('*'):
-                    query_set = query_set.exclude(mutation__gene__endswith=str(gene)[1:])
-                elif str(gene).endswith('*'):
-                    query_set = query_set.exclude(mutation__gene__startswith=str(gene)[:-1])
-                else:
-                    query_set = query_set.exclude(mutation__gene__contains=gene)
-    return query_set
+            ignored_mutation_id_list = []
+            for observed_mutation in observed_mutation_queryset:
+                gene_list = get_gene_list(observed_mutation.mutation.gene)
+                if set(gene_list) == set(ignored_genes):
+                    ignored_mutation_id_list.append(observed_mutation.mutation.id)
+            if ignored_mutation_id_list:
+                observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__id__in=ignored_mutation_id_list)
+            # for gene in ignored_genes:
+            #     if str(gene).startswith('*'):
+            #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__endswith=str(gene)[1:])
+            #     elif str(gene).endswith('*'):
+            #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__startswith=str(gene)[:-1])
+            #     else:
+            #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__contains=gene)
+
+    return observed_mutation_queryset
 
 
 def _filter_ignored_mutations(query_set, ignored_mutations, starting_strain_mutations):
@@ -103,11 +112,11 @@ def is_number(s):
         return False
 
 
-def _filter_by_frequency(query_set, min_cutoff, max_cutoff):
+def _frequency_filter(observed_mutation_queryset, min_cutoff, max_cutoff):
 
-    query_set = query_set.filter(frequency__gte=min_cutoff/100, frequency__lte=max_cutoff/100)
+    observed_mutation_queryset = observed_mutation_queryset.filter(frequency__gte=min_cutoff / 100, frequency__lte=max_cutoff / 100)
 
-    return query_set
+    return observed_mutation_queryset
 
 
 def _get_excluded_mutation_kwargs(mutation):
@@ -255,7 +264,6 @@ def dashboard_filter(queryset):
 
 
 def _mutation_exists(mut_id):
-
     try:
         Mutation.objects.get(id=mut_id)
         return True
@@ -264,7 +272,5 @@ def _mutation_exists(mut_id):
 
 
 def get_global_filter():
-
     global_filter, created = GlobalFilter.objects.get_or_create(id=1)
-
     return global_filter

@@ -14,7 +14,7 @@ from filter.common import DEFAULT_MUTATION_FREQ_MIN, DEFAULT_MUTATION_FREQ_MAX
 
 from django.utils.safestring import mark_safe
 
-from filter.mutation_filter import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, is_number
+from filter.util import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, is_number
 
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 

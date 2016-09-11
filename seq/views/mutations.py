@@ -12,7 +12,7 @@ import seq.views.common
 
 from seq.views import mutation_table_builder
 
-import filter.mutation_filter
+import filter.util
 
 from common.db_util import get_all_observed_mutations, get_all_ale_experiments, get_recent_experiments, get_ordered_reseq_dict
 
@@ -70,7 +70,7 @@ def _get_table_body(reseq_dict, request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
-    filter_settings = filter.mutation_filter.get_filter_settings(ale_experiment_id)
+    filter_settings = filter.util.get_filter_settings(ale_experiment_id)
 
     return mutation_table_builder.get_table_body(reseq_dict,
                                                  observed_mutations_query_set,

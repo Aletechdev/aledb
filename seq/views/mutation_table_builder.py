@@ -4,7 +4,7 @@ import os
 
 import seq.views.common
 
-from filter import mutation_filter
+from filter import util
 
 import re
 
@@ -113,8 +113,8 @@ def get_table_body(reseq_dict,
                    filter_settings=None,
                    table_type=None):
 
-    observed_mutations_queryset = mutation_filter.filter_ignored_genes_and_mutations(observed_mutations_queryset,
-                                                                                     filter_settings)
+    observed_mutations_queryset = util.filter(observed_mutations_queryset,
+                                              filter_settings)
 
     mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
 
