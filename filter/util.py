@@ -83,7 +83,7 @@ def _filter_ignored_genes(observed_mutation_queryset, ignored_genes):
     return observed_mutation_queryset
 
 
-def _filter_ignored_mutations(query_set, ignored_mutations, starting_strain_mutations):
+def _filter_ignored_mutations(observed_mutation_queryset, ignored_mutations, starting_strain_mutations):
 
     global_filter = get_global_filter()
 
@@ -99,9 +99,9 @@ def _filter_ignored_mutations(query_set, ignored_mutations, starting_strain_muta
 
         if is_number(mut_id):
 
-            query_set = query_set.exclude(mutation_id=mut_id)
+            observed_mutation_queryset = observed_mutation_queryset.exclude(mutation_id=mut_id)
 
-    return query_set
+    return observed_mutation_queryset
 
 
 def is_number(s):

@@ -307,12 +307,32 @@ class TestEnrichment(TestCase):
                                         mutation=mut,
                                         frequency=1)
 
-        ignored_mutation_id_list = [2]
-        mutation_queryset = Mutation.objects.all()
-        enrichment = Enrichment(reseq_obs_mut_list=[mutation_queryset],
-                                ignored_mutation_id_list=ignored_mutation_id_list)
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
 
-        self.assertTrue(len(enrichment.enrichment_mutation_list) == 0)
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+
+        filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp,
+                                                             ignored_mutations='2')
+
+        observed_mutation_queryset = ObservedMutation.objects.all()
+        enrichment = Enrichment(reseq_obs_mut_list=[observed_mutation_queryset],
+                                filter_settings=filter_settings)
+
+        self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
+        for enrichment_mutation in enrichment.enrichment_mutation_list:
+            self.assertTrue("geneB" in enrichment_mutation.gene)
 
     def test_using_both_ignore_mutation_id_and_gene(self):
         # Will ignore this mutation according to ignore gene list.
@@ -320,40 +340,59 @@ class TestEnrichment(TestCase):
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
 
         # Will ignore this mutation according to ignore gene list.
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
 
         # Will ignore this mutation according to ignore mutation id list.
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneC")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
 
         # geneC won't register as enriched since the other geneC mutation is ignored.
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneC")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneD, geneE")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneD")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
 
-        ignored_gene_list = ["geneA"]
-        ignored_mutation_id_list = [3]
+        filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp,
+                                                             ignored_genes="geneA",
+                                                             ignored_mutations='3')
 
-        mutation_queryset = Mutation.objects.all()
-        enrichment = Enrichment(reseq_obs_mut_list=[mutation_queryset],
-                                ignored_gene_list=ignored_gene_list,
-                                ignored_mutation_id_list=ignored_mutation_id_list)
+        observed_mutation_queryset = ObservedMutation.objects.all()
+        enrichment = Enrichment(reseq_obs_mut_list=[observed_mutation_queryset],
+                                filter_settings=filter_settings)
+
         self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
         for enrichment_mutation in enrichment.enrichment_mutation_list:
             self.assertTrue("geneD" in enrichment_mutation.gene)
@@ -366,19 +405,44 @@ class TestEnrichment(TestCase):
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneB, geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
 
         # Will ignore this mutation according to ignore gene list.
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
 
-        ignored_gene_list = ["geneA", "geneB"]
-        mutation_queryset = Mutation.objects.all()
-        enrichment = Enrichment(reseq_obs_mut_list=[mutation_queryset],
-                                ignored_gene_list=ignored_gene_list)
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneC")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
 
-        self.assertTrue(len(enrichment.enrichment_mutation_list) == 0)
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneC")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+
+        observed_mutation_queryset = ObservedMutation.objects.all()
+        filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp,
+                                                             ignored_genes="geneA, geneB")
+        enrichment = Enrichment(reseq_obs_mut_list=[observed_mutation_queryset],
+                                filter_settings=filter_settings)
+
+        self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
+        for enrichment_mutation in enrichment.enrichment_mutation_list:
+            self.assertTrue("geneC" in enrichment_mutation.gene)
 
     def test_ignore_mutation_gene_list_not_full_ignore_list(self):
 
@@ -386,17 +450,24 @@ class TestEnrichment(TestCase):
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneB, geneA, geneC")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
 
         # Will ignore this mutation according to ignore gene list.
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
 
-        ignored_gene_list = ["geneA", "geneB"]
-        mutation_queryset = Mutation.objects.all()
-        enrichment = Enrichment(reseq_obs_mut_list=[mutation_queryset],
-                                ignored_gene_list=ignored_gene_list)
+        observed_mutation_queryset = ObservedMutation.objects.all()
+        filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp,
+                                                             ignored_genes="geneA, geneB")
+        enrichment = Enrichment(reseq_obs_mut_list=[observed_mutation_queryset],
+                                filter_settings=filter_settings)
 
         self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
 
