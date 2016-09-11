@@ -3,7 +3,7 @@
 from common.constants import REQUEST_ALL
 
 from filter.models import AleExperimentFilter
-from filter.mutation_filter import get_global_filter
+from filter.util import get_global_filter
 
 
 def get_ale_experiment_selector(ale_experiment_id, reseq_query):

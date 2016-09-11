@@ -1,68 +1,45 @@
 import collections
-from filter.mutation_filter import get_filter_settings, clean_ignored_mutation_id_list
-from common.db_util import get_ordered_reseq_dict, get_ale_exp_reseq_mutation_lists
-from filter.mutation_filter import get_global_filter
+from filter.util import get_filter_settings, filter
+from common.db_util import get_ordered_reseq_dict, get_ale_exp_reseq_obs_mut_lists
 from genes.util import get_gene_list
 
 __author__ = "Patrick Phaneuf"
 
 
-# TODO: ignore local mutations according to frequency.
 class Enrichment:
-    def __init__(self,
-                 reseq_mutation_list,
-                 ignored_mutation_id_list=[],
-                 ignored_gene_list=[]):
-        self._reseq_mutation_list = reseq_mutation_list
-        self._ignored_mutation_id_list = ignored_mutation_id_list
-        self._ignored_gene_list = ignored_gene_list
+    def __init__(self, reseq_obs_mut_list, filter_settings=None):
+        self._reseq_obs_mut_list = reseq_obs_mut_list
+        self._filter_settings = filter_settings
         self._mutation_gene_count_dict = self._populate_mutation_gene_count_dict()
         self.enrichment_mutation_list = self._populate_enrichment_mutation_list()
 
-    # Expects the mutation lists from each reseq.
     def _populate_mutation_gene_count_dict(self):
         mutation_gene_count_dict = collections.defaultdict(int)
-        for mutation_list in self._reseq_mutation_list:
-            for mutation in mutation_list:
-                if not self._ignore(mutation):
-                    mutation_gene_list = get_gene_list(mutation.gene)
-                    for gene in mutation_gene_list:
-                        mutation_gene_count_dict[gene] += 1
+        for reseq_obs_mut_queryset in self._reseq_obs_mut_list:
+            if self._filter_settings is not None:  # TODO: shouldn't have to do this; filter_mutations should handle filter_settings=None gracefully
+                reseq_obs_mut_queryset = filter(reseq_obs_mut_queryset, self._filter_settings)
+            for observed_mutation in reseq_obs_mut_queryset:
+                mutation_gene_list = get_gene_list(observed_mutation.mutation.gene)
+                for gene in mutation_gene_list:
+                    mutation_gene_count_dict[gene] += 1
         return mutation_gene_count_dict
 
     def _populate_enrichment_mutation_list(self):
         enrichment_mutation_list = []
-        for reseq_mutation_list in self._reseq_mutation_list:
-            for mutation in reseq_mutation_list:
-                if not self._ignore(mutation):
-                    gene_list = get_gene_list(mutation.gene)
-                    for gene in gene_list:
-                        if self._mutation_gene_count_dict[gene] > 1 and mutation not in enrichment_mutation_list:  # This condition will keep intergenic mutations from being added twice since they consider two genes which may both already have a mutation; in the case the intergenic mutation will only be added once.
-                            enrichment_mutation_list.append(mutation)
+        for reseq_obs_mut_queryset in self._reseq_obs_mut_list:
+            if self._filter_settings is not None:  # TODO: shouldn't have to do this; filter_mutations should handle filter_settings=None gracefully
+                reseq_obs_mut_queryset = filter(reseq_obs_mut_queryset, self._filter_settings)
+            for observed_mutation in reseq_obs_mut_queryset:
+                mutation_gene_list = get_gene_list(observed_mutation.mutation.gene)
+                for gene in mutation_gene_list:
+                    if self._mutation_gene_count_dict[gene] > 1 and observed_mutation.mutation not in enrichment_mutation_list:  # This condition will keep intergenic mutations from being added twice since they consider two genes which may both already have a observed_mutation; in the case the intergenic observed_mutation will only be added once.
+                        enrichment_mutation_list.append(observed_mutation.mutation)
         return enrichment_mutation_list
-
-    # TODO: this ignore mutation logic should be within the filter app; other apps should call on this logic, such as mutation tables.
-    def _ignore(self, mutation):
-        ignore_mutation = False
-        if mutation.id in self._ignored_mutation_id_list:
-            ignore_mutation = True
-        if not ignore_mutation:
-            gene_list = get_gene_list(mutation.gene)
-            if set(gene_list) == set(self._ignored_gene_list):
-                ignore_mutation = True
-        return ignore_mutation
 
 
 def get_enrichment_mutation_list(ale_experiment_id):
     reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
-    ale_exp_reseq_mutation_lists = get_ale_exp_reseq_mutation_lists(reseq_dict)  # Will remove starting strain mutations.
+    ale_exp_reseq_obs_mut_lists = get_ale_exp_reseq_obs_mut_lists(reseq_dict)  # Will remove starting strain mutations.
     filter_settings = get_filter_settings(ale_experiment_id)
-    ignored_mutation_id_list = _get_ignored_mutation_id_list(filter_settings)
-    enrichment = Enrichment(ale_exp_reseq_mutation_lists, ignored_mutation_id_list)
+    enrichment = Enrichment(ale_exp_reseq_obs_mut_lists, filter_settings)
     return enrichment.enrichment_mutation_list
-
-
-def _get_ignored_mutation_id_list(filter_settings):
-    global_ignored_mutation_ids = clean_ignored_mutation_id_list(get_global_filter().ignored_mutations)
-    experiment_ignored_mutation_ids = clean_ignored_mutation_id_list(filter_settings.ignored_mutations)
-    return global_ignored_mutation_ids + experiment_ignored_mutation_ids

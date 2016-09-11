@@ -2,9 +2,10 @@
 
 import collections
 import ale.common
-import seq.models
 from common.util import get_ale_experiment_selector, get_ale_number_selector
 from seq.models import ResequencingExperiment
+from seq.models import ObservedMutation
+from seq.models import Mutation
 from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -47,7 +48,7 @@ def get_ordered_reseq_dict(ale_experiment_id):
     return reseq_dict
 
 
-def get_ale_exp_reseq_mutation_lists(reseq_dict):
+def get_ale_exp_reseq_obs_mut_lists(reseq_dict):
     """
     Be aware that this function removes all stating strain mutations.
 
@@ -58,39 +59,27 @@ def get_ale_exp_reseq_mutation_lists(reseq_dict):
 
     """
 
-    ale_experiment_mutation_list = []
-    mutations_to_exclude_list = []
+    ale_exp_obs_mut_list = []
+    obs_mut_to_exclude_queryset = []
 
+    # TODO: Don't filter out starting strain mutations here but rather when passing observed mutation queryset into filter.util.filter_mutations
     for reseq_id in reseq_dict:
         reseq = reseq_dict[reseq_id]
         if reseq.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
-            mutations_to_exclude_list = get_reseq_mutations_list(reseq_id)
+            obs_mut_to_exclude_queryset = ObservedMutation.objects.filter(sequencing_experiment_id=reseq_id)
         else:
-            ale_experiment_mutation_list.append(get_reseq_mutations_list(reseq_id))
+            ale_exp_obs_mut_list.append(ObservedMutation.objects.filter(sequencing_experiment_id=reseq_id))
 
-    filtered_ale_experiment_mutation_list = []
-    for reseq_mutation_list in ale_experiment_mutation_list:
-        filtered_reseq_mutation_list = [mutation for mutation in reseq_mutation_list if mutation not in mutations_to_exclude_list]
-        filtered_ale_experiment_mutation_list.append(filtered_reseq_mutation_list)
+    filtered_ale_exp_obs_mut_list = []
+    for reseq_obs_mut_list in ale_exp_obs_mut_list:
+        filtered_reseq_mutation_list = [mutation for mutation in reseq_obs_mut_list if mutation not in obs_mut_to_exclude_queryset]
+        filtered_ale_exp_obs_mut_list.append(filtered_reseq_mutation_list)
 
-    return filtered_ale_experiment_mutation_list
-
-
-def get_reseq_mutations_list(reseq_id):
-    mutations_list = []
-    observed_mutations_query_set = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id=reseq_id)
-    for observed_mutation in observed_mutations_query_set:
-        mutations_list.append(observed_mutation.mutation)
-    return mutations_list
-
-
-# TODO: Refactor: figure out how to get a ResequencingExperiment to return its list of observed mutations.
-def get_all_observed_mutations(reseq_id_list):
-    return seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
+    return filtered_ale_exp_obs_mut_list
 
 
 def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset):
-    return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
+    return Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
 
 
 def get_all_ale_experiments():

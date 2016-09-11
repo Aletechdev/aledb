@@ -3,7 +3,7 @@ from django.template import loader
 from django.contrib.auth.decorators import login_required
 from filter.forms.filter import FilterForm
 from django.utils.safestring import mark_safe
-from filter.mutation_filter import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, get_global_filter
+from filter.util import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, get_global_filter
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
