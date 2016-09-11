@@ -472,3 +472,50 @@ class TestEnrichment(TestCase):
         self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
 
     # TODO: write tests to ignore mutations according to frequency.
+    def test_ignore_mutation_on_low_freq(self):
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=0.1)
+
+        # Will ignore this mutation according to ignore gene list.
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=0.25)
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=0.25)
+
+        observed_mutation_queryset = ObservedMutation.objects.all()
+        filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp,
+                                                             min_cutoff=20)
+        enrichment = Enrichment(reseq_obs_mut_list=[observed_mutation_queryset],
+                                filter_settings=filter_settings)
+
+        self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
+        for enrichment_mutation in enrichment.enrichment_mutation_list:
+            self.assertTrue("geneB" in enrichment_mutation.gene)
+
+    # TODO: write tests for starting strain filtering.
+
+    # TODO: write tests for global mutation filtering.
