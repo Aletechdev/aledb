@@ -31,6 +31,8 @@ def filter_mutations(observed_mutation_queryset, filter_settings):
         ignored_genes = filter_settings.ignored_genes
         ignored_mutations = filter_settings.ignored_mutations
         starting_strain_mutations = filter_settings.starting_strain_mutations.split(',')
+        if starting_strain_mutations == ['']:
+            starting_strain_mutations = []
         min_cutoff = filter_settings.min_cutoff
         max_cutoff = filter_settings.max_cutoff
 
@@ -61,9 +63,7 @@ def _get_complete_ignored_gene_list(ignored_genes):
 
 
 def _filter_ignored_genes(observed_mutation_queryset, ignored_genes):
-
     if ignored_genes:
-
         if len(ignored_genes) > 0 and ignored_genes[0] is not '':
             ignored_mutation_id_list = []
             for observed_mutation in observed_mutation_queryset:
@@ -79,28 +79,16 @@ def _filter_ignored_genes(observed_mutation_queryset, ignored_genes):
             #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__startswith=str(gene)[:-1])
             #     else:
             #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__contains=gene)
-
     return observed_mutation_queryset
 
 
 def _filter_ignored_mutations(observed_mutation_queryset, ignored_mutations, starting_strain_mutations):
-
     global_filter = get_global_filter()
-
     global_ignored_mutations = global_filter.ignored_mutations
-
     global_ignored_mutations = clean_ignored_mutation_id_list(global_ignored_mutations)
-
     ignored_mutations = clean_ignored_mutation_id_list(ignored_mutations)
-
     ignored_mutation_list = global_ignored_mutations + ignored_mutations + starting_strain_mutations
-
-    for mut_id in ignored_mutation_list:
-
-        if is_number(mut_id):
-
-            observed_mutation_queryset = observed_mutation_queryset.exclude(mutation_id=mut_id)
-
+    observed_mutation_queryset = observed_mutation_queryset.exclude(mutation_id__in=ignored_mutation_list)
     return observed_mutation_queryset
 
 
@@ -113,9 +101,7 @@ def is_number(s):
 
 
 def _frequency_filter(observed_mutation_queryset, min_cutoff, max_cutoff):
-
     observed_mutation_queryset = observed_mutation_queryset.filter(frequency__gte=min_cutoff / 100, frequency__lte=max_cutoff / 100)
-
     return observed_mutation_queryset
 
 
@@ -145,9 +131,7 @@ def _get_excluded_mutation_kwargs(mutation):
 
 
 def get_filter_settings(ale_experiment_id):
-
     filter_settings, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id)
-
     return filter_settings
 
 
@@ -180,15 +164,12 @@ def _clean_ignored_genes_list(ignored_genes):
         return []
 
     if ignored_genes.endswith(','):
-
         ignored_genes = ignored_genes[:-1]
 
     if ignored_genes.startswith(','):
-
         ignored_genes = ignored_genes[1:]
 
     ignored_genes = ignored_genes.replace(" ", "").replace('\n', '').replace('\r', '').split(',')
-
     cleaned_list = []
 
     for gene in ignored_genes:

@@ -1,21 +1,13 @@
 from django.http import HttpResponse
-
 from django.contrib.auth.decorators import login_required
-
 from django.template import loader
-
 from django.utils.safestring import mark_safe
-
 import aleinfo.settings as settings
-
 import seq.views.common
-
 from seq.views import mutation_table_builder
-
+from seq.util import get_all_observed_mutations
 import filter.util
-
-from common.db_util import get_all_observed_mutations, get_all_ale_experiments, get_recent_experiments, get_ordered_reseq_dict
-
+from common.db_util import get_all_ale_experiments, get_recent_experiments, get_ordered_reseq_dict
 from common.util import check_hidden_columns_and_filters
 
 __author__ = 'pphaneuf'

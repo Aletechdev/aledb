@@ -12,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
 
+# TODO: go in seq.util
 def get_reseq_queryset(ale_experiment_id, ale_id=None):
     reseq_queryset = ResequencingExperiment.objects.all().order_by(
         'tech_rep__isolate__flask__ale_id__ale_experiment__name',
@@ -26,12 +27,14 @@ def get_reseq_queryset(ale_experiment_id, ale_id=None):
     return reseq_queryset
 
 
+# TODO: go in seq.util
 def get_reseq_dict(ale_experiment_id):
     reseq_queryset = get_reseq_queryset(ale_experiment_id, None)
     reseq_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
     return reseq_dict
 
 
+# TODO: go in seq.util
 def get_ordered_reseq_dict(ale_experiment_id):
     """
     Args:
@@ -48,44 +51,17 @@ def get_ordered_reseq_dict(ale_experiment_id):
     return reseq_dict
 
 
-def get_ale_exp_reseq_obs_mut_lists(reseq_dict):
-    """
-    Be aware that this function removes all stating strain mutations.
-
-    Args:
-        reseq_dict:
-
-    Returns:
-
-    """
-
-    ale_exp_obs_mut_list = []
-    obs_mut_to_exclude_queryset = []
-
-    # TODO: Don't filter out starting strain mutations here but rather when passing observed mutation queryset into filter.util.filter_mutations
-    for reseq_id in reseq_dict:
-        reseq = reseq_dict[reseq_id]
-        if reseq.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
-            obs_mut_to_exclude_queryset = ObservedMutation.objects.filter(sequencing_experiment_id=reseq_id)
-        else:
-            ale_exp_obs_mut_list.append(ObservedMutation.objects.filter(sequencing_experiment_id=reseq_id))
-
-    filtered_ale_exp_obs_mut_list = []
-    for reseq_obs_mut_list in ale_exp_obs_mut_list:
-        filtered_reseq_mutation_list = [mutation for mutation in reseq_obs_mut_list if mutation not in obs_mut_to_exclude_queryset]
-        filtered_ale_exp_obs_mut_list.append(filtered_reseq_mutation_list)
-
-    return filtered_ale_exp_obs_mut_list
-
-
-def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset):
+# TODO: go in seq.util
+def get_mutation_queryset_from_obs_mut_queryset(observed_mutations_queryset):
     return Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
 
 
+# TODO: go in ale.util
 def get_all_ale_experiments():
     return AleExperiment.objects.all().order_by('name')
 
 
+# TODO: go in ale.util
 def get_recent_experiments(ale_experiment_id=None):
 
     recent, created = RecentExperiments.objects.get_or_create(id=1)
@@ -112,24 +88,24 @@ def get_recent_experiments(ale_experiment_id=None):
     recent_experiments = []
 
     if recent.first is not None:
-        recent_experiments = experiment_exists(recent.first, recent_experiments)
+        recent_experiments = ale_axp_exists(recent.first, recent_experiments)
 
     if recent.second is not None:
-        recent_experiments = experiment_exists(recent.second, recent_experiments)
+        recent_experiments = ale_axp_exists(recent.second, recent_experiments)
 
     if recent.third is not None:
-        recent_experiments = experiment_exists(recent.third, recent_experiments)
+        recent_experiments = ale_axp_exists(recent.third, recent_experiments)
 
     if recent.fourth is not None:
-        recent_experiments = experiment_exists(recent.fourth, recent_experiments)
+        recent_experiments = ale_axp_exists(recent.fourth, recent_experiments)
 
     if recent.fifth is not None:
-        recent_experiments = experiment_exists(recent.fifth, recent_experiments)
+        recent_experiments = ale_axp_exists(recent.fifth, recent_experiments)
 
     return recent_experiments
 
 
-def experiment_exists(ale_id, recent_experiments):
+def ale_axp_exists(ale_id, recent_experiments):
 
     try:
         recent_experiments.append(AleExperiment.objects.get(ale_id=ale_id))

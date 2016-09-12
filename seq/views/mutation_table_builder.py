@@ -12,7 +12,7 @@ from enum import Enum
 
 from django.utils.html import strip_tags
 
-from common.db_util import get_mutation_queryset_from_observed_mutation_queryset
+from common.db_util import get_mutation_queryset_from_obs_mut_queryset
 
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
@@ -116,7 +116,7 @@ def get_table_body(reseq_dict,
     observed_mutations_queryset = util.filter_mutations(observed_mutations_queryset,
                                                         filter_settings)
 
-    mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset)
+    mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(observed_mutations_queryset)
 
     mutation_index_dict = dict((mutation_id, i) for i, mutation_id in enumerate(mutation_queryset.values_list("id", flat=True)))
 
