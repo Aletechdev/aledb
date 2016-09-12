@@ -14,6 +14,8 @@ from django.utils.html import strip_tags
 
 from common.db_util import get_mutation_queryset_from_obs_mut_queryset
 
+from genes.util import get_gene_list
+
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 
@@ -58,6 +60,12 @@ SAVE_TO_GLOBAL_FILTER_ONLY = """<td>
 </div>
 </td>
 """
+
+GENE_ENTRY_HTML_LINK = """<a href=/gene?g=%s>%s</a>"""
+
+EXPANDABLE_COLUMN_PLUS_SIGN = """<i onclick="expand_collapse_gene_entry(this)" class="fa fa-plus pull-left" aria-hidden="true" data-toggle="collapse" data-target="#%s"></i>"""
+
+EXPANDABLE_GENE_ENTRY = """<div class="collapse pull-left" id="%s">%s</div>"""
 
 non_decimal = re.compile(r'[^\d.]+')
 
@@ -166,7 +174,7 @@ def get_table_body(reseq_dict,
             table_row += "<td>%s</td>" % mutation.position
             table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += "<td>%s</td>" % mutation.sequence_change
-            table_row += "<td><a href=/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
+            table_row += _get_gene_table_entry(mutation)
             table_row += "<td>%s</td>" % ("" if mutation.function is None else mutation.function)
             table_row += "<td>%s</td>" % ("" if mutation.product is None else mutation.product)
             table_row += "<td>%s</td>" % ("" if mutation.go_process is None else mutation.go_process)
@@ -193,6 +201,37 @@ def get_table_body(reseq_dict,
         return table_body, protein_changes
 
     return table_body
+
+
+def _get_gene_table_entry(mutation):
+
+    table_entry = """<td style="width:150px">"""
+
+    original_gene_list = mutation.gene.split(',')
+
+    cleaned_gene_list = get_gene_list(mutation.gene)
+
+    gene_links = [GENE_ENTRY_HTML_LINK % (gene, original_gene_list[idx]) for idx, gene in enumerate(cleaned_gene_list)]
+
+    if len(cleaned_gene_list) > 10:
+
+        first_gene = GENE_ENTRY_HTML_LINK % (cleaned_gene_list[0], original_gene_list[0])
+
+        last_gene = GENE_ENTRY_HTML_LINK % (cleaned_gene_list[-1], original_gene_list[-1])
+
+        table_entry += EXPANDABLE_COLUMN_PLUS_SIGN % str(mutation.id)
+
+        table_entry += """<div class="pull-left"> %s ... %s</div>""" % (first_gene, last_gene)
+
+        table_entry += EXPANDABLE_GENE_ENTRY % (str(mutation.id), ", ".join(gene_links))
+
+    else:
+
+        table_entry += ", ".join(gene_links)
+
+    table_entry += "</td>"
+
+    return table_entry
 
 
 def _initialize_table(experiment_id_idx_mapping, mutations):
