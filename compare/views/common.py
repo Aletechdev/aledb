@@ -1,6 +1,6 @@
 import collections
 
-from filter.mutation_filter import dashboard_filter
+from filter.util import dashboard_filter
 
 from seq.models import ObservedMutation, ResequencingExperiment
 

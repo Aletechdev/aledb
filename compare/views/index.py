@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 
 from ale.models import AleExperiment
 
-from common.db_util import get_all_ale_experiments, get_recent_experiments, get_mutation_queryset_from_observed_mutation_queryset
+from common.db_util import get_all_ale_experiments, get_recent_experiments, get_mutation_queryset_from_obs_mut_queryset
 
 from common.util import check_hidden_columns_and_filters
 
@@ -72,7 +72,7 @@ def compare(request):
 
     experiments_info_list = get_reseq_experiment_info_list(ordered_reseq_dict.values())
 
-    mutation_query_set = get_mutation_queryset_from_observed_mutation_queryset(queryset)
+    mutation_query_set = get_mutation_queryset_from_obs_mut_queryset(queryset)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
     observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(queryset)
