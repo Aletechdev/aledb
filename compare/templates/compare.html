@@ -1,0 +1,408 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}<title>{{ title }}</title>{% endblock %}
+{% block scripts_and_style %}
+    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
+          media="print, projection, screen"/>
+    <script type="text/javascript">
+        $(function(){
+            $("#first li a").click(function(){
+                $("#first_button").text($(this).text());
+                $("#first_button").val($(this).text());
+                document.getElementById('first_exp').value = $(this).text()
+            });
+         });
+        $(function(){
+            $("#second li a").click(function(){
+                $("#second_button").text($(this).text());
+                $("#second_button").val($(this).text());
+                document.getElementById('second_exp').value = $(this).text()
+            });
+         });
+        $(document).ready(function () {
+
+            var first_exp = '{{ first_exp_name }}';
+            var second_exp = '{{ second_exp_name }}';
+
+            var first_button_children = document.getElementById('first').children;
+            var second_button_children = document.getElementById('second').children;
+
+            for(var i = 0; i < first_button_children.length; i++) {
+                if(first_button_children[i].innerText == first_exp) {
+                    first_button_children[i].children[0].click();
+                }
+            }
+            for(var j = 0; j < second_button_children.length; j++) {
+                if(second_button_children[j].innerText == second_exp) {
+                    second_button_children[j].children[0].click();
+                }
+            }
+        })
+    </script>
+    <style>
+        .huge {
+            font-size: 28px;
+        }
+        .panel-magenta {
+            background-color: #b7337a;
+            color: white;
+        }
+        .panel-purple {
+            background-color: #7033b7;
+            color: white;
+        }
+        .panel-orange {
+            background-color: #b77033;
+            color: white;
+        }
+    </style>
+{% endblock %}
+{% block header %}{{ header }}{% endblock %}
+{% block content %}
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default" id="first_button">First Experiment</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" id="first">
+                    {% for exp in experiments %}
+                        <li><a href="#/">{{ exp.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-default" id="second_button">Second Experiment</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" id="second">
+                    {% for exp in experiments %}
+                        <li><a href="#/">{{ exp.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="btn-group">
+                <form action="/compare/" method="get">
+                    <input type="submit" class="btn btn-default" id="compare" name="compare" value="Compare">
+                    <input type="hidden" name="first_exp" id="first_exp" value="">
+                    <input type="hidden" name="second_exp" id="second_exp" value="">
+                    <input type="hidden" name="clicked_compare_button" value="True">
+                </form>
+            </div>
+        </div>
+    </div>
+    {% if is_error %}
+        <br>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+            </div>
+        </div>
+    {% endif %}
+    {% if has_comparison %}
+        <br><br>
+        <div class="row">
+            <a href="/compare/metadata?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-info fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">Meta Data</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="/compare/mutations?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-green">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-tasks fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">Mutations</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="/compare/enrichment?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-yellow">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-bar-chart-o fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">Enriched Mutations</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            <a href="/compare/fixation?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-red">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <i class="fa fa-signal fa-5x"></i>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">Fixating Mutations</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="row">
+        <div class="col-sm-6 col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">ALE Flask and Isolate Counts</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>ALE Number</th>
+                        <th>Flask Count</th>
+                        <th>Isolate Count</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for ale_flask_isolate_count_tuple in ale_flask_isolate_count_list %}
+                    <tr>
+                        <td>{{ ale_flask_isolate_count_tuple.0 }}</td>
+                        <td>{{ ale_flask_isolate_count_tuple.1 }}</td>
+                        <td>{{ ale_flask_isolate_count_tuple.2 }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">ALE Experiment Mutation Stats</h3>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Mutation Type</th>
+                        <th>Unique</th>
+                        <th>Observed</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Single Base Substitutions</td>
+                        <td>{{ mutation_type_count_dict.SNP }}</td>
+                        <td>{{ observed_mutation_type_count_dict.SNP }}</td>
+                    </tr>
+                    <tr>
+                        <td>Multiple Base Substitutions</td>
+                        <td>{{ mutation_type_count_dict.SUB }}</td>
+                        <td>{{ observed_mutation_type_count_dict.SUB }}</td>
+                    </tr>
+                    <tr>
+                        <td>Deletions</td>
+                        <td>{{ mutation_type_count_dict.DEL }}</td>
+                        <td>{{ observed_mutation_type_count_dict.DEL }}</td>
+                    </tr>
+                    <tr>
+                        <td>Insertions</td>
+                        <td>{{ mutation_type_count_dict.INS }}</td>
+                        <td>{{ observed_mutation_type_count_dict.INS }}</td>
+                    </tr>
+                    <tr>
+                        <td>Mobile Element Insertions</td>
+                        <td>{{ mutation_type_count_dict.MOB }}</td>
+                        <td>{{ observed_mutation_type_count_dict.MOB }}</td>
+                    </tr>
+                    <tr>
+                        <td>Amplifications</td>
+                        <td>{{ mutation_type_count_dict.AMP }}</td>
+                        <td>{{ observed_mutation_type_count_dict.AMP }}</td>
+                    </tr>
+                    <tr>
+                        <td>Gene Conversions</td>
+                        <td>{{ mutation_type_count_dict.CON }}</td>
+                        <td>{{ observed_mutation_type_count_dict.CON }}</td>
+                    </tr>
+                    <tr>
+                        <td>Inversions</td>
+                        <td>{{ mutation_type_count_dict.INV }}</td>
+                        <td>{{ observed_mutation_type_count_dict.INV }}</td>
+                    </tr>
+                    <tr>
+                        <td>Duplications</td>
+                        <td>{{ mutation_type_count_dict.DUP }}</td>
+                        <td>{{ observed_mutation_type_count_dict.DUP }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">ALE Experiment Functional Change Stats</h3>
+                </div>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Functional Change Type</th>
+                        <th>Unique</th>
+                        <th>Observed</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Intergenic</td>
+                        <td>{{ protein_change_type_count_dict.intergenic }}</td>
+                        <td>{{ observed_protein_change_type_count_dict.intergenic }}</td>
+                    </tr>
+                    <tr>
+                        <td>Noncoding</td>
+                        <td>{{ protein_change_type_count_dict.noncoding }}</td>
+                        <td>{{ observed_protein_change_type_count_dict.noncoding }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pseudogene</td>
+                        <td>{{ protein_change_type_count_dict.pseudogene }}</td>
+                        <td>{{ observed_protein_change_type_count_dict.pseudogene }}</td>
+                    </tr>
+                    <tr>
+                        <td>Synonymous</td>
+                        <td>{{ protein_change_type_count_dict.snp_type_synonymous }}</td>
+                        <td>{{ observed_protein_change_type_count_dict.snp_type_synonymous }}</td>
+                    </tr>
+                    <tr>
+                        <td>Nonsynonymous</td>
+                        <td>{{ protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
+                        <td>{{ observed_protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Sample QA Thresholds</h3>
+                </div>
+                <div class="panel-body">
+                    <p><b>Unassigned Missing Coverage Evidence upper bound = </b>5</p>
+                    <p><b>Mean Coverage lower bound = </b>75</p>
+                    <p><b>Mapped Reads lower bound = </b>1,250,000</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-12">
+            <table id="runs" class="tablesorter">
+                <thead>
+                    <tr>
+                        <th>ALE, Flask, Isolate</th>
+                        <th>Predicted Mutations</th>
+                        <th>Unassigned Missing Coverage Evidence</th>
+                        <th>Mean Coverage</th>
+                        <th>Total Reads</th>
+                        <th>Percent Mapped</th>
+                        <th>Mapped Reads</th>
+                        <th>Average Read Length</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                {% for experiment_info_tuple in experiments_info_list %}
+                    <tr class="experiment_stats">
+                        <td class="sample_name"><a href="
+                                {{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
+                        </td>
+                        <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
+                        <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
+                        <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
+                        <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
+                        <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
+                        <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
+                        <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
+                    </tr>
+
+                {% endfor %}
+                </tbody>
+                <script type="text/javascript">{% include 'runs.js' %}</script>
+            </table>
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-lg-12">
+                {% include 'muts_needle_plot.html' %}
+                <hr>
+                <form action="/ale_analytics/stats" method="get">
+                    <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id }}">
+                    <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
+                    <input type="submit" value="Show"><br>
+                </form>
+                        <br>
+                <div class="chart"></div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <table>
+                    <tr>
+                        <td>
+                        <script>
+                            var gene_data = {{ genes }};
+                            var color_set = {{ gene_color_set }};
+                            var mutation_types = {{ mutation_types }};
+                            var extra_padding = 0;
+                            function _get_label(datum) {
+                                return datum.mutation__gene;
+                            }
+                            {% include 'bar_chart.js' %}
+                        </script>
+                    </td>
+                    <td>
+                        <script>
+                            var gene_data = {{ sequence_changes }};
+                            var color_set = {{ seq_color_set }};
+                            var mutation_types = {{ protein_types }};
+                            var extra_padding = 100;
+                            function _get_label(datum) {
+                                return datum.mutation__gene + " " + datum.mutation__protein_change;
+                            }
+                            {% include 'bar_chart.js' %}
+                        </script>
+                    </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+    {% endif %}
+{% endblock %}
