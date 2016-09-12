@@ -18,8 +18,7 @@ class TestEnrichment(TestCase):
         self.reseq = ResequencingExperiment.objects.create()
 
         # TODO: had to do this to make filter_settings object. Find cleaner way.
-        self.ale_exp = AleExperiment.objects.create(
-            instrument=Instrument.objects.create())
+        self.ale_exp = AleExperiment.objects.create(instrument=Instrument.objects.create())
 
     def test_enriched_geneA_same_mutation_queryset(self):
 
@@ -616,11 +615,18 @@ class TestEnrichment(TestCase):
                                         mutation=mut,
                                         frequency=1)
 
-        # Will ignore this mutation according to ignore gene list.
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
                                       gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        mutation=mut,
+                                        frequency=1)
+
+        mut = Mutation.objects.create(mutation_type="qwe",
+                                      position=1,
+                                      sequence_change="asdf",
+                                      gene="geneC")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
                                         mutation=mut,
                                         frequency=1)
@@ -631,7 +637,9 @@ class TestEnrichment(TestCase):
         enrichment = Enrichment(reseq_obs_mut_list=[observed_mutation_queryset],
                                 filter_settings=filter_settings)
 
-        self.assertTrue(len(enrichment.enrichment_mutation_list) == 2)
+        self.assertEquals(len(enrichment.enrichment_mutation_list), 2)
+        for enrichment_mutation in enrichment.enrichment_mutation_list:
+            self.assertTrue("geneC" in enrichment_mutation.gene)
 
     def test_ignore_mutation_on_low_freq(self):
         mut = Mutation.objects.create(mutation_type="qwe",
