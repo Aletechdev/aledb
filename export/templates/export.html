@@ -1,8 +1,6 @@
 {% extends 'dashboard_base.html' %}
 {% block title %}<title>ALE Analytics Export</title>{% endblock %}
 {% block scripts_and_style %}
-    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-sortable/0.9.13/jquery-sortable-min.js"></script>-->
-
     <script type="text/javascript">
         var selected_experiments = [];
         $(function(){
@@ -69,24 +67,6 @@
                 document.getElementById('download_experiments').value = "";
             }
         }
-
-        //TODO: Uncomment Section below if you want to enable drag and drop sorting of list elements
-        //TODO: Uncomment jquery sortable script above too
-{#        jQuery(function($) {#}
-{#            var panelList = $('#selected_experiments');#}
-{##}
-{#            panelList.sortable({#}
-{#                // Only make the .panel-heading child elements support dragging.#}
-{#                // Omit this to make then entire <li>...</li> draggable.#}
-{#                update: function() {#}
-{#                    $('.list-group', panelList).each(function(index, elem) {#}
-{#                         var $listItem = $(elem),#}
-{#                             newIndex = $listItem.index();#}
-{#                    });#}
-{#                }#}
-{#            });#}
-{#        });#}
-
     </script>
 {% endblock %}
 {% block header %}Export{% endblock %}
