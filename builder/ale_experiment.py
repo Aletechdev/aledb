@@ -100,11 +100,11 @@ def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate
     _delete_all_orphaned_mutations()
 
 
-def insert_wild_type_flask(breseq_wild_type_output_abs_path, ale_exp_user, ale_exp_name):
+def insert_starting_straing_flask(starting_strain_breseq_output_abs_path, ale_exp_user, ale_exp_name):
     """
     Executed from Django ipython shell.
     Args:
-        breseq_wild_type_output_abs_path (list): A string list of the absolution path of the output directory of a breseq report.
+        starting_strain_breseq_output_abs_path (list): A string list of the absolution path of the output directory of a breseq report.
         ale_exp_user (string): A string for the user name associated with the target ALE experiment.
         ale_exp_name (string): A string for the target ALE experiment name.
     """
@@ -124,12 +124,12 @@ def insert_wild_type_flask(breseq_wild_type_output_abs_path, ale_exp_user, ale_e
     freezer_box_orm = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
                                                                   number=DEFAULT_FREEZER_BOX_NUMBER)
 
-    _insert_wild_type_flask(breseq_wild_type_output_abs_path,
-                            ale_exp_user,
-                            ale_exp_name,
-                            experiment_orm,
-                            media_orm,
-                            freezer_box_orm)
+    _insert_staring_strain_flask(starting_strain_breseq_output_abs_path,
+                                 ale_exp_user,
+                                 ale_exp_name,
+                                 experiment_orm,
+                                 media_orm,
+                                 freezer_box_orm)
 
     rebuild_enrichment_mutations(experiment_orm.ale_id)
     rebuild_fixated_mutations(experiment_orm.ale_id)
@@ -151,14 +151,14 @@ def rebuild_all_fixated_mutations():
         rebuild_fixated_mutations(ale_experiment.ale_id)
 
 
-def _insert_wild_type_flask(breseq_wild_type_output_abs_path,
-                            ale_exp_user,
-                            ale_exp_name,
-                            experiment_orm,
-                            media_orm,
-                            freezer_box_orm):
+def _insert_staring_strain_flask(staring_strain_breseq_output_abs_path,
+                                 ale_exp_user,
+                                 ale_exp_name,
+                                 experiment_orm,
+                                 media_orm,
+                                 freezer_box_orm):
 
-    sanitized_breseq_output_wild_type_abs_path = builder.util.sanitize_path(breseq_wild_type_output_abs_path)
+    sanitized_breseq_output_wild_type_abs_path = builder.util.sanitize_path(staring_strain_breseq_output_abs_path)
 
     _create_and_commit_wild_type_ale_entry(sanitized_breseq_output_wild_type_abs_path,
                                            experiment_orm,
@@ -224,7 +224,7 @@ def insert_flasks(sample_breseq_abs_paths_list,
 def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                            ale_exp_user,
                                            ale_exp_name,
-                                           breseq_wild_type_output_abs_path=None):
+                                           breseq_starting_strain_output_abs_path=None):
 
     """
     Executed from Django ipython shell.
@@ -247,14 +247,14 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
     freezer_box_orm, created = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
                                                                            number=DEFAULT_FREEZER_BOX_NUMBER)
 
-    if breseq_wild_type_output_abs_path is not None:
+    if breseq_starting_strain_output_abs_path is not None:
 
-        _insert_wild_type_flask(breseq_wild_type_output_abs_path,
-                                ale_exp_user,
-                                ale_exp_name,
-                                experiment_orm,
-                                media_orm,
-                                freezer_box_orm)
+        _insert_staring_strain_flask(breseq_starting_strain_output_abs_path,
+                                     ale_exp_user,
+                                     ale_exp_name,
+                                     experiment_orm,
+                                     media_orm,
+                                     freezer_box_orm)
 
     # Might need to explicitly sort this list in the future.
     breseq_sample_report_list = _get_sample_report_list(sanitized_breseq_output_abs_path)
