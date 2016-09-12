@@ -328,6 +328,7 @@ def _create_enrichment_mutations(ale_experiment_id):
     """
 
     ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
+    print(ale_experiment)
 
     enrichment_mutations_list = enrichment.util.get_enrichment_mutation_list(ale_experiment_id)
 

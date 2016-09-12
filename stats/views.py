@@ -1,25 +1,16 @@
 from django.contrib.auth.decorators import login_required
-
 from django.http import HttpResponse
-
 from django.template import loader
-
 from django.utils.safestring import mark_safe
-
 import aleinfo.settings as settings
-
 import seq.models   # TODO: only import necessary models.
-
+from seq.util import get_all_observed_mutations
 from seq.views import common
-
 from django.db.models import Count
-
 from filter import util
-
 from common.db_util import get_reseq_queryset,\
     get_ordered_reseq_dict,\
-    get_mutation_queryset_from_observed_mutation_queryset,\
-    get_all_observed_mutations
+    get_mutation_queryset_from_obs_mut_queryset
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
@@ -78,7 +69,7 @@ def stats(request):
 
     observed_mutations_query_set = _get_observed_mutation_queryset(request, ale_experiment_id)
 
-    mutation_query_set = get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_query_set)
+    mutation_query_set = get_mutation_queryset_from_obs_mut_queryset(observed_mutations_query_set)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
     observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_query_set)
@@ -219,7 +210,7 @@ def _get_reseq_experiment_info_list(reseq_experiments):
     return reseq_experiments_info_list
 
 
-# TODO: should be transferred to common and have a parameter to filter wt mutations.
+# TODO: should be transferred to filter app and have a parameter to filter wt mutations.
 def _get_observed_mutation_queryset(request, ale_experiment_id):
 
     ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
@@ -231,7 +222,7 @@ def _get_observed_mutation_queryset(request, ale_experiment_id):
     return observed_mutation_query_set
 
 
-# TODO: Should move this function into common if it is used on any other pages
+# TODO: Should move this function into the filter app
 def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
 
     observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene='')

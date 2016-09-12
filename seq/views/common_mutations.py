@@ -6,8 +6,9 @@ import seq.views.common
 from collections import OrderedDict
 from seq.views import mutation_table_builder
 from filter import util
+from seq.util import get_all_observed_mutations
 from common.constants import REQUEST_ALE_EXPERIMENT_ID
-from common.db_util import get_ordered_reseq_dict, get_all_observed_mutations, get_all_ale_experiments, get_recent_experiments
+from common.db_util import get_ordered_reseq_dict, get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
 
 

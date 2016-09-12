@@ -237,6 +237,7 @@ class TechnicalReplicate(models.Model):
     description = models.CharField(max_length=500, **blank_field)
 
 
+# TODO: what are these integers referring to. If ALE Experiment, model should be moved to ale.models and use foreign keys.
 class RecentExperiments(models.Model):
 
     first = models.IntegerField(null=True)

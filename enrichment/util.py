@@ -1,7 +1,8 @@
 import collections
 from filter.util import get_filter_settings, filter_mutations
-from common.db_util import get_ordered_reseq_dict, get_ale_exp_reseq_obs_mut_lists
+from common.db_util import get_ordered_reseq_dict
 from genes.util import get_gene_list
+from seq.util import get_all_observed_mutations
 
 __author__ = "Patrick Phaneuf"
 
@@ -37,7 +38,9 @@ class Enrichment:
 
 def get_enrichment_mutation_list(ale_experiment_id):
     reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
-    ale_exp_reseq_obs_mut_lists = get_ale_exp_reseq_obs_mut_lists(reseq_dict)  # Will remove starting strain mutations.
+    ale_exp_reseq_obs_mut_lists = []
+    for reseq_id in reseq_dict:
+        ale_exp_reseq_obs_mut_lists.append(get_all_observed_mutations([reseq_id]))
     filter_settings = get_filter_settings(ale_experiment_id)
     enrichment = Enrichment(ale_exp_reseq_obs_mut_lists, filter_settings)
     return enrichment.enrichment_mutation_list
