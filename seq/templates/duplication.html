@@ -4,22 +4,22 @@
 {% block header %}<b> {{ ale_experiment_name }} </b> Duplications{% endblock %}
 {% block ale %}class="active"{% endblock %}
 {% block content %}
-<table id="runs" class="tablesorter">
-    <thead>
-    <tr>
-        <th>ALE, Flask, Isolate</th>
-    </tr>
-    </thead>
-    <tbody>
-    {% for experiment_url, experiment_name in experiment_links %}
-        <tr class="experiment_stats">
-            {% if experiment_url != False %}
-                <td class="sample_name"><a href="{{ experiment_url }}">{{ experiment_name }}</a></td>
-            {% else %}
-                <td class="sample_name">{{ experiment_name }}</td>
-            {% endif %}
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
+<div class="row">
+    <table id="runs" class="tablesorter">
+        <thead>
+            <tr><th>ALE, Flask, Isolate</th></tr>
+        </thead>
+        <tbody>
+        {% for experiment_url, experiment_name in experiment_links %}
+            <tr class="experiment_stats">
+                {% if experiment_url != False %}
+                    <td class="sample_name"><a href="{{ experiment_url }}">{{ experiment_name }}</a></td>
+                {% else %}
+                    <td class="sample_name">{{ experiment_name }}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
