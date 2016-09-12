@@ -1,3 +1,5 @@
+# TODO: Move to genes.views
+
 from django.http import HttpResponse
 
 from django.utils.safestring import mark_safe
@@ -29,8 +31,6 @@ import aleinfo.settings as settings
 from common.util import check_hidden_columns_and_filters
 
 from common.db_util import get_all_ale_experiments, get_recent_experiments
-
-INDEX_TEMPLATE = "duplication.html"
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.sequencing_url

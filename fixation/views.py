@@ -9,7 +9,7 @@ import seq.views.common
 from seq.views import mutation_table_builder
 from seq.models import ObservedMutation
 from seq.models import ResequencingExperiment
-from filter import mutation_filter
+from filter import util
 from fixation.models import FixatedMutation
 import metadata.views
 from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID
@@ -44,7 +44,7 @@ def fixating_mutations(request):
     table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
                                                            mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
-    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
+    filter_settings = util.get_filter_settings(ale_experiment_id)
 
     observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id,
                                                                                      reseq_ordered_dict,
@@ -74,6 +74,7 @@ def fixating_mutations(request):
                "recent_experiments": get_recent_experiments(int(ale_experiment_id))}
 
     return HttpResponse(template.render(context))
+
 
 @login_required
 def shared_fixated_mutations(request):

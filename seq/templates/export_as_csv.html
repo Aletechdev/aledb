@@ -61,12 +61,10 @@
 
                 outputFile = outputFile.replace('.csv','') + '.csv';
 
+                console.log($('.dataTable').dataTable());
+
                 // CSV
                 exportTableToCSV.apply(this, [$('.dataTable').dataTable(), outputFile]);
             });
         });
 </script>
-<a href="#" id ="export" class="ui" style="text-decoration: none;font: 14px Arial; background-color: #F0F0F0;
-                                            color: #333333; padding: 3px 4px 4px 4px; border: 1px solid #aaaaaa">
-                                            Export Table as CSV</a>
-

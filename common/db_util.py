@@ -2,15 +2,17 @@
 
 import collections
 import ale.common
-import seq.models
 from common.util import get_ale_experiment_selector, get_ale_number_selector
 from seq.models import ResequencingExperiment
+from seq.models import ObservedMutation
+from seq.models import Mutation
 from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
 
+# TODO: go in seq.util
 def get_reseq_queryset(ale_experiment_id, ale_id=None):
     reseq_queryset = ResequencingExperiment.objects.all().order_by(
         'tech_rep__isolate__flask__ale_id__ale_experiment__name',
@@ -25,12 +27,14 @@ def get_reseq_queryset(ale_experiment_id, ale_id=None):
     return reseq_queryset
 
 
+# TODO: go in seq.util
 def get_reseq_dict(ale_experiment_id):
     reseq_queryset = get_reseq_queryset(ale_experiment_id, None)
     reseq_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
     return reseq_dict
 
 
+# TODO: go in seq.util
 def get_ordered_reseq_dict(ale_experiment_id):
     """
     Args:
@@ -47,56 +51,17 @@ def get_ordered_reseq_dict(ale_experiment_id):
     return reseq_dict
 
 
-def get_ale_experiment_reseq_mutation_lists(reseq_dict):
-    """
-    Be aware that this function removes all stating strain mutations.
-
-    Args:
-        reseq_dict:
-
-    Returns:
-
-    """
-
-    ale_experiment_mutation_list = []
-    mutations_to_exclude_list = []
-
-    for reseq_id in reseq_dict:
-        reseq = reseq_dict[reseq_id]
-        if reseq.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
-            mutations_to_exclude_list = get_reseq_mutations_list(reseq_id)
-        else:
-            ale_experiment_mutation_list.append(get_reseq_mutations_list(reseq_id))
-
-    filtered_ale_experiment_mutation_list = []
-    for reseq_mutation_list in ale_experiment_mutation_list:
-        filtered_reseq_mutation_list = [mutation for mutation in reseq_mutation_list if mutation not in mutations_to_exclude_list]
-        filtered_ale_experiment_mutation_list.append(filtered_reseq_mutation_list)
-
-    return filtered_ale_experiment_mutation_list
+# TODO: go in seq.util
+def get_mutation_queryset_from_obs_mut_queryset(observed_mutations_queryset):
+    return Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
 
 
-def get_reseq_mutations_list(reseq_id):
-    mutations_list = []
-    observed_mutations_query_set = seq.models.ObservedMutation.objects.filter(sequencing_experiment_id=reseq_id)
-    for observed_mutation in observed_mutations_query_set:
-        mutations_list.append(observed_mutation.mutation)
-    return mutations_list
-
-
-# TODO: Refactor: figure out how to get a ResequencingExperiment to return its list of observed mutations.
-def get_all_observed_mutations(reseq_id_list):
-    return seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
-
-
-def get_mutation_queryset_from_observed_mutation_queryset(observed_mutations_queryset):
-    return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
-
-
+# TODO: go in ale.util
 def get_all_ale_experiments():
     return AleExperiment.objects.all().order_by('name')
 
 
+# TODO: go in ale.util
 def get_recent_experiments(ale_experiment_id=None):
 
     recent, created = RecentExperiments.objects.get_or_create(id=1)
@@ -123,24 +88,24 @@ def get_recent_experiments(ale_experiment_id=None):
     recent_experiments = []
 
     if recent.first is not None:
-        recent_experiments = experiment_exists(recent.first, recent_experiments)
+        recent_experiments = ale_axp_exists(recent.first, recent_experiments)
 
     if recent.second is not None:
-        recent_experiments = experiment_exists(recent.second, recent_experiments)
+        recent_experiments = ale_axp_exists(recent.second, recent_experiments)
 
     if recent.third is not None:
-        recent_experiments = experiment_exists(recent.third, recent_experiments)
+        recent_experiments = ale_axp_exists(recent.third, recent_experiments)
 
     if recent.fourth is not None:
-        recent_experiments = experiment_exists(recent.fourth, recent_experiments)
+        recent_experiments = ale_axp_exists(recent.fourth, recent_experiments)
 
     if recent.fifth is not None:
-        recent_experiments = experiment_exists(recent.fifth, recent_experiments)
+        recent_experiments = ale_axp_exists(recent.fifth, recent_experiments)
 
     return recent_experiments
 
 
-def experiment_exists(ale_id, recent_experiments):
+def ale_axp_exists(ale_id, recent_experiments):
 
     try:
         recent_experiments.append(AleExperiment.objects.get(ale_id=ale_id))

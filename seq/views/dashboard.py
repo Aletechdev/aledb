@@ -12,7 +12,7 @@ from django.db.models import Count
 
 from django.utils.safestring import mark_safe
 
-from filter.mutation_filter import dashboard_filter
+from filter.util import dashboard_filter
 
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 

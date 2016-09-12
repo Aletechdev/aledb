@@ -1,29 +1,15 @@
 from django.http import HttpResponse
-
 from django.contrib.auth.decorators import login_required
-
 from django.template import loader
-
 from django.utils.safestring import mark_safe
-
-import aleinfo.settings as settings
-
 import seq.views.common
-
 from seq.views import mutation_table_builder
-
-import filter.mutation_filter
-
-from common.db_util import get_all_observed_mutations, get_all_ale_experiments, get_recent_experiments, get_ordered_reseq_dict
-
+from seq.util import get_all_observed_mutations
+import filter.util
+from common.db_util import get_all_ale_experiments, get_recent_experiments, get_ordered_reseq_dict
 from common.util import check_hidden_columns_and_filters
 
 __author__ = 'pphaneuf'
-
-if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
-    reseqencing_report_url = settings.sequencing_url
-else:
-    reseqencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
 
 
 @login_required
@@ -65,15 +51,10 @@ def mutation_table(request):
 
 
 def _get_table_body(reseq_dict, request):
-
     observed_mutations_query_set = get_all_observed_mutations(list(reseq_dict.keys()))
-
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-
-    filter_settings = filter.mutation_filter.get_filter_settings(ale_experiment_id)
-
+    filter_settings = filter.util.get_filter_settings(ale_experiment_id)
     return mutation_table_builder.get_table_body(reseq_dict,
                                                  observed_mutations_query_set,
                                                  ale_experiment_id,
                                                  filter_settings)
-

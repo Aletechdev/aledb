@@ -3,10 +3,10 @@ import os
 import ale.models
 import builder.upload
 import builder.util
-import fixation.models
+from fixation.models import FixatedMutation
 import fixation.util
 import enrichment.util
-import enrichment.models
+from enrichment.models import EnrichmentMutation
 import seq.models
 from builder.gdparse.gdparse import gdparse
 
@@ -100,7 +100,7 @@ def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate
     _delete_all_orphaned_mutations()
 
 
-def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_abs_path):
+def insert_wild_type_flask(breseq_wild_type_output_abs_path, ale_exp_user, ale_exp_name):
     """
     Executed from Django ipython shell.
     Args:
@@ -124,14 +124,15 @@ def insert_wild_type_flask(ale_exp_user, ale_exp_name, breseq_wild_type_output_a
     freezer_box_orm = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
                                                                   number=DEFAULT_FREEZER_BOX_NUMBER)
 
-    _insert_wild_type_flask(ale_exp_user,
+    _insert_wild_type_flask(breseq_wild_type_output_abs_path,
+                            ale_exp_user,
                             ale_exp_name,
-                            breseq_wild_type_output_abs_path,
                             experiment_orm,
                             media_orm,
                             freezer_box_orm)
 
     rebuild_enrichment_mutations(experiment_orm.ale_id)
+    rebuild_fixated_mutations(experiment_orm.ale_id)
 
 
 def rebuild_all_enrichment_mutations():
@@ -150,9 +151,9 @@ def rebuild_all_fixated_mutations():
         rebuild_fixated_mutations(ale_experiment.ale_id)
 
 
-def _insert_wild_type_flask(ale_exp_user,
+def _insert_wild_type_flask(breseq_wild_type_output_abs_path,
+                            ale_exp_user,
                             ale_exp_name,
-                            breseq_wild_type_output_abs_path,
                             experiment_orm,
                             media_orm,
                             freezer_box_orm):
@@ -216,10 +217,10 @@ def insert_flasks(sample_breseq_abs_paths_list,
                                      is_wild_type=False)
 
     rebuild_enrichment_mutations(experiment_orm.ale_id)
+    rebuild_fixated_mutations(experiment_orm.ale_id)
 
 
 # For wild_type, expecting directory with output.gd in it.
-# TODO: this needs to change.
 def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                            ale_exp_user,
                                            ale_exp_name,
@@ -248,9 +249,9 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     if breseq_wild_type_output_abs_path is not None:
 
-        _insert_wild_type_flask(ale_exp_user,
+        _insert_wild_type_flask(breseq_wild_type_output_abs_path,
+                                ale_exp_user,
                                 ale_exp_name,
-                                breseq_wild_type_output_abs_path,
                                 experiment_orm,
                                 media_orm,
                                 freezer_box_orm)
@@ -291,25 +292,18 @@ def rebuild_fixated_mutations(ale_experiment_id):
 
 
 def _delete_fixated_mutations(ale_experiment_id):
-    fixation.models.FixatedMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
+    FixatedMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
 
 
 def _create_fixated_mutations(ale_experiment_id):
-
     """
     Find all fixated mutations for an ALE experiment and populate database table with them.
     Using only Django ORM to make commit to database.
     """
-
     ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
-
     fixated_mutation_list = fixation.util.get_fixated_mutation_list(ale_experiment_id)
-
     for mutation in fixated_mutation_list:
-        fixated_mutation = fixation.models.FixatedMutation()
-        fixated_mutation.ale_experiment = ale_experiment
-        fixated_mutation.mutation = mutation
-        fixated_mutation.save()
+        FixatedMutation.objects.create(ale_experiment=ale_experiment, mutation=mutation)
 
 
 def rebuild_enrichment_mutations(ale_experiment_id):
@@ -318,25 +312,18 @@ def rebuild_enrichment_mutations(ale_experiment_id):
 
 
 def _delete_enrichment_mutations(ale_experiment_id):
-    enrichment.models.EnrichmentMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
+    EnrichmentMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
 
 
 def _create_enrichment_mutations(ale_experiment_id):
-
     """
     Find all enriched/(hot gene) mutations for ALE experiment and populate database table with them.
     Using only Django ORM to make commit to database.
     """
-
     ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
-
     enrichment_mutations_list = enrichment.util.get_enrichment_mutation_list(ale_experiment_id)
-
     for mutation in enrichment_mutations_list:
-        enrichment_mutation = enrichment.models.EnrichmentMutation()
-        enrichment_mutation.ale_experiment = ale_experiment
-        enrichment_mutation.mutation = mutation
-        enrichment_mutation.save()
+        EnrichmentMutation.objects.create(ale_experiment=ale_experiment, mutation=mutation)
 
 
 def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
@@ -403,7 +390,7 @@ def _create_and_commit_ale_entry(person,
 
         annotation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
-    reseq_reference = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_SEQ_REF_KEY]
+    reseq_ref_name = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_SEQ_REF_KEY]
 
     reseq_date = ""
     if gdparse.GENOMIC_DIFF_CREATED_KEY in mutation_gd_parser.meta_data.keys():
@@ -432,7 +419,7 @@ def _create_and_commit_ale_entry(person,
     isolate, created = ale.models.Isolate.objects.get_or_create(flask=flask,
                                                                 isolate_number=isolate_number,
                                                                 is_population=is_population,
-                                                                reseq_reference=reseq_reference,
+                                                                reseq_reference=reseq_ref_name,
                                                                 reseq_date=reseq_date,
                                                                 breseq_version=breseq_version,
                                                                 freezer_box=freezer_box,
@@ -446,7 +433,7 @@ def _create_and_commit_ale_entry(person,
                                       breseq_folder=breseq_folder_path,
                                       mutation_gd_parser=mutation_gd_parser,
                                       annotation_gd_parser=annotation_gd_parser,
-                                      reseq_reference=reseq_reference,
+                                      reseq_ref_name=reseq_ref_name,
                                       experiment=experiment,
                                       is_wild_type=is_wild_type,)
 

@@ -164,6 +164,7 @@ class Flask(models.Model):
         verbose_name_plural = "Flasks"
 
 
+#TODO: Change 'reseq_reference' field to 'reseq_ref_name'
 class Isolate(models.Model):
 
     isolate_number = models.IntegerField()
@@ -236,6 +237,7 @@ class TechnicalReplicate(models.Model):
     description = models.CharField(max_length=500, **blank_field)
 
 
+# TODO: what are these integers referring to. If ALE Experiment, model should be moved to ale.models and use foreign keys.
 class RecentExperiments(models.Model):
 
     first = models.IntegerField(null=True)
