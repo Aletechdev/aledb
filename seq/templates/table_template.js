@@ -15,8 +15,10 @@ $(document).ready(function () {
     number_of_columns = document.getElementById('data').rows[0].cells.length - 1;
 
     var oTable = $("#data").dataTable({
-        "bPaginate": false,
+        "bPaginate": true,
         "bAutoWidth": false,
+        "iDisplayLength": 15,
+        "sPaginationType": "full_numbers",
         "aoColumnDefs": [ {
             "aTargets": non_sortable_columns,
             "bSortable": false
