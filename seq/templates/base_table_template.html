@@ -68,16 +68,19 @@
             <input type="hidden" name="ale_no" value="all"/>
         {% endif %}
         <table id="data">
-            <input type="button" value="Remove checked samples" class="ui" onclick="filterSample('remove')"/>
-            <input type="button" value="Show checked samples" class="ui" onclick="filterSample('show')"/>
-            <a href="#" id ="export" class="ui" style="text-decoration: none;font: 14px Arial; background-color: #F0F0F0;
+            <div class="ui">
+                <input type="button" value="Remove checked samples" onclick="filterSample('remove')"/>
+                <input type="button" value="Show checked samples" onclick="filterSample('show')"/>
+                <a href="#" id ="export" class="ui" style="text-decoration: none;font: 14px Arial; background-color: #F0F0F0;
                                             color: #333333; padding: 3px 4px 4px 4px; border: 1px solid #aaaaaa">
                                             Export Table as CSV</a>
-            {% include 'export_as_csv.html' %}
-            <label style="float:right" class="ui"><input class="ui" id="show_dups" onclick="filter_dups(this)"
-                                                         type="checkbox" name="checkbox" value="value"
-                                                         style="margin-left: 10px" checked> Show Duplications</label>
+                {% include 'export_as_csv.html' %}
+                <label style="float:right"><input id="show_dups" onclick="filter_dups(this)"
+                                                             type="checkbox" name="checkbox" value="value"
+                                                             style="margin-left: 10px" checked> Show Duplications</label>
+
             <button type="button" class="ui" onclick="column_sort_from_right()">Column Sort from Right</button>
+            </div>
             <br><br>
             {% block show_hide_columns %}{% endblock %}
             <thead>

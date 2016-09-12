@@ -55,6 +55,9 @@
             background-color: #b77033;
             color: white;
         }
+        .app {
+            height: 100px;
+        }
     </style>
 {% endblock %}
 {% block header %}{{ header }}{% endblock %}
@@ -110,14 +113,12 @@
             <a href="/compare/metadata?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-primary">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <i class="fa fa-info fa-5x"></i>
-                                </div>
-                                <div class="col-xs-9 text-right">
-                                    <div class="huge">Meta Data</div>
-                                </div>
+                        <div class="panel-heading app">
+                            <div style="width: 25%;" class="pull-left">
+                                <i class="fa fa-info fa-5x"></i>
+                            </div>
+                            <div style="width: 75%; text-align: right" class="pull-right">
+                                <div class="huge">Meta Data</div>
                             </div>
                         </div>
                     </div>
@@ -126,14 +127,12 @@
             <a href="/compare/mutations?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-green">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <i class="fa fa-tasks fa-5x"></i>
-                                </div>
-                                <div class="col-xs-9 text-right">
-                                    <div class="huge">Mutations</div>
-                                </div>
+                        <div class="panel-heading app">
+                            <div style="width: 25%;" class="pull-left">
+                                <i class="fa fa-tasks fa-5x"></i>
+                            </div>
+                            <div style="width: 75%; text-align: right" class="pull-right">
+                                <div class="huge">Mutations</div>
                             </div>
                         </div>
                     </div>
@@ -142,14 +141,12 @@
             <a href="/compare/enrichment?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-yellow">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <i class="fa fa-bar-chart-o fa-5x"></i>
-                                </div>
-                                <div class="col-xs-9 text-right">
-                                    <div class="huge">Enriched Mutations</div>
-                                </div>
+                        <div class="panel-heading app">
+                            <div style="width: 25%;" class="pull-left">
+                                <i class="fa fa-bar-chart-o fa-5x"></i>
+                            </div>
+                            <div style="width: 75%; text-align: right" class="pull-right">
+                                <div class="huge">Enriched Mutations</div>
                             </div>
                         </div>
                     </div>
@@ -158,14 +155,12 @@
             <a href="/compare/fixation?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-red">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <i class="fa fa-signal fa-5x"></i>
-                                </div>
-                                <div class="col-xs-9 text-right">
-                                    <div class="huge">Fixating Mutations</div>
-                                </div>
+                        <div class="panel-heading app">
+                            <div style="width: 25%;" class="pull-left">
+                                <i class="fa fa-signal fa-5x"></i>
+                            </div>
+                            <div style="width: 75%; text-align: right" class="pull-right">
+                                <div class="huge">Fixating Mutations</div>
                             </div>
                         </div>
                     </div>

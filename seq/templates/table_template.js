@@ -44,8 +44,12 @@ $(document).ready(function () {
         var scrollLeft = $(window).scrollLeft();
         $("#data_filter").offset({left: filter_offset.left + scrollLeft});
         i = 0;
+        var sidebar_offset = 0;
+        if (sidebar_hidden == true) {
+            sidebar_offset = 240;
+        }
         $(".ui").each(function () {
-            $(this).offset({left: ui_offset[i++] + scrollLeft});
+            $(this).offset({left: ui_offset[i++] + scrollLeft - sidebar_offset});
         });
     });
     var hidden_cols = document.getElementById('hidden_columns').value.split(',');

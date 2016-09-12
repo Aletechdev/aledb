@@ -108,7 +108,7 @@ class Mutation(models.Model):
                                       blank=True,
                                       null=True)
 
-    gene = models.CharField(max_length=300,
+    gene = models.CharField(max_length=19000,
                             blank=True,
                             null=True)
 
