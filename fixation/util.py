@@ -1,7 +1,7 @@
 from common.db_util import get_ordered_reseq_dict,\
-    get_all_observed_mutations,\
     get_mutation_queryset_from_obs_mut_queryset
 import seq.models
+from seq.util import get_all_observed_mutations
 from ale.common import STARTING_STRAIN_ALE_ID
 
 __author__ = "Patrick Phaneuf"

@@ -3,10 +3,10 @@ import os
 import ale.models
 import builder.upload
 import builder.util
-import fixation.models
+from fixation.models import FixatedMutation
 import fixation.util
 import enrichment.util
-import enrichment.models
+from enrichment.models import EnrichmentMutation
 import seq.models
 from builder.gdparse.gdparse import gdparse
 
@@ -132,6 +132,7 @@ def insert_wild_type_flask(breseq_wild_type_output_abs_path, ale_exp_user, ale_e
                             freezer_box_orm)
 
     rebuild_enrichment_mutations(experiment_orm.ale_id)
+    rebuild_fixated_mutations(experiment_orm.ale_id)
 
 
 def rebuild_all_enrichment_mutations():
@@ -216,6 +217,7 @@ def insert_flasks(sample_breseq_abs_paths_list,
                                      is_wild_type=False)
 
     rebuild_enrichment_mutations(experiment_orm.ale_id)
+    rebuild_fixated_mutations(experiment_orm.ale_id)
 
 
 # For wild_type, expecting directory with output.gd in it.
@@ -290,25 +292,18 @@ def rebuild_fixated_mutations(ale_experiment_id):
 
 
 def _delete_fixated_mutations(ale_experiment_id):
-    fixation.models.FixatedMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
+    FixatedMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
 
 
 def _create_fixated_mutations(ale_experiment_id):
-
     """
     Find all fixated mutations for an ALE experiment and populate database table with them.
     Using only Django ORM to make commit to database.
     """
-
     ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
-
     fixated_mutation_list = fixation.util.get_fixated_mutation_list(ale_experiment_id)
-
     for mutation in fixated_mutation_list:
-        fixated_mutation = fixation.models.FixatedMutation()
-        fixated_mutation.ale_experiment = ale_experiment
-        fixated_mutation.mutation = mutation
-        fixated_mutation.save()
+        FixatedMutation.objects.create(ale_experiment=ale_experiment, mutation=mutation)
 
 
 def rebuild_enrichment_mutations(ale_experiment_id):
@@ -317,26 +312,18 @@ def rebuild_enrichment_mutations(ale_experiment_id):
 
 
 def _delete_enrichment_mutations(ale_experiment_id):
-    enrichment.models.EnrichmentMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
+    EnrichmentMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
 
 
 def _create_enrichment_mutations(ale_experiment_id):
-
     """
     Find all enriched/(hot gene) mutations for ALE experiment and populate database table with them.
     Using only Django ORM to make commit to database.
     """
-
     ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
-    print(ale_experiment)
-
     enrichment_mutations_list = enrichment.util.get_enrichment_mutation_list(ale_experiment_id)
-
     for mutation in enrichment_mutations_list:
-        enrichment_mutation = enrichment.models.EnrichmentMutation()
-        enrichment_mutation.ale_experiment = ale_experiment
-        enrichment_mutation.mutation = mutation
-        enrichment_mutation.save()
+        EnrichmentMutation.objects.create(ale_experiment=ale_experiment, mutation=mutation)
 
 
 def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
