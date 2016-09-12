@@ -35,147 +35,6 @@
             src="/static/DataTables/extras/ColReorder/media/js/ColReorder.js"></script>
     <script type="text/javascript" charset="utf8"
             src="/static/DataTables/extras/TableTools/media/js/TableTools.min.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            var sorted_column = {% block sorted_column %}{% endblock %};
-
-            var non_sortable_columns = [0, 1];
-
-            if(sorted_column == 3) {
-                non_sortable_columns = [0, 1, 2];
-            }
-
-            var oTable = $("#data").dataTable({
-                "bPaginate": false,
-                "bAutoWidth": false,
-                "aoColumnDefs": [ {
-                    "aTargets": non_sortable_columns,
-                    "bSortable": false
-                    } ]
-            }).fnSort([[sorted_column, 'asc']]);
-            $("tr td:first-child").each(function () {
-                $(this).hover(
-                        function () {
-                            $(this).children(".shut").css("display", "block");
-                        },
-                        function () {
-                            $(this).children(".shut").css("display", "none");
-                        }
-                );
-            });
-            var filter_offset = $("#data_filter").offset();
-            $(window).resize(function () {
-                filter_offset = $("#data_filter").offset();
-            });
-            var ui_offset = [];
-            $(".ui").each(function () {
-                ui_offset.push($(this).offset().left);
-            });
-            $(window).scroll(function () {
-                var scrollLeft = $(window).scrollLeft();
-                $("#data_filter").offset({left: filter_offset.left + scrollLeft});
-                i = 0;
-                $(".ui").each(function () {
-                    $(this).offset({left: ui_offset[i++] + scrollLeft});
-                });
-            });
-            var hidden_cols = document.getElementById('hidden_columns').value.split(',');
-            for (var i = 0, len = hidden_cols.length; i < len; i++) {
-                if(hidden_cols[i] == "") {
-                    continue
-                }
-                fnShowHide(parseInt(hidden_cols[i]))
-            }
-        });
-    </script>
-    <script type="text/javascript">
-        function fnShowHide( iCol ) {
-            var oTable = $('#data').dataTable();
-
-            var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
-            if(bVis == true) {
-                oTable.fnSetColumnVis( iCol, false );
-                if(!document.getElementById('hidden_columns').value.includes(iCol)) {
-                    document.getElementById('hidden_columns').value = document.getElementById('hidden_columns').value + "," + iCol;
-                }
-            } else {
-                oTable.fnSetColumnVis( iCol, true );
-                if(document.getElementById('hidden_columns').value.includes(iCol)) {
-                    document.getElementById('hidden_columns').value = document.getElementById('hidden_columns').value.replace(iCol, "");
-                }
-            }
-        }
-    </script>
-    <script>
-        var deleteRow = function () {
-            var row = $(this).closest("tr").get(0);
-            $('.dataTable').dataTable().fnDeleteRow(row);
-        };
-        var filterSample = function (filter_type) {
-            var url = location.href.split("&remove=")[0].split("&show=")[0];
-            checked_samples = [];
-            $("tr td").children(".cb").each(function () {
-                if (this.checked) {
-                    checked_samples.push(this.name);
-                }
-            });
-            var removed_sample_ids, kept_sample_ids;
-            location.href.split("&").forEach(function (s) {
-                if (s.indexOf("remove") >= 0) {
-                    removed_sample_ids = s.split("=")[1];
-                }
-                else if (s.indexOf("show") >= 0) {
-                    kept_sample_ids = s.split("=")[1];
-                }
-            });
-            if (filter_type == "remove") {
-                query_string = typeof kept_sample_ids != "undefined" ? "&show=" + kept_sample_ids : "";
-                query_string += typeof removed_sample_ids != "undefined" ? "&remove=" + removed_sample_ids.replace("}", "") : "&remove={";
-            }
-            else if (filter_type == "show") {
-                query_string = "&show={";
-            }
-            checked_samples.forEach(function (id) {
-                query_string += id + ",";
-            });
-            query_string += "}";
-            window.location.replace(url + query_string);
-        }
-    </script>
-    <script>
-        function filter_dups() {
-            if ($('#show_dups').is(":checked")) {
-                $('.dataTable').dataTable().fnFilter('');
-            } else {
-                $('.dataTable').dataTable().fnFilter("^(.(?!DUP))*$", null, true, false);
-            }
-        }
-
-        function save_to_global_filter(mutation_id) {
-            $.ajax({
-                type: "POST",
-                url: "",
-                data: { mut_id: mutation_id,
-                        save_method: "global"
-                },
-            })
-        }
-
-        function save_to_experiment_filter(ale_experiment_id, mutation_id) {
-            console.log("SAVING TO EXP");
-            $.ajax({
-                type: "POST",
-                url: "",
-                data: { mut_id: mutation_id,
-                        save_method: "experiment"
-                },
-                success: function (response) {
-                    console.log("SUCCESS");
-                }
-            })
-        }
-
-    </script>
 {% endblock %}
 {% block header %}<b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
 {% block content %}
@@ -211,10 +70,14 @@
         <table id="data">
             <input type="button" value="Remove checked samples" class="ui" onclick="filterSample('remove')"/>
             <input type="button" value="Show checked samples" class="ui" onclick="filterSample('show')"/>
+            <a href="#" id ="export" class="ui" style="text-decoration: none;font: 14px Arial; background-color: #F0F0F0;
+                                            color: #333333; padding: 3px 4px 4px 4px; border: 1px solid #aaaaaa">
+                                            Export Table as CSV</a>
             {% include 'export_as_csv.html' %}
             <label style="float:right" class="ui"><input class="ui" id="show_dups" onclick="filter_dups(this)"
                                                          type="checkbox" name="checkbox" value="value"
                                                          style="margin-left: 10px" checked> Show Duplications</label>
+            <button type="button" class="ui" onclick="column_sort_from_right()">Column Sort from Right</button>
             <br><br>
             {% block show_hide_columns %}{% endblock %}
             <thead>
@@ -224,6 +87,10 @@
             {{ table_body }}
             </tbody>
         </table>
+        <script type="text/javascript">
+            var sorted_column = {% block sorted_column %}{% endblock %};
+            {% include 'table_template.js' %}
+        </script>
     </form>
 </div>
 {% endblock %}

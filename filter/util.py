@@ -216,11 +216,14 @@ def get_ignored_mutations(filter_form_model):
     return table_body, ignored_mutation_id_list
 
 
-def dashboard_filter(queryset):
+def dashboard_filter(queryset, ale_experiment_list='all'):
 
     global_filter = get_global_filter()
 
-    all_experiments = AleExperiment.objects.all()
+    if ale_experiment_list == 'all':
+        all_experiments = AleExperiment.objects.all()
+    else:
+        all_experiments = AleExperiment.objects.filter(ale_id__in=ale_experiment_list)
 
     for exp in all_experiments:
         filter_settings = get_filter_settings(exp.ale_id)
@@ -229,20 +232,36 @@ def dashboard_filter(queryset):
                                                            global_filter.ignored_mutations +
                                                            "," + filter_settings.starting_strain_mutations)
 
+        queryset = queryset.exclude(
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
+            frequency__lt=filter_settings.min_cutoff/100)
+
+        queryset = queryset.exclude(
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
+            frequency__gt=filter_settings.max_cutoff / 100)
+
         for mut_id in ignored_mutations:
 
-            queryset = queryset.exclude(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id, mutation_id=mut_id)
+            queryset = queryset.exclude(
+                sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
+                mutation_id=mut_id)
 
         ignored_genes = _clean_ignored_genes_list(filter_settings.ignored_genes + "," + global_filter.ignored_genes)
 
         for gene in ignored_genes:
 
             if str(gene).startswith('*'):
-                queryset = queryset.exclude(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id, mutation__gene__endswith=str(gene)[1:])
+                queryset = queryset.exclude(
+                    sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
+                    mutation__gene__endswith=str(gene)[1:])
             elif str(gene).endswith('*'):
-                queryset = queryset.exclude(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id, mutation__gene__startswith=str(gene)[:-1])
+                queryset = queryset.exclude(
+                    sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
+                    mutation__gene__startswith=str(gene)[:-1])
             else:
-                queryset = queryset.exclude(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id, mutation__gene__contains=gene)
+                queryset = queryset.exclude(
+                    sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
+                    mutation__gene__contains=gene)
 
     return queryset
 
