@@ -68,10 +68,12 @@ def _filter_ignored_genes(observed_mutation_queryset, ignored_genes):
             ignored_mutation_id_list = []
             for observed_mutation in observed_mutation_queryset:
                 gene_list = get_gene_list(observed_mutation.mutation.gene)
-                if set(gene_list) == set(ignored_genes):
+                if set(gene_list).issubset(set(ignored_genes)):
                     ignored_mutation_id_list.append(observed_mutation.mutation.id)
             if ignored_mutation_id_list:
                 observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__id__in=ignored_mutation_id_list)
+
+            # TODO: reimplement code that enabled wildcards
             # for gene in ignored_genes:
             #     if str(gene).startswith('*'):
             #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__endswith=str(gene)[1:])
@@ -79,6 +81,7 @@ def _filter_ignored_genes(observed_mutation_queryset, ignored_genes):
             #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__startswith=str(gene)[:-1])
             #     else:
             #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__contains=gene)
+
     return observed_mutation_queryset
 
 
