@@ -1,7 +1,7 @@
 from common.db_util import get_ordered_reseq_dict,\
-    get_all_observed_mutations,\
-    get_mutation_queryset_from_observed_mutation_queryset
+    get_mutation_queryset_from_obs_mut_queryset
 import seq.models
+from seq.util import get_all_observed_mutations
 from ale.common import STARTING_STRAIN_ALE_ID
 
 __author__ = "Patrick Phaneuf"
@@ -22,7 +22,7 @@ def _exclude_starting_strain_mutations(fixating_mutation_queryset, reseq_dict):
 
     if ref_reseq_id is not None:
         ref_observed_mutation_queryset = get_all_observed_mutations([ref_reseq_id])
-        ref_mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(ref_observed_mutation_queryset)
+        ref_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(ref_observed_mutation_queryset)
         fixating_mutation_queryset = fixating_mutation_queryset.exclude(id__in=ref_mutation_queryset)
 
     return fixating_mutation_queryset
@@ -43,7 +43,7 @@ def _get_ale_experiment_fixated_mutation_queryset(ordered_reseq_dict):
             isolate_number = id_reseq_tuple[1].tech_rep.isolate.isolate_number
 
             observed_mutation_queryset = get_all_observed_mutations([reseq_id])
-            mutation_queryset = get_mutation_queryset_from_observed_mutation_queryset(observed_mutation_queryset)
+            mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(observed_mutation_queryset)
             flask_isolate_mutation_dict[(flask_number, isolate_number)] = mutation_queryset
 
         flask_mutation_dict = _get_flask_mutation_dict(flask_isolate_mutation_dict)

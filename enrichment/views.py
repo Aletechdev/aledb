@@ -10,7 +10,7 @@ from seq.models import ResequencingExperiment
 import metadata.views
 from enrichment.models import EnrichmentMutation
 from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID
-from filter import mutation_filter
+from filter import util
 from common.util import check_hidden_columns_and_filters
 from collections import OrderedDict
 
@@ -107,7 +107,7 @@ def _get_table_body(reseq_dict, request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
-    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
+    filter_settings = util.get_filter_settings(ale_experiment_id)
 
     enrichment_mutation_queryset = EnrichmentMutation.objects.filter(ale_experiment_id=ale_experiment_id)
 

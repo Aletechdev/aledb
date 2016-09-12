@@ -1,4 +1,5 @@
 import os
+import sys
 
 from configparser import ConfigParser
 
@@ -28,6 +29,11 @@ DATABASES = {
         'PORT': config.get("DATABASE", "port"),
     }
 }
+
+# Likely has to be after initial DATABASES definition.
+# This is used for unit testing of django code.
+if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
+    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -84,13 +90,17 @@ SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
 FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
 FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
 LOGIN_TEMPLATE_PATH = os.path.join(BASE_DIR, 'login/templates')
+EXPORT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'export/templates')
+COMPARE_TEMPLATE_PATH = os.path.join(BASE_DIR, 'compare/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [SEQ_TEMPLATE_PATH,
                  FILTER_TEMPLATE_PATH,
                  FIXATION_TEMPLATE_PATH,
-                 LOGIN_TEMPLATE_PATH],
+                 LOGIN_TEMPLATE_PATH,
+                 COMPARE_TEMPLATE_PATH,
+                 EXPORT_TEMPLATE_PATH],
         'OPTIONS': {
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
@@ -140,6 +150,8 @@ INSTALLED_APPS = (
     'metadata',
     'enrichment',
     'login',
+    'compare',
+    'export'
 )
 
 # A sample logging configuration. The only tangible logging
