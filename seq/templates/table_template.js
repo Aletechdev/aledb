@@ -92,6 +92,7 @@ var deleteRow = function () {
     var row = $(this).closest("tr").get(0);
     $('.dataTable').dataTable().fnDeleteRow(row);
 };
+
 var filterSample = function (filter_type) {
     var url = location.href.split("&remove=")[0].split("&show=")[0];
     checked_samples = [];
@@ -122,6 +123,7 @@ var filterSample = function (filter_type) {
     query_string += "}";
     window.location.replace(url + query_string);
 }
+
 function filter_dups() {
     if ($('#show_dups').is(":checked")) {
         $('.dataTable').dataTable().fnFilter('');
@@ -141,15 +143,22 @@ function save_to_global_filter(mutation_id) {
 }
 
 function save_to_experiment_filter(ale_experiment_id, mutation_id) {
-    console.log("SAVING TO EXP");
     $.ajax({
         type: "POST",
         url: "",
         data: { mut_id: mutation_id,
                 save_method: "experiment"
-        },
-        success: function (response) {
-            console.log("SUCCESS");
         }
     })
+}
+
+function expand_collapse_gene_entry(sign) {
+
+    if(sign.className.includes('plus')) {
+        sign.className = sign.className.replace('plus', 'minus');
+        $($($(sign).parent()).children()[1]).hide();
+    } else {
+        sign.className = sign.className.replace('minus', 'plus');
+        $($($(sign).parent()).children()[1]).show()
+    }
 }

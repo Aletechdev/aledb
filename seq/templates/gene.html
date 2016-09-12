@@ -173,6 +173,17 @@
                 }
             })
         }
+
+        function expand_collapse_gene_entry(sign) {
+
+            if(sign.className.includes('plus')) {
+                sign.className = sign.className.replace('plus', 'minus');
+                $($($(sign).parent()).children()[1]).hide();
+            } else {
+                sign.className = sign.className.replace('minus', 'plus');
+                $($($(sign).parent()).children()[1]).show()
+            }
+        }
     </script>
 {% endblock %}
 {% block header %}<b>{{ gene_name }}</b> gene{% endblock %}
