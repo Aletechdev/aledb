@@ -18,13 +18,18 @@ $(document).ready(function () {
         paging: true,
         data: table_data,
         autoWidth: false,
-        iDisplayLength: 15,
+        iDisplayLength: 10,
         language: ',',
         columnDefs: [ {
             targets: non_sortable_columns,
             sortable: false
             } ],
         order: [[sorted_column, 'asc']],
+        dom: 'Bfrtip',
+        buttons: [
+            'colvis', 'excel', 'pdf', 'print'
+        ],
+        deferRender: true
     });
 
     oTable.buttons().container().appendTo( $('.col-sm-6:eq(0)', oTable.table().container() ) );
@@ -70,21 +75,11 @@ $(document).ready(function () {
         fnShowHide(parseInt(hidden_cols[i]))
     }
 
-    $(document.getElementsByClassName('true')).each(function (i, val) {
-        $(val).parent().css('background-color', 'rgba(0, 255, 0, 0.1)')
-    });
-
-    $(document.getElementsByClassName('false')).each(function (i, val) {
-        $(val).parent().css('background-color', 'rgba(255, 0, 0, 0.1)')
-    });
-
-    $(document.getElementsByClassName('empty')).each(function (i, val) {
-        $(val).parent().css('background-color', 'rgba(255, 0, 0, 0.1)')
-    });
+    add_css();
 
     $('.dataTables_paginate').click(function () {
 
-        console.log(oTable)
+        add_css()
     })
 
 });
@@ -97,7 +92,8 @@ function column_sort_from_right() {
     }
 
     var table = $("#data").DataTable();
-    table.order(sorting_array).draw()
+    table.order(sorting_array).draw();
+    add_css()
 }
 
 function fnShowHide( iCol ) {
@@ -153,11 +149,15 @@ var filterSample = function (filter_type) {
 };
 
 function filter_dups() {
+
+    var table = $('#data').DataTable();
+
     if ($('#show_dups').is(":checked")) {
-        $('.DataTable').DataTable().fnFilter('');
+        table.column(sorted_column + 1).search('').draw();
     } else {
-        $('.DataTable').DataTable().fnFilter("^(.(?!DUP))*$", null, true, false);
+        table.column(sorted_column + 1).search("^((?!DUP).)*$", true, false).draw();
     }
+    add_css()
 }
 
 function save_to_global_filter(mutation_id) {
@@ -190,3 +190,21 @@ function expand_collapse_gene_entry(sign) {
         $($($(sign).parent()).children()[1]).show()
     }
 }
+
+
+function add_css() {
+
+    $(document.getElementsByClassName('true')).each(function (i, val) {
+
+        $(val).parent().css('background-color', 'rgba(0, 255, 0, 0.1)')
+    });
+
+    $(document.getElementsByClassName('false')).each(function (i, val) {
+        $(val).parent().css('background-color', 'rgba(255, 0, 0, 0.1)')
+    });
+
+    $(document.getElementsByClassName('empty')).each(function (i, val) {
+        $(val).parent().css('background-color', 'rgba(255, 0, 0, 0.1)')
+    });
+}
+
