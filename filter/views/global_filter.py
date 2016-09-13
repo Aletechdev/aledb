@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from filter.forms.filter import FilterForm
 from django.utils.safestring import mark_safe
 from filter.util import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, get_global_filter
-from common.db_util import get_all_ale_experiments, get_recent_experiments
+from common.db_util import get_all_ale_experiments, get_recent_experiments, clear_dashboard_cache
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -19,6 +19,7 @@ def global_filter(request):
     filter_form_model = get_global_filter()
 
     if request.method == 'POST':
+        clear_dashboard_cache()
         _handle_POST(request, filter_form_model)
 
     initial_filter_form_data = {"ignored_genes": filter_form_model.ignored_genes}

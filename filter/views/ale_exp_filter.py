@@ -16,7 +16,7 @@ from django.utils.safestring import mark_safe
 
 from filter.util import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, is_number
 
-from common.db_util import get_all_ale_experiments, get_recent_experiments
+from common.db_util import get_all_ale_experiments, get_recent_experiments, clear_dashboard_cache
 
 from seq.models import Mutation
 
@@ -43,6 +43,7 @@ def mutation_filter(request):
                                                                            defaults=default_filter_form_model)
 
     if request.method == 'POST':
+        clear_dashboard_cache()
         _handle_POST(request, filter_form_model, ale_experiment_id)
 
     filter_form = FilterForm(filter_form_model.__dict__)
