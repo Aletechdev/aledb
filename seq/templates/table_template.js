@@ -14,26 +14,47 @@ $(document).ready(function () {
 
     number_of_columns = document.getElementById('data').rows[0].cells.length - 1;
 
+    var columns_to_export = [];
+
+    for(var k = sorted_column; k < number_of_columns; k++) {
+        columns_to_export.push(k)
+    }
+
     var oTable = $("#data").DataTable({
         paging: true,
         pagingType: "full_numbers",
         data: table_data,
         autoWidth: false,
-        iDisplayLength: 10,
+        pageLength: 10,
         language: ',',
         columnDefs: [ {
             targets: non_sortable_columns,
             sortable: false
-            } ],
+            }, {
+                className: 'exportable', 'targets': columns_to_export
+        } ],
         order: [[sorted_column, 'asc']],
-        dom: 'Bfrtip',
+        dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
         buttons: [
-            'colvis', 'excel'
+            'colvis', {
+                extend: 'csv',
+                text: 'CSV',
+                exportOptions: {
+                    columns: columns_to_export
+                }
+            }
+            // , {
+            //     extend: 'excel',
+            //     text: 'Excel',
+            //     exportOptions: {
+            //         columns: columns_to_export
+            //     }
+            // }
         ],
         deferRender: true
     });
 
-    oTable.buttons().container().appendTo( $('.col-sm-6:eq(0)', oTable.table().container() ) );
+    //oTable.buttons().container().appendTo( $('.col-sm-6:eq(0)', oTable.table().container() ) );
 
     $("tr td:first-child").each(function () {
         $(this).hover(
