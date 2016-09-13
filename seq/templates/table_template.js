@@ -14,24 +14,29 @@ $(document).ready(function () {
 
     number_of_columns = document.getElementById('data').rows[0].cells.length - 1;
 
-    var oTable = $("#data").dataTable({
-        "bPaginate": true,
-        "bAutoWidth": false,
-        "iDisplayLength": 15,
-        "sPaginationType": "full_numbers",
-        "aoColumnDefs": [ {
-            "aTargets": non_sortable_columns,
-            "bSortable": false
-            } ]
-    }).fnSort([[sorted_column, 'asc']]);
+    var oTable = $("#data").DataTable({
+        paging: true,
+        data: table_data,
+        autoWidth: false,
+        iDisplayLength: 15,
+        language: ',',
+        columnDefs: [ {
+            targets: non_sortable_columns,
+            sortable: false
+            } ],
+        order: [[sorted_column, 'asc']],
+    });
+
+    oTable.buttons().container().appendTo( $('.col-sm-6:eq(0)', oTable.table().container() ) );
+
     $("tr td:first-child").each(function () {
         $(this).hover(
-                function () {
-                    $(this).children(".shut").css("display", "block");
-                },
-                function () {
-                    $(this).children(".shut").css("display", "none");
-                }
+            function () {
+                $(this).children(".shut").css("display", "block");
+            },
+            function () {
+                $(this).children(".shut").css("display", "none");
+            }
         );
     });
     var filter_offset = $("#data_filter").offset();
@@ -64,6 +69,24 @@ $(document).ready(function () {
         }
         fnShowHide(parseInt(hidden_cols[i]))
     }
+
+    $(document.getElementsByClassName('true')).each(function (i, val) {
+        $(val).parent().css('background-color', 'rgba(0, 255, 0, 0.1)')
+    });
+
+    $(document.getElementsByClassName('false')).each(function (i, val) {
+        $(val).parent().css('background-color', 'rgba(255, 0, 0, 0.1)')
+    });
+
+    $(document.getElementsByClassName('empty')).each(function (i, val) {
+        $(val).parent().css('background-color', 'rgba(255, 0, 0, 0.1)')
+    });
+
+    $('.dataTables_paginate').click(function () {
+
+        console.log(oTable)
+    })
+
 });
 
 function column_sort_from_right() {
@@ -73,21 +96,20 @@ function column_sort_from_right() {
         sorting_array.push([i, 'desc'])
     }
 
-    var table = $("#data").dataTable();
-    table.fnSort(sorting_array)
+    var table = $("#data").DataTable();
+    table.order(sorting_array).draw()
 }
 
 function fnShowHide( iCol ) {
-    var oTable = $('#data').dataTable();
-
-    var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
-    if(bVis == true) {
-        oTable.fnSetColumnVis( iCol, false );
+    var oTable = $('#data').DataTable();
+    var column = oTable.settings().column([iCol]);
+    column.visible( ! column.visible() );
+    var is_visible = column.visible();
+    if(is_visible == true) {
         if(!document.getElementById('hidden_columns').value.includes(iCol)) {
             document.getElementById('hidden_columns').value = document.getElementById('hidden_columns').value + "," + iCol;
         }
     } else {
-        oTable.fnSetColumnVis( iCol, true );
         if(document.getElementById('hidden_columns').value.includes(iCol)) {
             document.getElementById('hidden_columns').value = document.getElementById('hidden_columns').value.replace(iCol, "");
         }
@@ -96,7 +118,7 @@ function fnShowHide( iCol ) {
 
 var deleteRow = function () {
     var row = $(this).closest("tr").get(0);
-    $('.dataTable').dataTable().fnDeleteRow(row);
+    $('.DataTable').DataTable().fnDeleteRow(row);
 };
 
 var filterSample = function (filter_type) {
@@ -128,13 +150,13 @@ var filterSample = function (filter_type) {
     });
     query_string += "}";
     window.location.replace(url + query_string);
-}
+};
 
 function filter_dups() {
     if ($('#show_dups').is(":checked")) {
-        $('.dataTable').dataTable().fnFilter('');
+        $('.DataTable').DataTable().fnFilter('');
     } else {
-        $('.dataTable').dataTable().fnFilter("^(.(?!DUP))*$", null, true, false);
+        $('.DataTable').DataTable().fnFilter("^(.(?!DUP))*$", null, true, false);
     }
 }
 
