@@ -8,6 +8,7 @@ from seq.models import ObservedMutation
 from seq.models import Mutation
 from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.cache import cache
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
@@ -114,3 +115,10 @@ def ale_axp_exists(ale_id, recent_experiments):
         pass
 
     return recent_experiments
+
+
+def clear_dashboard_cache():
+
+    cache.delete('dashboard_mutation')
+
+    cache.delete('dashboard_observed_mutation')
