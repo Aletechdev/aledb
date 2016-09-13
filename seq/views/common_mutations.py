@@ -28,7 +28,8 @@ def common_mutations(request):
  
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
+    ale_no = seq.views.common.get_ale_number(request)
+    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id, ale_no)
     wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
@@ -55,6 +56,7 @@ def common_mutations(request):
     reseq_list = sorted(ordered_reseq_dict.values(), key=lambda x: x.ale_id)
 
     context = {"ales": ale_queryset,
+               "ale_no": ale_no,
                "ale_experiment_name": ale_experiment_name,
                "reseq_list": reseq_list,
                "experiment_id": ale_experiment_id,
