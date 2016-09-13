@@ -35,10 +35,11 @@ def get_reseq_dict(ale_experiment_id):
 
 
 # TODO: go in seq.util
-def get_ordered_reseq_dict(ale_experiment_id):
+def get_ordered_reseq_dict(ale_experiment_id, ale_no=None):
     """
     Args:
         ale_experiment_id:
+        ale_no:
 
     Returns:
         reseq_dict: a ordered dictionary of reseq values and their ID's as keys.
@@ -46,7 +47,7 @@ def get_ordered_reseq_dict(ale_experiment_id):
         defined within RESEQ_QUERY
 
     """
-    reseq_queryset = get_reseq_queryset(ale_experiment_id, None)
+    reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_no)
     reseq_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
     return reseq_dict
 
