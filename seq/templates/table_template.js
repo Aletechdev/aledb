@@ -16,6 +16,7 @@ $(document).ready(function () {
 
     var oTable = $("#data").DataTable({
         paging: true,
+        pagingType: "full_numbers",
         data: table_data,
         autoWidth: false,
         iDisplayLength: 10,
@@ -27,7 +28,7 @@ $(document).ready(function () {
         order: [[sorted_column, 'asc']],
         dom: 'Bfrtip',
         buttons: [
-            'colvis', 'excel', 'pdf', 'print'
+            'colvis', 'excel'
         ],
         deferRender: true
     });
