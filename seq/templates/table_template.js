@@ -102,7 +102,11 @@ $(document).ready(function () {
     $('.dataTables_paginate').click(function () {
 
         add_css()
-    })
+    });
+
+    $('#data').on( 'length.dt', function ( e, settings, len ) {
+        setTimeout(add_css, 1);
+    } );
 
 });
 
@@ -206,10 +210,8 @@ function expand_collapse_gene_entry(sign) {
 
     if(sign.className.includes('plus')) {
         sign.className = sign.className.replace('plus', 'minus');
-        $($($(sign).parent()).children()[1]).hide();
     } else {
         sign.className = sign.className.replace('minus', 'plus');
-        $($($(sign).parent()).children()[1]).show()
     }
 }
 
