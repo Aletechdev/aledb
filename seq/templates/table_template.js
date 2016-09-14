@@ -14,22 +14,56 @@ $(document).ready(function () {
 
     number_of_columns = document.getElementById('data').rows[0].cells.length - 1;
 
-    var oTable = $("#data").dataTable({
-        "bPaginate": false,
-        "bAutoWidth": false,
-        "aoColumnDefs": [ {
-            "aTargets": non_sortable_columns,
-            "bSortable": false
-            } ]
-    }).fnSort([[sorted_column, 'asc']]);
+    var columns_to_export = [];
+
+    for(var k = sorted_column; k < number_of_columns; k++) {
+        columns_to_export.push(k)
+    }
+
+    var oTable = $("#data").DataTable({
+        paging: true,
+        pagingType: "full_numbers",
+        data: table_data,
+        autoWidth: false,
+        pageLength: 10,
+        language: ',',
+        columnDefs: [ {
+            targets: non_sortable_columns,
+            sortable: false
+            }, {
+                className: 'exportable', 'targets': columns_to_export
+        } ],
+        order: [[sorted_column, 'asc']],
+        dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
+        buttons: [
+            'colvis', {
+                extend: 'csv',
+                text: 'CSV',
+                exportOptions: {
+                    columns: columns_to_export
+                }
+            }
+            // , {
+            //     extend: 'excel',
+            //     text: 'Excel',
+            //     exportOptions: {
+            //         columns: columns_to_export
+            //     }
+            // }
+        ],
+        deferRender: true
+    });
+
+    //oTable.buttons().container().appendTo( $('.col-sm-6:eq(0)', oTable.table().container() ) );
+
     $("tr td:first-child").each(function () {
         $(this).hover(
-                function () {
-                    $(this).children(".shut").css("display", "block");
-                },
-                function () {
-                    $(this).children(".shut").css("display", "none");
-                }
+            function () {
+                $(this).children(".shut").css("display", "block");
+            },
+            function () {
+                $(this).children(".shut").css("display", "none");
+            }
         );
     });
     var filter_offset = $("#data_filter").offset();
@@ -62,6 +96,14 @@ $(document).ready(function () {
         }
         fnShowHide(parseInt(hidden_cols[i]))
     }
+
+    add_css();
+
+    $('.dataTables_paginate').click(function () {
+
+        add_css()
+    })
+
 });
 
 function column_sort_from_right() {
@@ -71,21 +113,21 @@ function column_sort_from_right() {
         sorting_array.push([i, 'desc'])
     }
 
-    var table = $("#data").dataTable();
-    table.fnSort(sorting_array)
+    var table = $("#data").DataTable();
+    table.order(sorting_array).draw();
+    add_css()
 }
 
 function fnShowHide( iCol ) {
-    var oTable = $('#data').dataTable();
-
-    var bVis = oTable.fnSettings().aoColumns[iCol].bVisible;
-    if(bVis == true) {
-        oTable.fnSetColumnVis( iCol, false );
+    var oTable = $('#data').DataTable();
+    var column = oTable.settings().column([iCol]);
+    column.visible( ! column.visible() );
+    var is_visible = column.visible();
+    if(is_visible == true) {
         if(!document.getElementById('hidden_columns').value.includes(iCol)) {
             document.getElementById('hidden_columns').value = document.getElementById('hidden_columns').value + "," + iCol;
         }
     } else {
-        oTable.fnSetColumnVis( iCol, true );
         if(document.getElementById('hidden_columns').value.includes(iCol)) {
             document.getElementById('hidden_columns').value = document.getElementById('hidden_columns').value.replace(iCol, "");
         }
@@ -94,7 +136,7 @@ function fnShowHide( iCol ) {
 
 var deleteRow = function () {
     var row = $(this).closest("tr").get(0);
-    $('.dataTable').dataTable().fnDeleteRow(row);
+    $('.DataTable').DataTable().fnDeleteRow(row);
 };
 
 var filterSample = function (filter_type) {
@@ -126,14 +168,18 @@ var filterSample = function (filter_type) {
     });
     query_string += "}";
     window.location.replace(url + query_string);
-}
+};
 
 function filter_dups() {
+
+    var table = $('#data').DataTable();
+
     if ($('#show_dups').is(":checked")) {
-        $('.dataTable').dataTable().fnFilter('');
+        table.column(sorted_column + 1).search('').draw();
     } else {
-        $('.dataTable').dataTable().fnFilter("^(.(?!DUP))*$", null, true, false);
+        table.column(sorted_column + 1).search("^((?!DUP).)*$", true, false).draw();
     }
+    add_css()
 }
 
 function save_to_global_filter(mutation_id) {
@@ -166,3 +212,21 @@ function expand_collapse_gene_entry(sign) {
         $($($(sign).parent()).children()[1]).show()
     }
 }
+
+
+function add_css() {
+
+    $(document.getElementsByClassName('true')).each(function (i, val) {
+
+        $(val).parent().css('background-color', 'rgba(0, 255, 0, 0.1)')
+    });
+
+    $(document.getElementsByClassName('false')).each(function (i, val) {
+        $(val).parent().css('background-color', 'rgba(255, 0, 0, 0.1)')
+    });
+
+    $(document.getElementsByClassName('empty')).each(function (i, val) {
+        $(val).parent().css('background-color', 'rgba(255, 0, 0, 0.1)')
+    });
+}
+
