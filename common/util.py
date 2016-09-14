@@ -1,6 +1,11 @@
+#TODO now that we can execute unit tests on code that involves django resources, bring all implementations with common.db_util into this file.
+
 from common.constants import REQUEST_ALL
 
-from filter.models import AleExperimentFilter, GlobalFilter
+from filter.models import AleExperimentFilter
+from filter.util import get_global_filter
+
+import common.db_util
 
 
 def get_ale_experiment_selector(ale_experiment_id, reseq_query):
@@ -36,7 +41,8 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
         if save_method == 'global':
 
-            global_filter, created = GlobalFilter.objects.get_or_create(id=1)
+            common.db_util.clear_dashboard_cache()
+            global_filter = get_global_filter()
 
             global_filter_ignored_mutations = global_filter.ignored_mutations
 
@@ -47,6 +53,8 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
             global_filter.save()
 
         elif save_method == 'experiment' and ale_experiment_id is not None:
+
+            common.db_util.clear_dashboard_cache()
 
             ale_exp_filter, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id)
 

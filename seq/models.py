@@ -108,7 +108,7 @@ class Mutation(models.Model):
                                       blank=True,
                                       null=True)
 
-    gene = models.CharField(max_length=300,
+    gene = models.CharField(max_length=19000,
                             blank=True,
                             null=True)
 
@@ -136,7 +136,7 @@ class Mutation(models.Model):
 
 class ObservedMutation(models.Model):
 
-    sequencing_experiment = models.ForeignKey(ResequencingExperiment)
+    sequencing_experiment = models.ForeignKey(ResequencingExperiment, null=True)
 
     mutation = models.ForeignKey(Mutation)
 
