@@ -8,6 +8,8 @@ from seq.util import get_all_observed_mutations
 import filter.util
 from common.db_util import get_all_ale_experiments, get_recent_experiments, get_ordered_reseq_dict
 from common.util import check_hidden_columns_and_filters
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 __author__ = 'pphaneuf'
 
@@ -37,7 +39,7 @@ def mutation_table(request):
                "ale_experiment_name": ale_experiment_name,
                "ale_no": ale_no,
                "experiment_id": ale_experiment_id,
-               "table_body": mark_safe(table_body),
+               "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "title": "Mutation Table",
                "table_header": mark_safe(table_header),
                "template_header": "Mutations",
