@@ -5,9 +5,10 @@ from django.utils.safestring import mark_safe
 import seq.views.common
 from collections import OrderedDict
 from seq.views import mutation_table_builder
-from filter import mutation_filter
+from filter import util
+from seq.util import get_all_observed_mutations
 from common.constants import REQUEST_ALE_EXPERIMENT_ID
-from common.db_util import get_ordered_reseq_dict, get_all_observed_mutations, get_all_ale_experiments, get_recent_experiments
+from common.db_util import get_ordered_reseq_dict, get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
 
 
@@ -27,7 +28,8 @@ def common_mutations(request):
  
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
+    ale_no = seq.views.common.get_ale_number(request)
+    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id, ale_no)
     wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
@@ -40,7 +42,7 @@ def common_mutations(request):
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    filter_settings = mutation_filter.get_filter_settings(ale_experiment_id)
+    filter_settings = util.get_filter_settings(ale_experiment_id)
 
     table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
                                                        observed_mutation_queryset,
@@ -54,6 +56,7 @@ def common_mutations(request):
     reseq_list = sorted(ordered_reseq_dict.values(), key=lambda x: x.ale_id)
 
     context = {"ales": ale_queryset,
+               "ale_no": ale_no,
                "ale_experiment_name": ale_experiment_name,
                "reseq_list": reseq_list,
                "experiment_id": ale_experiment_id,
