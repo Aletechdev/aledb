@@ -211,13 +211,13 @@ def _get_gene_table_entry(mutation):
 
     if len(cleaned_gene_list) > 10:
 
-        first_gene = GENE_ENTRY_HTML_LINK % (cleaned_gene_list[0], original_gene_list[0])
+        # first_gene = GENE_ENTRY_HTML_LINK % (cleaned_gene_list[0], original_gene_list[0])
 
-        last_gene = GENE_ENTRY_HTML_LINK % (cleaned_gene_list[-1], original_gene_list[-1])
+        # last_gene = GENE_ENTRY_HTML_LINK % (cleaned_gene_list[-1], original_gene_list[-1])
 
         table_entry += EXPANDABLE_COLUMN_PLUS_SIGN % str(mutation.id)
 
-        table_entry += """<div class="pull-left"> %s ... %s</div>""" % (first_gene, last_gene)
+        # table_entry += """<div class="pull-left"> %s ... %s</div>""" % (first_gene, last_gene)
 
         table_entry += EXPANDABLE_GENE_ENTRY % (str(mutation.id), ", ".join(gene_links))
 
