@@ -131,18 +131,19 @@
     }
 
     var selected_atoms = [];
-     function clear_selected_atoms() {
-         for (var i = 0; i < selected_atoms.length; i++) {
-             var mutation_id = selected_atoms[i][1];
-             var atom_number = selected_atoms[i][0];
-             var anchor = document.getElementById(mutation_id);
-             var prev = getAtomFromList(atom_number);
-             anchor.style.color = '#337ab7';  //default chrome link color
-             setColorForAtom(viewer._m[0], prev, starting_colors[atom_number]);
-         }
-         selected_atoms = [];
-         viewer.requestRedraw();
-     }
+    function clear_selected_atoms() {
+        for (var i = 0; i < selected_atoms.length; i++) {
+            var mutation_id = selected_atoms[i][1];
+            var atom_number = selected_atoms[i][0];
+            var element_id = "#mutation_" + mutation_id;
+            var anchor = $(element_id, $('#data').DataTable().rows().nodes()).get(0);
+            var prev = getAtomFromList(atom_number);
+            anchor.style.color = '#337ab7';  //default chrome link color
+            setColorForAtom(viewer._m[0], prev, starting_colors[atom_number]);
+        }
+        selected_atoms = [];
+        viewer.requestRedraw();
+    }
 
     function highlight_mutation(atom_number, mutation_id) {
         atom_number = get_residue_mapping(atom_number);
@@ -155,8 +156,8 @@
                 break;
             }
         }
-
-        var anchor = document.getElementById(mutation_id);
+        var element_id = "#mutation_" + mutation_id;
+        var anchor = $(element_id, $('#data').DataTable().rows().nodes()).get(0);
         var prev = getAtomFromList(atom_number);
 
         if(index != null) {
