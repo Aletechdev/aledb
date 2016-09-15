@@ -2,27 +2,29 @@
  * Created by dgosting on 9/6/16.
  */
 
-var non_sortable_columns = [0, 1];
-
-if(sorted_column == 3) {
-    non_sortable_columns = [0, 1, 2];
-}
-
-var number_of_columns = document.getElementById('data').rows[0].cells.length - 1;
-
-var columns_to_export = [];
-
-for(var k = sorted_column; k < number_of_columns; k++) {
-    columns_to_export.push(k)
-}
-
-var styling_targets = [];
-
-for (var i = number_of_columns; i > sorted_column + 8; i--) {
-    styling_targets.push(i)
-}
+var number_of_columns = null;
 
 $(document).ready(function () {
+
+    var non_sortable_columns = [0, 1];
+
+    if(sorted_column == 3) {
+        non_sortable_columns = [0, 1, 2];
+    }
+
+    number_of_columns = document.getElementById('data').rows[0].cells.length - 1;
+
+    var columns_to_export = [];
+
+    for(var k = sorted_column; k < number_of_columns; k++) {
+        columns_to_export.push(k)
+    }
+
+    var styling_targets = [];
+
+    for (var l = number_of_columns; l > sorted_column + 8; l--) {
+        styling_targets.push(l)
+    }
 
     var oTable = $("#data").DataTable({
         paging: true,
@@ -44,7 +46,6 @@ $(document).ready(function () {
                     } else {
                         $(td).css('background-color', 'rgba(255, 0, 0, 0.1)')
                     }
-
                 }
             }
         ],
