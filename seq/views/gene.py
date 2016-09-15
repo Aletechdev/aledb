@@ -32,6 +32,9 @@ from common.util import check_hidden_columns_and_filters
 
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 
+from django.core.serializers.json import DjangoJSONEncoder
+
+
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.sequencing_url
     username = settings.config.get("OTHER", "username")
@@ -62,8 +65,10 @@ def gene(request):
 
     template = loader.get_template("gene.html")
 
+    print(protein_changes)
+
     context = {"gene_name": gene_query,
-               "table_body": mark_safe(table_body),
+               "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "title": gene_query + " gene",
                "table_header": mark_safe(table_header),
                "pdb_url": pdb_url,
