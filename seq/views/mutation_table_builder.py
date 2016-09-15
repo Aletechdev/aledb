@@ -21,7 +21,7 @@ EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
-HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a>"""
+HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/close-icon.gif" width="12" height="11"></a>"""
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 # Difference with mutation_table_builder is the additional column.
