@@ -178,8 +178,9 @@ def get_table_body(reseq_dict,
             if table_type is TableType.GENE_TABLE:
                 if evidence.search(mutation.protein_change):
                     try:
-                        table_row.append("<a id=\"%d\" onclick=\"highlight_mutation(%d,%d)\">%s</a>" %
-                                         (int(mutation.id), int(non_decimal.sub('', mutation.protein_change)), int(mutation.id), mutation.protein_change))
+                        table_row.append("<a id=\"%s\" onclick=\"highlight_mutation(%d,%d)\">%s</a>" %
+                                         ("mutation_" + str(mutation.id), int(non_decimal.sub('', mutation.protein_change)),
+                                          int(mutation.id), mutation.protein_change))
                         protein_changes[mutation.id] = strip_tags(mutation.protein_change)
                     except:
                         table_row.append(mutation.protein_change)
