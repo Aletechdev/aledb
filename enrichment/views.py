@@ -13,6 +13,8 @@ from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID
 from filter import util
 from common.util import check_hidden_columns_and_filters
 from collections import OrderedDict
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
@@ -95,7 +97,7 @@ def shared_enriched_genes(request):
     template = loader.get_template("enrichment/shared_enrichment_mutations.html")
     context = {"title": "Shared Enriched Genes",
                "table_header": mark_safe(table_header),
-               "table_body": mark_safe(table_body),
+               "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "reseq_info_list": reseq_info_list,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments()}

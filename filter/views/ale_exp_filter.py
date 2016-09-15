@@ -20,6 +20,7 @@ from common.db_util import get_all_ale_experiments, get_recent_experiments, clea
 
 from seq.models import Mutation
 
+
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 FILTER_TEMPLATE = "filter/index.html"

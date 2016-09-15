@@ -14,7 +14,7 @@ MODEL_TO_FILTER_MAPPINGS = {"protein": "protein_change",
                             "position": "position",
                             "gene": "gene"}
 
-DELETE_ROW_BOX = """<td><img src="/static/DataTables/media/images/close-icon.gif" onclick="delete_row(%d)" width="12" height="11" style="float:right; cursor:pointer"></a></td>"""
+DELETE_ROW_BOX = """<td><img src="/static/close-icon.gif" onclick="delete_row(%d)" width="12" height="11" style="float:right; cursor:pointer"></td>"""
 
 TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td></tr>"
 
@@ -199,7 +199,7 @@ def get_ignored_mutations(filter_form_model):
         except ObjectDoesNotExist:
             continue
 
-        table_row = "<tr id=\"%s\">" % mutation.id
+        table_row = '<tr id="%s">' % mutation.id
         table_row += DELETE_ROW_BOX % mutation.id
         table_row += "<td>%d</td>" % mutation.position
         table_row += "<td>%s</td>" % mutation.mutation_type
@@ -212,6 +212,9 @@ def get_ignored_mutations(filter_form_model):
         table_row += "<td>%s</td>" % mutation.protein_change
         table_row += "</tr>"
         table_body += table_row
+
+    if table_body is None:
+        table_body = []
 
     return table_body, ignored_mutation_id_list
 

@@ -21,7 +21,7 @@ EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
-HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/DataTables/media/images/close-icon.gif" width="12" height="11"></a>"""
+HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/close-icon.gif" width="12" height="11"></a>"""
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 # Difference with mutation_table_builder is the additional column.
@@ -29,7 +29,7 @@ HTML_SHARED_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td></td><td>Positi
 
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 
-HTML_CHECKBOX = """<td><input type="checkbox" name=%s onclick="event.stopPropagation()" /><br>%s</td>"""
+HTML_HEADER = """<td>%s</td>"""
 
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 
@@ -102,9 +102,7 @@ def get_table_header(reseq_dict, table_type=None):
 
         mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id], sample_name)
 
-        table_header += HTML_CHECKBOX % (
-            reseq.id,
-            mutation_identifier)
+        table_header += HTML_HEADER % mutation_identifier
 
     table_header += "</tr>"
 
@@ -178,8 +176,9 @@ def get_table_body(reseq_dict,
             if table_type is TableType.GENE_TABLE:
                 if evidence.search(mutation.protein_change):
                     try:
-                        table_row.append("<a id=\"%d\" onclick=\"highlight_mutation(%d,%d)\">%s</a>" %
-                                         (int(mutation.id), int(non_decimal.sub('', mutation.protein_change)), int(mutation.id), mutation.protein_change))
+                        table_row.append("<a id=\"%s\" onclick=\"highlight_mutation(%d,%d)\">%s</a>" %
+                                         ("mutation_" + str(mutation.id), int(non_decimal.sub('', mutation.protein_change)),
+                                          int(mutation.id), mutation.protein_change))
                         protein_changes[mutation.id] = strip_tags(mutation.protein_change)
                     except:
                         table_row.append(mutation.protein_change)
