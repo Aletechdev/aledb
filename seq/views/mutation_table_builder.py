@@ -29,7 +29,7 @@ HTML_SHARED_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td></td><td>Positi
 
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 
-HTML_CHECKBOX = """<td><input type="checkbox" name=%s onclick="event.stopPropagation()" /><br>%s</td>"""
+HTML_HEADER = """<td>%s</td>"""
 
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 
@@ -102,9 +102,7 @@ def get_table_header(reseq_dict, table_type=None):
 
         mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id], sample_name)
 
-        table_header += HTML_CHECKBOX % (
-            reseq.id,
-            mutation_identifier)
+        table_header += HTML_HEADER % mutation_identifier
 
     table_header += "</tr>"
 
