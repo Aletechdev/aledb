@@ -14,10 +14,15 @@ from django.utils.safestring import mark_safe
 
 from filter.util import dashboard_filter
 
-from common.db_util import get_all_ale_experiments, get_recent_experiments
+from common.db_util import get_all_ale_experiments, get_recent_experiments, clear_dashboard_cache
 
 from django.core.cache import cache
 
+from genes.util import get_gene_list
+
+from itertools import groupby
+
+from operator import  itemgetter
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 
@@ -30,24 +35,25 @@ __author__ = 'pphaneuf'
 def dashboard(request):
     mutation_type_count_dict = {}
 
-    mutation_query_set, gene_query = _get_cached_dashboard_query()
+    clear_dashboard_cache()
+
+    mutation_query_set, observed_mutation_queryset = _get_cached_dashboard_query()
 
     for mutation_type in common.MUTATION_TYPE_LIST:
-        mutation_type_count = mutation_query_set.filter(mutation_type=mutation_type).count()
+        mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=mutation_type).count()
         mutation_type_count_dict[mutation_type] = mutation_type_count
 
     protein_change_type_count_dict = {}
     for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST:
-        protein_change_count = mutation_query_set.filter(protein_change__contains=protein_change_type).count()
+        protein_change_count = observed_mutation_queryset.filter(mutation__protein_change__contains=protein_change_type).count()
         protein_change_type_count_dict[protein_change_type] = protein_change_count
 
-    genes = gene_query.values('mutation__gene', 'mutation__mutation_type')\
+    gene_bar_chart_dict = get_gene_bar_chart_dict(observed_mutation_queryset)
+
+    sequence_changes = observed_mutation_queryset.values('mutation__gene', 'mutation__protein_change')\
         .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
 
-    sequence_changes = gene_query.values('mutation__gene', 'mutation__protein_change')\
-        .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
-
-    genes = common.set_gene_bar_chart_colors(genes)
+    genes = common.set_gene_bar_chart_colors(gene_bar_chart_dict)
 
     sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_changes)
 
@@ -104,3 +110,46 @@ def _get_cached_dashboard_query():
     else:
 
         return cached_mutation_queryset, cached_observed_mutation_queryset
+
+
+def get_gene_bar_chart_dict(observed_mutation_queryset):
+
+    cached_bar_chart_gene_dict = cache.get('bar_chart_gene_dict')
+
+    if cached_bar_chart_gene_dict is None:
+
+        gene_list = [[get_gene_list(gene['mutation__gene']), gene['mutation__mutation_type']] for
+                     gene in observed_mutation_queryset.values('mutation__gene', 'mutation__mutation_type')]
+
+        mutation_type_gene_dict = {}
+
+        for pair in gene_list:
+
+            try:
+                mutation_type_gene_dict[pair[1]] += [pair[0]]
+            except KeyError:
+                mutation_type_gene_dict[pair[1]] = [pair[0]]
+
+        final_list = []
+
+        for key, value in mutation_type_gene_dict.items():
+
+            flattened_list = sorted([item for sublist in value for item in sublist], reverse=True)
+
+            set_gene_list = list(set(flattened_list))
+
+            counted_list = [len(list(group)) for key, group in groupby(flattened_list)]
+
+            for idx, val in enumerate(counted_list):
+
+                new_dict = {'mutation__gene': set_gene_list[idx], 'the_count': val, 'mutation__mutation_type': key}
+
+                final_list.append(new_dict)
+
+        final_sorted_list = sorted(final_list, key=itemgetter('the_count'), reverse=True)
+
+        cache.set('bar_chart_gene_dict', final_sorted_list, None)
+
+        return final_sorted_list
+
+    return cached_bar_chart_gene_dict
