@@ -20,8 +20,6 @@ from common.db_util import get_all_ale_experiments, get_recent_experiments, clea
 
 from seq.models import Mutation
 
-from django.core.serializers.json import DjangoJSONEncoder
-import json
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -58,7 +56,7 @@ def mutation_filter(request):
     context = {"form": filter_form,
                "ale_experiment_id": ale_experiment_id,
                "ale_experiment_name": ale_experiment_name,
-               "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
+               "table_body": mark_safe(table_body),
                "table_header": mark_safe(TABLE_HEADER),
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(ale_experiment_id),

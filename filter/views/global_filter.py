@@ -5,8 +5,6 @@ from filter.forms.filter import FilterForm
 from django.utils.safestring import mark_safe
 from filter.util import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, get_global_filter
 from common.db_util import get_all_ale_experiments, get_recent_experiments, clear_dashboard_cache
-from django.core.serializers.json import DjangoJSONEncoder
-import json
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -31,7 +29,7 @@ def global_filter(request):
     table_body, ignored_mutation_id_list = get_ignored_mutations(filter_form_model)
 
     context = {"form": filter_form,
-               "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
+               "table_body": mark_safe(table_body),
                "table_header": mark_safe(TABLE_HEADER),
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments()}
