@@ -1,10 +1,10 @@
 /**
  * Created by dgosting on 9/6/16.
  */
+
 var number_of_columns = null;
 
 $(document).ready(function () {
-
 
     var non_sortable_columns = [0, 1];
 
@@ -20,6 +20,12 @@ $(document).ready(function () {
         columns_to_export.push(k)
     }
 
+    var styling_targets = [];
+
+    for (var l = number_of_columns; l > sorted_column + 8; l--) {
+        styling_targets.push(l)
+    }
+
     var oTable = $("#data").DataTable({
         paging: true,
         pagingType: "full_numbers",
@@ -32,7 +38,17 @@ $(document).ready(function () {
             sortable: false
             }, {
                 className: 'exportable', 'targets': columns_to_export
-        } ],
+            }, {
+                "targets": styling_targets,
+                "createdCell": function (td, cellData, rowData, row, col) {
+                    if(cellData.includes('class="true"')) {
+                        $(td).css('background-color', 'rgba(0, 255, 0, 0.1)')
+                    } else {
+                        $(td).css('background-color', 'rgba(255, 0, 0, 0.1)')
+                    }
+                }
+            }
+        ],
         order: [[sorted_column, 'asc']],
         dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
         buttons: [
@@ -43,15 +59,9 @@ $(document).ready(function () {
                     columns: columns_to_export
                 }
             }
-            // , {
-            //     extend: 'excel',
-            //     text: 'Excel',
-            //     exportOptions: {
-            //         columns: columns_to_export
-            //     }
-            // }
         ],
-        deferRender: true
+        deferRender: true,
+        scrollX: true
     });
 
     //oTable.buttons().container().appendTo( $('.col-sm-6:eq(0)', oTable.table().container() ) );
@@ -66,26 +76,7 @@ $(document).ready(function () {
             }
         );
     });
-    var filter_offset = $("#data_filter").offset();
-    $(window).resize(function () {
-        filter_offset = $("#data_filter").offset();
-    });
-    var ui_offset = [];
-    $(".ui").each(function () {
-        ui_offset.push($(this).offset().left);
-    });
-    $(window).scroll(function () {
-        var scrollLeft = $(window).scrollLeft();
-        $("#data_filter").offset({left: filter_offset.left + scrollLeft});
-        i = 0;
-        var sidebar_offset = 0;
-        if (sidebar_hidden == true) {
-            sidebar_offset = 240;
-        }
-        $(".ui").each(function () {
-            $(this).offset({left: ui_offset[i++] + scrollLeft - sidebar_offset});
-        });
-    });
+
     var hidden_cols = document.getElementById('hidden_columns').value.split(',');
     if(hidden_cols[0] == "") {
         hidden_cols = [sorted_column + 4, sorted_column + 5, sorted_column + 6, sorted_column + 7]
@@ -96,21 +87,10 @@ $(document).ready(function () {
         }
         fnShowHide(parseInt(hidden_cols[i]))
     }
-
-    add_css();
-
-    $('.dataTables_paginate').click(function () {
-
-        add_css()
-    });
-
-    $('#data').on( 'length.dt', function ( e, settings, len ) {
-        setTimeout(add_css, 1);
-    } );
-
 });
 
 function column_sort_from_right() {
+
     var sorting_array = [];
 
     for (var i = number_of_columns; i > sorted_column + 8; i--) {
@@ -119,7 +99,6 @@ function column_sort_from_right() {
 
     var table = $("#data").DataTable();
     table.order(sorting_array).draw();
-    add_css()
 }
 
 function fnShowHide( iCol ) {
@@ -140,7 +119,7 @@ function fnShowHide( iCol ) {
 
 var deleteRow = function () {
     var row = $(this).closest("tr").get(0);
-    $('.DataTable').DataTable().fnDeleteRow(row);
+    $('#data').DataTable().row(row).remove().draw();
 };
 
 var filterSample = function (filter_type) {
@@ -183,7 +162,6 @@ function filter_dups() {
     } else {
         table.column(sorted_column + 1).search("^((?!DUP).)*$", true, false).draw();
     }
-    add_css()
 }
 
 function save_to_global_filter(mutation_id) {

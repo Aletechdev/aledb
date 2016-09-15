@@ -1,24 +1,30 @@
 {% extends 'dashboard_base.html' %}
 {% block title %}<title>Resequencing Runs</title>{% endblock %}
 {% block scripts_and_style %}
-    <script type="text/javascript" src="/static/jquery-1.9.1.min.js"></script>
-    <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
+    <style type="text/css">
+        table.dataTable tr.odd { background-color: lightgrey; }
+        table.dataTable tr.even { background-color: white; }
+    </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.css"/>
 
-    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
-          media="print, projection, screen"/>
-
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.js"></script>
     <script type="text/javascript">
-        var asInitVals = new Array();
-        $(document).ready($(function () {
-            oTable = $("#runs").tablesorter({widgets: ['zebra']});
-
-        }));
+        $(document).ready(function () {
+            $('#runs').DataTable({
+                paging: false,
+                dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
+                buttons: [
+                    'colvis', 'csv'
+                ],
+                deferRender: true
+            });
+        })
     </script>
 {% endblock %}
 {% block header %}<b>{{ ale_experiment_name }}</b> Sample Meta Data{% endblock %}
 {% block content %}
 <div class="row">
-    <table id="runs" class="tablesorter">
+    <table id="runs" class="table">
         <thead>
         <tr>
             <th>ALE, Flask, Isolate</th>

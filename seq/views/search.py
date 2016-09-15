@@ -24,6 +24,10 @@ from common.db_util import get_all_ale_experiments, get_recent_experiments
 
 from common.util import check_hidden_columns_and_filters
 
+from django.core.serializers.json import DjangoJSONEncoder
+
+import json
+
 
 @login_required
 def search(request):
@@ -57,7 +61,7 @@ def search(request):
 
             template = loader.get_template("search.html")
 
-            context = {"table_body": mark_safe(table_body),
+            context = {"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                        "title": "Search Results",
                        "table_header": mark_safe(table_header),
                        "last_search": last_search,
