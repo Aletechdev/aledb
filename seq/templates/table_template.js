@@ -1,24 +1,28 @@
 /**
  * Created by dgosting on 9/6/16.
  */
-var number_of_columns = null;
+
+var non_sortable_columns = [0, 1];
+
+if(sorted_column == 3) {
+    non_sortable_columns = [0, 1, 2];
+}
+
+var number_of_columns = document.getElementById('data').rows[0].cells.length - 1;
+
+var columns_to_export = [];
+
+for(var k = sorted_column; k < number_of_columns; k++) {
+    columns_to_export.push(k)
+}
+
+var styling_targets = [];
+
+for (var i = number_of_columns; i > sorted_column + 8; i--) {
+    styling_targets.push(i)
+}
 
 $(document).ready(function () {
-
-
-    var non_sortable_columns = [0, 1];
-
-    if(sorted_column == 3) {
-        non_sortable_columns = [0, 1, 2];
-    }
-
-    number_of_columns = document.getElementById('data').rows[0].cells.length - 1;
-
-    var columns_to_export = [];
-
-    for(var k = sorted_column; k < number_of_columns; k++) {
-        columns_to_export.push(k)
-    }
 
     var oTable = $("#data").DataTable({
         paging: true,
@@ -32,7 +36,18 @@ $(document).ready(function () {
             sortable: false
             }, {
                 className: 'exportable', 'targets': columns_to_export
-        } ],
+            }, {
+                "targets": styling_targets,
+                "createdCell": function (td, cellData, rowData, row, col) {
+                    if(cellData.includes('class="true"')) {
+                        $(td).css('background-color', 'rgba(0, 255, 0, 0.1)')
+                    } else {
+                        $(td).css('background-color', 'rgba(255, 0, 0, 0.1)')
+                    }
+
+                }
+            }
+        ],
         order: [[sorted_column, 'asc']],
         dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
         buttons: [
@@ -43,13 +58,6 @@ $(document).ready(function () {
                     columns: columns_to_export
                 }
             }
-            // , {
-            //     extend: 'excel',
-            //     text: 'Excel',
-            //     exportOptions: {
-            //         columns: columns_to_export
-            //     }
-            // }
         ],
         deferRender: true
     });
@@ -96,21 +104,10 @@ $(document).ready(function () {
         }
         fnShowHide(parseInt(hidden_cols[i]))
     }
-
-    add_css();
-
-    $('.dataTables_paginate').click(function () {
-
-        add_css()
-    });
-
-    $('#data').on( 'length.dt', function ( e, settings, len ) {
-        setTimeout(add_css, 1);
-    } );
-
 });
 
 function column_sort_from_right() {
+
     var sorting_array = [];
 
     for (var i = number_of_columns; i > sorted_column + 8; i--) {
@@ -119,7 +116,6 @@ function column_sort_from_right() {
 
     var table = $("#data").DataTable();
     table.order(sorting_array).draw();
-    add_css()
 }
 
 function fnShowHide( iCol ) {
@@ -140,7 +136,7 @@ function fnShowHide( iCol ) {
 
 var deleteRow = function () {
     var row = $(this).closest("tr").get(0);
-    $('.DataTable').DataTable().fnDeleteRow(row);
+    $('#data').DataTable().row(row).remove().draw();
 };
 
 var filterSample = function (filter_type) {
@@ -183,7 +179,6 @@ function filter_dups() {
     } else {
         table.column(sorted_column + 1).search("^((?!DUP).)*$", true, false).draw();
     }
-    add_css()
 }
 
 function save_to_global_filter(mutation_id) {
