@@ -12,7 +12,7 @@ $(document).ready(function () {
         non_sortable_columns = [0, 1, 2];
     }
 
-    number_of_columns = document.getElementById('data').rows[0].cells.length - 1;
+    number_of_columns = document.getElementById('data').rows[0].cells.length;
 
     var columns_to_export = [];
 
