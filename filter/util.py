@@ -213,6 +213,9 @@ def get_ignored_mutations(filter_form_model):
         table_row += "</tr>"
         table_body += table_row
 
+    if table_body is None:
+        table_body = []
+
     return table_body, ignored_mutation_id_list
 
 
