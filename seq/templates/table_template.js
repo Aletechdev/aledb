@@ -79,8 +79,6 @@ $(document).ready(function () {
     var datatable_ui_offset = $("#data_length").offset();
     var paginate_offset = $("#data_paginate").offset();
 
-    console.log(paginate_offset);
-
     $(window).resize(function () {
         filter_offset = $("#data_filter").offset();
         datatable_ui_offset = $("#data_length").offset();
