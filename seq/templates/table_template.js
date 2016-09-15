@@ -76,21 +76,33 @@ $(document).ready(function () {
         );
     });
     var filter_offset = $("#data_filter").offset();
+    var datatable_ui_offset = $("#data_length").offset();
+    var paginate_offset = $("#data_paginate").offset();
+
+    console.log(paginate_offset);
+
     $(window).resize(function () {
         filter_offset = $("#data_filter").offset();
+        datatable_ui_offset = $("#data_length").offset();
+        paginate_offset = $("#data_length").offset();
     });
     var ui_offset = [];
     $(".ui").each(function () {
         ui_offset.push($(this).offset().left);
     });
     $(window).scroll(function () {
-        var scrollLeft = $(window).scrollLeft();
-        $("#data_filter").offset({left: filter_offset.left + scrollLeft});
-        i = 0;
         var sidebar_offset = 0;
         if (sidebar_hidden == true) {
             sidebar_offset = 240;
         }
+        var scrollLeft = $(window).scrollLeft();
+
+        $("#data_filter").offset({left: filter_offset.left + scrollLeft});
+        $("#data_paginate").offset({left: paginate_offset.left + scrollLeft});
+        $("#data_length").offset({left: datatable_ui_offset.left + scrollLeft - sidebar_offset});
+        $(".dt-buttons").offset({left: datatable_ui_offset.left + scrollLeft - sidebar_offset});
+        $("#data_info").offset({left: datatable_ui_offset.left + scrollLeft - sidebar_offset});
+        i = 0;
         $(".ui").each(function () {
             $(this).offset({left: ui_offset[i++] + scrollLeft - sidebar_offset});
         });
