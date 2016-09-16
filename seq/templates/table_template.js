@@ -22,7 +22,7 @@ $(document).ready(function () {
 
     var styling_targets = [];
 
-    for (var l = number_of_columns; l > sorted_column + 8; l--) {
+    for (var l = number_of_columns - 1; l > sorted_column + 8; l--) {
         styling_targets.push(l)
     }
 
