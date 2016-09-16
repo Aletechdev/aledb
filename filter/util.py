@@ -231,16 +231,13 @@ def dashboard_filter(queryset, ale_experiment_list='all'):
     for exp in all_experiments:
         filter_settings = get_filter_settings(exp.ale_id)
 
-        # print("Initial count:", queryset.count(), exp.ale_id)
-
         queryset = queryset.exclude(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
             frequency__lt=filter_settings.min_cutoff / 100)
-        # print("After Min Cutoff Filter:", queryset.count(), exp.ale_id)
+
         queryset = queryset.exclude(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
             frequency__gt=filter_settings.max_cutoff / 100)
-        # print("After Max Cutoff Filter:", queryset.count(), exp.ale_id)
 
         ignored_mutations = clean_ignored_mutation_id_list(filter_settings.ignored_mutations +
                                                            global_filter.ignored_mutations +

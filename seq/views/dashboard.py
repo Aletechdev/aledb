@@ -18,11 +18,11 @@ from common.db_util import get_all_ale_experiments, get_recent_experiments, clea
 
 from django.core.cache import cache
 
-from genes.util import get_gene_list
+from genes.util import get_gene_list, get_annotated_gene_list
 
-from itertools import groupby
+from operator import itemgetter
 
-from operator import  itemgetter
+from collections import Counter
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 
@@ -124,11 +124,11 @@ def get_gene_bar_chart_dict(observed_mutation_queryset):
         mutation_type_gene_dict = {}
 
         for pair in gene_list:
-
+            genes = set(pair[0])
             try:
-                mutation_type_gene_dict[pair[1]] += [pair[0]]
+                mutation_type_gene_dict[pair[1]] += [genes]
             except KeyError:
-                mutation_type_gene_dict[pair[1]] = [pair[0]]
+                mutation_type_gene_dict[pair[1]] = [genes]
 
         final_list = []
 
@@ -136,13 +136,11 @@ def get_gene_bar_chart_dict(observed_mutation_queryset):
 
             flattened_list = sorted([item for sublist in value for item in sublist], reverse=True)
 
-            set_gene_list = list(set(flattened_list))
+            counted_list = Counter(flattened_list)
 
-            counted_list = [len(list(group)) for key, group in groupby(flattened_list)]
+            for k, v in counted_list.items():
 
-            for idx, val in enumerate(counted_list):
-
-                new_dict = {'mutation__gene': set_gene_list[idx], 'the_count': val, 'mutation__mutation_type': key}
+                new_dict = {'mutation__gene': k, 'the_count': v, 'mutation__mutation_type': key}
 
                 final_list.append(new_dict)
 
