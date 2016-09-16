@@ -35,8 +35,6 @@ __author__ = 'pphaneuf'
 def dashboard(request):
     mutation_type_count_dict = {}
 
-    clear_dashboard_cache()
-
     mutation_query_set, observed_mutation_queryset = _get_cached_dashboard_query()
 
     for mutation_type in common.MUTATION_TYPE_LIST:
