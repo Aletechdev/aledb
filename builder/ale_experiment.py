@@ -10,46 +10,42 @@ from enrichment.models import EnrichmentMutation
 import seq.models
 from builder.gdparse.gdparse import gdparse
 from common.db_util import clear_dashboard_cache
+from metadata.parser import parse_and_upload_meta_data
 
 WILD_TYPE_ALE_NUMBER = 0
-
 WILD_TYPE_FLASK_NUMBER = 0
-
 WILD_TYPE_ISOLATE_NUMBER = 1
-
 WILD_TYPE_TECH_REP_NUMBER = 1
-
 WILD_TYPE_USER_NAME = "BOP27"
-
 BRESEQ_OUTPUT_REPORT_DIR = "output/"
-
 BRESEQ_OUTPUT_REPORT_FILE = "index.html"
-
 BRESEQ_LOG_FILE = "log.txt"
-
 OUTPUT_GENOMIC_DIFF_FILE_NAME = 'output.gd'
-
 ANNOTATION_GENOMIC_DIFF_FILE_NAME = 'annotated.gd'
-
 ANNOTATION_GENOMIC_DIFF_FILE_DIR = '/evidence/'
+METADATA_RELATIVE_PATH = 'metadata/'
+REF_RELATIVE_PATH = 'ref/'
 
 # TODO: Don't use defaults any longer.
-
 DEFAULT_INSTRUMENT_NAME = "UCSD1"
-
 DEFAULT_MEDIA_DESCRIPTION = "M9"
-
 DEFAULT_MEDIA_SUBSTRATE = "glucose"
-
 DEFAULT_TEMPERATURE = 37
-
 DEFAULT_VOLUME = 15
-
 DEFAULT_STIRRING_SPEED = 1100
-
 DEFAULT_FREEZER_BOX_NAME = "ALE box"
-
 DEFAULT_FREEZER_BOX_NUMBER = 1
+
+
+def integrate_metadata(ale_exp_path, ref_file_name, ale_exp_primary_key):
+    """
+    Executed from Django ipython shell
+    """
+    metadata_path = ale_exp_path + METADATA_RELATIVE_PATH
+    parse_and_upload_meta_data(metadata_path, ale_exp_primary_key)
+
+    ref_file_path = ale_exp_path + REF_RELATIVE_PATH + ref_file_name
+    create_functional_annotations(ref_file_path, ale_exp_primary_key)
 
 
 def remove_flask(flask_primary_key):
