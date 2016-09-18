@@ -15,8 +15,8 @@
    id="svg4236"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="header.svg"
-   inkscape:export-filename="/home/flagg/favicon.png"
+   sodipodi:docname="ale_header.svg"
+   inkscape:export-filename="/home/flagg/Desktop/logo.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -29,7 +29,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.8"
-     inkscape:cx="101.01426"
+     inkscape:cx="44.585689"
      inkscape:cy="37.270948"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -155,7 +155,7 @@
          id="tspan6412-1"
          x="100.78669"
          y="980.99536"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:condensed;font-size:40.00000381px;font-family:'Liberation Sans Narrow';-inkscape-font-specification:'Liberation Sans Narrow Condensed';fill:#ffffff;fill-opacity:1">A</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:condensed;font-size:40.00000381px;font-family:'Liberation Sans Narrow';-inkscape-font-specification:'Liberation Sans Narrow Condensed';fill:#ffffff;fill-opacity:1">A</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:22.71372986px;line-height:21.99999988%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -167,7 +167,7 @@
          id="tspan6412-5-7"
          x="102.5433"
          y="1015.4285"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:condensed;font-size:40.00000381px;font-family:'Liberation Sans Narrow';-inkscape-font-specification:'Liberation Sans Narrow Condensed';fill:#ffffff;fill-opacity:1">L</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:condensed;font-size:40.00000381px;font-family:'Liberation Sans Narrow';-inkscape-font-specification:'Liberation Sans Narrow Condensed';fill:#ffffff;fill-opacity:1">L</tspan></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-weight:normal;font-size:22.71372986px;line-height:21.99999988%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
@@ -179,6 +179,6 @@
          id="tspan6412-2-9"
          x="101.43419"
          y="1049.8337"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:condensed;font-size:40.00000381px;font-family:'Liberation Sans Narrow';-inkscape-font-specification:'Liberation Sans Narrow Condensed';fill:#ffffff;fill-opacity:1">E</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:condensed;font-size:40.00000381px;font-family:'Liberation Sans Narrow';-inkscape-font-specification:'Liberation Sans Narrow Condensed';fill:#ffffff;fill-opacity:1">E</tspan></text>
   </g>
 </svg>
