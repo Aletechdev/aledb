@@ -32,34 +32,23 @@ def compare(request):
 
     all_experiments = get_all_ale_experiments()
 
-    hidden_columns = check_hidden_columns_and_filters(request, None)
+    experiment_names = request.GET.get('download_experiments', None)
 
-    first_exp_name = request.GET.get('first_exp', None)
+    if not experiment_names:
 
-    second_exp_name = request.GET.get('second_exp', None)
+        hidden_columns = check_hidden_columns_and_filters(request, None)
 
-    if not first_exp_name or not second_exp_name:
+        return handle_get_response(all_experiments, hidden_columns)
 
-        clicked_compare = request.GET.get('clicked_compare_button', None)
+    # Else it is a valid request
+    if experiment_names == 'All':
+        ale_experiment_list = [ale_exp.ale_id for ale_exp in AleExperiment.objects.all()]
 
-        if clicked_compare == "True":
+    else:
+        experiment_name_list = experiment_names.split(',')
 
-            error_message = "Error: Must enter 2 experiments to compare"
-
-            return handle_get_response(all_experiments, hidden_columns, True, error_message)
-
-        else:
-            return handle_get_response(all_experiments, hidden_columns, False, "")
-
-    if first_exp_name == second_exp_name:
-        error_message = "Error: Cannot compare same experiment"
-        return handle_get_response(all_experiments, hidden_columns, True, error_message)
-
-    first_exp = AleExperiment.objects.get(name=first_exp_name)
-
-    second_exp = AleExperiment.objects.get(name=second_exp_name)
-
-    ale_experiment_list = [first_exp.ale_id, second_exp.ale_id]
+        ale_experiment_list = [AleExperiment.objects.get(name=ale_exp_name).ale_id for ale_exp_name in
+                               experiment_name_list]
 
     ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list)
 
@@ -82,7 +71,7 @@ def compare(request):
 
     ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(ordered_reseq_dict.values())
 
-    title = "Comparison of %s and %s" % (first_exp_name, second_exp_name)
+    header = "Comparison of %s" % experiment_names.replace(",", ", ")
 
     gene_query = queryset.values('mutation__gene', 'mutation__mutation_type').annotate(
         the_count=Count('mutation__gene')).order_by('-the_count')
@@ -97,12 +86,9 @@ def compare(request):
                                                                                                 sequence_changes)
 
     context = {"experiments": all_experiments,
-               "experiment_id": "%s,%s" % (first_exp.ale_id, second_exp.ale_id),
                "has_comparison": True,
-               "first_exp_name": first_exp_name,
-               "second_exp_name": second_exp_name,
-               "title": title,
-               "header": title,
+               "ale_experiment_id": ale_experiment_list,
+               "header": header,
                "genes": mark_safe(genes_to_show),
                "sequence_changes": mark_safe(sequence_changes_to_show),
                "gene_color_set": mark_safe(common.GENE_COLORS),
@@ -124,16 +110,14 @@ def compare(request):
     return HttpResponse(template.render(context))
 
 
-def handle_get_response(all_experiments, hidden_columns, is_error, error_message):
+def handle_get_response(all_experiments, hidden_columns):
 
     context = {"experiments": all_experiments,
                "has_comparison": False,
                "hidden_columns": hidden_columns,
                "recent_experiments": get_recent_experiments(),
                "title": "Compare",
-               "header": "Compare",
-               "is_error": is_error,
-               "error_message": error_message}
+               "header": "Compare"}
 
     template = loader.get_template(COMPARE_TEMPLATE)
 

@@ -33,7 +33,7 @@ def get_ale_number_selector(ale_id, reseq_query):
 def check_hidden_columns_and_filters(request, ale_experiment_id):
 
     if request.method == "GET":
-        hidden_columns = request.GET.get('hidden_columns', "")
+        hidden_columns = request.GET.get('hidden_columns', "5,6,7,8")
     else:
         hidden_columns = ""
         save_method = request.POST.get('save_method')

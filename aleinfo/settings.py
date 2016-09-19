@@ -92,6 +92,7 @@ FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
 LOGIN_TEMPLATE_PATH = os.path.join(BASE_DIR, 'login/templates')
 EXPORT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'export/templates')
 COMPARE_TEMPLATE_PATH = os.path.join(BASE_DIR, 'compare/templates')
+COMMON_TEMPLATE_PATH = os.path.join(BASE_DIR, 'common/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -100,7 +101,9 @@ TEMPLATES = [
                  FIXATION_TEMPLATE_PATH,
                  LOGIN_TEMPLATE_PATH,
                  COMPARE_TEMPLATE_PATH,
-                 EXPORT_TEMPLATE_PATH],
+                 EXPORT_TEMPLATE_PATH,
+                 COMMON_TEMPLATE_PATH
+                 ],
         'OPTIONS': {
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this

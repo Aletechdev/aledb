@@ -1,44 +1,8 @@
 {% extends 'dashboard_base.html' %}
 
-{% block title %}<title>{{ title }}</title>{% endblock %}
+{% block title %}<title>Compare</title>{% endblock %}
 {% block scripts_and_style %}
-    <link rel="stylesheet" href="/static/tablesorter/themes/blue/style.css" type="text/css"
-          media="print, projection, screen"/>
-    <script type="text/javascript">
-        $(function(){
-            $("#first li a").click(function(){
-                $("#first_button").text($(this).text());
-                $("#first_button").val($(this).text());
-                document.getElementById('first_exp').value = $(this).text()
-            });
-         });
-        $(function(){
-            $("#second li a").click(function(){
-                $("#second_button").text($(this).text());
-                $("#second_button").val($(this).text());
-                document.getElementById('second_exp').value = $(this).text()
-            });
-         });
-        $(document).ready(function () {
-
-            var first_exp = '{{ first_exp_name }}';
-            var second_exp = '{{ second_exp_name }}';
-
-            var first_button_children = document.getElementById('first').children;
-            var second_button_children = document.getElementById('second').children;
-
-            for(var i = 0; i < first_button_children.length; i++) {
-                if(first_button_children[i].innerText == first_exp) {
-                    first_button_children[i].children[0].click();
-                }
-            }
-            for(var j = 0; j < second_button_children.length; j++) {
-                if(second_button_children[j].innerText == second_exp) {
-                    second_button_children[j].children[0].click();
-                }
-            }
-        })
-    </script>
+    <script type="text/javascript">{% include 'experiment_selector.js' %}</script>
     <style>
         .huge {
             font-size: 28px;
@@ -62,55 +26,10 @@
 {% endblock %}
 {% block header %}{{ header }}{% endblock %}
 {% block content %}
-
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="btn-group">
-                <button type="button" class="btn btn-default" id="first_button">First Experiment</button>
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="caret"></span>
-                    <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu" id="first">
-                    {% for exp in experiments %}
-                        <li><a href="#/">{{ exp.name }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="btn-group">
-                <button type="button" class="btn btn-default" id="second_button">Second Experiment</button>
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="caret"></span>
-                    <span class="sr-only">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu" id="second">
-                    {% for exp in experiments %}
-                        <li><a href="#/">{{ exp.name }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-            <div class="btn-group">
-                <form action="/compare/" method="get">
-                    <input type="submit" class="btn btn-default" id="compare" name="compare" value="Compare">
-                    <input type="hidden" name="first_exp" id="first_exp" value="">
-                    <input type="hidden" name="second_exp" id="second_exp" value="">
-                    <input type="hidden" name="clicked_compare_button" value="True">
-                </form>
-            </div>
-        </div>
-    </div>
-    {% if is_error %}
-        <br>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="alert alert-danger" role="alert">{{ error_message }}</div>
-            </div>
-        </div>
-    {% endif %}
     {% if has_comparison %}
         <br><br>
         <div class="row">
-            <a href="/compare/metadata?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+            <a href="/compare/metadata?ale_experiment_id={{ ale_experiment_id}}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-primary">
                         <div class="panel-heading app">
@@ -124,7 +43,7 @@
                     </div>
                 </div>
             </a>
-            <a href="/compare/mutations?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+            <a href="/compare/mutations?ale_experiment_id={{ ale_experiment_id}}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-green">
                         <div class="panel-heading app">
@@ -138,7 +57,7 @@
                     </div>
                 </div>
             </a>
-            <a href="/compare/enrichment?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+            <a href="/compare/enrichment?ale_experiment_id={{ ale_experiment_id}}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-yellow">
                         <div class="panel-heading app">
@@ -152,7 +71,7 @@
                     </div>
                 </div>
             </a>
-            <a href="/compare/fixation?first_exp={{ first_exp_name }}&second_exp={{ second_exp_name }}">
+            <a href="/compare/fixation?ale_experiment_id={{ ale_experiment_id}}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-red">
                         <div class="panel-heading app">
@@ -317,7 +236,7 @@
     </div>
     <div class="row">
         <div class="col-lg-12">
-            <table id="runs" class="tablesorter">
+            <table id="runs" class="table">
                 <thead>
                     <tr>
                         <th>ALE, Flask, Isolate</th>
@@ -398,6 +317,45 @@
                 </table>
             </div>
         </div>
-
+    {% else %}
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default" id="selector_button">Select Experiment</button>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu" id="experiment_selector">
+                        <li><a href="#/">All</a></li>
+                        {% for exp in experiments %}
+                            <li><a href="#/">{{ exp.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success" onclick="add_experiment_to_download_list()">
+                        <i class="fa fa-plus fa-fw" aria-hidden="true"></i> Add Experiment
+                    </button>
+                </div>
+            </div>
+        </div>
+        <br><br>
+        <div class="row">
+            <div class="col-lg-4">
+                <ul class="list-group" id="selected_experiments"></ul>
+            </div>
+        </div>
+        <br><br>
+        <div class="row">
+            <div class="col-lg-6">
+                <form action="/compare" method="get">
+                    <div class="input-group">
+                        <input type="submit" class="btn btn-default" id="download" name="download" value="Compare">
+                        <input type="hidden" id="download_experiments" name="download_experiments" value="">
+                    </div>
+                </form>
+            </div>
+        </div>
     {% endif %}
 {% endblock %}

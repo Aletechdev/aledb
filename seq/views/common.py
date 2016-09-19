@@ -49,7 +49,9 @@ def get_ales(experiment_ids, exclude_starting_strain=False):
 
         experiment_queryset = experiment_queryset.exclude(ale_id=ale.common.STARTING_STRAIN_ALE_ID)
 
-    return experiment_queryset
+    experiment_queryset_list = [exp.ale_id for exp in experiment_queryset]
+
+    return experiment_queryset_list
 
 
 def is_ref_strain_filtered(request):
