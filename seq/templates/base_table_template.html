@@ -75,7 +75,7 @@
             </tbody>
         </table>
         <script type="text/javascript">
-            var sorted_column = {% block sorted_column %}{% endblock %};
+            var sorted_column = {{ sorted_column }};
             var table_data = {{ table_body }};
             {% include 'table_template.js' %}
         </script>

@@ -7,7 +7,7 @@ from collections import OrderedDict
 from seq.views import mutation_table_builder
 from filter import util
 from seq.util import get_all_observed_mutations
-from common.constants import REQUEST_ALE_EXPERIMENT_ID
+from common.constants import REQUEST_ALE_EXPERIMENT_ID, POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from common.db_util import get_ordered_reseq_dict, get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
 
@@ -51,7 +51,7 @@ def common_mutations(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
-    template = loader.get_template("mutation_table_template.html")
+    template = loader.get_template("base_table_template.html")
 
     reseq_list = sorted(ordered_reseq_dict.values(), key=lambda x: x.ale_id)
 
@@ -67,7 +67,8 @@ def common_mutations(request):
                "template_header": "Common Mutations",
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(int(ale_experiment_id))}
+               "recent_experiments": get_recent_experiments(int(ale_experiment_id)),
+               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE}
 
     return HttpResponse(template.render(context))
 
