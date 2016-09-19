@@ -9,9 +9,7 @@ from seq.views import mutation_table_builder
 from fixation.models import FixatedMutation
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
-from ale.models import AleExperiment
-from itertools import chain
-from compare.views.common import get_ordered_reseq_dict_and_queryset
+from compare.views.common import get_ordered_reseq_dict_and_queryset, get_ales_from_ale_experiment_list
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
@@ -24,25 +22,15 @@ REQUEST_ASCENDING_FREQ_FILTER = 'asndflt'
 # TODO: Shares some same functions as fixation.views.py and should be refactored/consolidated
 @login_required
 def comparison_fixation(request):
-    first_exp_name = request.GET.get('first_exp', None)
 
-    second_exp_name = request.GET.get('second_exp', None)
+    ale_no = seq.views.common.get_ale_number(request)
 
-    first_exp = AleExperiment.objects.get(name=first_exp_name)
+    ale_experiment_string_list = request.GET.get('ale_experiment_id', None).replace(" ", "").replace('[', '').replace(
+        ']', '').split(',')
 
-    second_exp = AleExperiment.objects.get(name=second_exp_name)
+    ale_experiment_list = [int(exp_id) for exp_id in ale_experiment_string_list]
 
-    ale_experiment_list = [first_exp.ale_id, second_exp.ale_id]
-
-    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list)
-
-    first_ale_queryset = AleExperiment.objects.get(ale_id=first_exp.ale_id).aleid_set.only("ale_id")
-
-    second_ale_queryset = AleExperiment.objects.get(ale_id=second_exp.ale_id).aleid_set.only("ale_id")
-
-    ale_queryset = list(chain(first_ale_queryset, second_ale_queryset))
-
-    ale_number = seq.views.common.get_ale_number(request)
+    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list, ale_no)
 
     is_ascending_freq_filter = _is_ascending_freq_filter(request)
 
@@ -61,18 +49,13 @@ def comparison_fixation(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, None)
 
-    name = "%s and %s" % (first_exp_name, second_exp_name)
-
-    title = "Fixating Mutation Comparison of %s" % name
-
     template = loader.get_template("shared_table_template.html")
 
-    context = {"ales": ale_queryset,
-               "ale_experiment_name": name,
-               "ale_no": ale_number,
-               "experiment_id": "%s,%s" % (first_exp.ale_id, second_exp.ale_id),
+    context = {"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
+               "ale_no": ale_no,
+               "experiment_id": ale_experiment_list,
                "table_body": mark_safe(table_body),
-               "title": title,
+               "title": "Fixating Mutations",
                "table_header": mark_safe(table_header),
                "is_ascending_freq_filter": is_ascending_freq_filter,
                "template_header": "Fixating Mutations",

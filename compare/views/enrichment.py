@@ -7,9 +7,7 @@ import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
 from enrichment.models import EnrichmentMutation
 from common.util import check_hidden_columns_and_filters
-from ale.models import AleExperiment
-from compare.views.common import get_ordered_reseq_dict_and_queryset
-from itertools import chain
+from compare.views.common import get_ordered_reseq_dict_and_queryset, get_ales_from_ale_experiment_list
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
@@ -19,25 +17,14 @@ __author__ = 'Patrick Phaneuf, Denny Gosting'
 @login_required
 def compared_enrichment_mutations(request):
 
-    first_exp_name = request.GET.get('first_exp', None)
+    ale_no = seq.views.common.get_ale_number(request)
 
-    second_exp_name = request.GET.get('second_exp', None)
+    ale_experiment_string_list = request.GET.get('ale_experiment_id', None).replace(" ", "").replace('[', '').replace(
+        ']', '').split(',')
 
-    first_exp = AleExperiment.objects.get(name=first_exp_name)
+    ale_experiment_list = [int(exp_id) for exp_id in ale_experiment_string_list]
 
-    second_exp = AleExperiment.objects.get(name=second_exp_name)
-
-    ale_experiment_list = [first_exp.ale_id, second_exp.ale_id]
-
-    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list)
-
-    first_ale_queryset = AleExperiment.objects.get(ale_id=first_exp.ale_id).aleid_set.only("ale_id")
-
-    second_ale_queryset = AleExperiment.objects.get(ale_id=second_exp.ale_id).aleid_set.only("ale_id")
-
-    ale_queryset = list(chain(first_ale_queryset, second_ale_queryset))
-
-    ale_number = seq.views.common.get_ale_number(request)
+    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list, ale_no)
 
     table_header = mutation_table_builder.get_table_header(reseq_dict=ordered_reseq_dict,
                                                            table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
@@ -46,17 +33,12 @@ def compared_enrichment_mutations(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, None)
 
-    name = "%s and %s" % (first_exp_name, second_exp_name)
-
-    title = "Enrichment Mutation Comparison of %s" % name
-
     template = loader.get_template('shared_table_template.html')
-    context = {"ales": ale_queryset,
-               "ale_experiment_name": name,
-               "ale_no": ale_number,
-               "experiment_id": "%s,%s" % (first_exp.ale_id, second_exp.ale_id),
+    context = {"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
+               "ale_no": ale_no,
                "table_body": mark_safe(table_body),
-               "title": title,
+               "experiment_id": ale_experiment_list,
+               "title": "Enrichment Mutation",
                "table_header": mark_safe(table_header),
                "template_header": "Enrichment Mutations",
                "hidden_columns": hidden_columns,

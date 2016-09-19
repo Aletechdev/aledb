@@ -28,36 +28,21 @@ else:
 @login_required
 def comparison_metadata(request):
 
-    all_experiments = get_all_ale_experiments()
-
-    first_exp_name = request.GET.get('first_exp', None)
-
-    second_exp_name = request.GET.get('second_exp', None)
-
-    first_exp = AleExperiment.objects.get(name=first_exp_name)
-
-    second_exp = AleExperiment.objects.get(name=second_exp_name)
-
-    ale_experiment_list = [first_exp.ale_id, second_exp.ale_id]
+    ale_experiment_list = request.GET.get('experiment_id', None).replace('[', '').replace(']', '').split(',')
 
     ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list)
 
     reseq_info_list = get_reseq_info_list(ordered_reseq_dict.values())
 
-    name = "%s and %s" % (first_exp_name, second_exp_name)
-
-    title = "Meta Data Comparison of %s" % name
+    header = ", ".join([AleExperiment.objects.get(ale_id=ale_exp_id).name for ale_exp_id in ale_experiment_list])
 
     template = loader.get_template(META_DATA_TEMPLATE)
 
-    context = {"experiments": all_experiments,
-               "experiment_id": "%s,%s" % (first_exp.ale_id, second_exp.ale_id),
-               "title": title,
-               "header": title,
+    context = {"experiments": get_all_ale_experiments(),
+               "ale_experiment_name": header,
                "recent_experiments": get_recent_experiments(),
                "reseq_info_list": reseq_info_list,
                "reseq_report_url": reseq_report_url,
-               "ale_experiment_name": name,
                }
 
     return HttpResponse(template.render(context))
