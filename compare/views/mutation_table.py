@@ -16,9 +16,11 @@ from common.util import check_hidden_columns_and_filters
 
 from compare.views.common import get_ordered_reseq_dict_and_queryset, get_ales_from_ale_experiment_list
 
+from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
+
 # Create your views here.
 
-MUTATION_TABLE_TEMPLATE = 'mutation_table_template.html'
+MUTATION_TABLE_TEMPLATE = 'base_table_template.html'
 
 
 @login_required
@@ -51,7 +53,8 @@ def compared_mutations(request):
                "table_header": mark_safe(table_header),
                "table_body": mark_safe(table_body),
                "hidden_columns": hidden_columns,
-               "recent_experiments": get_recent_experiments()}
+               "recent_experiments": get_recent_experiments(),
+               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE}
 
     template = loader.get_template(MUTATION_TABLE_TEMPLATE)
 

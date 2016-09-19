@@ -10,6 +10,7 @@ from fixation.models import FixatedMutation
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
 from compare.views.common import get_ordered_reseq_dict_and_queryset, get_ales_from_ale_experiment_list
+from common.constants import POSITION_COLUMN_IN_SHARED_MUTATION_TALBE
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
@@ -49,7 +50,7 @@ def comparison_fixation(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, None)
 
-    template = loader.get_template("shared_table_template.html")
+    template = loader.get_template("base_table_template.html")
 
     context = {"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
                "ale_no": ale_no,
@@ -61,7 +62,8 @@ def comparison_fixation(request):
                "template_header": "Fixating Mutations",
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(None)}
+               "recent_experiments": get_recent_experiments(None),
+               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TALBE}
 
     return HttpResponse(template.render(context))
 

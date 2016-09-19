@@ -8,6 +8,7 @@ from seq.views import mutation_table_builder  # TODO: The mutation table build s
 from enrichment.models import EnrichmentMutation
 from common.util import check_hidden_columns_and_filters
 from compare.views.common import get_ordered_reseq_dict_and_queryset, get_ales_from_ale_experiment_list
+from common.constants import POSITION_COLUMN_IN_SHARED_MUTATION_TALBE
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
@@ -33,7 +34,7 @@ def compared_enrichment_mutations(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, None)
 
-    template = loader.get_template('shared_table_template.html')
+    template = loader.get_template('base_table_template.html')
     context = {"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
                "ale_no": ale_no,
                "table_body": mark_safe(table_body),
@@ -43,7 +44,8 @@ def compared_enrichment_mutations(request):
                "template_header": "Enrichment Mutations",
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments()
+               "recent_experiments": get_recent_experiments(),
+               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TALBE
                }
 
     return HttpResponse(template.render(context))
