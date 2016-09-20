@@ -50,35 +50,35 @@ def compare(request):
         ale_experiment_list = [AleExperiment.objects.get(name=ale_exp_name).ale_id for ale_exp_name in
                                experiment_name_list]
 
-    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list)
+    ordered_reseq_dict, observed_mutation_queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list)
 
     needle_plot_data = []
 
-    for observed_mutation in queryset:
+    for observed_mutation in observed_mutation_queryset:
         needle_plot_data.append(
             {'coord': str(observed_mutation.mutation.position), 'category': observed_mutation.mutation.mutation_type,
              'value': 1})
 
     experiments_info_list = get_reseq_experiment_info_list(ordered_reseq_dict.values())
 
-    mutation_query_set = get_mutation_queryset_from_obs_mut_queryset(queryset)
+    mutation_query_set = get_mutation_queryset_from_obs_mut_queryset(observed_mutation_queryset)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
-    observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(queryset)
+    observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutation_queryset)
 
     protein_change_type_count_dict = _get_protein_change_type_count_dict(mutation_query_set)
-    observed_protein_change_type_count_dict = _get_observed_protein_change_type_count_dict(queryset)
+    observed_protein_change_type_count_dict = _get_observed_protein_change_type_count_dict(observed_mutation_queryset)
 
     ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(ordered_reseq_dict.values())
 
     header = "Comparison of %s" % experiment_names.replace(",", ", ")
 
-    gene_query = queryset.values('mutation__gene', 'mutation__mutation_type').annotate(
-        the_count=Count('mutation__gene')).order_by('-the_count')
-    sequence_change_query = queryset.values('mutation__gene', 'mutation__protein_change').annotate(
+    gene_bar_chart_dict = common.get_gene_bar_chart_dict(observed_mutation_queryset, experiment_names)
+
+    sequence_change_query = observed_mutation_queryset.values('mutation__gene', 'mutation__protein_change').annotate(
         the_count=Count('mutation__gene')).order_by('-the_count')
 
-    genes = common.set_gene_bar_chart_colors(gene_query)
+    genes = common.set_gene_bar_chart_colors(gene_bar_chart_dict)
 
     sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_change_query)
 

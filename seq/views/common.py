@@ -4,6 +4,14 @@ import ale.models
 import seq.models
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
+from django.core.cache import cache
+
+from genes.util import get_gene_list
+
+from operator import itemgetter
+
+from collections import Counter
+
 
 __author__ = 'Patrick Phaneuf'
 
@@ -189,3 +197,46 @@ def _is_query_empty(query):
         is_query_empty = True
 
     return is_query_empty
+
+
+def get_gene_bar_chart_dict(observed_mutation_queryset, page):
+
+    cache_string = page + 'bar_chart_gene_dict'
+
+    cached_bar_chart_gene_dict = cache.get(cache_string)
+
+    if cached_bar_chart_gene_dict is None:
+
+        gene_list = [[get_gene_list(gene['mutation__gene']), gene['mutation__mutation_type']] for
+                     gene in observed_mutation_queryset.values('mutation__gene', 'mutation__mutation_type')]
+
+        mutation_type_gene_dict = {}
+
+        for pair in gene_list:
+            genes = set(pair[0])
+            try:
+                mutation_type_gene_dict[pair[1]] += [genes]
+            except KeyError:
+                mutation_type_gene_dict[pair[1]] = [genes]
+
+        final_list = []
+
+        for key, value in mutation_type_gene_dict.items():
+
+            flattened_list = sorted([item for sublist in value for item in sublist], reverse=True)
+
+            counted_list = Counter(flattened_list)
+
+            for k, v in counted_list.items():
+
+                new_dict = {'mutation__gene': k, 'the_count': v, 'mutation__mutation_type': key}
+
+                final_list.append(new_dict)
+
+        final_sorted_list = sorted(final_list, key=itemgetter('the_count'), reverse=True)
+
+        cache.set(cache_string, final_sorted_list, None)
+
+        return final_sorted_list
+
+    return cached_bar_chart_gene_dict
