@@ -23,13 +23,9 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/close-icon.gif" width="12" height="11"></a>"""
 
-HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
-# Difference with mutation_table_builder is the additional column.
-HTML_SHARED_MUTATION_TABLE_HEADER = """<tr><td></td><td></td><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
+HTML_MUTATION_TABLE_HEADER = ["", "", "Position", "Mutation Type", "Sequence Change", "Gene", "Function", "Product", "GO Process", "GO Component", "Protein change"]
 
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
-
-HTML_HEADER = """<td>%s</td>"""
 
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 
@@ -88,11 +84,13 @@ else:
 def get_table_header(reseq_dict, table_type=None):
 
     if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.FIXATING_MUTATIONS:
-        table_header = HTML_SHARED_MUTATION_TABLE_HEADER
+        base_table_header = [""] + HTML_MUTATION_TABLE_HEADER
     else:
-        table_header = HTML_MUTATION_TABLE_HEADER
+        base_table_header = HTML_MUTATION_TABLE_HEADER
 
     experiment_urls = get_experiment_urls(reseq_dict)
+
+    table_header_list = []
 
     for seq_experiment_id in reseq_dict:
 
@@ -100,13 +98,9 @@ def get_table_header(reseq_dict, table_type=None):
 
         sample_name = reseq.aleexp_ale_flask_isolate_str
 
-        mutation_identifier = HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id], sample_name)
+        table_header_list += [HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id], sample_name)]
 
-        table_header += HTML_HEADER % mutation_identifier
-
-    table_header += "</tr>"
-
-    return table_header
+    return base_table_header + table_header_list
 
 
 # TODO: Refactor. The observed mutations argument may
