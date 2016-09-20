@@ -154,7 +154,8 @@ INSTALLED_APPS = (
     'enrichment',
     'login',
     'compare',
-    'export'
+    'export',
+    'common'
 )
 
 # A sample logging configuration. The only tangible logging

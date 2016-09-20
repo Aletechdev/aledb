@@ -97,7 +97,10 @@ function column_sort_from_right() {
         sorting_array.push([i, 'desc'])
     }
 
+    console.log(sorting_array);
+
     var table = $("#data").DataTable();
+    console.log(table);
     table.order(sorting_array).draw();
 }
 
@@ -120,37 +123,6 @@ function fnShowHide( iCol ) {
 var deleteRow = function () {
     var row = $(this).closest("tr").get(0);
     $('#data').DataTable().row(row).remove().draw();
-};
-
-var filterSample = function (filter_type) {
-    var url = location.href.split("&remove=")[0].split("&show=")[0];
-    checked_samples = [];
-    $("tr td").children(".cb").each(function () {
-        if (this.checked) {
-            checked_samples.push(this.name);
-        }
-    });
-    var removed_sample_ids, kept_sample_ids;
-    location.href.split("&").forEach(function (s) {
-        if (s.indexOf("remove") >= 0) {
-            removed_sample_ids = s.split("=")[1];
-        }
-        else if (s.indexOf("show") >= 0) {
-            kept_sample_ids = s.split("=")[1];
-        }
-    });
-    if (filter_type == "remove") {
-        query_string = typeof kept_sample_ids != "undefined" ? "&show=" + kept_sample_ids : "";
-        query_string += typeof removed_sample_ids != "undefined" ? "&remove=" + removed_sample_ids.replace("}", "") : "&remove={";
-    }
-    else if (filter_type == "show") {
-        query_string = "&show={";
-    }
-    checked_samples.forEach(function (id) {
-        query_string += id + ",";
-    });
-    query_string += "}";
-    window.location.replace(url + query_string);
 };
 
 function filter_dups() {
@@ -192,21 +164,3 @@ function expand_collapse_gene_entry(sign) {
         sign.className = sign.className.replace('minus', 'plus');
     }
 }
-
-
-function add_css() {
-
-    $(document.getElementsByClassName('true')).each(function (i, val) {
-
-        $(val).parent().css('background-color', 'rgba(0, 255, 0, 0.1)')
-    });
-
-    $(document.getElementsByClassName('false')).each(function (i, val) {
-        $(val).parent().css('background-color', 'rgba(255, 0, 0, 0.1)')
-    });
-
-    $(document.getElementsByClassName('empty')).each(function (i, val) {
-        $(val).parent().css('background-color', 'rgba(255, 0, 0, 0.1)')
-    });
-}
-
