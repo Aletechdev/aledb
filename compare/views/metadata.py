@@ -28,7 +28,7 @@ else:
 @login_required
 def comparison_metadata(request):
 
-    ale_experiment_list = request.GET.get('experiment_id', None).replace('[', '').replace(']', '').split(',')
+    ale_experiment_list = request.GET.get('ale_experiment_id', None).replace('[', '').replace(']', '').split(',')
 
     ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list)
 
