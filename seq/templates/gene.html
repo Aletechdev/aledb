@@ -34,14 +34,6 @@
     </style>
     <script type="text/javascript" src="/static/bio-pv.min.js"></script>
     <script type="text/javascript">
-        var sorted_column = 2;
-        var table_data = {{ table_body }};
-        {% include 'table_template.js' %}
-        $(document).ready(function () {
-            $('#show_dups').click()
-        })
-    </script>
-    <script type="text/javascript">
          $(function(){
             $("#first li a").click(function(){
                 $("#first_button").text($(this).text());
@@ -164,24 +156,38 @@
 <br>
 <h4>ALE Experiments</h4>
 {% if table_body %}
-<form action="" method="get">
-    <input type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
-    <table id="data" class="table">
-        <div class="ui">
-            <label style="float:right"><input id="show_dups" onclick="filter_dups(this)"
-                                                             type="checkbox" name="checkbox" value="value"
-                                                             style="margin-left: 10px" checked> Show Duplications</label>
-            <button type="button" class="ui" onclick="column_sort_from_right()">Column Sort from Right</button>
-            <input type="button" value="Zoom to Selected" class="ui" onclick="zoom_to_selected()">
-            <input type="button" value="Select All" class="ui" onclick="select_all()">
-        </div>
-        <br><br>
-        <thead>
-        {{table_header}}
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
-</form>
+    <form action="" method="get">
+        <input type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
+        <table id="data" class="table">
+            <div class="ui">
+                <label style="float:right"><input id="show_dups" onclick="filter_dups(this)"
+                                                                 type="checkbox" name="checkbox" value="value"
+                                                                 style="margin-left: 10px" checked> Show Duplications</label>
+                <button type="button" class="ui" onclick="column_sort_from_right()">Column Sort from Right</button>
+                <input type="button" value="Zoom to Selected" class="ui" onclick="zoom_to_selected()">
+                <input type="button" value="Select All" class="ui" onclick="select_all()">
+            </div>
+            <br><br>
+            <thead>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </form>
+    <script type="text/javascript">
+        var sorted_column = 2;
+        var table_data = {{ table_body }};
+        var table_titles = {{ table_header | safe }};
+            var table_heads = [];
+        var number_of_columns = 0;
+        for(var x in table_titles) {
+            table_heads.push({title: table_titles[x]});
+            number_of_columns += 1;
+        }
+        {% include 'table_template.js' %}
+        $(document).ready(function () {
+            $('#show_dups').click()
+        })
+    </script>
 {% endif %}
 {% endblock %}
