@@ -78,6 +78,10 @@ $(document).ready(function () {
             }
         );
     });
+
+    $('#sidebarbutton').click(function () {
+        oTable.draw( 'page' );
+    })
 });
 
 function column_sort_from_right() {
