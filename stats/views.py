@@ -68,15 +68,15 @@ def stats(request):
 
     experiments_info_list = get_reseq_experiment_info_list(reseq_queryset)
 
-    observed_mutations_query_set = _get_observed_mutation_queryset(request, ale_experiment_id)
+    observed_mutations_queryset = _get_observed_mutation_queryset(request, ale_experiment_id)
 
-    mutation_query_set = get_mutation_queryset_from_obs_mut_queryset(observed_mutations_query_set)
+    mutation_query_set = get_mutation_queryset_from_obs_mut_queryset(observed_mutations_queryset)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
-    observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_query_set)
+    observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_queryset)
 
     protein_change_type_count_dict = _get_protein_change_type_count_dict(mutation_query_set)
-    observed_protein_change_type_count_dict = _get_observed_protein_change_type_count_dict(observed_mutations_query_set)
+    observed_protein_change_type_count_dict = _get_observed_protein_change_type_count_dict(observed_mutations_queryset)
 
     template = loader.get_template(STATS_TEMPLATE)
 
@@ -84,17 +84,17 @@ def stats(request):
 
     needle_plot_data = []
 
-    for observed_mutation in observed_mutations_query_set:
+    for observed_mutation in observed_mutations_queryset:
         needle_plot_data.append(
             {'coord': str(observed_mutation.mutation.position), 'category': observed_mutation.mutation.mutation_type,
              'value': 1})
 
-    gene_query = observed_mutations_query_set.values('mutation__gene', 'mutation__mutation_type').annotate(
-        the_count=Count('mutation__gene')).order_by('-the_count')
-    sequence_change_query = observed_mutations_query_set.values('mutation__gene', 'mutation__protein_change').annotate(
+    gene_bar_chart_dict = common.get_gene_bar_chart_dict(observed_mutations_queryset, ale_experiment_name)
+
+    sequence_change_query = observed_mutations_queryset.values('mutation__gene', 'mutation__protein_change').annotate(
         the_count=Count('mutation__gene')).order_by('-the_count')
 
-    genes = common.set_gene_bar_chart_colors(gene_query)
+    genes = common.set_gene_bar_chart_colors(gene_bar_chart_dict)
 
     sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_change_query)
 
