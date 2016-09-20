@@ -27,7 +27,6 @@
 {% block header %}{{ header }}{% endblock %}
 {% block content %}
     {% if has_comparison %}
-        <br><br>
         <div class="row">
             <a href="/compare/metadata?ale_experiment_id={{ ale_experiment_id}}">
                 <div class="col-lg-3 col-md-6">
@@ -87,100 +86,99 @@
             </a>
         </div>
         <div class="row">
-        <div class="col-sm-6 col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">ALE Flask and Isolate Counts</h3>
+            <div class="col-sm-6 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">ALE Flask and Isolate Counts</h3>
+                    </div>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>ALE Number</th>
+                            <th>Flask Count</th>
+                            <th>Isolate Count</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for ale_flask_isolate_count_tuple in ale_flask_isolate_count_list %}
+                        <tr>
+                            <td>{{ ale_flask_isolate_count_tuple.0 }}</td>
+                            <td>{{ ale_flask_isolate_count_tuple.1 }}</td>
+                            <td>{{ ale_flask_isolate_count_tuple.2 }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>ALE Number</th>
-                        <th>Flask Count</th>
-                        <th>Isolate Count</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for ale_flask_isolate_count_tuple in ale_flask_isolate_count_list %}
-                    <tr>
-                        <td>{{ ale_flask_isolate_count_tuple.0 }}</td>
-                        <td>{{ ale_flask_isolate_count_tuple.1 }}</td>
-                        <td>{{ ale_flask_isolate_count_tuple.2 }}</td>
-                    </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
             </div>
-        </div>
-        <div class="col-sm-6 col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">ALE Experiment Mutation Stats</h3>
+            <div class="col-sm-6 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">ALE Experiment Mutation Stats</h3>
+                    </div>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Mutation Type</th>
+                            <th>Unique</th>
+                            <th>Observed</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Single Base Substitutions</td>
+                            <td>{{ mutation_type_count_dict.SNP }}</td>
+                            <td>{{ observed_mutation_type_count_dict.SNP }}</td>
+                        </tr>
+                        <tr>
+                            <td>Multiple Base Substitutions</td>
+                            <td>{{ mutation_type_count_dict.SUB }}</td>
+                            <td>{{ observed_mutation_type_count_dict.SUB }}</td>
+                        </tr>
+                        <tr>
+                            <td>Deletions</td>
+                            <td>{{ mutation_type_count_dict.DEL }}</td>
+                            <td>{{ observed_mutation_type_count_dict.DEL }}</td>
+                        </tr>
+                        <tr>
+                            <td>Insertions</td>
+                            <td>{{ mutation_type_count_dict.INS }}</td>
+                            <td>{{ observed_mutation_type_count_dict.INS }}</td>
+                        </tr>
+                        <tr>
+                            <td>Mobile Element Insertions</td>
+                            <td>{{ mutation_type_count_dict.MOB }}</td>
+                            <td>{{ observed_mutation_type_count_dict.MOB }}</td>
+                        </tr>
+                        <tr>
+                            <td>Amplifications</td>
+                            <td>{{ mutation_type_count_dict.AMP }}</td>
+                            <td>{{ observed_mutation_type_count_dict.AMP }}</td>
+                        </tr>
+                        <tr>
+                            <td>Gene Conversions</td>
+                            <td>{{ mutation_type_count_dict.CON }}</td>
+                            <td>{{ observed_mutation_type_count_dict.CON }}</td>
+                        </tr>
+                        <tr>
+                            <td>Inversions</td>
+                            <td>{{ mutation_type_count_dict.INV }}</td>
+                            <td>{{ observed_mutation_type_count_dict.INV }}</td>
+                        </tr>
+                        <tr>
+                            <td>Duplications</td>
+                            <td>{{ mutation_type_count_dict.DUP }}</td>
+                            <td>{{ observed_mutation_type_count_dict.DUP }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Mutation Type</th>
-                        <th>Unique</th>
-                        <th>Observed</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>Single Base Substitutions</td>
-                        <td>{{ mutation_type_count_dict.SNP }}</td>
-                        <td>{{ observed_mutation_type_count_dict.SNP }}</td>
-                    </tr>
-                    <tr>
-                        <td>Multiple Base Substitutions</td>
-                        <td>{{ mutation_type_count_dict.SUB }}</td>
-                        <td>{{ observed_mutation_type_count_dict.SUB }}</td>
-                    </tr>
-                    <tr>
-                        <td>Deletions</td>
-                        <td>{{ mutation_type_count_dict.DEL }}</td>
-                        <td>{{ observed_mutation_type_count_dict.DEL }}</td>
-                    </tr>
-                    <tr>
-                        <td>Insertions</td>
-                        <td>{{ mutation_type_count_dict.INS }}</td>
-                        <td>{{ observed_mutation_type_count_dict.INS }}</td>
-                    </tr>
-                    <tr>
-                        <td>Mobile Element Insertions</td>
-                        <td>{{ mutation_type_count_dict.MOB }}</td>
-                        <td>{{ observed_mutation_type_count_dict.MOB }}</td>
-                    </tr>
-                    <tr>
-                        <td>Amplifications</td>
-                        <td>{{ mutation_type_count_dict.AMP }}</td>
-                        <td>{{ observed_mutation_type_count_dict.AMP }}</td>
-                    </tr>
-                    <tr>
-                        <td>Gene Conversions</td>
-                        <td>{{ mutation_type_count_dict.CON }}</td>
-                        <td>{{ observed_mutation_type_count_dict.CON }}</td>
-                    </tr>
-                    <tr>
-                        <td>Inversions</td>
-                        <td>{{ mutation_type_count_dict.INV }}</td>
-                        <td>{{ observed_mutation_type_count_dict.INV }}</td>
-                    </tr>
-                    <tr>
-                        <td>Duplications</td>
-                        <td>{{ mutation_type_count_dict.DUP }}</td>
-                        <td>{{ observed_mutation_type_count_dict.DUP }}</td>
-                    </tr>
-                    </tbody>
-                </table>
             </div>
-        </div>
         <div class="col-sm-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">ALE Experiment Functional Change Stats</h3>
                 </div>
-
                 <table class="table">
                     <thead>
                     <tr>
@@ -220,57 +218,58 @@
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Sample QA Thresholds</h3>
-                </div>
-                <div class="panel-body">
-                    <p><b>Unassigned Missing Coverage Evidence upper bound = </b>5</p>
-                    <p><b>Mean Coverage lower bound = </b>75</p>
-                    <p><b>Mapped Reads lower bound = </b>1,250,000</p>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Sample QA Thresholds</h3>
+                    </div>
+                    <div class="panel-body">
+                        <p><b>Unassigned Missing Coverage Evidence upper bound = </b>5</p>
+                        <p><b>Mean Coverage lower bound = </b>75</p>
+                        <p><b>Mapped Reads lower bound = </b>1,250,000</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="col-lg-12">
-            <table id="runs" class="table">
-                <thead>
-                    <tr>
-                        <th>ALE, Flask, Isolate</th>
-                        <th>Predicted Mutations</th>
-                        <th>Unassigned Missing Coverage Evidence</th>
-                        <th>Mean Coverage</th>
-                        <th>Total Reads</th>
-                        <th>Percent Mapped</th>
-                        <th>Mapped Reads</th>
-                        <th>Average Read Length</th>
+        <div class="row">
+            <div class="col-lg-12">
+                <table id="runs" class="table">
+                    <thead>
+                        <tr>
+                            <th>ALE, Flask, Isolate</th>
+                            <th>Predicted Mutations</th>
+                            <th>Unassigned Missing Coverage Evidence</th>
+                            <th>Mean Coverage</th>
+                            <th>Total Reads</th>
+                            <th>Percent Mapped</th>
+                            <th>Mapped Reads</th>
+                            <th>Average Read Length</th>
 
-                    </tr>
-                </thead>
-                <tbody>
-                {% for experiment_info_tuple in experiments_info_list %}
-                    <tr class="experiment_stats">
-                        <td class="sample_name"><a href="
-                                {{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
-                        </td>
-                        <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
-                        <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
-                        <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
-                        <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
-                        <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
-                        <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
-                        <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
-                    </tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for experiment_info_tuple in experiments_info_list %}
+                        <tr class="experiment_stats">
+                            <td class="sample_name"><a href="
+                                    {{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
+                            </td>
+                            <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
+                            <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
+                            <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
+                            <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
+                            <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
+                            <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
+                            <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
+                        </tr>
 
-                {% endfor %}
-                </tbody>
-                <script type="text/javascript">{% include 'runs.js' %}</script>
-            </table>
+                    {% endfor %}
+                    </tbody>
+                    <script type="text/javascript">{% include 'runs.js' %}</script>
+                </table>
+            </div>
         </div>
-    </div>
+        <hr>
         <div class="row">
             <div class="col-lg-12">
                 {% include 'muts_needle_plot.html' %}
@@ -283,7 +282,6 @@
                         <br>
                 <div class="chart"></div>
             </div>
-
         </div>
         <div class="row">
             <div class="col-lg-12">
