@@ -69,7 +69,6 @@
             </div>
             <br><br>
             <thead>
-            {{ table_header }}
             </thead>
             <tbody>
             </tbody>
@@ -77,6 +76,13 @@
         <script type="text/javascript">
             var sorted_column = {{ sorted_column }};
             var table_data = {{ table_body }};
+            var table_titles = {{ table_header | safe }};
+            var table_heads = [];
+            var number_of_columns = 0;
+            for(var x in table_titles) {
+                table_heads.push({title: table_titles[x]});
+                number_of_columns += 1;
+            }
             {% include 'table_template.js' %}
         </script>
     </form>

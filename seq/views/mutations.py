@@ -42,13 +42,13 @@ def mutation_table(request):
                "experiment_id": ale_experiment_id,
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "title": "Mutation Table",
-               "table_header": mark_safe(table_header),
+               "table_header": table_header,
                "template_header": "Mutations",
                "wt_filter": is_ref_strain_filtered,
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(ale_experiment_id),
-               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
+               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
                }
 
     return HttpResponse(template.render(context))
