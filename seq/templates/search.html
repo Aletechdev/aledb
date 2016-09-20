@@ -65,11 +65,11 @@
 <p>
 <form action="/search/" method="get">
     <input type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
-    <input type="text" id="q"    value="{{ last_search.q }}"    name="q" placeholder="mutation gene annotation" autofocus>
-    <input type="submit"         value="Search"><input type="button" value="Clear" onclick="clear_search()"><br>
+    <input type="text" id="q"    value="{{ last_search.q }}"    name="q" placeholder="mutation gene annotation" autofocus><br>
     <input type="text" id="min"  value="{{ last_search.min }}"  name="min" placeholder="start position">
     <input type="text" id="max"  value="{{ last_search.max }}"  name="max" placeholder="end position"><br>
-    <input type="text" id="mut"  value="{{ last_search.mut }}"  name="mut" placeholder="mutation type"><br>
+    <input type="text" id="mut"  value="{{ last_search.mut }}"  name="mut" placeholder="mutation type">
+    <input type="submit" class="btn btn-default" value="Search"><input class="btn btn-default" type="button" value="Clear" onclick="clear_search()"><br>
     <input type="text" id="seq"  value="{{ last_search.seq }}"  name="seq" placeholder="sequence change"><br>
     <input type="text" id="prot" value="{{ last_search.prot }}" name="prot" placeholder="protein change"><br>
     <input type="text" id="ale"  value="{{ last_search.ale }}"  name="ale" placeholder="ALE Experiment">
@@ -83,7 +83,7 @@
                 <label style="float:right"><input id="show_dups" onclick="filter_dups(this)"
                                                                  type="checkbox" name="checkbox" value="value"
                                                                  style="margin-left: 10px" checked> Show Duplications</label>
-                <button type="button" class="ui" onclick="column_sort_from_right()">Column Sort from Right</button>
+                <button type="button" class="btn btn-default" onclick="column_sort_from_right()">Column Sort from Right</button>
             </div>
             <br><br>
             <thead>
