@@ -12,6 +12,8 @@ import seq.models
 
 import seq.views.common
 
+from ale.models import AleExperiment
+
 from django.db.models import Q
 
 import operator
@@ -89,48 +91,29 @@ def _is_query_empty(query):
 # TODO: Refactor. seq.views.common.py probably also need to be refactored along with this.
 def _get_seq_exp(request):
 
-    isolates_to_remove_id_list = []
-    isolates_to_remove_string = request.GET.get(mutation_table_builder.EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG)
-    if isolates_to_remove_string is not None:
-        isolates_to_remove_ids = str(isolates_to_remove_string).replace("{", "").replace("}", "")
-        isolates_to_remove_id_list = [int(i) for i in isolates_to_remove_ids.split(",") if i != ""]
-
-    isolates_to_show_id_list = []
-    isolates_to_show_string = request.GET.get(mutation_table_builder.EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG)
-    if isolates_to_show_string is not None:
-        isolates_to_show_ids = str(isolates_to_show_string).replace("{", "").replace("}", "")
-        isolates_to_show_id_list = [int(i) for i in isolates_to_show_ids.split(",") if i != ""]
-
     include_argument_list, exclude_argument_list = _get_search_query_arguments(request)
 
     ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
 
     mutations_with_gene_queryset = _get_django_search_query(include_argument_list, exclude_argument_list)
 
-    observed_mutations_with_gene = seq.models.ObservedMutation.objects.filter(mutation__in=mutations_with_gene_queryset)
+    observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(mutation__in=mutations_with_gene_queryset)
+
+    if ale_experiments_to_exclude:
+        observed_mutation_queryset = observed_mutation_queryset.exclude(
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_exclude)
+
+    if ale_experiments_to_include:
+        observed_mutation_queryset = observed_mutation_queryset.filter(
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_include)
 
     reseq_dict = {}
 
-    for observed_mutation in observed_mutations_with_gene:
-
-        # TODO: Should find a way to put checking experiment name in the filter query instead of checking the list after a query
-        observed_mutation_name = observed_mutation.sequencing_experiment.tech_rep.isolate.flask.ale_id.ale_experiment.name
-
-        if ale_experiments_to_include:
-            if observed_mutation_name not in ale_experiments_to_include:
-                continue
-
-        if ale_experiments_to_exclude:
-            if observed_mutation_name in ale_experiments_to_exclude:
-                continue
-
-        if observed_mutation.sequencing_experiment.id not in isolates_to_remove_id_list\
-            or observed_mutation.sequencing_experiment.id in isolates_to_remove_id_list\
-                and observed_mutation.sequencing_experiment.id in isolates_to_show_id_list:
+    for observed_mutation in observed_mutation_queryset:
 
             reseq_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
 
-    return reseq_dict, observed_mutations_with_gene
+    return reseq_dict, observed_mutation_queryset
 
 
 def _get_last_search(request):
@@ -254,9 +237,9 @@ def _get_ale_experiment_arguments(request):
         ale_experiment_list = request.GET['ale'].replace(" ", "").split(',')
         for ale_experiment in ale_experiment_list:
             if str(ale_experiment).startswith("-"):
-                ale_experiments_to_exclude.append(str(ale_experiment)[1:])
+                ale_experiments_to_exclude.append(AleExperiment.objects.get(name__contains=str(ale_experiment)[1:]).ale_id)
             else:
-                ale_experiments_to_include.append(str(ale_experiment))
+                ale_experiments_to_include.append(AleExperiment.objects.get(name__contains=str(ale_experiment)).ale_id)
     return ale_experiments_to_include, ale_experiments_to_exclude
 
 
