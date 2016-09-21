@@ -29,6 +29,10 @@
         .dropdown-menu li > a:hover, .dropdown-menu li > a:focus, .dropdown-submenu:hover > a {
             background-color: #4078c0;
         }
+        .input-group-addon {
+            min-width:150px;
+            text-align:left;
+        }
     </style>
     {% if table_body %}
         <script type="text/javascript">
@@ -62,19 +66,41 @@
 {% if error %}
     <p style="color: red;">Please submit a search term.</p>
 {% endif %}
-<p>
-<form action="/search/" method="get">
-    <input type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
-    <input type="text" id="q"    value="{{ last_search.q }}"    name="q" placeholder="mutation gene annotation" autofocus><br>
-    <input type="text" id="min"  value="{{ last_search.min }}"  name="min" placeholder="start position">
-    <input type="text" id="max"  value="{{ last_search.max }}"  name="max" placeholder="end position"><br>
-    <input type="text" id="mut"  value="{{ last_search.mut }}"  name="mut" placeholder="mutation type">
-    <input type="submit" class="btn btn-default" value="Search"><input class="btn btn-default" type="button" value="Clear" onclick="clear_search()"><br>
-    <input type="text" id="seq"  value="{{ last_search.seq }}"  name="seq" placeholder="sequence change"><br>
-    <input type="text" id="prot" value="{{ last_search.prot }}" name="prot" placeholder="protein change"><br>
-    <input type="text" id="ale"  value="{{ last_search.ale }}"  name="ale" placeholder="ALE Experiment">
-</form>
-</p>
+
+<div class="row">
+    <form action="/search/" method="get" class="form-group">
+        <input class="form-control" type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
+        <div class="input-group col-xs-6">
+            <span class="input-group-addon">Gene:</span>
+            <input type="text" value="{{ last_search.q }}" name="q" class="form-control" id="q" autofocus>
+        </div>
+        <div class="input-group col-xs-6">
+            <span class="input-group-addon">Start Position:</span>
+            <input type="number" value="{{ last_search.min }}" name="min" class="form-control" id="min">
+
+            <span class="input-group-addon">End Position:</span>
+            <input type="number" value="{{ last_search.max }}" name="max" class="form-control" id="max">
+        </div>
+        <div class="input-group col-xs-6">
+            <span class="input-group-addon">Mutation Type:</span>
+            <input type="text" value="{{ last_search.mut }}" name="mut" class="form-control" id="mut">
+        </div>
+        <div class="input-group col-xs-6">
+            <span class="input-group-addon">Sequence Change:</span>
+            <input type="text" value="{{ last_search.seq }}" name="seq" class="form-control" id="seq">
+        </div>
+        <div class="input-group col-xs-6">
+            <span class="input-group-addon">Protein Change:</span>
+            <input type="text" value="{{ last_search.prot }}" name="prot" class="form-control" id="prot">
+        </div>
+         <div class="input-group col-xs-6">
+            <span class="input-group-addon">ALE Experiments:</span>
+            <input type="text" value="{{ last_search.ale }}" name="ale" class="form-control" id="ale">
+        </div>
+        <input type="submit" class="btn btn-primary" value="Search"><input class="btn btn-danger" type="button" value="Clear" onclick="clear_search()"><br>
+    </form>
+</div>
+
 {% if table_body %}
 <div class="row">
     <form action="" method="get">
