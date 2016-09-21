@@ -34,47 +34,31 @@ import json
 @login_required
 def search(request):
 
-    error = False
-
     check_hidden_columns_and_filters(request, None)
 
-    if 'q' in request.GET:
+    reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request)
 
-        gene_query = request.GET['q']
+    if reseq_dict is None or observed_mutations_with_gene_queryset is None:
+        return render(request, 'search.html', {'error': True})
 
-        if _is_query_empty(gene_query):
+    table_header = mutation_table_builder.get_table_header(reseq_dict)
 
-            error = True
+    table_body = mutation_table_builder.get_table_body(reseq_dict,
+                                                       observed_mutations_with_gene_queryset,
+                                                       table_type=mutation_table_builder.TableType.SEARCH)
 
-        else:
+    last_search = _get_last_search(request)
 
-            reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request)
+    template = loader.get_template("search.html")
 
-            if reseq_dict is None or observed_mutations_with_gene_queryset is None:
-                return render(request, 'search.html', {'error': True})
+    context = {"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
+               "title": "Search Results",
+               "table_header": mark_safe(table_header),
+               "last_search": last_search,
+               "experiments": get_all_ale_experiments(),
+               "recent_experiments": get_recent_experiments()}
 
-            table_header = mutation_table_builder.get_table_header(reseq_dict)
-
-            table_body = mutation_table_builder.get_table_body(reseq_dict,
-                                                               observed_mutations_with_gene_queryset,
-                                                               table_type=mutation_table_builder.TableType.SEARCH)
-
-            last_search = _get_last_search(request)
-
-            template = loader.get_template("search.html")
-
-            context = {"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
-                       "title": "Search Results",
-                       "table_header": mark_safe(table_header),
-                       "last_search": last_search,
-                       "experiments": get_all_ale_experiments(),
-                       "recent_experiments": get_recent_experiments()}
-
-            return HttpResponse(template.render(context))
-
-    return render(request, 'search.html', {'error': error,
-                                           "experiments": get_all_ale_experiments(),
-                                           "recent_experiments": get_recent_experiments()})
+    return HttpResponse(template.render(context))
 
 
 def _is_query_empty(query):
@@ -93,11 +77,15 @@ def _get_seq_exp(request):
 
     include_argument_list, exclude_argument_list = _get_search_query_arguments(request)
 
+    if not include_argument_list:
+
+        return None, None
+
     ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
 
-    mutations_with_gene_queryset = _get_django_search_query(include_argument_list, exclude_argument_list)
+    mutation_queryset = _get_mutation_queryset(include_argument_list, exclude_argument_list)
 
-    observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(mutation__in=mutations_with_gene_queryset)
+    observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(mutation__in=mutation_queryset)
 
     if ale_experiments_to_exclude:
         observed_mutation_queryset = observed_mutation_queryset.exclude(
@@ -151,11 +139,13 @@ def _get_search_query_arguments(request):
 
 
 def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
-    if request.GET['q']:
+    if 'q' in request.GET:
 
         gene_list = request.GET['q'].replace(" ", "").split(',')
 
         for mutated_gene in gene_list:
+            if mutated_gene == '':
+                continue
             if str(mutated_gene).startswith("-"):
                 if str(mutated_gene).endswith("*"):
                     exclude_argument_list.append(Q(**{'gene__startswith': str(mutated_gene)[1:-1]}))
@@ -177,15 +167,15 @@ def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
 
 
 def _add_min_and_max_to_query(request, include_argument_list):
-    if request.GET['min']:
+    if 'min' in request.GET and request.GET['min']:
         include_argument_list.append(Q(**{'position__gte': request.GET['min']}))
 
-    if request.GET['max']:
+    if 'max' in request.GET and request.GET['max']:
         include_argument_list.append(Q(**{'position__lte': request.GET['max']}))
 
 
 def _add_mutation_change_to_query(request, include_argument_list, exclude_argument_list):
-    if request.GET['mut']:
+    if 'mut' in request.GET and request.GET['mut']:
         mutation_type_list = request.GET['mut'].replace(" ", "").split(',')
         for mutation in mutation_type_list:
             if str(mutation).startswith("-"):
@@ -195,11 +185,12 @@ def _add_mutation_change_to_query(request, include_argument_list, exclude_argume
 
 
 def _add_sequence_change_to_query(request, include_argument_list, exclude_argument_list):
-    if request.GET['seq']:
+    if 'seq' in request.GET and request.GET['seq']:
         sequence_change_list = request.GET['seq'].replace(" ", "").split(',')
         sequence_change_include = []
         sequence_change_exclude = []
         for sequence_change in sequence_change_list:
+
             if str(sequence_change).startswith("-"):
                 sequence_change_exclude.append(Q(**{'sequence_change__contains': str(sequence_change)[1:]}))
             else:
@@ -213,7 +204,7 @@ def _add_sequence_change_to_query(request, include_argument_list, exclude_argume
 
 
 def _add_protein_change_to_query(request, include_argument_list, exclude_argument_list):
-    if request.GET['prot']:
+    if 'prot' in request.GET and request.GET['prot']:
         protein_change_list = request.GET['prot'].replace(" ", "").split(',')
         protein_change_include = []
         protein_change_exclude = []
@@ -233,7 +224,7 @@ def _add_protein_change_to_query(request, include_argument_list, exclude_argumen
 def _get_ale_experiment_arguments(request):
     ale_experiments_to_include = []
     ale_experiments_to_exclude = []
-    if request.GET['ale']:
+    if 'ale' in request.GET and request.GET['ale']:
         ale_experiment_list = request.GET['ale'].replace(" ", "").split(',')
         for ale_experiment in ale_experiment_list:
             if str(ale_experiment).startswith("-"):
@@ -243,7 +234,8 @@ def _get_ale_experiment_arguments(request):
     return ale_experiments_to_include, ale_experiments_to_exclude
 
 
-def _get_django_search_query(include_argument_list, exclude_argument_list):
+def _get_mutation_queryset(include_argument_list, exclude_argument_list):
+
     if len(include_argument_list) > 0:
         include_argument_list = reduce(operator.and_, include_argument_list)
     else:
