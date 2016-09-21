@@ -66,29 +66,29 @@
 <div class="row">
     <form action="/search/" method="get" class="form-group">
         <input class="form-control" type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
-        <div class="input-group col-xs-6">
+        <div class="input-group col-xs-4">
             <span class="input-group-addon">Gene:</span>
             <input type="text" value="{{ last_search.q }}" name="q" class="form-control" id="q" autofocus>
         </div>
-        <div class="input-group col-xs-6">
+        <div class="input-group col-xs-4">
             <span class="input-group-addon">Start Position:</span>
             <input type="number" value="{{ last_search.min }}" name="min" class="form-control" id="min">
             <span class="input-group-addon">End Position:</span>
             <input type="number" value="{{ last_search.max }}" name="max" class="form-control" id="max">
         </div>
-        <div class="input-group col-xs-6">
+        <div class="input-group col-xs-4">
             <span class="input-group-addon">Mutation Type:</span>
             <input type="text" value="{{ last_search.mut }}" name="mut" class="form-control" id="mut">
         </div>
-        <div class="input-group col-xs-6">
+        <div class="input-group col-xs-4">
             <span class="input-group-addon">Sequence Change:</span>
             <input type="text" value="{{ last_search.seq }}" name="seq" class="form-control" id="seq">
         </div>
-        <div class="input-group col-xs-6">
+        <div class="input-group col-xs-4">
             <span class="input-group-addon">Protein Change:</span>
             <input type="text" value="{{ last_search.prot }}" name="prot" class="form-control" id="prot">
         </div>
-         <div class="input-group col-xs-6">
+         <div class="input-group col-xs-4">
             <span class="input-group-addon">ALE Experiments:</span>
             <input type="text" value="{{ last_search.ale }}" name="ale" class="form-control" id="ale">
         </div>
