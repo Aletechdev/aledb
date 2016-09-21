@@ -331,7 +331,7 @@
     <div class="row">
         {% include 'muts_needle_plot.html' %}
         <hr>
-        <form action="/ale_analytics/stats" method="get">
+        <form action="/stats" method="get">
             <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id }}">
             <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
             <input type="submit" class="btn btn-default" value="Show"><br>
