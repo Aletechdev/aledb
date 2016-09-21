@@ -63,10 +63,6 @@
 {% block header %}Search{% endblock %}
 {% block content %}
 
-{% if error %}
-    <p style="color: red;">Please submit a search term.</p>
-{% endif %}
-
 <div class="row">
     <form action="/search/" method="get" class="form-group">
         <input class="form-control" type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
@@ -77,7 +73,6 @@
         <div class="input-group col-xs-6">
             <span class="input-group-addon">Start Position:</span>
             <input type="number" value="{{ last_search.min }}" name="min" class="form-control" id="min">
-
             <span class="input-group-addon">End Position:</span>
             <input type="number" value="{{ last_search.max }}" name="max" class="form-control" id="max">
         </div>
