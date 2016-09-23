@@ -231,6 +231,11 @@
                         <td>{{ mutation_type_count_dict.DUP }}</td>
                         <td>{{ observed_mutation_type_count_dict.DUP }}</td>
                     </tr>
+		    <tr>
+			<td><b>Total</b></td>
+			<td>{{ mutation_sum }}</td>
+			<td>{{ observed_mutation_sum }}</td>
+		    </tr>
                     </tbody>
                 </table>
             </div>
@@ -275,6 +280,12 @@
                         <td>{{ protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
                         <td>{{ observed_protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
                     </tr>
+		    <tr>
+                        <td><b>Total</b></td>
+                        <td>{{ protein_change_sum }}</td>
+                        <td>{{ observed_protein_change_sum }}</td>
+                    </tr>
+
                     </tbody>
                 </table>
             </div>
