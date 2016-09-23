@@ -101,9 +101,13 @@ def stats(request):
     genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes, sequence_changes)
 
     context = {"protein_change_type_count_dict": protein_change_type_count_dict,
+	       "protein_change_sum": sum(protein_change_type_count_dict.values()),
                "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
+	       "observed_protein_change_sum": sum(observed_protein_change_type_count_dict.values()),
                "mutation_type_count_dict": mutation_type_count_dict,
+	       "mutation_sum": sum(mutation_type_count_dict.values()),
                "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
+	       "observed_mutation_sum": sum(observed_mutation_type_count_dict.values()),
                "experiments_info_list": experiments_info_list,
                "resequencing_report_url": resequencing_report_url,
                "ale_experiment_name": ale_experiment_name,
