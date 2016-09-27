@@ -15,6 +15,10 @@ from common.util import check_hidden_columns_and_filters
 from collections import OrderedDict
 from django.core.serializers.json import DjangoJSONEncoder
 import json
+from genes.util import get_gene_list
+import operator
+from functools import reduce
+from django.db.models import Q
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
@@ -61,9 +65,7 @@ def enrichment_mutations(request):
 
     return HttpResponse(template.render(context))
 
-
 # TODO: ensure that the local and global filters are used to remove unwanted mutations
-# TODO: remove table tech_rep checkboxes
 # TODO: filter out starting-strain mutations: Denny to implement first on normal mutation tables.
 @login_required
 def shared_enriched_genes(request):
@@ -71,9 +73,11 @@ def shared_enriched_genes(request):
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
     selected_enrichment_mutation_queryset = EnrichmentMutation.objects.filter(mutation_id=mutation_id)
     enrichment_mutation = selected_enrichment_mutation_queryset[0]  # Should only be one enrichment mutation per mutation_id
-    enriched_gene = enrichment_mutation.mutation.gene
+    enriched_gene_str = enrichment_mutation.mutation.gene
+    enriched_gene_list = get_gene_list(enriched_gene_str)
 
-    enrichment_mutation_queryset = EnrichmentMutation.objects.filter(mutation__gene=enriched_gene)
+    shared_enriched_gene_query = reduce(operator.or_, (Q(mutation__gene__contains=gene) for gene in enriched_gene_list))
+    enrichment_mutation_queryset = EnrichmentMutation.objects.filter(shared_enriched_gene_query)
     observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=enrichment_mutation_queryset.values('mutation'))
 
     ordered_reseq_queryset = ResequencingExperiment.objects.all().order_by(
