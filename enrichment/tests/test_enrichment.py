@@ -10,6 +10,7 @@ from ale.models import Instrument
 
 __author__ = 'Patrick Phaneuf'
 
+# TODO: each test should first test to see that the enrichment set isn't empty. If it is, the test will still pass.
 
 class TestEnrichment(TestCase):
 
