@@ -90,24 +90,24 @@ def get_recent_experiments(ale_experiment_id=None):
     recent_experiments = []
 
     if recent.first is not None:
-        recent_experiments = ale_axp_exists(recent.first, recent_experiments)
+        recent_experiments = ale_exp_exists(recent.first, recent_experiments)
 
     if recent.second is not None:
-        recent_experiments = ale_axp_exists(recent.second, recent_experiments)
+        recent_experiments = ale_exp_exists(recent.second, recent_experiments)
 
     if recent.third is not None:
-        recent_experiments = ale_axp_exists(recent.third, recent_experiments)
+        recent_experiments = ale_exp_exists(recent.third, recent_experiments)
 
     if recent.fourth is not None:
-        recent_experiments = ale_axp_exists(recent.fourth, recent_experiments)
+        recent_experiments = ale_exp_exists(recent.fourth, recent_experiments)
 
     if recent.fifth is not None:
-        recent_experiments = ale_axp_exists(recent.fifth, recent_experiments)
+        recent_experiments = ale_exp_exists(recent.fifth, recent_experiments)
 
     return recent_experiments
 
 
-def ale_axp_exists(ale_id, recent_experiments):
+def ale_exp_exists(ale_id, recent_experiments):
 
     try:
         recent_experiments.append(AleExperiment.objects.get(ale_id=ale_id))
