@@ -27,13 +27,15 @@ class TestEnrichment(TestCase):
                                       sequence_change="zxcv",
                                       gene="geneA")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
-                                        mutation=mut)
+                                        frequency=1,
+                                        mutation=mut,)
 
         mut = Mutation.objects.create(mutation_type="asd",
                                       position=1,
                                       sequence_change="gfds",
                                       gene="geneA")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         mut = Mutation.objects.create(mutation_type="yui",
@@ -41,6 +43,7 @@ class TestEnrichment(TestCase):
                                       sequence_change="hjkl",
                                       gene="geneB")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         mut = Mutation.objects.create(mutation_type="qwe",
@@ -48,6 +51,7 @@ class TestEnrichment(TestCase):
                                       sequence_change="zxcv",
                                       gene="geneC")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         mut = Mutation.objects.create(mutation_type="asd",
@@ -55,6 +59,7 @@ class TestEnrichment(TestCase):
                                       sequence_change="gfds",
                                       gene="geneD")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         mut = Mutation.objects.create(mutation_type="yui",
@@ -62,6 +67,7 @@ class TestEnrichment(TestCase):
                                       sequence_change="hjkl",
                                       gene="geneF")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         # Need queryset for this test.
@@ -70,7 +76,8 @@ class TestEnrichment(TestCase):
         enrichment = Enrichment([mutation_pos1_queryset, mutation_pos2_queryset])
         expected_enriched_gene = "geneA"
         for mutation in enrichment.enrichment_mutation_list:
-            self.assertEquals(expected_enriched_gene, mutation.gene)
+            enriched_gene = mutation.gene
+            self.assertEquals(expected_enriched_gene, enriched_gene)
 
     def test_enriched_geneA_diff_mutation_queryset(self):
         mut = Mutation.objects.create(mutation_type="qwe",
@@ -78,6 +85,7 @@ class TestEnrichment(TestCase):
                                       sequence_change="zxcv",
                                       gene="geneA")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         mut = Mutation.objects.create(mutation_type="asd",
@@ -85,6 +93,7 @@ class TestEnrichment(TestCase):
                                        sequence_change="gfds",
                                        gene="geneW")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         mut = Mutation.objects.create(mutation_type="yui",
@@ -92,6 +101,7 @@ class TestEnrichment(TestCase):
                                        sequence_change="hjkl",
                                        gene="geneB")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         mut = Mutation.objects.create(mutation_type="qwe",
@@ -99,6 +109,7 @@ class TestEnrichment(TestCase):
                                        sequence_change="zxcv",
                                        gene="geneC")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         mut = Mutation.objects.create(mutation_type="asd",
@@ -106,6 +117,7 @@ class TestEnrichment(TestCase):
                                        sequence_change="gfds",
                                        gene="geneD")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         mut = Mutation.objects.create(mutation_type="yui",
@@ -113,6 +125,7 @@ class TestEnrichment(TestCase):
                                        sequence_change="hjkl",
                                        gene="geneB")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
+                                        frequency=1,
                                         mutation=mut)
 
         # Need queryset for this test.
