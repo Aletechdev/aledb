@@ -269,25 +269,3 @@ class TestFixation(TestCase):
                 mut2_count += 1
         self.assertEquals(mut1_count, 1)
         self.assertEquals(mut2_count, 1)
-
-    # Test for core internal Fixation logic
-    def test_get_ale_fixated_mutation_queryset(self):
-
-        # flask_mutation_dict: {flask_id: mutation_query_set}
-        mut1 = Mutation.objects.create(mutation_type="qwe",
-                                      position=1,
-                                      sequence_change="asdf",
-                                      gene="geneA")
-
-        mut2 = Mutation.objects.create(mutation_type="qwe",
-                                      position=2,
-                                      sequence_change="asdf",
-                                      gene="geneB")
-
-        flask_mutation_dict = {1:{mut1}, 2:{mut1, mut1}}
-
-        fixated_mutation_queryset = fixation._get_ale_fixated_mutation_queryset(flask_mutation_dict)
-        expected_fixation_gene = "geneA"
-        self.assertEquals(len(fixated_mutation_queryset), 1)
-        for mutation in fixated_mutation_queryset:
-            self.assertEquals(expected_fixation_gene, mutation.gene)
