@@ -19,34 +19,83 @@ import collections
 __author__ = 'Patrick Phaneuf'
 
 class TestFixation(TestCase):
+    def setUp(self):
+        self.media = Media.objects.create()
+        self.instr = Instrument.objects.create()
+        self.ale_exp = AleExperiment.objects.create(instrument=self.instr)
+        self.freezer_box = FreezerBox.objects.create()
+        self.ale = AleId.objects.create(ale_experiment=self.ale_exp, ale_id=99)
 
-    def test_Fixation(self):
-        # Need to build an ordered_reseq_dict
-        # only considering one ALE
-        media = Media.objects.create()
-        instr = Instrument.objects.create()
-        ale_exp = AleExperiment.objects.create(instrument=instr)
-        freezer_box = FreezerBox.objects.create()
-        ale = AleId.objects.create(ale_experiment=ale_exp, ale_id=99)
-
-        # make a separate tech_rep, isolate and flask for each reseq.
-        flask_1 = Flask.objects.create(ale_id=ale,
-                                       media=media,
+    def test_no_fixation(self):
+        flask_1 = Flask.objects.create(ale_id=self.ale,
+                                       media=self.media,
                                        flask_number=1)
         isolate_1 = Isolate.objects.create(flask=flask_1,
                                            isolate_number=1,
                                            is_population=False,
-                                           freezer_box=freezer_box)
+                                           freezer_box=self.freezer_box)
         tech_rep_1 = TechnicalReplicate.objects.create(isolate=isolate_1)
         reseq_1 = ResequencingExperiment.objects.create(tech_rep=tech_rep_1)
 
-        flask_2 = Flask.objects.create(ale_id=ale,
-                                       media=media,
+        flask_2 = Flask.objects.create(ale_id=self.ale,
+                                       media=self.media,
                                        flask_number=2)
         isolate_2 = Isolate.objects.create(flask=flask_2,
                                            isolate_number=1,
                                            is_population=False,
-                                           freezer_box=freezer_box)
+                                           freezer_box=self.freezer_box)
+        tech_rep_2 = TechnicalReplicate.objects.create(isolate=isolate_2)
+        reseq_2 = ResequencingExperiment.objects.create(tech_rep=tech_rep_2)
+
+        mut1 = Mutation.objects.create(mutation_type="qwe",
+                                       position=1,
+                                       sequence_change="asdf",
+                                       gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=reseq_1,
+                                        frequency=1,
+                                        mutation=mut1)
+        mut2 = Mutation.objects.create(mutation_type="qwe",
+                                       position=2,
+                                       sequence_change="asdf",
+                                       gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=reseq_2,
+                                        frequency=1,
+                                        mutation=mut2)
+        mut3 = Mutation.objects.create(mutation_type="qwe",
+                                       position=2,
+                                       sequence_change="hhjk",
+                                       gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=reseq_2,
+                                        frequency=1,
+                                        mutation=mut3)
+
+        reseq_ordered_dict = collections.OrderedDict()
+        reseq_ordered_dict.update({1: reseq_1})
+        reseq_ordered_dict.update({2: reseq_2})
+        fixation = Fixation(reseq_ordered_dict)
+        self.assertEquals(0, len(fixation.fixating_mutation_list))
+
+    def test_fixation_single_mutation(self):
+
+        # only considering one ALE
+
+        flask_1 = Flask.objects.create(ale_id=self.ale,
+                                       media=self.media,
+                                       flask_number=1)
+        isolate_1 = Isolate.objects.create(flask=flask_1,
+                                           isolate_number=1,
+                                           is_population=False,
+                                           freezer_box=self.freezer_box)
+        tech_rep_1 = TechnicalReplicate.objects.create(isolate=isolate_1)
+        reseq_1 = ResequencingExperiment.objects.create(tech_rep=tech_rep_1)
+
+        flask_2 = Flask.objects.create(ale_id=self.ale,
+                                       media=self.media,
+                                       flask_number=2)
+        isolate_2 = Isolate.objects.create(flask=flask_2,
+                                           isolate_number=1,
+                                           is_population=False,
+                                           freezer_box=self.freezer_box)
         tech_rep_2 = TechnicalReplicate.objects.create(isolate=isolate_2)
         reseq_2 = ResequencingExperiment.objects.create(tech_rep=tech_rep_2)
 
@@ -77,8 +126,6 @@ class TestFixation(TestCase):
         expected_fixation_gene = "geneA"
         for mutation in fixation.fixating_mutation_list:
             self.assertEquals(expected_fixation_gene, mutation.gene)
-
-
 
     def test_get_ale_fixated_mutation_queryset(self):
 
