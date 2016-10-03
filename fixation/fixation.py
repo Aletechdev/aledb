@@ -2,13 +2,13 @@ from common.db_util import get_mutation_queryset_from_obs_mut_queryset
 import seq.models
 from seq.util import get_all_observed_mutations
 
-
 __author__ = "Patrick Phaneuf"
+
 
 # TODO: integrate filtering in Fixation class in the same way as implemented with the enrichment analysis. (Filtering seems to happen on observed mutations and we're working with Mutations).
 # Currently, assumes that ordered_reseq_dict represents multiple ALEs, such as with a ALE experiment.
 # Could reduce to only act on an ALE, since this is the smallest context Fixation operates within.
-def get_ale_exp_fixated_mutation_list(ale_reseq_ordered_dict):
+def get_ale_exp_fixated_mutation_list(ale_reseq_ordered_dict, filter_settings=None):
     # groups all reseq into their ALEs
     ale_id_reseq_dict = _get_ale_id_reseq_dict(ale_reseq_ordered_dict)
     ale_experiment_fixated_mutation_queryset = seq.models.Mutation.objects.none()
