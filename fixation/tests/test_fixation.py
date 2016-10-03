@@ -269,3 +269,100 @@ class TestFixation(TestCase):
                 mut2_count += 1
         self.assertEquals(mut1_count, 1)
         self.assertEquals(mut2_count, 1)
+
+    def test_fixation_ale_exp_filter(self):
+        flask_1 = Flask.objects.create(ale_id=self.ale,
+                                       media=self.media,
+                                       flask_number=1)
+        isolate_1 = Isolate.objects.create(flask=flask_1,
+                                           isolate_number=1,
+                                           is_population=False,
+                                           freezer_box=self.freezer_box)
+        tech_rep_1 = TechnicalReplicate.objects.create(isolate=isolate_1)
+        reseq_1 = ResequencingExperiment.objects.create(tech_rep=tech_rep_1)
+
+        flask_2 = Flask.objects.create(ale_id=self.ale,
+                                       media=self.media,
+                                       flask_number=2)
+        isolate_2 = Isolate.objects.create(flask=flask_2,
+                                           isolate_number=1,
+                                           is_population=False,
+                                           freezer_box=self.freezer_box)
+        tech_rep_2 = TechnicalReplicate.objects.create(isolate=isolate_2)
+        reseq_2 = ResequencingExperiment.objects.create(tech_rep=tech_rep_2)
+
+        mut1 = Mutation.objects.create(mutation_type="qwe",
+                                       position=1,
+                                       sequence_change="asdf",
+                                       gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=reseq_1,
+                                        frequency=1,
+                                        mutation=mut1)
+
+        ObservedMutation.objects.create(sequencing_experiment=reseq_2,
+                                        frequency=1,
+                                        mutation=mut1)
+        mut2 = Mutation.objects.create(mutation_type="qwe",
+                                       position=2,
+                                       sequence_change="asdf",
+                                       gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=reseq_2,
+                                        frequency=1,
+                                        mutation=mut2)
+
+        filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp, ignored_genes="geneA")
+
+        reseq_ordered_dict = collections.OrderedDict()
+        reseq_ordered_dict.update({1: reseq_1})
+        reseq_ordered_dict.update({2: reseq_2})
+        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict, filter_settings)
+        self.assertEquals(0, len(fixating_mutation_list))
+
+
+    def test_fixation_ale_exp_filter(self):
+        flask_1 = Flask.objects.create(ale_id=self.ale,
+                                       media=self.media,
+                                       flask_number=1)
+        isolate_1 = Isolate.objects.create(flask=flask_1,
+                                           isolate_number=1,
+                                           is_population=False,
+                                           freezer_box=self.freezer_box)
+        tech_rep_1 = TechnicalReplicate.objects.create(isolate=isolate_1)
+        reseq_1 = ResequencingExperiment.objects.create(tech_rep=tech_rep_1)
+
+        flask_2 = Flask.objects.create(ale_id=self.ale,
+                                       media=self.media,
+                                       flask_number=2)
+        isolate_2 = Isolate.objects.create(flask=flask_2,
+                                           isolate_number=1,
+                                           is_population=False,
+                                           freezer_box=self.freezer_box)
+        tech_rep_2 = TechnicalReplicate.objects.create(isolate=isolate_2)
+        reseq_2 = ResequencingExperiment.objects.create(tech_rep=tech_rep_2)
+
+        mut1 = Mutation.objects.create(mutation_type="qwe",
+                                       position=1,
+                                       sequence_change="asdf",
+                                       gene="geneA")
+        ObservedMutation.objects.create(sequencing_experiment=reseq_1,
+                                        frequency=1,
+                                        mutation=mut1)
+
+        ObservedMutation.objects.create(sequencing_experiment=reseq_2,
+                                        frequency=1,
+                                        mutation=mut1)
+        mut2 = Mutation.objects.create(mutation_type="qwe",
+                                       position=2,
+                                       sequence_change="asdf",
+                                       gene="geneB")
+        ObservedMutation.objects.create(sequencing_experiment=reseq_2,
+                                        frequency=1,
+                                        mutation=mut2)
+
+        GlobalFilter.objects.create(ignored_genes="geneA")
+
+        reseq_ordered_dict = collections.OrderedDict()
+        reseq_ordered_dict.update({1: reseq_1})
+        reseq_ordered_dict.update({2: reseq_2})
+        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict)
+        self.assertEquals(0, len(fixating_mutation_list))
