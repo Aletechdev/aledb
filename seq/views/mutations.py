@@ -6,7 +6,7 @@ import seq.views.common
 from seq.views import mutation_table_builder
 from seq.util import get_all_observed_mutations
 import filter.util
-from common.db_util import get_all_ale_experiments, get_recent_experiments, get_ordered_reseq_dict
+from common.db_util import get_all_ale_experiments, get_recent_experiments, get_reseq_ordered_dict
 from common.util import check_hidden_columns_and_filters
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from django.core.serializers.json import DjangoJSONEncoder
@@ -24,7 +24,7 @@ def mutation_table(request):
     is_ref_strain_filtered = seq.views.common.is_ref_strain_filtered(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, is_ref_strain_filtered)
 
-    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id, ale_no)
+    ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no)
 
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 

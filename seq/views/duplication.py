@@ -20,7 +20,7 @@ import requests
 
 from seq.views import mutation_table_builder
 
-from common.db_util import get_ordered_reseq_dict, get_all_ale_experiments, get_recent_experiments
+from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
 
 
 INDEX_TEMPLATE = "duplication.html"
@@ -44,7 +44,7 @@ def duplication(request):
 
     template = loader.get_template(INDEX_TEMPLATE)
 
-    seq_experiment_ordered_dict = get_ordered_reseq_dict(ale_experiment_id)
+    seq_experiment_ordered_dict = get_reseq_ordered_dict(ale_experiment_id)
 
     seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
