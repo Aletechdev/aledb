@@ -1,6 +1,6 @@
 import collections
 from filter.util import get_filter_settings, filter_mutations
-from common.db_util import get_ordered_reseq_dict
+from common.db_util import get_reseq_ordered_dict
 from genes.util import get_gene_list
 from seq.util import get_all_observed_mutations
 
@@ -37,7 +37,7 @@ class Enrichment:
 
 
 def get_enrichment_mutation_list(ale_experiment_id):
-    reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
+    reseq_dict = get_reseq_ordered_dict(ale_experiment_id)
     ale_exp_reseq_obs_mut_lists = []
     for reseq_id in reseq_dict:
         ale_exp_reseq_obs_mut_lists.append(get_all_observed_mutations([reseq_id]))

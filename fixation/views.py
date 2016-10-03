@@ -13,7 +13,7 @@ from filter import util
 from fixation.models import FixatedMutation
 import metadata.views
 from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID, POSITION_COLUMN_IN_SHARED_MUTATION_TALBE
-from common.db_util import get_ordered_reseq_dict, get_all_ale_experiments, get_recent_experiments
+from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
 from collections import OrderedDict
 
@@ -38,7 +38,7 @@ def fixating_mutations(request):
     # so as to filter out the mutations when choosing specific ALEs within the experiment. This means that there is
     # a disconnect between filtering methodologies that needs to be reconciled.
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    reseq_ordered_dict = get_ordered_reseq_dict(ale_experiment_id, ale_number)
+    reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number)
     reseq_ordered_dict = mutation_table_builder.filter_checked_flasks(request, reseq_ordered_dict)
 
     table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
