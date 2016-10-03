@@ -19,11 +19,13 @@ def get_fixated_mutation_list(ale_experiment_id):
 # TODO: integrate filtering in Fixation class in the same way as implemented with the enrichment analysis. (Filtering seems to happen on observed mutations and we're working with Mutations).
 # Doesn't necessarily need to be in a class since all functionality is static,
 # though good to encapsulate for reuse without get_fixated_mutation_list(ale_experiment_id)
+# Currently, assumes that ordered_reseq_dict represents multiple ALEs, such as with a ALE experiment.
+# Could reduce to only act on an ALE, since this is the smallest context Fixation operates within.
 class Fixation:
-    def __init__(self, ordered_reseq_dict, filter_settings=None):
-        self._ordered_reseq_dict = ordered_reseq_dict
+    def __init__(self, ale_exp_ordered_reseq_dict, filter_settings=None):
+        self._ale_exp_ordered_reseq_dict = ale_exp_ordered_reseq_dict
         self._filter_settings = filter_settings
-        self.fixating_mutation_list = Fixation._get_ale_experiment_fixated_mutation_list(ordered_reseq_dict)  # What to return
+        self.fixating_mutation_list = Fixation._get_ale_experiment_fixated_mutation_list(ale_exp_ordered_reseq_dict)  # What to return
 
     # Q1: Does this need to be in the class?
     @staticmethod
@@ -31,14 +33,11 @@ class Fixation:
         # groups all reseq into their ALEs
         ale_id_reseq_dict = Fixation._get_ale_id_reseq_dict(ordered_reseq_dict)
         ale_experiment_fixated_mutation_queryset = seq.models.Mutation.objects.none()
-
         # For each ALE (working only with the reseq's of a particular ALE.
         for id_reseq_list in ale_id_reseq_dict.values():
-
             # TODO: should do filtering out of mutations somewhere in here.
             flask_isolate_mutation_dict = Fixation._get_flask_isolate_mutation_dict(id_reseq_list)
             flask_mutation_dict = Fixation._get_flask_mutation_dict(flask_isolate_mutation_dict)
-
             # ANS1: yes, because of these two lines need to be exec'ed for all reseqs in ALE exp.
             ale_fixated_mutation_queryset = Fixation._get_ale_fixated_mutation_queryset(flask_mutation_dict)
             ale_experiment_fixated_mutation_queryset = ale_experiment_fixated_mutation_queryset | ale_fixated_mutation_queryset
@@ -109,15 +108,11 @@ class Fixation:
 
         Returns: flask_mutation_dict
         """
-
         flask_mutation_dict = {}
-
         for flask_isolate_id, mutation_queryset in flask_isolate_mutation_dict.items():
-
             flask_id = flask_isolate_id[0]
             if flask_id not in flask_mutation_dict.keys():
                 flask_mutation_dict[flask_id] = mutation_queryset
             else:
                 flask_mutation_dict[flask_id] = flask_mutation_dict[flask_id] | mutation_queryset
-
         return flask_mutation_dict
