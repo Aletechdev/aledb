@@ -76,7 +76,7 @@ def fixating_mutations(request):
 
     return HttpResponse(template.render(context))
 
-
+# TODO: https://github.com/SBRG/ale_analytics/issues/291
 @login_required
 def shared_fixated_mutations(request):
 
