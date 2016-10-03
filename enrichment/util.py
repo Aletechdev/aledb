@@ -3,6 +3,7 @@ from common.db_util import get_reseq_ordered_dict
 from seq.util import get_all_observed_mutations
 from enrichment import enrichment
 
+
 __author__ = "Patrick Phaneuf"
 
 
