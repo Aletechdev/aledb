@@ -12,7 +12,7 @@ from ale.models import TechnicalReplicate
 from ale.models import Flask
 from ale.models import Media
 from ale.models import FreezerBox
-from fixation.util import Fixation
+from fixation import fixation
 import collections
 
 
@@ -72,8 +72,8 @@ class TestFixation(TestCase):
         reseq_ordered_dict = collections.OrderedDict()
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
-        fixation = Fixation(reseq_ordered_dict)
-        self.assertEquals(0, len(fixation.fixating_mutation_list))
+        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict)
+        self.assertEquals(0, len(fixating_mutation_list))
 
     def test_fixation_single_mutation(self):
         flask_1 = Flask.objects.create(ale_id=self.ale,
@@ -118,10 +118,10 @@ class TestFixation(TestCase):
         reseq_ordered_dict = collections.OrderedDict()
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
-        fixation = Fixation(reseq_ordered_dict)
-        self.assertEquals(1, len(fixation.fixating_mutation_list))
+        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict)
+        self.assertEquals(1, len(fixating_mutation_list))
         expected_fixation_gene = "geneA"
-        for mutation in fixation.fixating_mutation_list:
+        for mutation in fixating_mutation_list:
             self.assertEquals(expected_fixation_gene, mutation.gene)
 
     def test_lost_fixation(self):
@@ -192,8 +192,8 @@ class TestFixation(TestCase):
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
         reseq_ordered_dict.update({3: reseq_3})
-        fixation = Fixation(reseq_ordered_dict)
-        self.assertEquals(0, len(fixation.fixating_mutation_list))
+        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict)
+        self.assertEquals(0, len(fixating_mutation_list))
 
     def test_multiple_fixations_same_ale(self):
         flask_1 = Flask.objects.create(ale_id=self.ale,
@@ -258,11 +258,11 @@ class TestFixation(TestCase):
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
         reseq_ordered_dict.update({3: reseq_3})
-        fixation = Fixation(reseq_ordered_dict)
-        self.assertEquals(2, len(fixation.fixating_mutation_list))
+        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict)
+        self.assertEquals(2, len(fixating_mutation_list))
         mut1_count = 0
         mut2_count = 0
-        for mutation in fixation.fixating_mutation_list:
+        for mutation in fixating_mutation_list:
             if mutation.gene == "geneA":
                 mut1_count += 1
             if mutation.gene == "geneB":
@@ -286,7 +286,7 @@ class TestFixation(TestCase):
 
         flask_mutation_dict = {1:{mut1}, 2:{mut1, mut1}}
 
-        fixated_mutation_queryset = Fixation._get_ale_fixated_mutation_queryset(flask_mutation_dict)
+        fixated_mutation_queryset = fixation._get_ale_fixated_mutation_queryset(flask_mutation_dict)
         expected_fixation_gene = "geneA"
         self.assertEquals(len(fixated_mutation_queryset), 1)
         for mutation in fixated_mutation_queryset:
