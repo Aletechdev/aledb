@@ -113,6 +113,10 @@ $(document).ready(function () {
             }
         } );
     });
+    if(localStorage && localStorage['dups'] == 'false') {
+        $('#show_dups').click()
+    }
+
 });
 
 function column_sort_from_right() {
@@ -142,8 +146,10 @@ function filter_dups() {
 
     if ($('#show_dups').is(":checked")) {
         table.column(sorted_column + 1).search('').draw();
+        localStorage['dups'] = true;
     } else {
         table.column(sorted_column + 1).search("^((?!DUP).)*$", true, false).draw();
+        localStorage['dups'] = false;
     }
 }
 
