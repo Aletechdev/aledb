@@ -209,7 +209,7 @@ def _parse_read_count(read_row_input):
 
 def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, person):
 
-    seq_experiment, created = seq.models.ResequencingExperiment.objects.get_or_create(location=breseq_folder[breseq_folder.find(ale_data_root_dir) + len(ale_data_root_dir):],
+    reseq, created = seq.models.ResequencingExperiment.objects.get_or_create(location=breseq_folder[breseq_folder.find(ale_data_root_dir) + len(ale_data_root_dir):],
                                                                                       tech_rep_id=technical_replicate_id,
                                                                                       person=person)
 
@@ -219,12 +219,12 @@ def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, pers
 
     # if any mutations were read in, we need to overwrite them
     # ??? WHY ??? -Patrick
-    # seq_experiment.mutations = []
-    seq_experiment.reads = _parse_read_count(row_read_info[READ_COUNT_INDEX].text)
-    seq_experiment.average_read_length = _parse_average_read_length(row_read_info[AVERAGE_READ_LENGTH_INDEX].text)
+    # reseq.mutations = []
+    reseq.reads = _parse_read_count(row_read_info[READ_COUNT_INDEX].text)
+    reseq.average_read_length = _parse_average_read_length(row_read_info[AVERAGE_READ_LENGTH_INDEX].text)
 
     try:
-        seq_experiment.percentage_mapped = float(row_read_info[7].text.replace("%", ""))
+        reseq.percentage_mapped = float(row_read_info[7].text.replace("%", ""))
     except:
         None
 
@@ -235,11 +235,11 @@ def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, pers
     except:
         mean_coverage = 0
 
-    seq_experiment.mean_coverage = mean_coverage
+    reseq.mean_coverage = mean_coverage
 
-    seq_experiment.save()
+    reseq.save()
 
-    return seq_experiment
+    return reseq
 
 
 def _process_mutations(sample_type,
