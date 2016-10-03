@@ -216,6 +216,16 @@ class TestFixation(TestCase):
         tech_rep_2 = TechnicalReplicate.objects.create(isolate=isolate_2)
         reseq_2 = ResequencingExperiment.objects.create(tech_rep=tech_rep_2)
 
+        flask_3 = Flask.objects.create(ale_id=self.ale,
+                                       media=self.media,
+                                       flask_number=3)
+        isolate_3 = Isolate.objects.create(flask=flask_3,
+                                           isolate_number=1,
+                                           is_population=False,
+                                           freezer_box=self.freezer_box)
+        tech_rep_3 = TechnicalReplicate.objects.create(isolate=isolate_3)
+        reseq_3 = ResequencingExperiment.objects.create(tech_rep=tech_rep_3)
+
         mut1 = Mutation.objects.create(mutation_type="qwe",
                                        position=1,
                                        sequence_change="asdf",
@@ -224,6 +234,7 @@ class TestFixation(TestCase):
                                         frequency=1,
                                         mutation=mut1)
 
+        # mut1 starts fixating
         ObservedMutation.objects.create(sequencing_experiment=reseq_2,
                                         frequency=1,
                                         mutation=mut1)
@@ -235,14 +246,29 @@ class TestFixation(TestCase):
                                         frequency=1,
                                         mutation=mut2)
 
+        # mut1 and mut2 have fixated
+        ObservedMutation.objects.create(sequencing_experiment=reseq_3,
+                                        frequency=1,
+                                        mutation=mut1)
+        ObservedMutation.objects.create(sequencing_experiment=reseq_3,
+                                        frequency=1,
+                                        mutation=mut2)
+
         reseq_ordered_dict = collections.OrderedDict()
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
+        reseq_ordered_dict.update({3: reseq_3})
         fixation = Fixation(reseq_ordered_dict)
-        self.assertEquals(1, len(fixation.fixating_mutation_list))
-        expected_fixation_gene = "geneA"
+        self.assertEquals(2, len(fixation.fixating_mutation_list))
+        mut1_count = 0
+        mut2_count = 0
         for mutation in fixation.fixating_mutation_list:
-            self.assertEquals(expected_fixation_gene, mutation.gene)
+            if mutation.gene == "geneA":
+                mut1_count += 1
+            if mutation.gene == "geneB":
+                mut2_count += 1
+        self.assertEquals(mut1_count, 1)
+        self.assertEquals(mut2_count, 1)
 
     # Test for core internal Fixation logic
     def test_get_ale_fixated_mutation_queryset(self):
