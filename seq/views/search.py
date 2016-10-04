@@ -39,7 +39,10 @@ def search(request):
     reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request)
 
     if reseq_dict is None or observed_mutations_with_gene_queryset is None:
-        return render(request, 'search.html', {'error': True})
+        return render(request, 'search.html', {'error': True,
+                                               "experiments": get_all_ale_experiments(),
+                                               "recent_experiments": get_recent_experiments()
+                                               })
 
     table_header = mutation_table_builder.get_table_header(reseq_dict)
 
