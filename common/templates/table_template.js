@@ -31,7 +31,8 @@ $(document).ready(function () {
         pagingType: "full_numbers",
         data: table_data,
         autoWidth: false,
-        pageLength: 10,
+        pageLength: 1000,
+        lengthMenu: [50, 100, 500, 1000],
         language: ',',
         columns: table_heads,
         columnDefs: [ {
@@ -56,7 +57,10 @@ $(document).ready(function () {
         order: [[sorted_column, 'asc']],
         dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
         buttons: [
-            'colvis', {
+            {
+                extend: 'colvis',
+                columns: columns_to_export
+            }, {
                 extend: 'csv',
                 text: 'CSV',
                 exportOptions: {
@@ -81,17 +85,53 @@ $(document).ready(function () {
 
     $('#sidebarbutton').click(function () {
         oTable.draw( 'page' );
-    })
+    });
+
+    $(document).on ("click", ".buttons-columnVisibility", function (x) {
+
+        var visible_columns = oTable.columns().visible();
+
+        var table = $('#data').DataTable();
+
+        table.rows().every( function ( index ) {
+            var row = table.row( index );
+
+            var data = row.data();
+
+            var has_entry = false;
+            for(var l = sorted_column + 9; l < visible_columns.length; l++) {
+                if(visible_columns[l] == true) {
+                    if(data[l] != '<span class="empty"></span>') {
+                        has_entry = true;
+                    }
+                }
+            }
+            if(has_entry == false) {
+                $(row.node()).addClass('hidden')
+            } else {
+                $(row.node()).removeClass('hidden')
+            }
+        } );
+    });
+    if(localStorage && localStorage['dups'] == 'false') {
+        $('#show_dups').click()
+    }
+
 });
 
 function column_sort_from_right() {
 
     var sorting_array = [];
 
-    for (var i = number_of_columns - 1; i > sorted_column + 8; i--) {
-        sorting_array.push([i, 'desc'])
-    }
     var table = $("#data").DataTable();
+    var visible_columns = table.columns().visible();
+
+    for (var i = number_of_columns - 1; i > sorted_column + 8; i--) {
+        if(visible_columns[i] == true) {
+            sorting_array.push([i, 'desc'])
+        }
+    }
+
     table.order(sorting_array).draw();
 }
 
@@ -106,8 +146,10 @@ function filter_dups() {
 
     if ($('#show_dups').is(":checked")) {
         table.column(sorted_column + 1).search('').draw();
+        localStorage['dups'] = true;
     } else {
         table.column(sorted_column + 1).search("^((?!DUP).)*$", true, false).draw();
+        localStorage['dups'] = false;
     }
 }
 
