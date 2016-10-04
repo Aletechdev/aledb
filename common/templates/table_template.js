@@ -31,7 +31,7 @@ $(document).ready(function () {
         pagingType: "full_numbers",
         data: table_data,
         autoWidth: false,
-        pageLength: 100,
+        pageLength: 1000,
         lengthMenu: [50, 100, 500, 1000],
         language: ',',
         columns: table_heads,
