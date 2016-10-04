@@ -9,7 +9,7 @@ from seq.views import common
 from django.db.models import Count
 from filter import util
 from common.db_util import get_reseq_queryset,\
-    get_ordered_reseq_dict,\
+    get_reseq_ordered_dict,\
     get_mutation_queryset_from_obs_mut_queryset
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
@@ -218,7 +218,7 @@ def get_reseq_experiment_info_list(reseq_experiments):
 # TODO: should be transferred to filter app and have a parameter to filter wt mutations.
 def _get_observed_mutation_queryset(request, ale_experiment_id):
 
-    ordered_reseq_dict = get_ordered_reseq_dict(ale_experiment_id)
+    ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id)
 
     observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
 
