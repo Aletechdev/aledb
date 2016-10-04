@@ -35,6 +35,7 @@ class AleExperiment(models.Model):
         verbose_name_plural = "ALE Experiments"
 
 
+# TODO: this model should be called "Ale".
 class AleId(models.Model):
     """Parallel ALE's run within an ALE experiment"""
 

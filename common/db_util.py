@@ -36,21 +36,21 @@ def get_reseq_dict(ale_experiment_id):
 
 
 # TODO: go in seq.util
-def get_ordered_reseq_dict(ale_experiment_id, ale_no=None):
+def get_reseq_ordered_dict(ale_experiment_id, ale_no=None):
     """
     Args:
         ale_experiment_id:
         ale_no:
 
     Returns:
-        reseq_dict: a ordered dictionary of reseq values and their ID's as keys.
+        reseq_ordered_dict: a ordered dictionary of reseq values and their ID's as keys.
         The reseq values within the dictionary will be ordered according to that
         defined within RESEQ_QUERY
 
     """
     reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_no)
-    reseq_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
-    return reseq_dict
+    reseq_ordered_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
+    return reseq_ordered_dict
 
 
 # TODO: go in seq.util
@@ -90,24 +90,24 @@ def get_recent_experiments(ale_experiment_id=None):
     recent_experiments = []
 
     if recent.first is not None:
-        recent_experiments = ale_axp_exists(recent.first, recent_experiments)
+        recent_experiments = ale_exp_exists(recent.first, recent_experiments)
 
     if recent.second is not None:
-        recent_experiments = ale_axp_exists(recent.second, recent_experiments)
+        recent_experiments = ale_exp_exists(recent.second, recent_experiments)
 
     if recent.third is not None:
-        recent_experiments = ale_axp_exists(recent.third, recent_experiments)
+        recent_experiments = ale_exp_exists(recent.third, recent_experiments)
 
     if recent.fourth is not None:
-        recent_experiments = ale_axp_exists(recent.fourth, recent_experiments)
+        recent_experiments = ale_exp_exists(recent.fourth, recent_experiments)
 
     if recent.fifth is not None:
-        recent_experiments = ale_axp_exists(recent.fifth, recent_experiments)
+        recent_experiments = ale_exp_exists(recent.fifth, recent_experiments)
 
     return recent_experiments
 
 
-def ale_axp_exists(ale_id, recent_experiments):
+def ale_exp_exists(ale_id, recent_experiments):
 
     try:
         recent_experiments.append(AleExperiment.objects.get(ale_id=ale_id))
