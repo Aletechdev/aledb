@@ -69,7 +69,6 @@ $(document).ready(function () {
             }
         ],
         deferRender: true,
-        scrollX: true
     });
 
     $("tr td:first-child").each(function () {
