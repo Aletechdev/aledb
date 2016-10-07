@@ -21,7 +21,7 @@ DEFAULT_TEMPERATURE = 37
 DEFAULT_DESCRIPTION = ""
 
 
-def parse_and_upload_meta_data(meta_data_path, ale_experiment_primary_key):
+def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary_key):
 
     for f in os.listdir(meta_data_path):
 
@@ -41,13 +41,6 @@ def parse_and_upload_meta_data(meta_data_path, ale_experiment_primary_key):
                     continue
 
                 try:
-                    temp = meta_data[TEMPERATURE]
-                    if temp is '':
-                        temp = DEFAULT_TEMPERATURE
-                except:
-                    temp = DEFAULT_TEMPERATURE
-
-                try:
                     ale_id_description = meta_data[DESCRIPTION]
                 except:
                     ale_id_description = DEFAULT_DESCRIPTION
@@ -64,20 +57,29 @@ def parse_and_upload_meta_data(meta_data_path, ale_experiment_primary_key):
                 except:
                     library_prep = DEFAULT_DESCRIPTION
 
-                try:
-                    media_description = meta_data[MEDIA]
-                except:
-                    media_description = DEFAULT_DESCRIPTION
+                # Shouldn't be changing media post experiment upload since a media can be referenced by multiple ALE Experiments.
+                # TODO: Have to establish media only when an experiment is uploaded.
+                # try:
+                #     temp = meta_data[TEMPERATURE]
+                #     if temp is '':
+                #         temp = DEFAULT_TEMPERATURE
+                # except:
+                #     temp = DEFAULT_TEMPERATURE
+                # try:
+                #     media_description = meta_data[MEDIA]
+                # except:
+                #     media_description = DEFAULT_DESCRIPTION
 
-                isolate.flask.media.temperature = temp
+                # isolate.flask.media.temperature = temp
+                # isolate.flask.media.description = media_description
+
                 isolate.flask.ale_id.description = ale_id_description
                 isolate.flask.ale_id.strain = strain
                 isolate.library_prep = library_prep
-                isolate.flask.media.description = media_description
 
                 if isolate.flask.ale_id.species is None:
                     isolate.flask.ale_id.species = DEFAULT_STRAIN
 
                 isolate.save()
-                isolate.flask.media.save()
                 isolate.flask.ale_id.save()
+                # isolate.flask.media.save()
