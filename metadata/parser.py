@@ -3,13 +3,31 @@ import os
 import csv
 
 from ale.models import Isolate
+from ale.models import Media
 
-__author__ = 'dgosting'
+
+__author__ = 'Denny Gosting, Patrick Phaneuf'
+
+DEFAULT_INSTRUMENT_NAME = "UCSD1"
+DEFAULT_MEDIA_DESCRIPTION = "M9"
+DEFAULT_MEDIA_SUBSTRATE = "glucose"
+DEFAULT_TEMPERATURE = 37
+DEFAULT_VOLUME = 15
+DEFAULT_STIRRING_SPEED = 1100
+DEFAULT_FREEZER_BOX_NAME = "ALE box"
+DEFAULT_FREEZER_BOX_NUMBER = 1
 
 STRAIN = "taxonomy-id"
-DESCRIPTION = "strain-description"
-MEDIA = "base-media"
-TEMPERATURE = "temperature"
+STRAIN_DESCRIPTION = "strain-description"
+MEDIA_BASE_DESCRIPTION = "base-media"
+MEDIA_CARBON_SOURCE = "carbon-source"
+MEDIA_NITROGEN_SOURCE = "nitrogen-source"
+MEDIA_PHOSPHOROUS_SOURCE = "phosphorous-source"
+MEDIA_SULFUR_SOURCE = "Sulfur-source"
+MEDIA_ELECTRON_ACCEPTOR = "electron-acceptor"
+MEDIA_SUPPLEMENT = "supplement"
+MEDIA_ANTIBIOTIC = "antibiotic"
+MEDIA_TEMPERATURE = "temperature"
 LIBRARY_PREP_KIT_MANUFACTURER = "library-prep-kit-manufacturer"
 LIBRARY_PREP_KIT_CYCLES = "library-prep-kit-cycles"
 ALE_NUMBER = "ALE-number"
@@ -17,8 +35,30 @@ FLASK_NUMBER = "Flask-number"
 ISOLATE_NUMBER = "Isolate-number"
 
 DEFAULT_STRAIN = "E. Coli"
-DEFAULT_TEMPERATURE = 37
 DEFAULT_DESCRIPTION = ""
+
+
+def _get_media_substrate_description(metadata_dict):
+
+    if MEDIA_CARBON_SOURCE in metadata_dict.keys():
+        media_substrate_description = metadata_dict[MEDIA_CARBON_SOURCE]
+    else:
+        media_substrate_description = DEFAULT_MEDIA_SUBSTRATE
+
+    if MEDIA_CARBON_SOURCE in metadata_dict.keys():
+        media_substrate_description += " " + metadata_dict[MEDIA_NITROGEN_SOURCE]
+    if MEDIA_PHOSPHOROUS_SOURCE in metadata_dict.keys():
+        media_substrate_description += " " + metadata_dict[MEDIA_PHOSPHOROUS_SOURCE]
+    if MEDIA_SULFUR_SOURCE in metadata_dict.keys():
+        media_substrate_description += " " + metadata_dict[MEDIA_SULFUR_SOURCE]
+    if MEDIA_ELECTRON_ACCEPTOR in metadata_dict.keys():
+        media_substrate_description += " " + metadata_dict[MEDIA_ELECTRON_ACCEPTOR]
+    if MEDIA_ELECTRON_ACCEPTOR in metadata_dict.keys():
+        media_substrate_description += " " + metadata_dict[MEDIA_ELECTRON_ACCEPTOR]
+    if MEDIA_SUPPLEMENT in metadata_dict.keys():
+        media_substrate_description += " " + metadata_dict[MEDIA_SUPPLEMENT]
+
+    return media_substrate_description
 
 
 def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary_key):
@@ -28,50 +68,55 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
         if f.endswith(".csv") or f.endswith(".CSV"):
 
             with open(os.path.join(meta_data_path, f), 'rt') as csvfile:
-
-                meta_data = dict(csv.reader(csvfile, delimiter=','))
+                metadata_dict = dict(csv.reader(csvfile, delimiter=','))
 
                 try:
-                    isolate = Isolate.objects.get(isolate_number=meta_data[ISOLATE_NUMBER],
-                                                  flask__flask_number=meta_data[FLASK_NUMBER],
-                                                  flask__ale_id__ale_id=meta_data[ALE_NUMBER],
+                    isolate = Isolate.objects.get(isolate_number=metadata_dict[ISOLATE_NUMBER],
+                                                  flask__flask_number=metadata_dict[FLASK_NUMBER],
+                                                  flask__ale_id__ale_id=metadata_dict[ALE_NUMBER],
                                                   flask__ale_id__ale_experiment__ale_id=ale_experiment_primary_key)
                 except Exception as e:
-                    print("Error for " + meta_data[ALE_NUMBER] + "-" + meta_data[FLASK_NUMBER] + "-" + meta_data[ISOLATE_NUMBER] + ": ", e)
+                    print("Error for " + metadata_dict[ALE_NUMBER] + "-" + metadata_dict[FLASK_NUMBER] + "-" + metadata_dict[ISOLATE_NUMBER] + ": ", e)
                     continue
 
                 try:
-                    ale_id_description = meta_data[DESCRIPTION]
+                    ale_id_description = metadata_dict[STRAIN_DESCRIPTION]
                 except:
                     ale_id_description = DEFAULT_DESCRIPTION
 
                 try:
-                    strain = meta_data[STRAIN]
+                    strain = metadata_dict[STRAIN]
                 except:
                     strain = DEFAULT_DESCRIPTION
 
                 try:
-                    library_prep = meta_data[LIBRARY_PREP_KIT_MANUFACTURER] + "/ " + meta_data[LIBRARY_PREP_KIT_CYCLES]
+                    library_prep = metadata_dict[LIBRARY_PREP_KIT_MANUFACTURER] + "/ " + metadata_dict[LIBRARY_PREP_KIT_CYCLES]
                     if library_prep is "/ ":
                         library_prep = DEFAULT_DESCRIPTION
                 except:
                     library_prep = DEFAULT_DESCRIPTION
 
-                # Shouldn't be changing media post experiment upload since a media can be referenced by multiple ALE Experiments.
-                # TODO: Have to establish media only when an experiment is uploaded.
-                # try:
-                #     temp = meta_data[TEMPERATURE]
-                #     if temp is '':
-                #         temp = DEFAULT_TEMPERATURE
-                # except:
-                #     temp = DEFAULT_TEMPERATURE
-                # try:
-                #     media_description = meta_data[MEDIA]
-                # except:
-                #     media_description = DEFAULT_DESCRIPTION
+                try:
+                    media_description = metadata_dict[MEDIA_BASE_DESCRIPTION]
+                except:
+                    media_description = DEFAULT_MEDIA_DESCRIPTION
 
-                # isolate.flask.media.temperature = temp
-                # isolate.flask.media.description = media_description
+                try:
+                    media_temperature = metadata_dict[MEDIA_TEMPERATURE]
+                    if media_temperature is '':
+                        media_temperature = DEFAULT_TEMPERATURE
+                except:
+                    media_temperature = DEFAULT_TEMPERATURE
+
+                media_substrate_description = _get_media_substrate_description(metadata_dict)
+
+                media, created = Media.objects.get_or_create(description=media_description,
+                                                             substrate=media_substrate_description,
+                                                             temperature=media_temperature,
+                                                             volume=DEFAULT_VOLUME,
+                                                             stirring_speed=DEFAULT_STIRRING_SPEED)
+                isolate.flask.media = media
+                print(media.id)
 
                 isolate.flask.ale_id.description = ale_id_description
                 isolate.flask.ale_id.strain = strain
@@ -82,4 +127,5 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
 
                 isolate.save()
                 isolate.flask.ale_id.save()
-                # isolate.flask.media.save()
+                isolate.flask.media.save()
+                isolate.flask.save()
