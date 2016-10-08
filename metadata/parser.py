@@ -42,6 +42,8 @@ def _get_media_substrate_description(metadata_dict):
 
     if MEDIA_CARBON_SOURCE in metadata_dict.keys():
         media_substrate_description = metadata_dict[MEDIA_CARBON_SOURCE]
+        if media_substrate_description == "":
+            media_substrate_description = DEFAULT_MEDIA_SUBSTRATE
     else:
         media_substrate_description = DEFAULT_MEDIA_SUBSTRATE
 
@@ -116,7 +118,6 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
                                                              volume=DEFAULT_VOLUME,
                                                              stirring_speed=DEFAULT_STIRRING_SPEED)
                 isolate.flask.media = media
-                print(media.id)
 
                 isolate.flask.ale_id.description = ale_id_description
                 isolate.flask.ale_id.strain = strain
