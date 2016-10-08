@@ -10,7 +10,7 @@ from enrichment.models import EnrichmentMutation
 import seq.models
 from builder.gdparse.gdparse import gdparse
 from common.db_util import clear_dashboard_cache
-from metadata.parser import parse_metadata_post_experiment_upload
+import metadata.parser
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -26,23 +26,13 @@ ANNOTATION_GENOMIC_DIFF_FILE_DIR = '/evidence/'
 METADATA_RELATIVE_PATH = 'metadata/'
 REF_RELATIVE_PATH = 'ref/'
 
-# TODO: Don't use defaults any longer.
-DEFAULT_INSTRUMENT_NAME = "UCSD1"
-DEFAULT_MEDIA_DESCRIPTION = "M9"
-DEFAULT_MEDIA_SUBSTRATE = "glucose"
-DEFAULT_TEMPERATURE = 37
-DEFAULT_VOLUME = 15
-DEFAULT_STIRRING_SPEED = 1100
-DEFAULT_FREEZER_BOX_NAME = "ALE box"
-DEFAULT_FREEZER_BOX_NUMBER = 1
-
 
 def integrate_metadata(ale_exp_path, ref_file_name, ale_exp_primary_key):
     """
     Executed from Django ipython shell
     """
     metadata_path = ale_exp_path + METADATA_RELATIVE_PATH
-    parse_metadata_post_experiment_upload(metadata_path, ale_exp_primary_key)
+    metadata.parser.parse_metadata_post_experiment_upload(metadata_path, ale_exp_primary_key)
 
     ref_file_path = ale_exp_path + REF_RELATIVE_PATH + ref_file_name
     create_functional_annotations(ref_file_path, ale_exp_primary_key)
@@ -112,20 +102,20 @@ def insert_starting_straing_flask(starting_strain_breseq_output_abs_path, ale_ex
 
     clear_dashboard_cache()
 
-    instrument_orm = ale.models.Instrument.objects.get_or_create(name=DEFAULT_INSTRUMENT_NAME)
+    instrument_orm = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
 
     experiment_orm = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                     instrument=instrument_orm,
                                                                     person=ale_exp_user)
 
-    media_orm = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
-                                                       substrate=DEFAULT_MEDIA_SUBSTRATE,
-                                                       temperature=DEFAULT_TEMPERATURE,
-                                                       volume=DEFAULT_VOLUME,
-                                                       stirring_speed=DEFAULT_STIRRING_SPEED)
+    media_orm = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
+                                                       substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
+                                                       temperature=metadata.parser.DEFAULT_TEMPERATURE,
+                                                       volume=metadata.parser.DEFAULT_VOLUME,
+                                                       stirring_speed=metadata.parser.DEFAULT_STIRRING_SPEED)
 
-    freezer_box_orm = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
-                                                                  number=DEFAULT_FREEZER_BOX_NUMBER)
+    freezer_box_orm = ale.models.FreezerBox.objects.get_or_create(name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
+                                                                  number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
 
     _insert_staring_strain_flask(starting_strain_breseq_output_abs_path,
                                  ale_exp_user,
@@ -180,20 +170,20 @@ def insert_flasks(sample_breseq_abs_paths_list,
         ale_exp_name (string): A string for the target ALE experiment name.
     """
 
-    instrument = ale.models.Instrument.objects.get_or_create(name=DEFAULT_INSTRUMENT_NAME)
+    instrument = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
 
     experiment = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
-                                                                    instrument=instrument,
-                                                                    person=ale_exp_user)
+                                                                instrument=instrument,
+                                                                person=ale_exp_user)
 
-    media = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
-                                                       substrate=DEFAULT_MEDIA_SUBSTRATE,
-                                                       temperature=DEFAULT_TEMPERATURE,
-                                                       volume=DEFAULT_VOLUME,
-                                                       stirring_speed=DEFAULT_STIRRING_SPEED)
+    media = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
+                                                   substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
+                                                   temperature=metadata.parser.DEFAULT_TEMPERATURE,
+                                                   volume=metadata.parser.DEFAULT_VOLUME,
+                                                   stirring_speed=metadata.parser.DEFAULT_STIRRING_SPEED)
 
-    freezer_box = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
-                                                                  number=DEFAULT_FREEZER_BOX_NUMBER)
+    freezer_box = ale.models.FreezerBox.objects.get_or_create(name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
+                                                              number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
 
     for sample_breseq_abs_paths in sample_breseq_abs_paths_list:
 
@@ -237,20 +227,20 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     sanitized_breseq_output_abs_path = builder.util.sanitize_path(breseq_output_abs_path)
 
-    instrument, created = ale.models.Instrument.objects.get_or_create(name=DEFAULT_INSTRUMENT_NAME)
+    instrument, created = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
 
     experiment, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                          instrument=instrument,
                                                                          person=ale_exp_user)
 
-    default_media, created = ale.models.Media.objects.get_or_create(description=DEFAULT_MEDIA_DESCRIPTION,
-                                                                    substrate=DEFAULT_MEDIA_SUBSTRATE,
-                                                                    temperature=DEFAULT_TEMPERATURE,
-                                                                    volume=DEFAULT_VOLUME,
-                                                                    stirring_speed=DEFAULT_STIRRING_SPEED)
+    default_media, created = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
+                                                                    substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
+                                                                    temperature=metadata.parser.DEFAULT_TEMPERATURE,
+                                                                    volume=metadata.parser.DEFAULT_VOLUME,
+                                                                    stirring_speed=metadata.parser.DEFAULT_STIRRING_SPEED)
 
-    freezer_box, created = ale.models.FreezerBox.objects.get_or_create(name=DEFAULT_FREEZER_BOX_NAME,
-                                                                       number=DEFAULT_FREEZER_BOX_NUMBER)
+    freezer_box, created = ale.models.FreezerBox.objects.get_or_create(name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
+                                                                       number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
 
     if breseq_starting_strain_output_abs_path is not None:
         _insert_staring_strain_flask(breseq_starting_strain_output_abs_path,
