@@ -65,11 +65,9 @@ def enrichment_mutations(request):
 
     return HttpResponse(template.render(context))
 
-# TODO: ensure that the local and global filters are used to remove unwanted mutations
-# TODO: filter out starting-strain mutations: Denny to implement first on normal mutation tables.
+
 @login_required
 def shared_enriched_genes(request):
-
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
     selected_enrichment_mutation_queryset = EnrichmentMutation.objects.filter(mutation_id=mutation_id)
     enrichment_mutation = selected_enrichment_mutation_queryset[0]  # Should only be one enrichment mutation per mutation_id
@@ -78,15 +76,21 @@ def shared_enriched_genes(request):
 
     shared_enriched_gene_query = reduce(operator.or_, (Q(mutation__gene__contains=gene) for gene in enriched_gene_list))
     enrichment_mutation_queryset = EnrichmentMutation.objects.filter(shared_enriched_gene_query)
+
+    enrichment_mutation_ale_experiment_list = []
+    for en_mut in enrichment_mutation_queryset:
+        enrichment_mutation_ale_experiment_list.append(en_mut.ale_experiment)
+
     observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=enrichment_mutation_queryset.values('mutation'))
+    observed_mutation_queryset = observed_mutation_queryset.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__in=enrichment_mutation_ale_experiment_list)
 
     ordered_reseq_queryset = ResequencingExperiment.objects.all().order_by(
         'tech_rep__isolate__flask__ale_id__ale_experiment__name',
         'tech_rep__isolate__flask__ale_id__ale_id',
         'tech_rep__isolate__flask__flask_number',
         'tech_rep__isolate__isolate_number')
-    ordered_reseq_queryset = ordered_reseq_queryset.filter(
-        id__in=observed_mutation_queryset.values('sequencing_experiment'))
+
+    ordered_reseq_queryset = ordered_reseq_queryset.filter(id__in=observed_mutation_queryset.values('sequencing_experiment'))
 
     ordered_reseq_dict = OrderedDict((reseq.id, reseq) for reseq in ordered_reseq_queryset)
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
