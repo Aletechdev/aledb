@@ -85,8 +85,14 @@ def shared_fixated_mutations(request):
     fixating_mutation = selected_fixating_mutation_queryset[0]  # Should only be one fixating mutation per mutation_id
     fixating_gene = fixating_mutation.mutation.gene
 
-    fixating_mutation_queryset = FixatedMutation.objects.filter(mutation__gene=fixating_gene)
-    observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=fixating_mutation_queryset.values('mutation'))
+    fixated_mutation_queryset = FixatedMutation.objects.filter(mutation__gene=fixating_gene)
+
+    fixated_mutation_ale_experiment_list = []
+    for fix_mut in fixated_mutation_queryset:
+        fixated_mutation_ale_experiment_list.append(fix_mut.ale_experiment)
+
+    observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=fixated_mutation_queryset.values('mutation'))
+    observed_mutation_queryset = observed_mutation_queryset.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__in=fixated_mutation_ale_experiment_list)
 
     ordered_reseq_queryset = ResequencingExperiment.objects.all().order_by(
         'tech_rep__isolate__flask__ale_id__ale_experiment__name',
