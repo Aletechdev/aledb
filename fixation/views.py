@@ -16,6 +16,10 @@ from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID, POS
 from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
 from collections import OrderedDict
+from genes.util import get_gene_list
+import operator
+from functools import reduce
+from django.db.models import Q
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
@@ -76,17 +80,18 @@ def fixating_mutations(request):
 
     return HttpResponse(template.render(context))
 
-# TODO: https://github.com/SBRG/ale_analytics/issues/291
-# TODO: understand if we should be returning mutations fixated within genes involved in fixated mutation, or exact same mutation.
+
 @login_required
 def shared_fixated_mutations(request):
 
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
     selected_fixating_mutation_queryset = FixatedMutation.objects.filter(mutation_id=mutation_id)
     fixating_mutation = selected_fixating_mutation_queryset[0]  # Should only be one fixating mutation per mutation_id
-    fixating_gene = fixating_mutation.mutation.gene
+    fixated_gene_str = fixating_mutation.mutation.gene
+    fixated_gene_list = get_gene_list(fixated_gene_str)
 
-    fixated_mutation_queryset = FixatedMutation.objects.filter(mutation__gene=fixating_gene)
+    shared_fixated_gene_query = reduce(operator.or_, (Q(mutation__gene__contains=gene) for gene in fixated_gene_list))
+    fixated_mutation_queryset = FixatedMutation.objects.filter(shared_fixated_gene_query)
 
     fixated_mutation_ale_experiment_list = []
     for fix_mut in fixated_mutation_queryset:
