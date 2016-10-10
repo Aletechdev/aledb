@@ -1,21 +1,11 @@
 from django.contrib.auth.decorators import login_required
-
 from django.template import loader
-
 from django.http import HttpResponse
-
 from common.db_util import get_all_ale_experiments, get_recent_experiments
-
 from compare.views.common import get_ordered_reseq_dict_and_queryset
-
 from ale.models import AleExperiment
-
 from seq.views.mutation_table_builder import get_table_body, get_table_header, TableType
-
 from django.utils.safestring import mark_safe
-
-
-# Create your views here.
 
 
 EXPORT_TEMPLATE = 'export.html'
