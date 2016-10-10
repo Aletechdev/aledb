@@ -235,6 +235,8 @@ class TechnicalReplicate(models.Model):
 
     isolate = models.ForeignKey(Isolate)
 
+    tags = models.CharField(max_length=500, **blank_field)
+
     description = models.CharField(max_length=500, **blank_field)
 
 

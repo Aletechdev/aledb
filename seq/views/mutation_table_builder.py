@@ -16,6 +16,8 @@ from common.db_util import get_mutation_queryset_from_obs_mut_queryset
 
 from genes.util import get_gene_list
 
+from common.constants import TAGS
+
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 
@@ -23,7 +25,7 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/close-icon.gif" width="12" height="11"></a>"""
 
-HTML_MUTATION_TABLE_HEADER = ["", "", "Position", "Mutation Type", "Sequence Change", "Gene", "Function", "Product", "GO Process", "GO Component", "Protein change"]
+HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequence Change", "Gene", "Function", "Product", "GO Process", "GO Component", "Protein change"]
 
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 
@@ -40,6 +42,7 @@ SAVE_MUTATION_TO_FILTER_CELL_HTML = """<div class="dropdown">
   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
     <li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>
     <li><a onclick="save_to_experiment_filter(%d, %d)" style="cursor:pointer">Save to Experiment Filter</a></li>
+    %s
   </ul>
 </div>"""
 
@@ -49,6 +52,7 @@ SAVE_TO_GLOBAL_FILTER_ONLY = """<div class="dropdown">
   </button>
   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
     <li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>
+    %s
   </ul>
 </div>
 """
@@ -149,15 +153,16 @@ def get_table_body(reseq_dict,
                             table_type == TableType.COMPARE or \
                             table_type == TableType.COMPARE_ENRICHEMENT_MUTATIONS or \
                             table_type == TableType.COMPARE_FIXATION_MUTATIONS:
-                table_row.append(SAVE_TO_GLOBAL_FILTER_ONLY % mutation.id)
+                table_row.append(SAVE_TO_GLOBAL_FILTER_ONLY % (mutation.id, _get_tag_filter_dropdown_entries(mutation.id)))
             else:
-                table_row.append(SAVE_MUTATION_TO_FILTER_CELL_HTML % (mutation.id, ale_experiment_id, mutation.id))
+                table_row.append(SAVE_MUTATION_TO_FILTER_CELL_HTML % (mutation.id, ale_experiment_id, mutation.id, _get_tag_filter_dropdown_entries(mutation.id)))
 
             if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.COMPARE_ENRICHEMENT_MUTATIONS:
                 table_row.append("<a href=/enrichment/shared?mutation_id=%s>shared</a>" % mutation.id)
             elif table_type == TableType.FIXATING_MUTATIONS or table_type == TableType.COMPARE_FIXATION_MUTATIONS:
                 table_row.append("<a href=/fixation/shared?mutation_id=%s>shared</a>" % mutation.id)
 
+            table_row.append(_get_tags(mutation.tags))
             table_row.append(format(mutation.position, ',d'))
             table_row.append(mutation.mutation_type)
             table_row.append(mutation.sequence_change)
@@ -339,3 +344,38 @@ def _remove_checked_flasks(request, seq_experiment_dict):
                     del seq_experiment_dict[int(checked_experiment_id)]
 
     return seq_experiment_dict
+
+
+def _get_tags(tags):
+
+    html = ''
+
+    if tags:
+
+        for tag in tags.split(','):
+
+            html += TAGS[tag]
+
+    return html
+
+
+def _get_tag_filter_dropdown_entries(mutation_id):
+
+    html = ''
+
+    for key, value in TAGS.items():
+
+        html += '<li><a onclick="add_tag(\'%s\', %d)" style="cursor:pointer">Add Tag: %s %s</a></li>' % (key, mutation_id, key, value)
+
+    return html
+
+
+def get_tag_toggle_dropdown_entries():
+
+    html = ''
+
+    for key, value in TAGS.items():
+
+        html += '<li><a onclick="filter_tag(\'%s\')" style="cursor:pointer">Show Tag: %s %s</a></li>' % (key, key, value)
+
+    return html
