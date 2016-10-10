@@ -48,7 +48,8 @@ def mutation_table(request):
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(ale_experiment_id),
-               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
+               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
+               "tag_dropdown": mutation_table_builder.get_tag_toggle_dropdown_entries()
                }
 
     return HttpResponse(template.render(context))

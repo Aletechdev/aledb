@@ -180,3 +180,19 @@ function expand_collapse_gene_entry(sign) {
         sign.className = sign.className.replace('minus', 'plus');
     }
 }
+
+function add_tag(tag_type, mutation_id) {
+    $.ajax({
+        type: "POST",
+        url: "",
+        data: { mut_id: mutation_id,
+                save_method: "tag",
+                tag_name: tag_type
+        }
+    })
+}
+
+function filter_tag(tag_type) {
+    $('#data').DataTable().column(sorted_column - 1).data().draw()
+
+}

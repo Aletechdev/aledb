@@ -122,6 +122,8 @@ class Mutation(models.Model):
 
     reseq_reference = models.CharField(max_length=200, **blank_field)
 
+    tags = models.CharField(max_length=500, **blank_field)
+
     # "reference_error" was created to indicate mutations that are generated only because
     # the reference isn't realistic and not because the organism is actually
     # different from the original strain. This is why setting this value to
