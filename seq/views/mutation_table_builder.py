@@ -354,7 +354,7 @@ def _get_tags(tags):
 
         for tag in tags.split(','):
 
-            html += TAGS[tag]
+            html += '<span class="fa-stack">%s<font style="font-size:0px">%s</font></span>' % (TAGS[tag], tag)
 
     return html
 

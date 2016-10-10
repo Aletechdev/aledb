@@ -193,6 +193,9 @@ function add_tag(tag_type, mutation_id) {
 }
 
 function filter_tag(tag_type) {
-    $('#data').DataTable().column(sorted_column - 1).data().draw()
-
+    if(tag_type == 'clear') {
+        $('#data').DataTable().column(sorted_column - 1).search('').draw();
+    } else {
+        $('#data').DataTable().column(sorted_column - 1).search(tag_type).draw();
+    }
 }
