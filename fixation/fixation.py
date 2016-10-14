@@ -1,7 +1,7 @@
 from common.db_util import get_mutation_queryset_from_obs_mut_queryset
 import seq.models
 from seq.util import get_all_observed_mutations
-from filter.util import filter_mutations
+from filter.util import filter_observed_mutations
 
 __author__ = "Patrick Phaneuf"
 
@@ -37,12 +37,12 @@ def _get_ale_fixated_mutation_queryset(flask_obs_mut_dict, filter_settings):
         last_flask_number = ordered_flask_number_list[-1]
 
         first_flask_obs_mut_queryset = flask_obs_mut_dict[first_flask_number]
-        first_flask_obs_mut_queryset = filter_mutations(first_flask_obs_mut_queryset, filter_settings)
+        first_flask_obs_mut_queryset = filter_observed_mutations(first_flask_obs_mut_queryset, filter_settings)
         fixated_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(first_flask_obs_mut_queryset)
 
         for flask_number in ordered_flask_number_list:
             flask_obs_mut_queryset = flask_obs_mut_dict[flask_number]
-            flask_obs_mut_queryset = filter_mutations(flask_obs_mut_queryset, filter_settings)
+            flask_obs_mut_queryset = filter_observed_mutations(flask_obs_mut_queryset, filter_settings)
             flask_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(flask_obs_mut_queryset)
             if flask_number == last_flask_number:
                 fixated_mutation_queryset = _get_common_mutations(fixated_mutation_queryset,
