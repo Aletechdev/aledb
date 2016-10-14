@@ -63,11 +63,7 @@
             </select>
         </div>
         <div class="checkbox">
-            {% if is_ascending_freq_filter %}
-                <label><input type="checkbox" name="asndflt" value="t" checked>Only fixed mutations with ascending frequencies</label>
-            {% else %}
-                <label><input type="checkbox" name="asndflt" value="t">Only fixed mutations with ascending frequencies</label>
-            {% endif %}
+            <label><input type="checkbox" name="asndflt" value="t" {% if is_ascending_freq_filter %} checked {% endif %}>Only fixed mutations with ascending frequencies</label>
         </div>
         <div>
             <p><input type="submit" class="btn btn-default" value="Apply"/></p>
