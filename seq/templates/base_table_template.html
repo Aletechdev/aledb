@@ -64,7 +64,7 @@
             <input type="hidden" name="ale_no" value="all"/>
         {% endif %}
         <table id="data" class="table" cellspacing="0px">
-            <label style="float:right"><input id="show_dups" onclick="filter_dups(this)" type="checkbox" name="checkbox" value="value" checked data-toggle="toggle"> Show Duplications</label>
+            <label style="float:right"><input id="show_dups" type="checkbox" name="checkbox" value="value" checked data-toggle="toggle" data-on="Show" data-off="Hide"> Duplications</label>
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-default" onclick="column_sort_from_right()">Column Sort from Right</button>
                 <div class="btn-group" role="group">
@@ -77,7 +77,7 @@
                         {{ tag_dropdown | safe }}
                     </ul>
                 </div>
-                <input type="checkbox" data-toggle="toggle">
+                <input id="tag_toggle" type="checkbox" data-toggle="toggle" checked>
             </div>
             <br><br>
             <thead>
