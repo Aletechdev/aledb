@@ -112,10 +112,19 @@ $(document).ready(function () {
             }
         } );
     });
-    if(localStorage && localStorage['dups'] == 'false') {
-        $('#show_dups').click()
-    }
 
+    if(localStorage && localStorage['dups'] == 'false') {
+        $('#show_dups').bootstrapToggle('off');
+        oTable.column(sorted_column + 1).search("^((?!DUP).)*$", true, false).draw();
+    }
+    $('#show_dups').change(function () {
+        filter_dups()
+    });
+
+    $('#tag_toggle').change(function() {
+        var column = oTable.column(sorted_column - 1);
+        column.visible( ! column.visible() );
+    })
 });
 
 function column_sort_from_right() {
