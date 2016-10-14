@@ -62,7 +62,7 @@ def fixating_mutations(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
-    template = loader.get_template("base_table_template.html")
+    template = loader.get_template("fixation/fixed_mutations.html")
 
     context = {"ales": ale_queryset,
                "ale_experiment_name": ale_experiment_name,
@@ -71,7 +71,7 @@ def fixating_mutations(request):
                "table_body": mark_safe(table_body),
                "title": "Fixating Mutations",
                "table_header": mark_safe(table_header),
-               "is_ascending_freq_filter": is_ascending_freq_filter,
+               "is_ascending_freq_filter": is_ascending_freq_filter,  # State of ascending fixed freq filter mutation; currently not being used.
                "template_header": "Fixating Mutations",
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
