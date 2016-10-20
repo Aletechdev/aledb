@@ -27,18 +27,27 @@ __author__ = 'pphaneuf'
 
 @login_required
 def dashboard(request):
-    mutation_type_count_dict = {}
-
     mutation_query_set, observed_mutation_queryset = _get_cached_dashboard_query()
 
+    mutation_type_count_dict = {}
+    mutation_type_count_dict['observed'] = {}
+    mutation_type_count_dict['unique'] = {}
     for mutation_type in common.MUTATION_TYPE_LIST:
-        mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=mutation_type).count()
-        mutation_type_count_dict[mutation_type] = mutation_type_count
+        observed_mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=mutation_type).count()
+        mutation_type_count_dict['observed'][mutation_type] = observed_mutation_type_count
+
+        mutation_type_count = mutation_query_set.filter(mutation_type=mutation_type).count()
+        mutation_type_count_dict['unique'][mutation_type] = mutation_type_count
 
     protein_change_type_count_dict = {}
+    protein_change_type_count_dict['observed'] = {}
+    protein_change_type_count_dict['unique'] = {}
     for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST:
         protein_change_count = observed_mutation_queryset.filter(mutation__protein_change__contains=protein_change_type).count()
-        protein_change_type_count_dict[protein_change_type] = protein_change_count
+        protein_change_type_count_dict['observed'][protein_change_type] = protein_change_count
+
+        protein_change_count = mutation_query_set.filter(protein_change__contains=protein_change_type).count()
+        protein_change_type_count_dict['unique'][protein_change_type] = protein_change_count
 
     gene_bar_chart_dict = common.get_gene_bar_chart_dict(observed_mutation_queryset, 'dashboard')
 
@@ -87,7 +96,11 @@ def _get_cached_dashboard_query():
 
     if cached_mutation_queryset is None or cached_observed_mutation_queryset is None:
 
-        initial_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
+        # TODO: only filter out mutations without genes for the barcharts. The
+        # mutations count tables above bar charts don't care if a mutation
+        # doesn't have a gene.
+        # initial_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
+        initial_query = seq.models.ObservedMutation.objects.exclude()
 
         observed_mutation_queryset = dashboard_filter(initial_query)
 
