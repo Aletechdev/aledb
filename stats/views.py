@@ -230,7 +230,11 @@ def _get_observed_mutation_queryset(request, ale_experiment_id):
 # TODO: Should move this function into the filter app
 def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
 
-    observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene='')
+    # TODO: only filter out mutations without genes for the barcharts. The
+    # mutations count tables above bar charts don't care if a mutation
+    # doesn't have a gene.
+    # observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene='')
+    observed_mutation_query_set = observed_mutation_query_set.exclude()
 
     ale_experiment_id = common.get_ale_experiment_id(request)
 
