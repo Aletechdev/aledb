@@ -29,13 +29,16 @@ __author__ = 'pphaneuf'
 def dashboard(request):
     mutation_query_set, observed_mutation_queryset = _get_cached_dashboard_query()
 
+    mutation_count_dict = {}
+    mutation_count_dict['observed'] = observed_mutation_queryset.count()
+    mutation_count_dict['unique'] = mutation_query_set.count()
+
     mutation_type_count_dict = {}
     mutation_type_count_dict['observed'] = {}
     mutation_type_count_dict['unique'] = {}
     for mutation_type in common.MUTATION_TYPE_LIST:
         observed_mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=mutation_type).count()
         mutation_type_count_dict['observed'][mutation_type] = observed_mutation_type_count
-
         mutation_type_count = mutation_query_set.filter(mutation_type=mutation_type).count()
         mutation_type_count_dict['unique'][mutation_type] = mutation_type_count
 
@@ -45,7 +48,6 @@ def dashboard(request):
     for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST:
         protein_change_count = observed_mutation_queryset.filter(mutation__protein_change__contains=protein_change_type).count()
         protein_change_type_count_dict['observed'][protein_change_type] = protein_change_count
-
         protein_change_count = mutation_query_set.filter(protein_change__contains=protein_change_type).count()
         protein_change_type_count_dict['unique'][protein_change_type] = protein_change_count
 
@@ -61,6 +63,7 @@ def dashboard(request):
     genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes,
                                                                                                 sequence_changes)
     context = {"protein_change_type_count_dict": protein_change_type_count_dict,
+               "mutation_count_dict": mutation_count_dict,
                "mutation_type_count_dict": mutation_type_count_dict,
                "genes": mark_safe(genes_to_show),
                "sequence_changes": mark_safe(sequence_changes_to_show),
