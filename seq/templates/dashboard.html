@@ -28,10 +28,33 @@
 {% block header %}Dashboard{% endblock %}
 {% block content %}
 <div class="row">
+  <div class="col-lg-6">
+      <div class="panel panel-default">
+          <div class="panel-heading">
+              <h3 class="panel-title">ALE Analytics Total Mutation Counts</h3>
+          </div>
+          <table class="table">
+              <thead>
+                  <tr>
+                      <th>Observed Mutations</th>
+                      <th>Unique Mutations</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  <tr>
+                      <td>{{ mutation_count_dict.observed }}</td>
+                      <td>{{ mutation_count_dict.unique }}</td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+  </div>
+</div>
+<div class="row">
     <div class="col-lg-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">ALE Analytics Mutation Stats</h3>
+                <h3 class="panel-title">ALE Analytics Mutation Type Counts</h3>
             </div>
             <table class="table">
                 <thead>
@@ -94,7 +117,7 @@
     <div class="col-lg-6">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title">ALE Analytics Functional Change Stats</h3>
+                <h3 class="panel-title">ALE Analytics Mutation Functional Change Counts</h3>
             </div>
 
             <table class="table">
