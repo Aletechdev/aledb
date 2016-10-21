@@ -18,6 +18,11 @@ from common.db_util import get_all_ale_experiments, get_recent_experiments
 
 from django.core.cache import cache
 
+from ale.models import AleExperiment
+from ale.models import AleId
+from ale.models import Flask
+from ale.models import Isolate
+
 DEFAULT_IGNORED_MUTATIONS = "[]"
 
 DASHBOARD_TEMPLATE = "dashboard.html"
@@ -29,9 +34,12 @@ __author__ = 'pphaneuf'
 def dashboard(request):
     mutation_query_set, observed_mutation_queryset = _get_cached_dashboard_query()
 
-    mutation_count_dict = {}
-    mutation_count_dict['observed'] = observed_mutation_queryset.count()
-    mutation_count_dict['unique'] = mutation_query_set.count()
+    count_dict = {}
+    count_dict['observed'] = observed_mutation_queryset.count()
+    count_dict['unique'] = mutation_query_set.count()
+    count_dict['ale_exp'] = AleExperiment.objects.count()
+    count_dict['ale'] = AleId.objects.count()
+    count_dict['isolate'] = Isolate.objects.count()
 
     mutation_type_count_dict = {}
     mutation_type_count_dict['observed'] = {}
@@ -63,7 +71,7 @@ def dashboard(request):
     genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes,
                                                                                                 sequence_changes)
     context = {"protein_change_type_count_dict": protein_change_type_count_dict,
-               "mutation_count_dict": mutation_count_dict,
+               "count_dict": count_dict,
                "mutation_type_count_dict": mutation_type_count_dict,
                "genes": mark_safe(genes_to_show),
                "sequence_changes": mark_safe(sequence_changes_to_show),
