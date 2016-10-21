@@ -48,6 +48,13 @@
                                 value="{{ ale }}">{{ ale }}</option>
                     {% endfor %}
                 </select>
+                <select name="tag_select">
+                    <option value="All Tags">All Tags</option>
+                    {% for key, value in tag_dropdown.items %}
+                        <option>Show Tag: {{ key }}</option>
+                        <option>Hide Tag: {{ key }}</option>
+                    {% endfor %}
+                </select>
             </p>
             <p>
                 <input type="submit" class="btn btn-default" value="Apply"/>
@@ -66,15 +73,18 @@
         <table id="data" class="table" cellspacing="0px">
             <label style="float:right"><input id="show_dups" type="checkbox" name="checkbox" value="value" checked data-toggle="toggle" data-on="Show" data-off="Hide"> Duplications</label>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default" onclick="column_sort_from_right()">Column Sort from Right</button>
+                <button type="button" class="btn btn-default" onclick="column_sort_from_right()"><i class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i>Column Sort from Right</button>
                 <div class="btn-group" role="group">
                     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Tags
+                    <i class="fa fa-tags fa-fw" aria-hidden="true"></i> Tags
                     <span class="caret"></span>
                     </button>
                     <ul class="dropdown-menu">
                         <li><a onclick="filter_tag('clear')" style="cursor:pointer">Clear Tags</a></li>
-                        {{ tag_dropdown | safe }}
+                        {% for key, value in tag_dropdown.items %}
+                            <li><a onclick="filter_tag('{{ key }}', true)" style="cursor:pointer">Show Tag: {{ key }} {{ value | safe }}</a></li>
+                            <li><a onclick="filter_tag('{{ key }}', false)" style="cursor:pointer">Hide Tag: {{ key }} {{ value | safe }}</a></li>
+                        {% endfor %}
                     </ul>
                 </div>
                 <input id="tag_toggle" type="checkbox" data-toggle="toggle" checked>
