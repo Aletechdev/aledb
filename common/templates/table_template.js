@@ -195,16 +195,28 @@ function add_tag(tag_type, mutation_id) {
         type: "POST",
         url: "",
         data: { mut_id: mutation_id,
-                save_method: "tag",
+                save_method: "tag_mut",
                 tag_name: tag_type
         }
     })
 }
 
-function filter_tag(tag_type) {
+function filter_tag(tag_type, is_show) {
     if(tag_type == 'clear') {
         $('#data').DataTable().column(sorted_column - 1).search('').draw();
     } else {
         $('#data').DataTable().column(sorted_column - 1).search(tag_type).draw();
     }
+}
+
+function add_tag_to_replicate(tag_type, replicate_id) {
+    event.preventDefault();
+    $.ajax({
+        type: "POST",
+        url: "",
+        data: { rep_id: replicate_id,
+                save_method: "tag_rep",
+                tag_name: tag_type
+        }
+    })
 }

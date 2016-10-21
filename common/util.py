@@ -9,6 +9,8 @@ import common.db_util
 
 from seq.models import Mutation
 
+from ale.models import TechnicalReplicate
+
 
 def get_ale_experiment_selector(ale_experiment_id, reseq_query):
 
@@ -67,7 +69,7 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
             ale_exp_filter.ignored_mutations = ignored_mutations
 
             ale_exp_filter.save()
-        elif save_method == 'tag':
+        elif save_method == 'tag_mut':
 
             mutation = Mutation.objects.get(id=mut_id)
 
@@ -87,5 +89,28 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
                 mutation.tags = request.POST.get('tag_name')
 
             mutation.save()
+
+        elif save_method == 'tag_rep':
+
+            rep_id = request.POST.get('rep_id')
+
+            replicate = TechnicalReplicate.objects.get(id=rep_id)
+
+            if replicate.tags:
+
+                selected_tag = request.POST.get('tag_name')
+
+                tag_list = replicate.tags.split(',')
+                if selected_tag in tag_list:
+                    tag_list.remove(selected_tag)
+
+                else:
+                    tag_list.append(selected_tag)
+
+                replicate.tags = ','.join(tag_list)
+            else:
+                replicate.tags = request.POST.get('tag_name')
+
+            replicate.save()
 
     return hidden_columns

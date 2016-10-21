@@ -27,7 +27,7 @@ HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" on
 
 HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequence Change", "Gene", "Function", "Product", "GO Process", "GO Component", "Protein change"]
 
-HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
+HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>%s"""
 
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 
@@ -67,6 +67,13 @@ non_decimal = re.compile(r'[^\d.]+')
 
 evidence = re.compile(r'[A-Z]\d+[A-Z]')
 
+TAGS_IMAGE = '<div class="dropdown"><button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">' \
+    '<i class="fa fa-tags" aria-hidden="true"></i>' \
+    '</button>' \
+    '<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">'\
+    '%s' \
+    '</ul>'
+
 
 class TableType(Enum):
     GENE_TABLE = 1
@@ -102,7 +109,9 @@ def get_table_header(reseq_dict, table_type=None):
 
         sample_name = reseq.aleexp_ale_flask_isolate_str
 
-        table_header_list += [HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id], sample_name)]
+        table_header_list += [HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id],
+                                                                       sample_name,
+                                                                       TAGS_IMAGE % _get_tag_replicate_dropdown_entries(reseq.tech_rep_id))]
 
     return base_table_header + table_header_list
 
@@ -162,7 +171,7 @@ def get_table_body(reseq_dict,
             elif table_type == TableType.FIXATING_MUTATIONS or table_type == TableType.COMPARE_FIXATION_MUTATIONS:
                 table_row.append("<a href=/fixation/shared?mutation_id=%s>shared</a>" % mutation.id)
 
-            table_row.append(_get_tags(mutation.tags))
+            table_row.append(_get_mutation_tags(mutation.tags))
             table_row.append(format(mutation.position, ',d'))
             table_row.append(mutation.mutation_type)
             table_row.append(mutation.sequence_change)
@@ -346,7 +355,7 @@ def _remove_checked_flasks(request, seq_experiment_dict):
     return seq_experiment_dict
 
 
-def _get_tags(tags):
+def _get_mutation_tags(tags):
 
     html = ''
 
@@ -370,12 +379,11 @@ def _get_tag_filter_dropdown_entries(mutation_id):
     return html
 
 
-def get_tag_toggle_dropdown_entries():
+def _get_tag_replicate_dropdown_entries(replicate_id):
 
     html = ''
 
     for key, value in TAGS.items():
-
-        html += '<li><a onclick="filter_tag(\'%s\')" style="cursor:pointer">Show Tag: %s %s</a></li>' % (key, key, value)
+        html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d)">Add Tag: %s %s</a></li>' % (key, replicate_id, key, value)
 
     return html

@@ -11,6 +11,7 @@ from common.util import check_hidden_columns_and_filters
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from django.core.serializers.json import DjangoJSONEncoder
 import json
+import common.constants
 
 __author__ = 'pphaneuf'
 
@@ -49,7 +50,7 @@ def mutation_table(request):
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(ale_experiment_id),
                "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
-               "tag_dropdown": mutation_table_builder.get_tag_toggle_dropdown_entries()
+               "tag_dropdown": common.constants.TAGS
                }
 
     return HttpResponse(template.render(context))
