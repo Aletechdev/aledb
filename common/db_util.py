@@ -36,7 +36,7 @@ def get_reseq_dict(ale_experiment_id):
 
 
 # TODO: go in seq.util
-def get_reseq_ordered_dict(ale_experiment_id, ale_no=None):
+def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, request=None):
     """
     Args:
         ale_experiment_id:
@@ -46,9 +46,23 @@ def get_reseq_ordered_dict(ale_experiment_id, ale_no=None):
         reseq_ordered_dict: a ordered dictionary of reseq values and their ID's as keys.
         The reseq values within the dictionary will be ordered according to that
         defined within RESEQ_QUERY
+        :param request:
 
     """
     reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_no)
+
+    if request:
+
+        tag = request.GET.get('tag_select').split(':')
+
+        if tag[0] == 'Hide Tag':
+
+            reseq_queryset = reseq_queryset.exclude(tech_rep__tags__contains=tag[1].replace(' ', ''))
+
+        elif tag[0] == 'Show Tag':
+
+            reseq_queryset = reseq_queryset.filter(tech_rep__tags__contains=tag[1].replace(' ', ''))
+
     reseq_ordered_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
     return reseq_ordered_dict
 

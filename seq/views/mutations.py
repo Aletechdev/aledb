@@ -25,8 +25,9 @@ def mutation_table(request):
     is_ref_strain_filtered = seq.views.common.is_ref_strain_filtered(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, is_ref_strain_filtered)
 
-    ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no)
+    ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no, request)
 
+    # TODO: Talk to Patrick about removing this line and its corresponding functions in mutation_table_builder
     ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
