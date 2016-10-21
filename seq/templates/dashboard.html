@@ -34,21 +34,7 @@
                 <h3 class="panel-title">ALE Analytics Total Mutation Counts</h3>
             </div>
             <table class="table">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Count</th>
-                    </tr>
-                </thead>
                 <tbody>
-                    <tr>
-                        <td>Observed Mutations</td>
-                        <td>{{ count_dict.observed }}</td>
-                    </tr>
-                    <tr>
-                        <td>Unique Mutations</td>
-                        <td>{{ count_dict.unique }}</td>
-                    </tr>
                     <tr>
                         <td>ALE Experiments</td>
                         <td>{{ count_dict.ale_exp }}</td>
@@ -60,6 +46,14 @@
                     <tr>
                         <td>Isolates</td>
                         <td>{{ count_dict.isolate }}</td>
+                    </tr>
+                    <tr>
+                        <td>Unique Mutations</td>
+                        <td>{{ count_dict.unique }}</td>
+                    </tr>
+                    <tr>
+                        <td>Observed Mutations</td>
+                        <td>{{ count_dict.observed }}</td>
                     </tr>
                 </tbody>
             </table>
