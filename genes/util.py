@@ -19,12 +19,15 @@ def get_annotated_gene_list(breseq_mutation_gene_annotation, breseq_gene_product
     else:
         gene_product_str = None
 
-    if INTERGENIC_SPLIT_CHAR in mutation_gene_str:
-        gene_list = mutation_gene_str.split(INTERGENIC_SPLIT_CHAR)
-    elif BRESEQ_GENE_RANGE_CHAR in mutation_gene_str:
-        gene_list = _get_gene_list_from_range(gene_product_str)
+    if mutation_gene_str is not None:
+        if INTERGENIC_SPLIT_CHAR in mutation_gene_str:
+            gene_list = mutation_gene_str.split(INTERGENIC_SPLIT_CHAR)
+        elif BRESEQ_GENE_RANGE_CHAR in mutation_gene_str:
+            gene_list = _get_gene_list_from_range(gene_product_str)
+        else:
+            gene_list = [mutation_gene_str]
     else:
-        gene_list = [mutation_gene_str]
+        gene_list = []
 
     return gene_list
 
