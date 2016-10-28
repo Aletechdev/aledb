@@ -69,7 +69,7 @@ non_decimal = re.compile(r'[^\d.]+')
 
 evidence = re.compile(r'[A-Z]\d+[A-Z]')
 
-TAGS_IMAGE = '<div class="dropdown"><button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">' \
+TAGS_IMAGE = '<div class="dropdown tag_dropdown"><button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">' \
     '<i class="fa fa-tags" aria-hidden="true"></i>' \
     '</button>' \
     '<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">'\
