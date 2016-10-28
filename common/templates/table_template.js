@@ -123,7 +123,16 @@ $(document).ready(function () {
 
     $('#tag_toggle').change(function() {
         var column = oTable.column(sorted_column - 1);
+        var visibility = column.visible();
         column.visible( ! column.visible() );
+
+        [].forEach.call(document.querySelectorAll('.tag_dropdown'), function (el) {
+            if(visibility) {
+                el.style.display = 'none';
+            } else {
+                el.style.display = '';
+            }
+        });
     })
 });
 

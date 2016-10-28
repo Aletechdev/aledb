@@ -51,7 +51,7 @@ def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, request=None):
     """
     reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_no)
 
-    if request:
+    if request and request.GET.get('tag_select'):
 
         tag = request.GET.get('tag_select').split(':')
 
