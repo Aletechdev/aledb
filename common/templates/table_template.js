@@ -214,7 +214,12 @@ function filter_tag(tag_type, is_show) {
     if(tag_type == 'clear') {
         $('#data').DataTable().column(sorted_column - 1).search('').draw();
     } else {
-        $('#data').DataTable().column(sorted_column - 1).search(tag_type).draw();
+        if(is_show) {
+            $('#data').DataTable().column(sorted_column - 1).search(tag_type).draw();
+        } else {
+            var regex = '^((?!' + tag_type + ').)*$';
+            $('#data').DataTable().column(sorted_column - 1).search(regex, true, false).draw();
+        }
     }
 }
 
