@@ -74,7 +74,8 @@ TAGS_IMAGE = '<div class="dropdown tag_dropdown"><button class="btn btn-default 
     '</button>' \
     '<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">'\
     '%s' \
-    '</ul>'
+    '</ul>' \
+    '%s'
 
 
 class TableType(Enum):
@@ -111,9 +112,11 @@ def get_table_header(reseq_dict, table_type=None):
 
         sample_name = reseq.aleexp_ale_flask_isolate_str
 
+        current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep_id)
+
         table_header_list += [HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id],
                                                                        sample_name,
-                                                                       TAGS_IMAGE % _get_tag_replicate_dropdown_entries(reseq.tech_rep_id))]
+                                                                       TAGS_IMAGE % (dropdown_html, current_tags))]
 
     return base_table_header + table_header_list
 
@@ -368,7 +371,7 @@ def _get_tag_filter_dropdown_entries(mutation_id):
 
     for key, value in TAGS.items():
 
-        html += '<li><a onclick="add_tag(\'%s\', %d)" style="cursor:pointer">Add Tag: %s %s</a></li>' % (key, mutation_id, key, value)
+        html += '<li><a onclick="add_tag(\'%s\', %d)" style="cursor:pointer">Toggle Tag: %s %s</a></li>' % (key, mutation_id, key, value)
 
     return html
 
@@ -379,13 +382,15 @@ def _get_tag_replicate_dropdown_entries(replicate_id):
 
     if tags:
 
-        html = '<li>Current Tags: %s</li>' % ''.join([TAGS[tag] for tag in tags.split(',')])
+        current_tags = ''.join([TAGS[tag] for tag in tags.split(',')])
 
     else:
 
-        html = ''
+        current_tags = ''
+
+    dropdown_html = ''
 
     for key, value in TAGS.items():
-        html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d)">Add Tag: %s %s</a></li>' % (key, replicate_id, key, value)
+        dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d)">Toggle Tag: %s %s</a></li>' % (key, replicate_id, key, value)
 
-    return html
+    return current_tags, dropdown_html
