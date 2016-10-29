@@ -112,15 +112,15 @@ def _get_flask_obs_mut_dict(flask_isolate_obs_mut_dict):
 
 def filter_for_ascending_freq(fixating_observed_mutation_queryset):
 
-    fixated_mutation_freq_dict = {}
+    fixated_obs_mut_freq_dict = {}
     for observed_mutation in fixating_observed_mutation_queryset:
         mutation_id = observed_mutation.mutation.id
-        if mutation_id in fixated_mutation_freq_dict.keys():
-            fixated_mutation_freq_dict[mutation_id].append(observed_mutation)
+        if mutation_id in fixated_obs_mut_freq_dict.keys():
+            fixated_obs_mut_freq_dict[mutation_id].append(observed_mutation)
         else:
-            fixated_mutation_freq_dict[mutation_id] = [observed_mutation]
+            fixated_obs_mut_freq_dict[mutation_id] = [observed_mutation]
 
-    mutation_id_exclude_list = _get_descending_freq_mutation_id_list(fixated_mutation_freq_dict)
+    mutation_id_exclude_list = _get_descending_freq_mutation_id_list(fixated_obs_mut_freq_dict)
 
     fixating_observed_mutation_queryset = fixating_observed_mutation_queryset.exclude(mutation_id__in=mutation_id_exclude_list)
 
@@ -128,10 +128,10 @@ def filter_for_ascending_freq(fixating_observed_mutation_queryset):
 
 
 # TODO: this can be unit tested.
-def _get_descending_freq_mutation_id_list(fixated_mutation_freq_dict):
+def _get_descending_freq_mutation_id_list(fixated_obs_mut_freq_dict):
     mutation_id_exclude_list = []
 
-    for mutation_id, observed_mutation_list in fixated_mutation_freq_dict.items():
+    for mutation_id, observed_mutation_list in fixated_obs_mut_freq_dict.items():
 
         observed_mutation_list = _filter_mutations_from_same_flask(observed_mutation_list)
 
