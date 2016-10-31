@@ -19,6 +19,7 @@ from genes.util import get_gene_list
 import operator
 from functools import reduce
 from django.db.models import Q
+import common.constants
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
@@ -60,7 +61,8 @@ def enrichment_mutations(request):
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(int(ale_experiment_id)),
-               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TALBE
+               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TALBE,
+               "tag_dropdown": common.constants.TAGS
                }
 
     return HttpResponse(template.render(context))

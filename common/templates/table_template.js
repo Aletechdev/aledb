@@ -255,5 +255,5 @@ function add_tag_to_replicate(tag_type, replicate_id, header) {
                 save_method: "tag_rep",
                 tag_name: tag_type
         }
-    })
+    });
 }
