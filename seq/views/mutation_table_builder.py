@@ -75,7 +75,7 @@ TAGS_IMAGE = '<div class="dropdown tag_dropdown"><button class="btn btn-default 
     '<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">'\
     '%s' \
     '</ul>' \
-    '%s'
+    '</div><div class="tag_dropdown">%s</div>'
 
 
 class TableType(Enum):
@@ -371,7 +371,7 @@ def _get_tag_filter_dropdown_entries(mutation_id):
 
     for key, value in TAGS.items():
 
-        html += '<li><a onclick="add_tag(\'%s\', %d)" style="cursor:pointer">Toggle Tag: %s %s</a></li>' % (key, mutation_id, key, value)
+        html += '<li><a onclick="add_tag(\'%s\', %d, this)" style="cursor:pointer">Toggle Tag: %s %s</a></li>' % (key, mutation_id, key, value)
 
     return html
 
@@ -380,17 +380,19 @@ def _get_tag_replicate_dropdown_entries(replicate_id):
 
     tags = TechnicalReplicate.objects.get(id=replicate_id).tags
 
-    if tags:
-
-        current_tags = ''.join([TAGS[tag] for tag in tags.split(',')])
-
-    else:
-
-        current_tags = ''
+    current_tags = ''
 
     dropdown_html = ''
 
     for key, value in TAGS.items():
-        dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d)">Toggle Tag: %s %s</a></li>' % (key, replicate_id, key, value)
+        dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d, this)">Toggle Tag: %s %s</a></li>' % (key, replicate_id, key, value)
+
+        if tags and key in tags:
+
+            current_tags += '<span class="fa-stack">%s<font style="font-size:0px">%s</font></span>' % (value, key)
+
+        else:
+
+            current_tags += '<span class="fa-stack" style="display:none">%s<font style="font-size:0px">%s</font></span>' % (value, key)
 
     return current_tags, dropdown_html
