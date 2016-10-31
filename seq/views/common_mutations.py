@@ -10,6 +10,7 @@ from seq.util import get_all_observed_mutations
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
+import common.constants
 
 
 __author__ = 'Patrick Phaneuf'
@@ -68,7 +69,9 @@ def common_mutations(request):
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(int(ale_experiment_id)),
-               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE}
+               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
+               "tag_dropdown": common.constants.TAGS
+               }
 
     return HttpResponse(template.render(context))
 
