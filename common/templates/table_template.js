@@ -160,9 +160,7 @@ var deleteRow = function () {
 };
 
 function filter_dups() {
-
     var table = $('#data').DataTable();
-
     if ($('#show_dups').is(":checked")) {
         table.column(sorted_column + 1).search('').draw();
         localStorage['dups'] = true;
@@ -193,7 +191,6 @@ function save_to_experiment_filter(ale_experiment_id, mutation_id) {
 }
 
 function expand_collapse_gene_entry(sign) {
-
     if(sign.className.includes('plus')) {
         sign.className = sign.className.replace('plus', 'minus');
     } else {
@@ -202,18 +199,15 @@ function expand_collapse_gene_entry(sign) {
 }
 
 function add_tag(tag_type, mutation_id, row) {
-
     var row_id = $(row).closest('tr')[0]._DT_RowIndex;
     var cell = $('#data').DataTable().cell(row_id, sorted_column-1);
     var span_html = '<span class="fa-stack">' + tag_list[tag_type] + '<font style="font-size:0px">' + tag_type + '</font></span>';
-
     if(cell.data().includes(tag_type)) {
         cell.data(cell.data().replace(span_html, ''));
     } else {
         cell.data(cell.data() + span_html);
     }
     cell.invalidate().draw();
-
     $.ajax({
         type: "POST",
         url: "",
@@ -240,11 +234,9 @@ function filter_tag(tag_type, is_show) {
 
 function add_tag_to_replicate(tag_type, replicate_id, header) {
     var cell = $(header).closest('th')[0];
-
     $('#data').DataTable().columns().every(function () {
         if(this.header() == cell) {
             var header_cell = $(this.header());
-
             $(header_cell.children()[header_cell.children().length-1]).children().each(function (idx, obj) {
                 if(obj.innerText.includes(tag_type)) {
                     if(obj.style.display == 'none') {
@@ -256,8 +248,6 @@ function add_tag_to_replicate(tag_type, replicate_id, header) {
             });
         }
     });
-
-    event.preventDefault();
     $.ajax({
         type: "POST",
         url: "",
