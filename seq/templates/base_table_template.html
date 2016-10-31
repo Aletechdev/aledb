@@ -57,7 +57,7 @@
                 </select>
             </p>
             <p>
-                <input type="submit" class="btn btn-default" value="Apply"/>
+                <input type="submit" class="btn btn-default btn-primary" value="Apply"/>
             </p>
         </form>
     {% endif %}
@@ -101,6 +101,7 @@
             var table_titles = {{ table_header | safe }};
             var table_heads = [];
             var number_of_columns = 0;
+            var tag_list = {{ tag_dropdown | safe}};
             for(var x in table_titles) {
                 table_heads.push({title: table_titles[x]});
                 number_of_columns += 1;

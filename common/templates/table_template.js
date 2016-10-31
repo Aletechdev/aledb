@@ -71,6 +71,8 @@ $(document).ready(function () {
         deferRender: true,
     });
 
+    //$('th').unbind('click.DT');
+
     $("tr td:first-child").each(function () {
         $(this).hover(
             function () {
@@ -199,7 +201,19 @@ function expand_collapse_gene_entry(sign) {
     }
 }
 
-function add_tag(tag_type, mutation_id) {
+function add_tag(tag_type, mutation_id, row) {
+
+    var row_id = $(row).closest('tr')[0]._DT_RowIndex;
+    var cell = $('#data').DataTable().cell(row_id, sorted_column-1);
+    var span_html = '<span class="fa-stack">' + tag_list[tag_type] + '<font style="font-size:0px">' + tag_type + '</font></span>';
+
+    if(cell.data().includes(tag_type)) {
+        cell.data(cell.data().replace(span_html, ''));
+    } else {
+        cell.data(cell.data() + span_html);
+    }
+    cell.invalidate().draw();
+
     $.ajax({
         type: "POST",
         url: "",
@@ -211,19 +225,38 @@ function add_tag(tag_type, mutation_id) {
 }
 
 function filter_tag(tag_type, is_show) {
+    var tag_column = $('#data').DataTable().column(sorted_column - 1);
     if(tag_type == 'clear') {
-        $('#data').DataTable().column(sorted_column - 1).search('').draw();
+        tag_column.search('').draw();
     } else {
         if(is_show) {
-            $('#data').DataTable().column(sorted_column - 1).search(tag_type).draw();
+            tag_column.search(tag_type).draw();
         } else {
             var regex = '^((?!' + tag_type + ').)*$';
-            $('#data').DataTable().column(sorted_column - 1).search(regex, true, false).draw();
+            tag_column.search(regex, true, false).draw();
         }
     }
 }
 
-function add_tag_to_replicate(tag_type, replicate_id) {
+function add_tag_to_replicate(tag_type, replicate_id, header) {
+    var cell = $(header).closest('th')[0];
+
+    $('#data').DataTable().columns().every(function () {
+        if(this.header() == cell) {
+            var header_cell = $(this.header());
+
+            $(header_cell.children()[header_cell.children().length-1]).children().each(function (idx, obj) {
+                if(obj.innerText.includes(tag_type)) {
+                    if(obj.style.display == 'none') {
+                        obj.style.display = ''
+                    } else {
+                        obj.style.display = 'none'
+                    }
+                }
+            });
+        }
+    });
+
     event.preventDefault();
     $.ajax({
         type: "POST",
