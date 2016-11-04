@@ -201,7 +201,7 @@ def _is_query_empty(query):
 
 def get_gene_bar_chart_dict(observed_mutation_queryset, page):
 
-    cache_string = page + 'bar_chart_gene_dict'
+    cache_string = page + '_bar_chart_gene_dict'
 
     cached_bar_chart_gene_dict = cache.get(cache_string)
 

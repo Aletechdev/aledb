@@ -137,4 +137,4 @@ def clear_dashboard_cache():
 
     cache.delete('dashboard_observed_mutation')
 
-    cache.delete('bar_chart_gene_dict')
+    cache.delete('dashboard_bar_chart_gene_dict')
