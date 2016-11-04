@@ -8,6 +8,14 @@
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.11.2/css/bootstrap-select.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.11.2/js/bootstrap-select.min.js"></script>
+
+    <!-- (Optional) Latest compiled and minified JavaScript translation files -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.11.2/js/i18n/defaults-*.min.js"></script>
+
     <style type="text/css">
 
         .FixedHeader_Cloned th {
@@ -37,18 +45,19 @@
 <div class="row">
      <!-- ALE selection drop-down -->
     {% if experiment_id %}
+        <div><b>Columns</b></div>
         <form action="" method="get">
             <p>
                 <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
                 <input type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
-                <select name="ale_no" class="ui">
+                <select name="ale_no" class="selectpicker">
                     <option value="all">All ales</option>
                     {% for ale in ales %}
                         <option {% if ale == ale_no %}selected="selected" {% endif %}
                                 value="{{ ale }}">{{ ale }}</option>
                     {% endfor %}
                 </select>
-                <select name="tag_select">
+                <select name="tag_select" class="selectpicker">
                     <option value="All Tags">All Tags</option>
                     {% for key, value in tag_dropdown.items %}
                         <option>Show Tag: {{ key }}</option>
@@ -61,9 +70,10 @@
             </p>
         </form>
     {% endif %}
-
+    <br>
     <!-- Mutation table -->
     <form action="" method="get">
+        <div><b>Rows</b></div>
         <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
         {% if ale_no %}
             <input type="hidden" name="ale_no" value="{{ ale_no }}"/>
