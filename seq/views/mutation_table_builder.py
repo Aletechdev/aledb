@@ -16,7 +16,7 @@ from common.db_util import get_mutation_queryset_from_obs_mut_queryset
 
 from genes.util import get_gene_list
 
-from common.constants import TAGS
+from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS
 
 from ale.models import TechnicalReplicate
 
@@ -369,9 +369,9 @@ def _get_tag_filter_dropdown_entries(mutation_id):
 
     html = ''
 
-    for key, value in TAGS.items():
+    for tag in ROW_TAGS:
 
-        html += '<li><a onclick="add_tag(\'%s\', %d, this)" style="cursor:pointer">Toggle Tag: %s %s</a></li>' % (key, mutation_id, key, value)
+        html += '<li><a onclick="add_tag(\'%s\', %d, this)" style="cursor:pointer">Toggle Tag: %s %s</a></li>' % (tag, mutation_id, tag, TAGS[tag])
 
     return html
 
@@ -384,15 +384,18 @@ def _get_tag_replicate_dropdown_entries(replicate_id):
 
     dropdown_html = ''
 
-    for key, value in TAGS.items():
-        dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d, this)">Toggle Tag: %s %s</a></li>' % (key, replicate_id, key, value)
+    for tag in COLUMN_TAGS:
 
-        if tags and key in tags:
+        image = TAGS[tag]
 
-            current_tags += '<span class="fa-stack">%s<font style="font-size:0px">%s</font></span>' % (value, key)
+        dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d, this)">Toggle Tag: %s %s</a></li>' % (tag, replicate_id, tag, image)
+
+        if tags and tag in tags:
+
+            current_tags += '<span class="fa-stack">%s<font style="font-size:0px">%s</font></span>' % (image, tag)
 
         else:
 
-            current_tags += '<span class="fa-stack" style="display:none">%s<font style="font-size:0px">%s</font></span>' % (value, key)
+            current_tags += '<span class="fa-stack" style="display:none">%s<font style="font-size:0px">%s</font></span>' % (image, tag)
 
     return current_tags, dropdown_html

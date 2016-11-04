@@ -12,3 +12,7 @@ TAGS = {
     "hypermutated": '<i class="fa fa-line-chart fa-fw" aria-hidden="true"></i>',
     "fixating":     '<i class="fa fa-signal fa-fw" aria-hidden="true"></i>',
 }
+
+COLUMN_TAGS = ["contaminated", "hypermutated"]
+
+ROW_TAGS = ["contaminated", "hypermutated", "fixating"]

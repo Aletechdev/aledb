@@ -34,6 +34,7 @@ def get_ale_number_selector(ale_id, reseq_query):
         return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_id=ale_id)
 
 
+# TODO: This should probably be refactored and split into separate functions
 def check_hidden_columns_and_filters(request, ale_experiment_id):
 
     if request.method == "GET":
