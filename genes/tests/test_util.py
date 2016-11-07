@@ -29,6 +29,12 @@ class TestUtil(unittest.TestCase):
         expected = ['[geneA]', 'geneB', 'geneC']
         self.assertEquals(returned, expected)
 
+    def test_get_annotated_gene_list_mutation_gene_annotation_is_None(self):
+        mutation_gene_annotation = None
+        returned = get_annotated_gene_list(mutation_gene_annotation)
+        expected = []
+        self.assertEquals(returned, expected)
+
     def test_get_gene_list_intragenic(self):
         annotated_gene_list_str = "[geneA], geneB, geneC"
         returned = get_gene_list(annotated_gene_list_str)
