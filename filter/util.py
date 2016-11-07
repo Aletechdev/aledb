@@ -201,7 +201,7 @@ def get_ignored_mutations(filter_form_model):
 
         table_row = '<tr id="%s">' % mutation.id
         table_row += DELETE_ROW_BOX % mutation.id
-        table_row += "<td>%d</td>" % mutation.position
+        table_row += "<td>%s</td>" % format(int(mutation.position), ',d')
         table_row += "<td>%s</td>" % mutation.mutation_type
         table_row += "<td>%s</td>" % mutation.sequence_change
         table_row += "<td><a href=/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)

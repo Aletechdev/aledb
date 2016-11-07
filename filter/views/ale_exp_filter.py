@@ -99,7 +99,7 @@ def get_starting_strain_mutations(filter_form_model):
 
             table_row = "<tr>"
 
-            table_row += "<td>%s</td>" % mutation.position
+            table_row += "<td>%s</td>" % format(int(mutation.position), ',d')
             table_row += "<td>%s</td>" % mutation.mutation_type
             table_row += "<td>%s</td>" % mutation.sequence_change
             table_row += "<td>%s</td>" % mutation.gene
