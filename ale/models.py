@@ -222,9 +222,9 @@ class Isolate(models.Model):
                                     population_or_clonal,
                                     parent)
 
-    class Meta:
+    #class Meta:
 
-        unique_together = (("flask", "isolate_number"),)
+        #unique_together = (("flask", "isolate_number", ),)
 
         # TODO - encode experiments done on the isolate
 
