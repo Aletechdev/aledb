@@ -70,7 +70,7 @@ def fixating_mutations(request):
                "ale_no": ale_number,
                "experiment_id": ale_experiment_id,
                "table_body": mark_safe(table_body),
-               "title": "Fixating Mutations",
+               "title": "Fixed Mutations",
                "table_header": mark_safe(table_header),
                "is_ascending_freq_filter": is_ascending_freq_filter,  # State of ascending fixed freq filter mutation; currently not being used.
                "template_header": "Fixating Mutations",
