@@ -96,12 +96,18 @@ def shared_fixated_mutations(request):
     shared_fixated_gene_query = reduce(operator.or_, (Q(mutation__gene__contains=gene) for gene in fixated_gene_list))
     fixated_mutation_queryset = FixatedMutation.objects.filter(shared_fixated_gene_query)
 
-    fixated_mutation_ale_experiment_list = []
+    # fixated_mutation_ale_experiment_list = []
+    ale_exp_fixed_obs_mut_id_list = []
     for fix_mut in fixated_mutation_queryset:
-        fixated_mutation_ale_experiment_list.append(fix_mut.ale_experiment)
+        # fixated_mutation_ale_experiment_list.append(fix_mut.ale_experiment)
+        fixed_obs_mut_id_lists = list(ast.literal_eval(fix_mut.fixed_observed_mutation_series))  # Turns list of string into 2D list of observed mutation id lists.
+        for fixed_obs_mut_id_list in fixed_obs_mut_id_lists:
+            ale_exp_fixed_obs_mut_id_list = ale_exp_fixed_obs_mut_id_list + fixed_obs_mut_id_list
 
-    observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=fixated_mutation_queryset.values('mutation'))
-    observed_mutation_queryset = observed_mutation_queryset.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__in=fixated_mutation_ale_experiment_list)
+    observed_mutation_queryset = ObservedMutation.objects.filter(id__in=ale_exp_fixed_obs_mut_id_list)
+
+    # observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=fixated_mutation_queryset.values('mutation'))
+    # observed_mutation_queryset = observed_mutation_queryset.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__in=fixated_mutation_ale_experiment_list)
 
     ordered_reseq_queryset = ResequencingExperiment.objects.all().order_by(
         'tech_rep__isolate__flask__ale_id__ale_experiment__name',
