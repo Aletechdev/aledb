@@ -55,6 +55,7 @@ def fixating_mutations(request):
                                                                                      reseq_ordered_dict,
                                                                                      is_ascending_freq_filter)
 
+
     table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
                                                        observed_mutations_queryset=observed_mutation_queryset,
                                                        ale_experiment_id=int(ale_experiment_id),
@@ -145,18 +146,29 @@ def _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id, order
 
     #TODO: filter out mutations from samples that were removed from table.
 
-    fixating_observed_mutation_queryset = _get_fixating_observed_mutation_queryset(fixating_mutation_queryset,
-                                                                                   ordered_reseq_dict.keys())
+    #fixating_observed_mutation_queryset = _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, ordered_reseq_dict.keys())
+    fixating_obs_mut_queryset_list = _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, ordered_reseq_dict.keys())
 
     if is_only_ascending:
-        fixating_observed_mutation_queryset = filter_for_ascending_freq(fixating_observed_mutation_queryset)
+        fixating_obs_mut_queryset_list = filter_for_ascending_freq(fixating_obs_mut_queryset_list)  # TODO: this should return the list of querysets we want to keep.
+
+    fixating_observed_mutation_queryset = ObservedMutation.objects.none()
+    for fixating_obs_mut_queryset in fixating_obs_mut_queryset_list:
+        fixating_observed_mutation_queryset = fixating_observed_mutation_queryset | fixating_obs_mut_queryset
 
     return fixating_observed_mutation_queryset
 
 
 def _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, reseq_id_list):
-    fixating_mutation_id_list = [fixating_mutation.mutation.id for fixating_mutation in fixating_mutation_queryset]
+    # fixating_mutation_id_list = [fixating_mutation.mutation.id for fixating_mutation in fixating_mutation_queryset]
     all_observed_mutation_queryset = ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
-    fixating_observed_mutation_queryset = all_observed_mutation_queryset.filter(mutation_id__in=fixating_mutation_id_list)
+    # fixating_observed_mutation_queryset = all_observed_mutation_queryset.filter(mutation_id__in=fixating_mutation_id_list)
 
-    return fixating_observed_mutation_queryset
+    # For debugging
+    # fixating_observed_mutation_queryset = all_observed_mutation_queryset.filter(mutation_id__in=[713])
+
+    obs_mut_queryset_1 = all_observed_mutation_queryset.filter(id__in=[824, 983, 2457])
+    obs_mut_queryset_2 = all_observed_mutation_queryset.filter(id__in=[1058, 1634, 2426])
+    obs_mut_queryset_list = [obs_mut_queryset_1, obs_mut_queryset_2]
+
+    return obs_mut_queryset_list
