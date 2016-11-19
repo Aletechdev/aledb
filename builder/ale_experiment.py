@@ -160,57 +160,60 @@ def _insert_staring_strain_flask(staring_strain_breseq_output_abs_path,
 
 
 # TODO: What I do here should also be used in insert_wild_type_flask()
-def insert_flasks(sample_breseq_abs_paths_list,
-                  ale_exp_user,
-                  ale_exp_name):
-    """
-    Args:
-        sample_breseq_abs_paths_list (list): A string list of the absolution path of the root of a each breseq report.
-        ale_exp_user (string): A string for the user name associated with the target ALE experiment.
-        ale_exp_name (string): A string for the target ALE experiment name.
-    """
-
-    instrument = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
-
-    experiment = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
-                                                                instrument=instrument,
-                                                                person=ale_exp_user)
-
-    media = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
-                                                   substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
-                                                   temperature=metadata.parser.DEFAULT_TEMPERATURE,
-                                                   volume=metadata.parser.DEFAULT_VOLUME,
-                                                   stirring_speed=metadata.parser.DEFAULT_STIRRING_SPEED)
-
-    freezer_box = ale.models.FreezerBox.objects.get_or_create(name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
-                                                              number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
-
-    for sample_breseq_abs_paths in sample_breseq_abs_paths_list:
-
-        sanitized_breseq_output_abs_path = builder.util.sanitize_path(sample_breseq_abs_paths)
-
-        ale_isolate_name = builder.util.get_ale_isolate_name_from_path(sanitized_breseq_output_abs_path)
-
-        ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
-
-        flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
-
-        isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
-
-        output_path = sanitized_breseq_output_abs_path + BRESEQ_OUTPUT_REPORT_DIR
-
-        _create_and_commit_ale_entry(ale_exp_user,
-                                     output_path,
-                                     ale_number,
-                                     flask_number,
-                                     isolate_number,
-                                     experiment,
-                                     media,
-                                     freezer_box,
-                                     is_wild_type=False)
-
-    rebuild_enrichment_mutations(experiment.ale_id)
-    rebuild_fixated_mutations(experiment.ale_id)
+# TODO: Needs to handle technical replicate numbers, which it currently does not.
+# def insert_flasks(sample_breseq_abs_paths_list,
+#                   ale_exp_user,
+#                   ale_exp_name):
+#
+#     """
+#     Args:
+#         sample_breseq_abs_paths_list (list): A string list of the absolution path of the root of a each breseq report.
+#         ale_exp_user (string): A string for the user name associated with the target ALE experiment.
+#         ale_exp_name (string): A string for the target ALE experiment name.
+#     """
+#
+#     instrument = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
+#
+#     experiment = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
+#                                                                 instrument=instrument,
+#                                                                 person=ale_exp_user)
+#
+#     media = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
+#                                                    substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
+#                                                    temperature=metadata.parser.DEFAULT_TEMPERATURE,
+#                                                    volume=metadata.parser.DEFAULT_VOLUME,
+#                                                    stirring_speed=metadata.parser.DEFAULT_STIRRING_SPEED)
+#
+#     freezer_box = ale.models.FreezerBox.objects.get_or_create(name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
+#                                                               number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
+#
+#     for sample_breseq_abs_paths in sample_breseq_abs_paths_list:
+#
+#         sanitized_breseq_output_abs_path = builder.util.sanitize_path(sample_breseq_abs_paths)
+#
+#         ale_isolate_name = builder.util.get_ale_isolate_name_from_path(sanitized_breseq_output_abs_path)
+#
+#         ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
+#
+#         flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
+#
+#         isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
+#
+#         output_path = sanitized_breseq_output_abs_path + BRESEQ_OUTPUT_REPORT_DIR
+#
+#         _create_and_commit_ale_entry(ale_exp_user,
+#                                      output_path,
+#                                      ale_number,
+#                                      flask_number,
+#                                      isolate_number,
+#                                      experiment,
+#                                      media,
+#                                      freezer_box,
+#                                      is_wild_type=False)
+#
+#
+#     rebuild_enrichment_mutations(experiment.ale_id)
+#     rebuild_fixated_mutations(experiment.ale_id)
 
 
 # For wild_type, expecting directory with output.gd in it.

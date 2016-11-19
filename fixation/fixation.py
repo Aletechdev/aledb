@@ -28,7 +28,6 @@ def _get_ale_fixated_mutation_queryset(flask_obs_mut_dict, filter_settings):
     :param flask_obs_mut_dict:
     :return:
     """
-    # TODO: should do filtering out of mutations somewhere in here.
     ordered_flask_number_list = sorted(flask_obs_mut_dict.keys())
     fixated_mutation_queryset = seq.models.Mutation.objects.none()
     if len(flask_obs_mut_dict.keys()) > 1:
@@ -110,42 +109,65 @@ def _get_flask_obs_mut_dict(flask_isolate_obs_mut_dict):
     return flask_obs_mut_dict
 
 
-def filter_for_ascending_freq(fixating_observed_mutation_queryset):
+# TODO: this should return the list of querysets we want to keep.
+def filter_for_ascending_freq(fixating_obs_mut_queryset_list):
 
-    fixated_obs_mut_freq_dict = {}
-    for observed_mutation in fixating_observed_mutation_queryset:
-        mutation_id = observed_mutation.mutation.id
-        if mutation_id in fixated_obs_mut_freq_dict.keys():
-            fixated_obs_mut_freq_dict[mutation_id].append(observed_mutation)
+    filtered_fixating_obs_mut_queryset_list = []
+
+    for obs_mut_queryset in fixating_obs_mut_queryset_list:
+        if not _has_descending_mut_freq(obs_mut_queryset):
+            filtered_fixating_obs_mut_queryset_list.append(obs_mut_queryset)
+
+    return filtered_fixating_obs_mut_queryset_list
+
+
+def _has_descending_mut_freq(obs_mut_queryset):
+
+    observed_mutation_list = _filter_mutations_from_same_flask(list(obs_mut_queryset))
+    observed_mutation_list.sort(key=lambda x: x.sequencing_experiment.flask_number)
+    current_observed_mutation_frequency = 0
+    for observed_mutation in observed_mutation_list:
+        if observed_mutation.frequency >= current_observed_mutation_frequency:
+            current_observed_mutation_frequency = observed_mutation.frequency
         else:
-            fixated_obs_mut_freq_dict[mutation_id] = [observed_mutation]
+            return True
+    return False
 
-    mutation_id_exclude_list = _get_descending_freq_mutation_id_list(fixated_obs_mut_freq_dict)
-
-    fixating_observed_mutation_queryset = fixating_observed_mutation_queryset.exclude(mutation_id__in=mutation_id_exclude_list)
-
-    return fixating_observed_mutation_queryset
-
-
-# TODO: this can be unit tested.
-def _get_descending_freq_mutation_id_list(fixated_obs_mut_freq_dict):
-    mutation_id_exclude_list = []
-
-    for mutation_id, observed_mutation_list in fixated_obs_mut_freq_dict.items():
-
-        observed_mutation_list = _filter_mutations_from_same_flask(observed_mutation_list)
-
-        observed_mutation_list.sort(key=lambda x: x.sequencing_experiment.flask_number)
-
-        current_observed_mutation_frequency = 0
-        for observed_mutation in observed_mutation_list:
-            if observed_mutation.frequency >= current_observed_mutation_frequency:
-                current_observed_mutation_frequency = observed_mutation.frequency
-            else:
-                mutation_id_exclude_list.append(mutation_id)
-                break
-
-    return mutation_id_exclude_list
+# def filter_for_ascending_freq(fixating_observed_mutation_queryset):
+#
+#     fixated_obs_mut_freq_dict = {}
+#     for observed_mutation in fixating_observed_mutation_queryset:
+#         mutation_id = observed_mutation.mutation.id
+#         if mutation_id in fixated_obs_mut_freq_dict.keys():
+#             fixated_obs_mut_freq_dict[mutation_id].append(observed_mutation)
+#         else:
+#             fixated_obs_mut_freq_dict[mutation_id] = [observed_mutation]
+#
+#     mutation_id_exclude_list = _get_descending_freq_mutation_id_list(fixated_obs_mut_freq_dict)
+#
+#     fixating_observed_mutation_queryset = fixating_observed_mutation_queryset.exclude(mutation_id__in=mutation_id_exclude_list)
+#
+#     return fixating_observed_mutation_queryset
+#
+#
+# def _get_descending_freq_mutation_id_list(fixated_obs_mut_freq_dict):
+#     mutation_id_exclude_list = []
+#
+#     for mutation_id, observed_mutation_list in fixated_obs_mut_freq_dict.items():
+#
+#         observed_mutation_list = _filter_mutations_from_same_flask(observed_mutation_list)
+#
+#         observed_mutation_list.sort(key=lambda x: x.sequencing_experiment.flask_number)
+#
+#         current_observed_mutation_frequency = 0
+#         for observed_mutation in observed_mutation_list:
+#             if observed_mutation.frequency >= current_observed_mutation_frequency:
+#                 current_observed_mutation_frequency = observed_mutation.frequency
+#             else:
+#                 mutation_id_exclude_list.append(mutation_id)
+#                 break
+#
+#     return mutation_id_exclude_list
 
 
 # TODO: this can be unit tested.
