@@ -166,12 +166,15 @@ def _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id, order
 #     return fixating_observed_mutation_queryset
 def _get_fixating_obs_mut_queryset_list(fixating_mutation, reseq_id_list):
     all_observed_mutation_queryset = ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
-
+    fixed_obs_mut_lists = list(ast.literal_eval(fixating_mutation.fixed_observed_mutation_series))
+    obs_mut_queryset_list = []
+    for fixed_obs_mut_list in fixed_obs_mut_lists:
+        obs_mut_queryset = all_observed_mutation_queryset.filter(id__in=fixed_obs_mut_list)
+        obs_mut_queryset_list.append(obs_mut_queryset)
 
     # TODO: get mutations back from
     # # obs_mut_queryset_1 = all_observed_mutation_queryset.filter(id__in=[824, 983, 2457])
     # # obs_mut_queryset_2 = all_observed_mutation_queryset.filter(id__in=[1058, 1634, 2426])
     # obs_mut_queryset_list = [obs_mut_queryset_1, obs_mut_queryset_2]
 
-    #return obs_mut_queryset_list
-    return None #debugging
+    return obs_mut_queryset_list
