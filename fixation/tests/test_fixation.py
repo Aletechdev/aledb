@@ -72,7 +72,7 @@ class TestFixation(TestCase):
         reseq_ordered_dict = collections.OrderedDict()
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
-        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict)
+        fixating_mutation_list = fixation.get_ale_exp_fixed_mut_dict(reseq_ordered_dict)
         self.assertEquals(0, len(fixating_mutation_list))
 
     def test_fixation_single_mutation(self):
@@ -118,7 +118,7 @@ class TestFixation(TestCase):
         reseq_ordered_dict = collections.OrderedDict()
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
-        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict)
+        fixating_mutation_list = fixation.get_ale_exp_fixed_mut_dict(reseq_ordered_dict)
         self.assertEquals(1, len(fixating_mutation_list))
         expected_fixation_gene = "geneA"
         for mutation in fixating_mutation_list:
@@ -192,7 +192,7 @@ class TestFixation(TestCase):
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
         reseq_ordered_dict.update({3: reseq_3})
-        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict)
+        fixating_mutation_list = fixation.get_ale_exp_fixed_mut_dict(reseq_ordered_dict)
         self.assertEquals(0, len(fixating_mutation_list))
 
     def test_multiple_fixations_same_ale(self):
@@ -258,7 +258,7 @@ class TestFixation(TestCase):
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
         reseq_ordered_dict.update({3: reseq_3})
-        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict)
+        fixating_mutation_list = fixation.get_ale_exp_fixed_mut_dict(reseq_ordered_dict)
         self.assertEquals(2, len(fixating_mutation_list))
         mut1_count = 0
         mut2_count = 0
@@ -315,7 +315,7 @@ class TestFixation(TestCase):
         reseq_ordered_dict = collections.OrderedDict()
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
-        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict, filter_settings)
+        fixating_mutation_list = fixation.get_ale_exp_fixed_mut_dict(reseq_ordered_dict, filter_settings)
         self.assertEquals(0, len(fixating_mutation_list))
 
 
@@ -364,5 +364,5 @@ class TestFixation(TestCase):
         reseq_ordered_dict = collections.OrderedDict()
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
-        fixating_mutation_list = fixation.get_ale_exp_fixated_mutation_list(reseq_ordered_dict)
+        fixating_mutation_list = fixation.get_ale_exp_fixed_mut_dict(reseq_ordered_dict)
         self.assertEquals(0, len(fixating_mutation_list))

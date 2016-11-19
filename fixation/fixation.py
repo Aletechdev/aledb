@@ -5,53 +5,76 @@ from filter.util import filter_observed_mutations
 
 __author__ = "Patrick Phaneuf"
 
-
 # Currently, assumes that ordered_reseq_dict represents multiple ALEs, such as with an ALE experiment.
 # Could reduce to only act on an ALE, since this is the smallest context Fixation operates within.
-def get_ale_exp_fixated_mutation_list(ale_reseq_ordered_dict, filter_settings=None):
+def get_ale_exp_fixed_mut_dict(ale_reseq_ordered_dict, filter_settings=None):
     # groups all reseq into their ALEs
     ale_id_reseq_dict = _get_ale_id_reseq_dict(ale_reseq_ordered_dict)
-    ale_experiment_fixated_mutation_queryset = seq.models.Mutation.objects.none()
     # For each ALE (working only with the reseq's of a particular ALE.
+    ale_fixed_mut_dict_list = []
     for id_reseq_list in ale_id_reseq_dict.values():
         flask_isolate_obs_mut_dict = _get_flask_isolate_obs_mut_dict(id_reseq_list)
         flask_obs_mut_dict = _get_flask_obs_mut_dict(flask_isolate_obs_mut_dict)
-        ale_fixated_mutation_queryset = _get_ale_fixated_mutation_queryset(flask_obs_mut_dict, filter_settings)
-        ale_experiment_fixated_mutation_queryset = ale_experiment_fixated_mutation_queryset | ale_fixated_mutation_queryset
+        # ale_fixated_mutation_queryset = _get_ale_fixated_mutation_queryset(flask_obs_mut_dict, filter_settings)
+        # ale_experiment_fixated_mutation_queryset = ale_experiment_fixated_mutation_queryset | ale_fixated_mutation_queryset
+        ale_fixed_mut_dict_list.append(_get_ale_fixed_mut_dict(flask_obs_mut_dict, filter_settings))
 
-    return list(ale_experiment_fixated_mutation_queryset)
+    ale_exp_fixed_mut_dict = {}
+    for ale_fixed_mut_dict in ale_fixed_mut_dict_list:
+        for ale_fixed_mut in ale_fixed_mut_dict.keys():
+            if ale_fixed_mut in ale_exp_fixed_mut_dict.keys():
+                ale_exp_fixed_mut_dict[ale_fixed_mut].append(ale_fixed_mut_dict[ale_fixed_mut])
+            else:
+                ale_exp_fixed_mut_dict[ale_fixed_mut] = [ale_fixed_mut_dict[ale_fixed_mut]]
+
+    return ale_exp_fixed_mut_dict
 
 
-def _get_ale_fixated_mutation_queryset(flask_obs_mut_dict, filter_settings):
-    """
-    Will convert obs mutation into mutation.
-    :param flask_obs_mut_dict:
-    :return:
-    """
+def _get_ale_fixed_mut_dict(flask_obs_mut_dict, filter_settings):
+
+    fixed_mut_obs_mut_list_dict = {}
     ordered_flask_number_list = sorted(flask_obs_mut_dict.keys())
-    fixated_mutation_queryset = seq.models.Mutation.objects.none()
+    #fixed_mutation_queryset = seq.models.Mutation.objects.none()
     if len(flask_obs_mut_dict.keys()) > 1:
         first_flask_number = ordered_flask_number_list[0]
         last_flask_number = ordered_flask_number_list[-1]
 
         first_flask_obs_mut_queryset = flask_obs_mut_dict[first_flask_number]
         first_flask_obs_mut_queryset = filter_observed_mutations(first_flask_obs_mut_queryset, filter_settings)
-        fixated_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(first_flask_obs_mut_queryset)
+        fixed_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(first_flask_obs_mut_queryset)
 
         for flask_number in ordered_flask_number_list:
             flask_obs_mut_queryset = flask_obs_mut_dict[flask_number]
             flask_obs_mut_queryset = filter_observed_mutations(flask_obs_mut_queryset, filter_settings)
             flask_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(flask_obs_mut_queryset)
             if flask_number == last_flask_number:
-                fixated_mutation_queryset = _get_common_mutations(fixated_mutation_queryset,
+                fixed_mutation_queryset = _get_common_mutations(fixed_mutation_queryset,
                                                                   flask_mutation_queryset)
             else:
-                fixated_mutation_queryset = _get_new_and_fixated_mutation_queryset(fixated_mutation_queryset,
-                                                                                   flask_mutation_queryset)
-    return fixated_mutation_queryset
+                fixed_mutation_queryset = _get_new_and_fixed_mutation_queryset(fixed_mutation_queryset,
+                                                                               flask_mutation_queryset)
+
+        # Get fixed observed mutation series
+        for fixed_mutation in fixed_mutation_queryset:
+            fixed_obs_mut_list = []
+            for flask_number in ordered_flask_number_list:
+                flask_obs_mut_queryset = flask_obs_mut_dict[flask_number]
+                flask_obs_mut_queryset = filter_observed_mutations(flask_obs_mut_queryset, filter_settings)
+                flask_obs_mut_queryset = flask_obs_mut_queryset.filter(mutation=fixed_mutation)
+                if len(flask_obs_mut_queryset) > 0:
+                    flask_obs_mut_id = flask_obs_mut_queryset.values_list('id', flat=True)[0]  # should only be 1
+                    fixed_obs_mut_list.append(flask_obs_mut_id)
 
 
-def _get_new_and_fixated_mutation_queryset(fixated_mutation_queryset, flask_mutation_queryset):
+            if fixed_mutation in fixed_mut_obs_mut_list_dict.keys():
+                fixed_mut_obs_mut_list_dict[fixed_mutation].append(fixed_obs_mut_list)
+            else:
+                fixed_mut_obs_mut_list_dict[fixed_mutation] = fixed_obs_mut_list  # The newly inserted list has to be 2D.
+
+    return fixed_mut_obs_mut_list_dict
+
+
+def _get_new_and_fixed_mutation_queryset(fixated_mutation_queryset, flask_mutation_queryset):
     new_mutation_queryset = _get_combined_mutations(fixated_mutation_queryset, flask_mutation_queryset)
     new_mutation_queryset = _get_common_mutations(new_mutation_queryset, flask_mutation_queryset)
     return new_mutation_queryset

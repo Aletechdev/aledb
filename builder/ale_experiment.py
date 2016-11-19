@@ -294,9 +294,11 @@ def _create_fixated_mutations(ale_experiment_id):
     Using only Django ORM to make commit to database.
     """
     ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
-    fixated_mutation_list = fixation.util.get_fixated_mutation_list(ale_experiment_id)
-    for mutation in fixated_mutation_list:
-        FixatedMutation.objects.create(ale_experiment=ale_experiment, mutation=mutation)
+    fixed_mut_dict = fixation.util.get_fixed_mut_dict(ale_experiment_id)
+    for fixed_mut, fixed_obs_mut_series_list in fixed_mut_dict.items():
+        FixatedMutation.objects.create(ale_experiment=ale_experiment, mutation=fixed_mut, fixed_observed_mutation_series=str(fixed_obs_mut_series_list))
+    # for mutation in fixated_mutation_list:
+    #     FixatedMutation.objects.create(ale_experiment=ale_experiment, mutation=mutation)
 
 
 def rebuild_enrichment_mutations(ale_experiment_id):
