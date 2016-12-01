@@ -1,13 +1,12 @@
 from common.db_util import get_mutation_queryset_from_obs_mut_queryset
 import seq.models
 from seq.util import get_all_observed_mutations
-from filter.util import filter_mutations
+from filter.util import filter_observed_mutations
 
 __author__ = "Patrick Phaneuf"
 
 
-# TODO: integrate filtering in Fixation class in the same way as implemented with the enrichment analysis. (Filtering seems to happen on observed mutations and we're working with Mutations).
-# Currently, assumes that ordered_reseq_dict represents multiple ALEs, such as with a ALE experiment.
+# Currently, assumes that ordered_reseq_dict represents multiple ALEs, such as with an ALE experiment.
 # Could reduce to only act on an ALE, since this is the smallest context Fixation operates within.
 def get_ale_exp_fixated_mutation_list(ale_reseq_ordered_dict, filter_settings=None):
     # groups all reseq into their ALEs
@@ -37,12 +36,12 @@ def _get_ale_fixated_mutation_queryset(flask_obs_mut_dict, filter_settings):
         last_flask_number = ordered_flask_number_list[-1]
 
         first_flask_obs_mut_queryset = flask_obs_mut_dict[first_flask_number]
-        first_flask_obs_mut_queryset = filter_mutations(first_flask_obs_mut_queryset, filter_settings)
+        first_flask_obs_mut_queryset = filter_observed_mutations(first_flask_obs_mut_queryset, filter_settings)
         fixated_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(first_flask_obs_mut_queryset)
 
         for flask_number in ordered_flask_number_list:
             flask_obs_mut_queryset = flask_obs_mut_dict[flask_number]
-            flask_obs_mut_queryset = filter_mutations(flask_obs_mut_queryset, filter_settings)
+            flask_obs_mut_queryset = filter_observed_mutations(flask_obs_mut_queryset, filter_settings)
             flask_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(flask_obs_mut_queryset)
             if flask_number == last_flask_number:
                 fixated_mutation_queryset = _get_common_mutations(fixated_mutation_queryset,
@@ -109,3 +108,72 @@ def _get_flask_obs_mut_dict(flask_isolate_obs_mut_dict):
         else:
             flask_obs_mut_dict[flask_id] = flask_obs_mut_dict[flask_id] | obs_mut_queryset
     return flask_obs_mut_dict
+
+
+def filter_for_ascending_freq(fixating_observed_mutation_queryset):
+
+    fixated_obs_mut_freq_dict = {}
+    for observed_mutation in fixating_observed_mutation_queryset:
+        mutation_id = observed_mutation.mutation.id
+        if mutation_id in fixated_obs_mut_freq_dict.keys():
+            fixated_obs_mut_freq_dict[mutation_id].append(observed_mutation)
+        else:
+            fixated_obs_mut_freq_dict[mutation_id] = [observed_mutation]
+
+    mutation_id_exclude_list = _get_descending_freq_mutation_id_list(fixated_obs_mut_freq_dict)
+
+    fixating_observed_mutation_queryset = fixating_observed_mutation_queryset.exclude(mutation_id__in=mutation_id_exclude_list)
+
+    return fixating_observed_mutation_queryset
+
+
+# TODO: this can be unit tested.
+def _get_descending_freq_mutation_id_list(fixated_obs_mut_freq_dict):
+    mutation_id_exclude_list = []
+
+    for mutation_id, observed_mutation_list in fixated_obs_mut_freq_dict.items():
+
+        observed_mutation_list = _filter_mutations_from_same_flask(observed_mutation_list)
+
+        observed_mutation_list.sort(key=lambda x: x.sequencing_experiment.flask_number)
+
+        current_observed_mutation_frequency = 0
+        for observed_mutation in observed_mutation_list:
+            if observed_mutation.frequency >= current_observed_mutation_frequency:
+                current_observed_mutation_frequency = observed_mutation.frequency
+            else:
+                mutation_id_exclude_list.append(mutation_id)
+                break
+
+    return mutation_id_exclude_list
+
+
+# TODO: this can be unit tested.
+def _filter_mutations_from_same_flask(observed_mutation_list):
+
+    filtered_observed_mutation_list = []
+
+    same_flask_observed_mutation_dict = {}
+    for observed_mutation_idx in range(len(observed_mutation_list)):
+        flask_number = observed_mutation_list[observed_mutation_idx].sequencing_experiment.flask_number
+        if flask_number in same_flask_observed_mutation_dict.keys():
+            same_flask_observed_mutation_dict[flask_number].append(observed_mutation_idx)
+        else:
+            same_flask_observed_mutation_dict[flask_number] = [observed_mutation_idx]
+
+    for observed_mutation_idx_list in same_flask_observed_mutation_dict.values():
+
+        if len(observed_mutation_idx_list) == 1:
+            observed_mutation_idx = observed_mutation_idx_list[0]
+            filtered_observed_mutation_list.append(observed_mutation_list[observed_mutation_idx])
+        else:
+            max_freq_idx = observed_mutation_idx_list[0]  # Default
+            max_freq = 0
+            for observed_mutation_idx in observed_mutation_idx_list:
+                current_freq = observed_mutation_list[observed_mutation_idx].frequency
+                if current_freq > max_freq:
+                    max_freq = current_freq
+                    max_freq_idx = observed_mutation_idx
+            filtered_observed_mutation_list.append(observed_mutation_list[max_freq_idx])
+
+    return filtered_observed_mutation_list
