@@ -19,7 +19,7 @@ DELETE_ROW_BOX = """<td><img src="/static/close-icon.gif" onclick="delete_row(%d
 TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td></tr>"
 
 
-def filter_mutations(observed_mutation_queryset, filter_settings):
+def filter_observed_mutations(observed_mutation_queryset, filter_settings):
 
     if filter_settings is None:
         ignored_genes = None
