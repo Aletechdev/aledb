@@ -157,7 +157,8 @@ INSTALLED_APPS = (
     'login',
     'compare',
     'export',
-    'common'
+    'common',
+    'dashboard',
 )
 
 # A sample logging configuration. The only tangible logging
