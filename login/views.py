@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from seq.views.dashboard import dashboard
+from dashboard.views import dashboard
 from django.template import loader
 from django.http import HttpResponse
 
