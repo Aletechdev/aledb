@@ -1,0 +1,33 @@
+from django.db import models
+
+class ObservedMutationCounts(models.Model):
+    single_base_substitution = models.IntegerField(default=0)
+    multiple_base_substitution = models.IntegerField(default=0)
+    deletion = models.IntegerField(default=0)
+    insertion = models.IntegerField(default=0)
+    mobile_element_insertion = models.IntegerField(default=0)
+    amplification = models.IntegerField(default=0)
+    duplication = models.IntegerField(default=0)
+    gene_conversion = models.IntegerField(default=0)
+    inversion = models.IntegerField(default=0)
+    intergenic = models.IntegerField(default=0)
+    noncoding = models.IntegerField(default=0)
+    pseudogene = models.IntegerField(default=0)
+    synonymous = models.IntegerField(default=0)
+    nonsynonymous = models.IntegerField(default=0)
+
+class UniqueMutationCounts(models.Model):
+    single_base_substitution = models.IntegerField(default=0)
+    multiple_base_substitution = models.IntegerField(default=0)
+    deletion = models.IntegerField(default=0)
+    insertion = models.IntegerField(default=0)
+    mobile_element_insertion = models.IntegerField(default=0)
+    amplification = models.IntegerField(default=0)
+    duplication = models.IntegerField(default=0)
+    gene_conversion = models.IntegerField(default=0)
+    inversion = models.IntegerField(default=0)
+    intergenic = models.IntegerField(default=0)
+    noncoding = models.IntegerField(default=0)
+    pseudogene = models.IntegerField(default=0)
+    synonymous = models.IntegerField(default=0)
+    nonsynonymous = models.IntegerField(default=0)
