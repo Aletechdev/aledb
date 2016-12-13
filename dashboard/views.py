@@ -42,6 +42,7 @@ def dashboard(request):
     count_dict['isolate'] = Isolate.objects.count()
 
     mutation_type_count_dict = {}
+    ### BELOW TAKE HUGE AMOUNTS OF RUNTIME
     mutation_type_count_dict['observed'] = {}
     mutation_type_count_dict['unique'] = {}
     for mutation_type in common.MUTATION_TYPE_LIST:
@@ -51,9 +52,10 @@ def dashboard(request):
         mutation_type_count_dict['unique'][mutation_type] = mutation_type_count
 
     protein_change_type_count_dict = {}
+    ### BELOW TAKE HUGE AMOUNTS OF RUNTIME
     protein_change_type_count_dict['observed'] = {}
     protein_change_type_count_dict['unique'] = {}
-    for protein_change_type in common.PROTEIN_CHANGE_TYPE_LIST:
+    for protein_change_type in common.CODING_CHANGE_TYPE_LIST:
         protein_change_count = observed_mutation_queryset.filter(mutation__protein_change__contains=protein_change_type).count()
         protein_change_type_count_dict['observed'][protein_change_type] = protein_change_count
         protein_change_count = mutation_query_set.filter(protein_change__contains=protein_change_type).count()
@@ -78,7 +80,7 @@ def dashboard(request):
                "gene_color_set": mark_safe(common.GENE_COLORS),
                "seq_color_set": mark_safe(common.SEQ_COLORS),
                "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
-               "protein_types": mark_safe(common.PROTEIN_CHANGE_TYPE_LIST),
+               "protein_types": mark_safe(common.CODING_CHANGE_TYPE_LIST),
                "number_of_genes_to_show": number_of_genes_to_show,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments()}
