@@ -1,6 +1,7 @@
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from django.conf.urls import include, url
+from django.conf import settings
 
 urlpatterns = [
     url(r'^accounts/login/', include('login.urls')),
@@ -16,3 +17,9 @@ urlpatterns = [
 ]
 
 urlpatterns += staticfiles_urlpatterns()
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]
