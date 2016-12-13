@@ -5,12 +5,17 @@ import builder.upload
 import builder.util
 from fixation.models import FixatedMutation
 import fixation.util
+from dashboard.models import ObservedMutationCounts
+from dashboard.models import UniqueMutationCounts
 import enrichment.util
 from enrichment.models import EnrichmentMutation
 import seq.models
+import seq.views.common
 from builder.gdparse.gdparse import gdparse
 from common.db_util import clear_dashboard_cache
 import metadata.parser
+from filter.util import dashboard_filter
+from dashboard.views import get_filtered_mutation_queryset  # TODO: should move this here if no longer used in dashboard.
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -297,8 +302,56 @@ def _create_fixated_mutations(ale_experiment_id):
     fixed_mut_dict = fixation.util.get_fixed_mut_dict(ale_experiment_id)
     for fixed_mut, fixed_obs_mut_series_list in fixed_mut_dict.items():
         FixatedMutation.objects.create(ale_experiment=ale_experiment, mutation=fixed_mut, fixed_observed_mutation_series=str(fixed_obs_mut_series_list))
-    # for mutation in fixated_mutation_list:
-    #     FixatedMutation.objects.create(ale_experiment=ale_experiment, mutation=mutation)
+
+
+# TODO: build unit test for this.
+def rebuild_counts():
+    observed_mutation_counts = ObservedMutationCounts.objects.all()
+    if observed_mutation_counts.count() == 0:
+        ObservedMutationCounts.objects.create()
+        observed_mutation_counts = ObservedMutationCounts.objects.all()
+    unique_mutation_counts = UniqueMutationCounts.objects.all()
+    if unique_mutation_counts.count() == 0:
+        UniqueMutationCounts.objects.create()
+        unique_mutation_counts = UniqueMutationCounts.objects.all()
+
+    # initial_query = seq.models.ObservedMutation.objects.all()
+    # observed_mutation_queryset = dashboard_filter(initial_query)
+    # unique_mutation_query_set = get_filtered_mutation_queryset(observed_mutation_queryset)
+    # for mutation_type in seq.views.common.MUTATION_TYPE_LIST:
+    #     observed_mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=mutation_type).count()
+    #     unique_mutation_type_count = unique_mutation_query_set.filter(mutation_type=mutation_type).count()
+    #     if seq.views.common.MUTATION_TYPE_LIST == 'SNP':
+    #         observed_mutation_counts[0].single_base_substitution = observed_mutation_type_count
+    #         unique_mutation_counts[0].single_base_substitution = unique_mutation_type_count
+    #     elif seq.views.common.MUTATION_TYPE_LIST == 'SUB':
+    #         observed_mutation_counts[0].multiple_base_substitution = observed_mutation_type_count
+    #         unique_mutation_counts[0].multiple_base_substitution = unique_mutation_type_count
+    #     elif seq.views.common.MUTATION_TYPE_LIST == 'DEL':
+    #         observed_mutation_counts[0].deletion = observed_mutation_type_count
+    #         unique_mutation_counts[0].deletion = unique_mutation_type_count
+    #     elif seq.views.common.MUTATION_TYPE_LIST == 'INS':
+    #         observed_mutation_counts[0].insertion = observed_mutation_type_count
+    #         unique_mutation_counts[0].insertion = unique_mutation_type_count
+    #     elif seq.views.common.MUTATION_TYPE_LIST == 'MOB':
+    #         observed_mutation_counts[0].mobile_element_insertion = observed_mutation_type_count
+    #         unique_mutation_counts[0].mobile_element_insertion = unique_mutation_type_count
+    #     elif seq.views.common.MUTATION_TYPE_LIST == 'DUP':
+    #         observed_mutation_counts[0].duplication = observed_mutation_type_count
+    #         unique_mutation_counts[0].duplication = unique_mutation_type_count
+    #     elif seq.views.common.MUTATION_TYPE_LIST == 'AMP':
+    #         observed_mutation_counts[0].amplification = observed_mutation_type_count
+    #         unique_mutation_counts[0].amplification = unique_mutation_type_count
+    #     elif seq.views.common.MUTATION_TYPE_LIST == 'CON':
+    #         observed_mutation_counts[0].gene_conversion = observed_mutation_type_count
+    #         unique_mutation_counts[0].gene_conversion = unique_mutation_type_count
+    #     elif seq.views.common.MUTATION_TYPE_LIST == 'INV':
+    #         observed_mutation_counts[0].inversion = observed_mutation_type_count
+    #         unique_mutation_counts[0].inversion = unique_mutation_type_count
+
+        # if seq.views.common.MUTATION_TYPE_LIST == 'INV':
+        #     observed_mutation_queryset[0].inversion = observed_mutation_type_count
+        #     unique_mutation_type_count[0].inversion = unique_mutation_type_count
 
 
 def rebuild_enrichment_mutations(ale_experiment_id):
