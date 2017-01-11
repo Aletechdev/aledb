@@ -159,6 +159,7 @@ INSTALLED_APPS = (
     'export',
     'common',
     'dashboard',
+    'commmonmuts',
 )
 
 # A sample logging configuration. The only tangible logging
