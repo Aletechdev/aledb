@@ -94,6 +94,7 @@ EXPORT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'export/templates')
 COMPARE_TEMPLATE_PATH = os.path.join(BASE_DIR, 'compare/templates')
 COMMON_TEMPLATE_PATH = os.path.join(BASE_DIR, 'common/templates')
 DASHBOARD_TEMPLATE_PATH = os.path.join(BASE_DIR, 'dashboard/templates')
+DUPLICATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'duplications/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -104,7 +105,8 @@ TEMPLATES = [
                  COMPARE_TEMPLATE_PATH,
                  EXPORT_TEMPLATE_PATH,
                  COMMON_TEMPLATE_PATH,
-                 DASHBOARD_TEMPLATE_PATH
+                 DASHBOARD_TEMPLATE_PATH,
+                 DUPLICATION_TEMPLATE_PATH,
                  ],
         'OPTIONS': {
             'context_processors': [
@@ -159,6 +161,7 @@ INSTALLED_APPS = (
     'export',
     'common',
     'dashboard',
+    'duplications',
 )
 
 # A sample logging configuration. The only tangible logging
