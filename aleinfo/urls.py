@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^enrichment/', include('enrichment.urls')),
     url(r'^export', include('export.urls')),
     url(r'^compare/', include('compare.urls')),
+    url(r'^gene/', include('genes.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
