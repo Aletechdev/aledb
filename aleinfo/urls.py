@@ -2,10 +2,12 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from django.conf.urls import include, url
 
+
+# TODO: remove all final '/' for apps that don't need it (enrichment, etc.)
 urlpatterns = [
-    url(r'^accounts/login/', include('login.urls')),
-    url(r'^seq/', include('seq.urls')),
     url(r'^', include('dashboard.urls')),
+    url(r'^accounts/login/', include('login.urls')),
+    url(r'^mutations', include('seq.urls')),
     url(r'^filter/', include('filter.urls')),
     url(r'^fixation/', include('fixation.urls')),
     url(r'^stats', include('stats.urls')),
@@ -14,6 +16,7 @@ urlpatterns = [
     url(r'^export', include('export.urls')),
     url(r'^compare/', include('compare.urls')),
     url(r'^search/', include('search.urls')),
+    url(r'^duplication/', include('duplications.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
