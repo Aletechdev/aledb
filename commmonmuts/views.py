@@ -12,9 +12,7 @@ from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_
 from common.util import check_hidden_columns_and_filters
 import common.constants
 
-
 __author__ = 'Patrick Phaneuf'
-
 
 REQUEST_PRIMARY_RESEQ_ID = "primary_reseq_id"
 
@@ -22,11 +20,10 @@ REQUEST_PRIMARY_RESEQ_ID = "primary_reseq_id"
 # TODO: very similar to fixation mutations page workflow. Should consolidate somehow.
 @login_required
 def common_mutations(request):
-
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
- 
+
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ale_no = seq.views.common.get_ale_number(request)
@@ -39,7 +36,8 @@ def common_mutations(request):
     if primary_reseq_id is None:
         primary_reseq_id = list(ordered_reseq_dict.keys())[0]
 
-    ordered_reseq_dict, observed_mutation_queryset = _get_experiments_and_mutations(ordered_reseq_dict, primary_reseq_id)
+    ordered_reseq_dict, observed_mutation_queryset = _get_experiments_and_mutations(ordered_reseq_dict,
+                                                                                    primary_reseq_id)
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
@@ -80,7 +78,6 @@ def common_mutations(request):
 # Will return seq experiment dict ordered according to observed mutation count shared with primary seq experiment.
 # Will return all seq experiments observed mutations shared with primary seq experiment.
 def _get_experiments_and_mutations(reseq_dict, primary_reseq_id):
-
     primary_observed_mutations_queryset = get_all_observed_mutations([primary_reseq_id])
     total_common_observed_mutations_queryset = primary_observed_mutations_queryset.all()
 
@@ -89,9 +86,9 @@ def _get_experiments_and_mutations(reseq_dict, primary_reseq_id):
     for reseq_id in reseq_dict.keys():
 
         if reseq_id != primary_reseq_id:
-
             observed_mutations_query_set = get_all_observed_mutations([reseq_id])
-            common_observed_mutation_queryset = _get_common_observed_mutation_queryset(primary_observed_mutations_queryset, observed_mutations_query_set)
+            common_observed_mutation_queryset = _get_common_observed_mutation_queryset(
+                primary_observed_mutations_queryset, observed_mutations_query_set)
             total_common_observed_mutations_queryset = total_common_observed_mutations_queryset.all() | common_observed_mutation_queryset.all()
             reseq_common_mutation_count_list.append((len(common_observed_mutation_queryset), reseq_id))
 
@@ -101,7 +98,6 @@ def _get_experiments_and_mutations(reseq_dict, primary_reseq_id):
     new_ordered_dict[primary_reseq_id] = reseq_dict[primary_reseq_id]
 
     for entry in sorted_reseq_common_mutation_count_list:
-
         reseq_id = entry[1]
         new_ordered_dict[reseq_id] = reseq_dict[reseq_id]
 
@@ -109,12 +105,11 @@ def _get_experiments_and_mutations(reseq_dict, primary_reseq_id):
 
 
 def _get_common_observed_mutation_queryset(primary_observed_mutations_query_set, observed_mutations_query_set):
-
-    return observed_mutations_query_set.filter(mutation__in=primary_observed_mutations_query_set.values_list("mutation", flat=True))
+    return observed_mutations_query_set.filter(
+        mutation__in=primary_observed_mutations_query_set.values_list("mutation", flat=True))
 
 
 def _get_primary_reseq_id(request):
-
     primary_reseq_id = request.GET.get(REQUEST_PRIMARY_RESEQ_ID)
 
     primary_reseq_id = None if primary_reseq_id is None else int(primary_reseq_id)

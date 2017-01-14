@@ -168,6 +168,7 @@ INSTALLED_APPS = (
     'search',
     'duplications',
     'genes',
+    'commmonmuts',
 )
 
 # A sample logging configuration. The only tangible logging

@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^search/', include('search.urls')),
     url(r'^duplication/', include('duplications.urls')),
     url(r'^gene/', include('genes.urls')),
+    url(r'^common_mutations/', include('commmonmuts.urls')),
 ]
 
 urlpatterns += staticfiles_urlpatterns()
