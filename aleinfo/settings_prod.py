@@ -168,6 +168,7 @@ INSTALLED_APPS = (
     'duplications',
     'dashboard',
     'genes',
+    'commmonmuts',
 )
 
 # A sample logging configuration. The only tangible logging
