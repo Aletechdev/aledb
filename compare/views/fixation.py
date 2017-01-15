@@ -10,7 +10,9 @@ from fixation.models import FixatedMutation
 from common.db_util import get_all_ale_experiments, get_recent_experiments
 from common.util import check_hidden_columns_and_filters
 from compare.views.common import get_ordered_reseq_dict_and_queryset, get_ales_from_ale_experiment_list
-from common.constants import POSITION_COLUMN_IN_SHARED_MUTATION_TALBE
+from common.constants import POSITION_COLUMN_IN_SHARED_MUTATION_TALBE, TAGS
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td>"""
 
@@ -55,7 +57,7 @@ def comparison_fixation(request):
     context = {"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
                "ale_no": ale_no,
                "experiment_id": ale_experiment_list,
-               "table_body": mark_safe(table_body),
+               "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "title": "Fixating Mutations",
                "table_header": mark_safe(table_header),
                "is_ascending_freq_filter": is_ascending_freq_filter,
@@ -63,7 +65,8 @@ def comparison_fixation(request):
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(None),
-               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TALBE}
+               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TALBE,
+               "tag_dropdown": TAGS}
 
     return HttpResponse(template.render(context))
 

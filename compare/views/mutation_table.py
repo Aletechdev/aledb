@@ -16,7 +16,11 @@ from common.util import check_hidden_columns_and_filters
 
 from compare.views.common import get_ordered_reseq_dict_and_queryset, get_ales_from_ale_experiment_list
 
-from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
+from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE, TAGS
+
+import json
+
+from django.core.serializers.json import DjangoJSONEncoder
 
 # Create your views here.
 
@@ -51,10 +55,11 @@ def compared_mutations(request):
                "title": "Mutation Table",
                "template_header": title,
                "table_header": mark_safe(table_header),
-               "table_body": mark_safe(table_body),
+               "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "hidden_columns": hidden_columns,
                "recent_experiments": get_recent_experiments(),
-               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE}
+               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
+               "tag_dropdown": TAGS}
 
     template = loader.get_template(MUTATION_TABLE_TEMPLATE)
 

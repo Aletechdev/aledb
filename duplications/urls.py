@@ -1,9 +1,11 @@
 from django.conf.urls import url
 
-from metadata import views
+from . import views
+
 
 __author__ = 'dgosting'
 
+
 urlpatterns = [
-    url('^$', views.metadata, name="metadata"),
+    url(r'^$', views.duplication, name="duplication"),
 ]
