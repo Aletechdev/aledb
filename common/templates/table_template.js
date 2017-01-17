@@ -64,14 +64,23 @@ $(document).ready(function () {
                 extend: 'csv',
                 text: 'CSV',
                 exportOptions: {
-                    columns: columns_to_export
+                    columns: columns_to_export,
+                    format: {
+                        header: function ( data, row, column, node ) {
+                            if(data.includes('Toggle')) {
+                                var div = document.createElement("div");
+                                div.innerHTML = data;
+                                return div.innerText.split('Toggle')[0];
+                            } else {
+                                return data;
+                            }
+                        }
+                    }
                 }
             }
         ],
-        deferRender: true,
+        deferRender: true
     });
-
-    //$('th').unbind('click.DT');
 
     $("tr td:first-child").each(function () {
         $(this).hover(
