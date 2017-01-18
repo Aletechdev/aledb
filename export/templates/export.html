@@ -57,7 +57,18 @@
                             extend: 'csv',
                             text: 'Download Table as CSV',
                             exportOptions: {
-                                columns: columns_to_export
+                                columns: columns_to_export,
+                                format: {
+                                    header: function (data, row, column, node) {
+                                        if (data.includes('Toggle')) {
+                                            var div = document.createElement("div");
+                                            div.innerHTML = data;
+                                            return div.innerText.split('Toggle')[0];
+                                        } else {
+                                            return data;
+                                        }
+                                    }
+                                }
                             }
                         }
                     ],
