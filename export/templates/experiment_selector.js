@@ -25,6 +25,8 @@ function add_experiment_to_download_list() {
         add_exp_to_list(exp_name)
     }
     set_export_experiments_input_field();
+
+    document.getElementById('download').style.display = 'block';
 }
 
 function add_exp_to_list(exp_name) {
@@ -57,6 +59,10 @@ function remove_experiment(param) {
     var index = selected_experiments.indexOf(elem_id);
     selected_experiments.splice(index, 1);
     set_export_experiments_input_field();
+
+    if (selected_experiments.length == 0) {
+        document.getElementById('download').style.display = 'none';
+    }
 }
 
 function set_export_experiments_input_field() {
