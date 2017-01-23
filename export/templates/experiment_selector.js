@@ -72,3 +72,7 @@ function set_export_experiments_input_field() {
         document.getElementById('download_experiments').value = "";
     }
 }
+
+function print_warning_message() {
+    document.getElementById('warning_message').style.display = 'block'
+}
