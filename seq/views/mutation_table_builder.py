@@ -121,20 +121,14 @@ def get_table_header(reseq_dict, table_type=None):
     return base_table_header + table_header_list
 
 
-# TODO: Refactor. The observed mutations argument may
-# reference to a seq_experiment that doesn't exist due to checkbox filtering.
-# This makes this function very confusing.
-def get_table_body(reseq_dict,
-                   observed_mutations_queryset,
-                   ale_experiment_id=None,
-                   filter_settings=None,
-                   table_type=None):
+def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset, filter_settings):
 
     observed_mutations_queryset = filter_observed_mutations(observed_mutations_queryset, filter_settings)
 
     mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(observed_mutations_queryset)
 
-    mutation_index_dict = dict((mutation_id, i) for i, mutation_id in enumerate(mutation_queryset.values_list("id", flat=True)))
+    mutation_index_dict = dict(
+        (mutation_id, i) for i, mutation_id in enumerate(mutation_queryset.values_list("id", flat=True)))
 
     experiment_url_dict = get_experiment_urls(reseq_dict)
 
@@ -149,7 +143,23 @@ def get_table_body(reseq_dict,
         new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
 
         if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
-            table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
+            table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
+                experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
+
+    return mutation_queryset, table_entry_list, mutation_index_dict
+
+
+# TODO: Refactor. The observed mutations argument may
+# reference to a seq_experiment that doesn't exist due to checkbox filtering.
+# This makes this function very confusing.
+def get_table_body(reseq_dict,
+                   observed_mutations_queryset,
+                   ale_experiment_id=None,
+                   filter_settings=None,
+                   table_type=None):
+
+    mutation_queryset, table_entry_list, mutation_index_dict = get_mutation_table_queryset_and_entry_list(
+        reseq_dict, observed_mutations_queryset, filter_settings)
 
     protein_changes = {}  # For calculating distances on the genes page only
 
@@ -180,7 +190,7 @@ def get_table_body(reseq_dict,
             table_row.append(format(mutation.position, ',d'))
             table_row.append(mutation.mutation_type)
             table_row.append(mutation.sequence_change)
-            table_row.append(_get_gene_table_entry(mutation))
+            table_row.append(get_gene_table_entry(mutation))
             table_row.append("" if mutation.function is None else mutation.function)
             table_row.append("" if mutation.product is None else mutation.product)
             table_row.append("" if mutation.go_process is None else mutation.go_process)
@@ -209,7 +219,8 @@ def get_table_body(reseq_dict,
     return table_body
 
 
-def _get_gene_table_entry(mutation):
+# TODO: Move this function into common/util
+def get_gene_table_entry(mutation):
 
     table_entry = """<div style="width:150px">"""
 
