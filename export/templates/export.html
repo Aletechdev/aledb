@@ -5,7 +5,7 @@
 {% endblock %}
 {% block header %}Export{% endblock %}
 {% block content %}
-    <div class="row">
+    <div class="row" id="selector_elements">
         <div class="col-lg-4">
             <div class="btn-group">
                 <button type="button" class="btn btn-default" id="selector_button">Select Experiment</button>
@@ -45,6 +45,15 @@
                         <div class="col-lg-12">
                             <div class="alert alert-danger" role="alert"><b>Warning!</b> Please do not leave or close this tab until your download has completely finished</div>
                             <div id="export_button"></div>
+                        </div>
+                    </div>
+                    <div class="row" id="success_message" style="display: none">
+                        <div class="col-lg-12">
+                            <div class="alert alert-success" role="alert"><b>Success!</b> Your file has been downloaded</div>
+                            <div id="export_button"></div>
+                        </div>
+                        <div class="col-lg-12">
+                            <a href="/export" class="btn btn-primary">Download Another Experiment</a>
                         </div>
                     </div>
                 </div>
