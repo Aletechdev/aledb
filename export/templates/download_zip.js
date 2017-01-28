@@ -25,3 +25,6 @@ zip.generateAsync({type:"blob"})
 .then(function (blob) {
   saveAs(blob, 'download' + '.zip')
 });
+
+document.getElementById('success_message').style.display = 'block';
+document.getElementById('selector_elements').style.display = 'none';
