@@ -8,3 +8,4 @@ Describe the workflow for integrating ALE experiments within the wiki.
 Need to cite:
 * https://github.com/bbglab/muts-needle-plot  
 * PV Viewer
+* describe current post-processing protocol (FastQC, Fastx trimmer...)
