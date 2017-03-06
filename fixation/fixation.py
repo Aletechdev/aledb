@@ -15,8 +15,6 @@ def get_ale_exp_fixed_mut_dict(ale_reseq_ordered_dict, filter_settings=None):
     for id_reseq_list in ale_id_reseq_dict.values():
         flask_isolate_obs_mut_dict = _get_flask_isolate_obs_mut_dict(id_reseq_list)
         flask_obs_mut_dict = _get_flask_obs_mut_dict(flask_isolate_obs_mut_dict)
-        # ale_fixated_mutation_queryset = _get_ale_fixated_mutation_queryset(flask_obs_mut_dict, filter_settings)
-        # ale_experiment_fixated_mutation_queryset = ale_experiment_fixated_mutation_queryset | ale_fixated_mutation_queryset
         ale_fixed_mut_dict_list.append(_get_ale_fixed_mut_dict(flask_obs_mut_dict, filter_settings))
 
     ale_exp_fixed_mut_dict = {}
@@ -33,7 +31,6 @@ def get_ale_exp_fixed_mut_dict(ale_reseq_ordered_dict, filter_settings=None):
 def _get_ale_fixed_mut_dict(flask_obs_mut_dict, filter_settings):
 
     fixed_mut_obs_mut_list_dict = {}
-    old_fixed_mut_obs_mut_list_dict = {}
     ordered_flask_number_list = sorted(flask_obs_mut_dict.keys())
 
     if len(flask_obs_mut_dict.keys()) > 1:

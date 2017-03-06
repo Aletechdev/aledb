@@ -102,7 +102,7 @@ class Mutation(models.Model):
     feature_length = models.IntegerField(blank=True,
                                          null=True)
 
-    sequence_change = models.CharField(max_length=100)
+    sequence_change = models.CharField(max_length=200)
 
     protein_change = models.CharField(max_length=300,
                                       blank=True,
@@ -161,5 +161,3 @@ class ObservedMutation(models.Model):
     frequency = models.DecimalField(null=True,
                                     max_digits=5,
                                     decimal_places=4)
-
-
