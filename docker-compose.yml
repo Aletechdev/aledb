@@ -1,0 +1,20 @@
+version: "2"
+services:
+  db:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_USER=composetest
+      - MYSQL_PASSWORD=testpassword
+      - MYSQL_DATABASE=composetest
+  web:
+    build: .
+    command: ./wait-for-it.sh db:3306 -t 120 -- gunicorn aleinfo.wsgi -b 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    links:
+      - db
+    depends_on:
+      - db
