@@ -9,10 +9,7 @@ services:
       - MYSQL_DATABASE=composetest
   web:
     build: .
-    command: bash -c "./wait-for-it.sh db:3306 -t 120 -- python manage.py collectstatic --no-input \
-                      && python manage.py makemigrations \
-                      && python manage.py migrate \
-                      && gunicorn aleinfo.wsgi -b 0.0.0.0:8000"
+    command: bash -c "./wait-for-it.sh db:3306 -t 120 -- gunicorn aleinfo.wsgi -b 0.0.0.0:8000"
     volumes:
       - .:/code
     ports:
