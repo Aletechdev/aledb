@@ -48,10 +48,7 @@ def dashboard(request):
     # TODO: likely don't need the cache any longer since we're caching the dashboard counts into the database.
     # mutation_query_set, observed_mutation_queryset = _get_cached_dashboard_query()
 
-    ### BELOW TAKE HUGE AMOUNTS OF RUNTIME
-    mutation_type_count_dict = {}
-    mutation_type_count_dict['observed'] = {}
-    mutation_type_count_dict['unique'] = {}
+    mutation_type_count_dict = {'observed': {}, 'unique': {}}
     for mutation_type in common.MUTATION_TYPE_LIST:
         observed_mutation_type_count = 0
         unique_mutation_type_count = 0
@@ -82,14 +79,10 @@ def dashboard(request):
         elif mutation_type == 'INV':
             observed_mutation_type_count = observed_mutation_count_queryset[0].inversion
             unique_mutation_type_count = unique_mutation_count_queryset[0].inversion
-
         mutation_type_count_dict['observed'][mutation_type] = observed_mutation_type_count
         mutation_type_count_dict['unique'][mutation_type] = unique_mutation_type_count
 
-    ### BELOW TAKE HUGE AMOUNTS OF RUNTIME
-    functional_change_type_count_dict = {}
-    functional_change_type_count_dict['observed'] = {}
-    functional_change_type_count_dict['unique'] = {}
+    functional_change_type_count_dict = {'observed': {}, 'unique': {}}
     for functional_change_type in common.FUNCTIONAL_CHANGE_TYPE_LIST:
         observed_function_change_count = 0
         unique_function_change_count = 0
@@ -108,7 +101,6 @@ def dashboard(request):
         elif functional_change_type == 'nonsynonymous':
             observed_function_change_count = observed_mutation_count_queryset[0].nonsynonymous
             unique_function_change_count = unique_mutation_count_queryset[0].nonsynonymous
-
         functional_change_type_count_dict['observed'][functional_change_type] = observed_function_change_count
         functional_change_type_count_dict['unique'][functional_change_type] = unique_function_change_count
 
