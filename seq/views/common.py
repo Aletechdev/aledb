@@ -22,7 +22,8 @@ REQUEST_WT_FILTER = "wtflt"
 
 MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'DUP', 'AMP', 'CON', 'INV', 'Unannotated']
 
-PROTEIN_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication', 'Unannotated']
+# Don't change these names since they match with Breseq's HTML annotations and used when parsing.
+FUNCTIONAL_CHANGE_TYPE_LIST = ['intergenic', 'noncoding', 'pseudogene', 'snp_type_synonymous', 'snp_type_nonsynonymous', 'Duplication', 'Unannotated']
 
 COLORS = ['#FF851B', '#2ECC40', '#0074D9', '#FFDC00', '#7FDBFF', '#B7337A', '#B10DC9', '#111111', '#85144b']
 
@@ -36,7 +37,7 @@ def _set_colors(length):
 
 
 GENE_COLORS = _set_colors(len(MUTATION_TYPE_LIST) - 1)
-SEQ_COLORS = _set_colors(len(PROTEIN_CHANGE_TYPE_LIST) - 1)
+SEQ_COLORS = _set_colors(len(FUNCTIONAL_CHANGE_TYPE_LIST) - 1)
 
 # TODO: change all instance of 'seq_experiment' to 'reseq'
 
@@ -154,9 +155,9 @@ def set_gene_bar_chart_colors(genes):
 def set_sequence_change_bar_chart_colors(sequence_changes):
     for seq_change in sequence_changes:
         has_match = False
-        for protein in PROTEIN_CHANGE_TYPE_LIST:
+        for protein in FUNCTIONAL_CHANGE_TYPE_LIST:
             if protein in seq_change['mutation__protein_change']:
-                seq_change['color'] = COLORS[PROTEIN_CHANGE_TYPE_LIST.index(protein)]
+                seq_change['color'] = COLORS[FUNCTIONAL_CHANGE_TYPE_LIST.index(protein)]
                 has_match = True
                 break
         if has_match is False:
