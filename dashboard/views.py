@@ -95,10 +95,10 @@ def dashboard(request):
         elif functional_change_type == 'pseudogene':
             observed_function_change_count = observed_mutation_count_queryset[0].pseudogene
             unique_function_change_count = unique_mutation_count_queryset[0].pseudogene
-        elif functional_change_type == 'synonymous':
+        elif functional_change_type == 'snp_type_synonymous':
             observed_function_change_count = observed_mutation_count_queryset[0].synonymous
             unique_function_change_count = unique_mutation_count_queryset[0].synonymous
-        elif functional_change_type == 'nonsynonymous':
+        elif functional_change_type == 'snp_type_nonsynonymous':
             observed_function_change_count = observed_mutation_count_queryset[0].nonsynonymous
             unique_function_change_count = unique_mutation_count_queryset[0].nonsynonymous
         functional_change_type_count_dict['observed'][functional_change_type] = observed_function_change_count

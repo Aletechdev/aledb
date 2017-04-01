@@ -366,10 +366,10 @@ def rebuild_counts():
         elif functional_change_type == 'pseudogene':
             observed_mutation_count_queryset.update(pseudogene=observed_mutation_type_count)
             unique_mutation_count_queryset.update(pseudogene=unique_mutation_type_count)
-        elif functional_change_type == 'synonymous':
+        elif functional_change_type == 'snp_type_synonymous':
             observed_mutation_count_queryset.update(synonymous=observed_mutation_type_count)
             unique_mutation_count_queryset.update(synonymous=unique_mutation_type_count)
-        elif functional_change_type == 'nonsynonymous':
+        elif functional_change_type == 'snp_type_nonsynonymous':
             observed_mutation_count_queryset.update(nonsynonymous=observed_mutation_type_count)
             unique_mutation_count_queryset.update(nonsynonymous=unique_mutation_type_count)
 
