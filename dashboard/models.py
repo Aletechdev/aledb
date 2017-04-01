@@ -1,6 +1,7 @@
 from django.db import models
 
 class ObservedMutationCounts(models.Model):
+    total = models.IntegerField(default=0)
     single_base_substitution = models.IntegerField(default=0)
     multiple_base_substitution = models.IntegerField(default=0)
     deletion = models.IntegerField(default=0)
@@ -17,6 +18,7 @@ class ObservedMutationCounts(models.Model):
     nonsynonymous = models.IntegerField(default=0)
 
 class UniqueMutationCounts(models.Model):
+    total = models.IntegerField(default=0)
     single_base_substitution = models.IntegerField(default=0)
     multiple_base_substitution = models.IntegerField(default=0)
     deletion = models.IntegerField(default=0)
