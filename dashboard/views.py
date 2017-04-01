@@ -129,17 +129,14 @@ def dashboard(request):
     return HttpResponse(template.render(context))
 
 
-def get_filtered_mutation_queryset(gene_query):
-
-    mut_id_list = gene_query.values_list('mutation_id').distinct()
-
-    filtered_mut_id_list = [mut_id[0] for mut_id in mut_id_list]
-
-    mutation_queryset = seq.models.Mutation.objects.filter(id__in=filtered_mut_id_list)
-
+def get_mutation_queryset(observed_mutation_queryset):
+    unique_mut_list = observed_mutation_queryset.values_list('mutation_id').distinct()
+    unique_mut_id_list = [mut_id[0] for mut_id in unique_mut_list]
+    mutation_queryset = seq.models.Mutation.objects.filter(id__in=unique_mut_id_list)
     return mutation_queryset
 
 
+# TODO: remove since no longer using this.
 def _get_cached_dashboard_query():
 
     cached_mutation_queryset = cache.get('dashboard_mutation')
@@ -156,7 +153,7 @@ def _get_cached_dashboard_query():
 
         observed_mutation_queryset = dashboard_filter(initial_query)
 
-        mutation_query_set = get_filtered_mutation_queryset(observed_mutation_queryset)
+        mutation_query_set = get_mutation_queryset(observed_mutation_queryset)
 
         cache.set('dashboard_mutation', mutation_query_set, None)
 
