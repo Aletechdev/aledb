@@ -34,13 +34,13 @@ __author__ = 'pphaneuf'
 
 @login_required
 def dashboard(request):
-
     count_dict = {}
-    count_dict['observed'] = ObservedMutation.objects.count()
-    count_dict['unique'] = Mutation.objects.count()
     count_dict['ale_exp'] = AleExperiment.objects.count()
     count_dict['ale'] = AleId.objects.count()
     count_dict['isolate'] = Isolate.objects.count()
+    # TODO: Can't use this since we need to filter out many of the starting strain counts
+    # count_dict['observed'] = ObservedMutation.objects.count()
+    # count_dict['unique'] = Mutation.objects.count()
 
     # mutation_query_set, observed_mutation_queryset = _get_cached_dashboard_query()
 

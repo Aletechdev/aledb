@@ -306,67 +306,69 @@ def _create_fixated_mutations(ale_experiment_id):
 
 # TODO: build unit test for this.
 def rebuild_counts():
-    observed_mutation_counts = ObservedMutationCounts.objects.all()
-    if observed_mutation_counts.count() == 0:
+    observed_mutation_count_queryset = ObservedMutationCounts.objects.all()
+    if observed_mutation_count_queryset.count() == 0:
         ObservedMutationCounts.objects.create()
-        observed_mutation_counts = ObservedMutationCounts.objects.all()
-    unique_mutation_counts = UniqueMutationCounts.objects.all()
-    if unique_mutation_counts.count() == 0:
+        observed_mutation_count_queryset = ObservedMutationCounts.objects.all()
+    unique_mutation_count_queryset = UniqueMutationCounts.objects.all()
+    if unique_mutation_count_queryset.count() == 0:
         UniqueMutationCounts.objects.create()
-        unique_mutation_counts = UniqueMutationCounts.objects.all()
+        unique_mutation_count_queryset = UniqueMutationCounts.objects.all()
 
+    # TODO: there has to be a better way than the below. It's full of unnecessary repetition.
     initial_query = seq.models.ObservedMutation.objects.all()
     observed_mutation_queryset = dashboard_filter(initial_query)
     unique_mutation_query_set = get_filtered_mutation_queryset(observed_mutation_queryset)
     for mutation_type in seq.views.common.MUTATION_TYPE_LIST:
         observed_mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=mutation_type).count()
         unique_mutation_type_count = unique_mutation_query_set.filter(mutation_type=mutation_type).count()
-        if seq.views.common.MUTATION_TYPE_LIST == 'SNP':
-            observed_mutation_counts[0].single_base_substitution = observed_mutation_type_count
-            unique_mutation_counts[0].single_base_substitution = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'SUB':
-            observed_mutation_counts[0].multiple_base_substitution = observed_mutation_type_count
-            unique_mutation_counts[0].multiple_base_substitution = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'DEL':
-            observed_mutation_counts[0].deletion = observed_mutation_type_count
-            unique_mutation_counts[0].deletion = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'INS':
-            observed_mutation_counts[0].insertion = observed_mutation_type_count
-            unique_mutation_counts[0].insertion = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'MOB':
-            observed_mutation_counts[0].mobile_element_insertion = observed_mutation_type_count
-            unique_mutation_counts[0].mobile_element_insertion = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'DUP':
-            observed_mutation_counts[0].duplication = observed_mutation_type_count
-            unique_mutation_counts[0].duplication = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'AMP':
-            observed_mutation_counts[0].amplification = observed_mutation_type_count
-            unique_mutation_counts[0].amplification = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'CON':
-            observed_mutation_counts[0].gene_conversion = observed_mutation_type_count
-            unique_mutation_counts[0].gene_conversion = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'INV':
-            observed_mutation_counts[0].inversion = observed_mutation_type_count
-            unique_mutation_counts[0].inversion = unique_mutation_type_count
+        if mutation_type == 'SNP':
+            observed_mutation_count_queryset.update(single_base_substitution=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(single_base_substitution=unique_mutation_type_count)
+        elif mutation_type == 'SUB':
+            observed_mutation_count_queryset.update(multiple_base_substitution=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(multiple_base_substitution=unique_mutation_type_count)
+        elif mutation_type == 'DEL':
+            observed_mutation_count_queryset.update(deletion=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(deletion=unique_mutation_type_count)
+        elif mutation_type == 'INS':
+            observed_mutation_count_queryset.update(insertion=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(insertion=unique_mutation_type_count)
+        elif mutation_type == 'MOB':
+            observed_mutation_count_queryset.update(mobile_element_insertion=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(mobile_element_insertion=unique_mutation_type_count)
+        elif mutation_type == 'DUP':
+            observed_mutation_count_queryset.update(duplication=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(duplication=unique_mutation_type_count)
+        elif mutation_type == 'AMP':
+            observed_mutation_count_queryset.update(amplification=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(amplification=unique_mutation_type_count)
+        elif mutation_type == 'CON':
+            observed_mutation_count_queryset.update(gene_conversion=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(gene_conversion=unique_mutation_type_count)
+        elif mutation_type == 'INV':
+            observed_mutation_count_queryset.update(inversion=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(inversion=unique_mutation_type_count)
 
     for functional_change_type in seq.views.common.FUNCTIONAL_CHANGE_TYPE_LIST:
         observed_mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=functional_change_type).count()
         unique_mutation_type_count = unique_mutation_query_set.filter(mutation_type=functional_change_type).count()
-        if seq.views.common.MUTATION_TYPE_LIST == 'intergenic':
-            observed_mutation_queryset[0].intergenic = observed_mutation_type_count
-            unique_mutation_type_count[0].intergenic = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'noncoding':
-            observed_mutation_queryset[0].noncoding = observed_mutation_type_count
-            unique_mutation_type_count[0].noncoding = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'pseudogene':
-            observed_mutation_queryset[0].pseudogene = observed_mutation_type_count
-            unique_mutation_type_count[0].pseudogene = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'synonymous':
-            observed_mutation_queryset[0].synonymous = observed_mutation_type_count
-            unique_mutation_type_count[0].synonymous = unique_mutation_type_count
-        elif seq.views.common.MUTATION_TYPE_LIST == 'nonsynonymous':
-            observed_mutation_queryset[0].nonsynonymous = observed_mutation_type_count
-            unique_mutation_type_count[0].nonsynonymous = unique_mutation_type_count
+
+        if functional_change_type == 'intergenic':
+            observed_mutation_count_queryset.update(intergenic=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(intergenic=unique_mutation_type_count)
+        elif functional_change_type == 'noncoding':
+            observed_mutation_count_queryset.update(noncoding=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(noncoding=unique_mutation_type_count)
+        elif functional_change_type == 'pseudogene':
+            observed_mutation_count_queryset.update(pseudogene=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(pseudogene=unique_mutation_type_count)
+        elif functional_change_type == 'synonymous':
+            observed_mutation_count_queryset.update(synonymous=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(synonymous=unique_mutation_type_count)
+        elif functional_change_type == 'nonsynonymous':
+            observed_mutation_count_queryset.update(nonsynonymous=observed_mutation_type_count)
+            unique_mutation_count_queryset.update(nonsynonymous=unique_mutation_type_count)
 
 
 def rebuild_enrichment_mutations(ale_experiment_id):
