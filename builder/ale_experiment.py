@@ -96,7 +96,7 @@ def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate
     _delete_all_orphaned_mutations()
 
 
-def insert_starting_straing_flask(starting_strain_breseq_output_abs_path, ale_exp_user, ale_exp_name):
+def insert_starting_strain_flask(starting_strain_breseq_output_abs_path, ale_exp_user, ale_exp_name):
     """
     Executed from Django ipython shell.
     Args:
@@ -122,15 +122,16 @@ def insert_starting_straing_flask(starting_strain_breseq_output_abs_path, ale_ex
     freezer_box_orm = ale.models.FreezerBox.objects.get_or_create(name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
                                                                   number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
 
-    _insert_staring_strain_flask(starting_strain_breseq_output_abs_path,
-                                 ale_exp_user,
-                                 ale_exp_name,
-                                 experiment_orm,
-                                 media_orm,
-                                 freezer_box_orm)
+    _insert_starting_strain_flask(starting_strain_breseq_output_abs_path,
+                                  ale_exp_user,
+                                  ale_exp_name,
+                                  experiment_orm,
+                                  media_orm,
+                                  freezer_box_orm)
 
     rebuild_enrichment_mutations(experiment_orm.ale_id)
     rebuild_fixated_mutations(experiment_orm.ale_id)
+    rebuild_counts()
 
 
 def rebuild_all_enrichment_mutations():
@@ -149,12 +150,12 @@ def rebuild_all_fixated_mutations():
         rebuild_fixated_mutations(ale_experiment.ale_id)
 
 
-def _insert_staring_strain_flask(staring_strain_breseq_output_abs_path,
-                                 ale_exp_user,
-                                 ale_exp_name,
-                                 experiment_orm,
-                                 media_orm,
-                                 freezer_box_orm):
+def _insert_starting_strain_flask(staring_strain_breseq_output_abs_path,
+                                  ale_exp_user,
+                                  ale_exp_name,
+                                  experiment_orm,
+                                  media_orm,
+                                  freezer_box_orm):
 
     sanitized_breseq_output_wild_type_abs_path = builder.util.sanitize_path(staring_strain_breseq_output_abs_path)
 
@@ -251,12 +252,12 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                                                        number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
 
     if breseq_starting_strain_output_abs_path is not None:
-        _insert_staring_strain_flask(breseq_starting_strain_output_abs_path,
-                                     ale_exp_user,
-                                     ale_exp_name,
-                                     experiment,
-                                     default_media,
-                                     freezer_box)
+        _insert_starting_strain_flask(breseq_starting_strain_output_abs_path,
+                                      ale_exp_user,
+                                      ale_exp_name,
+                                      experiment,
+                                      default_media,
+                                      freezer_box)
 
     # Might need to explicitly sort this list in the future.
     breseq_sample_report_list = _get_sample_report_list(sanitized_breseq_output_abs_path)
@@ -282,6 +283,7 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     rebuild_enrichment_mutations(experiment.ale_id)
     rebuild_fixated_mutations(experiment.ale_id)
+    rebuild_counts()
 
 
 def rebuild_fixated_mutations(ale_experiment_id):
@@ -316,9 +318,11 @@ def rebuild_counts():
         unique_mutation_count_queryset = UniqueMutationCounts.objects.all()
 
     # TODO: there has to be a better way than the below. It's full of unnecessary repetition.
-    initial_query = seq.models.ObservedMutation.objects.all()
-    observed_mutation_queryset = dashboard_filter(initial_query)
+    raw_observed_mutation_queryset = seq.models.ObservedMutation.objects.all()
+    observed_mutation_queryset = dashboard_filter(raw_observed_mutation_queryset)
+    observed_mutation_count_queryset.update(total=observed_mutation_queryset.count())
     unique_mutation_query_set = get_filtered_mutation_queryset(observed_mutation_queryset)
+    unique_mutation_count_queryset.update(total=unique_mutation_query_set.count())
     for mutation_type in seq.views.common.MUTATION_TYPE_LIST:
         observed_mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=mutation_type).count()
         unique_mutation_type_count = unique_mutation_query_set.filter(mutation_type=mutation_type).count()
