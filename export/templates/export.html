@@ -5,109 +5,68 @@
 {% endblock %}
 {% block header %}Export{% endblock %}
 {% block content %}
-    {% if is_download_request %}
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="alert alert-success" role="alert"><b>Success!</b> Your table has been generated. Click the button below to download as a CSV</div>
-                <div id="export_button"></div>
+    <div class="row" id="selector_elements">
+        <div class="col-lg-4">
+            <div class="btn-group">
+                <button type="button" class="btn btn-default" id="selector_button">Select Experiment</button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu" id="experiment_selector">
+                    <li><a href="#/">All</a></li>
+                    {% for exp in experiments %}
+                        <li><a href="#/">{{ exp.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-success" onclick="add_experiment_to_download_list()">
+                    <i class="fa fa-plus fa-fw" aria-hidden="true"></i> Add Experiment
+                </button>
             </div>
         </div>
-        <div style="display: none">
-            <table id="data">
-                <thead>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+    </div>
+    <br><br>
+    <div class="row">
+        <div class="col-lg-4">
+            <ul class="list-group" id="selected_experiments"></ul>
         </div>
-        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.css"/>
-
-        <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.js"></script>
-        <script type="text/javascript">
-
-            var sorted_column = 2;
-            var table_titles = {{ table_header | safe }};
-            var table_heads = [];
-            var number_of_columns = 0;
-            for(var x in table_titles) {
-                table_heads.push({title: table_titles[x]});
-                number_of_columns += 1;
-            }
-
-            var columns_to_export = [];
-
-            for(var k = sorted_column; k < number_of_columns; k++) {
-                columns_to_export.push(k)
-            }
-
-            $(document).ready(function () {
-                var oTable = $("#data").DataTable({
-                    paging: true,
-                    pagingType: "full_numbers",
-                    data: {{ table_body }},
-                    columns: table_heads,
-                    autoWidth: false,
-                    pageLength: 10,
-                    language: ',',
-                    columnDefs: [ {className: 'exportable', 'targets': columns_to_export } ],
-                    order: [[ sorted_column, 'asc']],
-                    dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
-                    buttons: [
-                        'colvis', {
-                            extend: 'csv',
-                            text: 'Download Table as CSV',
-                            exportOptions: {
-                                columns: columns_to_export
-                            }
-                        }
-                    ],
-                    deferRender: true
-                });
-
-                var element = $(document.getElementsByClassName('buttons-csv'));
-                element.appendTo(document.getElementById('export_button'));
-
-            });
-        </script>
-    {% else %}
-        <div class="row">
-            <div class="col-lg-4">
-                <div class="btn-group">
-                    <button type="button" class="btn btn-default" id="selector_button">Select Experiment</button>
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <span class="caret"></span>
-                        <span class="sr-only">Toggle Dropdown</span>
-                    </button>
-                    <ul class="dropdown-menu" id="experiment_selector">
-                        <li><a href="#/">All</a></li>
-                        {% for exp in experiments %}
-                            <li><a href="#/">{{ exp.name }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-success" onclick="add_experiment_to_download_list()">
-                        <i class="fa fa-plus fa-fw" aria-hidden="true"></i> Add Experiment
-                    </button>
-                </div>
-            </div>
-        </div>
-        <br><br>
-        <div class="row">
-            <div class="col-lg-4">
-                <ul class="list-group" id="selected_experiments"></ul>
-            </div>
-        </div>
-        <br><br>
-        <div class="row">
-            <div class="col-lg-6">
-                <form action="/export" method="get">
-                    <div class="input-group">
-                        <input type="submit" class="btn btn-default" id="download" name="download" value="Submit Request">
-                        <input type="hidden" id="download_experiments" name="download_experiments" value="">
+    </div>
+    <br><br>
+    <div class="row">
+        <div class="col-lg-6">
+            <form action="/export" method="get">
+                <div class="input-group">
+                    <input type="submit" class="btn btn-default" id="download" name="download" value="Download Experiments as CSV" onclick="print_warning_message()" style="display: none">
+                    <input type="hidden" id="download_experiments" name="download_experiments" value="">
+                    <br>
+                    <div class="row" id="warning_message" style="display: none">
+                        <div class="col-lg-12">
+                            <div class="alert alert-danger" role="alert"><b>Warning!</b> Please do not leave or close this tab until your download has completely finished</div>
+                            <div id="export_button"></div>
+                        </div>
                     </div>
-                </form>
-            </div>
+                    <div class="row" id="success_message" style="display: none">
+                        <div class="col-lg-12">
+                            <div class="alert alert-success" role="alert"><b>Success!</b> Your file has been downloaded</div>
+                            <div id="export_button"></div>
+                        </div>
+                        <div class="col-lg-12">
+                            <a href="/export" class="btn btn-primary">Download Another Experiment</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
+    </div>
+    {% if is_download %}
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.js"></script>
+        <script type="text/javascript" src="/static/csv.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
+        <script type="text/javascript">
+            var data = {{ data }};
+            {% include 'download_zip.js' %}
+        </script>
     {% endif %}
 {% endblock %}
