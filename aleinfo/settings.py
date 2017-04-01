@@ -134,6 +134,7 @@ TEMPLATES = [
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -169,6 +170,7 @@ INSTALLED_APPS = (
     'duplications',
     'genes',
     'commmonmuts',
+    'debug_toolbar',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -206,3 +208,5 @@ CACHES = {
         'LOCATION': 'cache_table',
     }
 }
+
+INTERNAL_IPS = ('128.54.250.14')
