@@ -15,7 +15,7 @@ from builder.gdparse.gdparse import gdparse
 from common.db_util import clear_dashboard_cache
 import metadata.parser
 from filter.util import dashboard_filter
-from dashboard.views import get_filtered_mutation_queryset  # TODO: should move this here if no longer used in dashboard.
+from dashboard.views import get_mutation_queryset
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -317,15 +317,20 @@ def rebuild_counts():
         UniqueMutationCounts.objects.create()
         unique_mutation_count_queryset = UniqueMutationCounts.objects.all()
 
+    observed_mutation_queryset = seq.models.ObservedMutation.objects.all()
+    unique_mutation_queryset = seq.models.Mutation.objects.all()
+
+    # TODO: need to validate that these filters are working with unit tests. Current implementation unclear and reduces observed mutation count to 1/3 or raw data count. https://github.com/SBRG/ale_analytics/issues/309
+    # raw_observed_mutation_queryset = seq.models.ObservedMutation.objects.all()
+    # observed_mutation_queryset = dashboard_filter(raw_observed_mutation_queryset)
+    # unique_mutation_queryset = get_mutation_queryset(observed_mutation_queryset)
+
     # TODO: there has to be a better way than the below. It's full of unnecessary repetition.
-    raw_observed_mutation_queryset = seq.models.ObservedMutation.objects.all()
-    observed_mutation_queryset = dashboard_filter(raw_observed_mutation_queryset)
     observed_mutation_count_queryset.update(total=observed_mutation_queryset.count())
-    unique_mutation_query_set = get_filtered_mutation_queryset(observed_mutation_queryset)
-    unique_mutation_count_queryset.update(total=unique_mutation_query_set.count())
+    unique_mutation_count_queryset.update(total=unique_mutation_queryset.count())
     for mutation_type in seq.views.common.MUTATION_TYPE_LIST:
         observed_mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=mutation_type).count()
-        unique_mutation_type_count = unique_mutation_query_set.filter(mutation_type=mutation_type).count()
+        unique_mutation_type_count = unique_mutation_queryset.filter(mutation_type=mutation_type).count()
         if mutation_type == 'SNP':
             observed_mutation_count_queryset.update(single_base_substitution=observed_mutation_type_count)
             unique_mutation_count_queryset.update(single_base_substitution=unique_mutation_type_count)
@@ -356,7 +361,7 @@ def rebuild_counts():
 
     for functional_change_type in seq.views.common.FUNCTIONAL_CHANGE_TYPE_LIST:
         observed_mutation_type_count = observed_mutation_queryset.filter(mutation__protein_change__contains=functional_change_type).count()
-        unique_mutation_type_count = unique_mutation_query_set.filter(protein_change__contains=functional_change_type).count()
+        unique_mutation_type_count = unique_mutation_queryset.filter(protein_change__contains=functional_change_type).count()
         if functional_change_type == 'intergenic':
             observed_mutation_count_queryset.update(intergenic=observed_mutation_type_count)
             unique_mutation_count_queryset.update(intergenic=unique_mutation_type_count)
