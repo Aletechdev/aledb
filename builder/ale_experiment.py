@@ -355,9 +355,8 @@ def rebuild_counts():
             unique_mutation_count_queryset.update(inversion=unique_mutation_type_count)
 
     for functional_change_type in seq.views.common.FUNCTIONAL_CHANGE_TYPE_LIST:
-        observed_mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=functional_change_type).count()
-        unique_mutation_type_count = unique_mutation_query_set.filter(mutation_type=functional_change_type).count()
-
+        observed_mutation_type_count = observed_mutation_queryset.filter(mutation__protein_change__contains=functional_change_type).count()
+        unique_mutation_type_count = unique_mutation_query_set.filter(protein_change__contains=functional_change_type).count()
         if functional_change_type == 'intergenic':
             observed_mutation_count_queryset.update(intergenic=observed_mutation_type_count)
             unique_mutation_count_queryset.update(intergenic=unique_mutation_type_count)
