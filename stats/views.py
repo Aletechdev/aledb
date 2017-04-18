@@ -1,4 +1,3 @@
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
@@ -52,7 +51,6 @@ def get_ale_flask_isolate_count_list(reseq_queryset):
     return ale_flask_isolate_count_list
 
 
-@login_required
 def stats(request):
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ale_id = request.GET.get(REQUEST_ALE_ID)

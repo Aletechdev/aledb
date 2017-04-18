@@ -4,8 +4,6 @@ from django.http import HttpResponse
 
 from django.template import loader
 
-from django.contrib.auth.decorators import login_required
-
 import aleinfo.settings as settings
 
 from seq.views import common
@@ -35,7 +33,6 @@ else:
     password = ""
 
 
-@login_required
 def duplication(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
