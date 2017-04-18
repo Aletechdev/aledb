@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.template import loader
 from django.utils.safestring import mark_safe
 import seq.views.common
@@ -18,7 +17,6 @@ REQUEST_PRIMARY_RESEQ_ID = "primary_reseq_id"
 
 
 # TODO: very similar to fixation mutations page workflow. Should consolidate somehow.
-@login_required
 def common_mutations(request):
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 

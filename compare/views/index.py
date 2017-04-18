@@ -1,5 +1,3 @@
-from django.contrib.auth.decorators import login_required
-
 from django.template import loader
 
 from django.http import HttpResponse
@@ -27,7 +25,6 @@ COMPARE_TEMPLATE = 'compare.html'
 
 
 # TODO: This needs to be refactored: shares quite a bit with the stats page
-@login_required
 def compare(request):
 
     all_experiments = get_all_ale_experiments()

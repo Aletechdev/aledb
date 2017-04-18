@@ -4,8 +4,6 @@ from django.http import HttpResponse
 
 from django.utils.safestring import mark_safe
 
-from django.contrib.auth.decorators import login_required
-
 from django.template import loader
 
 import seq.models
@@ -45,7 +43,6 @@ else:
     password = ""
 
 
-@login_required
 def gene(request):
     gene_query = request.GET['g']
 

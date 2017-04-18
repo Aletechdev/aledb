@@ -2,8 +2,6 @@ from django.http import HttpResponse
 
 from django.template import loader
 
-from django.contrib.auth.decorators import login_required
-
 from seq.views import common
 
 from filter.forms.filter import FilterForm
@@ -28,7 +26,6 @@ FILTER_TEMPLATE = "filter/index.html"
 STARTING_STRAIN_HEADER = """<tr><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td></tr>"""
 
 
-@login_required
 def mutation_filter(request):
     ale_experiment_name = common.get_ale_experiment_name(request)
     ale_experiment_id = common.get_ale_experiment_id(request)
