@@ -1,9 +1,6 @@
 import os
 import os.path
 import sys
-# module_path = os.path.abspath(os.path.join('../metadata'))
-# if module_path not in sys.path:
-#     sys.path.append(module_path)
 from metadata.parser import parse_metadata_post_experiment_upload
 
 
