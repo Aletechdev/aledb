@@ -2,6 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from dashboard.views import dashboard
 from django.template import loader
 from django.http import HttpResponse
+from django.conf import settings
 
 
 def login_user(request):
@@ -10,6 +11,17 @@ def login_user(request):
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return dashboard(request)
+
+    if request.GET and settings.PUBLIC:
+
+        username = settings.PUBLIC_USERNAME
+        password = settings.PUBLIC_PASSWORD
+        user = authenticate(username=username, password=password)
+
         if user is not None:
             if user.is_active:
                 login(request, user)
