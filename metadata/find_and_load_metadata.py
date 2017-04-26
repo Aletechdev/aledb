@@ -36,9 +36,17 @@ def _get_exp_primary_key(metadata_dir_path):
     return exp_primary_key
 
 
+def _output_metadata_dir_path_to_file(metadata_dir_path_list):
+    with open("metadata_dir_paths.txt", 'w') as f:
+        for metadata_dir_path in metadata_dir_path_list:
+            f.write(metadata_dir_path + '\n')
+
+
 def find_and_load_metadata(search_root_path):
     metadata_dir_path_list = _get_metadata_dir_path_list(search_root_path)
+    _output_metadata_dir_path_to_file(metadata_dir_path_list)
     for metadata_dir_path in metadata_dir_path_list:
+        print(metadata_dir_path)
         exp_primary_key = _get_exp_primary_key(metadata_dir_path)
         if exp_primary_key != "":
             parse_metadata_post_experiment_upload(metadata_dir_path, exp_primary_key)
