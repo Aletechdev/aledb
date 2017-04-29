@@ -31,7 +31,7 @@ $(document).ready(function () {
         pagingType: "full_numbers",
         data: table_data,
         autoWidth: false,
-        pageLength: 1000,
+        pageLength: 100,
         lengthMenu: [50, 100, 500, 1000],
         language: ',',
         columns: table_heads,
@@ -59,7 +59,11 @@ $(document).ready(function () {
         buttons: [
             {
                 extend: 'colvis',
-                columns: columns_to_export
+                columns: columns_to_export,
+                //TODO: Implement this function when Buttons 1.3 releases to remove tags from column visibility titles
+                columnText: function ( dt, idx, title ) {
+                    return title
+                }
             }, {
                 extend: 'csv',
                 text: 'CSV',
@@ -227,7 +231,11 @@ function add_tag(tag_type, mutation_id, row) {
     })
 }
 
-function filter_tag(tag_type, is_show) {
+function filter_tag(tag_type, is_show, tag_text) {
+
+    var row_tag_selector = document.getElementById('row_tag_selector');
+    row_tag_selector.textContent = tag_text;
+
     var tag_column = $('#data').DataTable().column(sorted_column - 1);
     if(tag_type == 'clear') {
         tag_column.search('').draw();

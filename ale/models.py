@@ -166,6 +166,7 @@ class Flask(models.Model):
 
 
 #TODO: Change 'reseq_reference' field to 'reseq_ref_name'
+#TODO: Change 'library_prep' field to 'wgs_kit'
 class Isolate(models.Model):
 
     isolate_number = models.IntegerField()
