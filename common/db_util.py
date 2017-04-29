@@ -19,7 +19,8 @@ def get_reseq_queryset(ale_experiment_id, ale_id=None):
         'tech_rep__isolate__flask__ale_id__ale_experiment__name',
         'tech_rep__isolate__flask__ale_id__ale_id',
         'tech_rep__isolate__flask__flask_number',
-        'tech_rep__isolate__isolate_number')
+        'tech_rep__isolate__isolate_number',
+        'tech_rep__tech_rep_number')
 
     reseq_queryset = get_ale_experiment_selector(ale_experiment_id, reseq_queryset)
 
