@@ -45,6 +45,8 @@
 {% if experiment_id %}
     <div class="row"> <!-- Columns -->
         <form action="" method="get">
+            <!--<i>NOTE: You must select the Apply when selecting specific ALEs or show/hide of columns according to tags.</i>-->
+            <br>
             <b>Columns: </b>
             <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
             <input type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
@@ -66,8 +68,8 @@
             <button type="button" class="btn btn-default" onclick="column_sort_from_right()"><i class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i>Column Sort from Right</button>
         </form>
     </div>
+    <div><i>Note: You must select the Apply button when selecting specific ALEs or show/hide of columns according to tags.</i></div>
     <br>
-
     <div class="row"> <!-- Rows -->
         <b>Rows: </b>
         <div class="btn-group" role="group">
