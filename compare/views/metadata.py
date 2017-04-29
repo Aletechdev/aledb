@@ -1,5 +1,3 @@
-from django.contrib.auth.decorators import login_required
-
 from django.template import loader
 
 from django.http import HttpResponse
@@ -25,7 +23,6 @@ else:
     reseq_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
-@login_required
 def comparison_metadata(request):
 
     ale_experiment_list = request.GET.get('ale_experiment_id', None).replace('[', '').replace(']', '').split(',')

@@ -2,8 +2,6 @@ from django.http import HttpResponse
 
 from django.utils.safestring import mark_safe
 
-from django.contrib.auth.decorators import login_required
-
 from django.template import loader
 
 from django.shortcuts import render
@@ -31,7 +29,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json
 
 
-@login_required
 def search(request):
 
     check_hidden_columns_and_filters(request, None)

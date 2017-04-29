@@ -1,6 +1,5 @@
 # TODO: All resources being pulled from seq app could possibly be stored in a common dir.
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.template import loader
 from django.utils.safestring import mark_safe
 # TODO: seq.views.common.get_ordered_reseq_dict could likely be refactored into common.db_util.get_reseq_dict
@@ -23,7 +22,6 @@ REQUEST_ASCENDING_FREQ_FILTER = 'asndflt'
 
 # TODO: very similar to common_mutations page workflow. Should consolidate somehow.
 # TODO: Shares some same functions as fixation.views.py and should be refactored/consolidated
-@login_required
 def comparison_fixation(request):
 
     ale_no = seq.views.common.get_ale_number(request)

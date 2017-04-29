@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.template import loader
 from django.utils.safestring import mark_safe
 import seq.views.common
@@ -16,7 +15,6 @@ import common.constants
 __author__ = 'pphaneuf'
 
 
-@login_required
 def mutation_table(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)

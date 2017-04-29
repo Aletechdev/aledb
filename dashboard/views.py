@@ -1,5 +1,3 @@
-from django.contrib.auth.decorators import login_required
-
 from django.template import loader
 
 from django.http import HttpResponse
@@ -32,7 +30,6 @@ DASHBOARD_TEMPLATE = "dashboard.html"
 __author__ = 'pphaneuf'
 
 
-@login_required
 def dashboard(request):
     count_dict = {}
     count_dict['ale_exp'] = AleExperiment.objects.count()
