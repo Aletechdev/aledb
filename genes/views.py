@@ -34,11 +34,11 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
-    reseqencing_report_url = settings.sequencing_url
+    aledata_url = settings.sequencing_url
     username = settings.config.get("OTHER", "username")
     password = settings.config.get("OTHER", "password")
 else:
-    reseqencing_report_url = ""
+    aledata_url = ""
     username = ""
     password = ""
 
@@ -168,7 +168,8 @@ def _get_pdb_url(gene_query):
 
 def _get_homology_data(gene_query):
 
-    mapping_url = 'https://ale-analytics.ucsd.edu/aledata/homology_models/160804-genes_to_homology_models.csv'
+    mapping_url = aledata_url + 'homology_models/160804-genes_to_homology_models.csv'
+
 
     response = requests.get(mapping_url, auth=(username, password))
 
@@ -177,7 +178,7 @@ def _get_homology_data(gene_query):
     for row in reader:
 
         if row[1] == gene_query:
-            homology_url = 'https://ale-analytics.ucsd.edu/aledata/homology_models/' + row[3]
+            homology_url = aledata_url + 'homology_models/' + row[3]
 
             return requests.get(homology_url, auth=(username, password)).text, True
 
