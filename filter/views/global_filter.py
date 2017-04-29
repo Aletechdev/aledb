@@ -1,6 +1,5 @@
 from django.http import HttpResponse
 from django.template import loader
-from django.contrib.auth.decorators import login_required
 from filter.forms.filter import FilterForm
 from django.utils.safestring import mark_safe
 from filter.util import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, get_global_filter
@@ -11,7 +10,6 @@ __author__ = 'Denny Gosting, Patrick Phaneuf'
 GLOBAL_FILTER_TEMPLATE = "filter/global_filter.html"
 
 
-@login_required
 def global_filter(request):
 
     template = loader.get_template(GLOBAL_FILTER_TEMPLATE)

@@ -1,7 +1,6 @@
 # TODO: All resources being pulled from seq app could possibly be stored in a common dir.
 
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.template import loader
 from django.utils.safestring import mark_safe
 #TODO: seq.views.common.get_ordered_reseq_dict could likely be refactored into common.db_util.get_reseq_dict
@@ -32,7 +31,6 @@ REQUEST_ASCENDING_FREQ_FILTER = 'asndflt'
 
 
 # TODO: very similar to common_mutations page workflow. Should consolidate somehow.
-@login_required
 def fixating_mutations(request):
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
@@ -87,7 +85,6 @@ def fixating_mutations(request):
     return HttpResponse(template.render(context))
 
 
-@login_required
 def shared_fixated_mutations(request):
 
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
