@@ -1,6 +1,4 @@
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-
-from django.conf.urls import include, url
+from django.conf.urls import include, url, patterns
 from django.conf import settings
 
 
@@ -22,10 +20,10 @@ urlpatterns = [
     url(r'^common_mutations/', include('commmonmuts.urls')),
 ]
 
-urlpatterns += staticfiles_urlpatterns()
-
 if settings.DEBUG:
     import debug_toolbar
     urlpatterns += [
         url(r'^__debug__/', include(debug_toolbar.urls)),
     ]
+else:
+    urlpatterns += patterns('', (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': 'static'}))
