@@ -33,13 +33,14 @@ def search(request):
 
     check_hidden_columns_and_filters(request, None)
 
-    reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request)
+    observed_mutations_with_gene_queryset = _get_seq_exp(request)
+
+    reseq_dict = _get_reseq_dict_from_observed_mutation_queryset(observed_mutations_with_gene_queryset)
 
     if reseq_dict is None or observed_mutations_with_gene_queryset is None:
         return render(request, 'search.html', {'error': True,
                                                "experiments": get_all_ale_experiments(),
-                                               "recent_experiments": get_recent_experiments()
-                                               })
+                                               "recent_experiments": get_recent_experiments()})
 
     table_header = mutation_table_builder.get_table_header(reseq_dict)
 
@@ -55,6 +56,8 @@ def search(request):
                "title": "Search Results",
                "table_header": mark_safe(table_header),
                "last_search": last_search,
+               "mutation_count": len(table_body),
+               "observed_mutation_count": observed_mutations_with_gene_queryset.count(),
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments()}
 
@@ -79,7 +82,7 @@ def _get_seq_exp(request):
 
     if not include_argument_list:
 
-        return None, None
+        return None
 
     ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
 
@@ -95,13 +98,20 @@ def _get_seq_exp(request):
         observed_mutation_queryset = observed_mutation_queryset.filter(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_include)
 
+    return observed_mutation_queryset
+
+
+def _get_reseq_dict_from_observed_mutation_queryset(observed_mutation_queryset):
+
     reseq_dict = {}
 
+    if not observed_mutation_queryset:
+        return None
+
     for observed_mutation in observed_mutation_queryset:
+        reseq_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
 
-            reseq_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
-
-    return reseq_dict, observed_mutation_queryset
+    return reseq_dict
 
 
 def _get_last_search(request):
