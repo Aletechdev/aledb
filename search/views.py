@@ -28,6 +28,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 import json
 
+from filter.models import AleExperimentFilter
+
 
 def search(request):
 
@@ -97,6 +99,18 @@ def _get_seq_exp(request):
     if ale_experiments_to_include:
         observed_mutation_queryset = observed_mutation_queryset.filter(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_include)
+
+    distinct_ale_experimnet_ids = observed_mutation_queryset.values("sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment").distinct()
+    for exp in distinct_ale_experimnet_ids:
+
+        exp_id = exp["sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"]
+
+        exp_filter = AleExperimentFilter.objects.get(ale_experiment__ale_id=exp_id)
+
+        observed_mutation_queryset = observed_mutation_queryset.filter(
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp_id,
+            frequency__gte=exp_filter.min_cutoff / 100,
+            frequency__lte=exp_filter.max_cutoff / 100)
 
     return observed_mutation_queryset
 
