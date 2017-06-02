@@ -44,7 +44,6 @@ def fixating_mutations(request):
     # a disconnect between filtering methodologies that needs to be reconciled.
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
-    reseq_ordered_dict = mutation_table_builder.filter_checked_flasks(request, reseq_ordered_dict)
 
     table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
                                                            mutation_table_builder.TableType.FIXATING_MUTATIONS)
@@ -54,7 +53,6 @@ def fixating_mutations(request):
     observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id,
                                                                                      reseq_ordered_dict,
                                                                                      is_ascending_freq_filter)
-
 
     table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
                                                        observed_mutations_queryset=observed_mutation_queryset,
