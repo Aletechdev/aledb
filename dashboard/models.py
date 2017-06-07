@@ -1,4 +1,5 @@
 from django.db import models
+import datetime
 
 class ObservedMutationCounts(models.Model):
     total = models.IntegerField(default=0)
@@ -33,3 +34,16 @@ class UniqueMutationCounts(models.Model):
     pseudogene = models.IntegerField(default=0)
     synonymous = models.IntegerField(default=0)
     nonsynonymous = models.IntegerField(default=0)
+
+
+class TimelineEvent(models.Model):
+
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    title = models.CharField(max_length=100)
+
+    message = models.CharField(max_length=500)
+
+    icon = models.CharField(max_length=200)
+
+    color = models.CharField(max_length=50, default='')

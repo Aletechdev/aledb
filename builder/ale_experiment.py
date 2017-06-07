@@ -14,8 +14,7 @@ import seq.views.common
 from builder.gdparse.gdparse import gdparse
 from common.db_util import clear_dashboard_cache
 import metadata.parser
-from filter.util import dashboard_filter
-from dashboard.views import get_mutation_queryset
+from dashboard.timeline_util import create_event
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -68,9 +67,16 @@ def delete_ale_experiment(ale_experiment_primary_key):
 
     ale_experiment_to_delete = ale.models.AleExperiment.objects.get(pk=ale_experiment_primary_key)
 
+    message = "Experiment %s was deleted" % ale_experiment_to_delete.name
+
     ale_experiment_to_delete.delete()
 
     _delete_all_orphaned_mutations()
+
+    create_event(title="Experiment Deleted",
+                 message=message,
+                 icon='<i class="fa fa-times" aria-hidden="true"></i>',
+                 color="danger")
 
 
 def _delete_all_orphaned_mutations():
@@ -241,6 +247,11 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
     experiment, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                          instrument=instrument,
                                                                          person=ale_exp_user)
+
+    create_event(title="Experiment Created",
+                 message="Experiment %s was created" % experiment.name,
+                 icon='<i class="fa fa-flask" aria-hidden="true"></i>',
+                 color="success")
 
     default_media, created = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
                                                                     substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
