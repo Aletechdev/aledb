@@ -1,10 +1,11 @@
 <div id="plot">
-    <script src="/static/node_modules/muts-needle-plot/build/muts-needle-plot.js"></script>
-    <script src="/static/node_modules/muts-needle-plot/src/js/dependencies/d3.js"></script>
-    <script src="/static/node_modules/muts-needle-plot/src/js/dependencies/underscore.js"></script>
-    <script src="/static/node_modules/muts-needle-plot/src/js/d3-svg-legend.js"></script>
-    <link type="text/css" rel="stylesheet" href="/static/node_modules/muts-needle-plot/build/muts-needle-plot.css">
-    <script type="text/javascript" src="/static/muts_needle_plot.js"></script>
+    {% load static %}
+    <script src="{% static "node_modules/muts-needle-plot/build/muts-needle-plot.js" %}"></script>
+    <script src="{% static "node_modules/muts-needle-plot/src/js/dependencies/d3.js" %}"></script>
+    <script src="{% static "node_modules/muts-needle-plot/src/js/dependencies/underscore.js" %}"></script>
+    <script src="{% static "node_modules/muts-needle-plot/src/js/d3-svg-legend.js" %}"></script>
+    <link type="text/css" rel="stylesheet" href="{% static "node_modules/muts-needle-plot/build/muts-needle-plot.css" %}">
+    <script type="text/javascript" src="{% static "muts_needle_plot.js" %}"></script>
     <script type="text/javascript">
         NEEDLE_PLOT.init([{{ needle_plot_data }}]);
         NEEDLE_PLOT.create_muts_needle_plot();
