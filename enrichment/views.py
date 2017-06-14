@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.template import loader
 from django.utils.safestring import mark_safe
 from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
@@ -26,7 +25,6 @@ HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type<
 __author__ = 'Patrick Phaneuf'
 
 
-@login_required
 def enrichment_mutations(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
@@ -40,7 +38,6 @@ def enrichment_mutations(request):
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
-    ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
     table_header = mutation_table_builder.get_table_header(reseq_dict=ordered_reseq_dict,
                                                            table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
@@ -68,7 +65,6 @@ def enrichment_mutations(request):
     return HttpResponse(template.render(context))
 
 
-@login_required
 def shared_enriched_genes(request):
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
     selected_enrichment_mutation_queryset = EnrichmentMutation.objects.filter(mutation_id=mutation_id)

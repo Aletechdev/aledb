@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.template import loader
 from django.utils.safestring import mark_safe
 import seq.views.common
@@ -16,7 +15,6 @@ import common.constants
 __author__ = 'pphaneuf'
 
 
-@login_required
 def mutation_table(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
@@ -26,9 +24,6 @@ def mutation_table(request):
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, is_ref_strain_filtered)
 
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no, request)
-
-    # TODO: Talk to Patrick about removing this line and its corresponding functions in mutation_table_builder
-    ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 

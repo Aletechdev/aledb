@@ -1,4 +1,3 @@
-from django.contrib.auth.decorators import login_required
 from django.template import loader
 from django.http import HttpResponse, StreamingHttpResponse
 from common.db_util import get_all_ale_experiments, get_recent_experiments
@@ -22,7 +21,6 @@ class Echo(object):
         return value
 
 
-@login_required
 def export(request):
 
     experiment_names = request.GET.get('download_experiments', None)

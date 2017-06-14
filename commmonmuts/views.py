@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.template import loader
 from django.utils.safestring import mark_safe
 import seq.views.common
@@ -18,7 +17,6 @@ REQUEST_PRIMARY_RESEQ_ID = "primary_reseq_id"
 
 
 # TODO: very similar to fixation mutations page workflow. Should consolidate somehow.
-@login_required
 def common_mutations(request):
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
@@ -30,7 +28,6 @@ def common_mutations(request):
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no, request)
     wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
-    ordered_reseq_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
 
     primary_reseq_id = _get_primary_reseq_id(request)
     if primary_reseq_id is None:

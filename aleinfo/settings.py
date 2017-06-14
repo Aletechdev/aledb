@@ -4,7 +4,7 @@ import sys
 from configparser import ConfigParser
 
 
-DEBUG = True
+DEBUG = False
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -211,8 +211,7 @@ CACHES = {
 
 INTERNAL_IPS = ('128.54.250.14')
 
-# Warning: Setting this to True will override user authentication and bypass manual login!
-# You must also create a user in the Django shell using matching username and password below.
 PUBLIC = False
 PUBLIC_USERNAME = 'public'
 PUBLIC_PASSWORD = 'public_password'
+ALLOWED_HOSTS = ['web', 'localhost']

@@ -1,5 +1,3 @@
-from django.contrib.auth.decorators import login_required
-
 from django.http import HttpResponse
 
 from django.template import loader
@@ -25,7 +23,6 @@ else:
     reseq_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
-@login_required
 def metadata(request):
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ale_id = request.GET.get(REQUEST_ALE_ID)

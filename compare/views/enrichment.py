@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.template import loader
 from django.utils.safestring import mark_safe
 from common.db_util import get_all_ale_experiments, get_recent_experiments
@@ -17,7 +16,6 @@ HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type<
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
 
-@login_required
 def compared_enrichment_mutations(request):
 
     ale_no = seq.views.common.get_ale_number(request)
