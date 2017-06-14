@@ -213,6 +213,6 @@ INTERNAL_IPS = ('128.54.250.14')
 
 # Warning: Setting this to True will override user authentication and bypass manual login!
 # You must also create a user in the Django shell using matching username and password below.
-PUBLIC = True
+PUBLIC = False
 PUBLIC_USERNAME = 'public'
 PUBLIC_PASSWORD = 'public_password'
