@@ -16,7 +16,7 @@ def login_user(request):
                 login(request, user)
                 return dashboard(request)
 
-    if request.GET and settings.PUBLIC:
+    if request.method == "GET" and settings.PUBLIC:
 
         username = settings.PUBLIC_USERNAME
         password = settings.PUBLIC_PASSWORD
