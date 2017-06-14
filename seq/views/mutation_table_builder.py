@@ -312,57 +312,6 @@ def _find_between(s, first, last):
         return ""
 
 
-def filter_checked_flasks(request, seq_experiment_dict):
-
-    seq_experiment_dict = _show_checked_flasks(request, seq_experiment_dict)
-
-    seq_experiment_dict = _remove_checked_flasks(request, seq_experiment_dict)
-
-    return seq_experiment_dict
-
-
-def _show_checked_flasks(request, seq_experiment_dict):
-
-    query_string = request.GET.get(EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG)
-
-    if query_string is not None:
-
-        checked_experiment_ids = str(query_string).replace("{", "").replace("}", "")
-
-        if checked_experiment_ids != "":
-
-            checked_experiment_id_list = [int(i) for i in checked_experiment_ids.split(",") if i != ""]
-
-            checked_experiment_ids = seq_experiment_dict.keys()
-
-            for checked_experiment_id in checked_experiment_ids:
-
-                if checked_experiment_id not in checked_experiment_id_list:
-
-                    del seq_experiment_dict[checked_experiment_id]
-
-    return seq_experiment_dict
-
-
-def _remove_checked_flasks(request, seq_experiment_dict):
-
-    query_string = request.GET.get(EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG)
-
-    if query_string is not None:
-
-        checked_experiment_ids = str(query_string).replace("{", "").replace("}", "")
-
-        if checked_experiment_ids != "":
-
-            for checked_experiment_id in checked_experiment_ids.split(","):
-
-                if checked_experiment_id != "":
-
-                    del seq_experiment_dict[int(checked_experiment_id)]
-
-    return seq_experiment_dict
-
-
 def _get_mutation_tags(tags):
 
     html = ''
