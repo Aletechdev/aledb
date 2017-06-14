@@ -34,7 +34,8 @@
             background-color: #4078c0;
         }
     </style>
-    <script type="text/javascript" src="/static/bio-pv.min.js"></script>
+    {% load static %}
+    <script type="text/javascript" src="{% static "bio-pv.min.js" %}"></script>
     <script type="text/javascript">
          $(function(){
             $("#first li a").click(function(){

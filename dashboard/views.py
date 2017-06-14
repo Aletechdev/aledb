@@ -6,8 +6,6 @@ from seq.views import common
 
 import seq.models
 
-from django.db.models import Count
-
 from django.utils.safestring import mark_safe
 
 from filter.util import dashboard_filter
@@ -16,12 +14,11 @@ from common.db_util import get_all_ale_experiments, get_recent_experiments
 
 from django.core.cache import cache
 
-from ale.models import AleExperiment
-from ale.models import AleId
-from ale.models import Isolate
+from ale.models import AleExperiment, AleId, Isolate
 
-from dashboard.models import ObservedMutationCounts
-from dashboard.models import UniqueMutationCounts
+from dashboard.models import ObservedMutationCounts, UniqueMutationCounts
+
+from dashboard.timeline_util import get_timeline
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 
@@ -45,61 +42,13 @@ def dashboard(request):
     # TODO: likely don't need the cache any longer since we're caching the dashboard counts into the database.
     # mutation_query_set, observed_mutation_queryset = _get_cached_dashboard_query()
 
-    mutation_type_count_dict = {'observed': {}, 'unique': {}}
-    for mutation_type in common.MUTATION_TYPE_LIST:
-        observed_mutation_type_count = 0
-        unique_mutation_type_count = 0
-        if mutation_type == 'SNP':
-            observed_mutation_type_count = observed_mutation_count_queryset[0].single_base_substitution
-            unique_mutation_type_count = unique_mutation_count_queryset[0].single_base_substitution
-        elif mutation_type == 'SUB':
-            observed_mutation_type_count = observed_mutation_count_queryset[0].multiple_base_substitution
-            unique_mutation_type_count = unique_mutation_count_queryset[0].multiple_base_substitution
-        elif mutation_type == 'DEL':
-            observed_mutation_type_count = observed_mutation_count_queryset[0].deletion
-            unique_mutation_type_count = unique_mutation_count_queryset[0].deletion
-        elif mutation_type == 'INS':
-            observed_mutation_type_count = observed_mutation_count_queryset[0].insertion
-            unique_mutation_type_count = unique_mutation_count_queryset[0].insertion
-        elif mutation_type == 'MOB':
-            observed_mutation_type_count = observed_mutation_count_queryset[0].mobile_element_insertion
-            unique_mutation_type_count = unique_mutation_count_queryset[0].mobile_element_insertion
-        elif mutation_type == 'DUP':
-            observed_mutation_type_count = observed_mutation_count_queryset[0].duplication
-            unique_mutation_type_count = unique_mutation_count_queryset[0].duplication
-        elif mutation_type == 'AMP':
-            observed_mutation_type_count = observed_mutation_count_queryset[0].amplification
-            unique_mutation_type_count = unique_mutation_count_queryset[0].amplification
-        elif mutation_type == 'CON':
-            observed_mutation_type_count = observed_mutation_count_queryset[0].gene_conversion
-            unique_mutation_type_count = unique_mutation_count_queryset[0].gene_conversion
-        elif mutation_type == 'INV':
-            observed_mutation_type_count = observed_mutation_count_queryset[0].inversion
-            unique_mutation_type_count = unique_mutation_count_queryset[0].inversion
-        mutation_type_count_dict['observed'][mutation_type] = observed_mutation_type_count
-        mutation_type_count_dict['unique'][mutation_type] = unique_mutation_type_count
+    mutation_type_count_dict = _get_mutation_type_count_dict(observed_mutation_count_queryset,
+                                                             unique_mutation_count_queryset)
 
-    functional_change_type_count_dict = {'observed': {}, 'unique': {}}
-    for functional_change_type in common.FUNCTIONAL_CHANGE_TYPE_LIST:
-        observed_function_change_count = 0
-        unique_function_change_count = 0
-        if functional_change_type == 'intergenic':
-            observed_function_change_count = observed_mutation_count_queryset[0].intergenic
-            unique_function_change_count = unique_mutation_count_queryset[0].intergenic
-        elif functional_change_type == 'noncoding':
-            observed_function_change_count = observed_mutation_count_queryset[0].noncoding
-            unique_function_change_count = unique_mutation_count_queryset[0].noncoding
-        elif functional_change_type == 'pseudogene':
-            observed_function_change_count = observed_mutation_count_queryset[0].pseudogene
-            unique_function_change_count = unique_mutation_count_queryset[0].pseudogene
-        elif functional_change_type == 'snp_type_synonymous':
-            observed_function_change_count = observed_mutation_count_queryset[0].synonymous
-            unique_function_change_count = unique_mutation_count_queryset[0].synonymous
-        elif functional_change_type == 'snp_type_nonsynonymous':
-            observed_function_change_count = observed_mutation_count_queryset[0].nonsynonymous
-            unique_function_change_count = unique_mutation_count_queryset[0].nonsynonymous
-        functional_change_type_count_dict['observed'][functional_change_type] = observed_function_change_count
-        functional_change_type_count_dict['unique'][functional_change_type] = unique_function_change_count
+    functional_change_type_count_dict = _get_functional_change_type_count_dict(observed_mutation_count_queryset,
+                                                                               unique_mutation_count_queryset)
+
+
 
     # gene_bar_chart_dict = common.get_gene_bar_chart_dict(observed_mutation_queryset, 'dashboard')
     # sequence_changes = observed_mutation_queryset.values('mutation__gene', 'mutation__protein_change')\
@@ -119,7 +68,8 @@ def dashboard(request):
                "protein_types": mark_safe(common.FUNCTIONAL_CHANGE_TYPE_LIST),
                #"number_of_genes_to_show": number_of_genes_to_show,
                "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments()}
+               "recent_experiments": get_recent_experiments(),
+               "timeline": get_timeline()}
 
     template = loader.get_template(DASHBOARD_TEMPLATE)
 
@@ -161,3 +111,68 @@ def _get_cached_dashboard_query():
     else:
 
         return cached_mutation_queryset, cached_observed_mutation_queryset
+
+
+def _get_mutation_type_count_dict(observed_mutation_count_queryset, unique_mutation_count_queryset):
+
+    mutation_type_count_dict = {'observed': {}, 'unique': {}}
+    for mutation_type in common.MUTATION_TYPE_LIST:
+        observed_mutation_type_count = 0
+        unique_mutation_type_count = 0
+        if mutation_type == 'SNP':
+            observed_mutation_type_count = observed_mutation_count_queryset[0].single_base_substitution
+            unique_mutation_type_count = unique_mutation_count_queryset[0].single_base_substitution
+        elif mutation_type == 'SUB':
+            observed_mutation_type_count = observed_mutation_count_queryset[0].multiple_base_substitution
+            unique_mutation_type_count = unique_mutation_count_queryset[0].multiple_base_substitution
+        elif mutation_type == 'DEL':
+            observed_mutation_type_count = observed_mutation_count_queryset[0].deletion
+            unique_mutation_type_count = unique_mutation_count_queryset[0].deletion
+        elif mutation_type == 'INS':
+            observed_mutation_type_count = observed_mutation_count_queryset[0].insertion
+            unique_mutation_type_count = unique_mutation_count_queryset[0].insertion
+        elif mutation_type == 'MOB':
+            observed_mutation_type_count = observed_mutation_count_queryset[0].mobile_element_insertion
+            unique_mutation_type_count = unique_mutation_count_queryset[0].mobile_element_insertion
+        elif mutation_type == 'DUP':
+            observed_mutation_type_count = observed_mutation_count_queryset[0].duplication
+            unique_mutation_type_count = unique_mutation_count_queryset[0].duplication
+        elif mutation_type == 'AMP':
+            observed_mutation_type_count = observed_mutation_count_queryset[0].amplification
+            unique_mutation_type_count = unique_mutation_count_queryset[0].amplification
+        elif mutation_type == 'CON':
+            observed_mutation_type_count = observed_mutation_count_queryset[0].gene_conversion
+            unique_mutation_type_count = unique_mutation_count_queryset[0].gene_conversion
+        elif mutation_type == 'INV':
+            observed_mutation_type_count = observed_mutation_count_queryset[0].inversion
+            unique_mutation_type_count = unique_mutation_count_queryset[0].inversion
+        mutation_type_count_dict['observed'][mutation_type] = observed_mutation_type_count
+        mutation_type_count_dict['unique'][mutation_type] = unique_mutation_type_count
+
+    return mutation_type_count_dict
+
+
+def _get_functional_change_type_count_dict(observed_mutation_count_queryset, unique_mutation_count_queryset):
+    functional_change_type_count_dict = {'observed': {}, 'unique': {}}
+    for functional_change_type in common.FUNCTIONAL_CHANGE_TYPE_LIST:
+        observed_function_change_count = 0
+        unique_function_change_count = 0
+        if functional_change_type == 'intergenic':
+            observed_function_change_count = observed_mutation_count_queryset[0].intergenic
+            unique_function_change_count = unique_mutation_count_queryset[0].intergenic
+        elif functional_change_type == 'noncoding':
+            observed_function_change_count = observed_mutation_count_queryset[0].noncoding
+            unique_function_change_count = unique_mutation_count_queryset[0].noncoding
+        elif functional_change_type == 'pseudogene':
+            observed_function_change_count = observed_mutation_count_queryset[0].pseudogene
+            unique_function_change_count = unique_mutation_count_queryset[0].pseudogene
+        elif functional_change_type == 'snp_type_synonymous':
+            observed_function_change_count = observed_mutation_count_queryset[0].synonymous
+            unique_function_change_count = unique_mutation_count_queryset[0].synonymous
+        elif functional_change_type == 'snp_type_nonsynonymous':
+            observed_function_change_count = observed_mutation_count_queryset[0].nonsynonymous
+            unique_function_change_count = unique_mutation_count_queryset[0].nonsynonymous
+        functional_change_type_count_dict['observed'][functional_change_type] = observed_function_change_count
+        functional_change_type_count_dict['unique'][functional_change_type] = unique_function_change_count
+
+    return functional_change_type_count_dict

@@ -35,16 +35,14 @@ def comparison_fixation(request):
 
     is_ascending_freq_filter = _is_ascending_freq_filter(request)
 
-    reseq_ordered_dict = mutation_table_builder.filter_checked_flasks(request, ordered_reseq_dict)
-
-    table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
+    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict,
                                                            mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
     observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(ale_experiment_list,
                                                                                      queryset,
                                                                                      is_ascending_freq_filter)
 
-    table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
+    table_body = mutation_table_builder.get_table_body(reseq_dict=ordered_reseq_dict,
                                                        observed_mutations_queryset=observed_mutation_queryset,
                                                        table_type=mutation_table_builder.TableType.COMPARE_FIXATION_MUTATIONS)
 

@@ -60,15 +60,18 @@ $(document).ready(function () {
             {
                 extend: 'colvis',
                 columns: columns_to_export,
-                //TODO: Implement this function when Buttons 1.3 releases to remove tags from column visibility titles
                 columnText: function ( dt, idx, title ) {
-                    return title
+                    return title.split("Toggle Tag:")[0]
                 }
             }, {
                 extend: 'csv',
                 text: 'CSV',
                 exportOptions: {
-                    columns: columns_to_export,
+                    columns: function (idx, data, node) {
+                        var isVisible = oTable.column(idx).visible();
+                        var exportable = $.inArray(idx, columns_to_export) !== -1;
+                        return isVisible && exportable;
+                    },
                     format: {
                         header: function ( data, row, column, node ) {
                             if(data.includes('Toggle')) {
