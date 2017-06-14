@@ -16,7 +16,9 @@ from django.core.cache import cache
 
 from ale.models import AleExperiment, AleId, Isolate
 
-from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, TimelineEvent
+from dashboard.models import ObservedMutationCounts, UniqueMutationCounts
+
+from dashboard.timeline_util import get_timeline
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 
@@ -67,7 +69,7 @@ def dashboard(request):
                #"number_of_genes_to_show": number_of_genes_to_show,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(),
-               "timeline": _get_timeline()}
+               "timeline": get_timeline()}
 
     template = loader.get_template(DASHBOARD_TEMPLATE)
 
@@ -174,22 +176,3 @@ def _get_functional_change_type_count_dict(observed_mutation_count_queryset, uni
         functional_change_type_count_dict['unique'][functional_change_type] = unique_function_change_count
 
     return functional_change_type_count_dict
-
-
-def _get_timeline():
-
-    timeline_list = []
-
-    events = TimelineEvent.objects.all().order_by("timestamp")
-
-    for event in events:
-
-        event_dict = {"title": event.title,
-                      "timestamp": event.timestamp,
-                      "message": event.message,
-                      "icon": event.icon,
-                      "color": event.color}
-
-        timeline_list.append(event_dict)
-
-    return timeline_list
