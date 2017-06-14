@@ -59,12 +59,19 @@ $(document).ready(function () {
         buttons: [
             {
                 extend: 'colvis',
-                columns: columns_to_export
+                columns: columns_to_export,
+                columnText: function ( dt, idx, title ) {
+                    return title.split("Toggle Tag:")[0]
+                }
             }, {
                 extend: 'csv',
                 text: 'CSV',
                 exportOptions: {
-                    columns: columns_to_export,
+                    columns: function (idx, data, node) {
+                        var isVisible = oTable.column(idx).visible();
+                        var exportable = $.inArray(idx, columns_to_export) !== -1;
+                        return isVisible && exportable;
+                    },
                     format: {
                         header: function ( data, row, column, node ) {
                             if(data.includes('Toggle')) {
@@ -227,7 +234,11 @@ function add_tag(tag_type, mutation_id, row) {
     })
 }
 
-function filter_tag(tag_type, is_show) {
+function filter_tag(tag_type, is_show, tag_text) {
+
+    var row_tag_selector = document.getElementById('row_tag_selector');
+    row_tag_selector.textContent = tag_text;
+
     var tag_column = $('#data').DataTable().column(sorted_column - 1);
     if(tag_type == 'clear') {
         tag_column.search('').draw();

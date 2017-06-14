@@ -4,8 +4,6 @@ from django.http import HttpResponse
 
 from django.template import loader
 
-from django.contrib.auth.decorators import login_required
-
 import aleinfo.settings as settings
 
 from seq.views import common
@@ -35,7 +33,6 @@ else:
     password = ""
 
 
-@login_required
 def duplication(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
@@ -45,8 +42,6 @@ def duplication(request):
     template = loader.get_template(INDEX_TEMPLATE)
 
     seq_experiment_ordered_dict = get_reseq_ordered_dict(ale_experiment_id)
-
-    seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
     experiment_urls = mutation_table_builder.get_experiment_urls(seq_experiment_ordered_dict)
 

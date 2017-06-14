@@ -1,5 +1,3 @@
-from django.contrib.auth.decorators import login_required
-
 from django.template import loader
 
 from django.http import HttpResponse
@@ -27,7 +25,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 MUTATION_TABLE_TEMPLATE = 'base_table_template.html'
 
 
-@login_required
 def compared_mutations(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, None)

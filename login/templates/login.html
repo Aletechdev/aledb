@@ -7,7 +7,8 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" type="image/png" href="/static/favicon.ico">
+    {% load static %}
+    <link rel="shortcut icon" type="image/png" href="{% static "favicon.ico" %}">
 
     <title>Signin Template for Bootstrap</title>
 
@@ -63,7 +64,7 @@
     <div class="container">
 
       <form class="form-signin" action="/accounts/login/" method="post">
-          <img src="/static/ale_header.svg" style="width:300px;height:59px;">
+          <img src="{% static "ale_header.svg" %}" style="width:300px;height:59px;">
         <h2 style="text-align: center" class="form-signin-heading">Please sign in</h2>
         <label for="username" class="sr-only">Email address</label>
         <input name="username" id="username" class="form-control" placeholder="Username" required="" autofocus="">
