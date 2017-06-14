@@ -211,4 +211,7 @@ CACHES = {
 
 INTERNAL_IPS = ('128.54.250.14')
 
+PUBLIC = False
+PUBLIC_USERNAME = 'public'
+PUBLIC_PASSWORD = 'public_password'
 ALLOWED_HOSTS = ['web', 'localhost']
