@@ -67,7 +67,11 @@ $(document).ready(function () {
                 extend: 'csv',
                 text: 'CSV',
                 exportOptions: {
-                    columns: columns_to_export,
+                    columns: function (idx, data, node) {
+                        var isVisible = oTable.column(idx).visible();
+                        var exportable = $.inArray(idx, columns_to_export) !== -1;
+                        return isVisible && exportable;
+                    },
                     format: {
                         header: function ( data, row, column, node ) {
                             if(data.includes('Toggle')) {
