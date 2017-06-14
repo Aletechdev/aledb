@@ -73,7 +73,8 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-STATICFILES_DIRS = ()
+STATICFILES_DIRS = ['/ale_analytics/common/static/']
+#STATICFILES_DIRS = ()
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -213,6 +214,30 @@ CACHES = {
 }
 
 INTERNAL_IPS = ('128.54.250.14')
+
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s'#
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'django':{
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': True,
+        }
+    }
+}
 
 PUBLIC = False
 PUBLIC_USERNAME = 'public'
