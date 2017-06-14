@@ -98,6 +98,10 @@
 </div>
 
 {% if table_body %}
+    <div class="row">
+        Search Returned <b>{{ mutation_count }}</b> Unique Mutations and <b>{{ observed_mutation_count }}</b> Observed Mutations
+    </div>
+    <br>
 <div class="row">
     <form action="" method="get">
         <table id="data" class="table">

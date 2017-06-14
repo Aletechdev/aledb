@@ -4,6 +4,9 @@
 <head>
     <meta charset="utf-8">
     {% block title %}{% endblock %}
+
+    {% load static %}
+
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -11,13 +14,13 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/metisMenu/2.5.2/metisMenu.min.css" rel="stylesheet">
 
     <!-- SBAdmin 2 Theme CSS -->
-    <link href="/static/dist/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="{% static "dist/css/sb-admin-2.min.css" %}" rel="stylesheet">
 
     <!-- Font Awesome CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
     <!-- Favicon -->
-    <link rel="shortcut icon" type="image/png" href="/static/fav.png">
+    <link rel="shortcut icon" type="image/png" href="{% static "fav.png" %}">
 
     <!-- Jquery JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
@@ -46,6 +49,11 @@
             }
         }
     </script>
+
+     <!-- Select 2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+
 {% block scripts_and_style %}{% endblock %}
 </head>
 <body style="background-color: white">
@@ -62,6 +70,7 @@
                     <li {% block filter %}{% endblock %}><a href="/filter/global_filter"><i class="fa fa-filter fa-fw" aria-hidden="true"></i> Global Filter</a></li>
                     <li><a href="/export"><i class="fa fa-share-square-o fa-fw" aria-hidden="true"></i> Export</a></li>
                     <li><a href="/compare"><i class="fa fa-balance-scale fa-fw" aria-hidden="true"></i> Compare</a> </li>
+                    <li><a href="/aledata"><i class="fa fa-database fa-fw" aria-hidden="true"></i> Data</a> </li>
                     <li class="active"><a href="#"><i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Recent<span class="fa arrow"></span></a>
                         <ul class="nav nav-second-level collapse">
                             {% for exp in recent_experiments %}
@@ -69,12 +78,24 @@
                             {% endfor %}
                         </ul>
                     </li>
-                    <li><a href="#"><i class="fa fa-flask fa-fw" aria-hidden="true"></i> ALE Experiments<span class="fa arrow"></span></a>
-                        <ul class="nav nav-second-level collapse">
+                    <li>
+                        <select onchange="window.location.href=this.value" style="width: 100%;" id="quick_select">
+                            <option></option>
                             {% for exp in experiments %}
-                                <li><a href="/stats?ale_experiment_id={{ exp.ale_id }}">{{ exp.name }}</a></li>
+                                <option value="/stats?ale_experiment_id={{ exp.ale_id }}"> {{ exp.name }}</option>
                             {% endfor %}
-                        </ul>
+                        </select>
+
+                        <script type="text/javascript">
+                            $(document).ready(function() {
+                              $("#quick_select").select2({
+                                  placeholder: '<span style="color:#337ab7">Select an Experiment <i class="fa fa-flask fa-fw" aria-hidden="true"></span>',
+                                  escapeMarkup: function (m) {
+                                      return m;
+                                  }
+                              });
+                            });
+                        </script>
                     </li>
                 </ul>
             </div>
@@ -86,7 +107,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="page-header">
-                        <h1>{% block header %}{% endblock %}<img src="/static/ale_header.svg" style="width:269px;height:53px;float: right"></h1>
+                        <h1>{% block header %}{% endblock %}<img src="{% static "ale_header.svg" %}" style="width:269px;height:53px;float: right"></h1>
                     </div>
                 </div>
            </div>
@@ -95,7 +116,7 @@
     </nav>
 </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/metisMenu/2.5.2/metisMenu.min.js"></script>
-    <script src="/static/dist/js/sb-admin-2.min.js"></script>
+    <script src="{% static "dist/js/sb-admin-2.min.js" %}"></script>
 
     <!-- DataTables Bootstrap JS -->
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
