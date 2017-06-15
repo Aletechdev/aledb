@@ -4,7 +4,7 @@ import sys
 from configparser import ConfigParser
 
 
-DEBUG = True
+DEBUG = False
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -73,7 +73,8 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-STATICFILES_DIRS = ()
+STATICFILES_DIRS = ['/ale_analytics/common/static/']
+#STATICFILES_DIRS = ()
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -134,12 +135,16 @@ TEMPLATES = [
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'login.login_middleware.LoginRequiredMiddleware'
 )
+
+LOGIN_URL = '/accounts/login/'
 
 ROOT_URLCONF = 'aleinfo.urls'
 
@@ -164,11 +169,12 @@ INSTALLED_APPS = (
     'compare',
     'export',
     'common',
+    'dashboard',
     'search',
     'duplications',
-    'dashboard',
     'genes',
     'commmonmuts',
+    'debug_toolbar',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -206,3 +212,34 @@ CACHES = {
         'LOCATION': 'cache_table',
     }
 }
+
+INTERNAL_IPS = ('128.54.250.14')
+
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s'#
+        }
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'django':{
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': True,
+        }
+    }
+}
+
+PUBLIC = False
+PUBLIC_USERNAME = 'public'
+PUBLIC_PASSWORD = 'public_password'
+ALLOWED_HOSTS = ['web', 'localhost']
