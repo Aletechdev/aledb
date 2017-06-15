@@ -170,7 +170,7 @@
         <h1 id="timeline">Timeline</h1>
         <ul class="timeline">
         {% for event in timeline %}
-            <li class="timeline-inverted">
+            <li class="timeline">
                 <div class="timeline-badge {{ event.color }}">{{ event.icon | safe }}</div>
                     <div class="timeline-panel">
                         <div class="timeline-heading">
@@ -187,7 +187,8 @@
         </ul>
     </div>
 </div>
-    <hr>
+<!--<hr>
+
 <div class="row">
     <form action="" method="get">
     <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
@@ -221,5 +222,5 @@
     </script>
     </td></table>
     </div>
-
+    -->
 {% endblock %}
