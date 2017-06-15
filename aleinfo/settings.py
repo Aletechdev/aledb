@@ -4,7 +4,7 @@ import sys
 from configparser import ConfigParser
 
 
-DEBUG = False
+DEBUG = True
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
