@@ -42,7 +42,8 @@ def metadata(request):
                "reseq_report_url": reseq_report_url,
                "ale_experiment_name": ale_experiment_name,
                "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(int(ale_experiment_id))}
+               "recent_experiments": get_recent_experiments(int(ale_experiment_id)),
+               "multiple": False}
 
     return HttpResponse(template.render(context))
 
@@ -68,7 +69,8 @@ def get_reseq_info_list(reseq_queryset):
                                  reseq.tech_rep.isolate.library_prep,
                                  reseq.tech_rep.isolate.reseq_reference,
                                  reseq.tech_rep.isolate.breseq_version,
-                                 reseq.tech_rep.isolate.reseq_date)
+                                 reseq.tech_rep.isolate.reseq_date,
+                                 reseq.tech_rep.isolate.flask.ale_id.ale_experiment.name)
 
         reseq_info_list.append(experiment_info_tuple)
 
