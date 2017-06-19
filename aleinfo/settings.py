@@ -73,8 +73,7 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-STATICFILES_DIRS = ['/ale_analytics/common/static/']
-#STATICFILES_DIRS = ()
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'common/staticfiles')]
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -182,29 +181,6 @@ INSTALLED_APPS = (
 # the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse'
-        }
-    },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    }
-}
 
 CACHES = {
     'default': {
@@ -214,30 +190,6 @@ CACHES = {
 }
 
 INTERNAL_IPS = ('128.54.250.14')
-
-LOGGING = {
-    'version': 1,
-    'formatters': {
-        'verbose': {
-            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s'#
-        }
-    },
-    'handlers': {
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
-            'formatter': 'verbose'
-        }
-    },
-    'loggers': {
-        'django':{
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            'propagate': True,
-        }
-    }
-}
 
 PUBLIC = False
 PUBLIC_USERNAME = 'public'
