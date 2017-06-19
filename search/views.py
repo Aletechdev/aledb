@@ -107,10 +107,10 @@ def _get_seq_exp(request):
 
         exp_filter = AleExperimentFilter.objects.get(ale_experiment__ale_id=exp_id)
 
-        observed_mutation_queryset = observed_mutation_queryset.filter(
+        observed_mutation_queryset = observed_mutation_queryset.exclude(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp_id,
-            frequency__gte=exp_filter.min_cutoff / 100,
-            frequency__lte=exp_filter.max_cutoff / 100)
+            frequency__lt=exp_filter.min_cutoff / 100,
+            frequency__gt=exp_filter.max_cutoff / 100)
 
     return observed_mutation_queryset
 

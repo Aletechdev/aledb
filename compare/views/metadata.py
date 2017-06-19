@@ -40,6 +40,7 @@ def comparison_metadata(request):
                "recent_experiments": get_recent_experiments(),
                "reseq_info_list": reseq_info_list,
                "reseq_report_url": reseq_report_url,
+               "multiple": True
                }
 
     return HttpResponse(template.render(context))
