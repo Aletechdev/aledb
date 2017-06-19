@@ -97,6 +97,8 @@ DASHBOARD_TEMPLATE_PATH = os.path.join(BASE_DIR, 'dashboard/templates')
 SEARCH_TEMPLATE_PATH = os.path.join(BASE_DIR, 'search/templates')
 DUPLICATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'duplications/templates')
 GENES_TEMPLATE_PATH = os.path.join(BASE_DIR, 'genes/templates')
+METADATA_TEMPLATE_PATH = os.path.join(BASE_DIR, 'metadata/templates')
+ABOUT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'about/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -111,6 +113,8 @@ TEMPLATES = [
                  SEARCH_TEMPLATE_PATH,
                  DUPLICATION_TEMPLATE_PATH,
                  GENES_TEMPLATE_PATH,
+                 METADATA_TEMPLATE_PATH,
+                 ABOUT_TEMPLATE_PATH
                  ],
         'OPTIONS': {
             'context_processors': [
@@ -163,6 +167,7 @@ INSTALLED_APPS = (
     'fixation',
     'stats',
     'metadata',
+    'about',
     'enrichment',
     'login',
     'compare',
@@ -230,7 +235,7 @@ CACHES = {
 
 INTERNAL_IPS = ('128.54.250.14')
 
-PUBLIC = False
+PUBLIC = True 
 PUBLIC_USERNAME = 'public'
 PUBLIC_PASSWORD = 'public_password'
-ALLOWED_HOSTS = ['web', 'localhost']
+ALLOWED_HOSTS = ['web', 'localhost', '127.0.0.1']
