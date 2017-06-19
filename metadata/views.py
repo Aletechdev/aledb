@@ -13,6 +13,7 @@ from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
 __author__ = 'Patrick Phaneuf'
 
+# TODO: use the template location described within settings.py
 META_DATA_TEMPLATE = "metadata/index.html"
 
 
