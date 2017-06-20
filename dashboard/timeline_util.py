@@ -2,7 +2,7 @@ from dashboard.models import TimelineEvent
 
 __author__ = 'dgosting'
 
-MAX_EVENTS = 10
+MAX_EVENTS = 5
 
 
 def create_event(title, message, icon, color):
