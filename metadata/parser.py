@@ -2,13 +2,13 @@ import os
 
 import csv
 
-from ale.models import Isolate
+from ale.models import TechnicalReplicate
 from ale.models import Media
 
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
-DEFAULT_INSTRUMENT_NAME = "UCSD1"
+DEFAULT_INSTRUMENT_NAME = ""
 DEFAULT_MEDIA_DESCRIPTION = "M9"
 DEFAULT_MEDIA_SUBSTRATE = "glucose"
 DEFAULT_TEMPERATURE = 37
@@ -33,6 +33,7 @@ LIBRARY_PREP_KIT_CYCLES = "library-prep-kit-cycles"
 ALE_NUMBER = "ALE-number"
 FLASK_NUMBER = "Flask-number"
 ISOLATE_NUMBER = "Isolate-number"
+TECH_REP_NUMBER = "technical-replicate-number"
 
 DEFAULT_STRAIN = "E. Coli"
 DEFAULT_DESCRIPTION = ""
@@ -48,15 +49,19 @@ def _get_media_substrate_description(metadata_dict):
         media_substrate_description = DEFAULT_MEDIA_SUBSTRATE
 
     if MEDIA_CARBON_SOURCE in metadata_dict.keys():
-        media_substrate_description += " " + metadata_dict[MEDIA_NITROGEN_SOURCE]
+        media_substrate_description += " " + \
+            metadata_dict[MEDIA_NITROGEN_SOURCE]
     if MEDIA_PHOSPHOROUS_SOURCE in metadata_dict.keys():
-        media_substrate_description += " " + metadata_dict[MEDIA_PHOSPHOROUS_SOURCE]
+        media_substrate_description += " " + \
+            metadata_dict[MEDIA_PHOSPHOROUS_SOURCE]
     if MEDIA_SULFUR_SOURCE in metadata_dict.keys():
         media_substrate_description += " " + metadata_dict[MEDIA_SULFUR_SOURCE]
     if MEDIA_ELECTRON_ACCEPTOR in metadata_dict.keys():
-        media_substrate_description += " " + metadata_dict[MEDIA_ELECTRON_ACCEPTOR]
+        media_substrate_description += " " + \
+            metadata_dict[MEDIA_ELECTRON_ACCEPTOR]
     if MEDIA_ELECTRON_ACCEPTOR in metadata_dict.keys():
-        media_substrate_description += " " + metadata_dict[MEDIA_ELECTRON_ACCEPTOR]
+        media_substrate_description += " " + \
+            metadata_dict[MEDIA_ELECTRON_ACCEPTOR]
     if MEDIA_SUPPLEMENT in metadata_dict.keys():
         media_substrate_description += " " + metadata_dict[MEDIA_SUPPLEMENT]
 
@@ -73,12 +78,14 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
                 metadata_dict = dict(csv.reader(csvfile, delimiter=','))
 
                 try:
-                    isolate = Isolate.objects.get(isolate_number=metadata_dict[ISOLATE_NUMBER],
-                                                  flask__flask_number=metadata_dict[FLASK_NUMBER],
-                                                  flask__ale_id__ale_id=metadata_dict[ALE_NUMBER],
-                                                  flask__ale_id__ale_experiment__ale_id=ale_experiment_primary_key)
+                    tech_rep = TechnicalReplicate.objects.get(
+                        tech_rep_number=metadata_dict[TECH_REP_NUMBER],
+                        isolate__isolate_number=metadata_dict[ISOLATE_NUMBER],
+                        isolate__flask__flask_number=metadata_dict[FLASK_NUMBER],
+                        isolate__flask__ale_id__ale_id=metadata_dict[ALE_NUMBER],
+                        isolate__flask__ale_id__ale_experiment__ale_id=ale_experiment_primary_key)
                 except Exception as e:
-                    print("Error for " + metadata_dict[ALE_NUMBER] + "-" + metadata_dict[FLASK_NUMBER] + "-" + metadata_dict[ISOLATE_NUMBER] + ": ", e)
+                    print("Error for " + metadata_dict[ALE_NUMBER] + "-" + metadata_dict[FLASK_NUMBER] + "-" + metadata_dict[ISOLATE_NUMBER] + '-' + metadata_dict[TECH_REP_NUMBER] + ": ", e)
                     continue
 
                 try:
@@ -92,7 +99,8 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
                     strain = DEFAULT_DESCRIPTION
 
                 try:
-                    library_prep = metadata_dict[LIBRARY_PREP_KIT_MANUFACTURER] + "/ " + metadata_dict[LIBRARY_PREP_KIT_CYCLES]
+                    library_prep = metadata_dict[LIBRARY_PREP_KIT_MANUFACTURER] + \
+                        "/ " + metadata_dict[LIBRARY_PREP_KIT_CYCLES]
                     if library_prep is "/ ":
                         library_prep = DEFAULT_DESCRIPTION
                 except:
@@ -110,23 +118,26 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
                 except:
                     media_temperature = DEFAULT_TEMPERATURE
 
-                media_substrate_description = _get_media_substrate_description(metadata_dict)
+                media_substrate_description = _get_media_substrate_description(
+                    metadata_dict)
 
                 media, created = Media.objects.get_or_create(description=media_description,
                                                              substrate=media_substrate_description,
                                                              temperature=media_temperature,
                                                              volume=DEFAULT_VOLUME,
                                                              stirring_speed=DEFAULT_STIRRING_SPEED)
-                isolate.flask.media = media
+                tech_rep.isolate.flask.media = media
 
-                isolate.flask.ale_id.description = ale_id_description
-                isolate.flask.ale_id.strain = strain
-                isolate.library_prep = library_prep
+                tech_rep.isolate.flask.ale_id.description = ale_id_description
+                tech_rep.isolate.flask.ale_id.strain = strain
+                tech_rep.isolate.library_prep = library_prep
 
-                if isolate.flask.ale_id.species is None:
-                    isolate.flask.ale_id.species = DEFAULT_STRAIN
+                if tech_rep.isolate.flask.ale_id.species is None:
+                    tech_rep.isolate.flask.ale_id.species = DEFAULT_STRAIN
 
-                isolate.save()
-                isolate.flask.ale_id.save()
-                isolate.flask.media.save()
-                isolate.flask.save()
+                tech_rep.isolate.flask.ale_id.save()
+
+                tech_rep.isolate.flask.media.save()
+                tech_rep.isolate.flask.save()
+                tech_rep.isolate.save()
+                tech_rep.save()
