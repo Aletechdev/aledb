@@ -91,8 +91,7 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
             try:
                 library_prep = metadata_dict[LIBRARY_PREP_KIT_MANUFACTURER] + \
                     "/ " + metadata_dict[LIBRARY_PREP_KIT_CYCLES]
-                if library_prep is "/ ":
-                    library_prep = DEFAULT_DESCRIPTION
+                if library_prep is "/ ": library_prep = DEFAULT_DESCRIPTION
             except:
                 library_prep = DEFAULT_DESCRIPTION
 
@@ -103,31 +102,30 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
 
             try:
                 media_temperature = metadata_dict[MEDIA_TEMPERATURE]
-                if media_temperature is '':
-                    media_temperature = DEFAULT_TEMPERATURE
+                if media_temperature is '': media_temperature = DEFAULT_TEMPERATURE
             except:
                 media_temperature = DEFAULT_TEMPERATURE
 
-            media_substrate_description = _get_media_substrate_description(
-                metadata_dict)
+            media_substrate_description = _get_media_substrate_description(metadata_dict)
+
+            ale_id = tech_rep.isolate.flask.ale_id
+            ale_id.description = ale_id_description
+            ale_id.strain = strain
+            if ale_id.species is None: ale_id.species = DEFAULT_STRAIN
+            ale_id.save()
 
             media, created = Media.objects.get_or_create(description=media_description,
                                                          substrate=media_substrate_description,
                                                          temperature=media_temperature,
                                                          volume=DEFAULT_VOLUME,
                                                          stirring_speed=DEFAULT_STIRRING_SPEED)
-            tech_rep.isolate.flask.media = media
 
-            tech_rep.isolate.flask.ale_id.description = ale_id_description
-            tech_rep.isolate.flask.ale_id.strain = strain
-            tech_rep.isolate.library_prep = library_prep
+            flask = tech_rep.isolate.flask
+            flask.media = media
+            flask.save()
 
-            if tech_rep.isolate.flask.ale_id.species is None:
-                tech_rep.isolate.flask.ale_id.species = DEFAULT_STRAIN
+            isolate = tech_rep.isolate
+            isolate.library_prep = library_prep
+            isolate.save()
 
-            tech_rep.isolate.flask.ale_id.save()
-
-            tech_rep.isolate.flask.media.save()
-            tech_rep.isolate.flask.save()
-            tech_rep.isolate.save()
             tech_rep.save()
