@@ -35,12 +35,19 @@ class TestParser(TestCase):
         TechnicalReplicate.objects.create(isolate=isolate,
                                           tech_rep_number=1)
 
-        tech_rep_queryset = TechnicalReplicate.objects.all()
         path = os.path.dirname(os.path.realpath(__file__)) + "/"
         parse_metadata_post_experiment_upload(path + "test1/", ALE_EXP_PRIMARY_EXP)
+        self.assertEqual(2, Media.objects.all().count())
+        tech_rep_queryset = TechnicalReplicate.objects.all()
+        self.assertEqual(1, tech_rep_queryset.count())
         test1_media = tech_rep_queryset[0].isolate.flask.media.substrate
         self.assertEquals(test1_media, "Glucose(4)")
+
+        # Tries to change the media of the same tech_rep.isolate.flask.
         parse_metadata_post_experiment_upload(path + "test2/", ALE_EXP_PRIMARY_EXP)
+        self.assertEqual(3, Media.objects.all().count())
+        tech_rep_queryset = TechnicalReplicate.objects.all()
+        self.assertEqual(1, len(tech_rep_queryset))
         test2_media = tech_rep_queryset[0].isolate.flask.media.substrate
         self.assertEquals(test2_media, "Acetate(4)")
 
@@ -84,7 +91,6 @@ class TestParser(TestCase):
                                           tech_rep_number=1)
         TechnicalReplicate.objects.create(isolate=isolate,
                                           tech_rep_number=2)
-        # The metadata uploading should be creating 2 different types of media.
         path = os.path.dirname(os.path.realpath(__file__)) + "/"
         parse_metadata_post_experiment_upload(path + "test_reuse_media_with_metadata_upload/", ALE_EXP_PRIMARY_EXP)
         media_queryset = Media.objects.all()
