@@ -117,17 +117,15 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
                                                          volume=DEFAULT_VOLUME,
                                                          stirring_speed=DEFAULT_STIRRING_SPEED)
             tech_rep.isolate.flask.media = media
-
+            tech_rep.isolate.flask.media.save()
             tech_rep.isolate.flask.ale_id.description = ale_id_description
             tech_rep.isolate.flask.ale_id.strain = strain
-            tech_rep.isolate.library_prep = library_prep
-
             if tech_rep.isolate.flask.ale_id.species is None:
                 tech_rep.isolate.flask.ale_id.species = DEFAULT_STRAIN
-
             tech_rep.isolate.flask.ale_id.save()
 
-            tech_rep.isolate.flask.media.save()
             tech_rep.isolate.flask.save()
+
+            tech_rep.isolate.library_prep = library_prep
             tech_rep.isolate.save()
             tech_rep.save()
