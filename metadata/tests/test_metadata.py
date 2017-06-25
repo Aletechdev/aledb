@@ -66,19 +66,18 @@ class TestParser(TestCase):
         parse_metadata_post_experiment_upload(path + "test3/", ALE_EXP_PRIMARY_EXP)
 
         for tech_rep in tech_rep_queryset:
-            substrate = tech_rep.isolate.flask.media.substrate.strip(' ')
-            print(substrate)
-            # expected_substrate = ""
-            # afir = self._get_afir(tech_rep)
-            # if afir == [7,90,0,1]:
-            #     expected_substrate = "Glucose(4)"
-            # elif afir == [7,90,0,2]:
-            #     expected_substrate = "Acetate(4)"
-            # try:
-            #     self.assertEqual(substrate, expected_substrate)
-            # except AssertionError as e:
-            #     print(afir)
-            #     raise e
+            substrate = tech_rep.isolate.flask.media.substrate
+            expected_substrate = ""
+            afir = self._get_afir(tech_rep)
+            if afir == [7,90,0,1]:
+                expected_substrate = "Acetate(4)"
+            elif afir == [7,90,0,2]:
+                expected_substrate = "Glucose(4)"
+            try:
+                self.assertEqual(substrate, expected_substrate)
+            except AssertionError as e:
+                print(afir)
+                raise e
 
     def _get_afir(self, tech_rep):
         afir_list=[]
