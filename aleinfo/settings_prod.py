@@ -4,7 +4,7 @@ import sys
 from configparser import ConfigParser
 
 
-DEBUG = True
+DEBUG = False
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -235,7 +235,7 @@ CACHES = {
 
 INTERNAL_IPS = ('128.54.250.14')
 
-PUBLIC = True 
+PUBLIC = True
 PUBLIC_USERNAME = 'public'
 PUBLIC_PASSWORD = 'public_password'
 ALLOWED_HOSTS = ['web', 'localhost', '127.0.0.1']
