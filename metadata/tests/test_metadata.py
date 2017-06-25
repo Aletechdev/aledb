@@ -44,6 +44,31 @@ class TestParser(TestCase):
         test2_media = tech_rep_queryset[0].isolate.flask.media.substrate
         self.assertEquals(test2_media, "Acetate(4)")
 
+    def test_creating_media_with_metadata_upload(self):
+        media = Media.objects.create(substrate="nothing")
+        ale_id = AleId.objects.create(ale_experiment=self.ale_exp,
+                                      ale_id=7)
+        flask = Flask.objects.create(media=media,
+                                     ale_id=ale_id,
+                                     flask_number=90)
+        isolate = Isolate.objects.create(flask=flask,
+                                         isolate_number=0,
+                                         is_population=False,
+                                         freezer_box=self.freezerbox)
+        TechnicalReplicate.objects.create(isolate=isolate,
+                                          tech_rep_number=1)
+        TechnicalReplicate.objects.create(isolate=isolate,
+                                          tech_rep_number=2)
+        # The metadata uploading should be creating 2 different types of media.
+        path = os.path.dirname(os.path.realpath(__file__)) + "/"
+        parse_metadata_post_experiment_upload(path + "test3/", ALE_EXP_PRIMARY_EXP)
+        media_queryset = Media.objects.all()
+        media_present_dict = {"nothing": False, "Glucose(4)": False, "Acetate(4)": False}
+        for media in media_queryset:
+            media_present_dict[media.substrate] = True
+        for media_present_value in media_present_dict.values():
+            self.assertEqual(True, media_present_value)
+
     def test_metadata_two_tech_reps(self):
         media = Media.objects.create(substrate="nothing")
         ale_id = AleId.objects.create(ale_experiment=self.ale_exp,
@@ -74,15 +99,20 @@ class TestParser(TestCase):
             elif afir == [7,90,0,2]:
                 expected_substrate = "Glucose(4)"
             try:
-                self.assertEqual(substrate, expected_substrate)
+                self.assertEqual(expected_substrate, substrate)
             except AssertionError as e:
-                print(afir)
+                print("Failed with:", substrate, afir)
                 raise e
 
+        first_tech_rep = tech_rep_queryset.filter(isolate__flask__ale_id__ale_id=7,
+                                                  isolate__flask__flask_number=90,
+                                                  isolate__isolate_number=0,
+                                                  tech_rep_number=1)
+        self.assertEqual("Acetate(4)", first_tech_rep[0].isolate.flask.media.substrate)
+
     def _get_afir(self, tech_rep):
-        afir_list=[]
-        afir_list.append(tech_rep.isolate.flask.ale_id.ale_id)
-        afir_list.append(tech_rep.isolate.flask.flask_number)
-        afir_list.append(tech_rep.isolate.isolate_number)
-        afir_list.append(tech_rep.tech_rep_number)
+        afir_list = [tech_rep.isolate.flask.ale_id.ale_id,
+                     tech_rep.isolate.flask.flask_number,
+                     tech_rep.isolate.isolate_number,
+                     tech_rep.tech_rep_number]
         return afir_list
