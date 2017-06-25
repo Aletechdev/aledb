@@ -69,6 +69,36 @@ class TestParser(TestCase):
         for media_present_value in media_present_dict.values():
             self.assertEqual(True, media_present_value)
 
+    def test_reuse_media_with_metadata_upload(self):
+        media = Media.objects.create(substrate="nothing")
+        ale_id = AleId.objects.create(ale_experiment=self.ale_exp,
+                                      ale_id=7)
+        flask = Flask.objects.create(media=media,
+                                     ale_id=ale_id,
+                                     flask_number=90)
+        isolate = Isolate.objects.create(flask=flask,
+                                         isolate_number=0,
+                                         is_population=False,
+                                         freezer_box=self.freezerbox)
+        TechnicalReplicate.objects.create(isolate=isolate,
+                                          tech_rep_number=1)
+        TechnicalReplicate.objects.create(isolate=isolate,
+                                          tech_rep_number=2)
+        # The metadata uploading should be creating 2 different types of media.
+        path = os.path.dirname(os.path.realpath(__file__)) + "/"
+        parse_metadata_post_experiment_upload(path + "test_reuse_media_with_metadata_upload/", ALE_EXP_PRIMARY_EXP)
+        media_queryset = Media.objects.all()
+        media_present_dict = {"nothing": 0, "Glucose(4)": 0}
+        for media in media_queryset:
+            media_present_dict[media.substrate] += 1
+        for media_name, media_count in media_present_dict.items():
+            expected_count = 0
+            if media_name == "nothing":
+                expected_count = 1
+            if media_name == "Glucose(4)":
+                expected_count = 1
+            self.assertEqual(expected_count, media_count)
+
     def test_metadata_two_tech_reps(self):
         media = Media.objects.create(substrate="nothing")
         ale_id = AleId.objects.create(ale_experiment=self.ale_exp,
