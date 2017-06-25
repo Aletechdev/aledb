@@ -123,6 +123,7 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
                                                          volume=DEFAULT_VOLUME,
                                                          stirring_speed=DEFAULT_STIRRING_SPEED)
             tech_rep.isolate.flask.media = media
+            tech_rep.isolate.flask.media.save()
             tech_rep.isolate.flask.save()
 
             tech_rep.isolate.library_prep = library_prep
