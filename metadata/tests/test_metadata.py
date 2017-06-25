@@ -107,7 +107,7 @@ class TestParser(TestCase):
                 expected_count = 1
             self.assertEqual(expected_count, media_count)
 
-    def test_metadata_two_tech_reps_change_media(self):
+    def test_metadata_two_tech_reps_cant_change_media(self):
         media = Media.objects.create(substrate="nothing")
         ale_id = AleId.objects.create(ale_experiment=self.ale_exp,
                                       ale_id=7)
@@ -130,16 +130,11 @@ class TestParser(TestCase):
         self.assertEqual(2, tech_rep_queryset.count())
         for tech_rep in tech_rep_queryset:
             substrate = tech_rep.isolate.flask.media.substrate
-            expected_substrate = ""
-            afir = self._get_afir(tech_rep)
-            if afir == [7,90,0,1]:
-                expected_substrate = "Glucose(4)"
-            elif afir == [7,90,0,2]:
-                expected_substrate = "Acetate(4)"
+            expected_substrate = "Glucose(4)"  # Will be Glucose even though tried to change tech_rep_2 to Acetate(4)
             try:
                 self.assertEqual(expected_substrate, substrate)
             except AssertionError as e:
-                print("Failed with:", substrate, afir)
+                print("Failed with:", substrate, "tech_rep_number " + str(tech_rep.tech_rep_number))
                 raise e
 
         first_tech_rep = tech_rep_queryset.filter(isolate__flask__ale_id__ale_id=7,
@@ -148,9 +143,42 @@ class TestParser(TestCase):
                                                   tech_rep_number=1)
         self.assertEqual("Glucose(4)", first_tech_rep[0].isolate.flask.media.substrate)
 
-    def _get_afir(self, tech_rep):
-        afir_list = [tech_rep.isolate.flask.ale_id.ale_id,
-                     tech_rep.isolate.flask.flask_number,
-                     tech_rep.isolate.isolate_number,
-                     tech_rep.tech_rep_number]
-        return afir_list
+    # def test_metadata_two_tech_reps_change_media(self):
+    #     media = Media.objects.create(substrate="nothing")
+    #     ale_id = AleId.objects.create(ale_experiment=self.ale_exp,
+    #                                   ale_id=7)
+    #     flask = Flask.objects.create(media=media,
+    #                                  ale_id=ale_id,
+    #                                  flask_number=90)
+    #     isolate = Isolate.objects.create(flask=flask,
+    #                                      isolate_number=0,
+    #                                      is_population=False,
+    #                                      freezer_box=self.freezerbox)
+    #     TechnicalReplicate.objects.create(isolate=isolate,
+    #                                       tech_rep_number=1)
+    #     TechnicalReplicate.objects.create(isolate=isolate,
+    #                                       tech_rep_number=2)
+    #
+    #     path = os.path.dirname(os.path.realpath(__file__)) + "/"
+    #     parse_metadata_post_experiment_upload(path + "test3/", ALE_EXP_PRIMARY_EXP)
+    #     self.assertEqual(3, Media.objects.all().count())
+    #     tech_rep_queryset = TechnicalReplicate.objects.all()
+    #     self.assertEqual(2, tech_rep_queryset.count())
+    #     for tech_rep in tech_rep_queryset:
+    #         substrate = tech_rep.isolate.flask.media.substrate
+    #         expected_substrate = ""
+    #         if tech_rep.tech_rep_number == 1:
+    #             expected_substrate = "Glucose(4)"
+    #         if tech_rep.tech_rep_number == 2:
+    #             expected_substrate = "Acetate(4)"
+    #         try:
+    #             self.assertEqual(expected_substrate, substrate)
+    #         except AssertionError as e:
+    #             print("Failed with:", substrate, "tech_rep_number " + str(tech_rep.tech_rep_number))
+    #             raise e
+    #
+    #     first_tech_rep = tech_rep_queryset.filter(isolate__flask__ale_id__ale_id=7,
+    #                                               isolate__flask__flask_number=90,
+    #                                               isolate__isolate_number=0,
+    #                                               tech_rep_number=1)
+    #     self.assertEqual("Glucose(4)", first_tech_rep[0].isolate.flask.media.substrate)
