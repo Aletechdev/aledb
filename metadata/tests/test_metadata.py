@@ -143,42 +143,36 @@ class TestParser(TestCase):
                                                   tech_rep_number=1)
         self.assertEqual("Glucose(4)", first_tech_rep[0].isolate.flask.media.substrate)
 
-    # def test_metadata_two_tech_reps_change_media(self):
-    #     media = Media.objects.create(substrate="nothing")
-    #     ale_id = AleId.objects.create(ale_experiment=self.ale_exp,
-    #                                   ale_id=7)
-    #     flask = Flask.objects.create(media=media,
-    #                                  ale_id=ale_id,
-    #                                  flask_number=90)
-    #     isolate = Isolate.objects.create(flask=flask,
-    #                                      isolate_number=0,
-    #                                      is_population=False,
-    #                                      freezer_box=self.freezerbox)
-    #     TechnicalReplicate.objects.create(isolate=isolate,
-    #                                       tech_rep_number=1)
-    #     TechnicalReplicate.objects.create(isolate=isolate,
-    #                                       tech_rep_number=2)
-    #
-    #     path = os.path.dirname(os.path.realpath(__file__)) + "/"
-    #     parse_metadata_post_experiment_upload(path + "test3/", ALE_EXP_PRIMARY_EXP)
-    #     self.assertEqual(3, Media.objects.all().count())
-    #     tech_rep_queryset = TechnicalReplicate.objects.all()
-    #     self.assertEqual(2, tech_rep_queryset.count())
-    #     for tech_rep in tech_rep_queryset:
-    #         substrate = tech_rep.isolate.flask.media.substrate
-    #         expected_substrate = ""
-    #         if tech_rep.tech_rep_number == 1:
-    #             expected_substrate = "Glucose(4)"
-    #         if tech_rep.tech_rep_number == 2:
-    #             expected_substrate = "Acetate(4)"
-    #         try:
-    #             self.assertEqual(expected_substrate, substrate)
-    #         except AssertionError as e:
-    #             print("Failed with:", substrate, "tech_rep_number " + str(tech_rep.tech_rep_number))
-    #             raise e
-    #
-    #     first_tech_rep = tech_rep_queryset.filter(isolate__flask__ale_id__ale_id=7,
-    #                                               isolate__flask__flask_number=90,
-    #                                               isolate__isolate_number=0,
-    #                                               tech_rep_number=1)
-    #     self.assertEqual("Glucose(4)", first_tech_rep[0].isolate.flask.media.substrate)
+    # Only way to change foreign key flask media is to change the media and save this change
+    def test_metadata_two_tech_reps_change_media(self):
+        media = Media.objects.create(substrate="nothing")
+        ale_id = AleId.objects.create(ale_experiment=self.ale_exp,
+                                      ale_id=7)
+        flask = Flask.objects.create(media=media,
+                                     ale_id=ale_id,
+                                     flask_number=90)
+        isolate = Isolate.objects.create(flask=flask,
+                                         isolate_number=0,
+                                         is_population=False,
+                                         freezer_box=self.freezerbox)
+        TechnicalReplicate.objects.create(isolate=isolate,
+                                          tech_rep_number=1)
+        TechnicalReplicate.objects.create(isolate=isolate,
+                                          tech_rep_number=2)
+
+        path = os.path.dirname(os.path.realpath(__file__)) + "/"
+        # SSW Glu Ac_7-90-0-2.csv has substrate as Acetate(4), but this won't change, as tested below.
+        parse_metadata_post_experiment_upload(path + "test3/", ALE_EXP_PRIMARY_EXP)
+        self.assertEqual(3, Media.objects.all().count())
+        tech_rep_queryset = TechnicalReplicate.objects.all()
+        self.assertEqual(2, tech_rep_queryset.count())
+        for tech_rep in tech_rep_queryset:
+            self.assertEqual("Glucose(4)", tech_rep.isolate.flask.media.substrate)
+        media, created = Media.objects.get_or_create(substrate="Acetate(4)")
+        for tech_rep in tech_rep_queryset:
+            tech_rep.isolate.flask.media = media
+            tech_rep.isolate.flask.save()
+        # fresh query of tech_reps
+        tech_rep_queryset = TechnicalReplicate.objects.all()
+        for tech_rep in tech_rep_queryset:
+            self.assertEqual("Acetate(4)", tech_rep.isolate.flask.media.substrate)
