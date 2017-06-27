@@ -25,9 +25,9 @@ ALE_NUMBER = "ALE-number"
 FLASK_NUMBER = "Flask-number"
 ISOLATE_NUMBER = "Isolate-number"
 TECH_REP_NUMBER = "technical-replicate-number"
+EXPERIMENT_DETAILS = "experiment-details"
 
 DEFAULT_STRAIN = "E. Coli"
-DEFAULT_DESCRIPTION = ""
 
 MEDIA_BASE_DESCRIPTION = "base-media"
 MEDIA_TEMPERATURE = "temperature"
@@ -78,33 +78,33 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
                 print("Error for " + metadata_dict[ALE_NUMBER] + "-" + metadata_dict[FLASK_NUMBER] + "-" + metadata_dict[ISOLATE_NUMBER] + '-' + metadata_dict[TECH_REP_NUMBER] + ": ", e)
                 continue
 
-            try:
+            ale_id_description = ""
+            if STRAIN_DESCRIPTION in metadata_dict.keys():
                 ale_id_description = metadata_dict[STRAIN_DESCRIPTION]
-            except:
-                ale_id_description = DEFAULT_DESCRIPTION
 
-            try:
+            strain = ""
+            if STRAIN in metadata_dict.keys():
                 strain = metadata_dict[STRAIN]
-            except:
-                strain = DEFAULT_DESCRIPTION
 
-            try:
-                library_prep = metadata_dict[LIBRARY_PREP_KIT_MANUFACTURER] + \
-                    "/ " + metadata_dict[LIBRARY_PREP_KIT_CYCLES]
-                if library_prep is "/ ": library_prep = DEFAULT_DESCRIPTION
-            except:
-                library_prep = DEFAULT_DESCRIPTION
-
-            try:
+            media_description = ""
+            if MEDIA_BASE_DESCRIPTION in metadata_dict.keys():
                 media_description = metadata_dict[MEDIA_BASE_DESCRIPTION]
-            except:
-                media_description = DEFAULT_MEDIA_DESCRIPTION
 
-            try:
-                media_temperature = metadata_dict[MEDIA_TEMPERATURE]
-                if media_temperature is '': media_temperature = DEFAULT_TEMPERATURE
-            except:
-                media_temperature = DEFAULT_TEMPERATURE
+            library_prep = ""
+            if LIBRARY_PREP_KIT_MANUFACTURER in metadata_dict.keys():
+                library_prep = metadata_dict[LIBRARY_PREP_KIT_MANUFACTURER]
+            if LIBRARY_PREP_KIT_CYCLES in metadata_dict.keys():
+                if library_prep != "":
+                    library_prep += "/ "
+                library_prep += metadata_dict[LIBRARY_PREP_KIT_CYCLES]
+
+            media_temperature = DEFAULT_TEMPERATURE
+            if MEDIA_TEMPERATURE in metadata_dict.keys() and metadata_dict[MEDIA_TEMPERATURE] != "":
+                media_temperature = int(metadata_dict[MEDIA_TEMPERATURE])
+
+            experiment_details = ""
+            if EXPERIMENT_DETAILS in metadata_dict.keys():
+                experiment_details = metadata_dict[EXPERIMENT_DETAILS]
 
             media_substrate_description = _get_media_substrate_description(metadata_dict)
 
@@ -128,4 +128,5 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
             isolate.library_prep = library_prep
             isolate.save()
 
+            tech_rep.description = experiment_details
             tech_rep.save()
