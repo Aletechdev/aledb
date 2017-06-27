@@ -71,7 +71,8 @@ def get_reseq_info_list(reseq_queryset):
                                  reseq.tech_rep.isolate.reseq_reference,
                                  reseq.tech_rep.isolate.breseq_version,
                                  reseq.tech_rep.isolate.reseq_date,
-                                 reseq.tech_rep.isolate.flask.ale_id.ale_experiment.name)
+                                 reseq.tech_rep.isolate.flask.ale_id.ale_experiment.name,
+                                 reseq.tech_rep.description)
 
         reseq_info_list.append(experiment_info_tuple)
 
