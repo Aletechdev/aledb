@@ -20,8 +20,7 @@ def mutation_table(request):
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
     ale_no = seq.views.common.get_ale_number(request)
-    is_ref_strain_filtered = seq.views.common.is_ref_strain_filtered(request)
-    ale_queryset = seq.views.common.get_ales(ale_experiment_id, is_ref_strain_filtered)
+    ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no, request)
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
@@ -42,7 +41,6 @@ def mutation_table(request):
                "title": "Mutation Table",
                "table_header": table_header,
                "template_header": "Mutations",
-               "wt_filter": is_ref_strain_filtered,
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(ale_experiment_id),
