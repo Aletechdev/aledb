@@ -38,10 +38,6 @@ def fixating_mutations(request):
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
     is_ascending_freq_filter = _is_ascending_freq_filter(request)
 
-    # TODO: shouldn't have to include param 'include_starting_strain=True', since this is intended to default to
-    # False for pages such as this, where we don't want to see the wild type, though we currently must include it
-    # so as to filter out the mutations when choosing specific ALEs within the experiment. This means that there is
-    # a disconnect between filtering methodologies that needs to be reconciled.
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
     reseq_ordered_dict = seq.views.common.filter_out_wt_reseq(reseq_ordered_dict)
@@ -63,7 +59,7 @@ def fixating_mutations(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
-    template = loader.get_template("fixation/fixed_mutations.html")
+    template = loader.get_template("base_table_template.html")
 
     context = {"ales": ale_queryset,
                "ale_experiment_name": ale_experiment_name,
@@ -72,7 +68,7 @@ def fixating_mutations(request):
                "table_body": mark_safe(table_body),
                "title": "Fixed Mutations",
                "table_header": mark_safe(table_header),
-               "is_ascending_freq_filter": is_ascending_freq_filter,  # State of ascending fixed freq filter mutation; currently not being used.
+               "is_ascending_freq_filter": is_ascending_freq_filter,
                "template_header": "Fixating Mutations",
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
