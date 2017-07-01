@@ -108,25 +108,11 @@ def get_ale_experiment_name(request):
     return ale_experiment_name
 
 
-# TODO: Should only be one starting strain per ALE, therefore as soon as found, delete and exit.
 def filter_out_wt_reseq(reseq_ordered_dict):
-
-    key_to_delete_found = False
-
-    key_to_delete = None
-
     for key, value in reseq_ordered_dict.items():
-
         if value.ale_id == ale.common.STARTING_STRAIN_ALE_ID:
-
-            key_to_delete = key
-
-            key_to_delete_found = True
-
-    if key_to_delete_found and key_to_delete:
-
-        del reseq_ordered_dict[key_to_delete]
-
+            del reseq_ordered_dict[key]
+            break
     return reseq_ordered_dict
 
 
