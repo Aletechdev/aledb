@@ -18,8 +18,6 @@ __author__ = 'Patrick Phaneuf'
 
 SETTINGS_SEQUENCING_URL = "sequencing_url"
 
-REQUEST_WT_FILTER = "wtflt"
-
 MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'DUP', 'AMP', 'CON', 'INV', 'Unannotated']
 
 # Don't change these names since they match with Breseq's HTML annotations and used when parsing.
@@ -61,16 +59,6 @@ def get_ales(experiment_ids, exclude_starting_strain=False):
     experiment_queryset_list = [exp.ale_id for exp in experiment_queryset]
 
     return experiment_queryset_list
-
-
-def is_ref_strain_filtered(request):
-
-    ret_val = False
-
-    if request.GET.get(REQUEST_WT_FILTER) is not None:
-        ret_val = True
-
-    return ret_val
 
 
 def get_ale_number(request):
