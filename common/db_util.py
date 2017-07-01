@@ -65,6 +65,7 @@ def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, request=None):
             reseq_queryset = reseq_queryset.filter(tech_rep__tags__contains=tag[1].replace(' ', ''))
 
     reseq_ordered_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
+
     return reseq_ordered_dict
 
 
