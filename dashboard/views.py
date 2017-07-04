@@ -16,22 +16,14 @@ __author__ = 'pphaneuf'
 
 def dashboard(request):
     general_count_dict = _get_general_count_dict()
-
     observed_mutation_count_queryset = ObservedMutationCounts.objects.all()
     unique_mutation_count_queryset = UniqueMutationCounts.objects.all()
     general_count_dict['observed'] = observed_mutation_count_queryset[0].total
     general_count_dict['unique'] = unique_mutation_count_queryset[0].total
-
-    # TODO: likely don't need the cache any longer since we're caching the dashboard counts into the database.
-    # mutation_query_set, observed_mutation_queryset = _get_cached_dashboard_query()
-
     mutation_type_count_dict = _get_mutation_type_count_dict(observed_mutation_count_queryset,
                                                              unique_mutation_count_queryset)
-
     functional_change_type_count_dict = _get_functional_change_type_count_dict(observed_mutation_count_queryset,
                                                                                unique_mutation_count_queryset)
-
-
     # TODO: uncomment to re-enable the mutation histograms on the dashboard.
     # gene_bar_chart_dict = common.get_gene_bar_chart_dict(observed_mutation_queryset, 'dashboard')
     # sequence_changes = observed_mutation_queryset.values('mutation__gene', 'mutation__protein_change')\
@@ -62,8 +54,10 @@ def dashboard(request):
 def _get_general_count_dict():
     count_dict = {}
     count_dict['ale_exp'] = AleExperiment.objects.count()  # No need to filter experiment count.
-    count_dict['ale'] = SampleCounts.objects.all()[0].ale_count
-    count_dict['isolate'] = SampleCounts.objects.all()[0].isolate_count
+    sample_counts = SampleCounts.objects.all()[0]
+    count_dict['ale'] = sample_counts.ale_count
+    count_dict['flask'] = sample_counts.flask_count
+    count_dict['isolate'] = sample_counts.isolate_count
     return count_dict
 
 

@@ -15,6 +15,16 @@ class TestDashboard(TestCase):
         expected_ale_count = 3
         self.assertEqual(SampleCounts.objects.all()[0].ale_count, expected_ale_count)
 
+    def test_rebuild_sample_counts_filter_starting_strain_flask(self):
+        ale_exp = AleExperiment.objects.create(instrument=Instrument.objects.create())
+        ale_id_starting_strain = AleId.objects.create(ale_experiment=ale_exp, ale_id=0)
+        ale_id_other = AleId.objects.create(ale_experiment=ale_exp, ale_id=9)
+        Flask.objects.create(media=Media.objects.create(), ale_id=ale_id_starting_strain)
+        Flask.objects.create(media=Media.objects.create(), ale_id=ale_id_other)
+        rebuild_sample_counts()
+        expected_ale_count = 1
+        self.assertEqual(SampleCounts.objects.all()[0].ale_count, expected_ale_count)
+
     def test_rebuild_sample_counts_filter_starting_strain_isolate(self):
         freezer_box = FreezerBox.objects.create()
         ale_exp = AleExperiment.objects.create(instrument=Instrument.objects.create())
