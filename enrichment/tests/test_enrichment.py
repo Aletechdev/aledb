@@ -1,12 +1,8 @@
 from django.test import TestCase
-from seq.models import Mutation
-from seq.models import ObservedMutation
-from seq.models import ResequencingExperiment
+from seq.models import Mutation, ObservedMutation, ResequencingExperiment
 from enrichment import enrichment
-from filter.models import AleExperimentFilter
-from filter.models import GlobalFilter
-from ale.models import AleExperiment
-from ale.models import Instrument
+from filter.models import AleExperimentFilter, GlobalFilter
+from ale.models import AleExperiment, Instrument
 
 __author__ = 'Patrick Phaneuf'
 
