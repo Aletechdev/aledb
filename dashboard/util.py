@@ -3,7 +3,7 @@ from seq.models import ObservedMutation
 from filter.util import dashboard_filter
 from common.db_util import get_mutation_queryset_from_obs_mut_queryset
 from seq.views.common import MUTATION_TYPE_LIST, FUNCTIONAL_CHANGE_TYPE_LIST
-from ale.models import AleId, Isolate
+from ale.models import AleId, Isolate, Flask
 from django.db.models import Q
 
 
@@ -17,6 +17,8 @@ def rebuild_sample_counts():
         SampleCounts.objects.create()
     ale_count = AleId.objects.filter(~Q(ale_id=0)).count()
     SampleCounts.objects.all().update(ale_count=ale_count)
+    flask_count = Flask.objects.filter(~Q(ale_id__ale_id=0)).count()
+    SampleCounts.objects.all().update(flask_count=flask_count)
     isolate_count = Isolate.objects.filter(~Q(flask__ale_id__ale_id=0)).count()
     SampleCounts.objects.all().update(isolate_count=isolate_count)
 
