@@ -18,12 +18,16 @@ class TestDashboard(TestCase):
     def test_rebuild_sample_counts_filter_starting_strain_isolate(self):
         freezer_box = FreezerBox.objects.create()
         ale_exp = AleExperiment.objects.create(instrument=Instrument.objects.create())
-        ale_id = AleId.objects.create(ale_experiment=ale_exp, ale_id=2)
-        flask = Flask.objects.create(media=Media.objects.create(), ale_id=ale_id)
-        Isolate.objects.create(freezer_box=freezer_box, flask=flask, is_population=False, isolate_number=0)
-        Isolate.objects.create(freezer_box=freezer_box, flask=flask, is_population=False, isolate_number=1)
-        Isolate.objects.create(freezer_box=freezer_box, flask=flask, is_population=False, isolate_number=2)
+
+        ale_id_starting_strain = AleId.objects.create(ale_experiment=ale_exp, ale_id=0)
+        ale_id_other = AleId.objects.create(ale_experiment=ale_exp, ale_id=1)
+        flask_starting_strain = Flask.objects.create(media=Media.objects.create(), ale_id=ale_id_starting_strain)
+        flask_other = Flask.objects.create(media=Media.objects.create(), ale_id=ale_id_other)
+
+        Isolate.objects.create(freezer_box=freezer_box, flask=flask_starting_strain, is_population=False,
+                               isolate_number=0)
+        Isolate.objects.create(freezer_box=freezer_box, flask=flask_other, is_population=False, isolate_number=1)
+        Isolate.objects.create(freezer_box=freezer_box, flask=flask_other, is_population=False, isolate_number=2)
         rebuild_sample_counts()
         expected_count = 2
         self.assertEqual(SampleCounts.objects.all()[0].isolate_count, expected_count)
-

@@ -1,23 +1,10 @@
 from django.template import loader
-
 from django.http import HttpResponse
-
 from seq.views import common
-
-import seq.models
-
 from django.utils.safestring import mark_safe
-
-from filter.util import dashboard_filter
-
 from common.db_util import get_all_ale_experiments, get_recent_experiments
-
-from django.core.cache import cache
-
 from ale.models import AleExperiment, AleId, Isolate
-
-from dashboard.models import ObservedMutationCounts, UniqueMutationCounts
-
+from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from dashboard.timeline_util import get_timeline
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
@@ -28,16 +15,12 @@ __author__ = 'pphaneuf'
 
 
 def dashboard(request):
-    count_dict = {}
-    count_dict['ale_exp'] = AleExperiment.objects.count()
-    count_dict['ale'] = AleId.objects.count()
-    count_dict['isolate'] = Isolate.objects.count()
+    general_count_dict = _get_general_count_dict()
 
     observed_mutation_count_queryset = ObservedMutationCounts.objects.all()
     unique_mutation_count_queryset = UniqueMutationCounts.objects.all()
-
-    count_dict['observed'] = observed_mutation_count_queryset[0].total
-    count_dict['unique'] = unique_mutation_count_queryset[0].total
+    general_count_dict['observed'] = observed_mutation_count_queryset[0].total
+    general_count_dict['unique'] = unique_mutation_count_queryset[0].total
 
     # TODO: likely don't need the cache any longer since we're caching the dashboard counts into the database.
     # mutation_query_set, observed_mutation_queryset = _get_cached_dashboard_query()
@@ -58,7 +41,7 @@ def dashboard(request):
     # genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes, sequence_changes)
 
     context = {"functional_change_type_count_dict": functional_change_type_count_dict,
-               "count_dict": count_dict,
+               "count_dict": general_count_dict,
                "mutation_type_count_dict": mutation_type_count_dict,
                #"genes": mark_safe(genes_to_show),
                #"sequence_changes": mark_safe(sequence_changes_to_show),
@@ -74,6 +57,14 @@ def dashboard(request):
     template = loader.get_template(DASHBOARD_TEMPLATE)
 
     return HttpResponse(template.render(context))
+
+
+def _get_general_count_dict():
+    count_dict = {}
+    count_dict['ale_exp'] = AleExperiment.objects.count()  # No need to filter experiment count.
+    count_dict['ale'] = SampleCounts.objects.all()[0].ale_count
+    count_dict['isolate'] = SampleCounts.objects.all()[0].isolate_count
+    return count_dict
 
 
 def _get_mutation_type_count_dict(observed_mutation_count_queryset, unique_mutation_count_queryset):
