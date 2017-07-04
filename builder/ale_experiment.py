@@ -58,21 +58,15 @@ def remove_flask(flask_primary_key):
 
 
 def delete_ale_experiment(ale_experiment_primary_key):
-
     """
     Executed from Django ipython shell.
     """
-
     clear_dashboard_cache()
-
     ale_experiment_to_delete = ale.models.AleExperiment.objects.get(pk=ale_experiment_primary_key)
-
     message = "Experiment %s was deleted" % ale_experiment_to_delete.name
-
     ale_experiment_to_delete.delete()
-
     _delete_all_orphaned_mutations()
-
+    rebuild_counts()
     create_event(title="Experiment Deleted",
                  message=message,
                  icon='<i class="fa fa-times" aria-hidden="true"></i>',
@@ -330,8 +324,8 @@ def rebuild_counts():
 
     observed_mutation_queryset = seq.models.ObservedMutation.objects.all()
     unique_mutation_queryset = seq.models.Mutation.objects.all()
-
-    # TODO: need to validate that these filters are working with unit tests. Current implementation unclear and reduces observed mutation count to 1/3 or raw data count. https://github.com/SBRG/ale_analytics/issues/309
+    # TODO: need to validate that these filters are working with unit tests. Current implementation unclear and reduces observed mutation count to 1/3 of raw data count.
+    # TODO: https://github.com/SBRG/ale_analytics/issues/309
     # raw_observed_mutation_queryset = seq.models.ObservedMutation.objects.all()
     # observed_mutation_queryset = dashboard_filter(raw_observed_mutation_queryset)
     # unique_mutation_queryset = get_mutation_queryset(observed_mutation_queryset)
