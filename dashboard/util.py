@@ -17,7 +17,7 @@ def rebuild_sample_counts():
         SampleCounts.objects.create()
     ale_count = AleId.objects.filter(~Q(ale_id=0)).count()
     SampleCounts.objects.all().update(ale_count=ale_count)
-    isolate_count = Isolate.objects.filter(~Q(isolate_number=0)).count()
+    isolate_count = Isolate.objects.filter(~Q(flask__ale_id__ale_id=0)).count()
     SampleCounts.objects.all().update(isolate_count=isolate_count)
 
 
