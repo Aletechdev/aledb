@@ -12,9 +12,12 @@ from enrichment.models import EnrichmentMutation
 import seq.models
 import seq.views.common
 from builder.gdparse.gdparse import gdparse
+from filter.util import dashboard_filter
 from common.db_util import clear_dashboard_cache
 import metadata.parser
 from dashboard.timeline_util import create_event
+from common.db_util import get_mutation_queryset_from_obs_mut_queryset
+
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -322,13 +325,9 @@ def rebuild_counts():
         UniqueMutationCounts.objects.create()
         unique_mutation_count_queryset = UniqueMutationCounts.objects.all()
 
-    observed_mutation_queryset = seq.models.ObservedMutation.objects.all()
-    unique_mutation_queryset = seq.models.Mutation.objects.all()
-    # TODO: need to validate that these filters are working with unit tests. Current implementation unclear and reduces observed mutation count to 1/3 of raw data count.
-    # TODO: https://github.com/SBRG/ale_analytics/issues/309
-    # raw_observed_mutation_queryset = seq.models.ObservedMutation.objects.all()
-    # observed_mutation_queryset = dashboard_filter(raw_observed_mutation_queryset)
-    # unique_mutation_queryset = get_mutation_queryset(observed_mutation_queryset)
+    raw_observed_mutation_queryset = seq.models.ObservedMutation.objects.all()
+    observed_mutation_queryset = dashboard_filter(raw_observed_mutation_queryset)
+    unique_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(observed_mutation_queryset)
 
     # TODO: there has to be a better way than the below. It's full of unnecessary repetition.
     observed_mutation_count_queryset.update(total=observed_mutation_queryset.count())
