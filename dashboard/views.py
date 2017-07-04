@@ -49,7 +49,7 @@ def dashboard(request):
                                                                                unique_mutation_count_queryset)
 
 
-
+    # TODO: uncomment to re-enable the mutation histograms on the dashboard.
     # gene_bar_chart_dict = common.get_gene_bar_chart_dict(observed_mutation_queryset, 'dashboard')
     # sequence_changes = observed_mutation_queryset.values('mutation__gene', 'mutation__protein_change')\
     #     .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
@@ -74,43 +74,6 @@ def dashboard(request):
     template = loader.get_template(DASHBOARD_TEMPLATE)
 
     return HttpResponse(template.render(context))
-
-
-def get_mutation_queryset(observed_mutation_queryset):
-    unique_mut_list = observed_mutation_queryset.values_list('mutation_id').distinct()
-    unique_mut_id_list = [mut_id[0] for mut_id in unique_mut_list]
-    mutation_queryset = seq.models.Mutation.objects.filter(id__in=unique_mut_id_list)
-    return mutation_queryset
-
-
-# TODO: remove since no longer using this.
-def _get_cached_dashboard_query():
-
-    cached_mutation_queryset = cache.get('dashboard_mutation')
-
-    cached_observed_mutation_queryset = cache.get('dashboard_observed_mutation')
-
-    if cached_mutation_queryset is None or cached_observed_mutation_queryset is None:
-
-        # TODO: only filter out mutations without genes for the barcharts. The
-        # mutations count tables above bar charts don't care if a mutation
-        # doesn't have a gene.
-        # initial_query = seq.models.ObservedMutation.objects.exclude(mutation__gene='')
-        initial_query = seq.models.ObservedMutation.objects.exclude()
-
-        observed_mutation_queryset = dashboard_filter(initial_query)
-
-        mutation_query_set = get_mutation_queryset(observed_mutation_queryset)
-
-        cache.set('dashboard_mutation', mutation_query_set, None)
-
-        cache.set('dashboard_observed_mutation', observed_mutation_queryset, None)
-
-        return mutation_query_set, observed_mutation_queryset
-
-    else:
-
-        return cached_mutation_queryset, cached_observed_mutation_queryset
 
 
 def _get_mutation_type_count_dict(observed_mutation_count_queryset, unique_mutation_count_queryset):
