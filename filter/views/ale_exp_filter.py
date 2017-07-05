@@ -14,7 +14,7 @@ from django.utils.safestring import mark_safe
 
 from filter.util import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, is_number
 
-from common.db_util import get_all_ale_experiments, get_recent_experiments, clear_dashboard_cache
+from common.util import get_all_ale_experiments, get_recent_experiments, clear_dashboard_cache
 
 from seq.models import Mutation
 

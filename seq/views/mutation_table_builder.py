@@ -12,7 +12,7 @@ from enum import Enum
 
 from django.utils.html import strip_tags
 
-from common.db_util import get_mutation_queryset_from_obs_mut_queryset
+from common.util import get_mutation_queryset_from_obs_mut_queryset
 
 from genes.util import get_gene_list
 

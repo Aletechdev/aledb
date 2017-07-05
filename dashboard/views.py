@@ -2,7 +2,7 @@ from django.template import loader
 from django.http import HttpResponse
 from seq.views import common
 from django.utils.safestring import mark_safe
-from common.db_util import get_all_ale_experiments, get_recent_experiments
+from common.util import get_all_ale_experiments, get_recent_experiments
 from ale.models import AleExperiment, AleId, Isolate
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from dashboard.timeline_util import get_timeline

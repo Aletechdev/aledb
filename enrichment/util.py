@@ -1,5 +1,5 @@
 from filter.util import get_filter_settings
-from common.db_util import get_reseq_ordered_dict
+from common.util import get_reseq_ordered_dict
 from seq.util import get_all_observed_mutations
 from enrichment import enrichment
 

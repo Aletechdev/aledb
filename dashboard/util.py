@@ -1,7 +1,7 @@
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from seq.models import ObservedMutation
 from filter.util import dashboard_filter
-from common.db_util import get_mutation_queryset_from_obs_mut_queryset
+from common.util import get_mutation_queryset_from_obs_mut_queryset
 from seq.views.common import MUTATION_TYPE_LIST, FUNCTIONAL_CHANGE_TYPE_LIST
 from ale.models import AleId, Isolate, Flask
 from django.db.models import Q

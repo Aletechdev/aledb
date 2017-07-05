@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
-from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
+from common.util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
 import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
 from seq.models import ObservedMutation

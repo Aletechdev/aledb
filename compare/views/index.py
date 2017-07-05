@@ -6,9 +6,7 @@ from django.utils.safestring import mark_safe
 
 from ale.models import AleExperiment
 
-from common.db_util import get_all_ale_experiments, get_recent_experiments, get_mutation_queryset_from_obs_mut_queryset
-
-from common.util import check_hidden_columns_and_filters
+from common.util import check_hidden_columns_and_filters, get_all_ale_experiments, get_recent_experiments, get_mutation_queryset_from_obs_mut_queryset
 
 from compare.views.common import get_ordered_reseq_dict_and_queryset
 

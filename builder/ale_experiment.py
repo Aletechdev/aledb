@@ -9,7 +9,7 @@ from enrichment.models import EnrichmentMutation
 import seq.models
 import seq.views.common
 from builder.gdparse.gdparse import gdparse
-from common.db_util import clear_dashboard_cache
+from common.util import clear_dashboard_cache
 import metadata.parser
 from dashboard.timeline_util import create_event
 from dashboard.util import rebuild_dashboard_counts

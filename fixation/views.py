@@ -13,8 +13,7 @@ from fixation.models import FixatedMutation
 from fixation.fixation import filter_for_ascending_freq
 import metadata.views
 from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID, POSITION_COLUMN_IN_SHARED_MUTATION_TALBE
-from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
-from common.util import check_hidden_columns_and_filters
+from common.util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments, check_hidden_columns_and_filters
 from collections import OrderedDict
 from genes.util import get_gene_list
 import operator
