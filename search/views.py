@@ -20,9 +20,7 @@ from functools import reduce
 
 from seq.views import mutation_table_builder
 
-from common.db_util import get_all_ale_experiments, get_recent_experiments
-
-from common.util import check_hidden_columns_and_filters
+from common.util import check_hidden_columns_and_filters, get_all_ale_experiments, get_recent_experiments
 
 from django.core.serializers.json import DjangoJSONEncoder
 

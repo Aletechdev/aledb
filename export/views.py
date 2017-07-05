@@ -1,6 +1,6 @@
 from django.template import loader
-from django.http import HttpResponse, StreamingHttpResponse
-from common.db_util import get_all_ale_experiments, get_recent_experiments
+from django.http import HttpResponse
+from common.util import get_all_ale_experiments, get_recent_experiments
 from compare.views.common import get_ordered_reseq_dict_and_queryset
 from ale.models import AleExperiment
 from seq.views.mutation_table_builder import get_mutation_table_queryset_and_entry_list, HTML_MUTATION_TABLE_HEADER

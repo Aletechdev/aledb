@@ -4,7 +4,7 @@ from django.http import HttpResponse
 
 from ale.models import AleExperiment
 
-from common.db_util import get_all_ale_experiments, get_recent_experiments
+from common.util import get_all_ale_experiments, get_recent_experiments
 
 from metadata.views import get_reseq_info_list
 

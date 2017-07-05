@@ -18,7 +18,7 @@ import requests
 
 from seq.views import mutation_table_builder
 
-from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
+from common.util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
 
 
 INDEX_TEMPLATE = "duplication.html"

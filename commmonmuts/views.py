@@ -7,8 +7,8 @@ from seq.views import mutation_table_builder
 from filter import util
 from seq.util import get_all_observed_mutations
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
-from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
-from common.util import check_hidden_columns_and_filters
+from common.util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments, \
+    check_hidden_columns_and_filters
 import common.constants
 
 __author__ = 'Patrick Phaneuf'

@@ -26,9 +26,7 @@ import requests
 
 import aleinfo.settings as settings
 
-from common.util import check_hidden_columns_and_filters
-
-from common.db_util import get_all_ale_experiments, get_recent_experiments
+from common.util import get_all_ale_experiments, get_recent_experiments, check_hidden_columns_and_filters
 
 from django.core.serializers.json import DjangoJSONEncoder
 

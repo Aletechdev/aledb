@@ -1,5 +1,4 @@
-from common.db_util import get_mutation_queryset_from_obs_mut_queryset
-import seq.models
+from common.util import get_mutation_queryset_from_obs_mut_queryset
 from seq.util import get_all_observed_mutations
 from filter.util import filter_observed_mutations
 

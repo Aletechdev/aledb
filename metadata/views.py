@@ -6,7 +6,7 @@ import aleinfo.settings as settings
 
 from seq.views import common
 
-from common.db_util import get_reseq_queryset, get_all_ale_experiments, get_recent_experiments
+from common.util import get_reseq_queryset, get_all_ale_experiments, get_recent_experiments
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 

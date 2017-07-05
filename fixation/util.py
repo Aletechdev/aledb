@@ -1,4 +1,4 @@
-from common.db_util import get_reseq_ordered_dict
+from common.util import get_reseq_ordered_dict
 from filter.util import get_filter_settings
 from fixation import fixation
 
