@@ -16,12 +16,13 @@ from filter.models import AleExperimentFilter
 
 def search(request):
     check_hidden_columns_and_filters(request, None)
-    observed_mutations_with_gene_queryset = _get_seq_exp(request)
+    observed_mutations_with_gene_queryset = _get_seq_exp(request)  # Filter out mutations with this one.
     reseq_dict = _get_reseq_dict_from_observed_mutation_queryset(observed_mutations_with_gene_queryset)
     if reseq_dict is None or observed_mutations_with_gene_queryset is None:
         return render(request, 'search.html', {'error': True,
                                                "experiments": get_all_ale_experiments(),
                                                "recent_experiments": get_recent_experiments()})
+
     table_header = mutation_table_builder.get_table_header(reseq_dict)
     table_body = mutation_table_builder.get_table_body(reseq_dict,
                                                        observed_mutations_with_gene_queryset,
@@ -57,13 +58,10 @@ def _get_seq_exp(request):
         observed_mutation_queryset = observed_mutation_queryset.filter(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_include)
 
-    distinct_ale_experimnet_ids = observed_mutation_queryset.values("sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment").distinct()
-    for exp in distinct_ale_experimnet_ids:
-
+    distinct_ale_experiment_ids = observed_mutation_queryset.values("sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment").distinct()
+    for exp in distinct_ale_experiment_ids:
         exp_id = exp["sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"]
-
         exp_filter = AleExperimentFilter.objects.get(ale_experiment__ale_id=exp_id)
-
         observed_mutation_queryset = observed_mutation_queryset.exclude(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp_id,
             frequency__lt=exp_filter.min_cutoff / 100,
@@ -216,7 +214,6 @@ def _get_ale_experiment_arguments(request):
 
 
 def _get_mutation_queryset(include_argument_list, exclude_argument_list):
-
     if len(include_argument_list) > 0:
         include_argument_list = reduce(operator.and_, include_argument_list)
     else:
