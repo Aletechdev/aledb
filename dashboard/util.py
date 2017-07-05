@@ -1,6 +1,6 @@
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from seq.models import ObservedMutation
-from filter.util import dashboard_filter
+from filter.util import filter_obs_muts
 from common.util import get_mutation_queryset_from_obs_mut_queryset
 from seq.views.common import MUTATION_TYPE_LIST, FUNCTIONAL_CHANGE_TYPE_LIST
 from ale.models import AleId, Isolate, Flask
@@ -35,7 +35,7 @@ def rebuild_mutation_counts():
         unique_mutation_count_queryset = UniqueMutationCounts.objects.all()
 
     raw_observed_mutation_queryset = ObservedMutation.objects.all()
-    observed_mutation_queryset = dashboard_filter(raw_observed_mutation_queryset)
+    observed_mutation_queryset = filter_obs_muts(raw_observed_mutation_queryset)
     unique_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(observed_mutation_queryset)
 
     # TODO: there has to be a better way than the below. It's full of unnecessary repetition.

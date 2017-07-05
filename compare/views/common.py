@@ -1,6 +1,6 @@
 import collections
 
-from filter.util import dashboard_filter
+from filter.util import filter_obs_muts
 
 from seq.models import ObservedMutation, ResequencingExperiment
 
@@ -14,7 +14,7 @@ def get_ordered_reseq_dict_and_queryset(ale_experiment_list, ale_no=None):
     observed_mutation_queryset = ObservedMutation.objects.exclude(mutation__gene='').filter(
         sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiment_list)
 
-    filtered_queryset = dashboard_filter(observed_mutation_queryset, ale_experiment_list=ale_experiment_list)
+    filtered_queryset = filter_obs_muts(observed_mutation_queryset, ale_experiment_list=ale_experiment_list)
 
     if ale_no:
 
