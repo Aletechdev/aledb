@@ -1,57 +1,33 @@
 from django.http import HttpResponse
-
 from django.utils.safestring import mark_safe
-
 from django.template import loader
-
 from django.shortcuts import render
-
-import seq.models
-
-import seq.views.common
-
+from seq.models import ObservedMutation, Mutation
 from ale.models import AleExperiment
-
 from django.db.models import Q
-
 import operator
-
 from functools import reduce
-
 from seq.views import mutation_table_builder
-
 from common.util import check_hidden_columns_and_filters, get_all_ale_experiments, get_recent_experiments
-
 from django.core.serializers.json import DjangoJSONEncoder
-
 import json
-
 from filter.models import AleExperimentFilter
 
 
 def search(request):
-
     check_hidden_columns_and_filters(request, None)
-
     observed_mutations_with_gene_queryset = _get_seq_exp(request)
-
     reseq_dict = _get_reseq_dict_from_observed_mutation_queryset(observed_mutations_with_gene_queryset)
-
     if reseq_dict is None or observed_mutations_with_gene_queryset is None:
         return render(request, 'search.html', {'error': True,
                                                "experiments": get_all_ale_experiments(),
                                                "recent_experiments": get_recent_experiments()})
-
     table_header = mutation_table_builder.get_table_header(reseq_dict)
-
     table_body = mutation_table_builder.get_table_body(reseq_dict,
                                                        observed_mutations_with_gene_queryset,
                                                        table_type=mutation_table_builder.TableType.SEARCH)
-
     last_search = _get_last_search(request)
-
     template = loader.get_template("search.html")
-
     context = {"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "title": "Search Results",
                "table_header": mark_safe(table_header),
@@ -64,31 +40,14 @@ def search(request):
     return HttpResponse(template.render(context))
 
 
-def _is_query_empty(query):
-
-    is_query_empty = False
-
-    if not query:
-
-        is_query_empty = True
-
-    return is_query_empty
-
-
 # TODO: Refactor. seq.views.common.py probably also need to be refactored along with this.
 def _get_seq_exp(request):
-
     include_argument_list, exclude_argument_list = _get_search_query_arguments(request)
-
     if not include_argument_list:
-
         return None
-
     ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
-
     mutation_queryset = _get_mutation_queryset(include_argument_list, exclude_argument_list)
-
-    observed_mutation_queryset = seq.models.ObservedMutation.objects.filter(mutation__in=mutation_queryset)
+    observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=mutation_queryset)
 
     if ale_experiments_to_exclude:
         observed_mutation_queryset = observed_mutation_queryset.exclude(
@@ -264,9 +223,9 @@ def _get_mutation_queryset(include_argument_list, exclude_argument_list):
         return None
 
     if len(exclude_argument_list) > 0:
-        mutations_with_gene_queryset = seq.models.Mutation.objects.filter(include_argument_list).exclude(
+        mutations_with_gene_queryset = Mutation.objects.filter(include_argument_list).exclude(
             reduce(operator.or_, exclude_argument_list))
     else:
-        mutations_with_gene_queryset = seq.models.Mutation.objects.filter(include_argument_list)
+        mutations_with_gene_queryset = Mutation.objects.filter(include_argument_list)
 
     return mutations_with_gene_queryset

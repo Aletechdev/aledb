@@ -165,6 +165,7 @@ def get_ale_number_selector(ale_id, reseq_query):
 
 
 # TODO: This should probably be refactored and split into separate functions
+# TODO: this doesn't seem to be used any longer since we're now using a different way of hiding columns.
 def check_hidden_columns_and_filters(request, ale_experiment_id):
 
     if request.method == "GET":
