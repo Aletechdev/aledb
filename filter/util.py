@@ -98,31 +98,6 @@ def _frequency_filter(observed_mutation_queryset, min_cutoff, max_cutoff):
     return observed_mutation_queryset
 
 
-def _get_excluded_mutation_kwargs(mutation):
-
-    kwargs = {}
-
-    if not mutation:
-        return kwargs
-
-    if mutation['position'] is not '':
-        kwargs['mutation__position'] = mutation['position']
-
-    if mutation['type'] is not '':
-        kwargs['mutation__mutation_type__contains'] = mutation['type']
-
-    if mutation['sequence'] is not '':
-        kwargs['mutation__sequence_change__contains'] = mutation['sequence']
-
-    if mutation['gene'] is not '':
-        kwargs['mutation__gene__contains'] = mutation['gene']
-
-    if mutation['protein'] is not '':
-        kwargs['mutation__protein_change__contains'] = mutation['protein']
-
-    return kwargs
-
-
 def get_filter_settings(ale_experiment_id):
     filter_settings, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id)
     return filter_settings
