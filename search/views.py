@@ -14,9 +14,10 @@ import json
 from filter.models import AleExperimentFilter
 
 
+# TODO: parse out all request arguments within this function and not those called within: enables unit testing.
 def search(request):
     check_hidden_columns_and_filters(request, None)
-    observed_mutations_with_gene_queryset = _get_seq_exp(request)  # Filter out mutations with this one.
+    observed_mutations_with_gene_queryset = _get_obs_muts(request)  # Filter out mutations with this one.
     reseq_dict = _get_reseq_dict_from_observed_mutation_queryset(observed_mutations_with_gene_queryset)
     if reseq_dict is None or observed_mutations_with_gene_queryset is None:
         return render(request, 'search.html', {'error': True,
@@ -42,51 +43,49 @@ def search(request):
 
 
 # TODO: Refactor. seq.views.common.py probably also need to be refactored along with this.
-def _get_seq_exp(request):
+def _get_obs_muts(request):
+    # Gets search argument list (ORM filter args)
     include_argument_list, exclude_argument_list = _get_search_query_arguments(request)
-    if not include_argument_list:
-        return None
-    ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
+    if not include_argument_list: return None
+    # Get muts according to search argument list
     mutation_queryset = _get_mutation_queryset(include_argument_list, exclude_argument_list)
+    # Get obs_muts from muts
     observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=mutation_queryset)
 
+    # Gets list of ALE experiments to include/exclude
+    ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
+    # Includes/excludes ALE experiments
     if ale_experiments_to_exclude:
         observed_mutation_queryset = observed_mutation_queryset.exclude(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_exclude)
-
     if ale_experiments_to_include:
         observed_mutation_queryset = observed_mutation_queryset.filter(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_include)
 
+    # Gets ALE experiments from observed mutations.
+    # Exclude obs mutation according to mutation frequencies to filter out.
     distinct_ale_experiment_ids = observed_mutation_queryset.values("sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment").distinct()
     for exp in distinct_ale_experiment_ids:
         exp_id = exp["sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"]
         exp_filter = AleExperimentFilter.objects.get(ale_experiment__ale_id=exp_id)
         observed_mutation_queryset = observed_mutation_queryset.exclude(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp_id,
-            frequency__lt=exp_filter.min_cutoff / 100,
-            frequency__gt=exp_filter.max_cutoff / 100)
+            frequency__lt=exp_filter.min_cutoff / 100,  # Filter out if less than exp_filter.min_cutoff / 100
+            frequency__gt=exp_filter.max_cutoff / 100)  # Filter out if greater than exp_filter.max_cutoff / 100
 
     return observed_mutation_queryset
 
 
 def _get_reseq_dict_from_observed_mutation_queryset(observed_mutation_queryset):
-
     reseq_dict = {}
-
-    if not observed_mutation_queryset:
-        return None
-
+    if not observed_mutation_queryset: return None
     for observed_mutation in observed_mutation_queryset:
         reseq_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
-
     return reseq_dict
 
 
 def _get_last_search(request):
-
     last_search = {
-
         'q': request.GET['q'],
         'min': request.GET['min'],
         'max': request.GET['max'],
@@ -95,7 +94,6 @@ def _get_last_search(request):
         'prot': request.GET['prot'],
         'ale': request.GET['ale']
     }
-
     return last_search
 
 
@@ -216,8 +214,7 @@ def _get_ale_experiment_arguments(request):
 def _get_mutation_queryset(include_argument_list, exclude_argument_list):
     if len(include_argument_list) > 0:
         include_argument_list = reduce(operator.and_, include_argument_list)
-    else:
-        return None
+    else: return None
 
     if len(exclude_argument_list) > 0:
         mutations_with_gene_queryset = Mutation.objects.filter(include_argument_list).exclude(

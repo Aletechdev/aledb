@@ -219,54 +219,50 @@ def get_ignored_mutations(filter_form_model):
     return table_body, ignored_mutation_id_list
 
 
-def dashboard_filter(queryset, ale_experiment_list='all'):
-
-    global_filter = get_global_filter()
-
+def dashboard_filter(obs_mut_queryset, ale_experiment_list='all'):
+    # Input of obs_mut_queryset
+    # Get ALE exps (redundant since ALE experiments can be pulled from obs_mut_queryset quickly using ORM. This is done at the end of search.views._get_obs_muts).
     if ale_experiment_list == 'all':
-        all_experiments = AleExperiment.objects.all()
+        ale_exp_queryset = AleExperiment.objects.all()
     else:
-        all_experiments = AleExperiment.objects.filter(ale_id__in=ale_experiment_list)
-
-    for exp in all_experiments:
+        ale_exp_queryset = AleExperiment.objects.filter(ale_id__in=ale_experiment_list)
+    # Get global mutation filter.
+    global_filter = get_global_filter()
+    # For each ALE exp of obs_mut_queryset
+    for exp in ale_exp_queryset:
+        # Get ALE exp filter settings
         filter_settings = get_filter_settings(exp.ale_id)
-
-        queryset = queryset.exclude(
+        # Filter out obs_muts that aren't within upper and lower thresholds according to specific ALE exp.
+        obs_mut_queryset = obs_mut_queryset.exclude(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
-            frequency__lt=filter_settings.min_cutoff / 100)
-
-        queryset = queryset.exclude(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
+            frequency__lt=filter_settings.min_cutoff / 100,
             frequency__gt=filter_settings.max_cutoff / 100)
-
-        ignored_mutations = clean_ignored_mutation_id_list(filter_settings.ignored_mutations +
+        # Filter out obs_muts according to MUTS in global filter and each ALE exp filter.
+        ignored_mut_list = clean_ignored_mutation_id_list(filter_settings.ignored_mutations +
                                                            global_filter.ignored_mutations +
                                                            "," + filter_settings.starting_strain_mutations)
-
-        for mut_id in ignored_mutations:
-
-            queryset = queryset.exclude(
+        for mut_id in ignored_mut_list:
+            obs_mut_queryset = obs_mut_queryset.exclude(
                 sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
                 mutation_id=mut_id)
 
+            # Filter out obs_muts according to GENES in global filter and each ALE exp filter.
         ignored_genes = _clean_ignored_genes_list(filter_settings.ignored_genes + "," + global_filter.ignored_genes)
-
         for gene in ignored_genes:
-
             if str(gene).startswith('*'):
-                queryset = queryset.exclude(
+                obs_mut_queryset = obs_mut_queryset.exclude(
                     sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
                     mutation__gene__endswith=str(gene)[1:])
             elif str(gene).endswith('*'):
-                queryset = queryset.exclude(
+                obs_mut_queryset = obs_mut_queryset.exclude(
                     sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
                     mutation__gene__startswith=str(gene)[:-1])
             else:
-                queryset = queryset.exclude(
+                obs_mut_queryset = obs_mut_queryset.exclude(
                     sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
                     mutation__gene__contains=gene)
 
-    return queryset
+    return obs_mut_queryset
 
 
 def _mutation_exists(mut_id):
