@@ -72,16 +72,6 @@ def _filter_ignored_genes(observed_mutation_queryset, ignored_genes):
                     ignored_mutation_id_list.append(observed_mutation.mutation.id)
             if ignored_mutation_id_list:
                 observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__id__in=ignored_mutation_id_list)
-
-            # TODO: reimplement code that enabled wildcards
-            # for gene in ignored_genes:
-            #     if str(gene).startswith('*'):
-            #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__endswith=str(gene)[1:])
-            #     elif str(gene).endswith('*'):
-            #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__startswith=str(gene)[:-1])
-            #     else:
-            #         observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene__contains=gene)
-
     return observed_mutation_queryset
 
 
@@ -246,21 +236,12 @@ def dashboard_filter(obs_mut_queryset, ale_experiment_list='all'):
                 sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
                 mutation_id=mut_id)
 
-            # Filter out obs_muts according to GENES in global filter and each ALE exp filter.
+        # Filter out obs_muts according to GENES in global filter and each ALE exp filter.
         ignored_genes = _clean_ignored_genes_list(filter_settings.ignored_genes + "," + global_filter.ignored_genes)
         for gene in ignored_genes:
-            if str(gene).startswith('*'):
-                obs_mut_queryset = obs_mut_queryset.exclude(
-                    sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
-                    mutation__gene__endswith=str(gene)[1:])
-            elif str(gene).endswith('*'):
-                obs_mut_queryset = obs_mut_queryset.exclude(
-                    sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
-                    mutation__gene__startswith=str(gene)[:-1])
-            else:
-                obs_mut_queryset = obs_mut_queryset.exclude(
-                    sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
-                    mutation__gene__contains=gene)
+            obs_mut_queryset = obs_mut_queryset.exclude(
+                sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id,
+                mutation__gene__contains=gene)
 
     return obs_mut_queryset
 
