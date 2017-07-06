@@ -204,29 +204,19 @@ def get_reseq_experiment_info_list(reseq_experiments):
 
 # TODO: should be transferred to filter app and have a parameter to filter wt mutations.
 def _get_observed_mutation_queryset(request, ale_experiment_id):
-
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id)
-
     observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
-
     observed_mutation_query_set = _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set)
-
     return observed_mutation_query_set
 
 
 # TODO: Should move this function into the filter app
 def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
-
     # TODO: only filter out mutations without genes for the barcharts. The
-    # mutations count tables above bar charts don't care if a mutation
-    # doesn't have a gene.
+    # mutations count tables above bar charts don't care if a mutation doesn't have a gene.
     # observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene='')
     observed_mutation_query_set = observed_mutation_query_set.exclude()
-
     ale_experiment_id = common.get_ale_experiment_id(request)
-
     filter_settings = util.get_filter_settings(ale_experiment_id)
-
     observed_mutation_query_set = filter_observed_mutations(observed_mutation_query_set, filter_settings)
-
     return observed_mutation_query_set
