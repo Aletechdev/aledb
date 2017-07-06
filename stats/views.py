@@ -7,7 +7,7 @@ from seq.util import get_all_observed_mutations
 from seq.views import common
 from django.db.models import Count
 from filter import util
-from common.util import get_reseq_queryset, get_reseq_ordered_dict, get_mutation_queryset_from_obs_mut_queryset, \
+from common.util import get_reseq_queryset, get_reseq_ordered_dict, get_mut_queryset_from_obs_mut_queryset, \
     get_all_ale_experiments, get_recent_experiments
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 from filter.util import filter_observed_mutations
@@ -48,63 +48,46 @@ def get_ale_flask_isolate_count_list(reseq_queryset):
 
 
 def stats(request):
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    ale_id = request.GET.get(REQUEST_ALE_ID)
-    reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_id)
 
+    ale_experiment_id = common.get_ale_experiment_id(request)
+    ale_id = common.get_ale_id(request)
+    reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_id)
     ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(reseq_queryset)
 
     # Would rather want to use something like a dictionary since an experiment is
     # unique, though an experiment is currently a structure and an integral type
     # that can be used as a key.
 
-    ale_experiment_id = common.get_ale_experiment_id(request)
-
     experiments_info_list = get_reseq_experiment_info_list(reseq_queryset)
-
-    observed_mutations_queryset = _get_observed_mutation_queryset(request, ale_experiment_id)
-
-    mutation_query_set = get_mutation_queryset_from_obs_mut_queryset(observed_mutations_queryset)
-
+    obs_mut_qset = _get_observed_mutation_queryset(request, ale_experiment_id)
+    mutation_query_set = get_mut_queryset_from_obs_mut_queryset(obs_mut_qset)
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
-    observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutations_queryset)
-
+    observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(obs_mut_qset)
     protein_change_type_count_dict = _get_protein_change_type_count_dict(mutation_query_set)
-    observed_protein_change_type_count_dict = _get_observed_protein_change_type_count_dict(observed_mutations_queryset)
-
+    observed_protein_change_type_count_dict = _get_observed_protein_change_type_count_dict(obs_mut_qset)
     template = loader.get_template(STATS_TEMPLATE)
+    ale_exp_name = common.get_ale_experiment_name(request)
 
-    ale_experiment_name = common.get_ale_experiment_name(request)
-
-    needle_plot_data = []
-
-    for observed_mutation in observed_mutations_queryset:
-        needle_plot_data.append(
-            {'coord': str(observed_mutation.mutation.position), 'category': observed_mutation.mutation.mutation_type,
-             'value': 1})
-
-    gene_bar_chart_dict = common.get_gene_bar_chart_dict(observed_mutations_queryset, ale_experiment_name)
-
-    sequence_change_query = observed_mutations_queryset.values('mutation__gene', 'mutation__protein_change').annotate(
-        the_count=Count('mutation__gene')).order_by('-the_count')
-
-    genes = common.set_gene_bar_chart_colors(gene_bar_chart_dict)
-
+    gene_bar_chart_list = common.get_gene_bar_chart_list(obs_mut_qset, ale_exp_name)
+    sequence_change_query = obs_mut_qset.values('mutation__gene', 'mutation__protein_change').annotate(the_count=Count('mutation__gene')).order_by('-the_count')
+    genes = common.set_gene_bar_chart_colors(gene_bar_chart_list)
     sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_change_query)
+    genes_to_show,\
+    sequence_changes_to_show,\
+    number_of_genes_to_show = common.get_genes_to_show(request, genes, sequence_changes)
 
-    genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes, sequence_changes)
-
+    needle_plot_data = _get_needle_plot_data(obs_mut_qset)
     context = {"protein_change_type_count_dict": protein_change_type_count_dict,
-	       "protein_change_sum": sum(protein_change_type_count_dict.values()),
+               "protein_change_sum": sum(protein_change_type_count_dict.values()),
                "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
-	       "observed_protein_change_sum": sum(observed_protein_change_type_count_dict.values()),
+               "observed_protein_change_sum": sum(observed_protein_change_type_count_dict.values()),
                "mutation_type_count_dict": mutation_type_count_dict,
-	       "mutation_sum": sum(mutation_type_count_dict.values()),
+               "mutation_sum": sum(mutation_type_count_dict.values()),
                "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
-	       "observed_mutation_sum": sum(observed_mutation_type_count_dict.values()),
+               "observed_mutation_sum": sum(observed_mutation_type_count_dict.values()),
                "experiments_info_list": experiments_info_list,
                "resequencing_report_url": resequencing_report_url,
-               "ale_experiment_name": ale_experiment_name,
+               "ale_experiment_name": ale_exp_name,
                "needle_plot_data": mark_safe(list(needle_plot_data)),
                "genes": mark_safe(genes_to_show),
                "sequence_changes": mark_safe(sequence_changes_to_show),
@@ -119,6 +102,16 @@ def stats(request):
                "recent_experiments": get_recent_experiments(ale_experiment_id)}
 
     return HttpResponse(template.render(context))
+
+
+def _get_needle_plot_data(obs_mut_queryset):
+    needle_plot_data = []
+    for observed_mutation in obs_mut_queryset:
+        needle_plot_data.append(
+            {'coord': str(observed_mutation.mutation.position),
+             'category': observed_mutation.mutation.mutation_type,
+             'value': 1})
+    return needle_plot_data
 
 
 def _get_protein_change_type_count_dict(mutation_query_set):

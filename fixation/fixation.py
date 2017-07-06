@@ -1,4 +1,4 @@
-from common.util import get_mutation_queryset_from_obs_mut_queryset
+from common.util import get_mut_queryset_from_obs_mut_queryset
 from seq.util import get_all_observed_mutations
 from filter.util import filter_observed_mutations
 
@@ -38,12 +38,12 @@ def _get_ale_fixed_mut_dict(flask_obs_mut_dict, filter_settings):
 
         first_flask_obs_mut_queryset = flask_obs_mut_dict[first_flask_number]
         first_flask_obs_mut_queryset = filter_observed_mutations(first_flask_obs_mut_queryset, filter_settings)
-        fixed_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(first_flask_obs_mut_queryset)
+        fixed_mutation_queryset = get_mut_queryset_from_obs_mut_queryset(first_flask_obs_mut_queryset)
 
         for flask_number in ordered_flask_number_list:
             flask_obs_mut_queryset = flask_obs_mut_dict[flask_number]
             flask_obs_mut_queryset = filter_observed_mutations(flask_obs_mut_queryset, filter_settings)
-            flask_mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(flask_obs_mut_queryset)
+            flask_mutation_queryset = get_mut_queryset_from_obs_mut_queryset(flask_obs_mut_queryset)
             if flask_number == last_flask_number:
                 fixed_mutation_queryset = _get_common_mutations(fixed_mutation_queryset, flask_mutation_queryset)
                 # get fixed obs mut id for this flask

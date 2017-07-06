@@ -69,7 +69,7 @@ def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, request=None):
 
 
 # TODO: go in seq.util
-def get_mutation_queryset_from_obs_mut_queryset(observed_mutations_queryset):
+def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
     return Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
 
 

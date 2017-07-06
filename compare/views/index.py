@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 
 from ale.models import AleExperiment
 
-from common.util import check_hidden_columns_and_filters, get_all_ale_experiments, get_recent_experiments, get_mutation_queryset_from_obs_mut_queryset
+from common.util import check_hidden_columns_and_filters, get_all_ale_experiments, get_recent_experiments, get_mut_queryset_from_obs_mut_queryset
 
 from compare.views.common import get_ordered_reseq_dict_and_queryset
 
@@ -56,7 +56,7 @@ def compare(request):
 
     experiments_info_list = get_reseq_experiment_info_list(ordered_reseq_dict.values())
 
-    mutation_query_set = get_mutation_queryset_from_obs_mut_queryset(observed_mutation_queryset)
+    mutation_query_set = get_mut_queryset_from_obs_mut_queryset(observed_mutation_queryset)
 
     mutation_type_count_dict = _get_mutation_type_count_dict(mutation_query_set)
     observed_mutation_type_count_dict = _get_observed_mutation_type_count_dict(observed_mutation_queryset)
@@ -68,12 +68,12 @@ def compare(request):
 
     header = "Comparison of %s" % experiment_names.replace(",", ", ")
 
-    gene_bar_chart_dict = common.get_gene_bar_chart_dict(observed_mutation_queryset, experiment_names)
+    gene_bar_chart_list = common.get_gene_bar_chart_list(observed_mutation_queryset, experiment_names)
 
     sequence_change_query = observed_mutation_queryset.values('mutation__gene', 'mutation__protein_change').annotate(
         the_count=Count('mutation__gene')).order_by('-the_count')
 
-    genes = common.set_gene_bar_chart_colors(gene_bar_chart_dict)
+    genes = common.set_gene_bar_chart_colors(gene_bar_chart_list)
 
     sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_change_query)
 

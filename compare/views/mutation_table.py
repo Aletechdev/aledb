@@ -27,7 +27,7 @@ def compared_mutations(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, None)
 
-    ale_no = common.get_ale_number(request)
+    ale_no = common.get_ale_id(request)
 
     ale_experiment_string_list = request.GET.get('ale_experiment_id', None).replace(" ", "").replace('[', '').replace(']', '').split(',')
 

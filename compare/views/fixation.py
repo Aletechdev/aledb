@@ -23,7 +23,7 @@ REQUEST_ASCENDING_FREQ_FILTER = 'asndflt'
 # TODO: Shares some same functions as fixation.views.py and should be refactored/consolidated
 def comparison_fixation(request):
 
-    ale_no = seq.views.common.get_ale_number(request)
+    ale_no = seq.views.common.get_ale_id(request)
 
     ale_experiment_string_list = request.GET.get('ale_experiment_id', None).replace(" ", "").replace('[', '').replace(
         ']', '').split(',')
