@@ -61,23 +61,17 @@ def get_ales(experiment_ids, exclude_starting_strain=False):
     return experiment_queryset_list
 
 
-def get_ale_number(request):
-
-    ale_number = request.GET.get(REQUEST_ALE_ID)
-
-    ale_number = None if ale_number is None or ale_number == "all" else int(ale_number)
-
-    return ale_number
+def get_ale_id(request):
+    ale_id = request.GET.get(REQUEST_ALE_ID)
+    ale_id = None if ale_id is None or ale_id == "all" else int(ale_id)
+    return ale_id
 
 
 def get_ale_experiment_id(request):
-
     # Get the full list of ale experiments for the ale number of interest
-    experiment_ids = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-
-    experiment_ids = None if experiment_ids is None or experiment_ids == "all" else int(experiment_ids)
-
-    return experiment_ids
+    exp_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+    exp_id = None if exp_id is None or exp_id == "all" else int(exp_id)
+    return exp_id
 
 
 def get_ale_experiment_name(request):
@@ -174,44 +168,28 @@ def _is_query_empty(query):
     return is_query_empty
 
 
-def get_gene_bar_chart_dict(observed_mutation_queryset, page):
+def get_gene_bar_chart_list(observed_mutation_queryset, page):
 
-    cache_string = page + '_bar_chart_gene_dict'
+    gene_list = [[get_gene_list(gene['mutation__gene']), gene['mutation__mutation_type']] for
+                 gene in observed_mutation_queryset.values('mutation__gene', 'mutation__mutation_type')]
 
-    cached_bar_chart_gene_dict = cache.get(cache_string)
+    mutation_type_gene_dict = {}
 
-    if cached_bar_chart_gene_dict is None:
+    for pair in gene_list:
+        genes = set(pair[0])
+        try:
+            mutation_type_gene_dict[pair[1]] += [genes]
+        except KeyError:
+            mutation_type_gene_dict[pair[1]] = [genes]
 
-        gene_list = [[get_gene_list(gene['mutation__gene']), gene['mutation__mutation_type']] for
-                     gene in observed_mutation_queryset.values('mutation__gene', 'mutation__mutation_type')]
+    final_list = []
 
-        mutation_type_gene_dict = {}
+    for key, value in mutation_type_gene_dict.items():
+        flattened_list = sorted([item for sublist in value for item in sublist], reverse=True)
+        counted_list = Counter(flattened_list)
+        for k, v in counted_list.items():
+            new_dict = {'mutation__gene': k, 'the_count': v, 'mutation__mutation_type': key}
+            final_list.append(new_dict)
+    final_sorted_list = sorted(final_list, key=itemgetter('the_count'), reverse=True)
 
-        for pair in gene_list:
-            genes = set(pair[0])
-            try:
-                mutation_type_gene_dict[pair[1]] += [genes]
-            except KeyError:
-                mutation_type_gene_dict[pair[1]] = [genes]
-
-        final_list = []
-
-        for key, value in mutation_type_gene_dict.items():
-
-            flattened_list = sorted([item for sublist in value for item in sublist], reverse=True)
-
-            counted_list = Counter(flattened_list)
-
-            for k, v in counted_list.items():
-
-                new_dict = {'mutation__gene': k, 'the_count': v, 'mutation__mutation_type': key}
-
-                final_list.append(new_dict)
-
-        final_sorted_list = sorted(final_list, key=itemgetter('the_count'), reverse=True)
-
-        cache.set(cache_string, final_sorted_list, None)
-
-        return final_sorted_list
-
-    return cached_bar_chart_gene_dict
+    return final_sorted_list

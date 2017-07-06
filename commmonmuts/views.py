@@ -24,7 +24,7 @@ def common_mutations(request):
 
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    ale_no = seq.views.common.get_ale_number(request)
+    ale_no = seq.views.common.get_ale_id(request)
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no, request)
     wt_id = seq.views.common.get_wt_reseq_id(ordered_reseq_dict)  # Must happen before filtering out wt reseq.
     ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)

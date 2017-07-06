@@ -19,7 +19,7 @@ def mutation_table(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
-    ale_no = seq.views.common.get_ale_number(request)
+    ale_no = seq.views.common.get_ale_id(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no, request)
