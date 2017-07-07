@@ -8,14 +8,15 @@ from common.util import check_hidden_columns_and_filters,\
     get_mut_queryset_from_obs_mut_queryset
 from compare.views.common import get_ordered_reseq_dict_and_queryset
 from seq.views import common
-from stats.util import get_barchart_jsons,\
+from stats.util import get_histogram_jsons,\
     get_needle_plot_data,\
     get_mutation_type_count_dict,\
     get_observed_mutation_type_count_dict,\
     get_protein_change_type_count_dict,\
     get_observed_protein_change_type_count_dict,\
     get_ale_flask_isolate_count_list,\
-    get_reseq_experiment_info_list
+    get_reseq_experiment_info_list,\
+    MAX_HISTOGRAM_SIZE
 from stats.views import get_barchart_item_count
 
 
@@ -50,7 +51,7 @@ def compare(request):
     header = "Comparison of %s" % experiment_names.replace(",", ", ")
 
     barchart_item_count = get_barchart_item_count(request)
-    genes_json, sequence_change_json = get_barchart_jsons(obs_mut_qryset, barchart_item_count)
+    genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
 
     context = {"experiments": all_experiments,
                "has_comparison": True,
@@ -70,7 +71,8 @@ def compare(request):
                "mutation_type_count_dict": mutation_type_count_dict,
                "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
                "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
-               "recent_experiments": get_recent_experiments()}
+               "recent_experiments": get_recent_experiments(),
+               "max_histogram_size": MAX_HISTOGRAM_SIZE}
 
     template = loader.get_template(COMPARE_TEMPLATE)
 

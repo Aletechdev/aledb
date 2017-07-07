@@ -1,15 +1,30 @@
-from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
+from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts, BarCharts
 from seq.models import ObservedMutation
 from filter.util import filter_obs_muts
 from common.util import get_mut_queryset_from_obs_mut_queryset
 from seq.views.common import MUTATION_TYPE_LIST, FUNCTIONAL_CHANGE_TYPE_LIST
 from ale.models import AleId, Isolate, Flask
 from django.db.models import Q
+from stats.util import get_histogram_jsons, MAX_HISTOGRAM_SIZE
 
 
 def rebuild_dashboard_counts():
     rebuild_mutation_counts()
     rebuild_sample_counts()
+    rebuild_mut_histogram_data()
+
+
+def rebuild_mut_histogram_data():
+    if ObservedMutation.objects.all().count() == 0:
+        ObservedMutation.objects.create()
+    raw_obs_mut_qryset = ObservedMutation.objects.all()
+    obs_mut_qryset = filter_obs_muts(raw_obs_mut_qryset)
+    genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, MAX_HISTOGRAM_SIZE)
+    if BarCharts.objects.all().count() == 0:
+        BarCharts.objects.create()
+    histogram_data = BarCharts.objects.all()
+    histogram_data.update(mut_gene_json=genes_json)
+    histogram_data.update(mut_json=sequence_change_json)
 
 
 def rebuild_sample_counts():
@@ -23,70 +38,67 @@ def rebuild_sample_counts():
     SampleCounts.objects.all().update(isolate_count=isolate_count)
 
 
-# TODO: build unit test for this.
 def rebuild_mutation_counts():
-    observed_mutation_count_queryset = ObservedMutationCounts.objects.all()
-    if observed_mutation_count_queryset.count() == 0:
-        ObservedMutationCounts.objects.create()
-        observed_mutation_count_queryset = ObservedMutationCounts.objects.all()
-    unique_mutation_count_queryset = UniqueMutationCounts.objects.all()
-    if unique_mutation_count_queryset.count() == 0:
-        UniqueMutationCounts.objects.create()
-        unique_mutation_count_queryset = UniqueMutationCounts.objects.all()
+    raw_obs_mut_qryset = ObservedMutation.objects.all()
+    obs_mut_qryset = filter_obs_muts(raw_obs_mut_qryset)
+    mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
 
-    raw_observed_mutation_queryset = ObservedMutation.objects.all()
-    observed_mutation_queryset = filter_obs_muts(raw_observed_mutation_queryset)
-    unique_mutation_queryset = get_mut_queryset_from_obs_mut_queryset(observed_mutation_queryset)
+    if ObservedMutationCounts.objects.all().count() == 0:
+        ObservedMutationCounts.objects.create()
+    obs_mut_count_qryset = ObservedMutationCounts.objects.all()
+    if UniqueMutationCounts.objects.all().count() == 0:
+        UniqueMutationCounts.objects.create()
+    mut_count_qryset = UniqueMutationCounts.objects.all()
 
     # TODO: there has to be a better way than the below. It's full of unnecessary repetition.
-    observed_mutation_count_queryset.update(total=observed_mutation_queryset.count())
-    unique_mutation_count_queryset.update(total=unique_mutation_queryset.count())
+    obs_mut_count_qryset.update(total=obs_mut_qryset.count())
+    mut_count_qryset.update(total=mut_qryset.count())
     for mutation_type in MUTATION_TYPE_LIST:
-        observed_mutation_type_count = observed_mutation_queryset.filter(mutation__mutation_type=mutation_type).count()
-        unique_mutation_type_count = unique_mutation_queryset.filter(mutation_type=mutation_type).count()
+        observed_mutation_type_count = obs_mut_qryset.filter(mutation__mutation_type=mutation_type).count()
+        unique_mutation_type_count = mut_qryset.filter(mutation_type=mutation_type).count()
         if mutation_type == 'SNP':
-            observed_mutation_count_queryset.update(single_base_substitution=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(single_base_substitution=unique_mutation_type_count)
+            obs_mut_count_qryset.update(single_base_substitution=observed_mutation_type_count)
+            mut_count_qryset.update(single_base_substitution=unique_mutation_type_count)
         elif mutation_type == 'SUB':
-            observed_mutation_count_queryset.update(multiple_base_substitution=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(multiple_base_substitution=unique_mutation_type_count)
+            obs_mut_count_qryset.update(multiple_base_substitution=observed_mutation_type_count)
+            mut_count_qryset.update(multiple_base_substitution=unique_mutation_type_count)
         elif mutation_type == 'DEL':
-            observed_mutation_count_queryset.update(deletion=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(deletion=unique_mutation_type_count)
+            obs_mut_count_qryset.update(deletion=observed_mutation_type_count)
+            mut_count_qryset.update(deletion=unique_mutation_type_count)
         elif mutation_type == 'INS':
-            observed_mutation_count_queryset.update(insertion=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(insertion=unique_mutation_type_count)
+            obs_mut_count_qryset.update(insertion=observed_mutation_type_count)
+            mut_count_qryset.update(insertion=unique_mutation_type_count)
         elif mutation_type == 'MOB':
-            observed_mutation_count_queryset.update(mobile_element_insertion=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(mobile_element_insertion=unique_mutation_type_count)
+            obs_mut_count_qryset.update(mobile_element_insertion=observed_mutation_type_count)
+            mut_count_qryset.update(mobile_element_insertion=unique_mutation_type_count)
         elif mutation_type == 'DUP':
-            observed_mutation_count_queryset.update(duplication=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(duplication=unique_mutation_type_count)
+            obs_mut_count_qryset.update(duplication=observed_mutation_type_count)
+            mut_count_qryset.update(duplication=unique_mutation_type_count)
         elif mutation_type == 'AMP':
-            observed_mutation_count_queryset.update(amplification=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(amplification=unique_mutation_type_count)
+            obs_mut_count_qryset.update(amplification=observed_mutation_type_count)
+            mut_count_qryset.update(amplification=unique_mutation_type_count)
         elif mutation_type == 'CON':
-            observed_mutation_count_queryset.update(gene_conversion=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(gene_conversion=unique_mutation_type_count)
+            obs_mut_count_qryset.update(gene_conversion=observed_mutation_type_count)
+            mut_count_qryset.update(gene_conversion=unique_mutation_type_count)
         elif mutation_type == 'INV':
-            observed_mutation_count_queryset.update(inversion=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(inversion=unique_mutation_type_count)
+            obs_mut_count_qryset.update(inversion=observed_mutation_type_count)
+            mut_count_qryset.update(inversion=unique_mutation_type_count)
 
     for functional_change_type in FUNCTIONAL_CHANGE_TYPE_LIST:
-        observed_mutation_type_count = observed_mutation_queryset.filter(mutation__protein_change__contains=functional_change_type).count()
-        unique_mutation_type_count = unique_mutation_queryset.filter(protein_change__contains=functional_change_type).count()
+        observed_mutation_type_count = obs_mut_qryset.filter(mutation__protein_change__contains=functional_change_type).count()
+        unique_mutation_type_count = mut_qryset.filter(protein_change__contains=functional_change_type).count()
         if functional_change_type == 'intergenic':
-            observed_mutation_count_queryset.update(intergenic=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(intergenic=unique_mutation_type_count)
+            obs_mut_count_qryset.update(intergenic=observed_mutation_type_count)
+            mut_count_qryset.update(intergenic=unique_mutation_type_count)
         elif functional_change_type == 'noncoding':
-            observed_mutation_count_queryset.update(noncoding=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(noncoding=unique_mutation_type_count)
+            obs_mut_count_qryset.update(noncoding=observed_mutation_type_count)
+            mut_count_qryset.update(noncoding=unique_mutation_type_count)
         elif functional_change_type == 'pseudogene':
-            observed_mutation_count_queryset.update(pseudogene=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(pseudogene=unique_mutation_type_count)
+            obs_mut_count_qryset.update(pseudogene=observed_mutation_type_count)
+            mut_count_qryset.update(pseudogene=unique_mutation_type_count)
         elif functional_change_type == 'snp_type_synonymous':
-            observed_mutation_count_queryset.update(synonymous=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(synonymous=unique_mutation_type_count)
+            obs_mut_count_qryset.update(synonymous=observed_mutation_type_count)
+            mut_count_qryset.update(synonymous=unique_mutation_type_count)
         elif functional_change_type == 'snp_type_nonsynonymous':
-            observed_mutation_count_queryset.update(nonsynonymous=observed_mutation_type_count)
-            unique_mutation_count_queryset.update(nonsynonymous=unique_mutation_type_count)
+            obs_mut_count_qryset.update(nonsynonymous=observed_mutation_type_count)
+            mut_count_qryset.update(nonsynonymous=unique_mutation_type_count)
