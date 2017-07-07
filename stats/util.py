@@ -7,7 +7,10 @@ from seq.models import UnassignedMissingCoverageEvidence
 from seq.views.common import MUTATION_TYPE_LIST, COLORS, DEFAULT_COLOR, FUNCTIONAL_CHANGE_TYPE_LIST
 
 
-def get_barchart_jsons(observed_mutation_queryset, barchart_item_count):
+MAX_HISTOGRAM_SIZE = 50
+
+
+def get_histogram_jsons(observed_mutation_queryset, barchart_item_count):
     gene_bar_chart_list = get_gene_bar_chart_list(observed_mutation_queryset)
     sequence_change_query = observed_mutation_queryset.values('mutation__gene', 'mutation__protein_change').annotate(
         the_count=Count('mutation__gene')).order_by('-the_count')

@@ -5,15 +5,17 @@ import aleinfo.settings as settings
 from seq.util import get_all_observed_mutations
 from seq.views import common
 from filter import util
-from stats.util import get_barchart_jsons,\
+from stats.util import get_histogram_jsons,\
     get_needle_plot_data,\
     get_mutation_type_count_dict, \
     get_observed_mutation_type_count_dict,\
     get_protein_change_type_count_dict,\
     get_observed_protein_change_type_count_dict,\
     get_ale_flask_isolate_count_list,\
-    get_reseq_experiment_info_list
-from common.util import get_reseq_queryset, get_reseq_ordered_dict, get_mut_queryset_from_obs_mut_queryset, \
+    get_reseq_experiment_info_list,\
+    MAX_HISTOGRAM_SIZE
+from common.util import get_reseq_queryset,\
+    get_reseq_ordered_dict, get_mut_queryset_from_obs_mut_queryset, \
     get_all_ale_experiments, get_recent_experiments
 from filter.util import filter_observed_mutations
 
@@ -45,7 +47,7 @@ def stats(request):
     ale_exp_name = common.get_ale_experiment_name(request)
 
     barchart_item_count = get_barchart_item_count(request)
-    genes_json, sequence_change_json = get_barchart_jsons(obs_mut_qryset, barchart_item_count)
+    genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
 
     needle_plot_data = get_needle_plot_data(obs_mut_qryset)
     context = {"protein_change_type_count_dict": protein_change_type_count_dict,
@@ -70,7 +72,8 @@ def stats(request):
                "ale_experiment_id": ale_experiment_id,
                "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
                "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(ale_experiment_id)}
+               "recent_experiments": get_recent_experiments(ale_experiment_id),
+               "max_histogram_size": MAX_HISTOGRAM_SIZE}
 
     return HttpResponse(template.render(context))
 
