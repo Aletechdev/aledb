@@ -1,16 +1,7 @@
-import re
 import ale.common
 import ale.models
 import seq.models
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
-
-from django.core.cache import cache
-
-from genes.util import get_gene_list
-
-from operator import itemgetter
-
-from collections import Counter
 
 
 __author__ = 'Patrick Phaneuf'
@@ -109,87 +100,3 @@ def get_wt_reseq_id(seq_experiment_ordered_dict):
             wt_id = key
 
     return wt_id
-
-
-def set_gene_bar_chart_colors(genes):
-    for gene in genes:
-        if gene['mutation__mutation_type'] in MUTATION_TYPE_LIST:
-            gene['color'] = COLORS[MUTATION_TYPE_LIST.index(gene['mutation__mutation_type'])]
-        else:
-            gene['color'] = DEFAULT_COLOR
-    return genes
-
-
-def set_sequence_change_bar_chart_colors(sequence_changes):
-    for seq_change in sequence_changes:
-        has_match = False
-        for protein in FUNCTIONAL_CHANGE_TYPE_LIST:
-            if protein in seq_change['mutation__protein_change']:
-                seq_change['color'] = COLORS[FUNCTIONAL_CHANGE_TYPE_LIST.index(protein)]
-                has_match = True
-                break
-        if has_match is False:
-            seq_change['color'] = DEFAULT_COLOR
-        seq_change['mutation__protein_change'] = re.compile(r'<[^>]+>').sub('', seq_change['mutation__protein_change'])
-    return sequence_changes
-
-
-def get_genes_to_show(request, genes, sequence_changes):
-    number_of_genes_to_show = 20
-
-    if 'number_of_top_genes' in request.GET:
-
-        number_of_genes = request.GET['number_of_top_genes']
-
-        if _is_query_empty(number_of_genes):
-            genes_to_show = list(genes[:number_of_genes_to_show])
-            sequence_changes_to_show = list(sequence_changes[:number_of_genes_to_show])
-
-        else:
-            number_of_genes_to_show = request.GET['number_of_top_genes']
-            genes_to_show = list(genes[:int(request.GET['number_of_top_genes'])])
-            sequence_changes_to_show = list(sequence_changes[:int(request.GET['number_of_top_genes'])])
-
-    else:
-        genes_to_show = list(genes[:20])
-        sequence_changes_to_show = list(sequence_changes[:20])
-
-    return genes_to_show, sequence_changes_to_show, number_of_genes_to_show
-
-
-def _is_query_empty(query):
-
-    is_query_empty = False
-
-    if not query:
-
-        is_query_empty = True
-
-    return is_query_empty
-
-
-def get_gene_bar_chart_list(observed_mutation_queryset, page):
-
-    gene_list = [[get_gene_list(gene['mutation__gene']), gene['mutation__mutation_type']] for
-                 gene in observed_mutation_queryset.values('mutation__gene', 'mutation__mutation_type')]
-
-    mutation_type_gene_dict = {}
-
-    for pair in gene_list:
-        genes = set(pair[0])
-        try:
-            mutation_type_gene_dict[pair[1]] += [genes]
-        except KeyError:
-            mutation_type_gene_dict[pair[1]] = [genes]
-
-    final_list = []
-
-    for key, value in mutation_type_gene_dict.items():
-        flattened_list = sorted([item for sublist in value for item in sublist], reverse=True)
-        counted_list = Counter(flattened_list)
-        for k, v in counted_list.items():
-            new_dict = {'mutation__gene': k, 'the_count': v, 'mutation__mutation_type': key}
-            final_list.append(new_dict)
-    final_sorted_list = sorted(final_list, key=itemgetter('the_count'), reverse=True)
-
-    return final_sorted_list

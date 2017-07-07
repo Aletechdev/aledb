@@ -1,6 +1,6 @@
 from django.test import TestCase
 from dashboard.util import rebuild_sample_counts
-from dashboard.models import SampleCounts
+from dashboard.models import SampleCounts, BarCharts
 from ale.models import AleExperiment, Instrument, AleId, Flask, Media, Isolate, FreezerBox
 
 
@@ -41,3 +41,8 @@ class TestDashboard(TestCase):
         rebuild_sample_counts()
         expected_count = 2
         self.assertEqual(SampleCounts.objects.all()[0].isolate_count, expected_count)
+
+    def test_bar_charts(self):
+        gene_bar_chart_dict = [{"rpo": 2}, {"crr": 5}]
+        BarCharts.objects.create(mut_gene_json=gene_bar_chart_dict)
+        print(BarCharts.objects.all()[0].mut_gene_json)
