@@ -8,7 +8,7 @@ from django.db.models import Q
 from stats.util import get_histogram_jsons, MAX_HISTOGRAM_SIZE
 
 
-def rebuild_dashboard_counts():
+def rebuild_dashboard_data():
     rebuild_mutation_counts()
     rebuild_sample_counts()
     rebuild_mut_histogram_data()
