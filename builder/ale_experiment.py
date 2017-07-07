@@ -12,7 +12,7 @@ from builder.gdparse.gdparse import gdparse
 from common.util import clear_dashboard_cache
 import metadata.parser
 from dashboard.timeline_util import create_event
-from dashboard.util import rebuild_dashboard_counts
+from dashboard.util import rebuild_dashboard_data
 
 
 WILD_TYPE_ALE_NUMBER = 0
@@ -65,7 +65,7 @@ def delete_ale_experiment(ale_experiment_primary_key):
     message = "Experiment %s was deleted" % ale_experiment_to_delete.name
     ale_experiment_to_delete.delete()
     _delete_all_orphaned_mutations()
-    rebuild_dashboard_counts()
+    rebuild_dashboard_data()
     create_event(title="Experiment Deleted",
                  message=message,
                  icon='<i class="fa fa-times" aria-hidden="true"></i>',
@@ -130,7 +130,7 @@ def insert_starting_strain_flask(starting_strain_breseq_output_abs_path, ale_exp
 
     rebuild_enrichment_mutations(experiment_orm.ale_id)
     rebuild_fixated_mutations(experiment_orm.ale_id)
-    rebuild_dashboard_counts()
+    rebuild_dashboard_data()
 
 
 def rebuild_all_enrichment_mutations():
@@ -287,7 +287,7 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     rebuild_enrichment_mutations(experiment.ale_id)
     rebuild_fixated_mutations(experiment.ale_id)
-    rebuild_dashboard_counts()
+    rebuild_dashboard_data()
 
 
 def rebuild_fixated_mutations(ale_experiment_id):
