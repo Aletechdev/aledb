@@ -1,4 +1,5 @@
 from django.db import models
+from django_mysql.models import JSONField, Model
 
 
 class ObservedMutationCounts(models.Model):
@@ -49,3 +50,8 @@ class SampleCounts(models.Model):
     ale_count = models.IntegerField(default=0)
     isolate_count = models.IntegerField(default=0)
     flask_count = models.IntegerField(default=0)
+
+def bar_chart_json_default(): return {"":""}
+class BarCharts(Model):
+    mut_gene_json = JSONField(default=bar_chart_json_default)
+    mut_json = JSONField(default=bar_chart_json_default)
