@@ -281,6 +281,7 @@
                 <hr>
                 <form action="" method="get">
                     <input type="hidden"
+                           name="download_experiments"
                            value="{{ download_experiments }}">
                     <input type="hidden"
                            name="ale_experiment_id"
@@ -366,7 +367,7 @@
             <div class="col-lg-6">
                 <form action="/compare" method="get">
                     <div class="input-group">
-                        <input type="submit" class="btn btn-default" id="download" name="download" value="Compare">
+                        <input type="submit" class="btn btn-default" id="download">
                         <input type="hidden" id="download_experiments" name="download_experiments" value="">
                     </div>
                 </form>
