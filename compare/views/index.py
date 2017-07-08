@@ -36,14 +36,14 @@ def handle_compare_report(request, ale_experiment_names):
 
     # Else it is a valid request
     if ale_experiment_names == 'All':
-        ale_experiment_list = [ale_exp.ale_id for ale_exp in AleExperiment.objects.all()]
+        ale_exp_id_list = [ale_exp.ale_id for ale_exp in AleExperiment.objects.all()]
     else:
         experiment_name_list = ale_experiment_names.split(',')
-        ale_experiment_list = [AleExperiment.objects.get(name=ale_exp_name).ale_id for ale_exp_name in
+        ale_exp_id_list = [AleExperiment.objects.get(name=ale_exp_name).ale_id for ale_exp_name in
                                experiment_name_list]
 
     # TODO: the below is very similar to stats.views.stats
-    ordered_reseq_dict, obs_mut_qryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list)
+    ordered_reseq_dict, obs_mut_qryset = get_ordered_reseq_dict_and_queryset(ale_exp_id_list)
     needle_plot_data = get_needle_plot_data(obs_mut_qryset)
     experiments_info_list = get_reseq_experiment_info_list(ordered_reseq_dict.values())
     mutation_query_set = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
@@ -59,7 +59,7 @@ def handle_compare_report(request, ale_experiment_names):
 
     context = {"experiments": all_ale_exp_qryset,
                "has_comparison": True,
-               "ale_experiment_id": ale_experiment_list,
+               "ale_experiment_id": ale_exp_id_list,
                "header": header,
                "genes": mark_safe(genes_json),
                "sequence_changes": mark_safe(sequence_change_json),
@@ -76,6 +76,7 @@ def handle_compare_report(request, ale_experiment_names):
                "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
                "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
                "recent_experiments": get_recent_experiments(),
+               "download_experiments": ale_experiment_names,
                "max_histogram_size": MAX_HISTOGRAM_SIZE}
 
     template = loader.get_template(COMPARE_TEMPLATE)
