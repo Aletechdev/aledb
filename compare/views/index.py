@@ -28,7 +28,7 @@ def compare(request):
     if not ale_exp_names:
         return handle_initial_compare_form(request)
     else:
-        handle_compare_report(request, ale_exp_names)
+        return handle_compare_report(request, ale_exp_names)
 
 
 def handle_compare_report(request, ale_experiment_names):
