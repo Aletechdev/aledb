@@ -7,18 +7,22 @@
         .huge {
             font-size: 28px;
         }
+
         .panel-magenta {
             background-color: #b7337a;
             color: white;
         }
+
         .panel-purple {
             background-color: #7033b7;
             color: white;
         }
+
         .panel-orange {
             background-color: #b77033;
             color: white;
         }
+
         .app {
             height: 100px;
         }
@@ -28,7 +32,7 @@
 {% block content %}
     {% if has_comparison %}
         <div class="row">
-            <a href="/compare/metadata?ale_experiment_id={{ ale_experiment_id}}">
+            <a href="/compare/metadata?ale_experiment_id={{ ale_experiment_id }}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-primary">
                         <div class="panel-heading app">
@@ -42,7 +46,7 @@
                     </div>
                 </div>
             </a>
-            <a href="/compare/mutations?ale_experiment_id={{ ale_experiment_id}}">
+            <a href="/compare/mutations?ale_experiment_id={{ ale_experiment_id }}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-green">
                         <div class="panel-heading app">
@@ -56,7 +60,7 @@
                     </div>
                 </div>
             </a>
-            <a href="/compare/enrichment?ale_experiment_id={{ ale_experiment_id}}">
+            <a href="/compare/enrichment?ale_experiment_id={{ ale_experiment_id }}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-yellow">
                         <div class="panel-heading app">
@@ -70,7 +74,7 @@
                     </div>
                 </div>
             </a>
-            <a href="/compare/fixation?ale_experiment_id={{ ale_experiment_id}}">
+            <a href="/compare/fixation?ale_experiment_id={{ ale_experiment_id }}">
                 <div class="col-lg-3 col-md-6">
                     <div class="panel panel-red">
                         <div class="panel-heading app">
@@ -101,11 +105,11 @@
                         </thead>
                         <tbody>
                         {% for ale_flask_isolate_count_tuple in ale_flask_isolate_count_list %}
-                        <tr>
-                            <td>{{ ale_flask_isolate_count_tuple.0 }}</td>
-                            <td>{{ ale_flask_isolate_count_tuple.1 }}</td>
-                            <td>{{ ale_flask_isolate_count_tuple.2 }}</td>
-                        </tr>
+                            <tr>
+                                <td>{{ ale_flask_isolate_count_tuple.0 }}</td>
+                                <td>{{ ale_flask_isolate_count_tuple.1 }}</td>
+                                <td>{{ ale_flask_isolate_count_tuple.2 }}</td>
+                            </tr>
                         {% endfor %}
                         </tbody>
                     </table>
@@ -174,50 +178,50 @@
                     </table>
                 </div>
             </div>
-        <div class="col-sm-6 col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">ALE Experiment Functional Change Stats</h3>
+            <div class="col-sm-6 col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">ALE Experiment Functional Change Stats</h3>
+                    </div>
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Functional Change Type</th>
+                            <th>Unique</th>
+                            <th>Observed</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>Intergenic</td>
+                            <td>{{ protein_change_type_count_dict.intergenic }}</td>
+                            <td>{{ observed_protein_change_type_count_dict.intergenic }}</td>
+                        </tr>
+                        <tr>
+                            <td>Noncoding</td>
+                            <td>{{ protein_change_type_count_dict.noncoding }}</td>
+                            <td>{{ observed_protein_change_type_count_dict.noncoding }}</td>
+                        </tr>
+                        <tr>
+                            <td>Pseudogene</td>
+                            <td>{{ protein_change_type_count_dict.pseudogene }}</td>
+                            <td>{{ observed_protein_change_type_count_dict.pseudogene }}</td>
+                        </tr>
+                        <tr>
+                            <td>Synonymous</td>
+                            <td>{{ protein_change_type_count_dict.snp_type_synonymous }}</td>
+                            <td>{{ observed_protein_change_type_count_dict.snp_type_synonymous }}</td>
+                        </tr>
+                        <tr>
+                            <td>Nonsynonymous</td>
+                            <td>{{ protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
+                            <td>{{ observed_protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Functional Change Type</th>
-                        <th>Unique</th>
-                        <th>Observed</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>Intergenic</td>
-                        <td>{{ protein_change_type_count_dict.intergenic }}</td>
-                        <td>{{ observed_protein_change_type_count_dict.intergenic }}</td>
-                    </tr>
-                    <tr>
-                        <td>Noncoding</td>
-                        <td>{{ protein_change_type_count_dict.noncoding }}</td>
-                        <td>{{ observed_protein_change_type_count_dict.noncoding }}</td>
-                    </tr>
-                    <tr>
-                        <td>Pseudogene</td>
-                        <td>{{ protein_change_type_count_dict.pseudogene }}</td>
-                        <td>{{ observed_protein_change_type_count_dict.pseudogene }}</td>
-                    </tr>
-                    <tr>
-                        <td>Synonymous</td>
-                        <td>{{ protein_change_type_count_dict.snp_type_synonymous }}</td>
-                        <td>{{ observed_protein_change_type_count_dict.snp_type_synonymous }}</td>
-                    </tr>
-                    <tr>
-                        <td>Nonsynonymous</td>
-                        <td>{{ protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
-                        <td>{{ observed_protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
-                    </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
-    </div>
         <div class="row">
             <div class="col-lg-12">
                 <div class="panel panel-default">
@@ -236,22 +240,23 @@
             <div class="col-lg-12">
                 <table id="runs" class="table">
                     <thead>
-                        <tr>
-                            <th>ALE, Flask, Isolate</th>
-                            <th>Predicted Mutations</th>
-                            <th>Unassigned Missing Coverage Evidence</th>
-                            <th>Mean Coverage</th>
-                            <th>Total Reads</th>
-                            <th>Percent Mapped</th>
-                            <th>Mapped Reads</th>
-                            <th>Average Read Length</th>
+                    <tr>
+                        <th>ALE, Flask, Isolate</th>
+                        <th>Predicted Mutations</th>
+                        <th>Unassigned Missing Coverage Evidence</th>
+                        <th>Mean Coverage</th>
+                        <th>Total Reads</th>
+                        <th>Percent Mapped</th>
+                        <th>Mapped Reads</th>
+                        <th>Average Read Length</th>
 
-                        </tr>
+                    </tr>
                     </thead>
                     <tbody>
                     {% for experiment_info_tuple in experiments_info_list %}
                         <tr class="experiment_stats">
                             <td class="sample_name"><a href="
+
                                     {{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
                             </td>
                             <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
@@ -272,14 +277,23 @@
         <hr>
         <div class="row">
             <div class="col-lg-12">
-                {% include 'muts_needle_plot.html' %}
+                {% include 'muts_needle_plot.html' %} {# histograms use d3js import from this implementation #}
                 <hr>
-                <form action="/ale_analytics/stats" method="get">
-                    <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id }}">
-                    <input type="number" name="number_of_top_genes" min="1" max={{ max_histogram_size }} value="{{ number_of_genes_to_show }}"> Top Genes
-                    <input type="submit" value="Show"><br>
+                <form action="" method="get">
+                    <input type="hidden"
+                           name="ale_experiment_id"
+                           value="{{ ale_experiment_id }}">
+                    <input type="number"
+                           name="number_of_top_genes"
+                           min="1"
+                           max="{{ max_histogram_size }}"
+                           value="{{ number_of_genes_to_show }}">
+                    Entries to show
+                    <input type="submit"
+                           class="btn btn-default"
+                           value="Show"><br>
                 </form>
-                        <br>
+                <br>
                 <div class="chart"></div>
             </div>
         </div>
@@ -288,29 +302,29 @@
                 <table>
                     <tr>
                         <td>
-                        <script>
-                            var gene_data = {{ genes }};
-                            var color_set = {{ gene_color_set }};
-                            var mutation_types = {{ mutation_types }};
-                            var extra_padding = 0;
-                            function _get_label(datum) {
-                                return datum.mutation__gene;
-                            }
-                            {% include 'bar_chart.js' %}
-                        </script>
-                    </td>
-                    <td>
-                        <script>
-                            var gene_data = {{ sequence_changes }};
-                            var color_set = {{ seq_color_set }};
-                            var mutation_types = {{ protein_types }};
-                            var extra_padding = 100;
-                            function _get_label(datum) {
-                                return datum.mutation__gene + " " + datum.mutation__protein_change;
-                            }
-                            {% include 'bar_chart.js' %}
-                        </script>
-                    </td>
+                            <script>
+                                var gene_data = {{ genes }};
+                                var color_set = {{ gene_color_set }};
+                                var mutation_types = {{ mutation_types }};
+                                var extra_padding = 0;
+                                function _get_label(datum) {
+                                    return datum.mutation__gene;
+                                }
+                                {% include 'bar_chart.js' %}
+                            </script>
+                        </td>
+                        <td>
+                            <script>
+                                var gene_data = {{ sequence_changes }};
+                                var color_set = {{ seq_color_set }};
+                                var mutation_types = {{ protein_types }};
+                                var extra_padding = 100;
+                                function _get_label(datum) {
+                                    return datum.mutation__gene + " " + datum.mutation__protein_change;
+                                }
+                                {% include 'bar_chart.js' %}
+                            </script>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -320,7 +334,8 @@
             <div class="col-lg-4">
                 <div class="btn-group">
                     <button type="button" class="btn btn-default" id="selector_button">Select Experiment</button>
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
                         <span class="caret"></span>
                         <span class="sr-only">Toggle Dropdown</span>
                     </button>

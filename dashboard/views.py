@@ -6,11 +6,13 @@ from common.util import get_all_ale_experiments, get_recent_experiments
 from ale.models import AleExperiment, AleId, Isolate
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from dashboard.timeline_util import get_timeline
+from stats.views import get_barchart_item_count
+from dashboard.models import BarCharts
+from stats.util import MAX_HISTOGRAM_SIZE
+
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
-
 DASHBOARD_TEMPLATE = "dashboard.html"
-
 __author__ = 'pphaneuf'
 
 
@@ -24,26 +26,25 @@ def dashboard(request):
                                                              unique_mutation_count_queryset)
     functional_change_type_count_dict = _get_functional_change_type_count_dict(observed_mutation_count_queryset,
                                                                                unique_mutation_count_queryset)
-    # TODO: uncomment to re-enable the mutation histograms on the dashboard.
-    # gene_bar_chart_dict = common.get_gene_bar_chart_dict(observed_mutation_queryset, 'dashboard')
-    # sequence_changes = observed_mutation_queryset.values('mutation__gene', 'mutation__protein_change')\
-    #     .annotate(the_count=Count('mutation__gene')).order_by('-the_count')
-    # genes = common.set_gene_bar_chart_colors(gene_bar_chart_dict)
-    # sequence_changes = common.set_sequence_change_bar_chart_colors(sequence_changes)
-    # genes_to_show, sequence_changes_to_show, number_of_genes_to_show = common.get_genes_to_show(request, genes, sequence_changes)
+    barchart_item_count = get_barchart_item_count(request)
+    histogram_data = BarCharts.objects.all()[0]
+
+    gene_histogram_data = histogram_data.mut_gene_json[:barchart_item_count]
+    gene_mut_histogram_data = histogram_data.mut_json[:barchart_item_count]
 
     context = {"functional_change_type_count_dict": functional_change_type_count_dict,
                "count_dict": general_count_dict,
                "mutation_type_count_dict": mutation_type_count_dict,
-               #"genes": mark_safe(genes_to_show),
-               #"sequence_changes": mark_safe(sequence_changes_to_show),
+               "genes": mark_safe(gene_histogram_data),
+               "sequence_changes": mark_safe(gene_mut_histogram_data),
                "gene_color_set": mark_safe(common.GENE_COLORS),
                "seq_color_set": mark_safe(common.SEQ_COLORS),
                "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
                "protein_types": mark_safe(common.FUNCTIONAL_CHANGE_TYPE_LIST),
-               #"number_of_genes_to_show": number_of_genes_to_show,
+               "number_of_genes_to_show": barchart_item_count,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(),
+               "max_histogram_size": MAX_HISTOGRAM_SIZE,
                "timeline": get_timeline()}
 
     template = loader.get_template(DASHBOARD_TEMPLATE)

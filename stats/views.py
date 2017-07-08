@@ -21,8 +21,7 @@ from filter.util import filter_observed_mutations
 
 
 __author__ = 'pphaneuf'
-
-STATS_TEMPLATE = "stats/index.html"
+STATS_TEMPLATE = "stats.html"
 
 
 # TODO: used by multiple views. Also implemented within ale_exp_filter.py; implement in one location.
