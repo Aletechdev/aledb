@@ -277,8 +277,11 @@
         <hr>
         <div class="row">
             <div class="col-lg-12">
+                <h2>Mutation Needle Plot</h2>
+                <div><i>Note: Only point mutations are shown on the mutation needle plot.</i></div>
                 {% include 'muts_needle_plot.html' %} {# histograms use d3js import from this implementation #}
                 <hr>
+                <h2>Mutation Histograms</h2>
                 <form action="" method="get">
                     <input type="hidden"
                            name="download_experiments"
