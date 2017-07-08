@@ -24,17 +24,21 @@ COMPARE_TEMPLATE = 'compare.html'
 
 
 def compare(request):
-    all_experiments = get_all_ale_experiments()
-    experiment_names = request.GET.get('download_experiments', None)
-    if not experiment_names:
-        hidden_columns = check_hidden_columns_and_filters(request, None)
-        return handle_get_response(all_experiments, hidden_columns)
+    ale_exp_names = request.GET.get('download_experiments', None)
+    if not ale_exp_names:
+        return handle_initial_compare_form(request)
+    else:
+        handle_compare_report(request, ale_exp_names)
+
+
+def handle_compare_report(request, ale_experiment_names):
+    all_ale_exp_qryset = get_all_ale_experiments()
 
     # Else it is a valid request
-    if experiment_names == 'All':
+    if ale_experiment_names == 'All':
         ale_experiment_list = [ale_exp.ale_id for ale_exp in AleExperiment.objects.all()]
     else:
-        experiment_name_list = experiment_names.split(',')
+        experiment_name_list = ale_experiment_names.split(',')
         ale_experiment_list = [AleExperiment.objects.get(name=ale_exp_name).ale_id for ale_exp_name in
                                experiment_name_list]
 
@@ -48,12 +52,12 @@ def compare(request):
     protein_change_type_count_dict = get_protein_change_type_count_dict(mutation_query_set)
     observed_protein_change_type_count_dict = get_observed_protein_change_type_count_dict(obs_mut_qryset)
     ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(ordered_reseq_dict.values())
-    header = "Comparison of %s" % experiment_names.replace(",", ", ")
+    header = "Comparison of %s" % ale_experiment_names.replace(",", ", ")
 
     barchart_item_count = get_barchart_item_count(request)
     genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
 
-    context = {"experiments": all_experiments,
+    context = {"experiments": all_ale_exp_qryset,
                "has_comparison": True,
                "ale_experiment_id": ale_experiment_list,
                "header": header,
@@ -79,15 +83,14 @@ def compare(request):
     return HttpResponse(template.render(context))
 
 
-def handle_get_response(all_experiments, hidden_columns):
-
-    context = {"experiments": all_experiments,
+def handle_initial_compare_form(request):
+    all_ale_exp_qryset = get_all_ale_experiments()
+    hidden_columns = check_hidden_columns_and_filters(request, None)
+    context = {"experiments": all_ale_exp_qryset,
                "has_comparison": False,
                "hidden_columns": hidden_columns,
                "recent_experiments": get_recent_experiments(),
                "title": "Compare",
                "header": "Compare"}
-
     template = loader.get_template(COMPARE_TEMPLATE)
-
     return HttpResponse(template.render(context))
