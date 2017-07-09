@@ -116,8 +116,6 @@ def _get_table_body(reseq_dict, request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
 
-    filter_settings = util.get_filter_settings(ale_experiment_id)
-
     enrichment_mutation_queryset = EnrichmentMutation.objects.filter(ale_experiment_id=ale_experiment_id)
 
     observed_mutations_queryset = _get_observed_enrichment_mutations(reseq_dict, enrichment_mutation_queryset)
@@ -125,8 +123,7 @@ def _get_table_body(reseq_dict, request):
     return mutation_table_builder.get_table_body(reseq_dict=reseq_dict,
                                                  observed_mutations_queryset=observed_mutations_queryset,
                                                  ale_experiment_id=ale_experiment_id,
-                                                 table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS,
-                                                 filter_settings=filter_settings)
+                                                 table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
 
 
 # TODO: refactor

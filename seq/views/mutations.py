@@ -12,6 +12,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json
 import common.constants
 
+
 __author__ = 'pphaneuf'
 
 
@@ -52,10 +53,8 @@ def mutation_table(request):
 
 
 def _get_table_body(reseq_dict, request):
-    observed_mutations_query_set = get_all_observed_mutations(list(reseq_dict.keys()))
+    obs_mut_qryset = get_all_observed_mutations(list(reseq_dict.keys()))
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-    filter_settings = filter.util.get_filter_settings(ale_experiment_id)
     return mutation_table_builder.get_table_body(reseq_dict,
-                                                 observed_mutations_query_set,
-                                                 ale_experiment_id,
-                                                 filter_settings)
+                                                 obs_mut_qryset,
+                                                 ale_experiment_id)

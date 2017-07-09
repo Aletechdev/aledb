@@ -121,32 +121,24 @@ def get_table_header(reseq_dict, table_type=None):
     return base_table_header + table_header_list
 
 
-def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset, filter_settings):
-
-    observed_mutations_queryset = filter_observed_mutations(observed_mutations_queryset, filter_settings)
-
-    mutation_queryset = get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset)
-
+def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset):
+    obs_mut_qryset = filter_observed_mutations(observed_mutations_queryset)
+    mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
     mutation_index_dict = dict(
-        (mutation_id, i) for i, mutation_id in enumerate(mutation_queryset.values_list("id", flat=True)))
-
+        (mutation_id, i) for i, mutation_id in enumerate(mut_qryset.values_list("id", flat=True)))
     experiment_url_dict = get_experiment_urls(reseq_dict)
-
     experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
 
     # Initialize all sample mutation table cells as empty.
-    table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mutation_queryset)
+    table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mut_qryset)
 
     # Populating table_entry_list
-    for observed_mutation in observed_mutations_queryset:
-
+    for observed_mutation in obs_mut_qryset:
         new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
-
         if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
             table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
                 experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
-
-    return mutation_queryset, table_entry_list, mutation_index_dict
+    return mut_qryset, table_entry_list, mutation_index_dict
 
 
 # TODO: Refactor. The observed mutations argument may
@@ -155,11 +147,12 @@ def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_qu
 def get_table_body(reseq_dict,
                    observed_mutations_queryset,
                    ale_experiment_id=None,
-                   filter_settings=None,
                    table_type=None):
 
-    mutation_queryset, table_entry_list, mutation_index_dict = get_mutation_table_queryset_and_entry_list(
-        reseq_dict, observed_mutations_queryset, filter_settings)
+    mutation_queryset,\
+    table_entry_list,\
+    mutation_index_dict = get_mutation_table_queryset_and_entry_list(
+        reseq_dict, observed_mutations_queryset)
 
     protein_changes = {}  # For calculating distances on the genes page only
 

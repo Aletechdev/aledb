@@ -4,7 +4,6 @@ from django.utils.safestring import mark_safe
 import seq.views.common
 from collections import OrderedDict
 from seq.views import mutation_table_builder
-from filter import util
 from seq.util import get_all_observed_mutations
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from common.util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments, \
@@ -14,6 +13,9 @@ import common.constants
 __author__ = 'Patrick Phaneuf'
 
 REQUEST_PRIMARY_RESEQ_ID = "primary_reseq_id"
+
+
+# TODO: remove extra 'm' in name of app 'commmonmuts'.
 
 
 # TODO: very similar to fixation mutations page workflow. Should consolidate somehow.
@@ -38,12 +40,9 @@ def common_mutations(request):
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    filter_settings = util.get_filter_settings(ale_experiment_id)
-
     table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
                                                        observed_mutation_queryset,
-                                                       int(ale_experiment_id),
-                                                       filter_settings)
+                                                       int(ale_experiment_id))
 
     hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
