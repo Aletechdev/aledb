@@ -1,5 +1,5 @@
 from filter.models import AleExperimentFilter, GlobalFilter
-from seq.models import Mutation
+from seq.models import Mutation, ObservedMutation
 from django.core.exceptions import ObjectDoesNotExist
 from ale.models import AleExperiment
 from genes.util import get_gene_list
@@ -19,28 +19,47 @@ DELETE_ROW_BOX = """<td><img src="/static/close-icon.gif" onclick="delete_row(%d
 TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td></tr>"
 
 
-def filter_observed_mutations(observed_mutation_queryset, filter_settings):
-    # Build a default filter setting if non is provided
+def filter_observed_mutations(observed_mutation_queryset, filter_settings=None):
     if filter_settings is None:
-        ignored_genes = None
-        ignored_mutations = None
-        starting_strain_mutations = []
-        min_cutoff = 0
-        max_cutoff = 100
+        return _filter_observed_mutations(observed_mutation_queryset)
     else:
-        ignored_genes = filter_settings.ignored_genes
-        ignored_mutations = filter_settings.ignored_mutations
-        starting_strain_mutations = filter_settings.starting_strain_mutations.split(',')
-        if starting_strain_mutations == ['']:
-            starting_strain_mutations = []
-        min_cutoff = filter_settings.min_cutoff
-        max_cutoff = filter_settings.max_cutoff
+        return _filter_observed_mutations_given_filter_settings(observed_mutation_queryset, filter_settings)
 
-    # Get ignored gene list from both experiments and
+
+def _filter_observed_mutations(observed_mutation_queryset):
+    # May have to deal with corner case that filter setttings is still None
+    # if filter_settings is None:
+    #     ignored_genes = None
+    #     ignored_mutations = None
+    #     starting_strain_mutations = []
+    #     min_cutoff = 0
+    #     max_cutoff = 100
+    ale_exp_qryset = AleExperiment.objects.filter(
+        ale_id__in=ObservedMutation.objects.all().values(
+            "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"))
+    output_obs_mut_qryset = ObservedMutation.objects.none()
+    for ale_exp in ale_exp_qryset:
+        ale_exp_filter_settings = AleExperimentFilter.objects.get(ale_experiment__ale_id=ale_exp.ale_id)
+        ale_exp_obs_mut_qryset = ObservedMutation.objects.all().filter(
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=ale_exp.ale_id)
+        ale_exp_obs_mut_qryset = _filter_observed_mutations_given_filter_settings(ale_exp_obs_mut_qryset,
+                                                                                  ale_exp_filter_settings)
+        output_obs_mut_qryset = output_obs_mut_qryset | ale_exp_obs_mut_qryset
+    return output_obs_mut_qryset
+
+def _filter_observed_mutations_given_filter_settings(observed_mutation_queryset, filter_settings):
+    ignored_genes = filter_settings.ignored_genes
+    ignored_mutations = filter_settings.ignored_mutations
+    starting_strain_mutations = filter_settings.starting_strain_mutations.split(',')
+    if starting_strain_mutations == ['']:
+        starting_strain_mutations = []
+    min_cutoff = filter_settings.min_cutoff
+    max_cutoff = filter_settings.max_cutoff
+
     ignored_genes = _append_global_filter_ignored_genes(ignored_genes)
-
     observed_mutation_queryset = _ignored_genes_filter(observed_mutation_queryset, ignored_genes)
-    observed_mutation_queryset = _ignored_muts_filter(observed_mutation_queryset, ignored_mutations, starting_strain_mutations)
+    observed_mutation_queryset = _ignored_muts_filter(observed_mutation_queryset, ignored_mutations,
+                                                      starting_strain_mutations)
     observed_mutation_queryset = _frequency_filter(observed_mutation_queryset, min_cutoff, max_cutoff)
 
     return observed_mutation_queryset
@@ -102,12 +121,6 @@ def _frequency_filter(observed_mutation_queryset, min_cutoff, max_cutoff):
 def get_filter_settings(ale_experiment_id):
     filter_settings, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id)
     return filter_settings
-
-
-def get_filter_settings_queryset_from_observed_mutations(observed_mutation_queryset):
-    ale_exp_qryset = AleExperiment.objects.filter(
-        ale_id__in=observed_mutation_queryset.values("sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"))
-    return AleExperimentFilter.objects.filter(ale_experiment__in=ale_exp_qryset)
 
 
 def clean_ignored_mutation_id_list(ignored_mutation_id_list, deleted_mutation_id=None):
