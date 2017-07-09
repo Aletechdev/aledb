@@ -13,25 +13,18 @@ class Instrument(models.Model):
 
 
 class AleExperiment(models.Model):
-
     ale_id = models.AutoField(primary_key=True)
-
     name = models.CharField(max_length=40)
-
     person = models.CharField(max_length=200)
-
     date = models.DateTimeField(auto_now_add=True)
-
     instrument = models.ForeignKey(Instrument)
-
     notes = models.TextField(**blank_field)
 
     def __unicode__(self):
-
             return "#%d-%s" % (self.ale_id, self.name)
 
-    class Meta:
 
+    class Meta:
         verbose_name_plural = "ALE Experiments"
 
 
@@ -109,39 +102,25 @@ class FreezerBox(models.Model):
 
 
 class Flask(models.Model):
-
     ale_id = models.ForeignKey(AleId)
-
     flask_number = models.IntegerField(**blank_field)
-
     media = models.ForeignKey(Media)
-
     comments = models.CharField(max_length=200, **blank_field)
 
     def __unicode__(self):
-
         if self.ale_id.description is not None:
-
             if self.ale_id.description.lower() == ('Not from ALE').lower():
-
                 return 'Not from ALE'
-
             else:
-
                 return "Flask#%d < %s" % (self.flask_number,
                                           self.ale_id)
-
         else:
-
             return "Flask#%d < %s" % (self.flask_number,
                                       self.ale_id)
 
     def ale_experiment(self):
-
         return self.ale_id.ale_experiment.ale_id
-
     class Meta:
-
         unique_together = (("ale_id",
                             "flask_number"),)
 
@@ -185,25 +164,16 @@ class Isolate(models.Model):
 
 
 class TechnicalReplicate(models.Model):
-
     tech_rep_number = models.IntegerField(default=1)
-
     isolate = models.ForeignKey(Isolate)
-
     tags = models.CharField(max_length=500, **blank_field)
-
     description = models.CharField(max_length=500, **blank_field)
 
 
 # TODO: what are these integers referring to. If ALE Experiment, model should be moved to ale.models and use foreign keys.
 class RecentExperiments(models.Model):
-
     first = models.IntegerField(null=True)
-
     second = models.IntegerField(null=True)
-
     third = models.IntegerField(null=True)
-
     fourth = models.IntegerField(null=True)
-
     fifth = models.IntegerField(null=True)
