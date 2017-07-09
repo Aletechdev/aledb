@@ -22,12 +22,12 @@ TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence
 def filter_observed_mutations(observed_mutation_queryset, filter_settings=None):
     if filter_settings is None:
         return _filter_observed_mutations(observed_mutation_queryset)
-    else:
+    else:  # Ideally, we don't use the else, though have it for backwards compatibility.
         return _filter_observed_mutations_given_filter_settings(observed_mutation_queryset, filter_settings)
 
 
 def _filter_observed_mutations(observed_mutation_queryset):
-    # May have to deal with corner case that filter setttings is still None
+    # May have to deal with corner case that filter settings is still None
     # if filter_settings is None:
     #     ignored_genes = None
     #     ignored_mutations = None
