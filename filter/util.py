@@ -20,7 +20,7 @@ TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence
 
 
 def filter_observed_mutations(observed_mutation_queryset, filter_settings):
-
+    # Build a default filter setting if non is provided
     if filter_settings is None:
         ignored_genes = None
         ignored_mutations = None
@@ -36,16 +36,17 @@ def filter_observed_mutations(observed_mutation_queryset, filter_settings):
         min_cutoff = filter_settings.min_cutoff
         max_cutoff = filter_settings.max_cutoff
 
-    ignored_genes = _get_complete_ignored_gene_list(ignored_genes)
+    # Get ignored gene list from both experiments and
+    ignored_genes = _append_global_filter_ignored_genes(ignored_genes)
 
-    observed_mutation_queryset = _filter_ignored_genes(observed_mutation_queryset, ignored_genes)
-    observed_mutation_queryset = _filter_ignored_mutations(observed_mutation_queryset, ignored_mutations, starting_strain_mutations)
+    observed_mutation_queryset = _ignored_genes_filter(observed_mutation_queryset, ignored_genes)
+    observed_mutation_queryset = _ignored_muts_filter(observed_mutation_queryset, ignored_mutations, starting_strain_mutations)
     observed_mutation_queryset = _frequency_filter(observed_mutation_queryset, min_cutoff, max_cutoff)
 
     return observed_mutation_queryset
 
 
-def _get_complete_ignored_gene_list(ignored_genes):
+def _append_global_filter_ignored_genes(ignored_genes):
     ignored_genes = _clean_ignored_genes_list(ignored_genes)
     global_filter = get_global_filter()
     global_ignored_genes = global_filter.ignored_genes.replace(' ', '').replace('\n', '').replace('\r', '').split(',')
@@ -62,7 +63,7 @@ def _get_complete_ignored_gene_list(ignored_genes):
     return ignored_genes
 
 
-def _filter_ignored_genes(observed_mutation_queryset, ignored_genes):
+def _ignored_genes_filter(observed_mutation_queryset, ignored_genes):
     if ignored_genes:
         if len(ignored_genes) > 0 and ignored_genes[0] is not '':
             ignored_mutation_id_list = []
@@ -75,7 +76,7 @@ def _filter_ignored_genes(observed_mutation_queryset, ignored_genes):
     return observed_mutation_queryset
 
 
-def _filter_ignored_mutations(observed_mutation_queryset, ignored_mutations, starting_strain_mutations):
+def _ignored_muts_filter(observed_mutation_queryset, ignored_mutations, starting_strain_mutations):
     global_filter = get_global_filter()
     global_ignored_mutations = global_filter.ignored_mutations
     global_ignored_mutations = clean_ignored_mutation_id_list(global_ignored_mutations)
@@ -101,6 +102,12 @@ def _frequency_filter(observed_mutation_queryset, min_cutoff, max_cutoff):
 def get_filter_settings(ale_experiment_id):
     filter_settings, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id)
     return filter_settings
+
+
+def get_filter_settings_queryset_from_observed_mutations(observed_mutation_queryset):
+    ale_exp_qryset = AleExperiment.objects.filter(
+        ale_id__in=observed_mutation_queryset.values("sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"))
+    return AleExperimentFilter.objects.filter(ale_experiment__in=ale_exp_qryset)
 
 
 def clean_ignored_mutation_id_list(ignored_mutation_id_list, deleted_mutation_id=None):
