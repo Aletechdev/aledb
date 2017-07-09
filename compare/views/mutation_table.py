@@ -1,24 +1,14 @@
 from django.template import loader
-
 from django.http import HttpResponse
-
 from django.utils.safestring import mark_safe
-
 from ale.models import AleExperiment
-
 from seq.views import mutation_table_builder, common
-
 from common.util import get_all_ale_experiments, get_recent_experiments, check_hidden_columns_and_filters
-
 from compare.views.common import get_ordered_reseq_dict_and_queryset, get_ales_from_ale_experiment_list
-
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE, TAGS
-
 import json
-
 from django.core.serializers.json import DjangoJSONEncoder
 
-# Create your views here.
 
 MUTATION_TABLE_TEMPLATE = 'base_table_template.html'
 
