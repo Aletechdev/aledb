@@ -1,6 +1,6 @@
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts, BarCharts
 from seq.models import ObservedMutation
-from filter.util import filter_obs_muts
+from filter.util import filter_observed_mutations
 from common.util import get_mut_queryset_from_obs_mut_queryset
 from seq.views.common import MUTATION_TYPE_LIST, FUNCTIONAL_CHANGE_TYPE_LIST
 from ale.models import AleId, Isolate, Flask
@@ -18,7 +18,7 @@ def rebuild_mut_histogram_data():
     if ObservedMutation.objects.all().count() == 0:
         ObservedMutation.objects.create()
     raw_obs_mut_qryset = ObservedMutation.objects.all()
-    obs_mut_qryset = filter_obs_muts(raw_obs_mut_qryset)
+    obs_mut_qryset = filter_observed_mutations(raw_obs_mut_qryset)
     genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, MAX_HISTOGRAM_SIZE)
     if BarCharts.objects.all().count() == 0:
         BarCharts.objects.create()
@@ -40,7 +40,7 @@ def rebuild_sample_counts():
 
 def rebuild_mutation_counts():
     raw_obs_mut_qryset = ObservedMutation.objects.all()
-    obs_mut_qryset = filter_obs_muts(raw_obs_mut_qryset)
+    obs_mut_qryset = filter_observed_mutations(raw_obs_mut_qryset)
     mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
 
     if ObservedMutationCounts.objects.all().count() == 0:

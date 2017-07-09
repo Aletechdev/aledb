@@ -204,6 +204,7 @@ def get_ignored_mutations(filter_form_model):
     return table_body, ignored_mutation_id_list
 
 
+# TODO: should no longer use this; rather use filter_observed_mutations()
 def filter_obs_muts(obs_mut_queryset, ale_experiment_list='all'):
     # Input of obs_mut_queryset
     # Get ALE exps (redundant since ALE experiments can be pulled from obs_mut_queryset quickly using ORM. This is done at the end of search.views._get_obs_muts).

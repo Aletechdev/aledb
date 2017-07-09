@@ -6,6 +6,7 @@ from seq.models import ResequencingExperiment, Mutation, ObservedMutation
 
 
 class TestDashboard(TestCase):
+
     def test_rebuild_sample_counts_filter_starting_strain_ale_id(self):
         ale_exp = AleExperiment.objects.create(instrument=Instrument.objects.create())
         AleId.objects.create(ale_experiment=ale_exp, ale_id=0)
