@@ -44,8 +44,6 @@ def fixating_mutations(request):
     table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
                                                            mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
-    filter_settings = util.get_filter_settings(ale_experiment_id)
-
     observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id,
                                                                                      reseq_ordered_dict,
                                                                                      is_ascending_freq_filter)
@@ -53,8 +51,7 @@ def fixating_mutations(request):
     table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
                                                        observed_mutations_queryset=observed_mutation_queryset,
                                                        ale_experiment_id=int(ale_experiment_id),
-                                                       table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS,
-                                                       filter_settings=filter_settings)
+                                                       table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
     hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 

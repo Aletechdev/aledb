@@ -66,7 +66,7 @@ def _get_rows_for_csv(exp_id):
     ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset([exp_id])
 
     mutation_queryset, table_entry_list, mutation_index_dict = get_mutation_table_queryset_and_entry_list(
-        ordered_reseq_dict, queryset, filter_settings=None)
+        ordered_reseq_dict, queryset)
 
     rows = [HTML_MUTATION_TABLE_HEADER[3:] + [ordered_reseq_dict[reseq].aleexp_ale_flask_isolate_str
                                               for reseq in ordered_reseq_dict]]
