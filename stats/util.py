@@ -10,15 +10,18 @@ from seq.views.common import MUTATION_TYPE_LIST, COLORS, DEFAULT_COLOR, FUNCTION
 MAX_HISTOGRAM_SIZE = 50
 
 
-def get_histogram_jsons(observed_mutation_queryset, barchart_item_count):
+def get_histogram_jsons(observed_mutation_queryset, histogram_item_count):
+    observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='')
+    observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='-')
+    observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='–, –')
     gene_bar_chart_list = get_gene_bar_chart_list(observed_mutation_queryset)
     sequence_change_query = observed_mutation_queryset.values('mutation__gene', 'mutation__protein_change').annotate(
         the_count=Count('mutation__gene')).order_by('-the_count')
     genes = set_gene_bar_chart_colors(gene_bar_chart_list)
     sequence_changes = set_sequence_change_bar_chart_colors(sequence_change_query)
 
-    genes_json = list(genes[:barchart_item_count])
-    sequence_change_json = list(sequence_changes[:barchart_item_count])
+    genes_json = list(genes[:histogram_item_count])
+    sequence_change_json = list(sequence_changes[:histogram_item_count])
 
     return genes_json, sequence_change_json
 
