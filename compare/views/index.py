@@ -17,7 +17,7 @@ from stats.util import get_histogram_jsons,\
     get_ale_flask_isolate_count_list,\
     get_reseq_experiment_info_list,\
     MAX_HISTOGRAM_SIZE
-from stats.views import get_barchart_item_count
+from stats.views import get_histogram_item_count
 
 
 COMPARE_TEMPLATE = 'compare.html'
@@ -54,7 +54,7 @@ def handle_compare_report(request, ale_experiment_names):
     ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(ordered_reseq_dict.values())
     header = "Comparison of %s" % ale_experiment_names.replace(",", ", ")
 
-    barchart_item_count = get_barchart_item_count(request)
+    barchart_item_count = get_histogram_item_count(request)
     genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
 
     context = {"experiments": all_ale_exp_qryset,

@@ -4,7 +4,6 @@ from django.utils.safestring import mark_safe
 import aleinfo.settings as settings
 from seq.util import get_all_observed_mutations
 from seq.views import common
-from filter import util
 from stats.util import get_histogram_jsons,\
     get_needle_plot_data,\
     get_mutation_type_count_dict, \
@@ -45,7 +44,7 @@ def stats(request):
     template = loader.get_template(STATS_TEMPLATE)
     ale_exp_name = common.get_ale_experiment_name(request)
 
-    barchart_item_count = get_barchart_item_count(request)
+    barchart_item_count = get_histogram_item_count(request)
     genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
 
     needle_plot_data = get_needle_plot_data(obs_mut_qryset)
@@ -77,7 +76,7 @@ def stats(request):
     return HttpResponse(template.render(context))
 
 
-def get_barchart_item_count(request):
+def get_histogram_item_count(request):
     barchart_item_count = 20
     if 'number_of_top_genes' in request.GET:
         barchart_item_count_str = request.GET['number_of_top_genes']
@@ -86,21 +85,8 @@ def get_barchart_item_count(request):
     return barchart_item_count
 
 
-# TODO: should be transferred to filter app and have a parameter to filter wt mutations.
 def _get_observed_mutation_queryset(request, ale_experiment_id):
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id)
     observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
-    observed_mutation_query_set = _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set)
-    return observed_mutation_query_set
-
-
-# TODO: Should move this function into the filter app
-def _exclude_ignored_genes_and_mutations(request, observed_mutation_query_set):
-    # TODO: only filter out mutations without genes for the barcharts. The
-    # mutations count tables above bar charts don't care if a mutation doesn't have a gene.
-    # observed_mutation_query_set = observed_mutation_query_set.exclude(mutation__gene='')
-    observed_mutation_query_set = observed_mutation_query_set.exclude()
-    ale_experiment_id = common.get_ale_experiment_id(request)
-    filter_settings = util.get_filter_settings(ale_experiment_id)
-    observed_mutation_query_set = filter_observed_mutations(observed_mutation_query_set, filter_settings)
+    observed_mutation_query_set = filter_observed_mutations(observed_mutation_query_set)
     return observed_mutation_query_set

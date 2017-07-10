@@ -6,7 +6,7 @@ from common.util import get_all_ale_experiments, get_recent_experiments
 from ale.models import AleExperiment, AleId, Isolate
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from dashboard.timeline_util import get_timeline
-from stats.views import get_barchart_item_count
+from stats.views import get_histogram_item_count
 from dashboard.models import BarCharts
 from stats.util import MAX_HISTOGRAM_SIZE
 
@@ -26,7 +26,7 @@ def dashboard(request):
                                                              unique_mutation_count_queryset)
     functional_change_type_count_dict = _get_functional_change_type_count_dict(observed_mutation_count_queryset,
                                                                                unique_mutation_count_queryset)
-    barchart_item_count = get_barchart_item_count(request)
+    barchart_item_count = get_histogram_item_count(request)
     histogram_data = BarCharts.objects.all()[0]
 
     gene_histogram_data = histogram_data.mut_gene_json[:barchart_item_count]
