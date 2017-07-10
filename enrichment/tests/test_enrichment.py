@@ -239,7 +239,8 @@ class TestEnrichment(TestCase):
         filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp, ignored_genes="geneA")
 
         observed_mutation_queryset = ObservedMutation.objects.all()
-        enrichment_mutation_list = enrichment.get_enrichment_mutation_list(reseq_obs_mut_queryset_list=[observed_mutation_queryset], filter_settings=filter_settings)
+        enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertTrue(len(enrichment_mutation_list) == 2)
 
@@ -279,8 +280,7 @@ class TestEnrichment(TestCase):
 
         observed_mutation_queryset = ObservedMutation.objects.all()
         enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
-            reseq_obs_mut_queryset_list=[observed_mutation_queryset],
-            filter_settings=filter_settings)
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertEquals(len(enrichment_mutation_list), 0)
 
@@ -319,7 +319,8 @@ class TestEnrichment(TestCase):
                                                              starting_strain_mutations="1")
 
         observed_mutation_queryset = ObservedMutation.objects.all()
-        enrichment_mutation_list = enrichment.get_enrichment_mutation_list(reseq_obs_mut_queryset_list=[observed_mutation_queryset], filter_settings=filter_settings)
+        enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertTrue(len(enrichment_mutation_list) == 2)
 
@@ -377,7 +378,8 @@ class TestEnrichment(TestCase):
                                                              starting_strain_mutations="2,3")
 
         observed_mutation_queryset = ObservedMutation.objects.all()
-        enrichment_mutation_list = enrichment.get_enrichment_mutation_list(reseq_obs_mut_queryset_list=[observed_mutation_queryset], filter_settings=filter_settings)
+        enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertTrue(len(enrichment_mutation_list) == 2)
 
@@ -405,8 +407,7 @@ class TestEnrichment(TestCase):
         filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp, ignored_genes="geneB")
         observed_mutation_queryset = ObservedMutation.objects.all()
         enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
-            reseq_obs_mut_queryset_list=[observed_mutation_queryset],
-            filter_settings=filter_settings)
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertTrue(len(enrichment_mutation_list) == 2)
         for enrichment_mutation in enrichment_mutation_list:
@@ -454,8 +455,7 @@ class TestEnrichment(TestCase):
 
         observed_mutation_queryset = ObservedMutation.objects.all()
         enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
-            reseq_obs_mut_queryset_list=[observed_mutation_queryset],
-            filter_settings=filter_settings)
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertTrue(len(enrichment_mutation_list) == 2)
         for enrichment_mutation in enrichment_mutation_list:
@@ -512,8 +512,7 @@ class TestEnrichment(TestCase):
 
         observed_mutation_queryset = ObservedMutation.objects.all()
         enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
-            reseq_obs_mut_queryset_list=[observed_mutation_queryset],
-            filter_settings=filter_settings)
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertTrue(len(enrichment_mutation_list) == 2)
         for enrichment_mutation in enrichment_mutation_list:
@@ -576,8 +575,7 @@ class TestEnrichment(TestCase):
 
         observed_mutation_queryset = ObservedMutation.objects.all()
         enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
-            reseq_obs_mut_queryset_list=[observed_mutation_queryset],
-            filter_settings=filter_settings)
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertTrue(len(enrichment_mutation_list) == 2)
         for enrichment_mutation in enrichment_mutation_list:
@@ -622,8 +620,7 @@ class TestEnrichment(TestCase):
         filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp,
                                                              ignored_genes="geneA, geneB")
         enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
-            reseq_obs_mut_queryset_list=[observed_mutation_queryset],
-            filter_settings=filter_settings)
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertTrue(len(enrichment_mutation_list) == 2)
         for enrichment_mutation in enrichment_mutation_list:
@@ -659,8 +656,7 @@ class TestEnrichment(TestCase):
         filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp,
                                                              ignored_genes="geneA, geneB")
         enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
-            reseq_obs_mut_queryset_list=[observed_mutation_queryset],
-            filter_settings=filter_settings)
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertEquals(len(enrichment_mutation_list), 2)
         for enrichment_mutation in enrichment_mutation_list:
@@ -704,8 +700,7 @@ class TestEnrichment(TestCase):
         filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp,
                                                              min_cutoff=20)
         enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
-            reseq_obs_mut_queryset_list=[observed_mutation_queryset],
-            filter_settings=filter_settings)
+            reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 
         self.assertTrue(len(enrichment_mutation_list) == 2)
         for enrichment_mutation in enrichment_mutation_list:
