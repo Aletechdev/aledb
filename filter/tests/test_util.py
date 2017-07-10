@@ -17,7 +17,7 @@ from filter.util import filter_observed_mutations
 __author__ = 'Patrick Phaneuf'
 
 
-class TestEnrichment(TestCase):
+class TestFilter(TestCase):
 
     def test_mutation_filter_one_gene_mutation_and_filter(self):
         reseq = ResequencingExperiment.objects.create()
@@ -240,4 +240,54 @@ class TestEnrichment(TestCase):
 
         self.assertEqual(gene_mut_count_dict["geneA"], 1)
         self.assertEqual(gene_mut_count_dict["geneB"], 0)
+        self.assertEqual(gene_mut_count_dict["geneC"], 1)
+
+    def test_filter_observed_mutations_default_filter(self):
+        ale_exp = AleExperiment.objects.create(ale_id=1,
+                                                name="exp1",
+                                                instrument=Instrument.objects.create())
+
+        ale = AleId.objects.create(ale_id=1, ale_experiment=ale_exp)
+        media = Media.objects.create()
+        flask = Flask.objects.create(ale_id=ale, media=media)
+        freezer_box = FreezerBox.objects.create()
+        isolate = Isolate.objects.create(flask=flask,
+                                          isolate_number=1,
+                                          is_population=False,
+                                          freezer_box=freezer_box)
+        tech_rep = TechnicalReplicate.objects.create(isolate=isolate)
+        reseq = ResequencingExperiment.objects.create(tech_rep=tech_rep)
+
+        mut1 = Mutation.objects.create(mutation_type="SNP",
+                                       position=1,
+                                       sequence_change="zxcv",
+                                       gene="geneA")
+        mut2 = Mutation.objects.create(mutation_type="SNP",
+                                       position=1,
+                                       sequence_change="zxcv",
+                                       gene="geneB")
+        mut3 = Mutation.objects.create(mutation_type="SNP",
+                                       position=1,
+                                       sequence_change="zxcv",
+                                       gene="geneC")
+
+        ObservedMutation.objects.create(sequencing_experiment=reseq,
+                                        mutation=mut1,
+                                        frequency=1)
+        ObservedMutation.objects.create(sequencing_experiment=reseq,
+                                        mutation=mut2,
+                                        frequency=1)
+        ObservedMutation.objects.create(sequencing_experiment=reseq,
+                                        mutation=mut3,
+                                        frequency=1)
+
+        obs_mut_qryset = ObservedMutation.objects.all()
+        obs_mut_qryset = filter_observed_mutations(obs_mut_qryset)
+
+        gene_mut_count_dict = {"geneA": 0, "geneB": 0, "geneC": 0}
+        for obs_mut in obs_mut_qryset:
+            gene_mut_count_dict[obs_mut.mutation.gene] += 1
+
+        self.assertEqual(gene_mut_count_dict["geneA"], 1)
+        self.assertEqual(gene_mut_count_dict["geneB"], 1)
         self.assertEqual(gene_mut_count_dict["geneC"], 1)
