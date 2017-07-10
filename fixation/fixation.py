@@ -6,7 +6,7 @@ __author__ = "Patrick Phaneuf"
 
 # Currently, assumes that ordered_reseq_dict represents multiple ALEs, such as with an ALE experiment.
 # Could reduce to only act on an ALE, since this is the smallest context Fixation operates within.
-def get_ale_exp_fixed_mut_dict(ale_reseq_ordered_dict, filter_settings=None):
+def get_ale_exp_fixed_mut_dict(ale_reseq_ordered_dict):
     # groups all reseq into their ALEs
     ale_id_reseq_dict = _get_ale_id_reseq_dict(ale_reseq_ordered_dict)
     # For each ALE (working only with the reseq's of a particular ALE.
@@ -14,7 +14,7 @@ def get_ale_exp_fixed_mut_dict(ale_reseq_ordered_dict, filter_settings=None):
     for id_reseq_list in ale_id_reseq_dict.values():
         flask_isolate_obs_mut_dict = _get_flask_isolate_obs_mut_dict(id_reseq_list)
         flask_obs_mut_dict = _get_flask_obs_mut_dict(flask_isolate_obs_mut_dict)
-        ale_fixed_mut_dict_list.append(_get_ale_fixed_mut_dict(flask_obs_mut_dict, filter_settings))
+        ale_fixed_mut_dict_list.append(_get_ale_fixed_mut_dict(flask_obs_mut_dict))
 
     ale_exp_fixed_mut_dict = {}
     for ale_fixed_mut_dict in ale_fixed_mut_dict_list:
@@ -27,7 +27,7 @@ def get_ale_exp_fixed_mut_dict(ale_reseq_ordered_dict, filter_settings=None):
     return ale_exp_fixed_mut_dict
 
 
-def _get_ale_fixed_mut_dict(flask_obs_mut_dict, filter_settings):
+def _get_ale_fixed_mut_dict(flask_obs_mut_dict):
 
     fixed_mut_obs_mut_list_dict = {}
     ordered_flask_number_list = sorted(flask_obs_mut_dict.keys())
@@ -37,12 +37,12 @@ def _get_ale_fixed_mut_dict(flask_obs_mut_dict, filter_settings):
         last_flask_number = ordered_flask_number_list[-1]
 
         first_flask_obs_mut_queryset = flask_obs_mut_dict[first_flask_number]
-        first_flask_obs_mut_queryset = filter_observed_mutations(first_flask_obs_mut_queryset, filter_settings)
+        first_flask_obs_mut_queryset = filter_observed_mutations(first_flask_obs_mut_queryset)
         fixed_mutation_queryset = get_mut_queryset_from_obs_mut_queryset(first_flask_obs_mut_queryset)
 
         for flask_number in ordered_flask_number_list:
             flask_obs_mut_queryset = flask_obs_mut_dict[flask_number]
-            flask_obs_mut_queryset = filter_observed_mutations(flask_obs_mut_queryset, filter_settings)
+            flask_obs_mut_queryset = filter_observed_mutations(flask_obs_mut_queryset)
             flask_mutation_queryset = get_mut_queryset_from_obs_mut_queryset(flask_obs_mut_queryset)
             if flask_number == last_flask_number:
                 fixed_mutation_queryset = _get_common_mutations(fixed_mutation_queryset, flask_mutation_queryset)
