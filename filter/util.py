@@ -47,24 +47,38 @@ def _get_obs_mut_qryset_of_ale_exp(obs_mut_qryset, ale_exp_id):
 
 def _filter_observed_mutations_given_filter_settings(observed_mutation_queryset, filter_settings):
     if filter_settings is not None:
-        ignored_genes = filter_settings.ignored_genes
-        ignored_mutations = filter_settings.ignored_mutations
-        starting_strain_mutations = filter_settings.starting_strain_mutations.split(',')
-        if starting_strain_mutations == ['']:
-            starting_strain_mutations = []
+        ignored_gene_list = _get_ignored_gene_list(filter_settings)
+        ignored_mut_list = _get_ignored_mut_list(filter_settings)
+
         min_cutoff = filter_settings.min_cutoff
         max_cutoff = filter_settings.max_cutoff
 
-        ignored_genes = _append_global_filter_ignored_genes(ignored_genes)
-        observed_mutation_queryset = _ignored_genes_filter(observed_mutation_queryset, ignored_genes)
-        observed_mutation_queryset = _ignored_muts_filter(observed_mutation_queryset, ignored_mutations,
-                                                          starting_strain_mutations)
+        observed_mutation_queryset = _ignored_genes_filter(observed_mutation_queryset, ignored_gene_list)
+        observed_mutation_queryset = _ignored_muts_filter(observed_mutation_queryset, ignored_mut_list)
         observed_mutation_queryset = _frequency_filter(observed_mutation_queryset, min_cutoff, max_cutoff)
 
     return observed_mutation_queryset
 
 
-def _append_global_filter_ignored_genes(ignored_genes):
+def _get_ignored_mut_list(filter_settings):
+    ignored_mutations = filter_settings.ignored_mutations
+    starting_strain_mutations = filter_settings.starting_strain_mutations.split(',')
+    if starting_strain_mutations == ['']: starting_strain_mutations = []
+    global_filter = get_global_filter()
+    global_ignored_mutations = global_filter.ignored_mutations
+    global_ignored_mutations = clean_ignored_mutation_id_list(global_ignored_mutations)
+    ignored_mutations = clean_ignored_mutation_id_list(ignored_mutations)
+    ignored_mut_list = global_ignored_mutations + ignored_mutations + starting_strain_mutations
+    return ignored_mut_list
+
+
+def  _get_ignored_gene_list(filter_settings):
+    ignored_genes_list = filter_settings.ignored_genes
+    ignored_genes_list = _append_global_filter_ignored_genes_list(ignored_genes_list)
+    return ignored_genes_list
+
+
+def _append_global_filter_ignored_genes_list(ignored_genes):
     ignored_genes = _clean_ignored_genes_list(ignored_genes)
     global_filter = get_global_filter()
     global_ignored_genes = global_filter.ignored_genes.replace(' ', '').replace('\n', '').replace('\r', '').split(',')
@@ -94,12 +108,7 @@ def _ignored_genes_filter(observed_mutation_queryset, ignored_genes):
     return observed_mutation_queryset
 
 
-def _ignored_muts_filter(observed_mutation_queryset, ignored_mutations, starting_strain_mutations):
-    global_filter = get_global_filter()
-    global_ignored_mutations = global_filter.ignored_mutations
-    global_ignored_mutations = clean_ignored_mutation_id_list(global_ignored_mutations)
-    ignored_mutations = clean_ignored_mutation_id_list(ignored_mutations)
-    ignored_mutation_list = global_ignored_mutations + ignored_mutations + starting_strain_mutations
+def _ignored_muts_filter(observed_mutation_queryset, ignored_mutation_list):
     observed_mutation_queryset = observed_mutation_queryset.exclude(mutation_id__in=ignored_mutation_list)
     return observed_mutation_queryset
 
