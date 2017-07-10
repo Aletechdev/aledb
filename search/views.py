@@ -11,10 +11,9 @@ from seq.views import mutation_table_builder
 from common.util import check_hidden_columns_and_filters, get_all_ale_experiments, get_recent_experiments
 from django.core.serializers.json import DjangoJSONEncoder
 import json
-from filter.models import AleExperimentFilter
+from filter.util import filter_observed_mutations
 
 
-# TODO: parse out all request arguments within this function and not those called within: enables unit testing.
 def search(request):
     check_hidden_columns_and_filters(request, None)
     observed_mutations_with_gene_queryset = _get_obs_muts(request)  # Filter out mutations with this one.
@@ -42,38 +41,20 @@ def search(request):
     return HttpResponse(template.render(context))
 
 
-# TODO: Refactor. seq.views.common.py probably also need to be refactored along with this.
 def _get_obs_muts(request):
-    # Gets search argument list (ORM filter args)
     include_argument_list, exclude_argument_list = _get_search_query_arguments(request)
     if not include_argument_list: return None
-    # Get muts according to search argument list
-    mutation_queryset = _get_mutation_queryset(include_argument_list, exclude_argument_list)
-    # Get obs_muts from muts
-    observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=mutation_queryset)
-
-    # Gets list of ALE experiments to include/exclude
+    mut_qryset = _get_mutation_queryset(include_argument_list, exclude_argument_list)
+    obs_mut_qryset = ObservedMutation.objects.filter(mutation__in=mut_qryset)
     ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
-    # Includes/excludes ALE experiments
     if ale_experiments_to_exclude:
-        observed_mutation_queryset = observed_mutation_queryset.exclude(
+        obs_mut_qryset = obs_mut_qryset.exclude(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_exclude)
     if ale_experiments_to_include:
-        observed_mutation_queryset = observed_mutation_queryset.filter(
+        obs_mut_qryset = obs_mut_qryset.filter(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_include)
-
-    # Gets ALE experiments from observed mutations.
-    # Exclude obs mutation according to mutation frequencies to filter out.
-    distinct_ale_experiment_ids = observed_mutation_queryset.values("sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment").distinct()
-    for exp in distinct_ale_experiment_ids:
-        exp_id = exp["sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"]
-        exp_filter = AleExperimentFilter.objects.get(ale_experiment__ale_id=exp_id)
-        observed_mutation_queryset = observed_mutation_queryset.exclude(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp_id,
-            frequency__lt=exp_filter.min_cutoff / 100,  # Filter out if less than exp_filter.min_cutoff / 100
-            frequency__gt=exp_filter.max_cutoff / 100)  # Filter out if greater than exp_filter.max_cutoff / 100
-
-    return observed_mutation_queryset
+    obs_mut_qryset = filter_observed_mutations(obs_mut_qryset)
+    return obs_mut_qryset
 
 
 def _get_reseq_dict_from_observed_mutation_queryset(observed_mutation_queryset):
