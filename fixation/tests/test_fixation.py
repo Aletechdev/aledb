@@ -18,6 +18,7 @@ import collections
 
 __author__ = 'Patrick Phaneuf'
 
+
 class TestFixation(TestCase):
     def setUp(self):
         self.media = Media.objects.create()
