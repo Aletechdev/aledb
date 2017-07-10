@@ -7,7 +7,7 @@ import seq.views.common
 from seq.views import mutation_table_builder
 from fixation.models import FixatedMutation
 from common.util import get_all_ale_experiments, get_recent_experiments, check_hidden_columns_and_filters
-from compare.views.common import get_ordered_reseq_dict_and_queryset, get_ales_from_ale_experiment_list
+from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset, get_ales_from_ale_experiment_list
 from common.constants import POSITION_COLUMN_IN_SHARED_MUTATION_TALBE, TAGS
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -30,7 +30,7 @@ def comparison_fixation(request):
 
     ale_experiment_list = [int(exp_id) for exp_id in ale_experiment_string_list]
 
-    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list, ale_no)
+    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_obs_mut_queryset(ale_experiment_list, ale_no)
 
     is_ascending_freq_filter = _is_ascending_freq_filter(request)
 

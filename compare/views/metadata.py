@@ -12,7 +12,7 @@ import aleinfo.settings as settings
 
 from seq.views import common
 
-from compare.views.common import get_ordered_reseq_dict_and_queryset
+from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
 __author__ = 'dgosting'
 
 META_DATA_TEMPLATE = 'metadata/index.html'
@@ -27,7 +27,7 @@ def comparison_metadata(request):
 
     ale_experiment_list = request.GET.get('ale_experiment_id', None).replace('[', '').replace(']', '').split(',')
 
-    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list)
+    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_obs_mut_queryset(ale_experiment_list)
 
     reseq_info_list = get_reseq_info_list(ordered_reseq_dict.values())
 

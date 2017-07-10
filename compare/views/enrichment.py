@@ -6,7 +6,7 @@ import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
 from enrichment.models import EnrichmentMutation
 from common.util import check_hidden_columns_and_filters
-from compare.views.common import get_ordered_reseq_dict_and_queryset, get_ales_from_ale_experiment_list
+from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset, get_ales_from_ale_experiment_list
 from common.constants import POSITION_COLUMN_IN_SHARED_MUTATION_TALBE, TAGS
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -25,7 +25,7 @@ def compared_enrichment_mutations(request):
 
     ale_experiment_list = [int(exp_id) for exp_id in ale_experiment_string_list]
 
-    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_queryset(ale_experiment_list, ale_no)
+    ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_obs_mut_queryset(ale_experiment_list, ale_no)
 
     table_header = mutation_table_builder.get_table_header(reseq_dict=ordered_reseq_dict,
                                                            table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)

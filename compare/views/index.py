@@ -6,7 +6,7 @@ from common.util import check_hidden_columns_and_filters,\
     get_all_ale_experiments,\
     get_recent_experiments, \
     get_mut_queryset_from_obs_mut_queryset
-from compare.views.common import get_ordered_reseq_dict_and_queryset
+from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
 from seq.views import common
 from stats.util import get_histogram_jsons,\
     get_needle_plot_data,\
@@ -43,7 +43,7 @@ def handle_compare_report(request, ale_experiment_names):
                                experiment_name_list]
 
     # TODO: the below is very similar to stats.views.stats
-    ordered_reseq_dict, obs_mut_qryset = get_ordered_reseq_dict_and_queryset(ale_exp_id_list)
+    ordered_reseq_dict, obs_mut_qryset = get_ordered_reseq_dict_and_obs_mut_queryset(ale_exp_id_list)
     needle_plot_data = get_needle_plot_data(obs_mut_qryset)
     experiments_info_list = get_reseq_experiment_info_list(ordered_reseq_dict.values())
     mutation_query_set = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
