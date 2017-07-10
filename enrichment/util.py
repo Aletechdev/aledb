@@ -12,7 +12,5 @@ def get_enrichment_mutation_list(ale_experiment_id):
     ale_exp_reseq_obs_mut_qryset_list = []
     for reseq_id in reseq_dict:
         ale_exp_reseq_obs_mut_qryset_list.append(get_all_observed_mutations([reseq_id]))
-    filter_settings = get_filter_settings(ale_experiment_id)
-    enrichment_mutation_list = enrichment.get_enrichment_mutation_list(ale_exp_reseq_obs_mut_qryset_list,
-                                                                       filter_settings)
+    enrichment_mutation_list = enrichment.get_enrichment_mutation_list(ale_exp_reseq_obs_mut_qryset_list)
     return enrichment_mutation_list
