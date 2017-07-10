@@ -2,20 +2,35 @@ from django.test import TestCase
 from seq.models import Mutation, ObservedMutation, ResequencingExperiment
 from enrichment import enrichment
 from filter.models import AleExperimentFilter, GlobalFilter
-from ale.models import AleExperiment, Instrument
+from ale.models import \
+    AleExperiment,\
+    Instrument,\
+    AleId,\
+    Flask,\
+    Media,\
+    FreezerBox,\
+    Isolate,\
+    TechnicalReplicate
+
 
 __author__ = 'Patrick Phaneuf'
 
-# TODO: each test should first test to see that the enrichment set isn't empty. If it is, the test will still pass.
 
+# TODO: each test should first test to see that the enrichment set isn't empty. If it is, the test will still pass.
 class TestEnrichment(TestCase):
 
     def setUp(self):
-        # TODO: figure out a way not to have to create a default reseq_exp
-        self.reseq = ResequencingExperiment.objects.create()
-
-        # TODO: had to do this to make filter_settings object. Find cleaner way.
         self.ale_exp = AleExperiment.objects.create(instrument=Instrument.objects.create())
+        self.ale = AleId.objects.create(ale_id=1, ale_experiment=self.ale_exp)
+        self.media = Media.objects.create()
+        self.freezer_box = FreezerBox.objects.create()
+        self.flask = Flask.objects.create(flask_number=1,
+                                      ale_id=self.ale, media=self.media)
+        self.isolate = Isolate.objects.create(flask=self.flask,
+                                         isolate_number=1, is_population=False, freezer_box=self.freezer_box)
+        self.tech_rep = TechnicalReplicate.objects.create(isolate=self.isolate)
+        self.reseq = ResequencingExperiment.objects.create(tech_rep=self.tech_rep)
+
 
     def test_enriched_geneA_same_mutation_queryset(self):
 
@@ -157,28 +172,22 @@ class TestEnrichment(TestCase):
             self.assertTrue("geneA" in enrichment_mutation.gene)
 
     def test_dont_add_same_enriched_mutation_twice(self):
-        # TODO: figure out a way not to have to create a default reseq_exp
-        test_reseq_exp = ResequencingExperiment.objects.create()
-        mut = Mutation.objects.create(mutation_type="qwe",
-                                       position=1,
-                                       sequence_change="seq_chng1",
-                                       gene="geneA")
-        ObservedMutation.objects.create(sequencing_experiment=self.reseq,
-                                        mutation=mut,
-                                        frequency=1)
+        mut = Mutation.objects.create(gene="geneA",
+                                      mutation_type="SNP", position=1, sequence_change="seq_chng_1")
+        ObservedMutation.objects.create(sequencing_experiment=self.reseq, mutation=mut, frequency=1)
 
-        mut = Mutation.objects.create(mutation_type="qwe",
+        mut = Mutation.objects.create(gene="geneA, geneB",
+                                      mutation_type="SNP",
                                       position=1,
-                                      sequence_change="seq_chng2",
-                                      gene="geneA, geneB")
+                                      sequence_change="seq_chng_2")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
                                         mutation=mut,
                                         frequency=1)
 
-        mut = Mutation.objects.create(mutation_type="qwe",
-                                       position=1,
-                                       sequence_change="seq_chng3",
-                                       gene="geneB")
+        mut = Mutation.objects.create(gene="geneB",
+                                      mutation_type="SNP",
+                                      position=1,
+                                      sequence_change="seq_chng_3")
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
                                         mutation=mut,
                                         frequency=1)
@@ -703,6 +712,7 @@ class TestEnrichment(TestCase):
             self.assertTrue("geneB" in enrichment_mutation.gene)
 
     def test_ignore_global_gene_only(self):
+        GlobalFilter.objects.create(ignored_genes="geneA")
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
@@ -710,8 +720,6 @@ class TestEnrichment(TestCase):
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
                                         mutation=mut,
                                         frequency=1)
-
-        # Will ignore this mutation according to ignore gene list.
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
@@ -727,7 +735,6 @@ class TestEnrichment(TestCase):
         ObservedMutation.objects.create(sequencing_experiment=self.reseq,
                                         mutation=mut,
                                         frequency=1)
-
         mut = Mutation.objects.create(mutation_type="qwe",
                                       position=1,
                                       sequence_change="asdf",
@@ -737,7 +744,6 @@ class TestEnrichment(TestCase):
                                         frequency=1)
 
         observed_mutation_queryset = ObservedMutation.objects.all()
-        GlobalFilter.objects.create(ignored_genes="geneA")
         enrichment_mutation_list = enrichment.get_enrichment_mutation_list(
             reseq_obs_mut_queryset_list=[observed_mutation_queryset])
 

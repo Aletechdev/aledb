@@ -5,6 +5,7 @@ from genes.util import get_gene_list
 __author__ = "Patrick Phaneuf"
 
 
+# TODO: remove filter setting
 def get_enrichment_mutation_list(reseq_obs_mut_queryset_list, filter_settings=None):
     mutation_gene_count_dict = _populate_mutation_gene_count_dict(reseq_obs_mut_queryset_list, filter_settings)
     return _populate_enrichment_mutation_list(reseq_obs_mut_queryset_list,
