@@ -12,7 +12,7 @@ from filter.common import DEFAULT_MUTATION_FREQ_MIN, DEFAULT_MUTATION_FREQ_MAX
 
 from django.utils.safestring import mark_safe
 
-from filter.util import clean_ignored_mutation_id_list, get_ignored_mutations, TABLE_HEADER, is_number
+from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations, TABLE_HEADER, is_number
 
 from common.util import get_all_ale_experiments, get_recent_experiments, clear_dashboard_cache
 
@@ -72,9 +72,9 @@ def _handle_POST(request, filter_form_model, ale_experiment_id):
         filter_form_model.max_cutoff = request.POST.get("max_cutoff", DEFAULT_MUTATION_FREQ_MAX)
         filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
         deleted_mut_id = request.POST.get('mut_id', None)
-        ignored_mutation_id_list = clean_ignored_mutation_id_list(
+        ignored_mutation_id_list = get_ignored_mut_id_list_from_str(
             AleExperimentFilter.objects.get(ale_experiment_id=ale_experiment_id).ignored_mutations, deleted_mut_id)
-        cleaned_list = clean_ignored_mutation_id_list(",".join(ignored_mutation_id_list))
+        cleaned_list = get_ignored_mut_id_list_from_str(",".join(ignored_mutation_id_list))
         filter_form_model.ignored_mutations = ",".join(cleaned_list)
         filter_form_model.save()
     else:
