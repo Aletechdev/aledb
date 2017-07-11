@@ -222,20 +222,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Sample QA Thresholds</h3>
-                    </div>
-                    <div class="panel-body">
-                        <p><b>Unassigned Missing Coverage Evidence upper bound = </b>5</p>
-                        <p><b>Mean Coverage lower bound = </b>75</p>
-                        <p><b>Mapped Reads lower bound = </b>1,250,000</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <h2>Sample Resequencing Stats</h2>
         <div class="row">
             <div class="col-lg-12">
                 <table id="runs" class="table">
@@ -257,6 +244,7 @@
                         <tr class="experiment_stats">
                             <td class="sample_name"><a href="
 
+
                                     {{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
                             </td>
                             <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
@@ -270,7 +258,6 @@
 
                     {% endfor %}
                     </tbody>
-                    <script type="text/javascript">{% include 'runs.js' %}</script>
                 </table>
             </div>
         </div>
