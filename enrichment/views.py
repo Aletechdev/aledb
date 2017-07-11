@@ -8,8 +8,11 @@ from seq.models import ObservedMutation
 from seq.models import ResequencingExperiment
 import metadata.views
 from enrichment.models import EnrichmentMutation
-from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID, POSITION_COLUMN_IN_SHARED_MUTATION_TALBE
-from filter import util
+from common.constants import \
+    REQUEST_MUTATION_ID, \
+    REQUEST_ALE_EXPERIMENT_ID, \
+    POSITION_COLUMN_IN_SHARED_MUTATION_TABLE, \
+    POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from common.util import check_hidden_columns_and_filters
 from collections import OrderedDict
 from django.core.serializers.json import DjangoJSONEncoder
@@ -58,7 +61,7 @@ def enrichment_mutations(request):
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(int(ale_experiment_id)),
-               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TALBE,
+               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
                "tag_dropdown": common.constants.TAGS
                }
 
@@ -107,7 +110,8 @@ def shared_enriched_genes(request):
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "reseq_info_list": reseq_info_list,
                "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments()}
+               "recent_experiments": get_recent_experiments(),
+               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TABLE}
 
     return HttpResponse(template.render(context))
 

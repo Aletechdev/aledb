@@ -8,11 +8,14 @@ import seq.views.common
 from seq.views import mutation_table_builder
 from seq.models import ObservedMutation
 from seq.models import ResequencingExperiment
-from filter import util
 from fixation.models import FixatedMutation
 from fixation.fixation import filter_for_ascending_freq
 import metadata.views
-from common.constants import REQUEST_MUTATION_ID, REQUEST_ALE_EXPERIMENT_ID, POSITION_COLUMN_IN_SHARED_MUTATION_TALBE
+from common.constants import \
+    REQUEST_MUTATION_ID, \
+    REQUEST_ALE_EXPERIMENT_ID, \
+    POSITION_COLUMN_IN_SHARED_MUTATION_TABLE, \
+    POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from common.util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments, check_hidden_columns_and_filters
 from collections import OrderedDict
 from genes.util import get_gene_list
@@ -69,7 +72,7 @@ def fixating_mutations(request):
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(int(ale_experiment_id)),
-               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TALBE,
+               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
                "tag_dropdown": common.constants.TAGS
                }
 
@@ -77,7 +80,6 @@ def fixating_mutations(request):
 
 
 def shared_fixated_mutations(request):
-
     mutation_id = request.GET.get(REQUEST_MUTATION_ID)
     selected_fixating_mutation_queryset = FixatedMutation.objects.filter(mutation_id=mutation_id)
     fixating_mutation = selected_fixating_mutation_queryset[0]  # Should only be one fixating mutation per mutation_id
@@ -125,7 +127,8 @@ def shared_fixated_mutations(request):
                "table_body": mark_safe(table_body),
                "reseq_info_list": reseq_info_list,
                "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments()
+               "recent_experiments": get_recent_experiments(),
+               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TABLE,
                }
 
     return HttpResponse(template.render(context))
