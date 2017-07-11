@@ -5,6 +5,7 @@
         table.dataTable tr.odd {
             background-color: lightgrey;
         }
+
         table.dataTable tr.even {
             background-color: white;
         }
@@ -81,50 +82,6 @@
                 </div>
             </div>
         </a>
-        <a href="/enrichment?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3 col-md-6">
-                <div class="panel panel-yellow">
-                    <div class="panel-heading app">
-                        <div style="width: 25%;" class="pull-left">
-                            <i class="fa fa-table fa-5x"></i>
-                        </div>
-                        <div style="width: 75%; text-align: right" class="pull-right">
-                            <div class="huge">Enrichment Mutations</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-        <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3 col-md-6">
-                <div class="panel panel-red">
-                    <div class="panel-heading app">
-                        <div style="width: 25%;" class="pull-left">
-                            <i class="fa fa-table fa-5x"></i>
-                        </div>
-                        <div style="width: 75%; text-align: right" class="pull-right">
-                            <div class="huge">Fixating Mutations</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="row">
-        <a style="color: #b77033;" href="/common_mutations?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3">
-                <div class="panel panel-orange">
-                    <div class="panel-heading app">
-                        <div style="width: 25%;" class="pull-left">
-                            <i class="fa fa-table fa-5x"></i>
-                        </div>
-                        <div style="width: 75%; text-align: right" class="pull-right">
-                            <div class="huge">Common Mutations</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
         <a style="color: #7033b7" href="/duplication?ale_experiment_id={{ ale_experiment_id }}">
             <div class="col-lg-3 col-md-6">
                 <div class="panel panel-purple">
@@ -153,6 +110,48 @@
                 </div>
             </div>
         </a>
+        <a href="/enrichment?ale_experiment_id={{ ale_experiment_id }}">
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-yellow">
+                    <div class="panel-heading app">
+                        <div style="width: 25%;" class="pull-left">
+                            <i class="fa fa-table fa-5x"></i>
+                        </div>
+                        <div style="width: 75%; text-align: right" class="pull-right">
+                            <div class="huge">Enrichment Mutations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">
+            <div class="col-lg-3 col-md-6">
+                <div class="panel panel-red">
+                    <div class="panel-heading app">
+                        <div style="width: 25%;" class="pull-left">
+                            <i class="fa fa-table fa-5x"></i>
+                        </div>
+                        <div style="width: 75%; text-align: right" class="pull-right">
+                            <div class="huge">Fixating Mutations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
+        <a style="color: #b77033;" href="/common_mutations?ale_experiment_id={{ ale_experiment_id }}">
+            <div class="col-lg-3">
+                <div class="panel panel-orange">
+                    <div class="panel-heading app">
+                        <div style="width: 25%;" class="pull-left">
+                            <i class="fa fa-table fa-5x"></i>
+                        </div>
+                        <div style="width: 75%; text-align: right" class="pull-right">
+                            <div class="huge">Common Mutations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>
     </div>
     <div class="row">
         <div class="col-sm-6 col-md-4">
@@ -167,7 +166,7 @@
                         <th>Flask Count</th>
                         <th>Isolate Count</th>
                     </tr>
-            </thead>
+                    </thead>
                     <tbody>
                     {% for ale_flask_isolate_count_tuple in ale_flask_isolate_count_list %}
                         <tr>
@@ -320,6 +319,7 @@
             {% for experiment_info_tuple in experiments_info_list %}
                 <tr class="experiment_stats">
                     <td class="sample_name"><a href="
+
 
                             {{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
                     </td>
