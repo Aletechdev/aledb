@@ -17,8 +17,7 @@ urlpatterns = [
     url(r'^compare/', include('compare.urls')),
     url(r'^search/', include('search.urls')),
     url(r'^duplication/', include('duplications.urls')),
-    url(r'^gene/', include('genes.urls')),
-    url(r'^common_mutations/', include('commmonmuts.urls')),
+    url(r'^gene/', include('genes.urls'))
 ]
 
 if settings.DEBUG:
