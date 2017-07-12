@@ -15,7 +15,7 @@ from common.constants import \
     REQUEST_MUTATION_ID, \
     REQUEST_ALE_EXPERIMENT_ID, \
     POSITION_COLUMN_IN_SHARED_MUTATION_TABLE, \
-    POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
+    POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
 from common.util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments, check_hidden_columns_and_filters
 from collections import OrderedDict
 from genes.util import get_gene_list
@@ -72,7 +72,7 @@ def fixating_mutations(request):
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(int(ale_experiment_id)),
-               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
+               "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                "tag_dropdown": common.constants.TAGS
                }
 
