@@ -52,7 +52,6 @@
 {% endblock %}
 {% block header %}<b>{{ ale_experiment_name }}</b> ALE Experiment{% endblock %}
 {% block content %}
-    <!-- /.row -->
     <div class="row">
         <a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">
             <div class="col-lg-3 col-md-6">
@@ -110,49 +109,27 @@
                 </div>
             </div>
         </a>
-        <a href="/enrichment?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3 col-md-6">
-                <div class="panel panel-yellow">
-                    <div class="panel-heading app">
-                        <div style="width: 25%;" class="pull-left">
-                            <i class="fa fa-table fa-5x"></i>
-                        </div>
-                        <div style="width: 75%; text-align: right" class="pull-right">
-                            <div class="huge">Enrichment Mutations</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-        <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3 col-md-6">
-                <div class="panel panel-red">
-                    <div class="panel-heading app">
-                        <div style="width: 25%;" class="pull-left">
-                            <i class="fa fa-table fa-5x"></i>
-                        </div>
-                        <div style="width: 75%; text-align: right" class="pull-right">
-                            <div class="huge">Fixating Mutations</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
-        <a style="color: #b77033;" href="/common_mutations?ale_experiment_id={{ ale_experiment_id }}">
-            <div class="col-lg-3">
-                <div class="panel panel-orange">
-                    <div class="panel-heading app">
-                        <div style="width: 25%;" class="pull-left">
-                            <i class="fa fa-table fa-5x"></i>
-                        </div>
-                        <div style="width: 75%; text-align: right" class="pull-right">
-                            <div class="huge">Common Mutations</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </a>
     </div>
+    <style>
+        img {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+    <div class="container">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="col-xs-6">
+                <h2 align="center">Enrichment Mutations</h2>
+                <a href="/enrichment?ale_experiment_id={{ ale_experiment_id }}"><img src="/static/enrich_mut_diag.png"></a>
+            </div>
+            <div class="col-xs-6">
+                <h2 align="center">Fixed Mutations</h2>
+                <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}"><img src="/static/fixed_mut_diag.png"></a>
+            </div>
+        </div>
+    </div>
+    <br><br><br>
     <div class="row">
         <div class="col-sm-6 col-md-4">
             <div class="panel panel-default">
