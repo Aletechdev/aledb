@@ -7,7 +7,7 @@ from seq.views import mutation_table_builder  # TODO: The mutation table build s
 from enrichment.models import EnrichmentMutation
 from common.util import check_hidden_columns_and_filters
 from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset, get_ales_from_ale_experiment_list
-from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE, TAGS
+from common.constants import POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE, TAGS
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 
@@ -45,7 +45,7 @@ def compared_enrichment_mutations(request):
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_experiments(),
                "recent_experiments": get_recent_experiments(),
-               "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
+               "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                "tag_dropdown": TAGS
                }
 
