@@ -177,7 +177,6 @@ INSTALLED_APPS = (
     'search',
     'duplications',
     'genes',
-    'commmonmuts',
     'debug_toolbar',
 )
 
