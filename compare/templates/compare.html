@@ -67,21 +67,34 @@
             img {
                 display: block;
                 margin: 0 auto;
+                max-width: 90%;
+                max-height: 90%;
+            }
+
+            #analysis_button {
+                border-radius: 25px;
+                border: 2px solid #999999;
+                padding: 10px;
             }
         </style>
         <div class="container">
-            <!-- Example row of columns -->
             <div class="row">
-                <div class="col-xs-6">
-                    <h2 align="center">Enrichment Mutations</h2>
-                    <a href="/compare/enrichment?ale_experiment_id={{ ale_experiment_id }}"><img
-                            src="/static/enrich_mut_diag.png"></a>
-                </div>
-                <div class="col-xs-6">
-                    <h2 align="center">Fixed Mutations</h2>
-                    <a href="/compare/fixation?ale_experiment_id={{ ale_experiment_id }}"><img
-                            src="/static/fixed_mut_diag.png"></a>
-                </div>
+                <a href="/compare/enrichment?ale_experiment_id={{ ale_experiment_id }}">
+                    <div class="col-md-6">
+                        <div id="analysis_button" class="panel">
+                            <div align="center" class="huge">Enrichment Mutations</div>
+                            <img src="/static/enrich_mut_diag.png">
+                        </div>
+                    </div>
+                </a>
+                <a href="/compare/fixation?ale_experiment_id={{ ale_experiment_id }}">
+                    <div class="col-md-6">
+                        <div id="analysis_button" class="panel">
+                            <div align="center" class="huge">Fixed Mutations</div>
+                            <img src="/static/fixed_mut_diag.png">
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
         <br><br><br>
