@@ -14,17 +14,35 @@ __author__ = 'Patrick Phaneuf'
 
 class TestUpload(TestCase):
 
-    def test_add_breseq_results(self):
-        current_location = os.path.dirname(os.path.realpath(__file__))
-        with open(current_location+"/0-0-1-1/output/output.gd") as output_genomic_diff_file:
+    def setUp(self):
+        self.current_location = os.path.dirname(os.path.realpath(__file__))
+
+    def test_add_breseq_results_no_mut_annotation_dict(self):
+        breseq_output_dir_path = self.current_location+"/0-0-1-1/output/"
+        with open(breseq_output_dir_path+"output.gd") as output_genomic_diff_file:
             mutation_gd_parser = GDParser(file_handle=output_genomic_diff_file)
 
-        # add_breseq_results(1,
-        #                    "Patrick",
-        #                    "0-0-1-1",
-        #                    None,
-        #                    None,
-        #                    "NC_000913_3")
+        add_breseq_results(1,
+                           "Patrick",
+                           breseq_output_dir_path,
+                           mutation_gd_parser,
+                           None,
+                           "NC_000913_3")
+        # if crashes, then failure.
+
+
+    def test_add_breseq_results_gd_file_only(self):
+        breseq_output_dir_path = self.current_location + "/0-0-1-1/output/"
+        with open(breseq_output_dir_path + "output.gd") as output_genomic_diff_file:
+            mutation_gd_parser = GDParser(file_handle=output_genomic_diff_file)
+
+        add_breseq_results(1,
+                           "Patrick",
+                           breseq_output_dir_path,
+                           mutation_gd_parser,
+                           None,
+                           "NC_000913_3")
+        # if crashes, then failure.
 
 
     def test_get_mutation_freq_89(self):
