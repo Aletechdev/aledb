@@ -1,0 +1,4 @@
+Sun Feb 14 13:30:07 2016
+
+breseq -j 8 -r NC_000913_3.gb -o BOP27Reseq BOP27Reseq_S1_L001_R1.fastq BOP27Reseq_S1_L001_R2.fastq
+
