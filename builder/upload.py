@@ -4,7 +4,10 @@ from bs4 import BeautifulSoup
 from builder.gdparse.gdparse import gdparse
 import collections
 import numbers
-import seq.models
+from seq.models import Mutation, \
+    ObservedMutation, \
+    UnassignedMissingCoverageEvidence, \
+    ResequencingExperiment
 import os
 from configparser import ConfigParser
 from genes.util import get_annotated_gene_list
@@ -102,7 +105,7 @@ def _process_duplications(breseq_output_dir_path,
     duplications = Duplications(breseq_output_dir_path)
     observed_mutation_list = []
     for dup_dict in duplications.dup_list:
-        mutation, created = seq.models.Mutation.objects.get_or_create(
+        mutation, created = Mutation.objects.get_or_create(
             position=dup_dict[Duplications.START_POSITION_KEY],
             gene=dup_dict[Duplications.GENES_KEY],
             sequence_change=dup_dict[Duplications.SEQUENCE_CHANGE_KEY],
@@ -111,13 +114,13 @@ def _process_duplications(breseq_output_dir_path,
 
         mutation.save()  # TODO: Not using bulk_create in case mutation already exists? Why aren't we using bulk_create?
 
-        observed_mutation = seq.models.ObservedMutation(sequencing_experiment=reseq,
-                                                        mutation=mutation,
-                                                        breseq_present=True,
-                                                        frequency=1.00)
+        observed_mutation = ObservedMutation(sequencing_experiment=reseq,
+                                             mutation=mutation,
+                                             breseq_present=True,
+                                             frequency=1.00)
         observed_mutation_list.append(observed_mutation)
 
-    seq.models.ObservedMutation.objects.bulk_create(observed_mutation_list)
+    ObservedMutation.objects.bulk_create(observed_mutation_list)
 
 
 def _get_beautifulsoup_html(output_folder, html_file_name):
@@ -177,23 +180,23 @@ def _process_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_f
             # TODO: Keyerrors only exist because the missing_coverage dict does not have the starting strain (wild type) html file
             try:
                 html_attrs = missing_coverage_dict[str(evidence_dict[key]['start'])]
-                seq.models.UnassignedMissingCoverageEvidence.objects.get_or_create(seq_id=evidence_dict[key]['seq_id'],
-                                                                                   start=evidence_dict[key]['start'],
-                                                                                   end=evidence_dict[key]['end'],
-                                                                                   sequencing_experiment=seq_experiment,
-                                                                                   reads_left_url=html_attrs[0],
-                                                                                   reads_right_url=html_attrs[1],
-                                                                                   coverage=html_attrs[2],
-                                                                                   size=html_attrs[3],
-                                                                                   reads_left=html_attrs[4],
-                                                                                   reads_right=html_attrs[5],
-                                                                                   gene=html_attrs[6],
-                                                                                   description=html_attrs[7])
+                UnassignedMissingCoverageEvidence.objects.get_or_create(seq_id=evidence_dict[key]['seq_id'],
+                                                                        start=evidence_dict[key]['start'],
+                                                                        end=evidence_dict[key]['end'],
+                                                                        sequencing_experiment=seq_experiment,
+                                                                        reads_left_url=html_attrs[0],
+                                                                        reads_right_url=html_attrs[1],
+                                                                        coverage=html_attrs[2],
+                                                                        size=html_attrs[3],
+                                                                        reads_left=html_attrs[4],
+                                                                        reads_right=html_attrs[5],
+                                                                        gene=html_attrs[6],
+                                                                        description=html_attrs[7])
             except KeyError:
-                seq.models.UnassignedMissingCoverageEvidence.objects.create(seq_id=evidence_dict[key]['seq_id'],
-                                                                            start=evidence_dict[key]['start'],
-                                                                            end=evidence_dict[key]['end'],
-                                                                            sequencing_experiment=seq_experiment)
+                UnassignedMissingCoverageEvidence.objects.create(seq_id=evidence_dict[key]['seq_id'],
+                                                                 start=evidence_dict[key]['start'],
+                                                                 end=evidence_dict[key]['end'],
+                                                                 sequencing_experiment=seq_experiment)
 
 
 def _parse_average_read_length(read_row_input):
@@ -210,7 +213,7 @@ def _parse_read_count(read_row_input):
 
 def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, person):
 
-    reseq, created = seq.models.ResequencingExperiment.objects.get_or_create(location=breseq_folder[breseq_folder.find(ale_data_root_dir) + len(ale_data_root_dir):],
+    reseq, created = ResequencingExperiment.objects.get_or_create(location=breseq_folder[breseq_folder.find(ale_data_root_dir) + len(ale_data_root_dir):],
                                                                                       tech_rep_id=technical_replicate_id,
                                                                                       person=person)
     statistics_html = _get_beautifulsoup_html(breseq_folder, HTML_SUMMARY_FILE_NAME)
@@ -242,7 +245,6 @@ def _database_mutations(sample_type,
                         mutation_annotation_dict,
                         experiment,
                         is_wild_type):
-
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
     column_type_index_dict = _get_mutation_header_dict(mutations_html)
     mutation_rows = _get_mutations_rows(mutations_html, sample_type)
@@ -250,9 +252,12 @@ def _database_mutations(sample_type,
 
     # Only used if is_wild_type is True. Doesn't affect functionality otherwise
     wild_type_mutation_list = []
+    # for mutation in
+
     for row_num, row in enumerate(mutation_rows):
         mutation_num = row_num + 1  # row_num is 0 based, mutation_num is 1 based.
         attrs = row.findChildren("td")
+
         gene_list_str = ""
         if mutation_annotation_dict:
             breseq_gene_annotation = mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
@@ -261,12 +266,13 @@ def _database_mutations(sample_type,
             gene_list_str = ', '.join(gene_list)
 
         mutation, \
-        created = seq.models.Mutation.objects.get_or_create(position=mutation_dict[mutation_num].get(GD_MUT_POS_ATTR_KEY),
-                                                                      gene=gene_list_str,
-                                                                      # mutations are in the same order in the html and output.gd
-                                                                      # files so we can index the ids with row_num
-                                                                      sequence_change=attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_MUTATION]].text,
-                                                                      mutation_type=mutation_dict[mutation_num].get(GD_MUT_TYPE_ATTR_KEY))
+        created = Mutation.objects.get_or_create(position=mutation_dict[mutation_num].get(GD_MUT_POS_ATTR_KEY),
+                                                 gene=gene_list_str,
+                                                 # mutations are in the same order in the html and output.gd
+                                                 # files so we can index the ids with row_num
+                                                 sequence_change=attrs[
+                                                     column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_MUTATION]].text,
+                                                 mutation_type=mutation_dict[mutation_num].get(GD_MUT_TYPE_ATTR_KEY))
         if mutation.protein_change is None:
             change = attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_ANNOTATION]].renderContents()
             mutation.protein_change = change
@@ -275,14 +281,15 @@ def _database_mutations(sample_type,
         if is_wild_type is True:
             wild_type_mutation_list.append(mutation.id)
 
-        observed_mutation = seq.models.ObservedMutation(sequencing_experiment=seq_experiment,
-                                                        mutation=mutation,
-                                                        breseq_present=True,
-                                                        evidence=attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents(),
-                                                        frequency=_get_mutation_freq(mutation_dict[mutation_num]))
+        observed_mutation = ObservedMutation(sequencing_experiment=seq_experiment,
+                                             mutation=mutation,
+                                             breseq_present=True,
+                                             evidence=attrs[column_type_index_dict[
+                                                 BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents(),
+                                             frequency=_get_mutation_freq(mutation_dict[mutation_num]))
         observed_mutation_list.append(observed_mutation)
 
-    seq.models.ObservedMutation.objects.bulk_create(observed_mutation_list)
+    ObservedMutation.objects.bulk_create(observed_mutation_list)
 
     if is_wild_type is True:
         exp_filter, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=experiment.ale_id)
