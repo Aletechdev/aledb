@@ -221,6 +221,110 @@ def _insert_starting_strain_flask(staring_strain_breseq_output_abs_path,
 #     rebuild_fixated_mutations(experiment.ale_id)
 
 
+# TODO: this and create_ale_experiment_or_insert_flasks are extremely similar: refactor.
+# TODO: no starting strain included.
+def create_ale_experiment(gd_file_path,
+                          ale_exp_user,
+                          ale_exp_name):
+    sanitized_breseq_output_abs_path = builder.util.sanitize_path(gd_file_path)
+
+    instrument, created = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
+    experiment, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
+                                                                         instrument=instrument,
+                                                                         person=ale_exp_user)
+    create_event(title="Experiment Created",
+                 message="Experiment %s was created" % experiment.name,
+                 icon='<i class="fa fa-flask" aria-hidden="true"></i>',
+                 color="success")
+
+    default_media, \
+    created = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
+                                                     substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
+                                                     temperature=metadata.parser.DEFAULT_TEMPERATURE,
+                                                     volume=metadata.parser.DEFAULT_VOLUME,
+                                                     stirring_speed=metadata.parser.DEFAULT_STIRRING_SPEED)
+
+    freezer_box, created = ale.models.FreezerBox.objects.get_or_create(name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
+                                                                       number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
+    #if breseq_starting_strain_output_abs_path is not None:...
+    #_get_sample_report_list...
+
+    # Get all samples in path
+    sample_name_list = os.listdir(gd_file_path)
+    for ale_isolate_name in sample_name_list:
+        ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
+        flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
+        isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
+        technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name,
+                                                                 builder.util.AleName.TechnicalReplicate)
+        output_path = sanitized_breseq_output_abs_path + ale_isolate_name + "/" + BRESEQ_OUTPUT_REPORT_DIR
+
+        ale_id, created = ale.models.AleId.objects.get_or_create(ale_experiment=experiment, ale_id=ale_number)
+        flask, created = ale.models.Flask.objects.get_or_create(flask_number=flask_number, ale_id=ale_id, media=default_media)
+        with open(os.path.join(output_path, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
+            mutation_gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
+
+        # annotated_output_file_dir = output_path + ANNOTATION_GENOMIC_DIFF_FILE_DIR
+        # with open(os.path.join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME),
+        #           'rb') as annotation_genomic_diff_file:
+        #     annotation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
+
+        reseq_ref_name = ""
+        if gdparse.GENOMIC_DIFF_SEQ_REF_KEY in mutation_gd_parser.meta_data.keys():
+            reseq_ref_name = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_SEQ_REF_KEY]
+
+        reseq_date = ""
+        if gdparse.GENOMIC_DIFF_CREATED_KEY in mutation_gd_parser.meta_data.keys():
+            reseq_date = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_CREATED_KEY]
+
+        breseq_version = ""
+        if gdparse.BRESEQ_VERSION_KEY in mutation_gd_parser.meta_data.keys():
+            breseq_version = mutation_gd_parser.meta_data[gdparse.BRESEQ_VERSION_KEY]
+
+        # if gdparse.RESEQ_TYPE_KEY in mutation_gd_parser.meta_data.keys():
+        #     sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
+        # else:  # Breseq version 0.26.0 doesn't have the #=COMMAND meta-data.
+        #     sample_reseq_type = _legacy_get_sample_reseq_type(breseq_folder_path)
+        #     mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY] = sample_reseq_type
+        is_population = False
+
+        isolate, created = ale.models.Isolate.objects.get_or_create(flask=flask,
+                                                                    isolate_number=isolate_number,
+                                                                    is_population=is_population,
+                                                                    reseq_reference=reseq_ref_name,
+                                                                    reseq_date=reseq_date,
+                                                                    breseq_version=breseq_version,
+                                                                    freezer_box=freezer_box,
+                                                                    person=ale_exp_user)
+
+        technical_replicate, created = ale.models.TechnicalReplicate.objects.get_or_create(
+            tech_rep_number=technical_replicate_number,
+            isolate=isolate)
+
+        builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
+                                          person=ale_exp_user,
+                                          breseq_ouput_dir_path=output_path,
+                                          mutation_gd_parser=mutation_gd_parser,
+                                          annotation_gd_parser=None,
+                                          reseq_ref_name=reseq_ref_name,
+                                          experiment=experiment,
+                                          is_wild_type=False, )
+
+
+        technical_replicate, created = ale.models.TechnicalReplicate.objects.get_or_create(
+            tech_rep_number=technical_replicate_number,
+            isolate=isolate)
+
+        builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
+                                          person=ale_exp_user,
+                                          breseq_ouput_dir_path=output_path,
+                                          mutation_gd_parser=mutation_gd_parser,
+                                          annotation_gd_parser=None,
+                                          reseq_ref_name=reseq_ref_name,
+                                          experiment=experiment,
+                                          is_wild_type=False)
+
+
 # For wild_type, expecting directory with output.gd in it.
 def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                                            ale_exp_user,
@@ -236,7 +340,6 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
     sanitized_breseq_output_abs_path = builder.util.sanitize_path(breseq_output_abs_path)
 
     instrument, created = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
-
     experiment, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                          instrument=instrument,
                                                                          person=ale_exp_user)
@@ -246,7 +349,8 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
                  icon='<i class="fa fa-flask" aria-hidden="true"></i>',
                  color="success")
 
-    default_media, created = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
+    default_media, \
+    created = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
                                                                     substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
                                                                     temperature=metadata.parser.DEFAULT_TEMPERATURE,
                                                                     volume=metadata.parser.DEFAULT_VOLUME,
@@ -265,7 +369,6 @@ def create_ale_experiment_or_insert_flasks(breseq_output_abs_path,
 
     # Might need to explicitly sort this list in the future.
     breseq_sample_report_list = _get_sample_report_list(sanitized_breseq_output_abs_path)
-
     for ale_isolate_name in breseq_sample_report_list:
 
         ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
@@ -355,7 +458,7 @@ def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
 
 
 def _create_and_commit_ale_entry(person,
-                                 breseq_folder_path,
+                                 breseq_output_dir_path,
                                  ale_number,
                                  flask_number,
                                  isolate_number,
@@ -381,17 +484,13 @@ def _create_and_commit_ale_entry(person,
     """
 
     ale_id, created = ale.models.AleId.objects.get_or_create(ale_experiment=experiment, ale_id=ale_number)
-
     flask, created = ale.models.Flask.objects.get_or_create(flask_number=flask_number, ale_id=ale_id, media=media)
 
-    with open(os.path.join(breseq_folder_path, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
-
+    with open(os.path.join(breseq_output_dir_path, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
         mutation_gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
 
-    annotated_output_file_dir = breseq_folder_path + ANNOTATION_GENOMIC_DIFF_FILE_DIR
-
+    annotated_output_file_dir = breseq_output_dir_path + ANNOTATION_GENOMIC_DIFF_FILE_DIR
     with open(os.path.join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
-
         annotation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
     reseq_ref_name = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_SEQ_REF_KEY]
@@ -405,19 +504,13 @@ def _create_and_commit_ale_entry(person,
         breseq_version = mutation_gd_parser.meta_data[gdparse.BRESEQ_VERSION_KEY]
 
     if gdparse.RESEQ_TYPE_KEY in mutation_gd_parser.meta_data.keys():
-
         sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
-
     else:  # Breseq version 0.26.0 doesn't have the #=COMMAND meta-data.
-
-        sample_reseq_type = _legacy_get_sample_reseq_type(breseq_folder_path)
-
+        sample_reseq_type = _legacy_get_sample_reseq_type(breseq_output_dir_path)
         mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY] = sample_reseq_type
 
     is_population = False
-
     if sample_reseq_type == gdparse.SampleType.POPULATION:
-
         is_population = True
 
     isolate, created = ale.models.Isolate.objects.get_or_create(flask=flask,
@@ -429,17 +522,18 @@ def _create_and_commit_ale_entry(person,
                                                                 freezer_box=freezer_box,
                                                                 person=person)
 
-    technical_replicate, created = ale.models.TechnicalReplicate.objects.get_or_create(tech_rep_number=technical_replicate_number,
+    technical_replicate, \
+    created = ale.models.TechnicalReplicate.objects.get_or_create(tech_rep_number=technical_replicate_number,
                                                                                        isolate=isolate)
 
     builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
                                       person=person,
-                                      breseq_folder=breseq_folder_path,
+                                      breseq_ouput_dir_path=breseq_output_dir_path,
                                       mutation_gd_parser=mutation_gd_parser,
                                       annotation_gd_parser=annotation_gd_parser,
                                       reseq_ref_name=reseq_ref_name,
                                       experiment=experiment,
-                                      is_wild_type=is_wild_type,)
+                                      is_wild_type=is_wild_type, )
 
 
 def _legacy_get_sample_reseq_type(breseq_folder_path):
@@ -482,6 +576,7 @@ def create_functional_annotations(genbank_path, ale_experiment_id):
     for observed_mutation in observed_mutations:
 
         mutation = observed_mutation.mutation
+        mutation_genes= ""
         if mutation.gene is not None:
             mutation_genes = mutation.gene.replace("[", "").replace("]", "").replace(u"\u2013", "/").replace("-", "/").split("/")
 

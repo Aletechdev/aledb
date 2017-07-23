@@ -1,6 +1,6 @@
 import os
 from django.test import TestCase
-
+from seq.models import Mutation
 from builder.upload import _is_missing_coverage_type
 from builder.upload import _parse_average_read_length
 from builder.upload import _parse_read_count
@@ -28,11 +28,17 @@ class TestUpload(TestCase):
                            mutation_gd_parser,
                            None,
                            "NC_000913_3")
-        # if crashes, then failure.
 
+        mut_qryset = Mutation.objects.all()
+        mut_pos_list = [mut.position for mut in mut_qryset]
+        self.assertEqual(len(mut_qryset), 4)
+        self.assertTrue(257908 in mut_pos_list)
+        self.assertTrue(2173363 in mut_pos_list)
+        self.assertTrue(3560455 in mut_pos_list)
+        self.assertTrue(4296381 in mut_pos_list)
 
     def test_add_breseq_results_gd_file_only(self):
-        breseq_output_dir_path = self.current_location + "/0-0-1-1/output/"
+        breseq_output_dir_path = self.current_location + "/1-0-1-1/output/"
         with open(breseq_output_dir_path + "output.gd") as output_genomic_diff_file:
             mutation_gd_parser = GDParser(file_handle=output_genomic_diff_file)
 
@@ -44,6 +50,18 @@ class TestUpload(TestCase):
                            "NC_000913_3")
         # if crashes, then failure.
 
+    def test_add_breseq_results_ltee_gd_file(self):
+        breseq_output_dir_path = self.current_location + "/2-0-1-1/output/"
+        with open(breseq_output_dir_path + "output.gd") as output_genomic_diff_file:
+            mutation_gd_parser = GDParser(file_handle=output_genomic_diff_file)
+
+        add_breseq_results(1,
+                           "Patrick",
+                           breseq_output_dir_path,
+                           mutation_gd_parser,
+                           None,
+                           "NC_000913_3")
+        # if crashes, then failure.
 
     def test_get_mutation_freq_89(self):
 

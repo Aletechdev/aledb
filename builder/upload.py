@@ -63,20 +63,18 @@ def add_breseq_results(technical_replicate_id,
                                              person)
 
     sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
-
     sample_mutation_dict = mutation_gd_parser.data[gdparse.MUTATION_KEY]
-
     sample_mutation_annotation_dict = None
     if annotation_gd_parser:
         sample_mutation_annotation_dict = annotation_gd_parser.data[gdparse.MUTATION_KEY]
 
-    _process_mutations(sample_reseq_type,
-                       breseq_ouput_dir_path,
-                       reseq,
-                       sample_mutation_dict,
-                       sample_mutation_annotation_dict,
-                       experiment,
-                       is_wild_type)
+    _database_mutations(sample_reseq_type,
+                        breseq_ouput_dir_path,
+                        reseq,
+                        sample_mutation_dict,
+                        sample_mutation_annotation_dict,
+                        experiment,
+                        is_wild_type)
 
     _process_duplications(breseq_ouput_dir_path,
                           reseq,
@@ -124,10 +122,10 @@ def _process_duplications(breseq_output_dir_path,
 
 def _get_beautifulsoup_html(output_folder, html_file_name):
     output_file_path = join(output_folder, html_file_name)
-
-    with open(output_file_path) as infile:
-        bs_html_file = BeautifulSoup(infile, "html.parser")
-
+    bs_html_file = None
+    if os.path.isfile(output_file_path):
+        with open(output_file_path) as infile:
+            bs_html_file = BeautifulSoup(infile, "html.parser")
     return bs_html_file
 
 
@@ -215,61 +213,46 @@ def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, pers
     reseq, created = seq.models.ResequencingExperiment.objects.get_or_create(location=breseq_folder[breseq_folder.find(ale_data_root_dir) + len(ale_data_root_dir):],
                                                                                       tech_rep_id=technical_replicate_id,
                                                                                       person=person)
-
     statistics_html = _get_beautifulsoup_html(breseq_folder, HTML_SUMMARY_FILE_NAME)
+    if statistics_html:
+        row_read_info = statistics_html.find("tr", attrs={"class": "highlight_table_row"}).findChildren("td")
+        reseq.reads = _parse_read_count(row_read_info[READ_COUNT_INDEX].text)
+        reseq.average_read_length = _parse_average_read_length(row_read_info[AVERAGE_READ_LENGTH_INDEX].text)
+        try:
+            reseq.percentage_mapped = float(row_read_info[7].text.replace("%", ""))
+        except:
+            None
+        # average coverage is 3rd table, 2nd row (could also be more rows), 5th column
+        mean_coverage = statistics_html.findChildren("table")[2].findChildren("tr")[1].findChildren("td")[4].text
+        try:
+            mean_coverage = float(mean_coverage)
+        except:
+            mean_coverage = 0
 
-    row_read_info = statistics_html.find("tr", attrs={"class": "highlight_table_row"}).findChildren("td")
-
-    # if any mutations were read in, we need to overwrite them
-    # ??? WHY ??? -Patrick
-    # reseq.mutations = []
-    reseq.reads = _parse_read_count(row_read_info[READ_COUNT_INDEX].text)
-    reseq.average_read_length = _parse_average_read_length(row_read_info[AVERAGE_READ_LENGTH_INDEX].text)
-
-    try:
-        reseq.percentage_mapped = float(row_read_info[7].text.replace("%", ""))
-    except:
-        None
-
-    # average coverage is 3rd table, 2nd row (could also be more rows), 5th column
-    mean_coverage = statistics_html.findChildren("table")[2].findChildren("tr")[1].findChildren("td")[4].text
-    try:
-        mean_coverage = float(mean_coverage)
-    except:
-        mean_coverage = 0
-
-    reseq.mean_coverage = mean_coverage
+        reseq.mean_coverage = mean_coverage
 
     reseq.save()
-
     return reseq
 
 
-def _process_mutations(sample_type,
-                       breseq_folder,
-                       seq_experiment,
-                       sample_mutation_dict,
-                       mutation_annotation_dict,
-                       experiment,
-                       is_wild_type):
+def _database_mutations(sample_type,
+                        breseq_folder,
+                        seq_experiment,
+                        mutation_dict,
+                        mutation_annotation_dict,
+                        experiment,
+                        is_wild_type):
 
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
-
     column_type_index_dict = _get_mutation_header_dict(mutations_html)
-
     mutation_rows = _get_mutations_rows(mutations_html, sample_type)
-
     observed_mutation_list = []
 
     # Only used if is_wild_type is True. Doesn't affect functionality otherwise
     wild_type_mutation_list = []
-
     for row_num, row in enumerate(mutation_rows):
-
         mutation_num = row_num + 1  # row_num is 0 based, mutation_num is 1 based.
-
         attrs = row.findChildren("td")
-
         gene_list_str = ""
         if mutation_annotation_dict:
             breseq_gene_annotation = mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
@@ -277,18 +260,16 @@ def _process_mutations(sample_type,
             gene_list = get_annotated_gene_list(breseq_gene_annotation, breseq_gene_product_annotation)
             gene_list_str = ', '.join(gene_list)
 
-        mutation, created = seq.models.Mutation.objects.get_or_create(position=sample_mutation_dict[mutation_num].get(GD_MUT_POS_ATTR_KEY),
+        mutation, \
+        created = seq.models.Mutation.objects.get_or_create(position=mutation_dict[mutation_num].get(GD_MUT_POS_ATTR_KEY),
                                                                       gene=gene_list_str,
                                                                       # mutations are in the same order in the html and output.gd
                                                                       # files so we can index the ids with row_num
                                                                       sequence_change=attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_MUTATION]].text,
-                                                                      mutation_type=sample_mutation_dict[mutation_num].get(GD_MUT_TYPE_ATTR_KEY))
-
+                                                                      mutation_type=mutation_dict[mutation_num].get(GD_MUT_TYPE_ATTR_KEY))
         if mutation.protein_change is None:
-
             change = attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_ANNOTATION]].renderContents()
             mutation.protein_change = change
-
         mutation.save()
 
         if is_wild_type is True:
@@ -298,17 +279,14 @@ def _process_mutations(sample_type,
                                                         mutation=mutation,
                                                         breseq_present=True,
                                                         evidence=attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents(),
-                                                        frequency=_get_mutation_freq(sample_mutation_dict[mutation_num]))
+                                                        frequency=_get_mutation_freq(mutation_dict[mutation_num]))
         observed_mutation_list.append(observed_mutation)
 
     seq.models.ObservedMutation.objects.bulk_create(observed_mutation_list)
 
     if is_wild_type is True:
-
         exp_filter, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=experiment.ale_id)
-
         exp_filter.starting_strain_mutations = ','.join(str(mut) for mut in wild_type_mutation_list)
-
         exp_filter.save()
 
 
@@ -326,37 +304,27 @@ def _get_mutation_freq(mutation_dict):
 
 
 def _get_mutation_header_dict(mutations_html):
-
-    mutation_table = mutations_html.find("th", attrs={"class": "mutation_header_row"}).parent.parent
-
-    table_header_rows = mutation_table.findChildren("th")
-
-    header_dict = collections.defaultdict()
-
-    for row_idx in range(1, len(table_header_rows)):
-
-        column_name = table_header_rows[row_idx].getText()
-        header_dict[column_name] = row_idx - 1
-
+    header_dict = None
+    if mutations_html:
+        mutation_table = mutations_html.find("th", attrs={"class": "mutation_header_row"}).parent.parent
+        table_header_rows = mutation_table.findChildren("th")
+        header_dict = collections.defaultdict()
+        for row_idx in range(1, len(table_header_rows)):
+            column_name = table_header_rows[row_idx].getText()
+            header_dict[column_name] = row_idx - 1
     return header_dict
 
 
 def _get_mutations_rows(mutations_html, sample_type):
-
-    # parse the mutation html file to find the correct table
-
-    mutation_table = mutations_html.find("th", attrs={"class": "mutation_header_row"}).parent.parent
-
-    if sample_type == gdparse.SampleType.CLONAL:
-
-        html_class_to_parse = CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
-
-    else:
-
-        html_class_to_parse = POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
-
-    mutation_rows = mutation_table.findChildren("tr", attrs={"class": html_class_to_parse})
-
+    mutation_rows = None
+    if mutations_html:
+        # parse the mutation html file to find the correct table
+        mutation_table = mutations_html.find("th", attrs={"class": "mutation_header_row"}).parent.parent
+        if sample_type == gdparse.SampleType.CLONAL:
+            html_class_to_parse = CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
+        else:
+            html_class_to_parse = POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS
+        mutation_rows = mutation_table.findChildren("tr", attrs={"class": html_class_to_parse})
     return mutation_rows
 
 
