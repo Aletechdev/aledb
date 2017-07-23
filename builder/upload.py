@@ -11,6 +11,7 @@ from genes.util import get_annotated_gene_list
 from filter.models import AleExperimentFilter
 from duplications.util import Duplications
 
+
 HTML_SUMMARY_FILE_NAME = "summary.html"
 HTML_MUTATION_FILE_NAME = "index.html"
 CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row"]
@@ -44,7 +45,7 @@ DUPLICATION_BP_TOLERANCE = 900
 
 def add_breseq_results(technical_replicate_id,
                        person,
-                       breseq_folder,
+                       breseq_ouput_dir_path,
                        mutation_gd_parser,
                        annotation_gd_parser,
                        reseq_ref_name,
@@ -57,25 +58,27 @@ def add_breseq_results(technical_replicate_id,
     sample was processed as a population.
     """
 
-    reseq = _get_reseq_experiment_with_stats(breseq_folder,
-                                                      technical_replicate_id,
-                                                      person)
+    reseq = _get_reseq_experiment_with_stats(breseq_ouput_dir_path,
+                                             technical_replicate_id,
+                                             person)
 
     sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
 
     sample_mutation_dict = mutation_gd_parser.data[gdparse.MUTATION_KEY]
 
-    sample_mutation_annotation_dict = annotation_gd_parser.data[gdparse.MUTATION_KEY]
+    sample_mutation_annotation_dict = None
+    if annotation_gd_parser:
+        sample_mutation_annotation_dict = annotation_gd_parser.data[gdparse.MUTATION_KEY]
 
     _process_mutations(sample_reseq_type,
-                       breseq_folder,
+                       breseq_ouput_dir_path,
                        reseq,
                        sample_mutation_dict,
                        sample_mutation_annotation_dict,
                        experiment,
                        is_wild_type)
 
-    _process_duplications(breseq_folder,
+    _process_duplications(breseq_ouput_dir_path,
                           reseq,
                           is_wild_type)
 
@@ -83,7 +86,7 @@ def add_breseq_results(technical_replicate_id,
 
     _process_unassigned_missing_coverage(reseq,
                                          sample_evidence_dict,
-                                         breseq_folder)
+                                         breseq_ouput_dir_path)
 
 
 def _process_duplications(breseq_output_dir_path,
@@ -246,7 +249,7 @@ def _process_mutations(sample_type,
                        breseq_folder,
                        seq_experiment,
                        sample_mutation_dict,
-                       sample_mutation_annotation_dict,
+                       mutation_annotation_dict,
                        experiment,
                        is_wild_type):
 
@@ -267,10 +270,12 @@ def _process_mutations(sample_type,
 
         attrs = row.findChildren("td")
 
-        breseq_gene_annotation = sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
-        breseq_gene_product_annotation = sample_mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
-        gene_list = get_annotated_gene_list(breseq_gene_annotation, breseq_gene_product_annotation)
-        gene_list_str = ', '.join(gene_list)
+        gene_list_str = ""
+        if mutation_annotation_dict:
+            breseq_gene_annotation = mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
+            breseq_gene_product_annotation = mutation_annotation_dict[mutation_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
+            gene_list = get_annotated_gene_list(breseq_gene_annotation, breseq_gene_product_annotation)
+            gene_list_str = ', '.join(gene_list)
 
         mutation, created = seq.models.Mutation.objects.get_or_create(position=sample_mutation_dict[mutation_num].get(GD_MUT_POS_ATTR_KEY),
                                                                       gene=gene_list_str,
