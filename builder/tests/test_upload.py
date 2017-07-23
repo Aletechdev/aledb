@@ -65,7 +65,14 @@ class TestUpload(TestCase):
                            mutation_gd_parser,
                            None,
                            "NC_000913_3")
-        # if crashes, then failure.
+
+        mut_qryset = Mutation.objects.all()
+        mut_pos_list = [mut.position for mut in mut_qryset]
+        self.assertEqual(len(mut_qryset), 4)
+        self.assertTrue(880542 in mut_pos_list)
+        self.assertTrue(1733559 in mut_pos_list)
+        self.assertTrue(2103918 in mut_pos_list)
+        self.assertTrue(4141016 in mut_pos_list)
 
     def test_get_mutation_freq_89(self):
 

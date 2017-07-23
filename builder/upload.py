@@ -15,6 +15,7 @@ from filter.models import AleExperimentFilter
 from duplications.util import Duplications
 
 
+
 HTML_SUMMARY_FILE_NAME = "summary.html"
 HTML_MUTATION_FILE_NAME = "index.html"
 CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row"]
@@ -65,7 +66,9 @@ def add_breseq_results(technical_replicate_id,
                                              technical_replicate_id,
                                              person)
 
-    sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
+    sample_reseq_type = gdparse.SampleType.CLONAL  # arbitrary default, though could have side-effects.
+    if gdparse.RESEQ_TYPE_KEY in mutation_gd_parser.meta_data.keys():
+        sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
     sample_mutation_dict = mutation_gd_parser.data[gdparse.MUTATION_KEY]
     sample_mutation_annotation_dict = None
     if annotation_gd_parser:
