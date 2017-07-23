@@ -93,21 +93,21 @@ def get_ale_flask_isolate_count_list(reseq_queryset):
 
 def get_reseq_experiment_info_list(reseq_experiments):
     reseq_experiments_info_list = []
-    for reseq_experiment in reseq_experiments:
-        mc_list = UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=reseq_experiment.id)
-        mapped_read_count = int((reseq_experiment.percentage_mapped / 100) * reseq_experiment.reads)
-        species = reseq_experiment.tech_rep.isolate.flask.ale_id.species
-        strain = reseq_experiment.tech_rep.isolate.flask.ale_id.strain
-        knockouts = reseq_experiment.tech_rep.isolate.flask.ale_id.description
+    for reseq in reseq_experiments:
+        mc_list = UnassignedMissingCoverageEvidence.objects.filter(sequencing_experiment_id=reseq.id)
+        mapped_read_count = int((reseq.percentage_mapped / 100) * reseq.reads)
+        species = reseq.tech_rep.isolate.flask.ale_id.species
+        strain = reseq.tech_rep.isolate.flask.ale_id.strain
+        knockouts = reseq.tech_rep.isolate.flask.ale_id.description
         clonal_or_population = "clonal"
-        if reseq_experiment.tech_rep.isolate.is_population:
+        if reseq.tech_rep.isolate.is_population:
             clonal_or_population = "population"
-        media_temperature = reseq_experiment.tech_rep.isolate.flask.media.temperature
-        media_description = reseq_experiment.tech_rep.isolate.flask.media.description
-        substrate = reseq_experiment.tech_rep.isolate.flask.media.substrate
+        media_temperature = reseq.tech_rep.isolate.flask.media.temperature
+        media_description = reseq.tech_rep.isolate.flask.media.description
+        substrate = reseq.tech_rep.isolate.flask.media.substrate
 
         # Using tuple because immutable; mc_list must remain associated with particular experiment.
-        experiment_info_tuple = (reseq_experiment,
+        experiment_info_tuple = (reseq,
                                  mc_list,
                                  mapped_read_count,
                                  clonal_or_population,
