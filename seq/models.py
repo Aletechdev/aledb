@@ -5,22 +5,23 @@ blank_field = {"blank": True, "null": True}
 
 # TODO: Refactor: figure out how to get a ResequencingExperiment to return its list of observed mutations and remove functionality from seq.views.common
 class ResequencingExperiment(models.Model):
-    tech_rep = models.ForeignKey("ale.TechnicalReplicate", null=True)
+    tech_rep = models.ForeignKey("ale.TechnicalReplicate",
+                                 null=True)
     person = models.CharField(max_length=200,
                               blank=True)
     reads = models.IntegerField(blank=True,
-                                null=True)
+                                default=0)
     average_read_length = models.FloatField(blank=True,
-                                            null=True)
+                                            default=0)
     mutations = models.ManyToManyField("Mutation",
                                        through="ObservedMutation")
     location = models.CharField(max_length=200,
                                 blank=True,
                                 null=True)
     mean_coverage = models.FloatField(blank=True,
-                                      null=True)
+                                      default=0)
     percentage_mapped = models.FloatField(blank=True,
-                                          null=True)
+                                          default=0)
 
     @property
     def ale_experiment(self):
