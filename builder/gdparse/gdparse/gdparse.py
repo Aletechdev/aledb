@@ -138,25 +138,17 @@ class GDParser():
             int, float, str
         """
         type_list = [int, float]
-
         for var_type in type_list:
-
             try:
-
                 converted_var = var_type(data_string.strip())
-
                 # Check for infinite values:
                 if converted_var == float('Inf'):
                     converted_var = 1e6
-
                 return converted_var
-
             except ValueError:
-
                 pass
-
         # No match found
-        return data_string.encode("utf-8").strip()
+        return data_string.strip()
 
     @staticmethod
     def _is_genome_diff_header_appropriate(gd_version_line):
