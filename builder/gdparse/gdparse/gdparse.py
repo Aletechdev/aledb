@@ -341,11 +341,8 @@ class GDParser():
         return meta_data_line_list
 
     def _process_breseq_version(self, meta_data_field_string):
-
         meta_data_list = meta_data_field_string.split()
-
         breseq_version = meta_data_list[BRESEQ_VERSION_INDEX]
-
         self.meta_data[BRESEQ_VERSION_KEY] = breseq_version
 
     def _process_clonal_or_population(self, meta_data_field_string):
