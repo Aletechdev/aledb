@@ -238,7 +238,7 @@ class GDParser():
             field_defs: a list of dictionaries defining the fields.
                 Required sub-fields:
                     name:    any valid string
-                    type:    int, float, char, string, int_tuple
+                    type:    int, float, char, string
                 Optional sub-fields:
                     allowed_values:    list that contains the values allowed in the field
                 Optional sub-fields for string fields:
@@ -313,17 +313,6 @@ class GDParser():
                                                                                                       field_defs[
                                                                                                           field_idx][
                                                                                                           'min_abs']))
-            elif field_defs[field_idx][
-                'type'] == 'int_tuple':  # Will take any comma-separated list and return it as a tuple of ints. Currently only used for sequence ranges.
-                split_field = field.split(',')
-                if len(split_field) < 2:
-                    raise GDFieldError(field_idx + start_field, field_defs[field_idx]['name'], field,
-                                       "Expected more than {} items".format(len(split_field)))
-                try:
-                    parsed_value = tuple([int(e) for e in split_field])
-                except ValueError as ve:
-                    raise GDFieldError(field_idx + start_field, field_defs[field_idx]['name'], field,
-                                       "Cannot convert to integer", ve.message)
             if 'allowed_values' in field_defs[field_idx] and parsed_value not in field_defs[field_idx][
                 'allowed_values']:
                 raise GDFieldError(field_idx + start_field, field_defs[field_idx]['name'], field,
@@ -553,7 +542,7 @@ class GDParser():
                 field_list.append({'name': 'size', 'type': 'int'})
                 # Field 7: region <sequence:start-end>
                 # region in the reference genome to use as a replacement.
-                field_list.append({'name': 'region', 'type': 'int_tuple'})
+                field_list.append({'name': 'region', 'type': 'string'})
                 # ------------------------------------------------------------------------------
                 next_field = self._parse_type_specific_fields(data_elements, new_data, field_list, 3)
                 # ------------------------------------------------------------------------------

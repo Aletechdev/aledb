@@ -1,9 +1,8 @@
-__author__ = 'pphaneuf'
-
-
-from gdparse import gdparse
-
+from builder.gdparse.gdparse.gdparse import GDParser
 import unittest
+
+
+__author__ = 'Patrick Phaneuf'
 
 
 class TestGDParser(unittest.TestCase):
@@ -12,13 +11,18 @@ class TestGDParser(unittest.TestCase):
 
         expected_mutation_name = "[crl]"
         mutation_id = 1
-        attribute = "gene_name"
         gd_file_name = "annotated.gd"
 
         with open(gd_file_name, 'rb') as genomic_diff_file:
-            gd_parser = gdparse.GDParser(genomic_diff_file)
+            gd_parser = GDParser(genomic_diff_file)
             experiment_mutation_dict = gd_parser.data['mutation']
 
-        returned_mutation_name = experiment_mutation_dict[mutation_id][attribute]
+        returned_mutation_name = experiment_mutation_dict[mutation_id]["gene_name"]
 
         self.assertEquals(expected_mutation_name, returned_mutation_name)
+
+
+    def test_CON_mutations(self):
+        with open("3-30000-1-1.gd") as gd_file:
+            gd_parser = GDParser(gd_file)
+        # pass if doesn't crash.
