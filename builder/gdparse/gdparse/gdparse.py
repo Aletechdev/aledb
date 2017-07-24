@@ -233,42 +233,6 @@ class GDParser():
                     print(file_handle.name + " Unhandled exception on line {}:".format(line_num))
                     # print(ex.message)
                     raise
-            try:
-                pass
-                self._qc_checks()
-
-            except GDFieldError as gd_file_field_error:
-
-                print(file_handle.name + " QC Check failed: {}, {}, {}, {}, {}".format(gd_file_field_error.field_num,
-                                                                                       gd_file_field_error.field_name,
-                                                                                       gd_file_field_error.field_value,
-                                                                                       gd_file_field_error.msg,
-                                                                                       gd_file_field_error.inner_exception_msg))
-
-            except GDParseError as gd_file_parse_error:
-
-                print(file_handle.name
-                      + " QC Check failed: {}, {}".format(gd_file_parse_error.msg,
-                                                          gd_file_parse_error.inner_exception_msg))
-
-    def _qc_checks(self):
-        """
-        Performs consistency checks for QC.
-
-        Currently only implements a check that
-        all evidence IDs cited as evidence by mutations are actually present.
-        """
-        # Check that all mutation evidence references actually exist
-        for mutation_id in self.data[MUTATION_KEY]:
-            for evidence_parent_ids_to_find in self.data[MUTATION_KEY][mutation_id][PARENT_IDS_KEY]:
-                if evidence_parent_ids_to_find not in self.data[EVIDENCE_KEY] \
-                        and evidence_parent_ids_to_find != 'manual':
-                    raise GDFieldError(3,
-                                       PARENT_IDS_KEY,
-                                       evidence_parent_ids_to_find,
-                                       "Error on line {}, invalid parent id: {}".format(self.id2line_num[mutation_id],
-                                                                                        evidence_parent_ids_to_find)
-                                       )
 
     def _parse_type_specific_fields(self, source_data, target_data, field_defs, start_field=3):
         """
