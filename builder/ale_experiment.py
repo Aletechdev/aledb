@@ -211,9 +211,9 @@ def _insert_starting_strain_flask(staring_strain_breseq_output_abs_path,
 
 # TODO: this and create_ale_experiment_or_insert_flasks are extremely similar: refactor.
 # TODO: no starting strain included.
-def create_ale_experiment(gd_file_path,
-                          ale_exp_user,
-                          ale_exp_name):
+def create_ale_experiment_with_genomediff(gd_file_path,
+                                          ale_exp_user,
+                                          ale_exp_name):
     sanitized_breseq_output_abs_path = builder.util.sanitize_path(gd_file_path)
 
     instrument, created = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
@@ -249,13 +249,11 @@ def create_ale_experiment(gd_file_path,
 
         ale_id, created = ale.models.AleId.objects.get_or_create(ale_experiment=experiment, ale_id=ale_number)
         flask, created = ale.models.Flask.objects.get_or_create(flask_number=flask_number, ale_id=ale_id, media=default_media)
-        with open(os.path.join(output_path, OUTPUT_GENOMIC_DIFF_FILE_NAME), 'rb') as output_genomic_diff_file:
-            mutation_gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
 
-        # annotated_output_file_dir = output_path + ANNOTATION_GENOMIC_DIFF_FILE_DIR
-        # with open(os.path.join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME),
-        #           'rb') as annotation_genomic_diff_file:
-        #     annotation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
+        annotated_output_file_dir = output_path + ANNOTATION_GENOMIC_DIFF_FILE_DIR
+        with open(os.path.join(annotated_output_file_dir, ANNOTATION_GENOMIC_DIFF_FILE_NAME),
+                  'rb') as annotation_genomic_diff_file:
+            mutation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
         reseq_ref_name = ""
         if gdparse.GENOMIC_DIFF_SEQ_REF_KEY in mutation_gd_parser.meta_data.keys():
@@ -274,7 +272,7 @@ def create_ale_experiment(gd_file_path,
         # else:  # Breseq version 0.26.0 doesn't have the #=COMMAND meta-data.
         #     sample_reseq_type = _legacy_get_sample_reseq_type(breseq_folder_path)
         #     mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY] = sample_reseq_type
-        is_population = False
+        is_population = False  # TODO: hardocded default for the LTEE project integration work.
 
         isolate, created = ale.models.Isolate.objects.get_or_create(flask=flask,
                                                                     isolate_number=isolate_number,
@@ -293,24 +291,10 @@ def create_ale_experiment(gd_file_path,
                                           person=ale_exp_user,
                                           breseq_ouput_dir_path=output_path,
                                           mutation_gd_parser=mutation_gd_parser,
-                                          annotation_gd_parser=None,
+                                          # annotation_gd_parser=None,
                                           reseq_ref_name=reseq_ref_name,
                                           experiment=experiment,
                                           is_wild_type=False, )
-
-
-        technical_replicate, created = ale.models.TechnicalReplicate.objects.get_or_create(
-            tech_rep_number=technical_replicate_number,
-            isolate=isolate)
-
-        builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
-                                          person=ale_exp_user,
-                                          breseq_ouput_dir_path=output_path,
-                                          mutation_gd_parser=mutation_gd_parser,
-                                          annotation_gd_parser=None,
-                                          reseq_ref_name=reseq_ref_name,
-                                          experiment=experiment,
-                                          is_wild_type=False)
 
 
 # For wild_type, expecting directory with output.gd in it.
