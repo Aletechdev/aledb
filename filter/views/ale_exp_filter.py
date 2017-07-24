@@ -23,7 +23,7 @@ __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 FILTER_TEMPLATE = "filter/index.html"
 
-STARTING_STRAIN_HEADER = """<tr><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td></tr>"""
+STARTING_STRAIN_HEADER = """<tr><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Details</td></tr>"""
 
 
 def mutation_filter(request):
