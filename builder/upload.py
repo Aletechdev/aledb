@@ -33,7 +33,6 @@ BRESEQ_REPORT_COLUMN_KEY_POSITION = "position"
 BRESEQ_REPORT_COLUMN_KEY_MUTATION = "mutation"
 BRESEQ_REPORT_COLUMN_KEY_MUTATION_FREQUENCY = "freq"
 BRESEQ_REPORT_COLUMN_KEY_ANNOTATION = "annotation"
-BRESEQ_REPORT_COLUMN_KEY_GENE = "gene"
 DUP_CSV_GENE_LIST_INDEX = 7
 DUP_CSV_START_POSITION_INDEX = 0
 DUP_CSV_WIDTH_INDEX = 2
@@ -147,22 +146,14 @@ def _is_missing_coverage_type(evidence_dict):
 
 # Should be able to re-use this with populations.
 def _process_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_folder):
-
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
-
     mutation_rows = _get_unassigned_missing_coverage_rows(mutations_html)
-
     missing_coverage_dict = {}
-
     for row_num, row in enumerate(mutation_rows):
-
         attrs = row.findChildren("td")
-
         if not attrs:
             continue
-
         position = attrs[4].get_text()
-
         missing_coverage_dict[position] = [attrs[0].find("a")['href'],  # reads_left_url
                                            attrs[1].find("a")['href'],  # reads_right_url
                                            attrs[2].find("a")['href'],  # coverage
@@ -171,15 +162,12 @@ def _process_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_f
                                            attrs[8].get_text(),         # reads_right
                                            attrs[9].get_text(),         # gene
                                            attrs[10].get_text()]        # description
-
     for key in evidence_dict:
-
         if _is_missing_coverage_type(evidence_dict[key]):
             # TODO: make literals into constants
             # Followed example given by ObservedMutations.
             # Seems like I have to use a mix of both Django and Alchemy ORM members.
             # Shouldn't have to do this.
-
             # TODO: Keyerrors only exist because the missing_coverage dict does not have the starting strain (wild type) html file
             try:
                 html_attrs = missing_coverage_dict[str(evidence_dict[key]['start'])]

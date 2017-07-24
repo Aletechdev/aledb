@@ -42,17 +42,12 @@ def integrate_metadata(ale_exp_path, ref_file_name, ale_exp_primary_key):
 
 
 def remove_flask(flask_primary_key):
-
     """
     Executed from Django ipython shell
     """
-
     clear_dashboard_cache()
-
     flask_to_delete = ale.models.Flask.objects.get(pk=flask_primary_key)
-
     flask_to_delete.delete()
-
     _delete_all_orphaned_mutations()
 
 
@@ -73,25 +68,18 @@ def delete_ale_experiment(ale_experiment_primary_key):
 
 
 def _delete_all_orphaned_mutations():
-
     all_mutations = seq.models.Mutation.objects.all()
-
     for mutation in all_mutations:
-
         if len(mutation.observedmutation_set.all()) == 0:
-
             mutation.delete()
 
 
 def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate_number):
-
     isolate_to_delete = ale.models.Isolate.objects.filter(isolate_number=isolate_number)
-
     for isolate in isolate_to_delete:
         if isolate.flask.ale_id.ale_experiment_id == ale_experiment_primary_key and isolate.flask.ale_id.ale_id == ale_number and isolate.flask.flask_number == flask_number:
             isolate.delete()
             print("Successfully removed: ", ale_number, flask_number, isolate_number)
-
     _delete_all_orphaned_mutations()
 
 
