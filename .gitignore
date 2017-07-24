@@ -9,4 +9,4 @@
 nohup.out
 aleinfo/settings.ini
 .DS_Store
-static/
+/static/
