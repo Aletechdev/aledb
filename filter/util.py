@@ -16,7 +16,7 @@ MODEL_TO_FILTER_MAPPINGS = {"protein": "protein_change",
 
 DELETE_ROW_BOX = """<td><img src="/static/close-icon.gif" onclick="delete_row(%d)" width="12" height="11" style="float:right; cursor:pointer"></td>"""
 
-TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Protein change</td></tr>"
+TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Details</td></tr>"
 
 
 def filter_observed_mutations(observed_mutation_queryset, filter_settings=None):
