@@ -50,7 +50,7 @@ def add_breseq_results(technical_replicate_id,
                        person,
                        breseq_ouput_dir_path,
                        mutation_gd_parser,
-                       annotation_gd_parser,
+                       # annotation_gd_parser,
                        reseq_ref_name,
                        experiment=None,
                        is_wild_type=False):
@@ -69,32 +69,32 @@ def add_breseq_results(technical_replicate_id,
     if gdparse.RESEQ_TYPE_KEY in mutation_gd_parser.meta_data.keys():
         sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
     sample_mutation_dict = mutation_gd_parser.data[gdparse.MUTATION_KEY]
-    sample_mutation_annotation_dict = None
-    if annotation_gd_parser:
-        sample_mutation_annotation_dict = annotation_gd_parser.data[gdparse.MUTATION_KEY]
+    # sample_mutation_annotation_dict = None
+    # if annotation_gd_parser:
+    #     sample_mutation_annotation_dict = annotation_gd_parser.data[gdparse.MUTATION_KEY]
 
     _database_mutations(sample_reseq_type,
                         breseq_ouput_dir_path,
                         reseq,
                         sample_mutation_dict,
-                        sample_mutation_annotation_dict,
+                        # sample_mutation_annotation_dict,
                         experiment,
                         is_wild_type)
 
-    _process_duplications(breseq_ouput_dir_path,
-                          reseq,
-                          is_wild_type)
+    _database_duplications(breseq_ouput_dir_path,
+                           reseq,
+                           is_wild_type)
 
     sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
 
-    _process_unassigned_missing_coverage(reseq,
-                                         sample_evidence_dict,
-                                         breseq_ouput_dir_path)
+    _database_unassigned_missing_coverage(reseq,
+                                          sample_evidence_dict,
+                                          breseq_ouput_dir_path)
 
 
-def _process_duplications(breseq_output_dir_path,
-                          reseq,
-                          is_wild_type):
+def _database_duplications(breseq_output_dir_path,
+                           reseq,
+                           is_wild_type):
     """
     Called per breseq folder.
     """
@@ -136,16 +136,13 @@ def _get_beautifulsoup_html(output_folder, html_file_name):
 
 def _is_missing_coverage_type(evidence_dict):
     is_missing_coverage = False
-
     if evidence_dict[gdparse.EVIDENCE_TYPE_KEY] == gdparse.MISSING_COVERAGE_EVIDENCE_TYPE:
-
         is_missing_coverage = True
-
     return is_missing_coverage
 
 
 # Should be able to re-use this with populations.
-def _process_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_folder):
+def _database_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_folder):
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
     mutation_rows = _get_unassigned_missing_coverage_rows(mutations_html)
     missing_coverage_dict = {}
@@ -233,7 +230,7 @@ def _database_mutations(sample_type,
                         breseq_folder,
                         seq_experiment,
                         mutation_dict,
-                        mutation_annotation_dict,
+                        # mutation_annotation_dict,
                         experiment,
                         is_wild_type):
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
@@ -251,12 +248,10 @@ def _database_mutations(sample_type,
             html_mut_idx = mut_num - 1
             html_row = html_mut_resultset[html_mut_idx]
             html_mut_attrs = html_row.findChildren("td")
-        gene_list_str = ""
-        if mutation_annotation_dict:
-            breseq_gene_annotation = mutation_annotation_dict[mut_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
-            breseq_gene_product_annotation = mutation_annotation_dict[mut_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
-            gene_list = get_annotated_gene_list(breseq_gene_annotation, breseq_gene_product_annotation)
-            gene_list_str = ', '.join(gene_list)
+        breseq_gene_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
+        breseq_gene_product_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
+        gene_list = get_annotated_gene_list(breseq_gene_annotation, breseq_gene_product_annotation)
+        gene_list_str = ', '.join(gene_list)
 
         sequence_change = ""
         if html_mut_attrs:
