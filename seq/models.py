@@ -81,8 +81,7 @@ class Mutation(models.Model):
                                          null=True)
     sequence_change = models.CharField(max_length=200)
     protein_change = models.CharField(max_length=300,
-                                      blank=True,
-                                      null=True)
+                                      default="")
     gene = models.CharField(max_length=19000,
                             blank=True,
                             null=True)
