@@ -272,7 +272,7 @@ def create_ale_experiment_with_genomediff(gd_file_path,
         # else:  # Breseq version 0.26.0 doesn't have the #=COMMAND meta-data.
         #     sample_reseq_type = _legacy_get_sample_reseq_type(breseq_folder_path)
         #     mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY] = sample_reseq_type
-        is_population = False  # TODO: hardocded default for the LTEE project integration work.
+        is_population = False  # TODO: hardcoded default for the LTEE project integration work.
 
         isolate, created = ale.models.Isolate.objects.get_or_create(flask=flask,
                                                                     isolate_number=isolate_number,
@@ -291,7 +291,6 @@ def create_ale_experiment_with_genomediff(gd_file_path,
                                           person=ale_exp_user,
                                           breseq_ouput_dir_path=output_path,
                                           mutation_gd_parser=mutation_gd_parser,
-                                          # annotation_gd_parser=None,
                                           reseq_ref_name=reseq_ref_name,
                                           experiment=experiment,
                                           is_wild_type=False, )

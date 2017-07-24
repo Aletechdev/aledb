@@ -50,7 +50,6 @@ def add_breseq_results(technical_replicate_id,
                        person,
                        breseq_ouput_dir_path,
                        mutation_gd_parser,
-                       # annotation_gd_parser,
                        reseq_ref_name,
                        experiment=None,
                        is_wild_type=False):
@@ -69,15 +68,11 @@ def add_breseq_results(technical_replicate_id,
     if gdparse.RESEQ_TYPE_KEY in mutation_gd_parser.meta_data.keys():
         sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
     sample_mutation_dict = mutation_gd_parser.data[gdparse.MUTATION_KEY]
-    # sample_mutation_annotation_dict = None
-    # if annotation_gd_parser:
-    #     sample_mutation_annotation_dict = annotation_gd_parser.data[gdparse.MUTATION_KEY]
 
     _database_mutations(sample_reseq_type,
                         breseq_ouput_dir_path,
                         reseq,
                         sample_mutation_dict,
-                        # sample_mutation_annotation_dict,
                         experiment,
                         is_wild_type)
 
