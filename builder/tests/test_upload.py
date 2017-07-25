@@ -19,7 +19,7 @@ class TestUpload(TestCase):
 
     def test_add_breseq_results_no_mut_annotation_dict(self):
         breseq_output_dir_path = self.current_location+"/0-0-1-1/output/"
-        with open(breseq_output_dir_path+"output.gd") as output_genomic_diff_file:
+        with open(breseq_output_dir_path+"annotated.gd") as output_genomic_diff_file:
             mutation_gd_parser = GDParser(file_handle=output_genomic_diff_file)
         add_breseq_results(1,
                            "Patrick",
@@ -35,6 +35,7 @@ class TestUpload(TestCase):
         self.assertTrue(3560455 in mut_pos_list)
         self.assertTrue(4296381 in mut_pos_list)
 
+    # TODO: change unit test to get use annotated.gd rather than output.gd.
     def test_add_breseq_results_gd_file_only(self):
         breseq_output_dir_path = self.current_location + "/1-0-1-1/output/"
         with open(breseq_output_dir_path + "output.gd") as output_genomic_diff_file:
@@ -54,6 +55,7 @@ class TestUpload(TestCase):
         self.assertTrue(3560455 in mut_pos_list)
         self.assertTrue(4296381 in mut_pos_list)
 
+    # TODO: change unit test to get use annotated.gd rather than output.gd.
     def test_add_breseq_results_ltee_gd_file(self):
         breseq_output_dir_path = self.current_location + "/2-0-1-1/output/"
         with open(breseq_output_dir_path + "output.gd") as output_genomic_diff_file:
