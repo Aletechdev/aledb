@@ -15,7 +15,6 @@ from filter.models import AleExperimentFilter
 from duplications.util import Duplications
 
 
-
 HTML_SUMMARY_FILE_NAME = "summary.html"
 HTML_MUTATION_FILE_NAME = "index.html"
 CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row"]
@@ -27,6 +26,8 @@ GD_MUT_GENE_NAME_ATTR_KEY = 'gene_name'
 GD_MUT_GENE_PRODUCT_ATTR_KEY = 'gene_product'  # Will contain list of genes for mutations affecting many.
 GD_MUT_TYPE_ATTR_KEY = 'type'
 GD_MUT_FREQ_ATTR_KEY = 'frequency'
+GD_MUT_HTML = 'html_mutation'
+GD_MUT_ANNOTATION_HTML = "html_mutation_annotation"
 DEFAULT_CLONAL_FREQ = 1
 BRESEQ_REPORT_COLUMN_KEY_EVIDENCE = "evidence"
 BRESEQ_REPORT_COLUMN_KEY_POSITION = "position"
@@ -225,7 +226,6 @@ def _database_mutations(sample_type,
                         breseq_folder,
                         seq_experiment,
                         mutation_dict,
-                        # mutation_annotation_dict,
                         experiment,
                         is_wild_type):
     mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
@@ -236,37 +236,33 @@ def _database_mutations(sample_type,
     # Only used if is_wild_type is True. Doesn't affect functionality otherwise
     wild_type_mutation_list = []
     for mut_num in mutation_dict.keys():
-        html_mut_attrs = None
-        if html_mut_resultset:
-            # mutations are in the same order in the html and output.gd
-            # files so we can index the ids with row_num
-            html_mut_idx = mut_num - 1
-            html_row = html_mut_resultset[html_mut_idx]
-            html_mut_attrs = html_row.findChildren("td")
         breseq_gene_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
         breseq_gene_product_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
         gene_list = get_annotated_gene_list(breseq_gene_annotation, breseq_gene_product_annotation)
         gene_list_str = ', '.join(gene_list)
-
-        sequence_change = ""
-        if html_mut_attrs:
-            sequence_change = html_mut_attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_MUTATION]].text
+        sequence_change, protein_change = "", ""
+        if GD_MUT_HTML in mutation_dict[mut_num].keys():
+            sequence_change = mutation_dict[mut_num].get(GD_MUT_HTML)
+        if GD_MUT_ANNOTATION_HTML in mutation_dict[mut_num].keys():
+            protein_change = mutation_dict[mut_num].get(GD_MUT_ANNOTATION_HTML)
         mut, \
         created = Mutation.objects.get_or_create(position=mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY),
                                                  gene=gene_list_str,
                                                  # mutations are in the same order in the html and output.gd
                                                  # files so we can index the ids with row_num
                                                  sequence_change=sequence_change,
-                                                 mutation_type=mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY))
-        if mut.protein_change is None \
-                and html_mut_attrs:
-            change = html_mut_attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_ANNOTATION]].renderContents()
-            mut.protein_change = change
+                                                 mutation_type=mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY),
+                                                 protein_change=protein_change)
         mut.save()
         if is_wild_type is True:
             wild_type_mutation_list.append(mut.id)
         evidence = ""
-        if html_mut_attrs:
+        if html_mut_resultset:
+            # mutations are in the same order in the html and output.gd
+            # files so we can index the ids with row_num
+            html_mut_idx = mut_num - 1
+            html_row = html_mut_resultset[html_mut_idx]
+            html_mut_attrs = html_row.findChildren("td")
             evidence = html_mut_attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents()
         observed_mutation = ObservedMutation(sequencing_experiment=seq_experiment,
                                              mutation=mut,
@@ -284,15 +280,12 @@ def _database_mutations(sample_type,
 
 
 def _get_mutation_freq(mutation_dict):
-
     frequency = DEFAULT_CLONAL_FREQ
-
     # This will only execute if the sample is a population.
     if GD_MUT_FREQ_ATTR_KEY in mutation_dict:
         freq = mutation_dict[GD_MUT_FREQ_ATTR_KEY]
         if isinstance(freq, numbers.Number):
             frequency = freq
-
     return frequency
 
 
