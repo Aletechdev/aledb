@@ -8,54 +8,32 @@ Version compatible with Python3
 import re
 
 EVIDENCE_TYPE_KEY = 'type'
-
 MUTATION_KEY = 'mutation'
-
 EVIDENCE_KEY = 'evidence'
-
 VALIDATION_KEY = 'validation'
-
 BRESEQ_VERSION_KEY = 'breseq_version'
-
 RESEQ_TYPE_KEY = "reseq_type"  # population or clonal.
-
-GENOMIC_DIFF_AUTHOR_KEY = "AUTHOR"
-
-GENOMIC_DIFF_COMMAND_KEY = "COMMAND"
-
-GENOMIC_DIFF_CREATED_KEY = "CREATED"
-
-GENOMIC_DIFF_SEQ_REF_KEY = "REFSEQ"
-
+GENOME_DIFF_AUTHOR_KEY = "AUTHOR"
+GENOME_DIFF_COMMAND_KEY = "COMMAND"
+GENOME_DIFF_CREATED_KEY = "CREATED"
+GENOME_DIFF_SEQ_REF_KEY = "REFSEQ"
 PARENT_IDS_KEY = 'parent_ids'
-
 MISSING_COVERAGE_EVIDENCE_TYPE = 'MC'
-
 READ_ALIGNMENT_TYPE = 'RA'
-
 JUNCTION_TYPE = 'JC'
-
 UNKNOWN_BASE_TYPE = 'UN'
-
 META_DATA_LINE_TAG = '#='
-
 GENOME_DIFF_VERSION_TAG = "#=GENOME_DIFF"
-
 MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'AMP', 'CON', 'INV']
-
 EVIDENCE_TYPE_LIST = [READ_ALIGNMENT_TYPE,
                       MISSING_COVERAGE_EVIDENCE_TYPE,
                       JUNCTION_TYPE,
                       UNKNOWN_BASE_TYPE]
 VALIDATION_TYPE_LIST = ['TSEQ', 'PFLP', 'RFLP', 'PFGE', 'PHYL', 'CURA']
-
 META_DATA_LINE_TAG_IDX = 0
-
 META_DATA_LINE_FIELD_IDX = 1
-
 BRESEQ_VERSION_INDEX = 1
-
-BRESEQ_POPULATION_OPTION = "-p"
+BRESEQ_POPULATION_EXEC_FLAG = "-p"
 
 
 class SampleType:
@@ -347,7 +325,7 @@ class GDParser():
 
     def _process_clonal_or_population(self, meta_data_field_string):
         meta_data_field_list = meta_data_field_string.split()
-        if BRESEQ_POPULATION_OPTION in meta_data_field_list:
+        if BRESEQ_POPULATION_EXEC_FLAG in meta_data_field_list:
             self.meta_data[RESEQ_TYPE_KEY] = SampleType.POPULATION
         else:
             self.meta_data[RESEQ_TYPE_KEY] = SampleType.CLONAL
@@ -364,9 +342,9 @@ class GDParser():
         else:
             self.meta_data[meta_data_tag] = meta_data_field
         if meta_data_field:
-            if meta_data_tag == GENOMIC_DIFF_AUTHOR_KEY:
+            if meta_data_tag == GENOME_DIFF_AUTHOR_KEY:
                 self._process_breseq_version(meta_data_field)
-            if meta_data_tag == GENOMIC_DIFF_COMMAND_KEY:
+            if meta_data_tag == GENOME_DIFF_COMMAND_KEY:
                 self._process_clonal_or_population(meta_data_field)
 
     @staticmethod
