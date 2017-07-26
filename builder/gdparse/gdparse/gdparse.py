@@ -12,9 +12,11 @@ MUTATION_KEY = 'mutation'
 EVIDENCE_KEY = 'evidence'
 VALIDATION_KEY = 'validation'
 BRESEQ_VERSION_KEY = 'breseq_version'
+BRESEQ_AS_AUTHOR = 'breseq'
 RESEQ_TYPE_KEY = "reseq_type"  # population or clonal.
 GENOME_DIFF_AUTHOR_KEY = "AUTHOR"
 GENOME_DIFF_COMMAND_KEY = "COMMAND"
+GENOME_DIFF_PROGRAM_KEY = "PROGRAM"
 GENOME_DIFF_CREATED_KEY = "CREATED"
 GENOME_DIFF_SEQ_REF_KEY = "REFSEQ"
 PARENT_IDS_KEY = 'parent_ids'
@@ -48,7 +50,6 @@ class GDParseError(Exception):
 
     def __init__(self, msg, inner_exception_msg=None):
         self.msg = msg
-
         self.inner_exception_msg = inner_exception_msg
 
 
@@ -99,13 +100,10 @@ class GDParser():
         """
 
         self.meta_data = {}
-
         self.data = {MUTATION_KEY: {},
                      EVIDENCE_KEY: {},
                      VALIDATION_KEY: {}}
-
         self.valid_types = MUTATION_TYPE_LIST + EVIDENCE_TYPE_LIST + VALIDATION_TYPE_LIST
-
         if file_handle is not None:
             self.populate_from_file(file_handle, ignore_errors)
 
@@ -320,8 +318,9 @@ class GDParser():
 
     def _process_breseq_version(self, meta_data_field_string):
         meta_data_list = meta_data_field_string.split()
-        breseq_version = meta_data_list[BRESEQ_VERSION_INDEX]
-        self.meta_data[BRESEQ_VERSION_KEY] = breseq_version
+        if len(meta_data_list) > 1 and meta_data_list[0] == BRESEQ_AS_AUTHOR:
+                breseq_version = meta_data_list[BRESEQ_VERSION_INDEX]
+                self.meta_data[BRESEQ_VERSION_KEY] = breseq_version
 
     def _process_clonal_or_population(self, meta_data_field_string):
         meta_data_field_list = meta_data_field_string.split()
@@ -342,7 +341,8 @@ class GDParser():
         else:
             self.meta_data[meta_data_tag] = meta_data_field
         if meta_data_field:
-            if meta_data_tag == GENOME_DIFF_AUTHOR_KEY:
+            if meta_data_tag == GENOME_DIFF_PROGRAM_KEY \
+                    or meta_data_tag == GENOME_DIFF_AUTHOR_KEY:
                 self._process_breseq_version(meta_data_field)
             if meta_data_tag == GENOME_DIFF_COMMAND_KEY:
                 self._process_clonal_or_population(meta_data_field)
