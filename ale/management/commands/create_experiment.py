@@ -1,5 +1,5 @@
 from django.core.management import BaseCommand
-from builder.ale_experiment import create_ale_experiment_or_insert_flasks
+from builder.ale_experiment import create_ale_experiment
 
 
 class Command(BaseCommand):
@@ -23,4 +23,4 @@ class Command(BaseCommand):
 
         name = options['name']
 
-        create_ale_experiment_or_insert_flasks(path, user, name)
+        create_ale_experiment(path, user, name)
