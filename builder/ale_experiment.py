@@ -426,12 +426,12 @@ def _create_and_commit_ale_entry(person,
         mutation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
     reseq_ref_name = ""
-    if gdparse.GENOMIC_DIFF_SEQ_REF_KEY in mutation_gd_parser.meta_data.keys():
-        reseq_ref_name = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_SEQ_REF_KEY]
+    if gdparse.GENOME_DIFF_SEQ_REF_KEY in mutation_gd_parser.meta_data.keys():
+        reseq_ref_name = mutation_gd_parser.meta_data[gdparse.GENOME_DIFF_SEQ_REF_KEY]
 
     reseq_date = ""
-    if gdparse.GENOMIC_DIFF_CREATED_KEY in mutation_gd_parser.meta_data.keys():
-        reseq_date = mutation_gd_parser.meta_data[gdparse.GENOMIC_DIFF_CREATED_KEY]
+    if gdparse.GENOME_DIFF_CREATED_KEY in mutation_gd_parser.meta_data.keys():
+        reseq_date = mutation_gd_parser.meta_data[gdparse.GENOME_DIFF_CREATED_KEY]
 
     breseq_version = ""
     if gdparse.BRESEQ_VERSION_KEY in mutation_gd_parser.meta_data.keys():
@@ -473,7 +473,7 @@ def _get_reseq_type(breseq_folder_path):
     sample_reseq_type = gdparse.SampleType.CLONAL
     breseq_log_file_path = breseq_folder_path + BRESEQ_LOG_FILE
     if os.path.isfile(breseq_log_file_path) \
-            and gdparse.BRESEQ_POPULATION_OPTION in open(breseq_log_file_path).read():
+            and gdparse.BRESEQ_POPULATION_EXEC_FLAG in open(breseq_log_file_path).read():
         sample_reseq_type = gdparse.SampleType.POPULATION
     return sample_reseq_type
 
