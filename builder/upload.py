@@ -13,6 +13,7 @@ from configparser import ConfigParser
 from genes.util import get_annotated_gene_list
 from filter.models import AleExperimentFilter
 from duplications.util import Duplications
+from html2text import html2text
 
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
@@ -240,11 +241,12 @@ def _database_mutations(sample_type,
         breseq_gene_product_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
         gene_list = get_annotated_gene_list(breseq_gene_annotation, breseq_gene_product_annotation)
         gene_list_str = ', '.join(gene_list)
-        sequence_change, protein_change = "", ""
+        sequence_change, protein_change_str = "", ""
         if GD_MUT_HTML in mutation_dict[mut_num].keys():
             sequence_change = mutation_dict[mut_num].get(GD_MUT_HTML)
         if GD_MUT_ANNOTATION_HTML in mutation_dict[mut_num].keys():
-            protein_change = mutation_dict[mut_num].get(GD_MUT_ANNOTATION_HTML)
+            protein_change_html_str = mutation_dict[mut_num].get(GD_MUT_ANNOTATION_HTML)
+            protein_change_str = html2text(protein_change_html_str).strip()
         mut, \
         created = Mutation.objects.get_or_create(position=mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY),
                                                  gene=gene_list_str,
@@ -252,7 +254,7 @@ def _database_mutations(sample_type,
                                                  # files so we can index the ids with row_num
                                                  sequence_change=sequence_change,
                                                  mutation_type=mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY),
-                                                 protein_change=protein_change)
+                                                 protein_change=protein_change_str)
         mut.save()
         if is_wild_type is True:
             wild_type_mutation_list.append(mut.id)
