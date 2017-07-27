@@ -17,8 +17,8 @@ class TestUpload(TestCase):
     def setUp(self):
         self.current_location = os.path.dirname(os.path.realpath(__file__))
 
-    def test_add_breseq_results_render_html_protein_change_to_text(self):
-        breseq_output_dir_path = self.current_location + "/0-0-1-1/output/"
+    def test_add_breseq_results_no_HTML_in_DB(self):
+        breseq_output_dir_path = self.current_location + "/no_HTML_in_DB_test/"
         with open(breseq_output_dir_path + "annotated.gd") as output_genomic_diff_file:
             mutation_gd_parser = GDParser(file_handle=output_genomic_diff_file)
         add_breseq_results(1,
@@ -26,9 +26,11 @@ class TestUpload(TestCase):
                            breseq_output_dir_path,
                            mutation_gd_parser,
                            None,
-                           "NC_000913_3")
-        mut = Mutation.objects.get(position = 2173363)
-        expected_annotation = "intergenic (‑1/+1)"
+                           "bop27_1_4")
+        mut = Mutation.objects.get(position = 4181791)
+        expected_annotation = 'C→A'
+        self.assertEqual(expected_annotation, mut.sequence_change)
+        expected_annotation = "P1100Q (CCG→CAG)"
         self.assertEqual(expected_annotation, mut.protein_change)
 
     def test_add_breseq_results_no_mut_annotation_dict(self):
