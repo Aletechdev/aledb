@@ -7,6 +7,12 @@ __author__ = 'Patrick Phaneuf'
 
 class TestGDParser(unittest.TestCase):
 
+    def test_parsing_HTML_with_quotations(self):
+        with open("no_HTML_in_DB_test/annotated.gd") as output_genomic_diff_file:
+            mutation_gd_parser = gdparse.GDParser(file_handle=output_genomic_diff_file)
+        expected = '<font class="snp_type_nonsynonymous">P1100Q</font>&nbsp;(C<font class="mutation_in_codon">C</font>G&rarr;C<font class="mutation_in_codon">A</font>G)&nbsp;'
+        self.assertEqual(expected, mutation_gd_parser.data['mutation'][5]['html_mutation_annotation'])
+
     def test_del_position_522526_gene_name_is_clr(self):
         expected_mutation_name = "[crl]"
         mutation_id = 1

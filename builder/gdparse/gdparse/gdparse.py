@@ -310,10 +310,8 @@ class GDParser():
 
     @staticmethod
     def _get_meta_data_line_list(line):
-
         # Variable name and value are delineated by the first whitespace character
         meta_data_line_list = re.split('\s', line[2:], 1)
-
         return meta_data_line_list
 
     def _process_breseq_version(self, meta_data_field_string):
@@ -744,10 +742,14 @@ class GDParser():
             # Process any optional key=value pairs
             # =================================================
             for field_idx in range(next_field, len(data_elements)):
-                split_field = data_elements[field_idx].split('=')
+                field_data_str = data_elements[field_idx]
+                split_field = field_data_str.split('=')
                 if len(split_field) > 1:
-                    key = split_field[0].strip()
-                    value = self._smart_convert(split_field[1].strip())
-                    new_data[key] = value
+                    key_str = split_field[0].strip()
+                    value_data_str = split_field[1].strip()
+                    if len(split_field) > 2:
+                        value_data_str = field_data_str[field_data_str.index('=')+1:].strip()
+                    value_data = self._smart_convert(value_data_str)
+                    new_data[key_str] = value_data
             # Insert the dictionary for the new item into the class data dictionary, keyed by id.
             self.data[item_class][item_id] = new_data
