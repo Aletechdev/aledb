@@ -4,7 +4,6 @@ from django.utils.safestring import mark_safe
 import seq.views.common
 from seq.views import mutation_table_builder
 from seq.util import get_all_observed_mutations
-import filter.util
 from common.util import get_all_ale_exps, get_recent_ale_exps, get_reseq_ordered_dict
 from common.util import check_hidden_columns_and_filters
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
