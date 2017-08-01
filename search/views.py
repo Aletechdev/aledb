@@ -8,7 +8,7 @@ from django.db.models import Q
 import operator
 from functools import reduce
 from seq.views import mutation_table_builder
-from common.util import check_hidden_columns_and_filters, get_all_ale_experiments, get_recent_experiments
+from common.util import check_hidden_columns_and_filters, get_all_ale_exps, get_recent_ale_exps
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from filter.util import filter_observed_mutations
@@ -20,8 +20,8 @@ def search(request):
     reseq_dict = _get_reseq_dict_from_observed_mutation_queryset(observed_mutations_with_gene_queryset)
     if reseq_dict is None or observed_mutations_with_gene_queryset is None:
         return render(request, 'search.html', {'error': True,
-                                               "experiments": get_all_ale_experiments(),
-                                               "recent_experiments": get_recent_experiments()})
+                                               "experiments": get_all_ale_exps(),
+                                               "recent_experiments": get_recent_ale_exps()})
 
     table_header = mutation_table_builder.get_table_header(reseq_dict)
     table_body = mutation_table_builder.get_table_body(reseq_dict,
@@ -35,8 +35,8 @@ def search(request):
                "last_search": last_search,
                "mutation_count": len(table_body),
                "observed_mutation_count": observed_mutations_with_gene_queryset.count(),
-               "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments()}
+               "experiments": get_all_ale_exps(),
+               "recent_experiments": get_recent_ale_exps()}
 
     return HttpResponse(template.render(context))
 

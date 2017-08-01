@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
-from common.util import get_all_ale_experiments, get_recent_experiments
+from common.util import get_all_ale_exps, get_recent_ale_exps
 import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
 from enrichment.models import EnrichmentMutation
@@ -43,8 +43,8 @@ def compared_enrichment_mutations(request):
                "table_header": mark_safe(table_header),
                "template_header": "Enrichment Mutations",
                "hidden_columns": hidden_columns,
-               "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(),
+               "experiments": get_all_ale_exps(),
+               "recent_experiments": get_recent_ale_exps(),
                "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                "tag_dropdown": TAGS
                }

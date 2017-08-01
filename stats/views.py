@@ -15,7 +15,7 @@ from stats.util import get_histogram_jsons,\
     MAX_HISTOGRAM_SIZE
 from common.util import get_reseq_queryset,\
     get_reseq_ordered_dict, get_mut_queryset_from_obs_mut_queryset, \
-    get_all_ale_experiments, get_recent_experiments
+    get_all_ale_exps, get_recent_ale_exps
 from filter.util import filter_observed_mutations
 
 
@@ -69,8 +69,8 @@ def stats(request):
                "number_of_genes_to_show": barchart_item_count,
                "ale_experiment_id": ale_experiment_id,
                "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
-               "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(ale_experiment_id),
+               "experiments": get_all_ale_exps(),
+               "recent_experiments": get_recent_ale_exps(ale_experiment_id),
                "max_histogram_size": MAX_HISTOGRAM_SIZE}
 
     return HttpResponse(template.render(context))

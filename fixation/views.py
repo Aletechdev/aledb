@@ -16,7 +16,7 @@ from common.constants import \
     REQUEST_ALE_EXPERIMENT_ID, \
     POSITION_COLUMN_IN_SHARED_MUTATION_TABLE, \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
-from common.util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments, check_hidden_columns_and_filters
+from common.util import get_reseq_ordered_dict, get_all_ale_exps, get_recent_ale_exps, check_hidden_columns_and_filters
 from collections import OrderedDict
 from genes.util import get_gene_list
 import operator
@@ -47,12 +47,12 @@ def fixating_mutations(request):
     table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
                                                            mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
-    observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id,
-                                                                                     reseq_ordered_dict,
-                                                                                     is_ascending_freq_filter)
+    obs_mut_qryset = _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id,
+                                                                         reseq_ordered_dict,
+                                                                         is_ascending_freq_filter)
 
     table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
-                                                       observed_mutations_queryset=observed_mutation_queryset,
+                                                       observed_mutations_queryset=obs_mut_qryset,
                                                        ale_experiment_id=int(ale_experiment_id),
                                                        table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
@@ -70,8 +70,8 @@ def fixating_mutations(request):
                "is_ascending_freq_filter": is_ascending_freq_filter,
                "template_header": "Fixating Mutations",
                "hidden_columns": hidden_columns,
-               "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(int(ale_experiment_id)),
+               "experiments": get_all_ale_exps(),
+               "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                "tag_dropdown": common.constants.TAGS
                }
@@ -126,8 +126,8 @@ def shared_fixated_mutations(request):
                "table_header": mark_safe(table_header),
                "table_body": mark_safe(table_body),
                "reseq_info_list": reseq_info_list,
-               "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(),
+               "experiments": get_all_ale_exps(),
+               "recent_experiments": get_recent_ale_exps(),
                "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TABLE,
                }
 
@@ -147,7 +147,6 @@ def _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id, order
     fixating_observed_mutation_queryset = ObservedMutation.objects.none()
     #TODO: filter out mutations from samples that were removed from table.
 
-    #fixating_observed_mutation_queryset = _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, ordered_reseq_dict.keys())
     for fixing_mutation in fixating_mutation_queryset:
         fixating_obs_mut_queryset_list = _get_fixating_obs_mut_queryset_list(fixing_mutation, ordered_reseq_dict.keys())
         if is_only_ascending:
@@ -171,10 +170,5 @@ def _get_fixating_obs_mut_queryset_list(fixating_mutation, reseq_id_list):
     for fixed_obs_mut_list in fixed_obs_mut_lists:
         obs_mut_queryset = all_observed_mutation_queryset.filter(id__in=fixed_obs_mut_list)
         obs_mut_queryset_list.append(obs_mut_queryset)
-
-    # TODO: get mutations back from
-    # # obs_mut_queryset_1 = all_observed_mutation_queryset.filter(id__in=[824, 983, 2457])
-    # # obs_mut_queryset_2 = all_observed_mutation_queryset.filter(id__in=[1058, 1634, 2426])
-    # obs_mut_queryset_list = [obs_mut_queryset_1, obs_mut_queryset_2]
 
     return obs_mut_queryset_list

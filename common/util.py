@@ -74,12 +74,12 @@ def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
 
 
 # TODO: go in ale.util
-def get_all_ale_experiments():
+def get_all_ale_exps():
     return AleExperiment.objects.all().order_by('name')
 
 
 # TODO: go in ale.util
-def get_recent_experiments(ale_experiment_id=None):
+def get_recent_ale_exps(ale_experiment_id=None):
 
     recent, created = RecentExperiments.objects.get_or_create(id=1)
 

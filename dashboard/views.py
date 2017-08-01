@@ -2,7 +2,7 @@ from django.template import loader
 from django.http import HttpResponse
 from seq.views import common
 from django.utils.safestring import mark_safe
-from common.util import get_all_ale_experiments, get_recent_experiments
+from common.util import get_all_ale_exps, get_recent_ale_exps
 from ale.models import AleExperiment, AleId, Isolate
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from dashboard.timeline_util import get_timeline
@@ -42,8 +42,8 @@ def dashboard(request):
                "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
                "protein_types": mark_safe(common.FUNCTIONAL_CHANGE_TYPE_LIST),
                "number_of_genes_to_show": barchart_item_count,
-               "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(),
+               "experiments": get_all_ale_exps(),
+               "recent_experiments": get_recent_ale_exps(),
                "max_histogram_size": MAX_HISTOGRAM_SIZE,
                "timeline": get_timeline()}
 
