@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from ale.models import AleExperiment
 from common.util import check_hidden_columns_and_filters,\
-    get_all_ale_experiments,\
-    get_recent_experiments, \
+    get_all_ale_exps,\
+    get_recent_ale_exps, \
     get_mut_queryset_from_obs_mut_queryset
 from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
 from seq.views import common
@@ -32,7 +32,7 @@ def compare(request):
 
 
 def handle_compare_report(request, ale_experiment_names):
-    all_ale_exp_qryset = get_all_ale_experiments()
+    all_ale_exp_qryset = get_all_ale_exps()
 
     # Else it is a valid request
     if ale_experiment_names == 'All':
@@ -75,7 +75,7 @@ def handle_compare_report(request, ale_experiment_names):
                "mutation_type_count_dict": mutation_type_count_dict,
                "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
                "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
-               "recent_experiments": get_recent_experiments(),
+               "recent_experiments": get_recent_ale_exps(),
                "download_experiments": ale_experiment_names,
                "max_histogram_size": MAX_HISTOGRAM_SIZE}
 
@@ -85,12 +85,12 @@ def handle_compare_report(request, ale_experiment_names):
 
 
 def handle_initial_compare_form(request):
-    all_ale_exp_qryset = get_all_ale_experiments()
+    all_ale_exp_qryset = get_all_ale_exps()
     hidden_columns = check_hidden_columns_and_filters(request, None)
     context = {"experiments": all_ale_exp_qryset,
                "has_comparison": False,
                "hidden_columns": hidden_columns,
-               "recent_experiments": get_recent_experiments(),
+               "recent_experiments": get_recent_ale_exps(),
                "title": "Compare",
                "header": "Compare"}
     template = loader.get_template(COMPARE_TEMPLATE)

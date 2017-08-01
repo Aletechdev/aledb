@@ -4,7 +4,7 @@ from django.http import HttpResponse
 
 from ale.models import AleExperiment
 
-from common.util import get_all_ale_experiments, get_recent_experiments
+from common.util import get_all_ale_exps, get_recent_ale_exps
 
 from metadata.views import get_reseq_info_list
 
@@ -35,9 +35,9 @@ def comparison_metadata(request):
 
     template = loader.get_template(META_DATA_TEMPLATE)
 
-    context = {"experiments": get_all_ale_experiments(),
+    context = {"experiments": get_all_ale_exps(),
                "ale_experiment_name": header,
-               "recent_experiments": get_recent_experiments(),
+               "recent_experiments": get_recent_ale_exps(),
                "reseq_info_list": reseq_info_list,
                "reseq_report_url": reseq_report_url,
                "multiple": True

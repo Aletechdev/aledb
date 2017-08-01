@@ -110,7 +110,7 @@ def get_table_header(reseq_dict, table_type=None):
 
         reseq = reseq_dict[seq_experiment_id]
 
-        sample_name = reseq.aleexp_ale_flask_isolate_str
+        sample_name = reseq.exp_ale_flask_isolate_str
 
         current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep_id)
 

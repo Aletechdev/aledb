@@ -1,6 +1,6 @@
 from django.template import loader
 from django.http import HttpResponse
-from common.util import get_all_ale_experiments, get_recent_experiments
+from common.util import get_all_ale_exps, get_recent_ale_exps
 from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
 from ale.models import AleExperiment
 from seq.views.mutation_table_builder import get_mutation_table_queryset_and_entry_list, HTML_MUTATION_TABLE_HEADER
@@ -23,24 +23,22 @@ class Echo(object):
 
 
 def export(request):
-
-    experiment_names = request.GET.get('download_experiments', None)
+    exp_names = request.GET.get('download_experiments', None)
 
     context = {
-        "experiments": get_all_ale_experiments(),
-        "recent_experiments": get_recent_experiments(),
+        "experiments": get_all_ale_exps(),
+        "recent_experiments": get_recent_ale_exps(),
         "is_download": False
     }
 
-    if experiment_names:
-        if experiment_names == 'All':
-            ale_experiment_list = [(ale_exp.ale_id, ale_exp.name) for ale_exp in AleExperiment.objects.all()]
+    if exp_names:
+        if exp_names == 'All':
+            exp_list = [(exp.ale_id, exp.name) for exp in AleExperiment.objects.all()]
         else:
-            experiment_name_list = experiment_names.split(',')
-            ale_experiment_list = [(AleExperiment.objects.get(name=ale_exp_name).ale_id, ale_exp_name)
-                                   for ale_exp_name in experiment_name_list]
+            exp_name_list = exp_names.split(',')
+            exp_list = [(AleExperiment.objects.get(name=exp_name).ale_id, exp_name) for exp_name in exp_name_list]
 
-        data = [(_get_rows_for_csv(ale_exp_id), ale_exp_name) for ale_exp_id, ale_exp_name in ale_experiment_list]
+        data = [(_get_rows_for_csv(ale_exp_id), ale_exp_name) for ale_exp_id, ale_exp_name in exp_list]
         context['data'] = mark_safe(json.dumps(data, cls=DjangoJSONEncoder))
         context['is_download'] = True
 
@@ -49,22 +47,17 @@ def export(request):
     return HttpResponse(template.render(context))
 
 
-def _strip_tags_from_list(frequencies):
-    temp = []
-    for frequency in frequencies:
-        temp.append(strip_tags(frequency))
-    return temp
-
-
 def _get_rows_for_csv(exp_id):
 
-    ordered_reseq_dict, obs_mut_qryset = get_ordered_reseq_dict_and_obs_mut_queryset([exp_id])
+    ordered_reseq_dict,\
+    obs_mut_qryset = get_ordered_reseq_dict_and_obs_mut_queryset([exp_id])
 
-    mutation_queryset,\
+    mut_qryset,\
     table_entry_list,\
-    mutation_index_dict = get_mutation_table_queryset_and_entry_list(ordered_reseq_dict, obs_mut_qryset)
+    mut_index_dict = get_mutation_table_queryset_and_entry_list(ordered_reseq_dict, obs_mut_qryset)
 
-    rows = [HTML_MUTATION_TABLE_HEADER[3:] + [ordered_reseq_dict[reseq].aleexp_ale_flask_isolate_str
+    mut_pos_index = 3
+    rows = [HTML_MUTATION_TABLE_HEADER[mut_pos_index:] + [ordered_reseq_dict[reseq].exp_ale_flask_isolate_str
                                               for reseq in ordered_reseq_dict]]
 
     rows += ([format(mutation.position, ',d'),
@@ -75,8 +68,14 @@ def _get_rows_for_csv(exp_id):
               "" if mutation.product is None else mutation.product,
               "" if mutation.go_process is None else mutation.go_process,
               "" if mutation.go_component is None else mutation.go_component,
-              strip_tags(mutation.protein_change)
-              ] + _strip_tags_from_list(table_entry_list[mutation_index_dict[mutation.id]])
-             for mutation in mutation_queryset)
+              strip_tags(mutation.protein_change)] + _strip_tags_from_list(table_entry_list[mut_index_dict[mutation.id]])
+             for mutation in mut_qryset)
 
     return rows
+
+
+def _strip_tags_from_list(frequencies):
+    temp = []
+    for frequency in frequencies:
+        temp.append(strip_tags(frequency))
+    return temp

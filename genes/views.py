@@ -26,7 +26,7 @@ import requests
 
 import aleinfo.settings as settings
 
-from common.util import get_all_ale_experiments, get_recent_experiments, check_hidden_columns_and_filters
+from common.util import get_all_ale_exps, get_recent_ale_exps, check_hidden_columns_and_filters
 
 from django.core.serializers.json import DjangoJSONEncoder
 
@@ -74,8 +74,8 @@ def gene(request):
                "homology_data": mark_safe(json.dumps(homology_data)),
                "has_homology_data": has_homology_data,
                "hidden_columns": hidden_columns,
-               "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments()}
+               "experiments": get_all_ale_exps(),
+               "recent_experiments": get_recent_ale_exps()}
 
     return HttpResponse(template.render(context))
 

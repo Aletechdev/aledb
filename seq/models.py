@@ -50,7 +50,7 @@ class ResequencingExperiment(models.Model):
                                      self.tech_rep.tech_rep_number)
 
     @property
-    def aleexp_ale_flask_isolate_str(self):
+    def exp_ale_flask_isolate_str(self):
         return self.ale_experiment.name + " " + self.ale_flask_isolate_str
 
 
