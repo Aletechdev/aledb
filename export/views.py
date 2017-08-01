@@ -23,7 +23,7 @@ class Echo(object):
 
 
 def export(request):
-    exp_names = request.GET.get('download_experiments', None)
+    exp_name_str = request.GET.get('download_experiments', None)
 
     context = {
         "experiments": get_all_ale_exps(),
@@ -31,11 +31,11 @@ def export(request):
         "is_download": False
     }
 
-    if exp_names:
-        if exp_names == 'All':
+    if exp_name_str:
+        if exp_name_str == 'All':
             exp_list = [(exp.ale_id, exp.name) for exp in AleExperiment.objects.all()]
         else:
-            exp_name_list = exp_names.split(',')
+            exp_name_list = exp_name_str.split(',')
             exp_list = [(AleExperiment.objects.get(name=exp_name).ale_id, exp_name) for exp_name in exp_name_list]
 
         data = [(_get_rows_for_csv(ale_exp_id), ale_exp_name) for ale_exp_id, ale_exp_name in exp_list]
