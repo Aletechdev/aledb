@@ -13,15 +13,6 @@ from django.utils.safestring import mark_safe
 EXPORT_TEMPLATE = 'export.html'
 
 
-class Echo(object):
-    """An object that implements just the write method of the file-like
-    interface.
-    """
-    def write(self, value):
-        """Write the value by returning it, instead of storing in a buffer."""
-        return value
-
-
 def export(request):
     exp_name_str = request.GET.get('download_experiments', None)
 
