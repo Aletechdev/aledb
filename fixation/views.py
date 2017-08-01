@@ -9,7 +9,6 @@ from seq.views import mutation_table_builder
 from seq.models import ObservedMutation
 from seq.models import ResequencingExperiment
 from fixation.models import FixatedMutation
-from fixation.fixation import filter_for_ascending_freq
 import metadata.views
 from common.constants import \
     REQUEST_MUTATION_ID, \
@@ -29,8 +28,6 @@ HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type<
 
 __author__ = 'Patrick Phaneuf'
 
-REQUEST_ASCENDING_FREQ_FILTER = 'asndflt'
-
 
 # TODO: very similar to common_mutations page workflow. Should consolidate somehow.
 def fixating_mutations(request):
@@ -38,7 +35,6 @@ def fixating_mutations(request):
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
     ale_number = seq.views.common.get_ale_id(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
-    is_ascending_freq_filter = _is_ascending_freq_filter(request)
 
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
@@ -48,8 +44,7 @@ def fixating_mutations(request):
                                                            mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
     obs_mut_qryset = _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id,
-                                                                         reseq_ordered_dict,
-                                                                         is_ascending_freq_filter)
+                                                                         reseq_ordered_dict)
 
     table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
                                                        observed_mutations_queryset=obs_mut_qryset,
@@ -67,7 +62,6 @@ def fixating_mutations(request):
                "table_body": mark_safe(table_body),
                "title": "Fixed Mutations",
                "table_header": mark_safe(table_header),
-               "is_ascending_freq_filter": is_ascending_freq_filter,
                "template_header": "Fixating Mutations",
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_exps(),
@@ -134,14 +128,7 @@ def shared_fixated_mutations(request):
     return HttpResponse(template.render(context))
 
 
-def _is_ascending_freq_filter(request):
-    ret_val = False
-    if request.GET.get(REQUEST_ASCENDING_FREQ_FILTER) is not None:
-        ret_val = True
-    return ret_val
-
-
-def _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id, ordered_reseq_dict, is_only_ascending=False):
+def _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id, ordered_reseq_dict):
 
     fixating_mutation_queryset = FixatedMutation.objects.filter(ale_experiment_id=ale_experiment_id)
     fixating_observed_mutation_queryset = ObservedMutation.objects.none()
@@ -149,8 +136,6 @@ def _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id, order
 
     for fixing_mutation in fixating_mutation_queryset:
         fixating_obs_mut_queryset_list = _get_fixating_obs_mut_queryset_list(fixing_mutation, ordered_reseq_dict.keys())
-        if is_only_ascending:
-            fixating_obs_mut_queryset_list = filter_for_ascending_freq(fixating_obs_mut_queryset_list)  # TODO: this should return the list of querysets we want to keep.
         # Could have more than 1 fixing sequence
         for fixating_obs_mut_queryset in fixating_obs_mut_queryset_list:
             fixating_observed_mutation_queryset = fixating_observed_mutation_queryset | fixating_obs_mut_queryset

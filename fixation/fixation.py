@@ -134,18 +134,6 @@ def _get_flask_obs_mut_dict(flask_isolate_obs_mut_dict):
     return flask_obs_mut_dict
 
 
-# TODO: this should return the list of querysets we want to keep.
-def filter_for_ascending_freq(fixating_obs_mut_queryset_list):
-
-    filtered_fixating_obs_mut_queryset_list = []
-
-    for obs_mut_queryset in fixating_obs_mut_queryset_list:
-        if not _has_descending_mut_freq(obs_mut_queryset):
-            filtered_fixating_obs_mut_queryset_list.append(obs_mut_queryset)
-
-    return filtered_fixating_obs_mut_queryset_list
-
-
 def _has_descending_mut_freq(obs_mut_queryset):
 
     observed_mutation_list = _filter_mutations_from_same_flask(list(obs_mut_queryset))
