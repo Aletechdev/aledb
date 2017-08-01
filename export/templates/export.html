@@ -5,6 +5,10 @@
 {% endblock %}
 {% block header %}Export{% endblock %}
 {% block content %}
+    <div>
+        <i>Note: scripts for generating Pandas Dataframe from exported mutation data can be found at <a href="https://github.com/SBRG/aledb_mut_scripts">https://github.com/SBRG/aledb_mut_scripts/</a></i>
+    </div>
+    <br>
     <div class="row" id="selector_elements">
         <div class="col-lg-4">
             <div class="btn-group">
@@ -20,6 +24,7 @@
                     {% endfor %}
                 </ul>
             </div>
+            <br><br>
             <div class="btn-group">
                 <button type="button" class="btn btn-success" onclick="add_experiment_to_download_list()">
                     <i class="fa fa-plus fa-fw" aria-hidden="true"></i> Add Experiment
