@@ -7,6 +7,7 @@ from seq.views.mutation_table_builder import \
     HTML_MUTATION_TABLE_HEADER
 from django.utils.html import strip_tags
 from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
+from enrichment.util import get_enrich_obs_mut_qryset
 
 
 MUT_TYPE_STR = "mut"
@@ -23,7 +24,9 @@ def get_csv_str(exp_id, mut_type_str):
         obs_mut_qryset = get_exp_fixed_obs_mut_qryset(exp_id,
                                                       reseq_ordered_dict)
     if mut_type_str == ENRICH_MUT_TYPE_STR:
-        print("do")
+        reseq_ordered_dict = get_reseq_ordered_dict(exp_id)
+        reseq_ordered_dict = filter_out_wt_reseq(reseq_ordered_dict)
+        obs_mut_qryset = get_enrich_obs_mut_qryset(exp_id, reseq_ordered_dict)
     else:
         reseq_ordered_dict,\
         obs_mut_qryset = get_ordered_reseq_dict_and_obs_mut_queryset([exp_id])
