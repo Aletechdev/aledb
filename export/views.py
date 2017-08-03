@@ -6,7 +6,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json
 from django.utils.safestring import mark_safe
 from export.util import \
-    get_csv, \
+    get_csv_str, \
     MUT_TYPE_STR, \
     FIXED_MUT_TYPE_STR, \
     ENRICH_MUT_TYPE_STR
@@ -31,8 +31,8 @@ def export(request):
             exp_name_list = exp_name_str.split(',')
             exp_list = [(AleExperiment.objects.get(name=exp_name).ale_id, exp_name) for exp_name in exp_name_list]
 
-        data = [(get_csv(exp_id, mut_type_str), exp_name) for exp_id, exp_name in exp_list]
-        context['data'] = mark_safe(json.dumps(data, cls=DjangoJSONEncoder))
+        csv_str = [(get_csv_str(exp_id, mut_type_str), exp_name) for exp_id, exp_name in exp_list]
+        context['data'] = mark_safe(json.dumps(csv_str, cls=DjangoJSONEncoder))
         context['is_download'] = True
 
     template = loader.get_template(EXPORT_TEMPLATE)

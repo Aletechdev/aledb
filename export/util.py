@@ -14,7 +14,7 @@ FIXED_MUT_TYPE_STR = "fixed_mut"
 ENRICH_MUT_TYPE_STR = "enrich_mut"
 
 
-def get_csv(exp_id, mut_type_str):
+def get_csv_str(exp_id, mut_type_str):
     reseq_ordered_dict= {}
     obs_mut_qryset = ObservedMutation.objects.none()
     if mut_type_str == FIXED_MUT_TYPE_STR:
