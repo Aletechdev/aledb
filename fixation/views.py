@@ -29,7 +29,6 @@ HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type<
 __author__ = 'Patrick Phaneuf'
 
 
-# TODO: very similar to common_mutations page workflow. Should consolidate somehow.
 def fixating_mutations(request):
     ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
