@@ -14,6 +14,8 @@ def get_fixed_mut_dict(ale_experiment_id):
     return ale_exp_fixed_mut_dict
 
 
+# TODO: exp_id input is likely redundant since we have access to the ALE experiment ID in the reseq_ordered_dict.
+# Ideally, we give as input the exp_id and get as output the enrichment observed mutations.
 def get_exp_fixed_obs_mut_qryset(exp_id, reseq_ordered_dict):
 
     fixed_mut_qryset = FixatedMutation.objects.filter(ale_experiment_id=exp_id)
