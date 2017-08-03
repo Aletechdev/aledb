@@ -27,7 +27,7 @@ function add_experiment_to_download_list() {
     set_export_experiments_input_field();
 
     document.getElementById('download').style.display = 'inline';
-    document.getElementById('mut_type').style.display = 'inline';
+    document.getElementById('mut_type_selected').style.display = 'inline';
 }
 
 function add_exp_to_list(exp_name) {
