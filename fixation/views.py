@@ -1,9 +1,6 @@
-# TODO: All resources being pulled from seq app could possibly be stored in a common dir.
-
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
-#TODO: seq.views.common.get_ordered_reseq_dict could likely be refactored into common.db_util.get_reseq_dict
 import seq.views.common
 from seq.views import mutation_table_builder
 from seq.models import ObservedMutation
@@ -12,17 +9,21 @@ from fixation.models import FixatedMutation
 import metadata.views
 from common.constants import \
     REQUEST_MUTATION_ID, \
-    REQUEST_ALE_EXPERIMENT_ID, \
     POSITION_COLUMN_IN_SHARED_MUTATION_TABLE, \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
-from common.util import get_reseq_ordered_dict, get_all_ale_exps, get_recent_ale_exps, check_hidden_columns_and_filters
+from common.util import get_reseq_ordered_dict,\
+    get_all_ale_exps,\
+    get_recent_ale_exps,\
+    check_hidden_columns_and_filters
 from collections import OrderedDict
 from genes.util import get_gene_list
 import operator
 from functools import reduce
 from django.db.models import Q
+from fixation.util import get_exp_fixed_obs_mut_qryset
 import common.constants
 import ast
+
 
 HTML_MUTATION_TABLE_HEADER = """<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Details</td>"""
 
@@ -30,44 +31,42 @@ __author__ = 'Patrick Phaneuf'
 
 
 def fixating_mutations(request):
-    ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
-    ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
+    ale_exp_name = seq.views.common.get_ale_experiment_name(request)
+    exp_id = seq.views.common.get_ale_experiment_id(request)
     ale_number = seq.views.common.get_ale_id(request)
-    ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
+    ale_qryset = seq.views.common.get_ales(exp_id, True)
 
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
+    reseq_ordered_dict = get_reseq_ordered_dict(exp_id, ale_number, request)
     reseq_ordered_dict = seq.views.common.filter_out_wt_reseq(reseq_ordered_dict)
 
     table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
                                                            mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
-    obs_mut_qryset = _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id,
-                                                                         reseq_ordered_dict)
+    obs_mut_qryset = get_exp_fixed_obs_mut_qryset(exp_id,
+                                                  reseq_ordered_dict)
 
     table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
                                                        observed_mutations_queryset=obs_mut_qryset,
-                                                       ale_experiment_id=int(ale_experiment_id),
+                                                       ale_experiment_id=int(exp_id),
                                                        table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
-    hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
+    hidden_columns = check_hidden_columns_and_filters(request, exp_id)
 
     template = loader.get_template("base_table_template.html")
 
-    context = {"ales": ale_queryset,
-               "ale_experiment_name": ale_experiment_name,
+    context = {"ales": ale_qryset,
+               "ale_experiment_name": ale_exp_name,
                "ale_no": ale_number,
-               "experiment_id": ale_experiment_id,
+               "experiment_id": exp_id,
                "table_body": mark_safe(table_body),
                "title": "Fixed Mutations",
                "table_header": mark_safe(table_header),
                "template_header": "Fixating Mutations",
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_exps(),
-               "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
+               "recent_experiments": get_recent_ale_exps(int(exp_id)),
                "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
-               "tag_dropdown": common.constants.TAGS
-               }
+               "tag_dropdown": common.constants.TAGS}
 
     return HttpResponse(template.render(context))
 
@@ -126,33 +125,3 @@ def shared_fixated_mutations(request):
 
     return HttpResponse(template.render(context))
 
-
-def _get_experiment_fixating_observed_mutation_queryset(ale_experiment_id, ordered_reseq_dict):
-
-    fixating_mutation_queryset = FixatedMutation.objects.filter(ale_experiment_id=ale_experiment_id)
-    fixating_observed_mutation_queryset = ObservedMutation.objects.none()
-    #TODO: filter out mutations from samples that were removed from table.
-
-    for fixing_mutation in fixating_mutation_queryset:
-        fixating_obs_mut_queryset_list = _get_fixating_obs_mut_queryset_list(fixing_mutation, ordered_reseq_dict.keys())
-        # Could have more than 1 fixing sequence
-        for fixating_obs_mut_queryset in fixating_obs_mut_queryset_list:
-            fixating_observed_mutation_queryset = fixating_observed_mutation_queryset | fixating_obs_mut_queryset
-
-    return fixating_observed_mutation_queryset
-
-
-# def _get_fixating_observed_mutation_queryset(fixating_mutation_queryset, reseq_id_list):
-#     fixating_mutation_id_list = [fixating_mutation.mutation.id for fixating_mutation in fixating_mutation_queryset]
-#     all_observed_mutation_queryset = ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
-#     fixating_observed_mutation_queryset = all_observed_mutation_queryset.filter(mutation_id__in=fixating_mutation_id_list)
-#     return fixating_observed_mutation_queryset
-def _get_fixating_obs_mut_queryset_list(fixating_mutation, reseq_id_list):
-    all_observed_mutation_queryset = ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
-    fixed_obs_mut_lists = list(ast.literal_eval(fixating_mutation.fixed_observed_mutation_series))
-    obs_mut_queryset_list = []
-    for fixed_obs_mut_list in fixed_obs_mut_lists:
-        obs_mut_queryset = all_observed_mutation_queryset.filter(id__in=fixed_obs_mut_list)
-        obs_mut_queryset_list.append(obs_mut_queryset)
-
-    return obs_mut_queryset_list
