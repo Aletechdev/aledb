@@ -18,7 +18,7 @@ __author__ = 'pphaneuf'
 def mutation_table(request):
 
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-    ale_experiment_name = seq.views.common.get_ale_experiment_name(request)
+    exp_name = seq.views.common.get_ale_experiment_name(request)
     ale_no = seq.views.common.get_ale_id(request)
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
@@ -34,11 +34,11 @@ def mutation_table(request):
     template = loader.get_template("base_table_template.html")
 
     context = {"ales": ale_queryset,
-               "ale_experiment_name": ale_experiment_name,
+               "ale_experiment_name": exp_name,
                "ale_no": ale_no,
                "experiment_id": ale_experiment_id,
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
-               "title": ale_experiment_name + " Mutation Table",
+               "title": exp_name + " Mutation Table",
                "table_header": table_header,
                "template_header": "Mutations",
                "hidden_columns": hidden_columns,

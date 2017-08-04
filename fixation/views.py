@@ -31,7 +31,7 @@ __author__ = 'Patrick Phaneuf'
 
 
 def fixating_mutations(request):
-    ale_exp_name = seq.views.common.get_ale_experiment_name(request)
+    exp_name = seq.views.common.get_ale_experiment_name(request)
     exp_id = seq.views.common.get_ale_experiment_id(request)
     ale_number = seq.views.common.get_ale_id(request)
     ale_qryset = seq.views.common.get_ales(exp_id, True)
@@ -55,11 +55,11 @@ def fixating_mutations(request):
     template = loader.get_template("base_table_template.html")
 
     context = {"ales": ale_qryset,
-               "ale_experiment_name": ale_exp_name,
+               "ale_experiment_name": exp_name,
                "ale_no": ale_number,
                "experiment_id": exp_id,
                "table_body": mark_safe(table_body),
-               "title": ale_experiment_name + " Fixed Mutations",
+               "title": exp_name + " Fixed Mutations",
                "table_header": mark_safe(table_header),
                "template_header": "Fixating Mutations",
                "hidden_columns": hidden_columns,
