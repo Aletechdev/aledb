@@ -59,7 +59,7 @@ def fixating_mutations(request):
                "ale_no": ale_number,
                "experiment_id": exp_id,
                "table_body": mark_safe(table_body),
-               "title": "Fixed Mutations",
+               "title": ale_experiment_name + " Fixed Mutations",
                "table_header": mark_safe(table_header),
                "template_header": "Fixating Mutations",
                "hidden_columns": hidden_columns,
