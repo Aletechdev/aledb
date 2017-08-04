@@ -311,16 +311,16 @@ class TestFixation(TestCase):
                                         frequency=1,
                                         mutation=mut2)
 
-        filter_settings = AleExperimentFilter.objects.create(ale_experiment=self.ale_exp, ignored_genes="geneA")
+        AleExperimentFilter.objects.create(ale_experiment=self.ale_exp, ignored_genes="geneA")
 
         reseq_ordered_dict = collections.OrderedDict()
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
-        fixating_mutation_list = fixation.get_ale_exp_fixed_mut_dict(reseq_ordered_dict, filter_settings)
+        fixating_mutation_list = fixation.get_ale_exp_fixed_mut_dict(reseq_ordered_dict)
         self.assertEquals(0, len(fixating_mutation_list))
 
 
-    def test_fixation_ale_exp_filter(self):
+    def test_fixation_global_filter(self):
         flask_1 = Flask.objects.create(ale_id=self.ale,
                                        media=self.media,
                                        flask_number=1)
