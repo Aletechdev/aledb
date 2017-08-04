@@ -117,7 +117,7 @@ def shared_enriched_genes(request):
 # TODO: refactor
 def _get_table_body(reseq_dict, request):
     exp_id = seq.views.common.get_ale_experiment_id(request)
-    obs_mut_qryset = get_enrich_obs_mut_qryset(exp_id, reseq_dict)
+    obs_mut_qryset = get_enrich_obs_mut_qryset(reseq_dict)
     return mutation_table_builder.get_table_body(reseq_dict=reseq_dict,
                                                  observed_mutations_queryset=obs_mut_qryset,
                                                  ale_experiment_id=exp_id,
