@@ -18,7 +18,8 @@ def get_enrichment_mutation_list(ale_experiment_id):
 
 
 # TODO optimize by only using ORM for the below query.
-def get_enrich_obs_mut_qryset(exp_id, reseq_dict):
+def get_enrich_obs_mut_qryset(reseq_dict):
+    exp_id = reseq_dict[next(iter(reseq_dict))].ale_experiment.ale_id
     obs_mut_qryset = ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_dict.keys())
     enrich_mut_qrtset = EnrichmentMutation.objects.filter(ale_experiment_id=exp_id)
     enrich_mut_id_list = []
