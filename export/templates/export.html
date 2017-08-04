@@ -2,6 +2,8 @@
 {% block title %}<title>ALE Analytics Export</title>{% endblock %}
 {% block scripts_and_style %}
     <script type="text/javascript">{% include 'experiment_selector.js' %}</script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
 {% endblock %}
 {% block header %}Export{% endblock %}
 {% block content %}
@@ -77,6 +79,9 @@
             </form>
         </div>
     </div>
+    <script type="text/javascript">
+        $('.selectpicker').selectpicker('hide');
+    </script>
     {% if is_download %}
         {% load static %}
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.js"></script>

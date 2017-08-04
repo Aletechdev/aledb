@@ -27,7 +27,7 @@ function add_experiment_to_download_list() {
     set_export_experiments_input_field();
 
     document.getElementById('download').style.display = 'inline';
-    document.getElementById('mut_type_selected').style.display = 'inline';
+    $('.selectpicker').selectpicker('show');
 }
 
 function add_exp_to_list(exp_name) {
@@ -63,6 +63,7 @@ function remove_experiment(param) {
 
     if (selected_experiments.length == 0) {
         document.getElementById('download').style.display = 'none';
+        $('.selectpicker').selectpicker('hide');
     }
 }
 
@@ -75,5 +76,7 @@ function set_export_experiments_input_field() {
 }
 
 function print_warning_message() {
+    document.getElementById('download').style.display = 'none';
+    $('.selectpicker').selectpicker('hide');
     document.getElementById('warning_message').style.display = 'block'
 }
