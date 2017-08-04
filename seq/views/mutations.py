@@ -38,7 +38,7 @@ def mutation_table(request):
                "ale_no": ale_no,
                "experiment_id": ale_experiment_id,
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
-               "title": "Mutation Table",
+               "title": ale_experiment_name + " Mutation Table",
                "table_header": table_header,
                "template_header": "Mutations",
                "hidden_columns": hidden_columns,

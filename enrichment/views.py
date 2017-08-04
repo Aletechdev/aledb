@@ -55,7 +55,7 @@ def enrichment_mutations(request):
                "table_body": mark_safe(table_body),
                "title": "Enrichment Mutations",
                "table_header": mark_safe(table_header),
-               "template_header": "Enrichment Mutations",
+               "template_header": ale_experiment_name + " Enrichment Mutations",
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(int(exp_id)),
