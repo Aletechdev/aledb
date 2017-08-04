@@ -48,20 +48,20 @@ def remove_flask(flask_primary_key):
     _delete_all_orphaned_mutations()
 
 
-def delete_ale_experiment(ale_experiment_primary_key):
+def delete_ale_experiments(ale_experiment_primary_key_list):
     """
     Executed from Django ipython shell.
     """
-    clear_dashboard_cache()
-    ale_experiment_to_delete = ale.models.AleExperiment.objects.get(pk=ale_experiment_primary_key)
-    message = "Experiment %s was deleted" % ale_experiment_to_delete.name
-    ale_experiment_to_delete.delete()
-    _delete_all_orphaned_mutations()
-    rebuild_dashboard_data()
-    create_event(title="Experiment Deleted",
-                 message=message,
-                 icon='<i class="fa fa-times" aria-hidden="true"></i>',
-                 color="danger")
+    for exp_id in ale_experiment_primary_key_list:
+        ale_experiment_to_delete = ale.models.AleExperiment.objects.get(pk=exp_id)
+        message = "Experiment %s was deleted" % ale_experiment_to_delete.name
+        ale_experiment_to_delete.delete()
+        _delete_all_orphaned_mutations()
+        rebuild_dashboard_data()
+        create_event(title="Experiment Deleted",
+                    message=message,
+                    icon='<i class="fa fa-times" aria-hidden="true"></i>',
+                    color="danger")
 
 
 def _delete_all_orphaned_mutations():
