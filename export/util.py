@@ -16,14 +16,12 @@ ENRICH_MUT_TYPE_STR = "enrich_mut"
 
 
 def get_csv_str(exp_id, mut_type_str):
-    reseq_ordered_dict= {}
-    obs_mut_qryset = ObservedMutation.objects.none()
     if mut_type_str == FIXED_MUT_TYPE_STR:
         reseq_ordered_dict = get_reseq_ordered_dict(exp_id)
         reseq_ordered_dict = filter_out_wt_reseq(reseq_ordered_dict)
         obs_mut_qryset = get_exp_fixed_obs_mut_qryset(exp_id,
                                                       reseq_ordered_dict)
-    if mut_type_str == ENRICH_MUT_TYPE_STR:
+    elif mut_type_str == ENRICH_MUT_TYPE_STR:
         reseq_ordered_dict = get_reseq_ordered_dict(exp_id)
         reseq_ordered_dict = filter_out_wt_reseq(reseq_ordered_dict)
         obs_mut_qryset = get_enrich_obs_mut_qryset(exp_id, reseq_ordered_dict)
