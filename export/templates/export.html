@@ -2,7 +2,8 @@
 {% block title %}<title>ALE Analytics Export</title>{% endblock %}
 {% block scripts_and_style %}
     <script type="text/javascript">{% include 'experiment_selector.js' %}</script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
 {% endblock %}
 {% block header %}Export{% endblock %}
@@ -47,14 +48,17 @@
         <div class="col-lg-6">
             <form action="/export" method="get">
                 <div class="input-group">
-                    <select class="selectpicker" name="mut_type_selected" id="mut_type_selected" style="display: none">
-                        <option value={{ mut_types_str_list.0 }}>Mutations</option>
-                        <option value={{ mut_types_str_list.1 }}>Enrichment Mutations</option>
-                        <option value={{ mut_types_str_list.2 }}>Fixed Mutations</option>
-                    </select>
-                    <input type="submit" class="btn btn-default" id="download" name="download"
-                           value="Download CSV" onclick="print_warning_message()"
-                           style="display: none">
+                    <div class="btn-group">
+                        <input type="submit" class="btn btn-default" id="download" name="download"
+                               value="Download CSV" onclick="print_warning_message()"
+                               style="display: none">
+                        <select class="selectpicker" name="mut_type_selected" id="mut_type_selected"
+                                style="display: none">
+                            <option value={{ mut_types_str_list.0 }}>Mutations</option>
+                            <option value={{ mut_types_str_list.1 }}>Enrichment Mutations</option>
+                            <option value={{ mut_types_str_list.2 }}>Fixed Mutations</option>
+                        </select>
+                    </div>
                     <input type="hidden" id="download_experiments" name="download_experiments" value="">
                     <br>
                     <div class="row" id="warning_message" style="display: none">
