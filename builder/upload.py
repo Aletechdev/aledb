@@ -245,7 +245,6 @@ def _database_mutations(sample_type,
             bs_html = BeautifulSoup(mutation_dict[mut_num].get(GD_MUT_HTML), "lxml")
             sequence_change_str = bs_html.text.replace(u'\xa0', u' ').strip()
         if GD_MUT_ANNOTATION_HTML in mutation_dict[mut_num].keys():
-            asdf = mutation_dict[mut_num].get(GD_MUT_ANNOTATION_HTML)
             bs_html = BeautifulSoup(mutation_dict[mut_num].get(GD_MUT_ANNOTATION_HTML), "lxml")
             protein_change_str = bs_html.text.replace(u'\xa0', u' ').strip()
         mut, \
