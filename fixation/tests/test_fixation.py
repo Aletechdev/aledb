@@ -299,10 +299,10 @@ class TestFixation(TestCase):
         ObservedMutation.objects.create(sequencing_experiment=reseq_1,
                                         frequency=1,
                                         mutation=mut1)
+
         ObservedMutation.objects.create(sequencing_experiment=reseq_2,
                                         frequency=1,
                                         mutation=mut1)
-
         mut2 = Mutation.objects.create(mutation_type="qwe",
                                        position=2,
                                        sequence_change="asdf",
@@ -317,10 +317,10 @@ class TestFixation(TestCase):
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
         fixating_mutation_list = fixation.get_ale_exp_fixed_mut_dict(reseq_ordered_dict)
-        self.assertEquals(1, len(fixating_mutation_list))
+        self.assertEquals(0, len(fixating_mutation_list))
 
 
-    def test_fixation_global_not_filtered(self):
+    def test_fixation_global_filter(self):
         flask_1 = Flask.objects.create(ale_id=self.ale,
                                        media=self.media,
                                        flask_number=1)
@@ -348,10 +348,10 @@ class TestFixation(TestCase):
         ObservedMutation.objects.create(sequencing_experiment=reseq_1,
                                         frequency=1,
                                         mutation=mut1)
+
         ObservedMutation.objects.create(sequencing_experiment=reseq_2,
                                         frequency=1,
                                         mutation=mut1)
-
         mut2 = Mutation.objects.create(mutation_type="qwe",
                                        position=2,
                                        sequence_change="asdf",
@@ -366,4 +366,4 @@ class TestFixation(TestCase):
         reseq_ordered_dict.update({1: reseq_1})
         reseq_ordered_dict.update({2: reseq_2})
         fixating_mutation_list = fixation.get_ale_exp_fixed_mut_dict(reseq_ordered_dict)
-        self.assertEquals(1, len(fixating_mutation_list))
+        self.assertEquals(0, len(fixating_mutation_list))
