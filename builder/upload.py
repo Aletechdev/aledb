@@ -248,6 +248,7 @@ def _database_mutations(sample_type,
         mut, \
         created = Mutation.objects.get_or_create(position=mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY),
                                                  gene=gene_list_str,
+                                                 product=breseq_gene_product_annotation,
                                                  sequence_change=sequence_change_str,
                                                  mutation_type=mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY),
                                                  protein_change=protein_change_str)
