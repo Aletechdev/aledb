@@ -30,10 +30,6 @@ GD_MUT_HTML = 'html_mutation'
 GD_MUT_ANNOTATION_HTML = "html_mutation_annotation"
 DEFAULT_CLONAL_FREQ = 1
 BRESEQ_REPORT_COLUMN_KEY_EVIDENCE = "evidence"
-BRESEQ_REPORT_COLUMN_KEY_POSITION = "position"
-BRESEQ_REPORT_COLUMN_KEY_MUTATION = "mutation"
-BRESEQ_REPORT_COLUMN_KEY_MUTATION_FREQUENCY = "freq"
-BRESEQ_REPORT_COLUMN_KEY_ANNOTATION = "annotation"
 DUP_CSV_GENE_LIST_INDEX = 7
 DUP_CSV_START_POSITION_INDEX = 0
 DUP_CSV_WIDTH_INDEX = 2
@@ -242,10 +238,11 @@ def _database_mutations(sample_type,
         gene_list_str = ', '.join(gene_list)
         sequence_change_str, protein_change_str = "", ""
         if GD_MUT_HTML in mutation_dict[mut_num].keys():
+            # What is in the mutation HTML under the "mutation" column.
             bs_html = BeautifulSoup(mutation_dict[mut_num].get(GD_MUT_HTML), "lxml")
             sequence_change_str = bs_html.text.replace(u'\xa0', u' ').strip()
         if GD_MUT_ANNOTATION_HTML in mutation_dict[mut_num].keys():
-            asdf = mutation_dict[mut_num].get(GD_MUT_ANNOTATION_HTML)
+            # What is in the mutation HTML under the "annotation" column.
             bs_html = BeautifulSoup(mutation_dict[mut_num].get(GD_MUT_ANNOTATION_HTML), "lxml")
             protein_change_str = bs_html.text.replace(u'\xa0', u' ').strip()
         mut, \
