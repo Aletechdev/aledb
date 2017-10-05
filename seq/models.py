@@ -83,7 +83,7 @@ class Mutation(models.Model):
     protein_change = models.CharField(max_length=300,
                                       default="")
     gene = models.CharField(max_length=19000, blank=True, null=True)  # TODO: use TextField for this.
-    product = models.TextField(max_length=1500, default="", null=True)
+    product = models.TextField(default="", null=True)
     function = models.CharField(max_length=500, default="", null=True)
     go_process = models.CharField(max_length=300, default="", null=True)
     go_component = models.CharField(max_length=300, default="", null=True)
