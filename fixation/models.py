@@ -13,4 +13,4 @@ class FixatedMutation(models.Model):
     mutation = models.ForeignKey(Mutation,
                                  null=True)
 
-    fixed_observed_mutation_series = models.CharField(max_length=500, default='', blank=True)
+    fixed_observed_mutation_series = models.TextField(default='', null=True)
