@@ -4,7 +4,7 @@ import os
 
 import seq.views.common
 
-from filter.util import filter_observed_mutations
+from filter.util import get_filtered_observed_mutations_queryset
 
 import re
 
@@ -122,7 +122,7 @@ def get_table_header(reseq_dict, table_type=None):
 
 
 def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset):
-    obs_mut_qryset = filter_observed_mutations(observed_mutations_queryset)
+    obs_mut_qryset = get_filtered_observed_mutations_queryset(observed_mutations_queryset)
     mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
     mutation_index_dict = dict(
         (mutation_id, i) for i, mutation_id in enumerate(mut_qryset.values_list("id", flat=True)))

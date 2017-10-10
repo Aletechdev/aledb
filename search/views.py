@@ -11,7 +11,7 @@ from seq.views import mutation_table_builder
 from common.util import check_hidden_columns_and_filters, get_all_ale_exps, get_recent_ale_exps
 from django.core.serializers.json import DjangoJSONEncoder
 import json
-from filter.util import filter_observed_mutations
+from filter.util import get_filtered_observed_mutations_queryset
 
 
 def search(request):
@@ -53,7 +53,7 @@ def _get_obs_muts(request):
     if ale_experiments_to_include:
         obs_mut_qryset = obs_mut_qryset.filter(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_include)
-    obs_mut_qryset = filter_observed_mutations(obs_mut_qryset)
+    obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset)
     return obs_mut_qryset
 
 

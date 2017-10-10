@@ -1,5 +1,5 @@
 import collections
-from filter.util import filter_observed_mutations
+from filter.util import get_filtered_observed_mutations_queryset
 from genes.util import get_gene_list
 
 __author__ = "Patrick Phaneuf"
@@ -13,7 +13,7 @@ def get_enrichment_mutation_list(reseq_obs_mut_queryset_list):
 def _populate_mutation_gene_count_dict(reseq_obs_mut_queryset_list):
     mutation_gene_count_dict = collections.defaultdict(int)
     for reseq_obs_mut_queryset in reseq_obs_mut_queryset_list:
-        reseq_obs_mut_queryset = filter_observed_mutations(reseq_obs_mut_queryset)
+        reseq_obs_mut_queryset = get_filtered_observed_mutations_queryset(reseq_obs_mut_queryset)
         for observed_mutation in reseq_obs_mut_queryset:
             mutation_gene_list = get_gene_list(observed_mutation.mutation.gene)
             for gene in mutation_gene_list:
@@ -25,7 +25,7 @@ def _populate_enrichment_mutation_list(reseq_obs_mut_queryset_list,
                                        mutation_gene_count_dict):
     enrichment_mutation_list = []
     for reseq_obs_mut_queryset in reseq_obs_mut_queryset_list:
-        reseq_obs_mut_queryset = filter_observed_mutations(reseq_obs_mut_queryset)
+        reseq_obs_mut_queryset = get_filtered_observed_mutations_queryset(reseq_obs_mut_queryset)
         for observed_mutation in reseq_obs_mut_queryset:
             mutation_gene_list = get_gene_list(observed_mutation.mutation.gene)
             for gene in mutation_gene_list:

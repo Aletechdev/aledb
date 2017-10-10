@@ -19,24 +19,39 @@ DELETE_ROW_BOX = """<td><img src="/static/close-icon.gif" onclick="delete_row(%d
 TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Details</td></tr>"
 
 
-def filter_observed_mutations(observed_mutation_queryset, filter_settings=None):
+def get_filtered_observed_mutations_queryset(observed_mutation_queryset, filter_settings=None):
     if filter_settings is None:
         return _filter_observed_mutations(observed_mutation_queryset)
     else:  # Ideally, we don't use the else, though have it for backwards compatibility.
         return _filter_observed_mutations_given_filter_settings(observed_mutation_queryset, filter_settings)
 
 
-def _filter_observed_mutations(observed_mutation_queryset):
+# TODO: refactor get_filtered_observed_mutations_dict() and _filter_observed_mutations(); identical logic.
+def get_filtered_observed_mutations_dict(observed_mutation_queryset):
     ale_exp_qryset = AleExperiment.objects.filter(
         ale_id__in=observed_mutation_queryset.values(
             "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"))
+    filt_obs_mut_dict = {}
+    for exp in ale_exp_qryset:
+        exp_filter_settings = AleExperimentFilter.objects.filter(ale_experiment__ale_id=exp.ale_id).first()
+        exp_obs_mut_qryset = _get_obs_mut_qryset_of_ale_exp(observed_mutation_queryset, exp.ale_id)
+        exp_obs_mut_qryset = _filter_observed_mutations_given_filter_settings(exp_obs_mut_qryset,
+                                                                                  exp_filter_settings)
+        filt_obs_mut_dict[exp.name] = exp_obs_mut_qryset
+    return filt_obs_mut_dict
+
+
+def _filter_observed_mutations(observed_mutation_queryset):
+    exp_qryset = AleExperiment.objects.filter(
+        ale_id__in=observed_mutation_queryset.values(
+            "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"))
     output_obs_mut_qryset = ObservedMutation.objects.none()
-    for ale_exp in ale_exp_qryset:
-        ale_exp_filter_settings = AleExperimentFilter.objects.filter(ale_experiment__ale_id=ale_exp.ale_id).first()
-        ale_exp_obs_mut_qryset = _get_obs_mut_qryset_of_ale_exp(observed_mutation_queryset, ale_exp.ale_id)
-        ale_exp_obs_mut_qryset = _filter_observed_mutations_given_filter_settings(ale_exp_obs_mut_qryset,
-                                                                                  ale_exp_filter_settings)
-        output_obs_mut_qryset = output_obs_mut_qryset | ale_exp_obs_mut_qryset
+    for exp in exp_qryset:
+        exp_filter_settings = AleExperimentFilter.objects.filter(ale_experiment__ale_id=exp.ale_id).first()
+        exp_obs_mut_qryset = _get_obs_mut_qryset_of_ale_exp(observed_mutation_queryset, exp.ale_id)
+        exp_obs_mut_qryset = _filter_observed_mutations_given_filter_settings(exp_obs_mut_qryset,
+                                                                                  exp_filter_settings)
+        output_obs_mut_qryset = output_obs_mut_qryset | exp_obs_mut_qryset
     return output_obs_mut_qryset
 
 
