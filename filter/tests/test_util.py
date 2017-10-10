@@ -11,7 +11,7 @@ from ale.models import TechnicalReplicate,\
     Media,\
     FreezerBox
 from ale.models import Instrument
-from filter.util import filter_observed_mutations
+from filter.util import get_filtered_observed_mutations_queryset
 
 
 __author__ = 'Patrick Phaneuf'
@@ -31,7 +31,7 @@ class TestFilter(TestCase):
                                         frequency=1)
 
         filter_settings = AleExperimentFilter.objects.create(ale_experiment=ale_exp, ignored_genes="geneA")
-        obs_mut_queryset = filter_observed_mutations(ObservedMutation.objects.all(), filter_settings)
+        obs_mut_queryset = get_filtered_observed_mutations_queryset(ObservedMutation.objects.all(), filter_settings)
         self.assertEquals(len(obs_mut_queryset), 0)
 
     def test_mutation_filter_one_gene_mutation_many_gene_filter(self):
@@ -47,7 +47,7 @@ class TestFilter(TestCase):
 
         filter_settings = AleExperimentFilter.objects.create(ale_experiment=ale_exp,
                                                              ignored_genes="rcsF, –/–, rrlH, rrlD, rrsH, rrlA, gltP/yjcO, rsxC, eco/mqo")
-        obs_mut_queryset = filter_observed_mutations(ObservedMutation.objects.all(), filter_settings)
+        obs_mut_queryset = get_filtered_observed_mutations_queryset(ObservedMutation.objects.all(), filter_settings)
         self.assertEquals(len(obs_mut_queryset), 0)
 
     def test_mutation_filter_many_gene_mutation_one_gene_filter(self):
@@ -64,7 +64,7 @@ class TestFilter(TestCase):
         filter_settings = AleExperimentFilter.objects.create(ale_experiment=ale_exp,
                                                              ignored_genes="geneA")
 
-        obs_mut_queryset = filter_observed_mutations(ObservedMutation.objects.all(), filter_settings)
+        obs_mut_queryset = get_filtered_observed_mutations_queryset(ObservedMutation.objects.all(), filter_settings)
         self.assertEquals(len(obs_mut_queryset), 1)
 
     def test_mutation_filter_many_gene_mutation_many_gene_filter(self):
@@ -81,7 +81,7 @@ class TestFilter(TestCase):
         filter_settings = AleExperimentFilter.objects.create(ale_experiment=ale_exp,
                                                              ignored_genes="geneB, geneA")
 
-        obs_mut_queryset = filter_observed_mutations(ObservedMutation.objects.all(), filter_settings)
+        obs_mut_queryset = get_filtered_observed_mutations_queryset(ObservedMutation.objects.all(), filter_settings)
         self.assertEquals(len(obs_mut_queryset), 0)
 
     def test_filter_observed_mutations_get_ale_exp_filter_from_observed_mutations(self):
@@ -152,7 +152,7 @@ class TestFilter(TestCase):
                                         frequency=1)
 
         obs_mut_qryset = ObservedMutation.objects.all()
-        obs_mut_qryset = filter_observed_mutations(obs_mut_qryset)
+        obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset)
 
         gene_mut_count_dict = {"geneA":0, "geneB":0, "geneC":0}
         for obs_mut in obs_mut_qryset:
@@ -232,7 +232,7 @@ class TestFilter(TestCase):
                                         frequency=1)
 
         obs_mut_qryset = ObservedMutation.objects.all()
-        obs_mut_qryset = filter_observed_mutations(obs_mut_qryset)
+        obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset)
 
         gene_mut_count_dict = {"geneA":0, "geneB":0, "geneC":0}
         for obs_mut in obs_mut_qryset:
@@ -282,7 +282,7 @@ class TestFilter(TestCase):
                                         frequency=1)
 
         obs_mut_qryset = ObservedMutation.objects.all()
-        obs_mut_qryset = filter_observed_mutations(obs_mut_qryset)
+        obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset)
 
         gene_mut_count_dict = {"geneA": 0, "geneB": 0, "geneC": 0}
         for obs_mut in obs_mut_qryset:

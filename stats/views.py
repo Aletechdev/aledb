@@ -16,7 +16,7 @@ from stats.util import get_histogram_jsons,\
 from common.util import get_reseq_queryset,\
     get_reseq_ordered_dict, get_mut_queryset_from_obs_mut_queryset, \
     get_all_ale_exps, get_recent_ale_exps
-from filter.util import filter_observed_mutations
+from filter.util import get_filtered_observed_mutations_queryset
 
 
 __author__ = 'pphaneuf'
@@ -88,5 +88,5 @@ def get_histogram_item_count(request):
 def _get_observed_mutation_queryset(request, ale_experiment_id):
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id)
     observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
-    observed_mutation_query_set = filter_observed_mutations(observed_mutation_query_set)
+    observed_mutation_query_set = get_filtered_observed_mutations_queryset(observed_mutation_query_set)
     return observed_mutation_query_set
