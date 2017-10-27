@@ -5,6 +5,8 @@ DEBUG = os.environ.get('DEBUG', '0') == '1'
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
+sequencing_url = os.environ.get('SEQUENCING_URL', 'https://aquaticus.ucsd.edu/aledata/')
+
 ADMINS = ()
 
 MANAGERS = ADMINS
@@ -12,15 +14,15 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get("MYSQL_DATABASE", "database"),
-        'USER': os.environ.get("MYSQL_USER", "user"),
-        "PASSWORD": os.environ.get("MYSQL_PASSWORD", "password"),
-        'HOST': os.environ.get("MYSQL_HOST", "db"),
-        'PORT': int(os.environ.get("MYSQL_PORT", 3306)),
+        'NAME': os.environ.get('MYSQL_DATABASE', 'database'),
+        'USER': os.environ.get('MYSQL_USER', 'user'),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'password'),
+        'HOST': os.environ.get('MYSQL_HOST', 'db'),
+        'PORT': int(os.environ.get('MYSQL_PORT', 3306)),
     }
 }
 
-ALLOWED_HOSTS = [os.environ.get("DJANGO_SERVER_HOST", "localhost")]
+ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost')]
 
 USE_X_FORWARDED_PORT = os.environ.get('USE_X_FORWARDED_PORT', '0') == '1'
 
@@ -54,22 +56,22 @@ USE_L10N = True
 USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/home/media/media.lawrence.com/media/"
+# Example: '/home/media/media.lawrence.com/media/'
 MEDIA_ROOT = ''
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
-# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
+# Examples: 'http://media.lawrence.com/media/', 'http://example.com/media/'
 MEDIA_URL = ''
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
-# in apps' "static/" subdirectories and in STATICFILES_DIRS.
-# Example: "/home/media/media.lawrence.com/static/"
+# in apps' 'static/' subdirectories and in STATICFILES_DIRS.
+# Example: '/home/media/media.lawrence.com/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'common/static'),
+    os.path.join(BASE_DIR, 'common/staticfiles'),
 )
 
 # List of finder classes that know how to find static files in
@@ -94,6 +96,8 @@ DASHBOARD_TEMPLATE_PATH = os.path.join(BASE_DIR, 'dashboard/templates')
 SEARCH_TEMPLATE_PATH = os.path.join(BASE_DIR, 'search/templates')
 DUPLICATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'duplications/templates')
 GENES_TEMPLATE_PATH = os.path.join(BASE_DIR, 'genes/templates')
+METADATA_TEMPLATE_PATH = os.path.join(BASE_DIR, 'metadata/templates')
+ABOUT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'about/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -108,6 +112,8 @@ TEMPLATES = [
                  SEARCH_TEMPLATE_PATH,
                  DUPLICATION_TEMPLATE_PATH,
                  GENES_TEMPLATE_PATH,
+                 METADATA_TEMPLATE_PATH,
+                 ABOUT_TEMPLATE_PATH
                  ],
         'OPTIONS': {
             'context_processors': [
@@ -131,12 +137,16 @@ TEMPLATES = [
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'login.login_middleware.LoginRequiredMiddleware'
 )
+
+LOGIN_URL = '/accounts/login/'
 
 ROOT_URLCONF = 'aleinfo.urls'
 
@@ -156,6 +166,7 @@ INSTALLED_APPS = (
     'fixation',
     'stats',
     'metadata',
+    'about',
     'enrichment',
     'login',
     'compare',
@@ -165,7 +176,7 @@ INSTALLED_APPS = (
     'search',
     'duplications',
     'genes',
-    'commmonmuts',
+    'debug_toolbar',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -210,3 +221,8 @@ CACHES = {
         'LOCATION': 'cache_table',
     }
 }
+
+PUBLIC = os.environ.get('PUBLIC', '0') == '1'
+PUBLIC_USERNAME = os.environ.get('PUBLIC_USERNAME', 'public')
+PUBLIC_PASSWORD = os.environ.get('PUBLIC_PASSWORD', 'public_password')
+

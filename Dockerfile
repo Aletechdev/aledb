@@ -17,5 +17,7 @@ VOLUME /app/settings
 
 EXPOSE 80
 
+ENV DJANGO_SETTINGS_MODULE=aleinfo.settings_dockerfile
+
 CMD ["./docker-runserver.sh"]
 
