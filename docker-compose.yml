@@ -9,11 +9,15 @@ services:
       - MYSQL_DATABASE=composetest
   web:
     build: .
-    command: bash -c "./wait-for-it.sh db:3306 -t 120 -- gunicorn aleinfo.wsgi -b 0.0.0.0:8000"
-    volumes:
-      - .:/code
+    command: "./docker-runserver.sh"
+    environment:
+      - DEBUG=0
+      - DJANGO_SERVER_HOST=localhost
+      - MYSQL_USER=composetest
+      - MYSQL_PASSWORD=testpassword
+      - MYSQL_DATABASE=composetest
     ports:
-      - "8000:8000"
+      - "8000:80"
     links:
       - db
     depends_on:

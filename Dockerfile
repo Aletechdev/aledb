@@ -4,11 +4,18 @@ FROM python:3.5
 # the application rather than buffering it.
 ENV PYTHONUNBUFFERED 1
 
-RUN mkdir /code
-WORKDIR /code
-ADD requirements.txt /code/
-RUN pip install -r requirements.txt
-ADD . /code/
+RUN mkdir /app
+WORKDIR /app
 
-# Expose listen ports
-EXPOSE 8000
+ADD requirements.txt /app
+RUN pip install -r requirements.txt
+
+ADD . /app
+
+VOLUME /app/static
+VOLUME /app/settings
+
+EXPOSE 80
+
+CMD ["./docker-runserver.sh"]
+
