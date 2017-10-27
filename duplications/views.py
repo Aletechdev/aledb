@@ -4,8 +4,6 @@ from django.http import HttpResponse
 
 from django.template import loader
 
-from django.contrib.auth.decorators import login_required
-
 import aleinfo.settings as settings
 
 from seq.views import common
@@ -20,7 +18,7 @@ import requests
 
 from seq.views import mutation_table_builder
 
-from common.db_util import get_reseq_ordered_dict, get_all_ale_experiments, get_recent_experiments
+from common.util import get_reseq_ordered_dict, get_all_ale_exps, get_recent_ale_exps
 
 
 INDEX_TEMPLATE = "duplication.html"
@@ -35,7 +33,6 @@ else:
     password = ""
 
 
-@login_required
 def duplication(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
@@ -45,8 +42,6 @@ def duplication(request):
     template = loader.get_template(INDEX_TEMPLATE)
 
     seq_experiment_ordered_dict = get_reseq_ordered_dict(ale_experiment_id)
-
-    seq_experiment_ordered_dict = mutation_table_builder.filter_checked_flasks(request, seq_experiment_ordered_dict)
 
     experiment_urls = mutation_table_builder.get_experiment_urls(seq_experiment_ordered_dict)
 
@@ -76,8 +71,8 @@ def duplication(request):
                "reseqencing_report_url": reseqencing_report_url,
                "ale_experiment_id": ale_experiment_id,
                "ale_experiment_name": ale_experiment_name,
-               "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(int(ale_experiment_id))}
+               "experiments": get_all_ale_exps(),
+               "recent_experiments": get_recent_ale_exps(int(ale_experiment_id))}
 
     return HttpResponse(template.render(context))
 

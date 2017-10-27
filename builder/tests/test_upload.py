@@ -1,20 +1,96 @@
-__author__ = 'pphaneuf'
-
-
-import unittest
-
-from builder.upload import _is_sample_clonal_or_popuation
-from builder.upload import SAMPLE_TYPE
+import os
+from django.test import TestCase
+from seq.models import Mutation
 from builder.upload import _is_missing_coverage_type
-
-# Use access to protected members till can wrap acceptance testing
-# around workflow using these functions.
 from builder.upload import _parse_average_read_length
 from builder.upload import _parse_read_count
 from builder.upload import _get_mutation_freq
+from builder.upload import add_breseq_results
+from builder.gdparse.gdparse.gdparse import GDParser
 
 
-class TestUpload(unittest.TestCase):
+__author__ = 'Patrick Phaneuf'
+
+
+class TestUpload(TestCase):
+
+    def setUp(self):
+        self.current_location = os.path.dirname(os.path.realpath(__file__))
+
+    def test_add_breseq_results_no_HTML_in_DB(self):
+        breseq_output_dir_path = self.current_location + "/no_HTML_in_DB_test/"
+        with open(breseq_output_dir_path + "annotated.gd") as output_genomic_diff_file:
+            mutation_gd_parser = GDParser(file_handle=output_genomic_diff_file)
+        add_breseq_results(1,
+                           "Patrick",
+                           breseq_output_dir_path,
+                           mutation_gd_parser,
+                           None,
+                           "bop27_1_4")
+        mut = Mutation.objects.get(position = 4181791)
+        expected_annotation = 'C→A'
+        self.assertEqual(expected_annotation, mut.sequence_change)
+        expected_annotation = "P1100Q (CCG→CAG)"
+        self.assertEqual(expected_annotation, mut.protein_change)
+
+    def test_add_breseq_results_no_mut_annotation_dict(self):
+        breseq_output_dir_path = self.current_location+"/0-0-1-1/output/"
+        with open(breseq_output_dir_path+"annotated.gd") as output_genomic_diff_file:
+            mutation_gd_parser = GDParser(file_handle=output_genomic_diff_file)
+        add_breseq_results(1,
+                           "Patrick",
+                           breseq_output_dir_path,
+                           mutation_gd_parser,
+                           None,
+                           "NC_000913_3")
+        mut_qryset = Mutation.objects.all()
+        mut_pos_list = [mut.position for mut in mut_qryset]
+        self.assertEqual(len(mut_qryset), 4)
+        self.assertTrue(257908 in mut_pos_list)
+        self.assertTrue(2173363 in mut_pos_list)
+        self.assertTrue(3560455 in mut_pos_list)
+        self.assertTrue(4296381 in mut_pos_list)
+
+    # TODO: change unit test to get use annotated.gd rather than output.gd.
+    def test_add_breseq_results_gd_file_only(self):
+        breseq_output_dir_path = self.current_location + "/1-0-1-1/output/"
+        with open(breseq_output_dir_path + "output.gd") as output_genomic_diff_file:
+            mutation_gd_parser = GDParser(file_handle=output_genomic_diff_file)
+
+        add_breseq_results(1,
+                           "Patrick",
+                           breseq_output_dir_path,
+                           mutation_gd_parser,
+                           None,
+                           "NC_000913_3")
+        mut_qryset = Mutation.objects.all()
+        mut_pos_list = [mut.position for mut in mut_qryset]
+        self.assertEqual(len(mut_qryset), 4)
+        self.assertTrue(257908 in mut_pos_list)
+        self.assertTrue(2173363 in mut_pos_list)
+        self.assertTrue(3560455 in mut_pos_list)
+        self.assertTrue(4296381 in mut_pos_list)
+
+    # TODO: change unit test to get use annotated.gd rather than output.gd.
+    def test_add_breseq_results_ltee_gd_file(self):
+        breseq_output_dir_path = self.current_location + "/2-0-1-1/output/"
+        with open(breseq_output_dir_path + "output.gd") as output_genomic_diff_file:
+            mutation_gd_parser = GDParser(file_handle=output_genomic_diff_file)
+
+        add_breseq_results(1,
+                           "Patrick",
+                           breseq_output_dir_path,
+                           mutation_gd_parser,
+                           None,
+                           "NC_000913_3")
+
+        mut_qryset = Mutation.objects.all()
+        mut_pos_list = [mut.position for mut in mut_qryset]
+        self.assertEqual(len(mut_qryset), 4)
+        self.assertTrue(880542 in mut_pos_list)
+        self.assertTrue(1733559 in mut_pos_list)
+        self.assertTrue(2103918 in mut_pos_list)
+        self.assertTrue(4141016 in mut_pos_list)
 
     def test_get_mutation_freq_89(self):
 
@@ -44,22 +120,6 @@ class TestUpload(unittest.TestCase):
         output_freq = _get_mutation_freq(mutation_dict)
 
         self.assertEquals(expected_freq, output_freq)
-
-    def test_is_sample_clonal_or_popuation_clonal(self):
-
-        log_file_path = "log_sample_is_clonal.txt"
-
-        sample_type = _is_sample_clonal_or_popuation(log_file_path)
-
-        self.assertEquals(SAMPLE_TYPE.clonal, sample_type)
-
-    def test_is_sample_clonal_or_popuation_population(self):
-
-        log_file_path = "log_sample_is_population.txt"
-
-        sample_type = _is_sample_clonal_or_popuation(log_file_path)
-
-        self.assertEquals(SAMPLE_TYPE.population, sample_type)
 
     def test_is_missing_coverage_type_True(self):
 
@@ -114,7 +174,3 @@ class TestUpload(unittest.TestCase):
         output = _parse_read_count(input)
 
         self.assertEquals(output, expected)
-
-
-if __name__ == '__main__':
-    unittest.main()

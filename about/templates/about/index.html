@@ -1,0 +1,122 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}<title>About</title>{% endblock %}
+{% block scripts_and_style %}
+    <style type="text/css">
+        table.dataTable tr.odd {
+            background-color: lightgrey;
+        }
+
+        table.dataTable tr.even {
+            background-color: white;
+        }
+
+        span.line {
+            display: inline-block;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.css"/>
+
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#runs').DataTable({
+                paging: false,
+                dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
+                buttons: [
+                    'colvis', 'csv'
+                ],
+                deferRender: true
+            });
+        })
+    </script>
+{% endblock %}
+{% block header %}About{% endblock %}
+{% block content %}
+    <h1>ALE Analytics</h1>
+    <p class="lead">This web platform has been built to support the report generation and consolidation of adaptive
+        mutations from Adaptive Laboratory Evolution (ALE) experiments. Please see the following work for a full
+        description of the platform: <a
+                href="https://github.com/pvphaneuf/cse-ms-thesis/blob/master/patrick-phaneuf-cse.pdf">thesis report</a>
+    </p>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Publications described by ALE Analytics projects</h3>
+        </div>
+        <table class="table">
+            <tr>
+                <td>PGI</td>
+                <td>Charusanti P, Conrad TM, Knight EM, Venkataraman K, Fong NL, et al. (2010) Genetic Basis of Growth
+                    Adaptation of Escherichia coli after Deletion of pgi, a Major Metabolic Gene. PLOS Genetics
+                    6(11):e1001186. https://doi.org/10.1371/journal.pgen.1001186
+                </td>
+            </tr>
+            <tr>
+                <td>C13</td>
+                <td>Sandberg TE, Long CP, Gonzalez JE, Feist AM, Antoniewicz MR, et al. (2016) Evolution of E. coli on
+                    [U-13C]Glucose Reveals a Negligible Isotopic Influence on Metabolism and Physiology. PLOS ONE
+                    11(3):e0151130. https://doi.org/10.1371/journal.pone.0151130
+                </td>
+            </tr>
+            <tr>
+                <td>42C</td>
+                <td>Troy E. Sandberg, Margit Pedersen, Ryan A. LaCroix, Ali Ebrahim, Mads Bonde, Markus J. Herrgard,
+                    Bernhard O. Palsson, Morten Sommer, Adam M. Feist; Evolution of Escherichia coli to 42 °C and
+                    Subsequent Genetic Engineering Reveals Adaptive Mechanisms and Novel Mutations. Mol Biol Evol 2014;
+                    31 (10): 2647-2662. https://doi.org/10.1093/molbev/msu209
+                </td>
+            </tr>
+            <tr>
+                <td>GLU</td>
+                <td>Sandberg TE, Pedersen M, LaCroix RA, et al. Evolution of Escherichia coli to 42 °C and Subsequent
+                    Genetic Engineering Reveals Adaptive Mechanisms and Novel Mutations. Molecular Biology and
+                    Evolution. 2014;31(10):2647-2662. doi:10.1093/molbev/msu209.
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span class="line">SSW GLU AC,</span>
+                    <span class="line">SSW GLU GLY,</span>
+                    <span class="line">SSW GLY XYL</span>
+                </td>
+                <td>Sandberg TE, Lloyd CJ, Palsson BO, Feist AM. 2017. Laboratory evolution to alternating substrate
+                    environments yields distinct phenotypic and genetic adaptive strategies. Appl Environ Microbiol
+                    83:e00410-17. https://doi.org/10.1128/AEM.00410-17.
+                </td>
+            </tr>
+        </table>
+    </div>
+    <h2>Mutation data generation</h2>
+    <p>The mutation data presented on this platform was generated using the <a href=https://github.com/barricklab/breseq>breseq</a> resquencing pipeline.</p>
+    <p>Deatherage, D.E., Barrick, J.E. (2014) Identification of mutations in laboratory-evolved microbes from next-generation sequencing data using breseq. Methods Mol. Biol.</p>
+    <h2>3rd party packages used</h2>
+    <p>mutation-needle-plot: http://dx.doi.org/10.5281/zenodo.14561</p>
+    <p>webGL protein viewer: http://dx.doi.org/10.5281/zenodo.20980</p>
+    <h2>Acknowledgements</h2>
+    <p>We thank Dennis Gosting for his enormous contributions to this platform.</p>
+    <p>This work was supported by Dr. Adam Feist and Dr. Bernhard Palsson of UCSD's Systems Biology Research Group, and by
+        a grant from the Novo Nordisk Foundation Center for Biosustainability (NNF16CC0021858).</p>
+    <h2>Contact</h2>
+    <p>Please send any bug reports or commends to:</p>
+    <p>pphaneuf 'at' eng 'dot' ucsd 'dot' edu</p>
+    <hr>
+    <div class="container">
+        <p class="text-muted" align="center">ALE Analytics is hosted and maintained by the Systems Biology Research Group at the University of California,
+            San Diego.</p>
+        <div class="row">
+            <div class="col-sm-5">
+                <a href="http://systemsbiology.ucsd.edu/">
+                    <img class="img-responsive footer-image" src="/static/sbrg-logo.png">
+                </a>
+            </div>
+            <div class="col-sm-2">
+                <a href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
+                                                         src="/static/cfb-logo.png"></a>
+            </div>
+            <div class="col-sm-5">
+                <a href="http://www.ucsd.edu/"><img class="img-responsive footer-image" src="/static/ucsd-logo.png"></a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

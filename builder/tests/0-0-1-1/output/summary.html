@@ -1,0 +1,117 @@
+<!DOCTYPE html
+PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<html>
+<head>
+<title>BRESEQ :: Summary Statistics</title>
+<style type = "text/css">
+body {font-family: sans-serif; font-size: 11pt;}
+th {background-color: rgb(0,0,0); color: rgb(255,255,255);}
+table {background-color: rgb(1,0,0); color: rgb(0,0,0);}
+tr {background-color: rgb(255,255,255);}
+.mutation_in_codon {color:red; text-decoration : underline;}
+.snp_type_synonymous{color:green;}
+.snp_type_nonsynonymous{color:blue;}
+.snp_type_nonsense{color:red;}
+.mutation_header_row {background-color: rgb(0,130,0);}
+.read_alignment_header_row {background-color: rgb(255,0,0);}
+.missing_coverage_header_row {background-color: rgb(0,100,100);}
+.new_junction_header_row {background-color: rgb(0,0,155);}
+.copy_number_header_row {background-color: rgb(153,102,0);}
+.alternate_table_row_0 {background-color: rgb(255,255,255);}
+.alternate_table_row_1 {background-color: rgb(235,235,235);}
+.gray_table_row {background-color: rgb(230,230,245);}
+.polymorphism_table_row {background-color: rgb(160,255,160);}
+.highlight_table_row {background-color: rgb(192,255,255);}
+.reject_table_row {background-color: rgb(255,200,165);}
+.user_defined_table_row {background-color: rgb(255,255,0);}
+.information_table_row {background-color: rgb(200,255,255);}
+.junction_repeat {background-color: rgb(255,165,0)}
+.junction_gene {}
+.hidden { display: none; }
+.unhidden { display: block; }
+
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<script type="text/javascript">
+  function hideTog(divID) {
+    var item = document.getElementById(divID);
+    if (item) {
+      item.className=(item.className=='hidden')?'unhidden':'hidden';
+    }
+  }
+  function showTog(butID) {
+    var button = document.getElementById(butID);
+    if (button) {
+      button.value=(button.value=='Show')?'Hide':'Show';
+    }
+  }
+</script>
+
+</head>
+<body>
+<table width="100%" border="0" cellspacing="0" cellpadding="3">
+<tr>
+<td><a href="http://barricklab.org/breseq"><img src="evidence/breseq_small.png" /></a></td>
+<td width="100%">
+<b><i>breseq</i></b>&nbsp;&nbsp;version 0.27.0b&nbsp;&nbsp;revision f32c2f7f32bc
+<br><a href="index.html">mutation predictions</a> | 
+<a href="marginal.html">marginal predictions</a> | 
+<a href="summary.html">summary statistics</a> | 
+<a href="output.gd">genome diff</a> | 
+<a href="log.txt">command line log</a>
+</td></tr></table>
+
+<p>
+<h2>Read File Information</h2>
+<table border="0" cellspace="1" cellpadding="5">
+<tr ><th></th><th>read file</th><th>reads</th><th>bases</th><th>passed&nbsp;filters</th><th>average</th><th>longest</th><th>mapped</th></tr>
+<tr ><td><a href="calibration/BOP27Reseq_S1_L001_R1.error_rates.pdf">errors</a></td><td>BOP27Reseq_S1_L001_R1</td><td align="right">5,978,523</td><td align="right">980,052,088</td><td align="right">100.0%</td><td align="right">163.9&nbsp;bases</td><td align="right">251&nbsp;bases</td><td align="right">99.0%</td></tr><tr ><td><a href="calibration/BOP27Reseq_S1_L001_R2.error_rates.pdf">errors</a></td><td>BOP27Reseq_S1_L001_R2</td><td align="right">5,977,520</td><td align="right">980,235,110</td><td align="right">100.0%</td><td align="right">164.0&nbsp;bases</td><td align="right">251&nbsp;bases</td><td align="right">98.7%</td></tr><tr class="highlight_table_row"><td></td><td><b>total</b></td><td align="right"><b>11,956,043</b></td><td align="right"><b>1,960,287,198</b></td><td align="right">100.0%</td><td align="right">164.0&nbsp;bases</td><td><b>251</b>&nbsp;bases</td><td align="right">98.9%</td></tr></table><h2>Reference Sequence Information</h2>
+<p>
+<table border="0" cellspacing="1" cellpadding="5" >
+<tr><th></th><th></th><th>seq id</th><th>length</th><th align="center">fit mean</th><th align="center">fit dispersion</th><th align="center">% mapped reads</th><th align="left">description</th></tr>
+<tr><td><a href="evidence/NC_000913.overview.png">coverage</a></td><td><a href="calibration/0.unique_coverage.pdf">distribution</a></td><td>NC_000913</td><td align="right">4,641,652</td><td align="center">422.4</td><td align="center">11.9</td><td align="center">100.0%</td><td>Escherichia coli str. K-12 substr. MG1655, complete genome.</td></tr><tr class="highlight_table_row"><td></td><td></td><td><b>total</b></td><td align="right"><b>4,641,652</b></td><td></td><td></td><td align="center">100.0%</td><td></td></tr>
+</table>
+<p><b>fit dispersion</b> is the ratio of the variance to the mean for the negative binomial fit. It is =1 for Poisson and >1 for over-dispersed data.
+<h2>New Junction Evidence</h2>
+<p>
+<h3>Junction Candidates Tested</h3>
+<p>
+<table border="0" cellspacing="1" cellpadding="5">
+<tr><th align="center">option</th><th align="center">limit</th><th align="center">actual</th></tr><tr><td>Number of alignment pairs examined for constructing junction candidates</td><td align="center">&le;&nbsp;100000</td><td align="center">6265</td></tr><tr><td>Coverage evenness (position-hash) score of junction candidates</td><td align="center">&ge;&nbsp;2</td><td align="center">&ge;&nbsp;2</td></tr><tr><td>Test this many junction candidates (n). May be smaller if not enough passed the coverage evenness threshold</td><td align="center">100&nbsp;&le;&nbsp;n&nbsp;&le;&nbsp;5000</td><td align="center">763</td></tr><tr><td>Total length of all junction candidates (factor times the reference genome length)</td><td align="center">&le;&nbsp;0.1</td><td align="center">0.084</td></tr></table>
+<h3>Junction Skew Score Calculation</h3>
+<p>
+<table border="0" cellspacing="1" cellpadding="5">
+<tr ><th>reference sequence</th><th>pr(no read start)</th></tr>
+<tr >
+<td>NC_000913</td><td align="center">0.62484</td></tr></table><p><b>pr(no read start)</b> is the probability that there will not be an aligned read whose first base matches a given position on a given strand.
+<h3>Final Junction Predictions</h3>
+<p>
+<table border="0" cellspacing="1" cellpadding="5">
+<tr><th align="center">option</th><th align="center">value</th></tr><tr><td>Coverage evenness (position-hash) score of predicted junctions must be</td><td align="center">&ge;&nbsp;3</td></tr><tr><td>Skew score of predicted junction (&minus;log10 probability of unusual coverage evenness) must be</td><td align="center">&le;&nbsp;3</td></tr><tr><td>Number of bases that at least one read must overlap each uniquely aligned side of a predicted junction</td><td align="center">&ge;&nbsp;1</td></tr></table>
+<h2>Read Alignment Evidence</h2>
+<p>
+<table border="0" cellspacing="1" cellpadding="5">
+<tr><th>option</th><th>value</th></tr><tr><td>Mode</td><td>Consensus/Mixed Base</td></tr><tr><td>Ploidy</td><td>1 (haploid)</td></tr><tr><td>Consensus mutation E-value cutoff</td><td>10</td></tr><tr><td>Consensus frequency cutoff</td><td>0.8</td></tr><tr><td>Consensus minimum coverage each strand</td><td>OFF</td></tr><tr><td>Polymorphism E-value cutoff</td><td>10</td></tr><tr><td>Polymorphism frequency cutoff</td><td>0.2</td></tr><tr><td>Polymorphism minimum coverage each strand</td><td>OFF</td></tr><tr><td>Polymorphism bias cutoff</td><td>OFF</td></tr><tr><td>Predict indel polymorphisms</td><td>YES</td></tr><tr><td>Skip indel polymorphisms in homopolymers runs of</td><td>OFF</td></tr><tr><td>Skip base substitutions when they create a homopolymer flanked on each side by</td><td>OFF</td></tr></table><p>
+<h2>Execution Times</h2>
+<table border="0" cellspacing="1" cellpadding="5">
+<tr><th>step</th><th>start</th><th>end</th><th>elapsed</th></tr>
+<tr><td>Read and reference sequence file input</td><td>13:30:07&nbsp;14&nbsp;Feb&nbsp;2016</td><td>13:33:14&nbsp;14&nbsp;Feb&nbsp;2016</td><td>3&nbsp;minutes&nbsp;7&nbsp;seconds</td></tr>
+<tr><td>Read alignment to reference genome</td><td>13:33:15&nbsp;14&nbsp;Feb&nbsp;2016</td><td>13:41:33&nbsp;14&nbsp;Feb&nbsp;2016</td><td>8&nbsp;minutes&nbsp;18&nbsp;seconds</td></tr>
+<tr><td>Preprocessing alignments for candidate junction identification</td><td>13:41:33&nbsp;14&nbsp;Feb&nbsp;2016</td><td>13:45:58&nbsp;14&nbsp;Feb&nbsp;2016</td><td>4&nbsp;minutes&nbsp;25&nbsp;seconds</td></tr>
+<tr><td>Preliminary analysis of coverage distribution</td><td>13:45:58&nbsp;14&nbsp;Feb&nbsp;2016</td><td>13:58:11&nbsp;14&nbsp;Feb&nbsp;2016</td><td>12&nbsp;minutes&nbsp;13&nbsp;seconds</td></tr>
+<tr><td>Identifying junction candidates</td><td>13:58:11&nbsp;14&nbsp;Feb&nbsp;2016</td><td>13:58:12&nbsp;14&nbsp;Feb&nbsp;2016</td><td>1&nbsp;second</td></tr>
+<tr><td>Re-alignment to junction candidates</td><td>13:58:12&nbsp;14&nbsp;Feb&nbsp;2016</td><td>14:00:48&nbsp;14&nbsp;Feb&nbsp;2016</td><td>2&nbsp;minutes&nbsp;36&nbsp;seconds</td></tr>
+<tr><td>Resolving alignments with junction candidates</td><td>14:00:48&nbsp;14&nbsp;Feb&nbsp;2016</td><td>14:11:04&nbsp;14&nbsp;Feb&nbsp;2016</td><td>10&nbsp;minutes&nbsp;16&nbsp;seconds</td></tr>
+<tr><td>Creating BAM files</td><td>14:11:04&nbsp;14&nbsp;Feb&nbsp;2016</td><td>14:19:03&nbsp;14&nbsp;Feb&nbsp;2016</td><td>7&nbsp;minutes&nbsp;59&nbsp;seconds</td></tr>
+<tr><td>Tabulating error counts</td><td>14:19:03&nbsp;14&nbsp;Feb&nbsp;2016</td><td>14:29:23&nbsp;14&nbsp;Feb&nbsp;2016</td><td>10&nbsp;minutes&nbsp;20&nbsp;seconds</td></tr>
+<tr><td>Re-calibrating base error rates</td><td>14:29:23&nbsp;14&nbsp;Feb&nbsp;2016</td><td>14:29:24&nbsp;14&nbsp;Feb&nbsp;2016</td><td>1&nbsp;second</td></tr>
+<tr><td>Examining read alignment evidence</td><td>14:29:24&nbsp;14&nbsp;Feb&nbsp;2016</td><td>15:37:50&nbsp;14&nbsp;Feb&nbsp;2016</td><td>1&nbsp;hour&nbsp;8&nbsp;minutes&nbsp;26&nbsp;seconds</td></tr>
+<tr><td>Polymorphism statistics</td><td>15:37:50&nbsp;14&nbsp;Feb&nbsp;2016</td><td>15:38:10&nbsp;14&nbsp;Feb&nbsp;2016</td><td>20&nbsp;seconds</td></tr>
+<tr><td>Output</td><td>15:38:10&nbsp;14&nbsp;Feb&nbsp;2016</td><td>15:39:47&nbsp;14&nbsp;Feb&nbsp;2016</td><td>1&nbsp;minute&nbsp;37&nbsp;seconds</td></tr>
+<tr class="highlight_table_row">
+<td colspan="3" ><b>Total</b></td>
+<td><b>2&nbsp;hours&nbsp;9&nbsp;minutes&nbsp;39&nbsp;seconds</b></td>
+</tr>
+</table></body></html>

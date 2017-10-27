@@ -13,82 +13,59 @@ class Instrument(models.Model):
 
 
 class AleExperiment(models.Model):
-
     ale_id = models.AutoField(primary_key=True)
-
     name = models.CharField(max_length=40)
-
     person = models.CharField(max_length=200)
-
     date = models.DateTimeField(auto_now_add=True)
-
     instrument = models.ForeignKey(Instrument)
-
     notes = models.TextField(**blank_field)
 
     def __unicode__(self):
-
             return "#%d-%s" % (self.ale_id, self.name)
 
-    class Meta:
 
+    class Meta:
         verbose_name_plural = "ALE Experiments"
 
 
 # TODO: this model should be called "Ale".
 class AleId(models.Model):
     """Parallel ALE's run within an ALE experiment"""
-
     ale_id = models.IntegerField()
-
     description = models.CharField(max_length=300, **blank_field)
-
     species = models.CharField(max_length=300, **blank_field)
-
     strain = models.CharField(max_length=300, **blank_field)
-
     ale_experiment = models.ForeignKey(AleExperiment)
-
     starting_strain = models.ForeignKey("Isolate",
                                         default=None,
                                         **blank_field)
 
     def __unicode__(self):
-
         # return "ALE #%d < %s" % (self.ale_id, self.ale_experiment.name)
         return "ALE #%d < %s" % (self.ale_id, self.ale_experiment)
 
     class Meta:
-
-        unique_together = (("ale_experiment",
-                            "ale_id"),)
+        unique_together = (("ale_experiment", "ale_id"),)
 
         verbose_name_plural = "ALEs"
 
 
 class Media(models.Model):
-
     temperature = models.FloatField(default=37,
                                     help_text="Temperature in Celcius")
-
     volume = models.FloatField(default=25,
                                help_text="Volume of culture in each flask (mL)")
-
     stirring_speed = models.FloatField(default=1123,
                                        help_text="RPM")
-
     description = models.CharField(max_length=200)
-
     substrate = models.CharField(max_length=200,
                                  default=None,
                                  **blank_field)
-
     other = models.TextField(**blank_field)
 
     # TODO: figure out components
     # maybe carbon source, etc.? or track individual chemicals
     def __unicode__(self):
-
         return "%s (%.1f C, %.1f mL, %.1f RPM)" % \
                (self.description,
                 self.temperature,
@@ -96,7 +73,6 @@ class Media(models.Model):
                 self.stirring_speed)
 
     class Meta:
-
         verbose_name_plural = "Media"
 
 
@@ -126,39 +102,25 @@ class FreezerBox(models.Model):
 
 
 class Flask(models.Model):
-
     ale_id = models.ForeignKey(AleId)
-
     flask_number = models.IntegerField(**blank_field)
-
     media = models.ForeignKey(Media)
-
     comments = models.CharField(max_length=200, **blank_field)
 
     def __unicode__(self):
-
         if self.ale_id.description is not None:
-
             if self.ale_id.description.lower() == ('Not from ALE').lower():
-
                 return 'Not from ALE'
-
             else:
-
                 return "Flask#%d < %s" % (self.flask_number,
                                           self.ale_id)
-
         else:
-
             return "Flask#%d < %s" % (self.flask_number,
                                       self.ale_id)
 
     def ale_experiment(self):
-
         return self.ale_id.ale_experiment.ale_id
-
     class Meta:
-
         unique_together = (("ale_id",
                             "flask_number"),)
 
@@ -166,89 +128,52 @@ class Flask(models.Model):
 
 
 #TODO: Change 'reseq_reference' field to 'reseq_ref_name'
+#TODO: Change 'library_prep' field to 'wgs_kit'
 class Isolate(models.Model):
-
     isolate_number = models.IntegerField()
-
     parent_isolate = models.ForeignKey("Isolate", **blank_field)
-
     flask = models.ForeignKey(Flask)
-
     is_population = models.BooleanField()
-
     freezer_box = models.ForeignKey(FreezerBox)
-
     description = models.CharField(max_length=300, **blank_field)
-
     person = models.CharField(max_length=200, **blank_field)
-
     reseq_reference = models.CharField(max_length=200, **blank_field)
-
     reseq_date = models.CharField(max_length=200, **blank_field)
-
     breseq_version = models.CharField(max_length=200, **blank_field)
-
     library_prep = models.CharField(max_length=200, **blank_field)
 
     def seq_location(self):
-
         return self.resequencingexperiment_set.values_list("location")[0][0]
 
     def __unicode__(self):
-
         if self.flask.ale_id.description is not None:
-
             if self.flask.ale_id.description.lower() == ('Not from ALE').lower():
-
                 return self.description
-
             else:
-
                 population_or_clonal = "POP" if self.is_population else "COL"
-
                 parent = self.parent_isolate if self.parent_isolate else self.flask
-
                 return "#%d %s < %s" % (self.isolate_number,
                                         population_or_clonal,
                                         parent)
-
         else:
-
             population_or_clonal = "POP" if self.is_population else "COL"
-
             parent = self.parent_isolate if self.parent_isolate else self.flask
-
             return "#%d %s < %s" % (self.isolate_number,
                                     population_or_clonal,
                                     parent)
 
-    #class Meta:
-
-        #unique_together = (("flask", "isolate_number", ),)
-
-        # TODO - encode experiments done on the isolate
-
 
 class TechnicalReplicate(models.Model):
-
     tech_rep_number = models.IntegerField(default=1)
-
     isolate = models.ForeignKey(Isolate)
-
     tags = models.CharField(max_length=500, **blank_field)
-
     description = models.CharField(max_length=500, **blank_field)
 
 
 # TODO: what are these integers referring to. If ALE Experiment, model should be moved to ale.models and use foreign keys.
 class RecentExperiments(models.Model):
-
     first = models.IntegerField(null=True)
-
     second = models.IntegerField(null=True)
-
     third = models.IntegerField(null=True)
-
     fourth = models.IntegerField(null=True)
-
     fifth = models.IntegerField(null=True)

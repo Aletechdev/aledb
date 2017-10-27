@@ -1,6 +1,6 @@
 from django.conf.urls import url
-
 from compare.views import index, mutation_table, enrichment, metadata, fixation
+
 
 __author__ = 'dgosting'
 

@@ -1,5 +1,3 @@
-from django.contrib.auth.decorators import login_required
-
 from django.http import HttpResponse
 
 from django.template import loader
@@ -8,13 +6,14 @@ import aleinfo.settings as settings
 
 from seq.views import common
 
-from common.db_util import get_reseq_queryset, get_all_ale_experiments, get_recent_experiments
+from common.util import get_reseq_queryset, get_all_ale_exps, get_recent_ale_exps
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
 
 __author__ = 'Patrick Phaneuf'
 
+# TODO: use the template location described within settings.py
 META_DATA_TEMPLATE = "metadata/index.html"
 
 
@@ -25,7 +24,6 @@ else:
     reseq_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
-@login_required
 def metadata(request):
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ale_id = request.GET.get(REQUEST_ALE_ID)
@@ -44,8 +42,9 @@ def metadata(request):
     context = {"reseq_info_list": reseq_info_list,
                "reseq_report_url": reseq_report_url,
                "ale_experiment_name": ale_experiment_name,
-               "experiments": get_all_ale_experiments(),
-               "recent_experiments": get_recent_experiments(int(ale_experiment_id))}
+               "experiments": get_all_ale_exps(),
+               "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
+               "multiple": False}
 
     return HttpResponse(template.render(context))
 
@@ -71,7 +70,9 @@ def get_reseq_info_list(reseq_queryset):
                                  reseq.tech_rep.isolate.library_prep,
                                  reseq.tech_rep.isolate.reseq_reference,
                                  reseq.tech_rep.isolate.breseq_version,
-                                 reseq.tech_rep.isolate.reseq_date)
+                                 reseq.tech_rep.isolate.reseq_date,
+                                 reseq.tech_rep.isolate.flask.ale_id.ale_experiment.name,
+                                 reseq.tech_rep.description)
 
         reseq_info_list.append(experiment_info_tuple)
 
