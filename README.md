@@ -10,10 +10,8 @@ Please refer to the wiki contained within this github project for technical docu
 
 ### Quick-start steps for ALE Analytics docker deployment
 1. `docker-compose up`
-2. `docker-compose run web python manage.py collectstatic`
-3. `docker-compose run web python manage.py migrate`
-4. `docker-compose run web python manage.py createsuperuser`; this will be the user and password to log into a live instance of ALE Analytics.
-5. `docker-compose run web python manage.py createcachetable`
+2. `docker-compose run web python manage.py createsuperuser`; this will be the user and password to log into a live instance of ALE Analytics.
+
 
 ## TODOs:  
 * Describe the workflow for integrating ALE experiments within the wiki.
