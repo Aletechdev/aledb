@@ -2,3 +2,8 @@ Django
 mysqlclient
 gunicorn
 requests
+django-debug-toolbar
+beautifulsoup4
+configparser
+django_mysql
+lxml
