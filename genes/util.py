@@ -34,10 +34,10 @@ def get_annotated_gene_list(breseq_mutation_gene_annotation, breseq_gene_product
 
 def _get_str_from_annotation(annotation):
     try:
-        str = annotation.decode("utf-8")
+        annot = annotation.decode("utf-8")
     except AttributeError:
-        str = annotation
-    return str
+        annot = annotation
+    return str(annot)
 
 
 def _get_gene_list_from_range(gene_product_str):

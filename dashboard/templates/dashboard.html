@@ -1,40 +1,44 @@
 {% extends 'dashboard_base.html' %}
-    {% block title %}<title>Dashboard</title>{% endblock %}
-    {% block scripts_and_style %}
-<style>
+{% block title %}<title>Dashboard</title>{% endblock %}
+{% block scripts_and_style %}
+    <style>
 
-   .chart div {
-       font: 15px sans-serif;
-       background-color: steelblue;
-       text-align: right;
-       padding: 5px;
-       margin: 1px;
-       color: white;
-   }
-    .axis path,
-    .axis line {
-        fill: none;
-        stroke: black;
-        shape-rendering: crispEdges;
-    }
-    .axis text {
-        font-family: sans-serif;
-        font-size: 12px;
-    }
-</style>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>
+        .chart div {
+            font: 15px sans-serif;
+            background-color: steelblue;
+            text-align: right;
+            padding: 5px;
+            margin: 1px;
+            color: white;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges;
+        }
+
+        .axis text {
+            font-family: sans-serif;
+            font-size: 12px;
+        }
+    </style>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static "timeline.css" %}">
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.2/d3.min.js"></script>#}
 {% endblock %}
 <br>
 {% block header %}Dashboard{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col-sm-6 col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">ALE Analytics Total Mutation Counts</h3>
-            </div>
-            <table class="table">
-                <tbody>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">ALE Analytics Total Mutation Counts</h3>
+                </div>
+                <table class="table">
+                    <tbody>
                     <tr>
                         <td>ALE Experiments</td>
                         <td>{{ count_dict.ale_exp }}</td>
@@ -42,6 +46,10 @@
                     <tr>
                         <td>ALEs</td>
                         <td>{{ count_dict.ale }}</td>
+                    </tr>
+                    <tr>
+                        <td>Flasks</td>
+                        <td>{{ count_dict.flask }}</td>
                     </tr>
                     <tr>
                         <td>Isolates</td>
@@ -55,24 +63,66 @@
                         <td>Observed Mutations</td>
                         <td>{{ count_dict.observed }}</td>
                     </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="col-sm-6 col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">ALE Analytics Mutation Type Counts</h3>
+                    </tbody>
+                </table>
             </div>
-            <table class="table">
-                <thead>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">ALE Analytics Mutation Functional Change Counts</h3>
+                </div>
+
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Functional Change Type</th>
+                        <th>Observed Mutations</th>
+                        <th>Unique Mutations</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Intergenic</td>
+                        <td>{{ functional_change_type_count_dict.observed.intergenic }}</td>
+                        <td>{{ functional_change_type_count_dict.unique.intergenic }}</td>
+                    </tr>
+                    <tr>
+                        <td>Noncoding</td>
+                        <td>{{ functional_change_type_count_dict.observed.noncoding }}</td>
+                        <td>{{ functional_change_type_count_dict.unique.noncoding }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pseudogene</td>
+                        <td>{{ functional_change_type_count_dict.observed.pseudogene }}</td>
+                        <td>{{ functional_change_type_count_dict.unique.pseudogene }}</td>
+                    </tr>
+                    <tr>
+                        <td>Synonymous</td>
+                        <td>{{ functional_change_type_count_dict.observed.snp_type_synonymous }}</td>
+                        <td>{{ functional_change_type_count_dict.unique.snp_type_synonymous }}</td>
+                    </tr>
+                    <tr>
+                        <td>Nonsynonymous</td>
+                        <td>{{ functional_change_type_count_dict.observed.snp_type_nonsynonymous }}</td>
+                        <td>{{ functional_change_type_count_dict.unique.snp_type_nonsynonymous }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">ALE Analytics Mutation Type Counts</h3>
+                </div>
+                <table class="table">
+                    <thead>
                     <tr>
                         <th>Mutation Type</th>
                         <th>Observed Mutations</th>
                         <th>Unique Mutations</th>
                     </tr>
-                </thead>
-                <tbody>
+                    </thead>
+                    <tbody>
                     <tr>
                         <td>Single Base Substitutions</td>
                         <td>{{ mutation_type_count_dict.observed.SNP }}</td>
@@ -118,88 +168,94 @@
                         <td>{{ mutation_type_count_dict.observed.DUP }}</td>
                         <td>{{ mutation_type_count_dict.unique.DUP }}</td>
                     </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="col-sm-6 col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">ALE Analytics Mutation Functional Change Counts</h3>
+                    </tbody>
+                </table>
             </div>
+        </div>
+        <div class="col-md-4">
+            <ul class="timeline">
+                {% for event in timeline %}
+                    <li class="timeline-inverted">
+                        <div class="timeline-badge {{ event.color }}">{{ event.icon | safe }}</div>
+                        <div class="timeline-panel">
+                            <div class="timeline-heading">
+                                <h4 class="timeline-title">{{ event.title }}</h4>
+                                <p>
+                                    <small class="text-muted"><i
+                                            class="glyphicon glyphicon-time"></i> {{ event.timestamp }}</small>
+                                </p>
+                            </div>
+                            <div class="timeline-body">
+                                <p>{{ event.message }}</p>
+                            </div>
+                        </div>
+                    </li>
 
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Functional Change Type</th>
-                        <th>Observed Mutations</th>
-                        <th>Unique Mutations</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Intergenic</td>
-                        <td>{{ protein_change_type_count_dict.observed.intergenic }}</td>
-                        <td>{{ protein_change_type_count_dict.unique.intergenic }}</td>
-                    </tr>
-                    <tr>
-                        <td>Noncoding</td>
-                        <td>{{ protein_change_type_count_dict.observed.noncoding }}</td>
-                        <td>{{ protein_change_type_count_dict.unique.noncoding }}</td>
-                    </tr>
-                    <tr>
-                        <td>Pseudogene</td>
-                        <td>{{ protein_change_type_count_dict.observed.pseudogene }}</td>
-                        <td>{{ protein_change_type_count_dict.unique.pseudogene }}</td>
-                    </tr>
-                    <tr>
-                        <td>Synonymous</td>
-                        <td>{{ protein_change_type_count_dict.observed.snp_type_synonymous }}</td>
-                        <td>{{ protein_change_type_count_dict.unique.snp_type_synonymous }}</td>
-                    </tr>
-                    <tr>
-                        <td>Nonsynonymous</td>
-                        <td>{{ protein_change_type_count_dict.observed.snp_type_nonsynonymous }}</td>
-                        <td>{{ protein_change_type_count_dict.unique.snp_type_nonsynonymous }}</td>
-                    </tr>
-                </tbody>
-            </table>
+                {% endfor %}
+            </ul>
         </div>
     </div>
-</div>
     <hr>
-<div class="row">
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <h2>Mutation Histograms</h2>
     <form action="" method="get">
-    <input type="number" name="number_of_top_genes" min="1" max="50" value="{{ number_of_genes_to_show }}"> Top Genes
-    <input type="submit" class="btn btn-default" value="Show" ><br>
-</form>
-<br>
-<div class="chart"></div>
-<script src="//d3js.org/d3.v3.min.js"></script>
+        <input type="number"
+               name="number_of_top_genes"
+               min="1"
+               max="{{ max_histogram_size }}"
+               value="{{ number_of_genes_to_show }}">
+        Entries to show
+        <input type="submit"
+               class="btn btn-default"
+               value="Show"><br>
+    </form>
+    <br>
+    <div class="chart"></div>
     <table>
-    <td>
-<script>
-
-   var gene_data = {{ genes }};
-   var color_set = {{ gene_color_set }};
-   var mutation_types = {{ mutation_types }};
-   var extra_padding = 0;
-   function _get_label(datum) { return datum.mutation__gene;}
-
-   {% include 'bar_chart.js' %}
-
-</script></td>
-        <td><script>
-        var gene_data = {{ sequence_changes }};
-        var color_set = {{ seq_color_set }};
-        var mutation_types = {{ protein_types }};
-        var extra_padding = 100;
-        function _get_label(datum) {return datum.mutation__gene + " " + datum.mutation__protein_change;}
-
-        {% include 'bar_chart.js' %}
-
-    </script>
-    </td></table>
+        <tr>
+            <td>
+                <script>
+                    var gene_data = {{ genes }};
+                    var color_set = {{ gene_color_set }};
+                    var mutation_types = {{ mutation_types }};
+                    var extra_padding = 0;
+                    function _get_label(datum) {
+                        return datum.mutation__gene;
+                    }
+                    {% include 'bar_chart.js' %}
+                </script>
+            </td>
+            <td>
+                <script>
+                    var gene_data = {{ sequence_changes }};
+                    var color_set = {{ seq_color_set }};
+                    var mutation_types = {{ protein_types }};
+                    var extra_padding = 100;
+                    function _get_label(datum) {
+                        return datum.mutation__gene + " " + datum.mutation__protein_change;
+                    }
+                    {% include 'bar_chart.js' %}
+                </script>
+            </td>
+    </table>
+    <br><br><br>
+    <hr>
+    <div class="container">
+        <p class="text-muted" align="center">ALE Analytics is hosted and maintained by the Systems Biology Research Group at the University of California,
+            San Diego.</p>
+        <div class="row">
+            <div class="col-sm-5">
+                <a href="http://systemsbiology.ucsd.edu/">
+                    <img class="img-responsive footer-image" src="/static/sbrg-logo.png">
+                </a>
+            </div>
+            <div class="col-sm-2">
+                <a href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
+                                                         src="/static/cfb-logo.png"></a>
+            </div>
+            <div class="col-sm-5">
+                <a href="http://www.ucsd.edu/"><img class="img-responsive footer-image" src="/static/ucsd-logo.png"></a>
+            </div>
+        </div>
     </div>
-
 {% endblock %}

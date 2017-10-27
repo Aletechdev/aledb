@@ -27,15 +27,19 @@
     <table id="runs" class="table">
         <thead>
         <tr>
+            {% if multiple %}
+                <th>Experiment Name</th>
+            {% endif %}
             <th>ALE, Flask, Isolate</th>
             <th>Clonal or Population</th>
             <th>Species</th>
             <th>Strain</th>
-            <th>Description</th>
+            <th>Additional Strain Details</th>
             <th>Media</th>
             <th>Substrate</th>
             <th>Temperature</th>
-            <th>Library Prep</th>
+            <th>ALE Sample Details</th>
+            <th>WGS kit</th>
             <th>Reference</th>
             <th>Breseq Version</th>
             <th>Reseq Date</th>
@@ -45,6 +49,9 @@
         <tbody>
         {% for reseq_info_tuple in reseq_info_list %}
             <tr class="experiment_stats">
+                {% if multiple %}
+                    <td class="name">{{ reseq_info_tuple.12 }}</td>
+                {% endif %}
                 <td class="sample_name"><a href="
                         {{ reseq_report_url }}{{ reseq_info_tuple.0.location }}">{{ reseq_info_tuple.0.ale_flask_isolate_str }}</a>
                 </td>
@@ -55,6 +62,7 @@
                 <td class="media_description">{{ reseq_info_tuple.3 }}</td>
                 <td class="substrate">{{ reseq_info_tuple.4 }}</td>
                 <td class="temperature">{{ reseq_info_tuple.2 }}</td>
+                <td class="tech_rep_description">{{ reseq_info_tuple.13 }}</td>
                 <td class="library_prep">{{ reseq_info_tuple.8 }}</td>
                 <td class="reseq_reference">{{ reseq_info_tuple.9 }}</td>
                 <td class="breseq_version">{{ reseq_info_tuple.10 }}</td>

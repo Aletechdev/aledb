@@ -1,6 +1,5 @@
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-
 from django.conf.urls import include, url
+from django.conf import settings
 
 
 # TODO: remove all final '/' for apps that don't need it (enrichment, etc.)
@@ -12,13 +11,17 @@ urlpatterns = [
     url(r'^fixation/', include('fixation.urls')),
     url(r'^stats', include('stats.urls')),
     url(r'^metadata', include('metadata.urls')),
+    url(r'^about', include('about.urls')),
     url(r'^enrichment/', include('enrichment.urls')),
     url(r'^export', include('export.urls')),
     url(r'^compare/', include('compare.urls')),
     url(r'^search/', include('search.urls')),
     url(r'^duplication/', include('duplications.urls')),
-    url(r'^gene/', include('genes.urls')),
-    url(r'^common_mutations/', include('commmonmuts.urls')),
+    url(r'^gene/', include('genes.urls'))
 ]
 
-urlpatterns += staticfiles_urlpatterns()
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+    ]

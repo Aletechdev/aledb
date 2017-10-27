@@ -1,39 +1,46 @@
 {% extends 'dashboard_base.html' %}
 {% block title %}<title>{{ title }}</title>{% endblock %}
 {% block scripts_and_style %}
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.css"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.css"/>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.js"></script>
 
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous" type="text/javascript"></script>
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
-    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.11.2/css/bootstrap-select.min.css">
-
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/bootstrap-select.min.js"></script>
-
-    <!-- (Optional) Latest compiled and minified JavaScript translation files -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.1/js/i18n/defaults-en_US.min.js"></script>
-
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"
+            type="text/javascript"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/i18n/defaults-*.min.js"></script>
     <style type="text/css">
 
         .FixedHeader_Cloned th {
             background-color: white;
             opacity: 0.5;
         }
+
         .intergenic {
             font-style: italic;
         }
+
         .mutation_in_codon {
             color: red;
             text-decoration: underline;
         }
+
         .reference_error {
             text-decoration: line-through;
         }
-        table.dataTable tr.odd { background-color: #E2E4FF; }
-        table.dataTable tr.even { background-color: white; }
+
+        table.dataTable tr.odd {
+            background-color: #E2E4FF;
+        }
+
+        table.dataTable tr.even {
+            background-color: white;
+        }
+
         .dropdown-menu li > a:hover, .dropdown-menu li > a:focus, .dropdown-submenu:hover > a {
             background-color: #4078c0;
         }
@@ -42,12 +49,11 @@
 {% endblock %}
 {% block header %}<b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
 {% block content %}
-<div class="row">
-     <!-- ALE selection drop-down -->
     {% if experiment_id %}
-        <div><b>Columns</b></div>
-        <form action="" method="get">
-            <p>
+        <div class="row"> <!-- Columns -->
+            <form action="" method="get">
+                <br>
+                <b>Columns: </b>
                 <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
                 <input type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
                 <select name="ale_no" class="selectpicker">
@@ -64,60 +70,70 @@
                         <option>Hide Tag: {{ key }}</option>
                     {% endfor %}
                 </select>
-            </p>
-            <p>
                 <input type="submit" class="btn btn-default btn-primary" value="Apply"/>
-            </p>
+                <button type="button" class="btn btn-default" onclick="column_sort_from_right()"><i
+                        class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i>Column Sort from Right
+                </button>
+            </form>
+        </div>
+        <div><i>Note: You must select the Apply button when selecting specific ALEs or show/hide of columns according to
+            tags.</i></div>
+        <br>
+        <div class="row"> <!-- Rows -->
+            <b>Rows: </b>
+            <div class="btn-group" role="group">
+                <button id="row_tag_selector" type="button" class="btn btn-default"
+                        style="width: 180px; text-align: left">All Tags
+                </button>
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a onclick="filter_tag('clear', true, 'All Tags')" style="cursor:pointer">All Tags</a></li>
+                    {% for key, value in tag_dropdown.items %}
+                        <li><a onclick="filter_tag('{{ key }}', true, 'Show Tag: {{ key }}')" style="cursor:pointer">Show
+                            Tag: {{ key }} {{ value | safe }}</a></li>
+                        <li><a onclick="filter_tag('{{ key }}', false, 'Hide Tag: {{ key }}')" style="cursor:pointer">Hide
+                            Tag: {{ key }} {{ value | safe }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <b style="margin-left: 3%">Tags: </b>
+            <input id="tag_toggle" type="checkbox" data-toggle="toggle" checked data-on="Show" data-off="Hide">
+
+            <b style="margin-left: 3%">Duplications: </b>
+            <input id="show_dups" type="checkbox" name="checkbox" value="value" checked data-toggle="toggle"
+                   data-on="Show" data-off="Hide">
+        </div>
+        <!-- Mutation table -->
+        <form action="" method="get">
+            <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+            {% if ale_no %}
+                <input type="hidden" name="ale_no" value="{{ ale_no }}"/>
+            {% else %}
+                <input type="hidden" name="ale_no" value="all"/>
+            {% endif %}
+            <table id="data" class="table" cellspacing="0px">
+                <br>
+                <thead>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <script type="text/javascript">
+                var sorted_column = {{ sorted_column }};
+                var table_data = {{ table_body }};
+                var table_titles = {{ table_header | safe }};
+                var table_heads = [];
+                var number_of_columns = 0;
+                var tag_list = {{ tag_dropdown | safe}};
+                for (var x in table_titles) {
+                    table_heads.push({title: table_titles[x]});
+                    number_of_columns += 1;
+                }
+                {% include 'table_template.js' %}
+            </script>
         </form>
     {% endif %}
-    <br>
-    <!-- Mutation table -->
-    <form action="" method="get">
-        <div><b>Rows</b></div>
-        <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
-        {% if ale_no %}
-            <input type="hidden" name="ale_no" value="{{ ale_no }}"/>
-        {% else %}
-            <input type="hidden" name="ale_no" value="all"/>
-        {% endif %}
-        <table id="data" class="table" cellspacing="0px">
-            <label style="float:right"><input id="show_dups" type="checkbox" name="checkbox" value="value" checked data-toggle="toggle" data-on="Show" data-off="Hide"> Duplications</label>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-default" onclick="column_sort_from_right()"><i class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i>Column Sort from Right</button>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fa fa-tags fa-fw" aria-hidden="true"></i> Tags
-                    <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a onclick="filter_tag('clear')" style="cursor:pointer">Clear Tags</a></li>
-                        {% for key, value in tag_dropdown.items %}
-                            <li><a onclick="filter_tag('{{ key }}', true)" style="cursor:pointer">Show Tag: {{ key }} {{ value | safe }}</a></li>
-                            <li><a onclick="filter_tag('{{ key }}', false)" style="cursor:pointer">Hide Tag: {{ key }} {{ value | safe }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <input id="tag_toggle" type="checkbox" data-toggle="toggle" checked>
-            </div>
-            <br><br>
-            <thead>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-        <script type="text/javascript">
-            var sorted_column = {{ sorted_column }};
-            var table_data = {{ table_body }};
-            var table_titles = {{ table_header | safe }};
-            var table_heads = [];
-            var number_of_columns = 0;
-            var tag_list = {{ tag_dropdown | safe}};
-            for(var x in table_titles) {
-                table_heads.push({title: table_titles[x]});
-                number_of_columns += 1;
-            }
-            {% include 'table_template.js' %}
-        </script>
-    </form>
-</div>
 {% endblock %}

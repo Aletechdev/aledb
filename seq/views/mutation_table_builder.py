@@ -4,7 +4,7 @@ import os
 
 import seq.views.common
 
-from filter.util import filter_observed_mutations
+from filter.util import get_filtered_observed_mutations_queryset
 
 import re
 
@@ -12,7 +12,7 @@ from enum import Enum
 
 from django.utils.html import strip_tags
 
-from common.db_util import get_mutation_queryset_from_obs_mut_queryset
+from common.util import get_mut_queryset_from_obs_mut_queryset
 
 from genes.util import get_gene_list
 
@@ -27,7 +27,7 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/close-icon.gif" width="12" height="11"></a>"""
 
-HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequence Change", "Gene", "Function", "Product", "GO Process", "GO Component", "Protein change"]
+HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequence Change", "Gene", "Function", "Product", "GO Process", "GO Component", "Details"]
 
 HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>%s"""
 
@@ -110,7 +110,7 @@ def get_table_header(reseq_dict, table_type=None):
 
         reseq = reseq_dict[seq_experiment_id]
 
-        sample_name = reseq.aleexp_ale_flask_isolate_str
+        sample_name = reseq.exp_ale_flask_isolate_str
 
         current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep_id)
 
@@ -121,32 +121,24 @@ def get_table_header(reseq_dict, table_type=None):
     return base_table_header + table_header_list
 
 
-def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset, filter_settings):
-
-    observed_mutations_queryset = filter_observed_mutations(observed_mutations_queryset, filter_settings)
-
-    mutation_queryset = get_mutation_queryset_from_obs_mut_queryset(observed_mutations_queryset)
-
+def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset):
+    obs_mut_qryset = get_filtered_observed_mutations_queryset(observed_mutations_queryset)
+    mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
     mutation_index_dict = dict(
-        (mutation_id, i) for i, mutation_id in enumerate(mutation_queryset.values_list("id", flat=True)))
-
+        (mutation_id, i) for i, mutation_id in enumerate(mut_qryset.values_list("id", flat=True)))
     experiment_url_dict = get_experiment_urls(reseq_dict)
-
     experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
 
     # Initialize all sample mutation table cells as empty.
-    table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mutation_queryset)
+    table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mut_qryset)
 
     # Populating table_entry_list
-    for observed_mutation in observed_mutations_queryset:
-
+    for observed_mutation in obs_mut_qryset:
         new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
-
         if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
             table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
                 experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
-
-    return mutation_queryset, table_entry_list, mutation_index_dict
+    return mut_qryset, table_entry_list, mutation_index_dict
 
 
 # TODO: Refactor. The observed mutations argument may
@@ -155,11 +147,12 @@ def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_qu
 def get_table_body(reseq_dict,
                    observed_mutations_queryset,
                    ale_experiment_id=None,
-                   filter_settings=None,
                    table_type=None):
 
-    mutation_queryset, table_entry_list, mutation_index_dict = get_mutation_table_queryset_and_entry_list(
-        reseq_dict, observed_mutations_queryset, filter_settings)
+    mutation_queryset,\
+    table_entry_list,\
+    mutation_index_dict = get_mutation_table_queryset_and_entry_list(
+        reseq_dict, observed_mutations_queryset)
 
     protein_changes = {}  # For calculating distances on the genes page only
 
@@ -310,57 +303,6 @@ def _find_between(s, first, last):
         return s[start:end]
     except ValueError:
         return ""
-
-
-def filter_checked_flasks(request, seq_experiment_dict):
-
-    seq_experiment_dict = _show_checked_flasks(request, seq_experiment_dict)
-
-    seq_experiment_dict = _remove_checked_flasks(request, seq_experiment_dict)
-
-    return seq_experiment_dict
-
-
-def _show_checked_flasks(request, seq_experiment_dict):
-
-    query_string = request.GET.get(EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG)
-
-    if query_string is not None:
-
-        checked_experiment_ids = str(query_string).replace("{", "").replace("}", "")
-
-        if checked_experiment_ids != "":
-
-            checked_experiment_id_list = [int(i) for i in checked_experiment_ids.split(",") if i != ""]
-
-            checked_experiment_ids = seq_experiment_dict.keys()
-
-            for checked_experiment_id in checked_experiment_ids:
-
-                if checked_experiment_id not in checked_experiment_id_list:
-
-                    del seq_experiment_dict[checked_experiment_id]
-
-    return seq_experiment_dict
-
-
-def _remove_checked_flasks(request, seq_experiment_dict):
-
-    query_string = request.GET.get(EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG)
-
-    if query_string is not None:
-
-        checked_experiment_ids = str(query_string).replace("{", "").replace("}", "")
-
-        if checked_experiment_ids != "":
-
-            for checked_experiment_id in checked_experiment_ids.split(","):
-
-                if checked_experiment_id != "":
-
-                    del seq_experiment_dict[int(checked_experiment_id)]
-
-    return seq_experiment_dict
 
 
 def _get_mutation_tags(tags):

@@ -1,0 +1,129 @@
+#=GENOME_DIFF	1.0
+#=TITLE	output
+#=AUTHOR	breseq 0.27.0b revision f32c2f7f32bc
+#=CREATED	15:38:18 14 Feb 2016
+#=COMMAND	breseq -j 8 -r NC_000913_3.gb -o BOP27Reseq BOP27Reseq_S1_L001_R1.fastq BOP27Reseq_S1_L001_R2.fastq
+#=REFSEQ	NC_000913_3.gb
+#=READSEQ	BOP27Reseq_S1_L001_R1.fastq
+#=READSEQ	BOP27Reseq_S1_L001_R2.fastq
+DEL	1	.	NC_000913	257908	776	end_position=258683	gene_name=[crl]	gene_product=[crl]	genes_inactivated=crl	html_gene_name=<i>[crl]</i>	html_gene_product=<i>[crl]</i>	html_mutation=&Delta;776&nbsp;bp	html_position=257,908	html_seq_id=NC_000913	locus_tag=[b0240]	locus_tags_inactivated=b0240	mutation_category=large_deletion	start_position=257908
+DEL	2	.	NC_000913	2173363	2	end_position=2173364	gene_name=gatC/gatC	gene_position=intergenic (-1/+1)	gene_product=pseudogene, galactitol-specific enzyme IIC component of PTS;transport; Transport of small molecules: Carbohydrates, organic acids, alcohols; PTS system galactitol-specific enzyme IIC/pseudogene, galactitol-specific enzyme IIC component of PTS;transport; Transport of small molecules: Carbohydrates, organic acids, alcohols; PTS system galactitol-specific enzyme IIC	genes_promoter=gatC	html_gene_name=<i>gatC</i>&nbsp;&larr;&nbsp;/&nbsp;&larr;&nbsp;<i>gatC</i>	html_gene_product=pseudogene, galactitol&#8209;specific enzyme IIC component of PTS;transport; Transport of small molecules: Carbohydrates, organic acids, alcohols; PTS system galactitol&#8209;specific enzyme IIC/pseudogene, galactitol&#8209;specific enzyme IIC component of PTS;transport; Transport of small molecules: Carbohydrates, organic acids, alcohols; PTS system galactitol&#8209;specific enzyme IIC	html_mutation=&Delta;2&nbsp;bp	html_mutation_annotation=intergenic&nbsp;(&#8209;1/+1)	html_position=2,173,363	html_seq_id=NC_000913	locus_tag=b2092/b2092	locus_tags_promoter=b2092	mutation_category=small_indel	start_position=2173363
+INS	3	.	NC_000913	3560455	G	end_position=3560455	gene_name=glpR/glpR	gene_position=intergenic (-2/+1)	gene_product=pseudogene, DNA-binding transcriptional repressor;regulator; Energy metabolism, carbon: Anaerobic respiration; repressor of the glp operon/pseudogene, DNA-binding transcriptional repressor;regulator; Energy metabolism, carbon: Anaerobic respiration; repressor of the glp operon	genes_promoter=glpR	html_gene_name=<i>glpR</i>&nbsp;&larr;&nbsp;/&nbsp;&larr;&nbsp;<i>glpR</i>	html_gene_product=pseudogene, DNA&#8209;binding transcriptional repressor;regulator; Energy metabolism, carbon: Anaerobic respiration; repressor of the glp operon/pseudogene, DNA&#8209;binding transcriptional repressor;regulator; Energy metabolism, carbon: Anaerobic respiration; repressor of the glp operon	html_mutation=+G	html_mutation_annotation=intergenic&nbsp;(&#8209;2/+1)	html_position=3,560,455	html_seq_id=NC_000913	locus_tag=b3423/b3423	locus_tags_promoter=b3423	mutation_category=small_indel	start_position=3560455
+INS	4	.	NC_000913	4296381	GC	end_position=4296381	gene_name=gltP/yjcO	gene_position=intergenic (+587/+55)	gene_product=glutamate/aspartate:proton symporter/Sel1 family TPR-like repeat protein	genes_promoter=yjcO	html_gene_name=<i>gltP</i>&nbsp;&rarr;&nbsp;/&nbsp;&larr;&nbsp;<i>yjcO</i>	html_gene_product=glutamate/aspartate:proton symporter/Sel1 family TPR&#8209;like repeat protein	html_mutation=+GC	html_mutation_annotation=intergenic&nbsp;(+587/+55)	html_position=4,296,381	html_seq_id=NC_000913	locus_tag=b4077/b4078	locus_tags_promoter=b4078	mutation_category=small_indel	start_position=4296381
+UN	5	.	NC_000913	15586	15588
+UN	6	.	NC_000913	15591	15591
+UN	7	.	NC_000913	15593	15593
+UN	8	.	NC_000913	15595	16497
+UN	9	.	NC_000913	20027	20325
+UN	10	.	NC_000913	223967	224540
+UN	11	.	NC_000913	224543	224543
+UN	12	.	NC_000913	225118	225118
+UN	13	.	NC_000913	225125	225379
+UN	14	.	NC_000913	225381	225381
+UN	15	.	NC_000913	225383	225383
+UN	16	.	NC_000913	227219	227219
+UN	17	.	NC_000913	227224	228457
+UN	18	.	NC_000913	257908	258683
+UN	19	.	NC_000913	270779	271055
+UN	20	.	NC_000913	274197	274905
+UN	21	.	NC_000913	279394	279692
+UN	22	.	NC_000913	290865	291180
+UN	23	.	NC_000913	315471	316249
+UN	24	.	NC_000913	316256	316256
+UN	25	.	NC_000913	381475	382365
+UN	26	.	NC_000913	391943	392737
+UN	27	.	NC_000913	526068	526504
+UN	28	.	NC_000913	526506	526508
+UN	29	.	NC_000913	566990	566990
+UN	30	.	NC_000913	566994	566994
+UN	31	.	NC_000913	566996	566996
+UN	32	.	NC_000913	566998	567802
+UN	33	.	NC_000913	574830	574830
+UN	34	.	NC_000913	574833	575552
+UN	35	.	NC_000913	608243	609117
+UN	36	.	NC_000913	688082	688825
+UN	37	.	NC_000913	1094469	1095263
+UN	38	.	NC_000913	1299499	1300697
+UN	39	.	NC_000913	1396266	1396998
+UN	40	.	NC_000913	1432885	1432960
+UN	41	.	NC_000913	1468135	1468135
+UN	42	.	NC_000913	1468138	1469009
+UN	43	.	NC_000913	1469535	1470272
+UN	44	.	NC_000913	1470278	1470278
+UN	45	.	NC_000913	1528543	1528958
+UN	46	.	NC_000913	1528961	1528961
+UN	47	.	NC_000913	1571068	1571068
+UN	48	.	NC_000913	1571070	1571103
+UN	49	.	NC_000913	1571106	1571106
+UN	50	.	NC_000913	1571113	1571115
+UN	51	.	NC_000913	1571119	1571127
+UN	52	.	NC_000913	1634338	1634415
+UN	53	.	NC_000913	1651073	1651073
+UN	54	.	NC_000913	1651075	1651317
+UN	55	.	NC_000913	1978503	1979273
+UN	56	.	NC_000913	2066950	2067063
+UN	57	.	NC_000913	2069167	2070040
+UN	58	.	NC_000913	2101991	2102708
+UN	59	.	NC_000913	2170410	2171190
+UN	60	.	NC_000913	2289161	2289868
+UN	61	.	NC_000913	2289870	2289870
+UN	62	.	NC_000913	2289872	2289873
+UN	63	.	NC_000913	2514487	2515389
+UN	64	.	NC_000913	2726294	2726294
+UN	65	.	NC_000913	2726296	2729010
+UN	66	.	NC_000913	2729787	2730732
+UN	67	.	NC_000913	2996586	2997476
+UN	68	.	NC_000913	3130373	3131102
+UN	69	.	NC_000913	3186332	3186332
+UN	70	.	NC_000913	3186334	3186334
+UN	71	.	NC_000913	3186338	3187201
+UN	72	.	NC_000913	3365794	3366510
+UN	73	.	NC_000913	3423889	3424414
+UN	74	.	NC_000913	3424879	3424880
+UN	75	.	NC_000913	3424883	3426608
+UN	76	.	NC_000913	3427051	3428333
+UN	77	.	NC_000913	3470397	3470498
+UN	78	.	NC_000913	3583666	3583964
+UN	79	.	NC_000913	3583966	3583968
+UN	80	.	NC_000913	3619517	3620880
+UN	81	.	NC_000913	3621303	3621303
+UN	82	.	NC_000913	3621305	3621305
+UN	83	.	NC_000913	3621308	3622084
+UN	84	.	NC_000913	3652267	3653016
+UN	85	.	NC_000913	3653018	3653018
+UN	86	.	NC_000913	3666613	3666615
+UN	87	.	NC_000913	3666619	3666663
+UN	88	.	NC_000913	3762490	3763848
+UN	89	.	NC_000913	3763850	3763850
+UN	90	.	NC_000913	3763852	3763853
+UN	91	.	NC_000913	3763856	3763856
+UN	92	.	NC_000913	3763864	3763864
+UN	93	.	NC_000913	3763867	3763867
+UN	94	.	NC_000913	3764311	3765058
+UN	95	.	NC_000913	3765062	3765062
+UN	96	.	NC_000913	3765065	3765065
+UN	97	.	NC_000913	3942233	3942233
+UN	98	.	NC_000913	3942235	3942236
+UN	99	.	NC_000913	3942241	3942241
+UN	100	.	NC_000913	3942243	3943180
+UN	101	.	NC_000913	3944298	3945340
+UN	102	.	NC_000913	4035398	4035494
+UN	103	.	NC_000913	4035948	4035948
+UN	104	.	NC_000913	4035953	4036881
+UN	105	.	NC_000913	4038068	4038461
+UN	106	.	NC_000913	4038465	4038466
+UN	107	.	NC_000913	4038954	4038954
+UN	108	.	NC_000913	4038959	4038960
+UN	109	.	NC_000913	4038963	4039145
+UN	110	.	NC_000913	4039621	4040368
+UN	111	.	NC_000913	4166525	4166620
+UN	112	.	NC_000913	4166878	4167986
+UN	113	.	NC_000913	4167992	4167993
+UN	114	.	NC_000913	4168000	4168000
+UN	115	.	NC_000913	4168810	4171421
+UN	116	.	NC_000913	4176771	4176771
+UN	117	.	NC_000913	4176775	4176871
+UN	118	.	NC_000913	4208343	4209533
+UN	119	.	NC_000913	4210248	4212891
+UN	120	.	NC_000913	4498426	4499281
+UN	121	.	NC_000913	4507703	4508446

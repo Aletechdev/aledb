@@ -4,7 +4,7 @@ import sys
 from configparser import ConfigParser
 
 
-DEBUG = True
+DEBUG = False
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -73,7 +73,7 @@ MEDIA_URL = ''
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-STATICFILES_DIRS = ()
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'common/staticfiles')]
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -97,6 +97,8 @@ DASHBOARD_TEMPLATE_PATH = os.path.join(BASE_DIR, 'dashboard/templates')
 SEARCH_TEMPLATE_PATH = os.path.join(BASE_DIR, 'search/templates')
 DUPLICATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'duplications/templates')
 GENES_TEMPLATE_PATH = os.path.join(BASE_DIR, 'genes/templates')
+METADATA_TEMPLATE_PATH = os.path.join(BASE_DIR, 'metadata/templates')
+ABOUT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'about/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -111,6 +113,8 @@ TEMPLATES = [
                  SEARCH_TEMPLATE_PATH,
                  DUPLICATION_TEMPLATE_PATH,
                  GENES_TEMPLATE_PATH,
+                 METADATA_TEMPLATE_PATH,
+                 ABOUT_TEMPLATE_PATH
                  ],
         'OPTIONS': {
             'context_processors': [
@@ -134,12 +138,16 @@ TEMPLATES = [
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'login.login_middleware.LoginRequiredMiddleware'
 )
+
+LOGIN_URL = '/accounts/login/'
 
 ROOT_URLCONF = 'aleinfo.urls'
 
@@ -159,16 +167,17 @@ INSTALLED_APPS = (
     'fixation',
     'stats',
     'metadata',
+    'about',
     'enrichment',
     'login',
     'compare',
     'export',
     'common',
+    'dashboard',
     'search',
     'duplications',
-    'dashboard',
     'genes',
-    'commmonmuts',
+    'debug_toolbar',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -179,6 +188,11 @@ INSTALLED_APPS = (
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s'#
+        }
+    },
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -189,6 +203,12 @@ LOGGING = {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'verbose'
         }
     },
     'loggers': {
@@ -197,6 +217,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'django': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+            'propagate': True,
+        }
     }
 }
 
@@ -206,3 +231,10 @@ CACHES = {
         'LOCATION': 'cache_table',
     }
 }
+
+INTERNAL_IPS = ('128.54.250.14')
+
+PUBLIC = True
+PUBLIC_USERNAME = 'public'
+PUBLIC_PASSWORD = 'public_password'
+ALLOWED_HOSTS = ['web', 'localhost', '127.0.0.1']
