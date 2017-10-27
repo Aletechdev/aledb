@@ -55,10 +55,13 @@ def dashboard(request):
 def _get_general_count_dict():
     count_dict = {}
     count_dict['ale_exp'] = AleExperiment.objects.count()  # No need to filter experiment count.
-    sample_counts = SampleCounts.objects.all()[0]
-    count_dict['ale'] = sample_counts.ale_count
-    count_dict['flask'] = sample_counts.flask_count
-    count_dict['isolate'] = sample_counts.isolate_count
+
+    sample_counts = SampleCounts.objects.first()
+
+    if sample_counts:
+        count_dict['ale'] = sample_counts.ale_count
+        count_dict['flask'] = sample_counts.flask_count
+        count_dict['isolate'] = sample_counts.isolate_count
     return count_dict
 
 
