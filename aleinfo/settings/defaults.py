@@ -1,9 +1,16 @@
 import os
 import sys
+from pathlib import Path
 
 DEBUG = os.environ.get('DEBUG', '0') == '1'
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+BASE_DIR = Path(__file__).resolve().parent.parent
+# read machine-specific configuration from settings.ini
+# from configparser import ConfigParser
+# config = ConfigParser()
+# settings_file_path = BASE_DIR / "settings.ini"
+# config.read(settings_file_path)
+# SEQUENCING_URL = config.get("OTHER", "SEQUENCING_URL")
 
 SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'https://aquaticus.ucsd.edu/aledata/')
 
@@ -21,6 +28,11 @@ DATABASES = {
         'PORT': int(os.environ.get('MYSQL_PORT', 3306)),
     }
 }
+
+# settings in settings.ini
+# temporarily placed here till it's settled whether we want to keep settings.ini
+OTHER_USERNAME = os.environ.get('OTHER_DATABASE_USERNAME', 'other_database_username')
+OTHER_PASSWORD = os.environ.get('OTHER_DATABASE_', 'other_database_password')
 
 ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost')]
 

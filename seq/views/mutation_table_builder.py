@@ -1,4 +1,4 @@
-import aleinfo.settings
+from django.conf import settings
 
 import os
 
@@ -89,8 +89,8 @@ class TableType(Enum):
     COMPARE_FIXATION_MUTATIONS = 8
 
 
-if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
-    reseqencing_report_url = aleinfo.settings.SEQUENCING_URL
+if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
+    reseqencing_report_url = settings.SEQUENCING_URL
 else:
     reseqencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
 

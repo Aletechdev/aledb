@@ -24,7 +24,7 @@ import json
 
 import requests
 
-import aleinfo.settings as settings
+from django.conf import settings
 
 from common.util import get_all_ale_exps, get_recent_ale_exps, check_hidden_columns_and_filters
 
@@ -33,8 +33,8 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     aledata_url = settings.SEQUENCING_URL
-    username = settings.config.get("OTHER", "username")
-    password = settings.config.get("OTHER", "password")
+    username = settings.OTHER_USERNAME
+    password = settings.OTHER_PASSWORD
 else:
     aledata_url = ""
     username = ""

@@ -14,7 +14,8 @@ framework.
 
 """
 import os
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "aleinfo.settings")
+# TODO: need a default value
+# os.environ.setdefault("DJANGO_SETTINGS_MODULE", "aleinfo.settings")
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION
