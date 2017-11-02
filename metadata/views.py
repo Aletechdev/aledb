@@ -18,8 +18,8 @@ META_DATA_TEMPLATE = "metadata/index.html"
 
 
 # TODO: used by multiple views. Also implemented within ale_exp_filter.py; implement in one location.
-if hasattr(settings, "sequencing_url"):
-    reseq_report_url = settings.sequencing_url
+if hasattr(settings, "SEQUENCING_URL"):
+    reseq_report_url = settings.SEQUENCING_URL
 else:
     reseq_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
