@@ -2,7 +2,14 @@ import os
 import sys
 from pathlib import Path
 
-DEBUG = os.environ.get('DEBUG', '0') == '1'
+# Set debug here so we don't have to remove debug_toolbar from the
+# default middleware list.  If we don't include debug_toolbar in the
+# default middleware list we'd have to figure out where exactly in the
+# list we should add it in the development mode.  This can be tricky
+# because we can't foresee what the list could be made up of.  And
+# debug_toolbar needs to be as early as possible but after encoders,
+# such as gzip, which may or may not be present.
+DEBUG = False
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 # read machine-specific configuration from settings.ini
@@ -94,9 +101,6 @@ STATICFILES_FINDERS = (
     #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-# Make this unique, and don't share it with anybody.
-SECRET_KEY = os.environ.get('SECRET_KEY', 'iv3^9^ccmwlfyeyp5q=%#z14p=p^6f1ujyzk8a3p*buzrg^2or')
-
 SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
 FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
 FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
@@ -155,7 +159,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'login.login_middleware.LoginRequiredMiddleware'
 )
 
 LOGIN_URL = '/accounts/login/'
@@ -188,7 +191,6 @@ INSTALLED_APPS = (
     'search',
     'duplications',
     'genes',
-    'debug_toolbar',
 )
 
 # A sample logging configuration. The only tangible logging
@@ -237,4 +239,3 @@ CACHES = {
 PUBLIC = os.environ.get('PUBLIC', '0') == '1'
 PUBLIC_USERNAME = os.environ.get('PUBLIC_USERNAME', 'public')
 PUBLIC_PASSWORD = os.environ.get('PUBLIC_PASSWORD', 'public_password')
-
