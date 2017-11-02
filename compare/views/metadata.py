@@ -17,8 +17,8 @@ __author__ = 'dgosting'
 
 META_DATA_TEMPLATE = 'metadata/index.html'
 
-if hasattr(settings, "sequencing_url"):
-    reseq_report_url = settings.sequencing_url
+if hasattr(settings, "SEQUENCING_URL"):
+    reseq_report_url = settings.SEQUENCING_URL
 else:
     reseq_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
