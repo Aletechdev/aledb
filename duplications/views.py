@@ -4,7 +4,7 @@ from django.http import HttpResponse
 
 from django.template import loader
 
-import aleinfo.settings as settings
+from django.conf import settings
 
 from seq.views import common
 
@@ -25,8 +25,8 @@ INDEX_TEMPLATE = "duplication.html"
 
 if hasattr(settings, common.SETTINGS_SEQUENCING_URL):
     reseqencing_report_url = settings.SEQUENCING_URL
-    username = settings.config.get("OTHER", "username")
-    password = settings.config.get("OTHER", "password")
+    username = settings.OTHER_USERNAME
+    password = settings.OTHER_PASSWORD
 else:
     reseqencing_report_url = common.DEFAULT_RESEQ_REPORT_URL
     username = ""

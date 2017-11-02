@@ -8,7 +8,7 @@ from common.util import get_all_ale_exps, get_recent_ale_exps
 
 from metadata.views import get_reseq_info_list
 
-import aleinfo.settings as settings
+from django.conf import settings
 
 from seq.views import common
 

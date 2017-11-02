@@ -2,7 +2,7 @@ from django.http import HttpResponse
 
 from django.template import loader
 
-import aleinfo.settings as settings
+from django.conf import settings
 
 from seq.views import common
 
