@@ -1,34 +1,31 @@
 import os
 import sys
 
-from configparser import ConfigParser
-
-
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', '0') == '1'
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-config = ConfigParser()
-settings_file_path = os.path.join(os.path.dirname(__file__), "settings.ini")
-config.read(settings_file_path)
-sequencing_url = config.get("OTHER", "sequencing_url")
+SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'https://aquaticus.ucsd.edu/aledata/')
 
-ADMINS = (
-    ('Patrick Phaneuf', 'pphaneuf@eng.ucsd.com'),
-)
+ADMINS = ()
 
 MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.' + config.get("DATABASE", "engine"),
-        'NAME': config.get("DATABASE", "database"),
-        'USER': config.get("DATABASE", "user"),
-        "PASSWORD": config.get("DATABASE", "password"),
-        'HOST': config.get("DATABASE", "host"),
-        'PORT': config.get("DATABASE", "port"),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('MYSQL_DATABASE', 'database'),
+        'USER': os.environ.get('MYSQL_USER', 'user'),
+        'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'password'),
+        'HOST': os.environ.get('MYSQL_HOST', 'db'),
+        'PORT': int(os.environ.get('MYSQL_PORT', 3306)),
     }
 }
+
+ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost')]
+
+USE_X_FORWARDED_PORT = os.environ.get('USE_X_FORWARDED_PORT', '0') == '1'
+
 
 # Likely has to be after initial DATABASES definition.
 # This is used for unit testing of django code.
@@ -39,7 +36,7 @@ if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing an
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = 'America/Los_Angeles'
+TIME_ZONE = os.environ.get('TIME_ZONE', 'America/Los_Angeles')
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -59,21 +56,23 @@ USE_L10N = True
 USE_TZ = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-# Example: "/home/media/media.lawrence.com/media/"
+# Example: '/home/media/media.lawrence.com/media/'
 MEDIA_ROOT = ''
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash.
-# Examples: "http://media.lawrence.com/media/", "http://example.com/media/"
+# Examples: 'http://media.lawrence.com/media/', 'http://example.com/media/'
 MEDIA_URL = ''
 
 # Absolute path to the directory static files should be collected to.
 # Don't put anything in this directory yourself; store your static files
-# in apps' "static/" subdirectories and in STATICFILES_DIRS.
-# Example: "/home/media/media.lawrence.com/static/"
+# in apps' 'static/' subdirectories and in STATICFILES_DIRS.
+# Example: '/home/media/media.lawrence.com/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'common/staticfiles')]
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'common/staticfiles'),
+)
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -84,7 +83,7 @@ STATICFILES_FINDERS = (
 )
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = '<DJANGO_KEY_REDACTED>'
+SECRET_KEY = os.environ.get('SECRET_KEY', '<DJANGO_KEY_REDACTED>')
 
 SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
 FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
@@ -185,6 +184,36 @@ INSTALLED_APPS = (
 # the site admins on every HTTP 500 error when DEBUG=False.
 # See http://docs.djangoproject.com/en/dev/topics/logging for
 # more details on how to customize your logging configuration.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse'
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    }
+}
 
 CACHES = {
     'default': {
@@ -193,9 +222,7 @@ CACHES = {
     }
 }
 
-INTERNAL_IPS = ('128.54.250.14')
+PUBLIC = os.environ.get('PUBLIC', '0') == '1'
+PUBLIC_USERNAME = os.environ.get('PUBLIC_USERNAME', 'public')
+PUBLIC_PASSWORD = os.environ.get('PUBLIC_PASSWORD', 'public_password')
 
-PUBLIC = False
-PUBLIC_USERNAME = 'public'
-PUBLIC_PASSWORD = 'public_password'
-ALLOWED_HOSTS = ['web', 'localhost', '127.0.0.1']
