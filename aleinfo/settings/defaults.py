@@ -11,7 +11,7 @@ from pathlib import Path
 # such as gzip, which may or may not be present.
 DEBUG = False
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # read machine-specific configuration from settings.ini
 # from configparser import ConfigParser
 # config = ConfigParser()
