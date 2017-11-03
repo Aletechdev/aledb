@@ -18,8 +18,8 @@ __author__ = 'pphaneuf'
 
 def dashboard(request):
     general_count_dict = _get_general_count_dict()
-    observed_mutation_counts = ObservedMutationCounts.objects.all()
-    unique_mutation_counts = UniqueMutationCounts.objects.all()
+    observed_mutation_counts = ObservedMutationCounts.objects.first()
+    unique_mutation_counts = UniqueMutationCounts.objects.first()
 
     if unique_mutation_counts and observed_mutation_counts:
         general_count_dict['observed'] = observed_mutation_counts.total
