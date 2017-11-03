@@ -104,7 +104,7 @@ STATICFILES_FINDERS = (
 SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
 FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
 FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
-LOGIN_TEMPLATE_PATH = os.path.join(BASE_DIR, 'login/templates')
+LOGIN_TEMPLATE_PATH = os.path.join(BASE_DIR, 'accounts/templates')
 EXPORT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'export/templates')
 COMPARE_TEMPLATE_PATH = os.path.join(BASE_DIR, 'compare/templates')
 COMMON_TEMPLATE_PATH = os.path.join(BASE_DIR, 'common/templates')
@@ -183,7 +183,7 @@ INSTALLED_APPS = (
     'metadata',
     'about',
     'enrichment',
-    'login',
+    'accounts',
     'compare',
     'export',
     'common',

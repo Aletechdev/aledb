@@ -7,7 +7,7 @@ SECRET_KEY = '<DJANGO_KEY_REDACTED>'
 
 # perhaps this should be set only for server deployed in private mode
 MIDDLEWARE_CLASSES += (
-    'login.login_middleware.LoginRequiredMiddleware',
+    'accounts.login_middleware.LoginRequiredMiddleware',
 )
 
 INSTALLED_APPS += (
