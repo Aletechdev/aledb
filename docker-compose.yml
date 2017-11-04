@@ -1,0 +1,37 @@
+version: "3.2"
+services:
+  db:
+    image: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_USER=composetest
+      - MYSQL_PASSWORD=testpassword
+      - MYSQL_DATABASE=composetest
+  web:
+    build: .
+    command: "./docker-runserver.sh"
+    environment:
+      - DEBUG=0
+      - DJANGO_SERVER_HOST=localhost
+      - MYSQL_USER=composetest
+      - MYSQL_PASSWORD=testpassword
+      - MYSQL_DATABASE=composetest
+    volumes:
+      - .:/app
+      - static:/app/static
+    links:
+      - db
+    depends_on:
+      - db
+  nginx:
+    image: nginx
+    links:
+      - web
+    volumes:
+      - static:/usr/share/nginx/static:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    command: [nginx-debug, '-g', 'daemon off;']
+    ports:
+      - "8000:80"
+volumes:
+  static:

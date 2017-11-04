@@ -4,9 +4,15 @@
 *.swp
 *.pyc
 *~
+*.ini
+static/
+.ropeproject/
 .idea/
 .htpasswd
 nohup.out
 aleinfo/settings.ini
 .DS_Store
-/static/
+.builder/
+
+# PyCharm
+.idea
