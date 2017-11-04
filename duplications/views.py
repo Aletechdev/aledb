@@ -24,7 +24,7 @@ from common.util import get_reseq_ordered_dict, get_all_ale_exps, get_recent_ale
 INDEX_TEMPLATE = "duplication.html"
 
 if hasattr(settings, common.SETTINGS_SEQUENCING_URL):
-    reseqencing_report_url = settings.sequencing_url
+    reseqencing_report_url = settings.SEQUENCING_URL
     username = settings.config.get("OTHER", "username")
     password = settings.config.get("OTHER", "password")
 else:

@@ -32,7 +32,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
-    aledata_url = settings.sequencing_url
+    aledata_url = settings.SEQUENCING_URL
     username = settings.config.get("OTHER", "username")
     password = settings.config.get("OTHER", "password")
 else:

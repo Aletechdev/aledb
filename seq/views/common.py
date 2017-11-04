@@ -7,7 +7,7 @@ from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 __author__ = 'Patrick Phaneuf'
 
 
-SETTINGS_SEQUENCING_URL = "sequencing_url"
+SETTINGS_SEQUENCING_URL = "SEQUENCING_URL"
 
 MUTATION_TYPE_LIST = ['SNP', 'SUB', 'DEL', 'INS', 'MOB', 'DUP', 'AMP', 'CON', 'INV', 'Unannotated']
 

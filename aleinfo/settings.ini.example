@@ -7,7 +7,7 @@ password = user_password_to_database
 engine = mysql
 
 [OTHER]
-sequencing_url = ale_data_reports_url
+SEQUENCING_URL = ale_data_reports_url
 ale_data_root_dir = ale_data_root_dir
 username = other_user_database_name
 password = other_user_database_password

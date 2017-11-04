@@ -24,8 +24,8 @@ STATS_TEMPLATE = "stats.html"
 
 
 # TODO: used by multiple views. Also implemented within ale_exp_filter.py; implement in one location.
-if hasattr(settings, "sequencing_url"):
-    resequencing_report_url = settings.sequencing_url
+if hasattr(settings, "SEQUENCING_URL"):
+    resequencing_report_url = settings.SEQUENCING_URL
 
 
 def stats(request):
