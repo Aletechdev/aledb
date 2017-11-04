@@ -90,7 +90,7 @@ class TableType(Enum):
 
 
 if hasattr(aleinfo.settings, seq.views.common.SETTINGS_SEQUENCING_URL):
-    reseqencing_report_url = aleinfo.settings.sequencing_url
+    reseqencing_report_url = aleinfo.settings.SEQUENCING_URL
 else:
     reseqencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
 
