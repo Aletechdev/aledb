@@ -8,6 +8,6 @@ __author__ = 'dgosting'
 
 urlpatterns = [
     url(r'^login/$', views.login_user, name='login'),
-    url(r'^logout/$', auth_views.logout, name='logout'),
+    url(r'^logout/$', auth_views.logout, {'next_page': '/'}, name='logout'),
     url(r'^admin/', admin.site.urls),
 ]
