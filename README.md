@@ -15,5 +15,3 @@ Please refer to the wiki contained within this github project for technical docu
 
 ## TODOs:  
 * Describe the workflow for integrating ALE experiments within the wiki.
-* cite: https://github.com/bbglab/muts-needle-plot  
-* cite" PV Viewer
