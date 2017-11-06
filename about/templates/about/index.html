@@ -36,8 +36,8 @@
 {% block content %}
     <h1>ALE Analytics</h1>
     <p class="lead">This web platform has been built to support the report generation and consolidation of adaptive
-        mutations from Adaptive Laboratory Evolution (ALE) experiments. Please see the following work for a full
-        description of the platform: <a
+        mutations from Adaptive Laboratory Evolution (ALE) experiments. For an in-depth review of the platfrom, refer to
+        the following work: <a
                 href="https://github.com/pvphaneuf/cse-ms-thesis/blob/master/patrick-phaneuf-cse.pdf">thesis report</a>
     </p>
     <div class="panel panel-default">
@@ -69,7 +69,10 @@
             </tr>
             <tr>
                 <td>GLU</td>
-                <td>LaCroix RA, Sandberg TE, O'Brien EJ, Utrilla J, Ebrahim A, Guzman GI, Szubin R, Palsson BO, Feist AM. 2015. Use of adaptive laboratory evolution to discover key mutations enabling rapid growth of Escherichia coli K-12 MG1655 on glucose minimal medium. Appl Environ Microbiol 81:17–30. doi:10.1128/AEM.02246-14.
+                <td>LaCroix RA, Sandberg TE, O'Brien EJ, Utrilla J, Ebrahim A, Guzman GI, Szubin R, Palsson BO, Feist
+                    AM. 2015. Use of adaptive laboratory evolution to discover key mutations enabling rapid growth of
+                    Escherichia coli K-12 MG1655 on glucose minimal medium. Appl Environ Microbiol 81:17–30.
+                    doi:10.1128/AEM.02246-14.
                 </td>
             </tr>
             <tr>
@@ -85,22 +88,34 @@
             </tr>
         </table>
     </div>
+    <h2>Feature Overview</h2>
+    <img src="/static/workflow.png" style="width: 70%; height: 70%; padding-bottom: 20px">
+    <p>The ALE Analytics web platform maintains two categories of features: those that describe individual ALE experiments,
+    and those that describe all consolidated ALE experiment data (Figure 2B). To describe individual ALE experiments,
+    ALE Analytics generates reports that describe the mutation lineage of ALEs, potential key mutations, and metadata
+    reports describing the conditions for experiment isolates. To describe the consolidated ALE experiment database, ALE
+    Analytics provides a mutation search feature, an automated ALE experiment comparison feature, and the ability to
+    export the mutation data from one or more ALE experiments in a flat file format.</p>
+    <h3>Mutation tables</h3>
     <h2>Mutation data generation</h2>
-    <p>The mutation data presented on this platform was generated using the <a href=https://github.com/barricklab/breseq>breseq</a> resquencing pipeline.</p>
-    <p>Deatherage, D.E., Barrick, J.E. (2014) Identification of mutations in laboratory-evolved microbes from next-generation sequencing data using breseq. Methods Mol. Biol.</p>
+    <p>The mutation data presented on this platform was generated using the <a
+            href=https://github.com/barricklab/breseq>breseq</a> resquencing pipeline.</p>
+    <p>Deatherage, D.E., Barrick, J.E. (2014) Identification of mutations in laboratory-evolved microbes from
+        next-generation sequencing data using breseq. Methods Mol. Biol.</p>
     <h2>3rd party packages used</h2>
     <p>mutation-needle-plot: http://dx.doi.org/10.5281/zenodo.14561</p>
     <p>webGL protein viewer: http://dx.doi.org/10.5281/zenodo.20980</p>
     <h2>Acknowledgements</h2>
     <p>We thank Dennis Gosting for his enormous contributions to this platform.</p>
-    <p>This work was supported by Dr. Adam Feist and Dr. Bernhard Palsson of UCSD's Systems Biology Research Group, and by
-        a grant from the Novo Nordisk Foundation Center for Biosustainability (NNF16CC0021858).</p>
+    <p>This work was supported by Dr. Adam Feist and Dr. Bernhard Palsson of UCSD's Systems Biology Research Group, and
+        by a grant from the Novo Nordisk Foundation Center for Biosustainability (NNF16CC0021858).</p>
     <h2>Contact</h2>
     <p>Please send any bug reports or commends to:</p>
     <p>pphaneuf 'at' eng 'dot' ucsd 'dot' edu</p>
     <hr>
     <div class="container">
-        <p class="text-muted" align="center">ALE Analytics is hosted and maintained by the Systems Biology Research Group at the University of California,
+        <p class="text-muted" align="center">ALE Analytics is hosted and maintained by the Systems Biology Research
+            Group at the University of California,
             San Diego.</p>
         <div class="row">
             <div class="col-sm-5">
@@ -110,7 +125,7 @@
             </div>
             <div class="col-sm-2">
                 <a href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
-                                                         src="/static/cfb-logo.png"></a>
+                                                             src="/static/cfb-logo.png"></a>
             </div>
             <div class="col-sm-5">
                 <a href="http://www.ucsd.edu/"><img class="img-responsive footer-image" src="/static/ucsd-logo.png"></a>
