@@ -90,7 +90,7 @@
             <tr>
                 <td>
                     <span class="line">LTEE,</span>
-                    <span class="line">LTEE ARA,</span>
+                    <span class="line">LTEE ARA</span>
                 </td>
                 <td>Tenaillon, O., Barrick, J. E., Ribeck, N., Deatherage, D. E., Blanchard, J. L., Dasgupta, A., …
                     Lenski, R. E. (2016). Tempo and mode of genome evolution in a 50,000-generation experiment. Nature,
@@ -111,6 +111,35 @@
         ALE Analytics provides a mutation search feature, an automated ALE experiment comparison feature, and the
         ability to
         export the mutation data from one or more ALE experiments in a flat file format.</p>
+    <h3>ALE Experiment</h3>
+    <p>The foundational work to which this thesis builds on are the ALE experimental wet lab methodologies. Beginning
+        with a well known starting strain, an ALE experiment is commonly executed by serially passing a selected cell
+        culture to a fresh flask of media, enabling the particular strain passed to continue evolving under the
+        experimental conditions. The selection of cells to pass on to the next flask is often based on growth rate since
+        we assume that the most adapted strain population will outgrow their competition. ALE experiments can also
+        involve replicate ALEs, which are identical experimental evolutions that execute in parallel. This approach
+        reveals additional mutational data on the dynamics of adaptation and evolution for an organism and can describe
+        a convergence of adaptations across multiple ALEs. ALE experiments can involve multiple ALEs with multiple
+        flasks and isolates. In addition, each isolate can have one or more technical replicates, which are used to
+        serialize duplicate isolates with the goal of increasing the quality of a previous isolate. The work described
+        by this thesis serializes each sample with an abbreviation for each ALE layer and a count value representing a
+        sample’s identity within an ALE layer’s sequence. For example, the serialization A6 F21 I2 R1 represents the
+        first technical replicate of the second isolate from the 21st flask of the 6th ALE in an ALE experiment. The
+        output of an ALE experiment are populations or clonal isolates which were derived from the original strain and
+        additionally include the mutations in the cells according to the environmental stresses introduced in the ALE
+        experiment. This output is then processed by additional foundational technologies leveraged with ALE: the DNA
+        sequencer and mutation identifying software. The output sample to be analyzed is sequenced, typically by an
+        Illumina platform, and resequenced primarily using the Breseq computational pipeline. Breseq’s resequencing
+        process aligns all of the DNA reads to a provided genome reference and reports single-nucleotide mutations,
+        point insertions and deletions, large deletions, missing coverage and new junctions according to the differences
+        between the aligned reads and the reference genome.</p>
+    <img src="/static/ale_exp.png" style="width: 40%; height: 40%; padding-bottom: 20px">
+    <p>Generally, researchers compare the mutations from each ALE’s
+        endpoint samples to identify genomic regions with many alleles. If a researcher sequenced ALE midpoint or
+        intermediate samples, an ALE’s mutations can be organized in chronological order to identify mutations that fix.
+        The mutations that are involved in multiple alleles of a genomic region or are shown to fix from starting or
+        midpoint to endpoint samples are considered the key mutation sets and are investigated for their possible
+        fitness benefit according to the genomic region they affect.</p>
     <h3>Mutation tables</h3>
     <p>The primary focus of the ALE Analytics web platform is ALE mutation report generation. Each ALE experiment can be
         described as a series of isolate mutation sets in relation to an ALE’s starting strain. Ordering sample mutation
@@ -121,7 +150,7 @@
     <p>Above is an example mutation table. This mutation table represents an ALE lineage report, where samples are
         represented as columns, ordered from left to right
         as earliest to latest in an ALE. Rows describe the specific mutations manifested within the sample set, and
-        values contained within cells represent the allele frequency. This format enables researchers to intuitively
+        values contained within cells represent the allele frequency.This format enables researchers to intuitively
         identify important mutational patterns, such as the fixed mutations with <i>corA</i> and the <i>hns/tdk</i>
         intergenic region.</p>
     <p>Mutation lineage reports enable researchers to recognize patterns of key adaptive mutations. Among the many
@@ -136,7 +165,6 @@
         experiments.
     </p>
     <h2>Key mutation reporting</h2>
-    <img src="/static/fixed_enriched_muts.png" style="width: 40%; height: 40%; padding-bottom: 20px">
     <p>Using the ALE Analytics mutation reporting mechanism, we have implemented features that automate the
         identification and reporting of mutations which describe significant mutational patterns within an ALE
         experiment. These features describe key and potentially adaptive mutation patterns which we refer to as
@@ -151,6 +179,7 @@
         analyses will contribute to more accurate results, more consistent analysis and the shortening of turnaround
         time from ALE experiment execution to results interpretation.
     </p>
+    <img src="/static/fixed_enriched_muts.png" style="width: 40%; height: 40%; padding-bottom: 20px">
     <p>As with the manual consolidation of ALE experiment mutation data, the analysis of adaptive mutations can be prone
         to human error, inconsistent between researchers and time consuming. The automation of these common analyses
         will contribute to more accurate results, more consistent analysis and the shortening of turnaround time from
