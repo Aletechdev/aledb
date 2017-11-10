@@ -48,7 +48,7 @@ def mutation_table(request):
                "tag_dropdown": common.constants.TAGS
                }
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def _get_table_body(reseq_dict, request):

@@ -32,7 +32,7 @@ def global_filter(request):
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps()}
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def _handle_POST(request, filter_form_model):

@@ -81,7 +81,7 @@ def handle_compare_report(request, ale_experiment_names):
 
     template = loader.get_template(COMPARE_TEMPLATE)
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def handle_initial_compare_form(request):
@@ -94,4 +94,4 @@ def handle_initial_compare_form(request):
                "title": "Compare",
                "header": "Compare"}
     template = loader.get_template(COMPARE_TEMPLATE)
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")

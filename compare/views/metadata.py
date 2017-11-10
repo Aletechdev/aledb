@@ -43,4 +43,4 @@ def comparison_metadata(request):
                "multiple": True
                }
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
