@@ -29,4 +29,4 @@ def login_user(request):
 
     template = loader.get_template('login.html')
 
-    return HttpResponse(template.render())
+    return HttpResponse(template.render({}, request), content_type="text/html")

@@ -77,7 +77,7 @@ def gene(request):
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps()}
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 # TODO: This is the same implementation as found within seq.views.search.py; need to consolidate.

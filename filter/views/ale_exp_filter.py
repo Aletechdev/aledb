@@ -60,7 +60,7 @@ def mutation_filter(request):
                "starting_strain_body": mark_safe(starting_strain_body),
                "starting_strain_header": mark_safe(STARTING_STRAIN_HEADER)}
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def _handle_POST(request, filter_form_model, ale_experiment_id):

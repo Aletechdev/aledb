@@ -63,7 +63,7 @@ def enrichment_mutations(request):
                "tag_dropdown": common.constants.TAGS
                }
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def shared_enriched_genes(request):
@@ -111,7 +111,7 @@ def shared_enriched_genes(request):
                "recent_experiments": get_recent_ale_exps(),
                "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TABLE}
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 # TODO: refactor

@@ -49,7 +49,7 @@ def compared_enrichment_mutations(request):
                "tag_dropdown": TAGS
                }
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def _get_table_body(reseq_dict, ale_experiment_list, queryset):

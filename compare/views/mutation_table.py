@@ -48,5 +48,5 @@ def compared_mutations(request):
 
     template = loader.get_template(MUTATION_TABLE_TEMPLATE)
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
