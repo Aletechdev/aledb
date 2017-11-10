@@ -56,7 +56,7 @@ def dashboard(request):
 
     template = loader.get_template(DASHBOARD_TEMPLATE)
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def _get_general_count_dict():

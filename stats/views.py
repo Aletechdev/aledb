@@ -73,7 +73,7 @@ def stats(request):
                "recent_experiments": get_recent_ale_exps(ale_experiment_id),
                "max_histogram_size": MAX_HISTOGRAM_SIZE}
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def get_histogram_item_count(request):

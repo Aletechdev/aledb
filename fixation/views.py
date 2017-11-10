@@ -67,7 +67,7 @@ def fixating_mutations(request):
                "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                "tag_dropdown": common.constants.TAGS}
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def shared_fixated_mutations(request):
@@ -122,5 +122,5 @@ def shared_fixated_mutations(request):
                "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TABLE,
                }
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
