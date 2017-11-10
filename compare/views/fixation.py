@@ -41,7 +41,7 @@ def comparison_fixation(request):
                                                                                      queryset,
                                                                                      is_ascending_freq_filter)
 
-    table_body = mutation_table_builder.get_table_body(reseq_dict=ordered_reseq_dict,
+    table_body = mutation_table_builder.get_table_body(request, reseq_dict=ordered_reseq_dict,
                                                        observed_mutations_queryset=observed_mutation_queryset,
                                                        table_type=mutation_table_builder.TableType.COMPARE_FIXATION_MUTATIONS)
 

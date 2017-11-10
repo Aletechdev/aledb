@@ -144,7 +144,7 @@ def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_qu
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
-def get_table_body(reseq_dict,
+def get_table_body(request, reseq_dict,
                    observed_mutations_queryset,
                    ale_experiment_id=None,
                    table_type=None):
