@@ -94,7 +94,7 @@ def shared_enriched_genes(request):
     ordered_reseq_dict = OrderedDict((reseq.id, reseq) for reseq in ordered_reseq_queryset)
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
+    table_body = mutation_table_builder.get_table_body(request, ordered_reseq_dict,
                                                        observed_mutation_queryset,
                                                        table_type=mutation_table_builder.TableType.SHARED)
 

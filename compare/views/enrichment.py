@@ -30,7 +30,7 @@ def compared_enrichment_mutations(request):
     table_header = mutation_table_builder.get_table_header(reseq_dict=ordered_reseq_dict,
                                                            table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
 
-    table_body = _get_table_body(ordered_reseq_dict, ale_experiment_list, queryset)
+    table_body = _get_table_body(request, ordered_reseq_dict, ale_experiment_list, queryset)
 
     hidden_columns = check_hidden_columns_and_filters(request, None)
 
@@ -52,13 +52,13 @@ def compared_enrichment_mutations(request):
     return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-def _get_table_body(reseq_dict, ale_experiment_list, queryset):
+def _get_table_body(request, reseq_dict, ale_experiment_list, queryset):
 
     enrichment_mutation_queryset = EnrichmentMutation.objects.filter(ale_experiment_id__in=ale_experiment_list)
 
     observed_mutations_queryset = _get_observed_enrichment_mutations(enrichment_mutation_queryset, queryset)
 
-    return mutation_table_builder.get_table_body(reseq_dict=reseq_dict,
+    return mutation_table_builder.get_table_body(request, reseq_dict=reseq_dict,
                                                  observed_mutations_queryset=observed_mutations_queryset,
                                                  table_type=mutation_table_builder.TableType.COMPARE_ENRICHEMENT_MUTATIONS)
 

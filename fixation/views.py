@@ -44,7 +44,7 @@ def fixating_mutations(request):
 
     obs_mut_qryset = get_exp_fixed_obs_mut_qryset(reseq_ordered_dict)
 
-    table_body = mutation_table_builder.get_table_body(reseq_dict=reseq_ordered_dict,
+    table_body = mutation_table_builder.get_table_body(request, reseq_dict=reseq_ordered_dict,
                                                        observed_mutations_queryset=obs_mut_qryset,
                                                        ale_experiment_id=int(exp_id),
                                                        table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS)
@@ -104,7 +104,7 @@ def shared_fixated_mutations(request):
     ordered_reseq_dict = OrderedDict((reseq.id, reseq) for reseq in ordered_reseq_queryset)
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
-    table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
+    table_body = mutation_table_builder.get_table_body(request, ordered_reseq_dict,
                                                        observed_mutation_queryset,
                                                        table_type=mutation_table_builder.TableType.SHARED)
 
