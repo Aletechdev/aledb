@@ -74,5 +74,5 @@ def duplication(request):
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(int(ale_experiment_id))}
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 

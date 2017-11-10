@@ -37,6 +37,6 @@ def export(request):
 
     template = loader.get_template(EXPORT_TEMPLATE)
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
