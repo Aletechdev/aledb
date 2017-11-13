@@ -88,7 +88,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'iv3^9^ccmwlfyeyp5q=%#z14p=p^6f1ujyzk8
 SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
 FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
 FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
-LOGIN_TEMPLATE_PATH = os.path.join(BASE_DIR, 'login/templates')
+LOGIN_TEMPLATE_PATH = os.path.join(BASE_DIR, 'accounts/templates')
 EXPORT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'export/templates')
 COMPARE_TEMPLATE_PATH = os.path.join(BASE_DIR, 'compare/templates')
 COMMON_TEMPLATE_PATH = os.path.join(BASE_DIR, 'common/templates')
@@ -143,7 +143,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'login.login_middleware.LoginRequiredMiddleware'
+    'accounts.login_middleware.LoginRequiredMiddleware'
 )
 
 LOGIN_URL = '/accounts/login/'
@@ -168,7 +168,7 @@ INSTALLED_APPS = (
     'metadata',
     'about',
     'enrichment',
-    'login',
+    'accounts',
     'compare',
     'export',
     'common',
