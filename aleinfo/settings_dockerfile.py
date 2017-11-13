@@ -5,7 +5,7 @@ DEBUG = os.environ.get('DEBUG', '0') == '1'
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-sequencing_url = os.environ.get('SEQUENCING_URL', 'https://aquaticus.ucsd.edu/aledata/')
+SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'https://aquaticus.ucsd.edu/aledata/')
 
 ADMINS = ()
 
