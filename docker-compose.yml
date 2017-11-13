@@ -12,7 +12,7 @@ services:
     command: "./docker-runserver.sh"
     environment:
       - DEBUG=0
-      - DJANGO_SERVER_HOST=localhost
+      - DJANGO_SERVER_HOST=localhost,127.0.0.1
       - MYSQL_USER=composetest
       - MYSQL_PASSWORD=testpassword
       - MYSQL_DATABASE=composetest
