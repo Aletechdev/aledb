@@ -9,10 +9,10 @@ from seq.models import Mutation, \
     UnassignedMissingCoverageEvidence, \
     ResequencingExperiment
 import os
-from configparser import ConfigParser
 from genes.util import get_annotated_gene_list
 from filter.models import AleExperimentFilter
 from duplications.util import Duplications
+from django.conf import settings
 
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
@@ -35,10 +35,7 @@ DUP_CSV_START_POSITION_INDEX = 0
 DUP_CSV_WIDTH_INDEX = 2
 DUP_CSV_DEPTH_INDEX = 4
 
-config = ConfigParser()
-settings_file_path = os.path.join(os.path.dirname(__file__), "../aleinfo/settings.ini")
-config.read(settings_file_path)
-ale_data_root_dir = config.get("OTHER", "ale_data_root_dir")
+ale_data_root_dir = settings.ALE_DATA_ROOT_DIR
 
 DUPLICATION_BP_TOLERANCE = 900
 

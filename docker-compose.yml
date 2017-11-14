@@ -13,6 +13,7 @@ services:
     environment:
       - DEBUG=1
       - DJANGO_SERVER_HOST=localhost
+      - DJANGO_SETTINGS_MODULE=aleinfo.settings_public
       - MYSQL_USER=composetest
       - MYSQL_PASSWORD=testpassword
       - MYSQL_DATABASE=composetest
