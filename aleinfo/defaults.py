@@ -22,6 +22,12 @@ DATABASES = {
     }
 }
 
+# XXX(lyschoening) what does this refer to?
+OTHER_USERNAME = os.environ.get('OTHER_DATABASE_USERNAME', 'other_database_username')
+OTHER_PASSWORD = os.environ.get('OTHER_DATABASE_', 'other_database_password')
+
+ALE_DATA_ROOT_DIR = os.environ.get('ALE_DATA_ROOT_DIR', 'ale_data_root_dir')
+
 ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost')]
 
 USE_X_FORWARDED_PORT = os.environ.get('USE_X_FORWARDED_PORT', '0') == '1'
@@ -143,7 +149,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'accounts.login_middleware.LoginRequiredMiddleware'
 )
 
 LOGIN_URL = '/accounts/login/'
