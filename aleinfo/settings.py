@@ -99,6 +99,7 @@ DUPLICATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'duplications/templates')
 GENES_TEMPLATE_PATH = os.path.join(BASE_DIR, 'genes/templates')
 METADATA_TEMPLATE_PATH = os.path.join(BASE_DIR, 'metadata/templates')
 ABOUT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'about/templates')
+BIBLIOME_TEMPLATE_PATH = os.path.join(BASE_DIR, 'bibliome/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -114,7 +115,8 @@ TEMPLATES = [
                  DUPLICATION_TEMPLATE_PATH,
                  GENES_TEMPLATE_PATH,
                  METADATA_TEMPLATE_PATH,
-                 ABOUT_TEMPLATE_PATH
+                 ABOUT_TEMPLATE_PATH,
+                 BIBLIOME_TEMPLATE_PATH
                  ],
         'OPTIONS': {
             'context_processors': [
