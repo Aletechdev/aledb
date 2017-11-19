@@ -149,7 +149,6 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'accounts.login_middleware.LoginRequiredMiddleware'
 )
 
 LOGIN_URL = '/accounts/login/'
