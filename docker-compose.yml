@@ -11,8 +11,9 @@ services:
     build: .
     command: "./docker-runserver.sh"
     environment:
-      - DEBUG=0
-      - DJANGO_SERVER_HOST=localhost,127.0.0.1
+      - DEBUG=1
+      - DJANGO_SERVER_HOST=localhost
+      - DJANGO_SETTINGS_MODULE=aleinfo.settings_public
       - MYSQL_USER=composetest
       - MYSQL_PASSWORD=testpassword
       - MYSQL_DATABASE=composetest
