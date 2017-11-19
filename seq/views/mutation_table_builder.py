@@ -37,27 +37,44 @@ HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
 
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
 
-SAVE_MUTATION_TO_FILTER_CELL_HTML = """<div class="dropdown">
+# the dropdown cell in the mutation table
+_menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
+_menu_item_save_to_experiment_filter = """<li><a onclick="save_to_experiment_filter(%d, %d)" style="cursor:pointer">Save to Experiment Filter</a></li>"""
+_table_cell_dropdown_template = """<div class="dropdown">
   <button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
     <i class="fa fa-filter" aria-hidden="true"></i>
   </button>
   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-    <li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>
-    <li><a onclick="save_to_experiment_filter(%d, %d)" style="cursor:pointer">Save to Experiment Filter</a></li>
     %s
   </ul>
 </div>"""
+def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experiment_id):
+    """Returns a <div> element containing the drop down menu for each row
+    in the mutation table.
 
-SAVE_TO_GLOBAL_FILTER_ONLY = """<div class="dropdown">
-  <button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-    <i class="fa fa-filter" aria-hidden="true"></i>
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-    <li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>
-    %s
-  </ul>
-</div>
-"""
+    Depending on user permissions, the drop down may contain menu
+    items for saving filter to global or experiment sets.
+
+    NOTE: this is a temporary solution for implementing #425 until the
+    mutation table component rendering is refactored
+    """
+
+    menuitems = ''
+    if (request.user.has_perm('add_global_filter')):
+        # all tables have a 'Save to Global Filter' menuitem
+        menuitems = _menu_item_save_to_global_filter % (mutation_id)
+
+        # some other tables have a 'Save to Experiment Filter' menuitem
+        if (not table_type in [ TableType.GENE_TABLE \
+                            , TableType.SEARCH \
+                            , TableType.SHARED \
+                            , TableType.COMPARE \
+                            , TableType.COMPARE_ENRICHEMENT_MUTATIONS \
+                            , TableType.COMPARE_FIXATION_MUTATIONS \
+        ]):
+            menuitems += _menu_item_save_to_experiment_filter % (ale_experiment_id, mutation_id)
+
+    return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation_id))
 
 GENE_ENTRY_HTML_LINK = """<a href=/gene?g=%s>%s</a>"""
 
@@ -158,21 +175,12 @@ def get_table_body(request, reseq_dict,
 
     # Populating table body
     table_body = []
-
     for mutation in mutation_queryset:
 
         if _contains_mutation(table_entry_list[mutation_index_dict[mutation.id]]):
 
             table_row = [HTML_MUTATION_TABLE_ROW]
-            if table_type == TableType.GENE_TABLE or \
-                            table_type == TableType.SEARCH or \
-                            table_type == TableType.SHARED or \
-                            table_type == TableType.COMPARE or \
-                            table_type == TableType.COMPARE_ENRICHEMENT_MUTATIONS or \
-                            table_type == TableType.COMPARE_FIXATION_MUTATIONS:
-                table_row.append(SAVE_TO_GLOBAL_FILTER_ONLY % (mutation.id, _get_tag_filter_dropdown_entries(mutation.id)))
-            else:
-                table_row.append(SAVE_MUTATION_TO_FILTER_CELL_HTML % (mutation.id, ale_experiment_id, mutation.id, _get_tag_filter_dropdown_entries(mutation.id)))
+            table_row.append(_build_table_cell_for_dropdown(request, table_type, mutation.id, ale_experiment_id,))
 
             if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.COMPARE_ENRICHEMENT_MUTATIONS:
                 table_row.append("<a href=/enrichment/shared?mutation_id=%s>shared</a>" % mutation.id)
