@@ -28,6 +28,11 @@ def get_csv_str(exp_id, mut_type_str):
         reseq_ordered_dict,\
         obs_mut_qryset = get_ordered_reseq_dict_and_obs_mut_queryset([exp_id])
 
+    obs_mut_qryset = obs_mut_qryset.select_related(
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment',
+        'mutation'
+    )
+
     mut_qryset,\
     table_entry_list,\
     mut_index_dict = get_mutation_table_queryset_and_entry_list(reseq_ordered_dict, obs_mut_qryset)
