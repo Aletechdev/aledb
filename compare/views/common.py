@@ -8,8 +8,14 @@ __author__ = 'dgosting, pphaneuf'
 
 
 def get_ordered_reseq_dict_and_obs_mut_queryset(ale_experiment_list, ale_no=None):
-    raw_obs_mut_qryset = ObservedMutation.objects.exclude(mutation__gene='').filter(
-        sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiment_list)
+    raw_obs_mut_qryset = ObservedMutation.objects.exclude(
+        mutation__gene=''
+    ).filter(
+        sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiment_list
+    ).select_related(
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment',
+        'mutation'
+    )
     obs_mut_qryset = get_filtered_observed_mutations_queryset(raw_obs_mut_qryset)
     if ale_no:
         obs_mut_qryset = obs_mut_qryset.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_id=ale_no)
@@ -19,7 +25,11 @@ def get_ordered_reseq_dict_and_obs_mut_queryset(ale_experiment_list, ale_no=None
 
 def _get_ordered_reseq_dict(filtered_queryset):
     reseq_exp_id_set = set([observed_mutation.sequencing_experiment_id for observed_mutation in filtered_queryset])
-    queryset = ResequencingExperiment.objects.filter(id__in=reseq_exp_id_set)
+    queryset = ResequencingExperiment.objects.filter(
+        id__in=reseq_exp_id_set
+    ).select_related(
+        'tech_rep__isolate__flask__ale_id__ale_experiment'
+    )
     seq_experiment_ordered_dict = collections.OrderedDict()
     for reseq in queryset:
         seq_experiment_ordered_dict[reseq.id] = reseq
