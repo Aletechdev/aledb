@@ -6,7 +6,7 @@ from django.conf import settings
 # TODO: remove all final '/' for apps that don't need it (enrichment, etc.)
 urlpatterns = [
     url(r'^', include('dashboard.urls')),
-    url(r'^accounts/login/', include('login.urls')),
+    url(r'^accounts/', include('accounts.urls', namespace="accounts")),
     url(r'^mutations', include('seq.urls')),
     url(r'^filter/', include('filter.urls')),
     url(r'^fixation/', include('fixation.urls')),

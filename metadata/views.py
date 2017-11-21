@@ -46,7 +46,7 @@ def metadata(request):
                "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                "multiple": False}
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def get_reseq_info_list(reseq_queryset):

@@ -48,7 +48,7 @@ def gene(request):
 
     table_header = mutation_table_builder.get_table_header(reseq_dict)
 
-    table_body, protein_changes = mutation_table_builder.get_table_body(reseq_dict,
+    table_body, protein_changes = mutation_table_builder.get_table_body(request, reseq_dict,
                                                                         observed_mutations_with_gene_queryset,
                                                                         table_type=mutation_table_builder.TableType.GENE_TABLE)
 
@@ -77,7 +77,7 @@ def gene(request):
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps()}
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 # TODO: This is the same implementation as found within seq.views.search.py; need to consolidate.

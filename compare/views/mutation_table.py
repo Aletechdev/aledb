@@ -25,7 +25,7 @@ def compared_mutations(request):
 
     ordered_reseq_dict, queryset = get_ordered_reseq_dict_and_obs_mut_queryset(ale_experiment_list, ale_no)
 
-    table_body = mutation_table_builder.get_table_body(ordered_reseq_dict,
+    table_body = mutation_table_builder.get_table_body(request, ordered_reseq_dict,
                                                        queryset,
                                                        table_type=mutation_table_builder.TableType.COMPARE)
 
@@ -48,5 +48,5 @@ def compared_mutations(request):
 
     template = loader.get_template(MUTATION_TABLE_TEMPLATE)
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 

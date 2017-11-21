@@ -1,4 +1,5 @@
-from django.template import loader
+from django.shortcuts import render
+
 from django.http import HttpResponse
 from seq.views import common
 from django.utils.safestring import mark_safe
@@ -54,9 +55,7 @@ def dashboard(request):
                "max_histogram_size": MAX_HISTOGRAM_SIZE,
                "timeline": get_timeline()}
 
-    template = loader.get_template(DASHBOARD_TEMPLATE)
-
-    return HttpResponse(template.render(context))
+    return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
 
 
 def _get_general_count_dict():

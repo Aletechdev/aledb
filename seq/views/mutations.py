@@ -48,12 +48,12 @@ def mutation_table(request):
                "tag_dropdown": common.constants.TAGS
                }
 
-    return HttpResponse(template.render(context))
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def _get_table_body(reseq_dict, request):
     obs_mut_qryset = get_all_observed_mutations(list(reseq_dict.keys()))
     ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-    return mutation_table_builder.get_table_body(reseq_dict,
+    return mutation_table_builder.get_table_body(request, reseq_dict,
                                                  obs_mut_qryset,
                                                  ale_experiment_id)
