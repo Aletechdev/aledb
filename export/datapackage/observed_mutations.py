@@ -1,4 +1,5 @@
 import csv
+import io
 import os
 import tempfile
 from collections import OrderedDict
@@ -13,28 +14,40 @@ observed_mutations_table_schema = get_table_schema('observed_mutations.json')
 
 
 class ObservedMutationsDataPackageWriter(object):
-    def __init__(self):
+    def __init__(self, ale_experiments=None, package_name=None):
         self.schema = observed_mutations_table_schema
+        self.ale_experiments = ale_experiments
+        if package_name is not None:
+            self.package_name = package_name
+        else:
+            self.package_name = 'ale-analytics-observed-mutations.zip'
 
     def query_values(self):
-        return ObservedMutation.objects.select_related(
-                'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment',
-                'mutation'
-        ).values(
-                'mutation__position',
-                'mutation__mutation_type',
-                'mutation__sequence_change',
-                'mutation__gene',
-                'mutation__function',
-                'mutation__product',
-                'mutation__go_process',
-                'mutation__go_component',
-                'mutation__protein_change',
-                'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__name',
-                'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_id',
-                'sequencing_experiment__tech_rep__isolate__flask__flask_number',
-                'sequencing_experiment__tech_rep__isolate__isolate_number',
-                'sequencing_experiment__tech_rep__tech_rep_number',
+        queryset = ObservedMutation.objects.select_related(
+            'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment',
+            'mutation'
+        )
+
+        if self.ale_experiments:
+            queryset = queryset.filter(
+                sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__in=self.ale_experiments,
+            )
+
+        return queryset.values(
+            'mutation__position',
+            'mutation__mutation_type',
+            'mutation__sequence_change',
+            'mutation__gene',
+            'mutation__function',
+            'mutation__product',
+            'mutation__go_process',
+            'mutation__go_component',
+            'mutation__protein_change',
+            'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__name',
+            'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_id',
+            'sequencing_experiment__tech_rep__isolate__flask__flask_number',
+            'sequencing_experiment__tech_rep__isolate__isolate_number',
+            'sequencing_experiment__tech_rep__tech_rep_number',
         ).all()
 
     def get_table(self):
@@ -67,9 +80,9 @@ class ObservedMutationsDataPackageWriter(object):
             value['sequencing_experiment__tech_rep__tech_rep_number'],
         )
         return '{ale_experiment_name} {ale_flask_isolate_str}'.format(
-                ale_experiment_name=value[
-                    'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__name'],
-                ale_flask_isolate_str=ale_flask_isolate_str,
+            ale_experiment_name=value[
+                'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__name'],
+            ale_flask_isolate_str=ale_flask_isolate_str,
         )
 
     def write_csv(self, table, filepath):
@@ -77,23 +90,29 @@ class ObservedMutationsDataPackageWriter(object):
             csv_writer = csv.writer(f)
             csv_writer.writerows(table)
 
-    def write(self, target_filepath: str):
-        with tempfile.TemporaryDirectory() as base_path:
-            package = DataPackage({
-                'name': os.path.basename(target_filepath),
-            }, base_path=base_path)
+    def write(self):
+        output = io.BytesIO()
+        with tempfile.NamedTemporaryFile() as target_file:
+            with tempfile.TemporaryDirectory() as base_path:
+                package = DataPackage({
+                    'name': self.package_name,
+                }, base_path=base_path)
 
-            csv_filepath = os.path.normpath(os.path.join(base_path, self.schema['path']))
-            table = self.get_table()
-            self.write_csv(table, csv_filepath)
-            package.add_resource(Resource(self.schema).descriptor)
+                csv_filepath = os.path.normpath(os.path.join(base_path, self.schema['path']))
+                table = self.get_table()
+                self.write_csv(table, csv_filepath)
+                package.add_resource(Resource(self.schema).descriptor)
 
-            package.infer()
-            assert package.valid
+                package.infer()
+                try:
+                    assert package.valid
+                except:
+                    raise Exception(package.errors)
 
-            package.save(target_filepath)
+                package.save(target_file.name)
 
-#
-# if __name__ == '__main__':
-#     writer = ObservedMutationsDataPackageWriter()
-#     writer.write('ale_analytics.zip')
+            target_file.file.seek(0)
+            output.write(target_file.file.read())
+
+        output.seek(0)
+        return output

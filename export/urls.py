@@ -6,4 +6,5 @@ __author__ = 'dgosting'
 
 urlpatterns = [
     url('^$', views.export, name="export"),
+    url('^datapackage/$', views.export_datapackage, name="export_datapackage"),
 ]

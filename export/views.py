@@ -1,16 +1,19 @@
-from django.template import loader
-from django.http import HttpResponse
-from common.util import get_all_ale_exps, get_recent_ale_exps
-from ale.models import AleExperiment
-from django.core.serializers.json import DjangoJSONEncoder
 import json
+
+from django.core.serializers.json import DjangoJSONEncoder
+from django.http import Http404
+from django.http import HttpResponse
+from django.template import loader
 from django.utils.safestring import mark_safe
+
+from ale.models import AleExperiment
+from common.util import get_all_ale_exps, get_recent_ale_exps
+from export.datapackage.observed_mutations import ObservedMutationsDataPackageWriter
 from export.util import \
     get_csv_str, \
     MUT_TYPE_STR, \
     FIXED_MUT_TYPE_STR, \
     ENRICH_MUT_TYPE_STR
-
 
 EXPORT_TEMPLATE = 'export.html'
 
@@ -40,3 +43,22 @@ def export(request):
     return HttpResponse(template.render(context, request), content_type="text/html")
 
 
+def export_datapackage(request):
+    exp_name_str = request.GET.get('experiments', 'All')
+    ale_experiments_queryset = AleExperiment.objects.all()
+
+    if exp_name_str != 'All':
+        exp_name_list = exp_name_str.split(',')
+        ale_experiments_queryset = ale_experiments_queryset.filter(name__in=exp_name_list)
+
+    if not ale_experiments_queryset.exists():
+        raise Http404('No ALE Experiment was found in the database for given value of `experiments`')
+
+    package_writer = ObservedMutationsDataPackageWriter(ale_experiments=ale_experiments_queryset)
+    output_buf = package_writer.write()
+    output_buf.seek(0)
+
+    response = HttpResponse(output_buf.read(), content_type="application/x-zip-compressed")
+    response['Content-Disposition'] = 'attachment; filename={}'.format(package_writer.package_name)
+
+    return response
