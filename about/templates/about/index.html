@@ -1,108 +1,138 @@
 {% extends 'dashboard_base.html' %}
 {% block title %}<title>About</title>{% endblock %}
-{% block scripts_and_style %}
-    <style type="text/css">
-        table.dataTable tr.odd {
-            background-color: lightgrey;
-        }
-
-        table.dataTable tr.even {
-            background-color: white;
-        }
-
-        span.line {
-            display: inline-block;
-        }
-    </style>
-    <link rel="stylesheet" type="text/css"
-          href="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.css"/>
-
-    <script type="text/javascript"
-            src="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.js"></script>
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $('#runs').DataTable({
-                paging: false,
-                dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
-                buttons: [
-                    'colvis', 'csv'
-                ],
-                deferRender: true
-            });
-        })
-    </script>
-{% endblock %}
 {% block header %}About{% endblock %}
 {% block content %}
     <h1>ALE Analytics</h1>
     <p class="lead">This web platform has been built to support the report generation and consolidation of adaptive
-        mutations from Adaptive Laboratory Evolution (ALE) experiments. Please see the following work for a full
-        description of the platform: <a
-                href="https://github.com/pvphaneuf/cse-ms-thesis/blob/master/patrick-phaneuf-cse.pdf">thesis report</a>
+        mutations from Experimental Evolutions and Adaptive Laboratory Evolution (ALE) experiments.
     </p>
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h3 class="panel-title">Publications described by ALE Analytics projects</h3>
-        </div>
-        <table class="table">
-            <tr>
-                <td>PGI</td>
-                <td>Charusanti P, Conrad TM, Knight EM, Venkataraman K, Fong NL, et al. (2010) Genetic Basis of Growth
-                    Adaptation of Escherichia coli after Deletion of pgi, a Major Metabolic Gene. PLOS Genetics
-                    6(11):e1001186. https://doi.org/10.1371/journal.pgen.1001186
-                </td>
-            </tr>
-            <tr>
-                <td>C13</td>
-                <td>Sandberg TE, Long CP, Gonzalez JE, Feist AM, Antoniewicz MR, et al. (2016) Evolution of E. coli on
-                    [U-13C]Glucose Reveals a Negligible Isotopic Influence on Metabolism and Physiology. PLOS ONE
-                    11(3):e0151130. https://doi.org/10.1371/journal.pone.0151130
-                </td>
-            </tr>
-            <tr>
-                <td>42C</td>
-                <td>Troy E. Sandberg, Margit Pedersen, Ryan A. LaCroix, Ali Ebrahim, Mads Bonde, Markus J. Herrgard,
-                    Bernhard O. Palsson, Morten Sommer, Adam M. Feist; Evolution of Escherichia coli to 42 °C and
-                    Subsequent Genetic Engineering Reveals Adaptive Mechanisms and Novel Mutations. Mol Biol Evol 2014;
-                    31 (10): 2647-2662. https://doi.org/10.1093/molbev/msu209
-                </td>
-            </tr>
-            <tr>
-                <td>GLU</td>
-                <td>Sandberg TE, Pedersen M, LaCroix RA, et al. Evolution of Escherichia coli to 42 °C and Subsequent
-                    Genetic Engineering Reveals Adaptive Mechanisms and Novel Mutations. Molecular Biology and
-                    Evolution. 2014;31(10):2647-2662. doi:10.1093/molbev/msu209.
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <span class="line">SSW GLU AC,</span>
-                    <span class="line">SSW GLU GLY,</span>
-                    <span class="line">SSW GLY XYL</span>
-                </td>
-                <td>Sandberg TE, Lloyd CJ, Palsson BO, Feist AM. 2017. Laboratory evolution to alternating substrate
-                    environments yields distinct phenotypic and genetic adaptive strategies. Appl Environ Microbiol
-                    83:e00410-17. https://doi.org/10.1128/AEM.00410-17.
-                </td>
-            </tr>
-        </table>
-    </div>
+    <a href="/bibliome"><h3>Publications described by ALEdb</h3></a>
+    <h2>Feature Overview</h2>
+    <img src="/static/workflow.png" style="width: 70%; height: 70%; padding-bottom: 20px">
+    <p>The ALE Analytics web platform maintains two categories of features: those that describe individual ALE
+        experiments, and those that describe all consolidated ALE experiment data (Figure 2B). To describe individual
+        ALE
+        experiments, ALE Analytics generates reports that describe the mutation lineage of ALEs, potential key
+        mutations, and
+        metadata reports describing the conditions for experiment isolates. To describe the consolidated ALE experiment
+        database,
+        ALE Analytics provides a mutation search feature, an automated ALE experiment comparison feature, and the
+        ability to
+        export the mutation data from one or more ALE experiments in a flat file format.</p>
+    <h3>ALE Experiment</h3>
+    <p>The foundational work to which this thesis builds on are the ALE experimental wet lab methodologies. Beginning
+        with a well known starting strain, an ALE experiment is commonly executed by serially passing a selected cell
+        culture to a fresh flask of media, enabling the particular strain passed to continue evolving under the
+        experimental conditions. The selection of cells to pass on to the next flask is often based on growth rate since
+        we assume that the most adapted strain population will outgrow their competition. ALE experiments can also
+        involve replicate ALEs, which are identical experimental evolutions that execute in parallel. This approach
+        reveals additional mutational data on the dynamics of adaptation and evolution for an organism and can describe
+        a convergence of adaptations across multiple ALEs. ALE experiments can involve multiple ALEs with multiple
+        flasks and isolates. In addition, each isolate can have one or more technical replicates, which are used to
+        serialize duplicate isolates with the goal of increasing the quality of a previous isolate. The work described
+        by this thesis serializes each sample with an abbreviation for each ALE layer and a count value representing a
+        sample’s identity within an ALE layer’s sequence. For example, the serialization A6 F21 I2 R1 represents the
+        first technical replicate of the second isolate from the 21st flask of the 6th ALE in an ALE experiment. The
+        output of an ALE experiment are populations or clonal isolates which were derived from the original strain and
+        additionally include the mutations in the cells according to the environmental stresses introduced in the ALE
+        experiment. This output is then processed by additional foundational technologies leveraged with ALE: the DNA
+        sequencer and mutation identifying software. The output sample to be analyzed is sequenced, typically by an
+        Illumina platform, and resequenced primarily using the Breseq computational pipeline. Breseq’s resequencing
+        process aligns all of the DNA reads to a provided genome reference and reports single-nucleotide mutations,
+        point insertions and deletions, large deletions, missing coverage and new junctions according to the differences
+        between the aligned reads and the reference genome.</p>
+    <img src="/static/ale_exp.png" style="width: 40%; height: 40%; padding-bottom: 20px">
+    <p>Generally, researchers compare the mutations from each ALE’s
+        endpoint samples to identify genomic regions with many alleles. If a researcher sequenced ALE midpoint or
+        intermediate samples, an ALE’s mutations can be organized in chronological order to identify mutations that fix.
+        The mutations that are involved in multiple alleles of a genomic region or are shown to fix from starting or
+        midpoint to endpoint samples are considered the key mutation sets and are investigated for their possible
+        fitness benefit according to the genomic region they affect.</p>
+    <h3>Mutation tables</h3>
+    <p>The primary focus of the ALE Analytics web platform is ALE mutation report generation. Each ALE experiment can be
+        described as a series of isolate mutation sets in relation to an ALE’s starting strain. Ordering sample mutation
+        sets as columns from earliest to latest in an ALE serves as a visualization to grant intuition on mutational
+        trends. The occurrence of a mutation in a sample is annotated with an allele frequency within the cell of a
+        mutation row for the sample.</p>
+    <img src="/static/mut_table.png" style="padding-bottom: 20px">
+    <p>Above is an example mutation table. This mutation table represents an ALE lineage report, where samples are
+        represented as columns, ordered from left to right
+        as earliest to latest in an ALE. Rows describe the specific mutations manifested within the sample set, and
+        values contained within cells represent the allele frequency.This format enables researchers to intuitively
+        identify important mutational patterns, such as the fixed mutations with <i>corA</i> and the <i>hns/tdk</i>
+        intergenic region.</p>
+    <p>Mutation lineage reports enable researchers to recognize patterns of key adaptive mutations. Among the many
+        mutations that manifest within an ALE experiment, mutation rows that describe multiple alleles of a gene will
+        cluster together with the sorting of mutations according to their positions on the genome. This is illustrated
+        with the mutated <i>corA</i> within the example table. Due to the chronological sorting of the sample columns
+        per ALE,
+        a mutation that fixes across samples will manifest as an unbroken sequence of cells in a mutation row annotated
+        with an allele frequency. This is illustrated with both the <i>hns/tdk</i> and <i>corA</i> mutations in the
+        example table.
+        These two patterns are obvious to an observer and serve well to describe the mutational trends in ALE
+        experiments.
+    </p>
+    <h2>Key mutation reporting</h2>
+    <p>Using the ALE Analytics mutation reporting mechanism, we have implemented features that automate the
+        identification and reporting of mutations which describe significant mutational patterns within an ALE
+        experiment. These features describe key and potentially adaptive mutation patterns which we refer to as
+        <i>enrichment</i> and <i>fixed mutations</i>. The methods encapsulated in the enrichment and fixed mutation
+        analysis are those
+        which have been developed to manually identify adaptive mutations within the results of published ALE
+        experiments (PGI) (C13) (42C) (GLU) and are therefore considered common
+        ALE experiment key mutation analysis. Once an experiment’s initial set of key mutations are identified,
+        additional validation experiments and functional analysis are executed to validate that they are adaptive.
+        As with the manual consolidation of ALE experiment mutation data, the analysis of adaptive mutations can be
+        prone to human error, inconsistent between researchers and time consuming. The automation of these common
+        analyses will contribute to more accurate results, more consistent analysis and the shortening of turnaround
+        time from ALE experiment execution to results interpretation.
+    </p>
+    <img src="/static/fixed_enriched_muts.png" style="width: 40%; height: 40%; padding-bottom: 20px">
+    <p>As with the manual consolidation of ALE experiment mutation data, the analysis of adaptive mutations can be prone
+        to human error, inconsistent between researchers and time consuming. The automation of these common analyses
+        will contribute to more accurate results, more consistent analysis and the shortening of turnaround time from
+        ALE experiment execution to results interpretation.</p>
+    <p>In the SBRG’s published ALE experiment literature, adaptive mutations were identified as those involved in two
+        cases. If a mutation manifested in more than one sample, it signified that this mutation described a dominant
+        phenotype. If a genomic region was mutated via different mutations across multiple samples, it was hypothesized
+        that simply perturbing the gene may have rendered a beneficial phenotype. Considering that these circumstances
+        all involve isolates with the same mutated genomic region, we can also consider a single sample with multiple
+        alleles of the same region to represent multiple populations which benefit from this region’s perturbation. The
+        identification of these cases can be accomplished by finding genomic regions within an ALE experiment that have
+        more than one observed mutation; we consider these enriched genomic regions and their mutations as enrichment
+        mutations. Previous to ALE Analytics, this analysis was accomplished as additional steps in manually curating
+        the ALE experiment’s mutation report such that mutations affecting the same genomic region would cluster
+        together within a matrix of mutations and their samples. ALE Analytics automates this enrichment mutation
+        analysis and reports the results in the same mutation table format.</p>
+    <p>A fixed mutation is one in which a mutation manifests in an ALE’s midpoint, or intermediate sample, and is
+        propagated to all following samples in the ALE. This analysis is only possible if an ALE experiment
+        includes midpoint samples, providing the possibility of more than one data point per mutation. Previous to ALE
+        Analytics, the identification of fixed mutations was accomplished as an additional results reporting task by
+        manually organizing mutations according to their ALE’s sample chronology and identifying mutations that emerge
+        in a midpoint and manifest in all remaining ALE samples. The fixed mutation analysis automates this approach and
+        reports results in the mutation table format.</p>
+    <h2>Publications</h2>
+    <p>The initial in-depth review of ALE Analytics was published as a <a
+                href="https://escholarship.org/content/qt056243b5/qt056243b5.pdf">masters thesis</a>.</p>
     <h2>Mutation data generation</h2>
-    <p>The mutation data presented on this platform was generated using the <a href=https://github.com/barricklab/breseq>breseq</a> resquencing pipeline.</p>
-    <p>Deatherage, D.E., Barrick, J.E. (2014) Identification of mutations in laboratory-evolved microbes from next-generation sequencing data using breseq. Methods Mol. Biol.</p>
+    <p>The mutation data presented on this platform was generated using the <a
+            href=https://github.com/barricklab/breseq>BreSeq</a> resquencing pipeline.</p>
+    <p>Deatherage, D.E., Barrick, J.E. (2014) Identification of mutations in laboratory-evolved microbes from
+        next-generation sequencing data using breseq. Methods Mol. Biol.</p>
     <h2>3rd party packages used</h2>
     <p>mutation-needle-plot: http://dx.doi.org/10.5281/zenodo.14561</p>
     <p>webGL protein viewer: http://dx.doi.org/10.5281/zenodo.20980</p>
     <h2>Acknowledgements</h2>
     <p>We thank Dennis Gosting for his enormous contributions to this platform.</p>
-    <p>This work was supported by Dr. Adam Feist and Dr. Bernhard Palsson of UCSD's Systems Biology Research Group, and by
-        a grant from the Novo Nordisk Foundation Center for Biosustainability (NNF16CC0021858).</p>
+    <p>This work is developed by UCSD's Systems Biology Research Group and is supported by a grant from the Novo Nordisk
+        Foundation Center for Biosustainability (NNF16CC0021858).</p>
     <h2>Contact</h2>
-    <p>Please send any bug reports or commends to:</p>
+    <p>Please send comments or report issues to:</p>
     <p>pphaneuf 'at' eng 'dot' ucsd 'dot' edu</p>
     <hr>
     <div class="container">
-        <p class="text-muted" align="center">ALE Analytics is hosted and maintained by the Systems Biology Research Group at the University of California,
+        <p class="text-muted" align="center">ALE Analytics is hosted and maintained by the Systems Biology Research
+            Group at the University of California,
             San Diego.</p>
         <div class="row">
             <div class="col-sm-5">
@@ -112,7 +142,7 @@
             </div>
             <div class="col-sm-2">
                 <a href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
-                                                         src="/static/cfb-logo.png"></a>
+                                                             src="/static/cfb-logo.png"></a>
             </div>
             <div class="col-sm-5">
                 <a href="http://www.ucsd.edu/"><img class="img-responsive footer-image" src="/static/ucsd-logo.png"></a>
