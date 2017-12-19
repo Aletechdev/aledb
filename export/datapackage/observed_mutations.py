@@ -92,27 +92,24 @@ class ObservedMutationsDataPackageWriter(object):
 
     def write(self):
         output = io.BytesIO()
-        with tempfile.NamedTemporaryFile() as target_file:
-            with tempfile.TemporaryDirectory() as base_path:
-                package = DataPackage({
-                    'name': self.package_name,
-                }, base_path=base_path)
 
-                csv_filepath = os.path.normpath(os.path.join(base_path, self.schema['path']))
-                table = self.get_table()
-                self.write_csv(table, csv_filepath)
-                package.add_resource(Resource(self.schema).descriptor)
+        with tempfile.TemporaryDirectory() as base_path:
+            package = DataPackage({
+                'name': self.package_name,
+            }, base_path=base_path)
 
-                package.infer()
-                try:
-                    assert package.valid
-                except:
-                    raise Exception(package.errors)
+            csv_filepath = os.path.normpath(os.path.join(base_path, self.schema['path']))
+            table = self.get_table()
+            self.write_csv(table, csv_filepath)
+            package.add_resource(Resource(self.schema).descriptor)
 
-                package.save(target_file.name)
+            package.infer()
+            try:
+                assert package.valid
+            except:
+                raise Exception(package.errors)
 
-            target_file.file.seek(0)
-            output.write(target_file.file.read())
+            package.save(output)
 
         output.seek(0)
         return output
