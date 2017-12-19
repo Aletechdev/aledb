@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^compare/', include('compare.urls')),
     url(r'^search/', include('search.urls')),
     url(r'^duplication/', include('duplications.urls')),
+    url(r'^bibliome/', include('bibliome.urls')),
     url(r'^gene/', include('genes.urls'))
 ]
 
