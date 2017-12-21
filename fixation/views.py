@@ -37,7 +37,6 @@ def fixating_mutations(request):
     ale_qryset = seq.views.common.get_ales(exp_id, True)
 
     reseq_ordered_dict = get_reseq_ordered_dict(exp_id, ale_number, request)
-    reseq_ordered_dict = seq.views.common.filter_out_wt_reseq(reseq_ordered_dict)
 
     table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
                                                            mutation_table_builder.TableType.FIXATING_MUTATIONS)
