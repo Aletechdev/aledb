@@ -2,21 +2,21 @@
 {% block title %}<title>About</title>{% endblock %}
 {% block header %}About{% endblock %}
 {% block content %}
-    <h1>ALE Analytics</h1>
+    <h1>ALEdb</h1>
     <p class="lead">This web platform has been built to support the report generation and consolidation of adaptive
         mutations from Experimental Evolutions and Adaptive Laboratory Evolution (ALE) experiments.
     </p>
     <a href="/bibliome"><h3>Publications described by ALEdb</h3></a>
     <h2>Feature Overview</h2>
     <img src="/static/workflow.png" style="width: 70%; height: 70%; padding-bottom: 20px">
-    <p>The ALE Analytics web platform maintains two categories of features: those that describe individual ALE
+    <p>The ALEdb web platform maintains two categories of features: those that describe individual ALE
         experiments, and those that describe all consolidated ALE experiment data (Figure 2B). To describe individual
         ALE
-        experiments, ALE Analytics generates reports that describe the mutation lineage of ALEs, potential key
+        experiments, ALEdb generates reports that describe the mutation lineage of ALEs, potential key
         mutations, and
         metadata reports describing the conditions for experiment isolates. To describe the consolidated ALE experiment
         database,
-        ALE Analytics provides a mutation search feature, an automated ALE experiment comparison feature, and the
+        ALEdb provides a mutation search feature, an automated ALE experiment comparison feature, and the
         ability to
         export the mutation data from one or more ALE experiments in a flat file format.</p>
     <h3>ALE Experiment</h3>
@@ -49,7 +49,7 @@
         midpoint to endpoint samples are considered the key mutation sets and are investigated for their possible
         fitness benefit according to the genomic region they affect.</p>
     <h3>Mutation tables</h3>
-    <p>The primary focus of the ALE Analytics web platform is ALE mutation report generation. Each ALE experiment can be
+    <p>The primary focus of the ALEdb web platform is ALE mutation report generation. Each ALE experiment can be
         described as a series of isolate mutation sets in relation to an ALE’s starting strain. Ordering sample mutation
         sets as columns from earliest to latest in an ALE serves as a visualization to grant intuition on mutational
         trends. The occurrence of a mutation in a sample is annotated with an allele frequency within the cell of a
@@ -73,7 +73,7 @@
         experiments.
     </p>
     <h2>Key mutation reporting</h2>
-    <p>Using the ALE Analytics mutation reporting mechanism, we have implemented features that automate the
+    <p>Using the ALEdb mutation reporting mechanism, we have implemented features that automate the
         identification and reporting of mutations which describe significant mutational patterns within an ALE
         experiment. These features describe key and potentially adaptive mutation patterns which we refer to as
         <i>enrichment</i> and <i>fixed mutations</i>. The methods encapsulated in the enrichment and fixed mutation
@@ -100,9 +100,9 @@
         alleles of the same region to represent multiple populations which benefit from this region’s perturbation. The
         identification of these cases can be accomplished by finding genomic regions within an ALE experiment that have
         more than one observed mutation; we consider these enriched genomic regions and their mutations as enrichment
-        mutations. Previous to ALE Analytics, this analysis was accomplished as additional steps in manually curating
+        mutations. Previous to ALEdb, this analysis was accomplished as additional steps in manually curating
         the ALE experiment’s mutation report such that mutations affecting the same genomic region would cluster
-        together within a matrix of mutations and their samples. ALE Analytics automates this enrichment mutation
+        together within a matrix of mutations and their samples. ALEdb automates this enrichment mutation
         analysis and reports the results in the same mutation table format.</p>
     <p>A fixed mutation is one in which a mutation manifests in an ALE’s midpoint, or intermediate sample, and is
         propagated to all following samples in the ALE. This analysis is only possible if an ALE experiment
@@ -112,7 +112,7 @@
         in a midpoint and manifest in all remaining ALE samples. The fixed mutation analysis automates this approach and
         reports results in the mutation table format.</p>
     <h2>Publications</h2>
-    <p>The initial in-depth review of ALE Analytics was published as a <a
+    <p>The initial in-depth review of ALEdb was published as a <a
                 href="https://escholarship.org/content/qt056243b5/qt056243b5.pdf">masters thesis</a>.</p>
     <h2>Mutation data generation</h2>
     <p>The mutation data presented on this platform was generated using the <a
@@ -131,7 +131,7 @@
     <p>pphaneuf 'at' eng 'dot' ucsd 'dot' edu</p>
     <hr>
     <div class="container">
-        <p class="text-muted" align="center">ALE Analytics is hosted and maintained by the Systems Biology Research
+        <p class="text-muted" align="center">ALEdb is hosted and maintained by the Systems Biology Research
             Group at the University of California,
             San Diego.</p>
         <div class="row">

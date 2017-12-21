@@ -31,7 +31,7 @@ DEFAULT_STRAIN = "E. Coli"
 
 MEDIA_BASE_DESCRIPTION = "base-media"
 MEDIA_TEMPERATURE = "temperature"
-#  The following media descriptors are consolidated into the ALE Analytics "substrate" descriptor.
+#  The following media descriptors are consolidated into the ALEdb "substrate" descriptor.
 MEDIA_CARBON_SOURCE = "carbon-source"
 MEDIA_NITROGEN_SOURCE = "nitrogen-source"
 MEDIA_PHOSPHOROUS_SOURCE = "phosphorous-source"
