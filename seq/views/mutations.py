@@ -23,7 +23,6 @@ def mutation_table(request):
     ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
 
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no, request)
-    ordered_reseq_dict = seq.views.common.filter_out_wt_reseq(ordered_reseq_dict)
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 
