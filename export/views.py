@@ -2,13 +2,14 @@ import json
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import Http404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
 
 from ale.models import AleExperiment
 from common.util import get_all_ale_exps, get_recent_ale_exps
 from export.datapackage.observed_mutations import ObservedMutationsDataPackageWriter
+from export.forms import ExportForm
 from export.util import \
     get_csv_str, \
     MUT_TYPE_STR, \
@@ -44,17 +45,14 @@ def export(request):
 
 
 def export_datapackage(request):
-    exp_name_str = request.GET.get('experiments', 'All')
-    ale_experiments_queryset = AleExperiment.objects.all()
+    form = ExportForm(request.GET, request.FILES)
 
-    if exp_name_str != 'All':
-        exp_name_list = exp_name_str.split(',')
-        ale_experiments_queryset = ale_experiments_queryset.filter(name__in=exp_name_list)
+    if not form.is_valid():
+        return JsonResponse(form.errors, status=400)
 
-    if not ale_experiments_queryset.exists():
-        raise Http404('No ALE Experiment was found in the database for given value of `experiments`')
+    ale_experiments = form.cleaned_data['experiments']
 
-    package_writer = ObservedMutationsDataPackageWriter(ale_experiments=ale_experiments_queryset)
+    package_writer = ObservedMutationsDataPackageWriter(ale_experiments=ale_experiments)
     output_buf = package_writer.write()
     output_buf.seek(0)
 
