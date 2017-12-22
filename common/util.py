@@ -14,12 +14,15 @@ __author__ = 'Patrick Phaneuf, Denny Gosting'
 
 # TODO: go in seq.util
 def get_reseq_queryset(ale_experiment_id, ale_id=None):
-    reseq_queryset = ResequencingExperiment.objects.all().order_by(
+    reseq_queryset = ResequencingExperiment.objects.select_related(
+        'tech_rep__isolate__flask__ale_id__ale_experiment'
+    ).order_by(
         'tech_rep__isolate__flask__ale_id__ale_experiment__name',
         'tech_rep__isolate__flask__ale_id__ale_id',
         'tech_rep__isolate__flask__flask_number',
         'tech_rep__isolate__isolate_number',
-        'tech_rep__tech_rep_number')
+        'tech_rep__tech_rep_number'
+    )
 
     reseq_queryset = get_ale_experiment_selector(ale_experiment_id, reseq_queryset)
 
