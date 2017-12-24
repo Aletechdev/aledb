@@ -13,7 +13,7 @@ __author__ = 'Patrick Phaneuf, Denny Gosting'
 
 
 # TODO: go in seq.util
-def get_reseq_queryset(ale_experiment_id, ale_id=None):
+def get_ordered_reseq_queryset(ale_experiment_id, ale_id=None):
     reseq_queryset = ResequencingExperiment.objects.select_related(
         'tech_rep__isolate__flask__ale_id__ale_experiment'
     ).order_by(
@@ -32,10 +32,10 @@ def get_reseq_queryset(ale_experiment_id, ale_id=None):
 
 
 # TODO: go in seq.util
-def get_reseq_dict(ale_experiment_id):
-    reseq_queryset = get_reseq_queryset(ale_experiment_id, None)
-    reseq_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
-    return reseq_dict
+# def get_reseq_dict(ale_experiment_id):
+#     reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, None)
+#     reseq_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
+#     return reseq_dict
 
 
 # TODO: go in seq.util
@@ -52,22 +52,14 @@ def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, request=None):
         :param request:
 
     """
-    reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_no)
-
+    reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_no)
     if request and request.GET.get('tag_select'):
-
         tag = request.GET.get('tag_select').split(':')
-
         if tag[0] == 'Hide Tag':
-
             reseq_queryset = reseq_queryset.exclude(tech_rep__tags__contains=tag[1].replace(' ', ''))
-
         elif tag[0] == 'Show Tag':
-
             reseq_queryset = reseq_queryset.filter(tech_rep__tags__contains=tag[1].replace(' ', ''))
-
     reseq_ordered_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_queryset)
-
     return reseq_ordered_dict
 
 

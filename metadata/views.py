@@ -6,7 +6,7 @@ from django.conf import settings
 
 from seq.views import common
 
-from common.util import get_reseq_queryset, get_all_ale_exps, get_recent_ale_exps
+from common.util import get_ordered_reseq_queryset, get_all_ale_exps, get_recent_ale_exps
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
@@ -27,7 +27,7 @@ else:
 def metadata(request):
     ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
     ale_id = request.GET.get(REQUEST_ALE_ID)
-    reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_id)
+    reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
 
     # Would rather want to use something like a dictionary since an experiment is
     # unique, though an experiment is currently a structure and an integral type
