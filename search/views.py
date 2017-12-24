@@ -16,16 +16,16 @@ from filter.util import get_filtered_observed_mutations_queryset
 
 def search(request):
     check_hidden_columns_and_filters(request, None)
-    observed_mutations_with_gene_queryset = _get_obs_muts(request)  # Filter out mutations with this one.
-    reseq_dict = _get_reseq_dict_from_observed_mutation_queryset(observed_mutations_with_gene_queryset)
-    if reseq_dict is None or observed_mutations_with_gene_queryset is None:
+    obs_mut_qryset = _get_obs_mut_qryset(request)  # Filter out mutations with this one.
+    reseq_dict = _get_reseq_dict_from_observed_mutation_queryset(obs_mut_qryset)
+    if reseq_dict is None or obs_mut_qryset is None:
         return render(request, 'search.html', {'error': True,
                                                "experiments": get_all_ale_exps(),
                                                "recent_experiments": get_recent_ale_exps()})
 
     table_header = mutation_table_builder.get_table_header(reseq_dict)
     table_body = mutation_table_builder.get_table_body(request, reseq_dict,
-                                                       observed_mutations_with_gene_queryset,
+                                                       obs_mut_qryset,
                                                        table_type=mutation_table_builder.TableType.SEARCH)
     last_search = _get_last_search(request)
     template = loader.get_template("search.html")
@@ -34,26 +34,31 @@ def search(request):
                "table_header": mark_safe(table_header),
                "last_search": last_search,
                "mutation_count": len(table_body),
-               "observed_mutation_count": observed_mutations_with_gene_queryset.count(),
+               "observed_mutation_count": obs_mut_qryset.count(),
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps()}
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-def _get_obs_muts(request):
-    include_argument_list, exclude_argument_list = _get_search_query_arguments(request)
-    if not include_argument_list: return None
-    mut_qryset = _get_mutation_queryset(include_argument_list, exclude_argument_list)
+# TODO: roll _get_search_ale_exp_params into _get_search_params.
+def _get_obs_mut_qryset(request):
+
+    search_include_param_list, search_exclude_param_list = _get_search_params(request)
+    if not search_include_param_list: return None
+    mut_qryset = _get_mut_qryset(search_include_param_list, search_exclude_param_list)
     obs_mut_qryset = ObservedMutation.objects.filter(mutation__in=mut_qryset)
-    ale_experiments_to_include, ale_experiments_to_exclude = _get_ale_experiment_arguments(request)
-    if ale_experiments_to_exclude:
+
+    ale_exp_to_include, ale_exp_to_exclude = _get_search_ale_exp_params(request)
+    if ale_exp_to_exclude:
         obs_mut_qryset = obs_mut_qryset.exclude(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_exclude)
-    if ale_experiments_to_include:
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_exp_to_exclude)
+    if ale_exp_to_include:
         obs_mut_qryset = obs_mut_qryset.filter(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_experiments_to_include)
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_exp_to_include)
+
     obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset)
+
     return obs_mut_qryset
 
 
@@ -78,7 +83,7 @@ def _get_last_search(request):
     return last_search
 
 
-def _get_search_query_arguments(request):
+def _get_search_params(request):
 
     include_argument_list = []
     exclude_argument_list = []
@@ -179,7 +184,7 @@ def _add_protein_change_to_query(request, include_argument_list, exclude_argumen
             exclude_argument_list.append(reduce(operator.or_, protein_change_exclude))
 
 
-def _get_ale_experiment_arguments(request):
+def _get_search_ale_exp_params(request):
     ale_experiments_to_include = []
     ale_experiments_to_exclude = []
     if 'ale' in request.GET and request.GET['ale']:
@@ -192,15 +197,15 @@ def _get_ale_experiment_arguments(request):
     return ale_experiments_to_include, ale_experiments_to_exclude
 
 
-def _get_mutation_queryset(include_argument_list, exclude_argument_list):
+def _get_mut_qryset(include_argument_list, exclude_argument_list):
     if len(include_argument_list) > 0:
         include_argument_list = reduce(operator.and_, include_argument_list)
     else: return None
 
     if len(exclude_argument_list) > 0:
-        mutations_with_gene_queryset = Mutation.objects.filter(include_argument_list).exclude(
+        mut_qryset = Mutation.objects.filter(include_argument_list).exclude(
             reduce(operator.or_, exclude_argument_list))
     else:
-        mutations_with_gene_queryset = Mutation.objects.filter(include_argument_list)
+        mut_qryset = Mutation.objects.filter(include_argument_list)
 
-    return mutations_with_gene_queryset
+    return mut_qryset
