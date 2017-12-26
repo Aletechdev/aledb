@@ -13,7 +13,7 @@ from stats.util import get_histogram_jsons,\
     get_ale_flask_isolate_count_list,\
     get_reseq_experiment_info_list,\
     MAX_HISTOGRAM_SIZE
-from common.util import get_reseq_queryset,\
+from common.util import get_ordered_reseq_queryset,\
     get_reseq_ordered_dict, get_mut_queryset_from_obs_mut_queryset, \
     get_all_ale_exps, get_recent_ale_exps
 from filter.util import get_filtered_observed_mutations_queryset
@@ -31,7 +31,7 @@ if hasattr(settings, "SEQUENCING_URL"):
 def stats(request):
     ale_experiment_id = common.get_ale_experiment_id(request)
     ale_id = common.get_ale_id(request)
-    reseq_queryset = get_reseq_queryset(ale_experiment_id, ale_id)
+    reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
     ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(reseq_queryset)
 
     experiments_info_list = get_reseq_experiment_info_list(reseq_queryset)
