@@ -64,9 +64,8 @@ def _get_obs_mut_qryset(request):
     return obs_mut_qryset
 
 
-def _get_ordered_reseq_dict(observed_mutation_queryset):
-    if not observed_mutation_queryset: return None
-
+def _get_ordered_reseq_dict(obs_muts_qryset):
+    if not obs_muts_qryset: return None
     reseq_qryset = ResequencingExperiment.objects.select_related(
         'tech_rep__isolate__flask__ale_id__ale_experiment'
     ).order_by(
@@ -75,10 +74,8 @@ def _get_ordered_reseq_dict(observed_mutation_queryset):
         'tech_rep__isolate__flask__flask_number',
         'tech_rep__isolate__isolate_number',
         'tech_rep__tech_rep_number'
-    ).filter(mutations__observedmutation__in=observed_mutation_queryset)
-
+    ).filter(mutations__observedmutation__in=obs_muts_qryset)
     reseq_ordered_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_qryset)
-
     return reseq_ordered_dict
 
 
