@@ -5,7 +5,8 @@ from django.shortcuts import render
 from seq.models import ObservedMutation, Mutation
 from ale.models import AleExperiment
 from django.db.models import Q
-import operator
+import operator, collections
+from seq.models import ResequencingExperiment
 from functools import reduce
 from seq.views import mutation_table_builder
 from common.util import check_hidden_columns_and_filters, get_all_ale_exps, get_recent_ale_exps
@@ -16,15 +17,16 @@ from filter.util import get_filtered_observed_mutations_queryset
 
 def search(request):
     check_hidden_columns_and_filters(request, None)
-    obs_mut_qryset = _get_obs_mut_qryset(request)  # Filter out mutations with this one.
-    reseq_dict = _get_reseq_dict_from_observed_mutation_queryset(obs_mut_qryset)
+    obs_mut_qryset = _get_obs_mut_qryset(request)
+    reseq_dict = _get_ordered_reseq_dict(obs_mut_qryset)
     if reseq_dict is None or obs_mut_qryset is None:
         return render(request, 'search.html', {'error': True,
                                                "experiments": get_all_ale_exps(),
                                                "recent_experiments": get_recent_ale_exps()})
 
     table_header = mutation_table_builder.get_table_header(reseq_dict)
-    table_body = mutation_table_builder.get_table_body(request, reseq_dict,
+    table_body = mutation_table_builder.get_table_body(request,
+                                                       reseq_dict,
                                                        obs_mut_qryset,
                                                        table_type=mutation_table_builder.TableType.SEARCH)
     last_search = _get_last_search(request)
@@ -62,12 +64,22 @@ def _get_obs_mut_qryset(request):
     return obs_mut_qryset
 
 
-def _get_reseq_dict_from_observed_mutation_queryset(observed_mutation_queryset):
-    reseq_dict = {}
+def _get_ordered_reseq_dict(observed_mutation_queryset):
     if not observed_mutation_queryset: return None
-    for observed_mutation in observed_mutation_queryset:
-        reseq_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
-    return reseq_dict
+
+    reseq_qryset = ResequencingExperiment.objects.select_related(
+        'tech_rep__isolate__flask__ale_id__ale_experiment'
+    ).order_by(
+        'tech_rep__isolate__flask__ale_id__ale_experiment__name',
+        'tech_rep__isolate__flask__ale_id__ale_id',
+        'tech_rep__isolate__flask__flask_number',
+        'tech_rep__isolate__isolate_number',
+        'tech_rep__tech_rep_number'
+    ).filter(mutations__observedmutation__in=observed_mutation_queryset)
+
+    reseq_ordered_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_qryset)
+
+    return reseq_ordered_dict
 
 
 def _get_last_search(request):
