@@ -14,7 +14,7 @@ __author__ = 'Patrick Phaneuf, Denny Gosting'
 
 # TODO: go in seq.util
 def get_ordered_reseq_queryset(ale_experiment_id, ale_id=None):
-    reseq_queryset = ResequencingExperiment.objects.select_related(
+    reseq_qryset = ResequencingExperiment.objects.select_related(
         'tech_rep__isolate__flask__ale_id__ale_experiment'
     ).order_by(
         'tech_rep__isolate__flask__ale_id__ale_experiment__name',
@@ -24,11 +24,10 @@ def get_ordered_reseq_queryset(ale_experiment_id, ale_id=None):
         'tech_rep__tech_rep_number'
     )
 
-    reseq_queryset = get_ale_experiment_selector(ale_experiment_id, reseq_queryset)
+    reseq_qryset = filter_for_ale_exp(ale_experiment_id, reseq_qryset)
+    reseq_qryset = filter_for_ale(ale_id, reseq_qryset)
 
-    reseq_queryset = get_ale_number_selector(ale_id, reseq_queryset)
-
-    return reseq_queryset
+    return reseq_qryset
 
 
 # TODO: go in seq.util
@@ -137,25 +136,17 @@ def clear_dashboard_cache():
 
 
 
-def get_ale_experiment_selector(ale_experiment_id, reseq_query):
-
+def filter_for_ale_exp(ale_experiment_id, reseq_query):
     if ale_experiment_id is None or ale_experiment_id == REQUEST_ALL:
-
         return reseq_query
-
     else:
-
         return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=ale_experiment_id)
 
 
-def get_ale_number_selector(ale_id, reseq_query):
-
+def filter_for_ale(ale_id, reseq_query):
     if ale_id is None or ale_id == REQUEST_ALL:
-
         return reseq_query
-
     else:
-
         return reseq_query.filter(tech_rep__isolate__flask__ale_id__ale_id=ale_id)
 
 
