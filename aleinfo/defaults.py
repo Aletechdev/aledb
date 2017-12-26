@@ -1,8 +1,7 @@
 import os
 import sys
 
-# DEBUG = os.environ.get('DEBUG', '0') == '1'
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', '0') == '1'
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -12,7 +11,6 @@ ADMINS = ()
 
 MANAGERS = ADMINS
 
-'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -23,17 +21,6 @@ DATABASES = {
         'PORT': int(os.environ.get('MYSQL_PORT', 3306)),
     }
 }
-'''
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': "ale_db",
-        'USER': "root",
-        'PASSWORD': "m0t0r0l6",
-        'HOST': "localhost",
-        'PORT': 3306,
-        }
-    }
 
 # XXX(lyschoening) what does this refer to?
 OTHER_USERNAME = os.environ.get('OTHER_DATABASE_USERNAME', 'other_database_username')
