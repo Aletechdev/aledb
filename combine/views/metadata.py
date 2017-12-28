@@ -12,7 +12,7 @@ from django.conf import settings
 
 from seq.views import common
 
-from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
+from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
 __author__ = 'dgosting'
 
 META_DATA_TEMPLATE = 'metadata/index.html'
@@ -23,7 +23,7 @@ else:
     reseq_report_url = common.DEFAULT_RESEQ_REPORT_URL
 
 
-def comparison_metadata(request):
+def combined_metadata(request):
 
     ale_experiment_list = request.GET.get('ale_experiment_id', None).replace('[', '').replace(']', '').split(',')
 
