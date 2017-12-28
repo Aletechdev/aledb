@@ -7,7 +7,7 @@ import seq.views.common
 from seq.views import mutation_table_builder
 from fixation.models import FixatedMutation
 from common.util import get_all_ale_exps, get_recent_ale_exps, check_hidden_columns_and_filters
-from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset, get_ales_from_ale_experiment_list
+from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset, get_ales_from_ale_experiment_list
 from common.constants import POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE, TAGS
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -21,7 +21,7 @@ REQUEST_ASCENDING_FREQ_FILTER = 'asndflt'
 
 # TODO: very similar to common_mutations page workflow. Should consolidate somehow.
 # TODO: Shares some same functions as fixation.views.py and should be refactored/consolidated
-def comparison_fixation(request):
+def combined_fixation(request):
 
     ale_no = seq.views.common.get_ale_id(request)
 
@@ -43,7 +43,7 @@ def comparison_fixation(request):
 
     table_body = mutation_table_builder.get_table_body(request, reseq_dict=ordered_reseq_dict,
                                                        observed_mutations_queryset=observed_mutation_queryset,
-                                                       table_type=mutation_table_builder.TableType.COMPARE_FIXATION_MUTATIONS)
+                                                       table_type=mutation_table_builder.TableType.COMBINE_FIXATION_MUTATIONS)
 
     hidden_columns = check_hidden_columns_and_filters(request, None)
 

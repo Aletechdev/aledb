@@ -68,9 +68,9 @@ def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experim
         if (not table_type in [ TableType.GENE_TABLE \
                             , TableType.SEARCH \
                             , TableType.SHARED \
-                            , TableType.COMPARE \
-                            , TableType.COMPARE_ENRICHEMENT_MUTATIONS \
-                            , TableType.COMPARE_FIXATION_MUTATIONS \
+                            , TableType.COMBINE \
+                            , TableType.COMBINE_ENRICHEMENT_MUTATIONS \
+                            , TableType.COMBINE_FIXATION_MUTATIONS \
         ]):
             menuitems += _menu_item_save_to_experiment_filter % (ale_experiment_id, mutation_id)
 
@@ -101,9 +101,9 @@ class TableType(Enum):
     FIXATING_MUTATIONS = 3
     SEARCH = 4
     SHARED = 5
-    COMPARE = 6
-    COMPARE_ENRICHEMENT_MUTATIONS = 7
-    COMPARE_FIXATION_MUTATIONS = 8
+    COMBINE = 6
+    COMBINE_ENRICHEMENT_MUTATIONS = 7
+    COMBINE_FIXATION_MUTATIONS = 8
 
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -183,9 +183,9 @@ def get_table_body(request,
             table_row = [HTML_MUTATION_TABLE_ROW]
             table_row.append(_build_table_cell_for_dropdown(request, table_type, mutation.id, ale_experiment_id,))
 
-            if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.COMPARE_ENRICHEMENT_MUTATIONS:
+            if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.COMBINE_ENRICHEMENT_MUTATIONS:
                 table_row.append("<a href=/enrichment/shared?mutation_id=%s>shared</a>" % mutation.id)
-            elif table_type == TableType.FIXATING_MUTATIONS or table_type == TableType.COMPARE_FIXATION_MUTATIONS:
+            elif table_type == TableType.FIXATING_MUTATIONS or table_type == TableType.COMBINE_FIXATION_MUTATIONS:
                 table_row.append("<a href=/fixation/shared?mutation_id=%s>shared</a>" % mutation.id)
 
             table_row.append(_get_mutation_tags(mutation.tags))
