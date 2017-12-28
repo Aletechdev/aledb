@@ -1,6 +1,6 @@
 {% extends 'dashboard_base.html' %}
 
-{% block title %}<title>Compare</title>{% endblock %}
+{% block title %}<title>Combine</title>{% endblock %}
 {% block scripts_and_style %}
     <script type="text/javascript">{% include 'experiment_selector.js' %}</script>
     <style>
@@ -33,7 +33,7 @@
     {% if has_comparison %}
         <div class="container">
             <div class="row">
-                <a href="/compare/metadata?ale_experiment_id={{ ale_experiment_id }}">
+                <a href="/combine/metadata?ale_experiment_id={{ ale_experiment_id }}">
                     <div class="col-xs-6">
                         <div class="panel panel-primary">
                             <div class="panel-heading app">
@@ -47,7 +47,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="/compare/mutations?ale_experiment_id={{ ale_experiment_id }}">
+                <a href="/combine/mutations?ale_experiment_id={{ ale_experiment_id }}">
                     <div class="col-xs-6">
                         <div class="panel panel-green">
                             <div class="panel-heading app">
@@ -79,7 +79,7 @@
         </style>
         <div class="container">
             <div class="row">
-                <a href="/compare/enrichment?ale_experiment_id={{ ale_experiment_id }}">
+                <a href="/combine/enrichment?ale_experiment_id={{ ale_experiment_id }}">
                     <div class="col-md-6">
                         <div id="analysis_button" class="panel">
                             <div align="center" class="huge">Enrichment Mutations</div>
@@ -87,7 +87,7 @@
                         </div>
                     </div>
                 </a>
-                <a href="/compare/fixation?ale_experiment_id={{ ale_experiment_id }}">
+                <a href="/combine/fixation?ale_experiment_id={{ ale_experiment_id }}">
                     <div class="col-md-6">
                         <div id="analysis_button" class="panel">
                             <div align="center" class="huge">Fixed Mutations</div>
@@ -361,7 +361,7 @@
         <br><br>
         <div class="row">
             <div class="col-lg-6">
-                <form action="/compare" method="get">
+                <form action="/combine" method="get">
                     <div class="input-group">
                         <input type="submit" class="btn btn-default" id="download">
                         <input type="hidden" id="download_experiments" name="download_experiments" value="">
