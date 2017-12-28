@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from ale.models import AleExperiment
 from seq.views import mutation_table_builder, common
 from common.util import get_all_ale_exps, get_recent_ale_exps, check_hidden_columns_and_filters
-from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset, get_ales_from_ale_experiment_list
+from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset, get_ales_from_ale_experiment_list
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE, TAGS
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -13,7 +13,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 MUTATION_TABLE_TEMPLATE = 'base_table_template.html'
 
 
-def compared_mutations(request):
+def combined_mutations(request):
 
     hidden_columns = check_hidden_columns_and_filters(request, None)
 
@@ -27,7 +27,7 @@ def compared_mutations(request):
 
     table_body = mutation_table_builder.get_table_body(request, ordered_reseq_dict,
                                                        queryset,
-                                                       table_type=mutation_table_builder.TableType.COMPARE)
+                                                       table_type=mutation_table_builder.TableType.COMBINE)
 
     table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
 

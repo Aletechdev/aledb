@@ -4,7 +4,7 @@ from seq.views.mutation_table_builder import \
     get_mutation_table_queryset_and_entry_list, \
     HTML_MUTATION_TABLE_HEADER
 from django.utils.html import strip_tags
-from compare.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
+from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
 from enrichment.util import get_enrich_obs_mut_qryset
 
 
