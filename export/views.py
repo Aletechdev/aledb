@@ -1,7 +1,6 @@
 import json
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import Http404
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
@@ -51,8 +50,9 @@ def export_datapackage(request):
         return JsonResponse(form.errors, status=400)
 
     ale_experiments = form.cleaned_data['experiments']
+    mutation_type = form.cleaned_data['mutation_type']
 
-    package_writer = ObservedMutationsDataPackageWriter(ale_experiments=ale_experiments)
+    package_writer = ObservedMutationsDataPackageWriter(ale_experiments=ale_experiments, mutation_type=mutation_type)
     output_buf = package_writer.write()
     output_buf.seek(0)
 

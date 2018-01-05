@@ -5,6 +5,7 @@ from ale.models import AleExperiment
 
 class ExportForm(forms.Form):
     experiments = forms.CharField(required=True, strip=True)
+    mutation_type = forms.CharField(strip=True)
 
     def clean_experiments(self):
         queryset = AleExperiment.objects.all()
