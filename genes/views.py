@@ -1,34 +1,18 @@
-# TODO: Move to genes.views
-
 from django.http import HttpResponse
-
 from django.utils.safestring import mark_safe
-
 from django.template import loader
-
 import seq.models
-
 import seq.views.common
-
 from seq.views import mutation_table_builder
-
 import urllib.request
-
 from xml.dom import minidom
-
 import gzip
-
 import csv
-
 import json
-
 import requests
-
-from django.conf import settings
-
 from common.util import get_all_ale_exps, get_recent_ale_exps, check_hidden_columns_and_filters
-
 from django.core.serializers.json import DjangoJSONEncoder
+from django.conf import settings
 
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
