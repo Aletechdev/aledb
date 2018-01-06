@@ -43,24 +43,16 @@ else:
 
 def gene(request):
     gene_query = request.GET['g']
-
     reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request, gene_query)
-
     table_header = mutation_table_builder.get_table_header(reseq_dict)
-
     table_body, protein_changes = mutation_table_builder.get_table_body(request, reseq_dict,
                                                                         observed_mutations_with_gene_queryset,
                                                                         table_type=mutation_table_builder.TableType.GENE_TABLE)
 
     pdb_url, residue_mappings, has_pdb_file = _get_pdb_info(gene_query)
-
     homology_data, has_homology_data = _get_homology_data(gene_query)
-
     hidden_columns = check_hidden_columns_and_filters(request, None)
-
     template = loader.get_template("gene.html")
-
-    print(protein_changes)
 
     context = {"gene_name": gene_query,
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
@@ -113,13 +105,9 @@ def _get_seq_exp(request, mutated_gene):
 
 
 def _get_pdb_info(gene_query):
-
     pdb_code, has_pdb_file = _get_pdb_url(gene_query)
-
     pdb_url = 'https://files.rcsb.org/download/' + pdb_code + '.pdb'
-
     residue_mappings = _get_xml_for_pdb(pdb_code)
-
     return pdb_url, residue_mappings, has_pdb_file
 
 
@@ -165,19 +153,11 @@ def _get_pdb_url(gene_query):
 
 
 def _get_homology_data(gene_query):
-
     mapping_url = aledata_url + 'homology_models/160804-genes_to_homology_models.csv'
-
-
     response = requests.get(mapping_url, auth=(username, password))
-
     reader = csv.reader(response.text.splitlines())
-
     for row in reader:
-
         if row[1] == gene_query:
             homology_url = aledata_url + 'homology_models/' + row[3]
-
             return requests.get(homology_url, auth=(username, password)).text, True
-
     return '', False
