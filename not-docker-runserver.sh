@@ -2,12 +2,13 @@
 
 export DEBUG=1
 export SEQUENCING_URL=http://sbrg.ucsd.edu
-export MYSQL_DATABASE=database
-export MYSQL_USER=user
-export MYSQL_PASSWORD=password
-export MYSQL_HOST=db
+export MYSQL_DATABASE=ale_db
+export MYSQL_USER=ale
+export MYSQL_PASSWORD=Adaptation!
+export MYSQL_HOST=localhost
 export MYSQL_PORT=3306
 export DJANGO_SETTINGS_MODULE=aleinfo.settings_private
+export GOOGLE_ANALYTICS_TAG=UA-111512162-1
 
 if [ "$DEBUG" = 0 ]
 then
