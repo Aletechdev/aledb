@@ -5,7 +5,7 @@ DEBUG = os.environ.get('DEBUG', '0') == '1'
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'https://aquaticus.ucsd.edu/aledata/')
+SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'http://sbrg.ucsd.edu')
 
 ADMINS = ()
 
@@ -28,7 +28,7 @@ OTHER_PASSWORD = os.environ.get('OTHER_DATABASE_', 'other_database_password')
 
 ALE_DATA_ROOT_DIR = os.environ.get('ALE_DATA_ROOT_DIR', 'ale_data_root_dir')
 
-ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost')]
+ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), '127.0.0.1']
 
 USE_X_FORWARDED_PORT = os.environ.get('USE_X_FORWARDED_PORT', '0') == '1'
 
