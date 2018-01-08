@@ -1,0 +1,50 @@
+{
+  "name": "ale_analytics_observed_mutations",
+  "path": "ale_analytics_observed_mutations.csv",
+  "format": "CSV",
+  "schema": {
+    "profile": "data-resource",
+    "fields": [
+      {
+        "name": "position",
+        "type": "integer"
+      },
+      {
+        "name": "mutation_type",
+        "type": "string"
+      },
+      {
+        "name": "sequence_change",
+        "type": "string"
+      },
+      {
+        "name": "gene",
+        "type": "string"
+      },
+      {
+        "name": "function",
+        "type": "string"
+      },
+      {
+        "name": "product",
+        "type": "string"
+      },
+      {
+        "name": "go_process",
+        "type": "string"
+      },
+      {
+        "name": "go_component",
+        "type": "string"
+      },
+      {
+        "name": "protein_change",
+        "type": "string"
+      },
+      {
+        "name": "exp_ale_flask_isolate_str",
+        "type": "string"
+      }
+    ]
+  }
+}
