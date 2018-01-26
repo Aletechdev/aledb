@@ -9,8 +9,8 @@ from ale.models import Media
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 DEFAULT_INSTRUMENT_NAME = ""
-DEFAULT_MEDIA_DESCRIPTION = "M9"
-DEFAULT_MEDIA_SUBSTRATE = "glucose"
+DEFAULT_MEDIA_DESCRIPTION = ""
+DEFAULT_MEDIA_SUBSTRATE = ""
 DEFAULT_TEMPERATURE = 37
 DEFAULT_VOLUME = 15
 DEFAULT_STIRRING_SPEED = 1100
@@ -39,23 +39,22 @@ MEDIA_SULFUR_SOURCE = "Sulfur-source"
 MEDIA_ELECTRON_ACCEPTOR = "electron-acceptor"
 MEDIA_SUPPLEMENT = "supplement"
 MEDIA_ANTIBIOTIC = "antibiotic"
-MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
-                         MEDIA_NITROGEN_SOURCE,
-                         MEDIA_PHOSPHOROUS_SOURCE,
-                         MEDIA_PHOSPHOROUS_SOURCE,
-                         MEDIA_SULFUR_SOURCE,
-                         MEDIA_ELECTRON_ACCEPTOR,
-                         MEDIA_SUPPLEMENT,
-                         MEDIA_ANTIBIOTIC]
+# MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
+#                          MEDIA_NITROGEN_SOURCE,
+#                          MEDIA_PHOSPHOROUS_SOURCE,
+#                          MEDIA_SULFUR_SOURCE,
+#                          MEDIA_ELECTRON_ACCEPTOR,
+#                          MEDIA_SUPPLEMENT,
+#                          MEDIA_ANTIBIOTIC]
 
 
-def _get_media_substrate_description(metadata_dict):
-    media_substrate_description = ''
-    for media_descriptor in MEDIA_DESCRIPTOR_LIST:
-        if media_descriptor in metadata_dict.keys() and metadata_dict[media_descriptor] != '':
-            media_substrate_description += metadata_dict[media_descriptor]
-
-    return media_substrate_description
+# def _get_media_substrate_description(metadata_dict):
+#     media_substrate_description = ''
+#     for media_descriptor in MEDIA_DESCRIPTOR_LIST:
+#         if media_descriptor in metadata_dict.keys() and metadata_dict[media_descriptor] != '':
+#             media_substrate_description += metadata_dict[media_descriptor]
+#
+#     return media_substrate_description
 
 
 def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary_key):
@@ -106,7 +105,28 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
             if EXPERIMENT_DETAILS in metadata_dict.keys():
                 experiment_details = metadata_dict[EXPERIMENT_DETAILS]
 
-            media_substrate_description = _get_media_substrate_description(metadata_dict)
+            # carbon_source_description = _get_media_substrate_description(metadata_dict)
+            carbon_source_description = ""
+            if MEDIA_CARBON_SOURCE in metadata_dict.keys():
+                carbon_source_description = metadata_dict[MEDIA_CARBON_SOURCE]
+            nitrogen_source_description = ""
+            if MEDIA_NITROGEN_SOURCE in metadata_dict.keys():
+                nitrogen_source_description = metadata_dict[MEDIA_NITROGEN_SOURCE]
+            phosphorous_source_description = ""
+            if MEDIA_PHOSPHOROUS_SOURCE in metadata_dict.keys():
+                phosphorous_source_description = metadata_dict[MEDIA_PHOSPHOROUS_SOURCE]
+            sulfur_source_description = ""
+            if MEDIA_SULFUR_SOURCE in metadata_dict.keys():
+                sulfur_source_description = metadata_dict[MEDIA_SULFUR_SOURCE]
+            electron_acceptor_description = ""
+            if MEDIA_ELECTRON_ACCEPTOR in metadata_dict.keys():
+                electron_acceptor_description = metadata_dict[MEDIA_ELECTRON_ACCEPTOR]
+            media_supplement_description = ""
+            if MEDIA_SUPPLEMENT in metadata_dict.keys():
+                media_supplement_description = metadata_dict[MEDIA_SUPPLEMENT]
+                antibiotic_description = ""
+            if MEDIA_ANTIBIOTIC in metadata_dict.keys():
+                antibiotic_description = metadata_dict[MEDIA_ANTIBIOTIC]
 
             ale_id = tech_rep.isolate.flask.ale_id
             ale_id.description = ale_id_description
@@ -115,7 +135,7 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
             ale_id.save()
 
             media, created = Media.objects.get_or_create(description=media_description,
-                                                         substrate=media_substrate_description,
+                                                         substrate=carbon_source_description,
                                                          temperature=media_temperature,
                                                          volume=DEFAULT_VOLUME,
                                                          stirring_speed=DEFAULT_STIRRING_SPEED)
