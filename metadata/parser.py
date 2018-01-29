@@ -42,10 +42,9 @@ MEDIA_ANTIBIOTIC = "antibiotic"
 MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
                          MEDIA_NITROGEN_SOURCE,
                          MEDIA_PHOSPHOROUS_SOURCE,
-                         MEDIA_PHOSPHOROUS_SOURCE,
                          MEDIA_SULFUR_SOURCE,
                          MEDIA_ELECTRON_ACCEPTOR,
-                         MEDIA_SUPPLEMENT,
+                         # MEDIA_SUPPLEMENT,
                          MEDIA_ANTIBIOTIC]
 
 
@@ -53,18 +52,17 @@ def _get_media_substrate_description(metadata_dict):
     media_substrate_description = ''
     for media_descriptor in MEDIA_DESCRIPTOR_LIST:
         if media_descriptor in metadata_dict.keys() and metadata_dict[media_descriptor] != '':
-            media_substrate_description += metadata_dict[media_descriptor]
-
+            if media_substrate_description != "": media_substrate_description += ', '
+            if metadata_dict[media_descriptor] != "none": media_substrate_description += metadata_dict[media_descriptor]
+    media_substrate_description = media_substrate_description[:-2]  # removing the final ', '
     return media_substrate_description
 
 
-def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary_key):
-
-    for f in os.listdir(meta_data_path):
-
+def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_key):
+    for f in os.listdir(metadata_path):
         if f.endswith(".csv") or f.endswith(".CSV"):
 
-            with open(os.path.join(meta_data_path, f), 'rt') as csvfile:
+            with open(os.path.join(metadata_path, f), 'rt') as csvfile:
                 metadata_dict = dict(csv.reader(csvfile, delimiter=','))
 
             try:
