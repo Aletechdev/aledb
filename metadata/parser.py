@@ -9,8 +9,8 @@ from ale.models import Media
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 DEFAULT_INSTRUMENT_NAME = ""
-DEFAULT_MEDIA_DESCRIPTION = ""
-DEFAULT_MEDIA_SUBSTRATE = ""
+DEFAULT_MEDIA_DESCRIPTION = "M9"
+DEFAULT_MEDIA_SUBSTRATE = "glucose"
 DEFAULT_TEMPERATURE = 37
 DEFAULT_VOLUME = 15
 DEFAULT_STIRRING_SPEED = 1100
@@ -39,31 +39,30 @@ MEDIA_SULFUR_SOURCE = "Sulfur-source"
 MEDIA_ELECTRON_ACCEPTOR = "electron-acceptor"
 MEDIA_SUPPLEMENT = "supplement"
 MEDIA_ANTIBIOTIC = "antibiotic"
-# MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
-#                          MEDIA_NITROGEN_SOURCE,
-#                          MEDIA_PHOSPHOROUS_SOURCE,
-#                          MEDIA_SULFUR_SOURCE,
-#                          MEDIA_ELECTRON_ACCEPTOR,
-#                          MEDIA_SUPPLEMENT,
-#                          MEDIA_ANTIBIOTIC]
+MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
+                         MEDIA_NITROGEN_SOURCE,
+                         MEDIA_PHOSPHOROUS_SOURCE,
+                         MEDIA_SULFUR_SOURCE,
+                         MEDIA_ELECTRON_ACCEPTOR,
+                         # MEDIA_SUPPLEMENT,
+                         MEDIA_ANTIBIOTIC]
 
 
-# def _get_media_substrate_description(metadata_dict):
-#     media_substrate_description = ''
-#     for media_descriptor in MEDIA_DESCRIPTOR_LIST:
-#         if media_descriptor in metadata_dict.keys() and metadata_dict[media_descriptor] != '':
-#             media_substrate_description += metadata_dict[media_descriptor]
-#
-#     return media_substrate_description
+def _get_media_substrate_description(metadata_dict):
+    media_substrate_description = ''
+    for media_descriptor in MEDIA_DESCRIPTOR_LIST:
+        if media_descriptor in metadata_dict.keys() and metadata_dict[media_descriptor] != '':
+            if media_substrate_description != "": media_substrate_description += ', '
+            if metadata_dict[media_descriptor] != "none": media_substrate_description += metadata_dict[media_descriptor]
+    media_substrate_description = media_substrate_description[:-2]  # removing the final ', '
+    return media_substrate_description
 
 
-def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary_key):
-
-    for f in os.listdir(meta_data_path):
-
+def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_key):
+    for f in os.listdir(metadata_path):
         if f.endswith(".csv") or f.endswith(".CSV"):
 
-            with open(os.path.join(meta_data_path, f), 'rt') as csvfile:
+            with open(os.path.join(metadata_path, f), 'rt') as csvfile:
                 metadata_dict = dict(csv.reader(csvfile, delimiter=','))
 
             try:
@@ -105,28 +104,7 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
             if EXPERIMENT_DETAILS in metadata_dict.keys():
                 experiment_details = metadata_dict[EXPERIMENT_DETAILS]
 
-            # carbon_source_description = _get_media_substrate_description(metadata_dict)
-            carbon_source_description = ""
-            if MEDIA_CARBON_SOURCE in metadata_dict.keys():
-                carbon_source_description = metadata_dict[MEDIA_CARBON_SOURCE]
-            nitrogen_source_description = ""
-            if MEDIA_NITROGEN_SOURCE in metadata_dict.keys():
-                nitrogen_source_description = metadata_dict[MEDIA_NITROGEN_SOURCE]
-            phosphorous_source_description = ""
-            if MEDIA_PHOSPHOROUS_SOURCE in metadata_dict.keys():
-                phosphorous_source_description = metadata_dict[MEDIA_PHOSPHOROUS_SOURCE]
-            sulfur_source_description = ""
-            if MEDIA_SULFUR_SOURCE in metadata_dict.keys():
-                sulfur_source_description = metadata_dict[MEDIA_SULFUR_SOURCE]
-            electron_acceptor_description = ""
-            if MEDIA_ELECTRON_ACCEPTOR in metadata_dict.keys():
-                electron_acceptor_description = metadata_dict[MEDIA_ELECTRON_ACCEPTOR]
-            media_supplement_description = ""
-            if MEDIA_SUPPLEMENT in metadata_dict.keys():
-                media_supplement_description = metadata_dict[MEDIA_SUPPLEMENT]
-                antibiotic_description = ""
-            if MEDIA_ANTIBIOTIC in metadata_dict.keys():
-                antibiotic_description = metadata_dict[MEDIA_ANTIBIOTIC]
+            media_substrate_description = _get_media_substrate_description(metadata_dict)
 
             ale_id = tech_rep.isolate.flask.ale_id
             ale_id.description = ale_id_description
@@ -135,7 +113,7 @@ def parse_metadata_post_experiment_upload(meta_data_path, ale_experiment_primary
             ale_id.save()
 
             media, created = Media.objects.get_or_create(description=media_description,
-                                                         substrate=carbon_source_description,
+                                                         substrate=media_substrate_description,
                                                          temperature=media_temperature,
                                                          volume=DEFAULT_VOLUME,
                                                          stirring_speed=DEFAULT_STIRRING_SPEED)
