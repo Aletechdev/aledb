@@ -1,13 +1,14 @@
 #!/bin/sh
 
 export DEBUG=1
-export SEQUENCING_URL=http://sbrg.ucsd.edu
+export SEQUENCING_URL=http://aledb.org/aledata/
 export MYSQL_DATABASE=database
 export MYSQL_USER=user
 export MYSQL_PASSWORD=password
-export MYSQL_HOST=db
+export MYSQL_HOST=db_name
 export MYSQL_PORT=3306
 export DJANGO_SETTINGS_MODULE=aleinfo.settings_private
+export ALE_DATA_ROOT_DIR=/var/www/ale_analytics_data/
 export GOOGLE_ANALYTICS_TAG=UA-111512162-1
 
 if [ "$DEBUG" = 0 ]
