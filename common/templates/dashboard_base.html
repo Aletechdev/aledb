@@ -96,14 +96,16 @@
                     <li><a href="/export">Export</a></li>
                     <li><a href="/combine">Combine</a></li>
                     <li><a href="/aledata">Files</a></li>
-                    <li class="active"><a href="#">Recent<span
-                            class="fa arrow"></span></a>
-                        <ul class="nav nav-second-level collapse">
-                            {% for exp in recent_experiments %}
-                                <li><a href="/stats?ale_experiment_id={{ exp.ale_id }}">{{ exp.name }}</a></li>
-                            {% endfor %}
-                        </ul>
-                    </li>
+                    {%  if ale_experiment_id %}
+                        <li><a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">Metadata</a></li>
+                        <li><a href="/mutations?ale_experiment_id={{ ale_experiment_id }}">Mutations</a></li>
+                        <li><a href="/enrichment?ale_experiment_id={{ ale_experiment_id }}">Enrichment Mutations</a></li>
+                        <li><a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">Fixed Mutations</a></li>
+                        <li><a href="/duplication?ale_experiment_id={{ ale_experiment_id }}">Duplications</a></li>
+                        {% if perms.filter.add_global_filter %}
+                            <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">Experiment Filter</a></li>
+                        {% endif %}
+                    {% endif %}
                     <li>
                         <select onchange="window.location.href=this.value" style="width: 100%;" id="quick_select">
                             <option></option>
