@@ -82,25 +82,21 @@
             <div class="sidebar-nav navbar-collapse pull-left" style="width: 240px">
                 <ul class="nav in" id="side-menu">
                     {% if user.is_authenticated %}
-                        <li><a href="{% url 'accounts:logout' %}"><i class="fa fa-sign-out fa-fw"></i> Logout {{ user.username }}</a>
+                        <li><a href="{% url 'accounts:logout' %}">Logout {{ user.username }}</a></li>
                     {% else %}
-                        <li><a href="{% url 'accounts:login' %}"><i class="fa fa-sign-in fa-fw"></i> Login</a>
+                        <li><a href="{% url 'accounts:login' %}">Login</a></li>
                     {% endif %}
-                    <li {% block dash %}{% endblock %}><a href="/"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
-                    </li>
-                    <li><a href="/about"><i class="fa fa-info-circle fa-fw" aria-hidden="true"></i> About</a></li>
-                    <li {% block search %}{% endblock %}><a href="/search"><i class="fa fa-search fa-fw"
-                                                                              aria-hidden="true"></i> Search</a></li>
-                    <li><a href="/bibliome"><i class="fa fa-book fa-fw" aria-hidden="true"></i> Bibliome</a></li>
+                    <li {% block dash %}{% endblock %}><a href="/">Dashboard</a></li>
+                    <li><a href="/about">About</a></li>
+                    <li {% block search %}{% endblock %}><a href="/search">Search</a></li>
+                    <li><a href="/bibliome">Bibliome</a></li>
                     {% if perms.filter.add_global_filter %}
-                    <li {% block filter %}{% endblock %}><a href="/filter/global_filter"><i class="fa fa-filter fa-fw"
-                                                                                            aria-hidden="true"></i>
-                        Global Filter</a></li>
+                    <li {% block filter %}{% endblock %}><a href="/filter/global_filter">Global Filter</a></li>
                     {% endif %}
-                    <li><a href="/export"><i class="fa fa-share-square-o fa-fw" aria-hidden="true"></i> Export</a></li>
-                    <li><a href="/combine"><i class="fa fa-table fa-fw" aria-hidden="true"></i> Combine</a></li>
-                    <li><a href="/aledata"><i class="fa fa-file fa-fw" aria-hidden="true"></i> Files</a></li>
-                    <li class="active"><a href="#"><i class="fa fa-clock-o fa-fw" aria-hidden="true"></i> Recent<span
+                    <li><a href="/export">Export</a></li>
+                    <li><a href="/combine">Combine</a></li>
+                    <li><a href="/aledata">Files</a></li>
+                    <li class="active"><a href="#">Recent<span
                             class="fa arrow"></span></a>
                         <ul class="nav nav-second-level collapse">
                             {% for exp in recent_experiments %}
@@ -119,7 +115,7 @@
                         <script type="text/javascript">
                             $(document).ready(function () {
                                 $("#quick_select").select2({
-                                    placeholder: '<span style="color:#337ab7"><i class="fa fa-flask fa-fw" aria-hidden="true"></i> Select an Experiment</span>',
+                                    placeholder: '<span style="color:#337ab7">Select an Experiment</span>',
                                     escapeMarkup: function (m) {
                                         return m;
                                     }
