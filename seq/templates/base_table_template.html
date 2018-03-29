@@ -49,12 +49,12 @@
 {% endblock %}
 {% block header %}<b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
 {% block content %}
-    {% if experiment_id %}
+    {% if ale_experiment_id %}
         <div class="row"> <!-- Columns -->
             <form action="" method="get">
                 <br>
                 <b>Columns: </b>
-                <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+                <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id  }}"/>
                 <input type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
                 <select name="ale_no" class="selectpicker">
                     <option value="all">All ales</option>
@@ -108,7 +108,7 @@
         </div>
         <!-- Mutation table -->
         <form action="" method="get">
-            <input type="hidden" name="ale_experiment_id" value="{{ experiment_id }}"/>
+            <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id  }}"/>
             {% if ale_no %}
                 <input type="hidden" name="ale_no" value="{{ ale_no }}"/>
             {% else %}

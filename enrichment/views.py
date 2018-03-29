@@ -31,33 +31,32 @@ __author__ = 'Patrick Phaneuf'
 
 
 def enrichment_mutations(request):
-
-    exp_id = seq.views.common.get_ale_experiment_id(request)
+    ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
     exp_name = seq.views.common.get_ale_experiment_name(request)
     ale_number = seq.views.common.get_ale_id(request)
-    ale_qrtset = seq.views.common.get_ales(exp_id, True)
+    ale_qrtset = seq.views.common.get_ales(ale_experiment_id, True)
 
-    reseq_ordered_dict = get_reseq_ordered_dict(exp_id, ale_number, request)
+    reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
 
     table_header = mutation_table_builder.get_table_header(reseq_dict=reseq_ordered_dict,
                                                            table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
 
     table_body = _get_table_body(reseq_ordered_dict, request)
 
-    hidden_columns = check_hidden_columns_and_filters(request, exp_id)
+    hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
     template = loader.get_template('base_table_template.html')
     context = {"ales": ale_qrtset,
                "ale_experiment_name": exp_name,
                "ale_no": ale_number,
-               "experiment_id": exp_id,
+               "ale_experiment_id": ale_experiment_id,
                "table_body": mark_safe(table_body),
                "title": exp_name + " Enrichment Mutations",
                "table_header": mark_safe(table_header),
                "template_header": "Enrichment Mutations",
                "hidden_columns": hidden_columns,
                "experiments": get_all_ale_exps(),
-               "recent_experiments": get_recent_ale_exps(int(exp_id)),
+               "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                "tag_dropdown": common.constants.TAGS
                }

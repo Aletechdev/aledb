@@ -35,7 +35,7 @@ def mutation_table(request):
     context = {"ales": ale_queryset,
                "ale_experiment_name": exp_name,
                "ale_no": ale_no,
-               "experiment_id": ale_experiment_id,
+               "ale_experiment_id": ale_experiment_id,
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "title": exp_name + " Mutation Table",
                "table_header": table_header,
