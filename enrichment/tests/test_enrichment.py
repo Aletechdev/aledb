@@ -25,7 +25,8 @@ class TestEnrichment(TestCase):
         self.media = Media.objects.create()
         self.freezer_box = FreezerBox.objects.create()
         self.flask = Flask.objects.create(flask_number=1,
-                                      ale_id=self.ale, media=self.media)
+                                          ale_id=self.ale,
+                                          media=self.media)
         self.isolate = Isolate.objects.create(flask=self.flask,
                                          isolate_number=1, is_population=False, freezer_box=self.freezer_box)
         self.tech_rep = TechnicalReplicate.objects.create(isolate=self.isolate)
