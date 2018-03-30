@@ -6,6 +6,8 @@ from fixation.models import FixatedMutation
 import fixation.util
 import enrichment.util
 from enrichment.models import EnrichmentMutation
+import converge.util
+from converge.models import ConvergeMutation
 import seq.models
 import seq.views.common
 from builder.gdparse.gdparse import gdparse
@@ -114,14 +116,13 @@ def insert_starting_strain_flask(starting_strain_breseq_output_abs_path, ale_exp
                                   freezer_box_orm)
 
     rebuild_enrichment_mutations(experiment_orm.ale_id)
+    rebuild_converge_mutations(experiment_orm.ale_id)
     rebuild_fixated_mutations(experiment_orm.ale_id)
     rebuild_dashboard_data()
 
 
 def rebuild_all_enrichment_mutations():
-
     ale_experiment_queryset = ale.models.AleExperiment.objects.all()
-
     for ale_experiment in ale_experiment_queryset:
         rebuild_enrichment_mutations(ale_experiment.ale_id)
 
@@ -224,6 +225,7 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
                                      is_wild_type=False)
 
     rebuild_enrichment_mutations(experiment.ale_id)
+    rebuild_converge_mutations(experiment.ale_id)
     rebuild_fixated_mutations(experiment.ale_id)
     rebuild_dashboard_data()
 
@@ -258,14 +260,26 @@ def _delete_enrichment_mutations(ale_experiment_id):
 
 
 def _create_enrichment_mutations(ale_experiment_id):
-    """
-    Find all enriched/(hot gene) mutations for ALE experiment and populate database table with them.
-    Using only Django ORM to make commit to database.
-    """
     ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
-    enrichment_mutations_list = enrichment.util.get_enrichment_mutation_list(ale_experiment_id)
-    for mutation in enrichment_mutations_list:
-        EnrichmentMutation.objects.create(ale_experiment=ale_experiment, mutation=mutation)
+    enrich_mut_list = enrichment.util.get_enrichment_mutation_list(ale_experiment_id)
+    for mut in enrich_mut_list:
+        EnrichmentMutation.objects.create(ale_experiment=ale_experiment, mutation=mut)
+
+
+def rebuild_converge_mutations(ale_experiment_id):
+    _delete_converge_mutations(ale_experiment_id)
+    _create_converge_mutations(ale_experiment_id)
+
+
+def _delete_converge_mutations(ale_experiment_id):
+    ConvergeMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
+
+
+def _create_converge_mutations(ale_experiment_id):
+    ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
+    converge_mut_list = converge.util.get_converge_mutation_list(ale_experiment_id)
+    for mut in converge_mut_list :
+        ConvergeMutation.objects.create(ale_experiment=ale_experiment, mutation=mut)
 
 
 def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,

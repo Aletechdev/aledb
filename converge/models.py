@@ -1,7 +1,5 @@
 from django.db import models
-
 from ale.models import AleExperiment
-
 from seq.models import Mutation
 
 

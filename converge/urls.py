@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
-import enrichment.views
+import converge.views
 
 urlpatterns = [
-    url('^$', enrichment.views.enrichment_mutations, name="converge"),
+    url('^$', converge.views.converge_mutations, name="converge"),
 ]

@@ -10,7 +10,6 @@ import metadata.views
 from enrichment.models import EnrichmentMutation
 from common.constants import \
     REQUEST_MUTATION_ID, \
-    REQUEST_ALE_EXPERIMENT_ID, \
     POSITION_COLUMN_IN_SHARED_MUTATION_TABLE, \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
 from common.util import check_hidden_columns_and_filters
