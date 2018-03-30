@@ -4,10 +4,22 @@ from django.utils.safestring import mark_safe
 from common.util import get_reseq_ordered_dict, get_all_ale_exps, get_recent_ale_exps
 import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
+from seq.models import ObservedMutation
+from seq.models import ResequencingExperiment
+import metadata.views
+from converge.models import ConvergeMutation
 from common.constants import \
     REQUEST_MUTATION_ID, \
+    POSITION_COLUMN_IN_SHARED_MUTATION_TABLE, \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
 from common.util import check_hidden_columns_and_filters
+from collections import OrderedDict
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+from genes.util import get_gene_list
+import operator
+from functools import reduce
+from django.db.models import Q
 import common.constants
 from converge.util import get_converge_obs_mut_qryset
 
@@ -47,6 +59,54 @@ def converge_mutations(request):
                "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                "tag_dropdown": common.constants.TAGS
                }
+
+    return HttpResponse(template.render(context, request), content_type="text/html")
+
+
+def shared_converge_genes(request):
+    mutation_id = request.GET.get(REQUEST_MUTATION_ID)
+    selected_converge_mut_qryset = ConvergeMutation.objects.filter(mutation_id=mutation_id)
+    converge_mutation = selected_converge_mut_qryset[0]  # Should only be one mutation per mutation_id
+    converge_gene_str = converge_mutation.mutation.gene
+    converge_gene_list = get_gene_list(converge_gene_str)
+
+    shared_converge_gene_query = reduce(operator.or_, (Q(mutation__gene__contains=gene) for gene in converge_gene_list))
+    converge_mutation_queryset = ConvergeMutation.objects.filter(shared_converge_gene_query)
+
+    converge_mut__list = []
+    for en_mut in converge_mutation_queryset:
+        converge_mut__list.append(en_mut.ale_experiment)
+
+    observed_mutation_queryset = ObservedMutation.objects.filter(mutation__in=converge_mutation_queryset.values('mutation'))
+    observed_mutation_queryset = observed_mutation_queryset.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__in=converge_mut__list)
+
+    ordered_reseq_queryset = ResequencingExperiment.objects.all().order_by(
+        'tech_rep__isolate__flask__ale_id__ale_experiment__name',
+        'tech_rep__isolate__flask__ale_id__ale_id',
+        'tech_rep__isolate__flask__flask_number',
+        'tech_rep__isolate__isolate_number')
+
+    ordered_reseq_queryset = ordered_reseq_queryset.filter(id__in=observed_mutation_queryset.values('sequencing_experiment'))
+
+    ordered_reseq_dict = OrderedDict((reseq.id, reseq) for reseq in ordered_reseq_queryset)
+    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
+
+    table_body = mutation_table_builder.get_table_body(request, ordered_reseq_dict,
+                                                       observed_mutation_queryset,
+                                                       table_type=mutation_table_builder.TableType.SHARED)
+
+    reseq_info_list = metadata.views.get_reseq_info_list(ordered_reseq_queryset)
+
+    check_hidden_columns_and_filters(request, None)
+
+    template = loader.get_template("shared_mutations.html")
+    context = {"title": "Shared Converging Genes",
+               "table_header": mark_safe(table_header),
+               "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
+               "reseq_info_list": reseq_info_list,
+               "experiments": get_all_ale_exps(),
+               "recent_experiments": get_recent_ale_exps(),
+               "sorted_column": POSITION_COLUMN_IN_SHARED_MUTATION_TABLE}
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 
