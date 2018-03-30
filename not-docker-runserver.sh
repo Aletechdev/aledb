@@ -9,7 +9,7 @@ export MYSQL_HOST=localhost
 export MYSQL_PORT=3306
 export DJANGO_SETTINGS_MODULE=aleinfo.settings_private
 export GOOGLE_ANALYTICS_TAG=XXXX
-export PUBLIC=1
+export PUBLIC=0
 
 if [ "$DEBUG" = 0 ]
 then

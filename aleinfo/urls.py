@@ -3,7 +3,7 @@ from django.conf.urls import include, url
 from django.conf import settings
 
 
-# TODO: remove all final '/' for apps that don't need it (enrichment, etc.)
+# TODO: remove all final '/' for apps that don't need it (enrichment, converge, fixed need because of shared app.)
 urlpatterns = [
     url(r'^', include('dashboard.urls')),
     url(r'^accounts/', include('accounts.urls', namespace="accounts")),
