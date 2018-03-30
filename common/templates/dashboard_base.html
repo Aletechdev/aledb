@@ -96,15 +96,15 @@
                     <li><a href="/export">Export</a></li>
 {#                    <li><a href="/combine">Combine</a></li>#}
                     <li><a href="/aledata">Files</a></li>
-                    {%  if ale_experiment_id %}
+                    {% if ale_experiment_id %}
+                        <li><a href="/stats?ale_experiment_id={{ ale_experiment_id }}">{{ ale_experiment_name }}</a></li>
                         <li><a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">Metadata</a></li>
                         <li><a href="/mutations?ale_experiment_id={{ ale_experiment_id }}">Mutations</a></li>
-                        <li><a href="/enrichment?ale_experiment_id={{ ale_experiment_id }}">Enrichment Mutations</a></li>
                         <li><a href="/converge?ale_experiment_id={{ ale_experiment_id }}">Converging Mutations</a></li>
                         <li><a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">Fixed Mutations</a></li>
                         <li><a href="/duplication?ale_experiment_id={{ ale_experiment_id }}">Duplications</a></li>
                         {% if perms.filter.add_global_filter %}
-                            <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">Experiment Filter</a></li>
+                            <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">Filter</a></li>
                         {% endif %}
                     {% endif %}
                     <li>
