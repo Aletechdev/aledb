@@ -4,8 +4,6 @@ import builder.upload
 import builder.util
 from fixation.models import FixatedMutation
 import fixation.util
-import enrichment.util
-from enrichment.models import EnrichmentMutation
 import converge.util
 from converge.models import ConvergeMutation
 import seq.models
@@ -115,16 +113,9 @@ def insert_starting_strain_flask(starting_strain_breseq_output_abs_path, ale_exp
                                   media_orm,
                                   freezer_box_orm)
 
-    rebuild_enrichment_mutations(experiment_orm.ale_id)
     rebuild_converge_mutations(experiment_orm.ale_id)
     rebuild_fixated_mutations(experiment_orm.ale_id)
     rebuild_dashboard_data()
-
-
-def rebuild_all_enrichment_mutations():
-    ale_experiment_queryset = ale.models.AleExperiment.objects.all()
-    for ale_experiment in ale_experiment_queryset:
-        rebuild_enrichment_mutations(ale_experiment.ale_id)
 
 
 def rebuild_all_fixated_mutations():
@@ -224,7 +215,6 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
                                      freezer_box,
                                      is_wild_type=False)
 
-    rebuild_enrichment_mutations(experiment.ale_id)
     rebuild_converge_mutations(experiment.ale_id)
     rebuild_fixated_mutations(experiment.ale_id)
     rebuild_dashboard_data()
@@ -248,22 +238,6 @@ def _create_fixated_mutations(ale_experiment_id):
     fixed_mut_dict = fixation.util.get_fixed_mut_dict(ale_experiment_id)
     for fixed_mut, fixed_obs_mut_series_list in fixed_mut_dict.items():
         FixatedMutation.objects.create(ale_experiment=ale_experiment, mutation=fixed_mut, fixed_observed_mutation_series=str(fixed_obs_mut_series_list))
-
-
-def rebuild_enrichment_mutations(ale_experiment_id):
-    _delete_enrichment_mutations(ale_experiment_id)
-    _create_enrichment_mutations(ale_experiment_id)
-
-
-def _delete_enrichment_mutations(ale_experiment_id):
-    EnrichmentMutation.objects.filter(ale_experiment=ale_experiment_id).delete()
-
-
-def _create_enrichment_mutations(ale_experiment_id):
-    ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
-    enrich_mut_list = enrichment.util.get_enrichment_mutation_list(ale_experiment_id)
-    for mut in enrich_mut_list:
-        EnrichmentMutation.objects.create(ale_experiment=ale_experiment, mutation=mut)
 
 
 def rebuild_converge_mutations(ale_experiment_id):
