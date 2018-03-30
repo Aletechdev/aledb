@@ -60,7 +60,7 @@ def _get_table_body(request, reseq_dict, ale_experiment_list, queryset):
 
     return mutation_table_builder.get_table_body(request, reseq_dict=reseq_dict,
                                                  observed_mutations_queryset=observed_mutations_queryset,
-                                                 table_type=mutation_table_builder.TableType.COMBINE_ENRICHEMENT_MUTATIONS)
+                                                 table_type=mutation_table_builder.TableType.COMBINE_ENRICHMENT_MUTATIONS)
 
 
 # TODO: refactor

@@ -69,7 +69,7 @@ def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experim
                             , TableType.SEARCH \
                             , TableType.SHARED \
                             , TableType.COMBINE \
-                            , TableType.COMBINE_ENRICHEMENT_MUTATIONS \
+                            , TableType.COMBINE_ENRICHMENT_MUTATIONS \
                             , TableType.COMBINE_FIXATION_MUTATIONS \
         ]):
             menuitems += _menu_item_save_to_experiment_filter % (ale_experiment_id, mutation_id)
@@ -102,39 +102,27 @@ class TableType(Enum):
     SEARCH = 4
     SHARED = 5
     COMBINE = 6
-    COMBINE_ENRICHEMENT_MUTATIONS = 7
+    COMBINE_ENRICHMENT_MUTATIONS = 7
     COMBINE_FIXATION_MUTATIONS = 8
 
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
-    reseqencing_report_url = settings.SEQUENCING_URL
+    resequencing_report_url = settings.SEQUENCING_URL
 else:
-    reseqencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
+    resequencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
 
 
 def get_table_header(reseq_dict, table_type=None):
-
-    if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.FIXATING_MUTATIONS:
-        base_table_header = [""] + HTML_MUTATION_TABLE_HEADER
-    else:
-        base_table_header = HTML_MUTATION_TABLE_HEADER
-
+    base_table_header = HTML_MUTATION_TABLE_HEADER
     experiment_urls = get_experiment_urls(reseq_dict)
-
     table_header_list = []
-
     for seq_experiment_id in reseq_dict:
-
         reseq = reseq_dict[seq_experiment_id]
-
         sample_name = reseq.exp_ale_flask_isolate_str
-
         current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep_id)
-
         table_header_list += [HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id],
                                                                        sample_name,
                                                                        TAGS_IMAGE % (dropdown_html, current_tags))]
-
     return base_table_header + table_header_list
 
 
@@ -182,11 +170,6 @@ def get_table_body(request,
 
             table_row = [HTML_MUTATION_TABLE_ROW]
             table_row.append(_build_table_cell_for_dropdown(request, table_type, mutation.id, ale_experiment_id,))
-
-            if table_type == TableType.ENRICHMENT_MUTATIONS or table_type == TableType.COMBINE_ENRICHEMENT_MUTATIONS:
-                table_row.append("<a href=/enrichment/shared?mutation_id=%s>shared</a>" % mutation.id)
-            elif table_type == TableType.FIXATING_MUTATIONS or table_type == TableType.COMBINE_FIXATION_MUTATIONS:
-                table_row.append("<a href=/fixation/shared?mutation_id=%s>shared</a>" % mutation.id)
 
             table_row.append(_get_mutation_tags(mutation.tags))
             table_row.append(format(mutation.position, ',d'))
@@ -251,7 +234,7 @@ def _initialize_table(experiment_id_idx_mapping, mutations):
 
 def get_experiment_urls(reseq_dict):
 
-    experiment_urls = dict((i.id, reseqencing_report_url + i.location) for i in reseq_dict.values())
+    experiment_urls = dict((i.id, resequencing_report_url + i.location) for i in reseq_dict.values())
 
     return experiment_urls
 
