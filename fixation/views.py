@@ -111,7 +111,7 @@ def shared_fixated_mutations(request):
 
     check_hidden_columns_and_filters(request, None)
 
-    template = loader.get_template("fixation/shared_fixating_mutations.html")
+    template = loader.get_template("shared_mutations.html")
     context = {"title": "Shared Fixated Genes",
                "table_header": mark_safe(table_header),
                "table_body": mark_safe(table_body),

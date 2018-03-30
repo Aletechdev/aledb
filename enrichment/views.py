@@ -99,7 +99,7 @@ def shared_enriched_genes(request):
 
     check_hidden_columns_and_filters(request, None)
 
-    template = loader.get_template("enrichment/shared_enrichment_mutations.html")
+    template = loader.get_template("shared_mutations.html")
     context = {"title": "Shared Enriched Genes",
                "table_header": mark_safe(table_header),
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
