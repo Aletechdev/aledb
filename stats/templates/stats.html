@@ -56,14 +56,14 @@
         <div class="col-sm-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">ALE Flask and Isolate Counts</h3>
+                    <h3 class="panel-title">ALE, flask, and isolate counts</h3>
                 </div>
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>ALE Number</th>
-                        <th>Flask Count</th>
-                        <th>Isolate Count</th>
+                        <th>ALE replicate</th>
+                        <th>Flask count</th>
+                        <th>Isolate count</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -74,6 +74,11 @@
                             <td>{{ ale_flask_isolate_count_tuple.2 }}</td>
                         </tr>
                     {% endfor %}
+                    <tr>
+                        <td><b>{{ ale_sum }}</b></td>
+                        <td><b>{{ flask_sum }}</b></td>
+                        <td><b>{{ isolate_sum }}</b></td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -81,7 +86,7 @@
         <div class="col-sm-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">ALE Experiment Mutation Counts</h3>
+                    <h3 class="panel-title">ALE experiment mutation counts</h3>
                 </div>
                 <table class="table">
                     <thead>
@@ -139,8 +144,8 @@
                     </tr>
                     <tr>
                         <td><b>Total</b></td>
-                        <td>{{ mutation_sum }}</td>
-                        <td>{{ observed_mutation_sum }}</td>
+                        <td><b>{{ mutation_sum }}</b></td>
+                        <td><b>{{ observed_mutation_sum }}</b></td>
                     </tr>
                     </tbody>
                 </table>
@@ -149,7 +154,7 @@
         <div class="col-sm-6 col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <h3 class="panel-title">ALE Experiment Functional Change Counts</h3>
+                    <h3 class="panel-title">ALE experiment functional change counts</h3>
                 </div>
 
                 <table class="table">
@@ -188,8 +193,8 @@
                     </tr>
                     <tr>
                         <td><b>Total</b></td>
-                        <td>{{ protein_change_sum }}</td>
-                        <td>{{ observed_protein_change_sum }}</td>
+                        <td><b>{{ protein_change_sum }}</b></td>
+                        <td><b>{{ observed_protein_change_sum }}</b></td>
                     </tr>
 
                     </tbody>

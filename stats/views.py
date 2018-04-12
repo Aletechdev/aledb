@@ -33,6 +33,12 @@ def stats(request):
     ale_id = common.get_ale_id(request)
     reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
     ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(reseq_queryset)
+    ale_sum = len(ale_flask_isolate_count_list)
+    flask_sum = 0
+    isolate_sum = 0
+    for l in ale_flask_isolate_count_list:
+        flask_sum += l[1]
+        isolate_sum += l[2]
 
     experiments_info_list = get_reseq_experiment_info_list(reseq_queryset)
     obs_mut_qryset = _get_observed_mutation_queryset(request, ale_experiment_id)
@@ -69,6 +75,9 @@ def stats(request):
                "number_of_genes_to_show": barchart_item_count,
                "ale_experiment_id": ale_experiment_id,
                "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
+               "ale_sum": ale_sum,
+               "flask_sum": flask_sum,
+               "isolate_sum": isolate_sum,
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(ale_experiment_id),
                "max_histogram_size": MAX_HISTOGRAM_SIZE}
