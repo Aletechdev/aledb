@@ -1,7 +1,7 @@
 #!/bin/sh
 
 export DEBUG=1
-export SEQUENCING_URL=http://sbrg.ucsd.edu
+export SEQUENCING_URL=http://XXXXXX/aledata/
 export MYSQL_DATABASE=ale_db
 export MYSQL_USER=root
 export MYSQL_PASSWORD=m0t0r0l6
