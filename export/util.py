@@ -5,21 +5,21 @@ from seq.views.mutation_table_builder import \
     HTML_MUTATION_TABLE_HEADER
 from django.utils.html import strip_tags
 from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
-from enrichment.util import get_enrich_obs_mut_qryset
+from converge.util import get_converge_obs_mut_qryset
 
 
 MUT_TYPE_STR = "mut"
 FIXED_MUT_TYPE_STR = "fixed_mut"
-ENRICH_MUT_TYPE_STR = "enrich_mut"
+CONVERGED_MUT_TYPE_STR = "converged_mut"
 
 
 def get_csv_str(exp_id, mut_type_str):
     if mut_type_str == FIXED_MUT_TYPE_STR:
         reseq_ordered_dict = get_reseq_ordered_dict(exp_id)
         obs_mut_qryset = get_exp_fixed_obs_mut_qryset(reseq_ordered_dict)
-    elif mut_type_str == ENRICH_MUT_TYPE_STR:
+    elif mut_type_str == CONVERGED_MUT_TYPE_STR:
         reseq_ordered_dict = get_reseq_ordered_dict(exp_id)
-        obs_mut_qryset = get_enrich_obs_mut_qryset(reseq_ordered_dict)
+        obs_mut_qryset = get_converge_obs_mut_qryset(reseq_ordered_dict)
     else:
         reseq_ordered_dict,\
         obs_mut_qryset = get_ordered_reseq_dict_and_obs_mut_queryset([exp_id])
