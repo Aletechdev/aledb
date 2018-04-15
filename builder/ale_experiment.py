@@ -119,11 +119,15 @@ def insert_starting_strain_flask(starting_strain_breseq_output_abs_path, ale_exp
 
 
 def rebuild_all_fixated_mutations():
-
     ale_experiment_queryset = ale.models.AleExperiment.objects.all()
-
     for ale_experiment in ale_experiment_queryset:
         rebuild_fixated_mutations(ale_experiment.ale_id)
+
+
+def rebuild_all_converged_mutations():
+    ale_experiment_queryset = ale.models.AleExperiment.objects.all()
+    for ale_experiment in ale_experiment_queryset:
+        rebuild_converge_mutations(ale_experiment.ale_id)
 
 
 def _insert_starting_strain_flask(staring_strain_breseq_output_abs_path,
