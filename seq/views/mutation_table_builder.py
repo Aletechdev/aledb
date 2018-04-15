@@ -76,10 +76,7 @@ def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experim
 
     return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation_id))
 
-GENE_ENTRY_HTML_LINK = """<a href=/gene?g=%s>%s</a>"""
-
 EXPANDABLE_COLUMN_PLUS_SIGN = """<i onclick="expand_collapse_gene_entry(this)" class="fa fa-plus pull-left" aria-hidden="true" data-toggle="collapse" data-target="#%s"></i>"""
-
 EXPANDABLE_GENE_ENTRY = """<div class="collapse pull-left" id="%s">%s</div>"""
 
 non_decimal = re.compile(r'[^\d.]+')
@@ -204,27 +201,14 @@ def get_table_body(request,
     return table_body
 
 
-# TODO: Move this function into common/util
 def get_gene_table_entry(mutation):
-
     table_entry = """<div style="width:150px">"""
-
-    original_gene_list = mutation.gene.split(',')
-
     cleaned_gene_list = get_gene_list(mutation.gene)
-
-    gene_links = [GENE_ENTRY_HTML_LINK % (gene, original_gene_list[idx]) for idx, gene in enumerate(cleaned_gene_list)]
-
     if len(cleaned_gene_list) > 10:
-
         table_entry += EXPANDABLE_COLUMN_PLUS_SIGN % str(mutation.id)
-
-        table_entry += EXPANDABLE_GENE_ENTRY % (str(mutation.id), ", ".join(gene_links))
-
+        table_entry += EXPANDABLE_GENE_ENTRY % (str(mutation.id), ", ".join(cleaned_gene_list))
     else:
-
-        table_entry += ", ".join(gene_links) + "</div>"
-
+        table_entry += ", ".join(cleaned_gene_list) + "</div>"
     return table_entry
 
 
