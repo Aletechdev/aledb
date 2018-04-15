@@ -9,7 +9,7 @@ from export.util import \
     get_csv_str, \
     MUT_TYPE_STR, \
     FIXED_MUT_TYPE_STR, \
-    ENRICH_MUT_TYPE_STR
+    CONVERGED_MUT_TYPE_STR
 
 
 EXPORT_TEMPLATE = 'export.html'
@@ -19,7 +19,7 @@ def export(request):
     exp_name_str = request.GET.get('download_experiments', None)
     mut_type_str = request.GET.get('mut_type_selected', None)
     context = {
-        "mut_types_str_list": [MUT_TYPE_STR, ENRICH_MUT_TYPE_STR, FIXED_MUT_TYPE_STR],
+        "mut_types_str_list": [MUT_TYPE_STR, CONVERGED_MUT_TYPE_STR, FIXED_MUT_TYPE_STR],
         "experiments": get_all_ale_exps(),
         "recent_experiments": get_recent_ale_exps(),
         "is_download": False
