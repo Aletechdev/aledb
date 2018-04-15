@@ -8,7 +8,7 @@
     </p>
     <a href="/bibliome"><h3>Publications described by ALEdb</h3></a>
     <h2>Feature Overview</h2>
-    <img src="/static/workflow.png" style="width: 70%; height: 70%; padding-bottom: 20px">
+    <img src="/static/ALEdb_flow.png" style="width: 70%; height: 70%; padding-bottom: 20px">
     <p>The ALEdb web platform maintains two categories of features: those that describe individual ALE
         experiments, and those that describe all consolidated ALE experiment data (Figure 2B). To describe individual
         ALE
@@ -37,7 +37,7 @@
         additionally include the mutations in the cells according to the environmental stresses introduced in the ALE
         experiment. This output is then processed by additional foundational technologies leveraged with ALE: the DNA
         sequencer and mutation identifying software. The output sample to be analyzed is sequenced, typically by an
-        Illumina platform, and resequenced primarily using the Breseq computational pipeline. Breseq’s resequencing
+        Illumina platform, and resequenced primarily using the BreSeq computational pipeline. BreSeq’s resequencing
         process aligns all of the DNA reads to a provided genome reference and reports single-nucleotide mutations,
         point insertions and deletions, large deletions, missing coverage and new junctions according to the differences
         between the aligned reads and the reference genome.</p>
@@ -76,7 +76,7 @@
     <p>Using the ALEdb mutation reporting mechanism, we have implemented features that automate the
         identification and reporting of mutations which describe significant mutational patterns within an ALE
         experiment. These features describe key and potentially adaptive mutation patterns which we refer to as
-        <i>enrichment</i> and <i>fixed mutations</i>. The methods encapsulated in the enrichment and fixed mutation
+        <i>converged</i> and <i>fixed mutations</i>. The methods encapsulated in the converged and fixed mutation
         analysis are those
         which have been developed to manually identify adaptive mutations within the results of published ALE
         experiments (PGI) (C13) (42C) (GLU) and are therefore considered common
@@ -87,38 +87,26 @@
         analyses will contribute to more accurate results, more consistent analysis and the shortening of turnaround
         time from ALE experiment execution to results interpretation.
     </p>
-    <img src="/static/fixed_enriched_muts.png" style="width: 40%; height: 40%; padding-bottom: 20px">
-    <p>As with the manual consolidation of ALE experiment mutation data, the analysis of adaptive mutations can be prone
-        to human error, inconsistent between researchers and time consuming. The automation of these common analyses
-        will contribute to more accurate results, more consistent analysis and the shortening of turnaround time from
-        ALE experiment execution to results interpretation.</p>
-    <p>In the SBRG’s published ALE experiment literature, adaptive mutations were identified as those involved in two
-        cases. If a mutation manifested in more than one sample, it signified that this mutation described a dominant
-        phenotype. If a genomic region was mutated via different mutations across multiple samples, it was hypothesized
-        that simply perturbing the gene may have rendered a beneficial phenotype. Considering that these circumstances
-        all involve isolates with the same mutated genomic region, we can also consider a single sample with multiple
-        alleles of the same region to represent multiple populations which benefit from this region’s perturbation. The
-        identification of these cases can be accomplished by finding genomic regions within an ALE experiment that have
-        more than one observed mutation; we consider these enriched genomic regions and their mutations as enrichment
-        mutations. Previous to ALEdb, this analysis was accomplished as additional steps in manually curating
-        the ALE experiment’s mutation report such that mutations affecting the same genomic region would cluster
-        together within a matrix of mutations and their samples. ALEdb automates this enrichment mutation
-        analysis and reports the results in the same mutation table format.</p>
-    <p>A fixed mutation is one in which a mutation manifests in an ALE’s midpoint, or intermediate sample, and is
-        propagated to all following samples in the ALE. This analysis is only possible if an ALE experiment
-        includes midpoint samples, providing the possibility of more than one data point per mutation. Previous to
-        ALEdb, the identification of fixed mutations was accomplished as an additional results reporting task by
-        manually organizing mutations according to their ALE’s sample chronology and identifying mutations that emerge
-        in a midpoint and manifest in all remaining ALE samples. The fixed mutation analysis automates this approach and
-        reports results in the mutation table format.</p>
+    <img src="/static/key_mutations_ALEdb.png" style="width: 40%; height: 40%; padding-bottom: 20px">
+    <p>A <i>fixed</i> mutation is one in which manifests in an ALE’s midpoint, or intermediate sample, and is propagated to all
+        following samples in the ALE. The propagation of a mutation from their emergence to an ALE’s endpoint may
+        describe the selection of a mutation due to its fitness benefits. This analysis is only possible if an ALE
+        experiment includes midpoint samples, providing the possibility of more than one data point per ALE mutation.
+        The identification of fixed mutations is accomplished by organizing mutations according to the ALE’s sample
+        chronology and identifying mutations that emerge in a midpoint and manifest in all following samples of the same
+        ALE.</p>
+    <p>A <i>converged</i> mutation is one in which manifests in a genetic region seen to be mutated in multiple replicate ALEs.
+        This phenomenon describes evidence of a potential common adaptive trajectory between microbes
+        exposed to the same conditions and has been leveraged in ALE analysis methods to more quickly identify mutations
+        causal for adaptive phenotypes.</p>
     <h2>Publications</h2>
     <p>The initial in-depth review of ALEdb was published as a <a
-                href="https://escholarship.org/content/qt056243b5/qt056243b5.pdf">masters thesis</a>.</p>
+            href="https://escholarship.org/content/qt056243b5/qt056243b5.pdf">masters thesis</a>.</p>
     <h2>Mutation data generation</h2>
     <p>The mutation data presented on this platform was generated using the <a
             href=https://github.com/barricklab/breseq>BreSeq</a> resquencing pipeline.</p>
     <p>Deatherage, D.E., Barrick, J.E. (2014) Identification of mutations in laboratory-evolved microbes from
-        next-generation sequencing data using breseq. Methods Mol. Biol.</p>
+        next-generation sequencing data using BreSeq. Methods Mol. Biol.</p>
     <h2>3rd party packages used</h2>
     <p>mutation-needle-plot: http://dx.doi.org/10.5281/zenodo.14561</p>
     <p>webGL protein viewer: http://dx.doi.org/10.5281/zenodo.20980</p>
