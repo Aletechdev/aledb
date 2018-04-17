@@ -52,6 +52,20 @@
 {% endblock %}
 {% block header %}<b>{{ ale_experiment_name }}</b> ALE Experiment{% endblock %}
 {% block content %}
+    <div class="panel panel-default">
+        <div class="panel-heading">Notes</div>
+        <div class="panel-body">
+            <p>
+                Publication:
+                {% if pub_ref %}
+                    <a href={{ pub_url }}>{{ pub_ref }}</a>
+                {% else %}
+                    None
+                {% endif %}
+            </p>
+            <p>{{ notes|linebreaks }}</p>
+        </div>
+    </div>
     <div class="row">
         <div class="col-sm-6 col-md-4">
             <div class="panel panel-default">
