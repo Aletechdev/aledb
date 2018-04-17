@@ -63,7 +63,11 @@
                     None
                 {% endif %}
             </p>
-            <p>{{ notes|linebreaks }}</p>
+            <p>
+                {% if notes %}
+                    {{ notes|linebreaks }}
+                {% endif %}
+            </p>
         </div>
     </div>
     <div class="row">
