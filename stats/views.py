@@ -17,6 +17,7 @@ from common.util import get_ordered_reseq_queryset,\
     get_reseq_ordered_dict, get_mut_queryset_from_obs_mut_queryset, \
     get_all_ale_exps, get_recent_ale_exps
 from filter.util import get_filtered_observed_mutations_queryset
+import ale.models
 
 
 __author__ = 'pphaneuf'
@@ -30,6 +31,9 @@ if hasattr(settings, "SEQUENCING_URL"):
 
 def stats(request):
     ale_experiment_id = common.get_ale_experiment_id(request)
+
+    exp = ale.models.AleExperiment.objects.get(pk=ale_experiment_id)
+
     ale_id = common.get_ale_id(request)
     reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
     ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(reseq_queryset)
@@ -80,7 +84,11 @@ def stats(request):
                "isolate_sum": isolate_sum,
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(ale_experiment_id),
-               "max_histogram_size": MAX_HISTOGRAM_SIZE}
+               "max_histogram_size": MAX_HISTOGRAM_SIZE,
+               "notes": exp.notes,
+               "pub_ref": exp.pub_ref,
+               "pub_url": exp.pub_url
+               }
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 
