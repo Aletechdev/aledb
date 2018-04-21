@@ -1,0 +1,14 @@
+#!/bin/bash
+
+export DEBUG=1
+export PUBLIC=0
+export DJANGO_SETTINGS_MODULE=aleinfo.settings_private
+
+export SEQUENCING_URL=http://aledb.org/aledata/
+export MYSQL_DATABASE=ale_db
+export MYSQL_USER=ale_user
+export MYSQL_PASSWORD=password
+export MYSQL_HOST=localhost
+export MYSQL_PORT=3306
+export ALE_DATA_ROOT_DIR=/var/www/ale_analytics_data/
+export GOOGLE_ANALYTICS_TAG=xxxxxxx
