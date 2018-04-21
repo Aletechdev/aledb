@@ -57,8 +57,10 @@
         <div class="panel-body">
             <p>
                 Publication:
-                {% if pub_ref %}
-                    <a href={{ pub_url }}>{{ pub_ref }}</a>
+                {% if pub_qryset %}
+                    {% for pub in pub_qryset %}
+                        <p><a href={{ pub.url }}>{{ pub.title }}</a></p>
+                    {% endfor %}
                 {% else %}
                     None
                 {% endif %}

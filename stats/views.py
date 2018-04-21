@@ -18,6 +18,7 @@ from common.util import get_ordered_reseq_queryset,\
     get_all_ale_exps, get_recent_ale_exps
 from filter.util import get_filtered_observed_mutations_queryset
 import ale.models
+from bibliome.models import Publication
 
 
 __author__ = 'pphaneuf'
@@ -33,6 +34,11 @@ def stats(request):
     ale_experiment_id = common.get_ale_experiment_id(request)
 
     exp = ale.models.AleExperiment.objects.get(pk=ale_experiment_id)
+
+    try:
+        pub_qryset = Publication.objects.filter(ale_experiment=exp)
+    except Publication.DoesNotExist:
+        pub_qryset = None
 
     ale_id = common.get_ale_id(request)
     reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
@@ -85,9 +91,8 @@ def stats(request):
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(ale_experiment_id),
                "max_histogram_size": MAX_HISTOGRAM_SIZE,
+               "pub_qryset": pub_qryset,
                "notes": exp.notes,
-               "pub_ref": exp.pub_ref,
-               "pub_url": exp.pub_url
                }
 
     return HttpResponse(template.render(context, request), content_type="text/html")
