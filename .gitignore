@@ -6,11 +6,10 @@
 *~
 *.ini
 static/
+config.sh
 .ropeproject/
 .idea/
 .htpasswd
-nohup.out
-aleinfo/settings.ini
 .DS_Store
 .builder/
 
