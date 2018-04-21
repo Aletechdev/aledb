@@ -19,8 +19,6 @@ class AleExperiment(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     instrument = models.ForeignKey(Instrument)
     notes = models.TextField(**blank_field)
-    pub_ref = models.TextField(**blank_field)
-    pub_url = models.TextField(**blank_field)
 
     def __unicode__(self):
             return "#%d-%s" % (self.ale_id, self.name)

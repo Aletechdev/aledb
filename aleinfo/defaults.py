@@ -188,6 +188,7 @@ INSTALLED_APPS = (
     'search',
     'duplications',
     'genes',
+    'bibliome',
     'debug_toolbar',
 )
 
