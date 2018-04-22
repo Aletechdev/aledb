@@ -19,6 +19,7 @@ HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
+
 # the dropdown cell in the mutation table
 _menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
 _menu_item_save_to_experiment_filter = """<li><a onclick="save_to_experiment_filter(%d, %d)" style="cursor:pointer">Save to Experiment Filter</a></li>"""
@@ -42,19 +43,18 @@ def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experim
     """
  
     menuitems = ''
-    if (request.user.has_perm('add_global_filter')):
-        # all tables have a 'Save to Global Filter' menuitem
-        menuitems = _menu_item_save_to_global_filter % (mutation_id)
+    # all tables have a 'Save to Global Filter' menuitem
+    menuitems = _menu_item_save_to_global_filter % (mutation_id)
 
-        # some other tables have a 'Save to Experiment Filter' menuitem
-        if (not table_type in [ TableType.GENE_TABLE \
-                            , TableType.SEARCH \
-                            , TableType.SHARED \
-                            , TableType.COMBINE \
-                            , TableType.COMBINE_ENRICHMENT_MUTATIONS \
-                            , TableType.COMBINE_FIXATION_MUTATIONS \
-        ]):
-            menuitems += _menu_item_save_to_experiment_filter % (ale_experiment_id, mutation_id)
+    # some other tables have a 'Save to Experiment Filter' menuitem
+    if (not table_type in [ TableType.GENE_TABLE \
+                        , TableType.SEARCH \
+                        , TableType.SHARED \
+                        , TableType.COMBINE \
+                        , TableType.COMBINE_ENRICHMENT_MUTATIONS \
+                        , TableType.COMBINE_FIXATION_MUTATIONS \
+    ]):
+        menuitems += _menu_item_save_to_experiment_filter % (ale_experiment_id, mutation_id)
 
     return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation_id))
 
@@ -154,7 +154,10 @@ def get_table_body(request,
         if _contains_mutation(table_entry_list[mutation_index_dict[mutation.id]]):
 
             table_row = [HTML_MUTATION_TABLE_ROW]
-            table_row.append(_build_table_cell_for_dropdown(request, table_type, mutation.id, ale_experiment_id,))
+            if request.user.has_perm('add_global_filter'):
+                table_row.append(_build_table_cell_for_dropdown(request, table_type, mutation.id, ale_experiment_id,))
+            else:
+                table_row.append("""""")
 
             table_row.append(_get_mutation_tags(mutation.tags))
             table_row.append(format(mutation.position, ',d'))
