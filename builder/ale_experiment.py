@@ -13,6 +13,7 @@ from common.util import clear_dashboard_cache
 import metadata.parser
 from dashboard.timeline_util import create_event
 from dashboard.util import rebuild_dashboard_data
+from filter.models import AleExperimentFilter
 
 
 WILD_TYPE_ALE_NUMBER = 0
@@ -207,7 +208,6 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.TechnicalReplicate)
         print(ale_number, flask_number, isolate_number, technical_replicate_number)
         output_path = breseq_output_group_root_abs_path + ale_isolate_name + "/" + BRESEQ_OUTPUT_REPORT_DIR
-
         _create_and_commit_ale_entry(ale_exp_user,
                                      output_path,
                                      ale_number,
@@ -219,6 +219,7 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
                                      freezer_box,
                                      is_wild_type=False)
 
+    AleExperimentFilter.objects.create(ale_experiment=experiment)
     rebuild_converge_mutations(experiment.ale_id)
     rebuild_fixated_mutations(experiment.ale_id)
     rebuild_dashboard_data()
