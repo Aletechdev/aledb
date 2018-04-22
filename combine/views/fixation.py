@@ -34,7 +34,7 @@ def combined_fixation(request):
 
     is_ascending_freq_filter = _is_ascending_freq_filter(request)
 
-    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict,
+    table_header = mutation_table_builder.get_table_header(request, ordered_reseq_dict,
                                                            mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
     observed_mutation_queryset = _get_experiment_fixating_observed_mutation_queryset(ale_experiment_list,
