@@ -61,7 +61,7 @@ def stats(request):
     ale_exp_name = common.get_ale_experiment_name(request)
 
     barchart_item_count = get_histogram_item_count(request)
-    genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
+    genes_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
 
     needle_plot_data = get_needle_plot_data(obs_mut_qryset)
     context = {"protein_change_type_count_dict": protein_change_type_count_dict,
@@ -77,7 +77,6 @@ def stats(request):
                "ale_experiment_name": ale_exp_name,
                "needle_plot_data": mark_safe(list(needle_plot_data)),
                "genes": mark_safe(genes_json),
-               "sequence_changes": mark_safe(sequence_change_json),
                "gene_color_set": mark_safe(common.GENE_COLORS),
                "seq_color_set": mark_safe(common.SEQ_COLORS),
                "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
