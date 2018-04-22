@@ -25,7 +25,7 @@ def fixating_mutations(request):
 
     reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
 
-    table_header = mutation_table_builder.get_table_header(reseq_ordered_dict,
+    table_header = mutation_table_builder.get_table_header(request, reseq_ordered_dict,
                                                            mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
     obs_mut_qryset = get_exp_fixed_obs_mut_qryset(reseq_ordered_dict)
