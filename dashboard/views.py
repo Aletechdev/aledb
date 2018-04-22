@@ -95,9 +95,6 @@ def _get_mutation_type_count_dict(observed_mutation_counts, unique_mutation_coun
         elif mutation_type == 'MOB':
             observed_mutation_type_count = observed_mutation_counts.mobile_element_insertion
             unique_mutation_type_count = unique_mutation_counts.mobile_element_insertion
-        elif mutation_type == 'DUP':
-            observed_mutation_type_count = observed_mutation_counts.duplication
-            unique_mutation_type_count = unique_mutation_counts.duplication
         elif mutation_type == 'AMP':
             observed_mutation_type_count = observed_mutation_counts.amplification
             unique_mutation_type_count = unique_mutation_counts.amplification

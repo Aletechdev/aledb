@@ -19,12 +19,11 @@ def rebuild_mut_histogram_data():
         ObservedMutation.objects.create()
     raw_obs_mut_qryset = ObservedMutation.objects.all()
     obs_mut_qryset = get_filtered_observed_mutations_queryset(raw_obs_mut_qryset)
-    genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, MAX_HISTOGRAM_SIZE)
+    genes_json = get_histogram_jsons(obs_mut_qryset, MAX_HISTOGRAM_SIZE)
     if BarCharts.objects.all().count() == 0:
         BarCharts.objects.create()
     histogram_data = BarCharts.objects.all()
     histogram_data.update(mut_gene_json=genes_json)
-    histogram_data.update(mut_json=sequence_change_json)
 
 
 def rebuild_sample_counts():
@@ -71,9 +70,6 @@ def rebuild_mutation_counts():
         elif mutation_type == 'MOB':
             obs_mut_count_qryset.update(mobile_element_insertion=observed_mutation_type_count)
             mut_count_qryset.update(mobile_element_insertion=unique_mutation_type_count)
-        elif mutation_type == 'DUP':
-            obs_mut_count_qryset.update(duplication=observed_mutation_type_count)
-            mut_count_qryset.update(duplication=unique_mutation_type_count)
         elif mutation_type == 'AMP':
             obs_mut_count_qryset.update(amplification=observed_mutation_type_count)
             mut_count_qryset.update(amplification=unique_mutation_type_count)

@@ -11,7 +11,6 @@ from seq.models import Mutation, \
 import os
 from genes.util import get_annotated_gene_list
 from filter.models import AleExperimentFilter
-from duplications.util import Duplications
 from django.conf import settings
 
 
@@ -30,14 +29,8 @@ GD_MUT_HTML = 'html_mutation'
 GD_MUT_ANNOTATION_HTML = "html_mutation_annotation"
 DEFAULT_CLONAL_FREQ = 1
 BRESEQ_REPORT_COLUMN_KEY_EVIDENCE = "evidence"
-DUP_CSV_GENE_LIST_INDEX = 7
-DUP_CSV_START_POSITION_INDEX = 0
-DUP_CSV_WIDTH_INDEX = 2
-DUP_CSV_DEPTH_INDEX = 4
 
 ale_data_root_dir = settings.ALE_DATA_ROOT_DIR
-
-DUPLICATION_BP_TOLERANCE = 900
 
 
 def add_breseq_results(technical_replicate_id,
@@ -70,48 +63,11 @@ def add_breseq_results(technical_replicate_id,
                         experiment,
                         is_wild_type)
 
-    _database_duplications(breseq_ouput_dir_path,
-                           reseq,
-                           is_wild_type)
-
     sample_evidence_dict = mutation_gd_parser.data[gdparse.EVIDENCE_KEY]
 
     _database_unassigned_missing_coverage(reseq,
                                           sample_evidence_dict,
                                           breseq_ouput_dir_path)
-
-
-def _database_duplications(breseq_output_dir_path,
-                           reseq,
-                           is_wild_type):
-    """
-    Called per breseq folder.
-    """
-
-    # TODO: ale_flask_isolate_annotation.startswith is not a valid approach. Need to find a way to determine wildtype if none is given
-    ale_flask_isolate_annotation = os.path.basename(os.path.dirname(os.path.dirname(breseq_output_dir_path)))
-    if is_wild_type or ale_flask_isolate_annotation.startswith('0'):
-        return
-
-    duplications = Duplications(breseq_output_dir_path)
-    observed_mutation_list = []
-    for dup_dict in duplications.dup_list:
-        mutation, created = Mutation.objects.get_or_create(
-            position=dup_dict[Duplications.START_POSITION_KEY],
-            gene=dup_dict[Duplications.GENES_KEY],
-            sequence_change=dup_dict[Duplications.SEQUENCE_CHANGE_KEY],
-            protein_change=dup_dict[Duplications.PROTEIN_CHANGE_KEY],
-            mutation_type=dup_dict[Duplications.MUTATION_TYPE_KEY])
-
-        mutation.save()  # TODO: Not using bulk_create in case mutation already exists? Why aren't we using bulk_create?
-
-        observed_mutation = ObservedMutation(sequencing_experiment=reseq,
-                                             mutation=mutation,
-                                             breseq_present=True,
-                                             frequency=1.00)
-        observed_mutation_list.append(observed_mutation)
-
-    ObservedMutation.objects.bulk_create(observed_mutation_list)
 
 
 def _get_beautifulsoup_html(output_folder, html_file_name):
