@@ -35,9 +35,6 @@ def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experim
     """Returns a <div> element containing the drop down menu for each row
     in the mutation table.
 
-    Depending on user permissions, the drop down may contain menu
-    items for saving filter to global or experiment sets.
-
     NOTE: this is a temporary solution for implementing #425 until the
     mutation table component rendering is refactored
     """
