@@ -23,7 +23,7 @@ def converge_mutations(request):
 
     reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
 
-    table_header = mutation_table_builder.get_table_header(reseq_dict=reseq_ordered_dict,
+    table_header = mutation_table_builder.get_table_header(request, reseq_dict=reseq_ordered_dict,
                                                            table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
 
     table_body = _get_table_body(reseq_ordered_dict, request)

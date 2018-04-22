@@ -29,7 +29,7 @@ def combined_mutations(request):
                                                        queryset,
                                                        table_type=mutation_table_builder.TableType.COMBINE)
 
-    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
+    table_header = mutation_table_builder.get_table_header(request, ordered_reseq_dict)
 
     title = "%s Mutations" % (", ".join([AleExperiment.objects.get(ale_id=ale_exp_id).name for ale_exp_id in ale_experiment_list]))
 

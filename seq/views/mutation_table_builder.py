@@ -1,42 +1,24 @@
 from django.conf import settings
-
 import os
-
 import seq.views.common
-
 from filter.util import get_filtered_observed_mutations_queryset
-
 import re
-
 from enum import Enum
-
 from django.utils.html import strip_tags
-
 from common.util import get_mut_queryset_from_obs_mut_queryset
-
 from genes.util import get_gene_list
-
 from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS
-
 from ale.models import TechnicalReplicate
 
-
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
-
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
-
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/close-icon.gif" width="12" height="11"></a>"""
-
 HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequence Change", "Gene", "Function", "Product", "GO Process", "GO Component", "Details"]
-
-HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>%s"""
-
+HTML_MUTATION_TABLE_EXPERIMENT_HEADER_WITH_DROPDOWN = """<a href="%s">%s</a>%s"""
+HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
-
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
-
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
-
 # the dropdown cell in the mutation table
 _menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
 _menu_item_save_to_experiment_filter = """<li><a onclick="save_to_experiment_filter(%d, %d)" style="cursor:pointer">Save to Experiment Filter</a></li>"""
@@ -58,7 +40,7 @@ def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experim
     NOTE: this is a temporary solution for implementing #425 until the
     mutation table component rendering is refactored
     """
-
+ 
     menuitems = ''
     if (request.user.has_perm('add_global_filter')):
         # all tables have a 'Save to Global Filter' menuitem
@@ -76,13 +58,11 @@ def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experim
 
     return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation_id))
 
+
 EXPANDABLE_COLUMN_PLUS_SIGN = """<i onclick="expand_collapse_gene_entry(this)" class="fa fa-plus pull-left" aria-hidden="true" data-toggle="collapse" data-target="#%s"></i>"""
 EXPANDABLE_GENE_ENTRY = """<div class="collapse pull-left" id="%s">%s</div>"""
-
 non_decimal = re.compile(r'[^\d.]+')
-
 evidence = re.compile(r'[A-Z]\d+[A-Z]')
-
 TAGS_IMAGE = '<div class="dropdown tag_dropdown"><button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">' \
     '<i class="fa fa-tags" aria-hidden="true"></i>' \
     '</button>' \
@@ -109,17 +89,25 @@ else:
     resequencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
 
 
-def get_table_header(reseq_dict, table_type=None):
+def get_table_header(request, reseq_dict, table_type=None):
     base_table_header = HTML_MUTATION_TABLE_HEADER
     experiment_urls = get_experiment_urls(reseq_dict)
     table_header_list = []
+
+    header_html = HTML_MUTATION_TABLE_EXPERIMENT_HEADER
+    if(request.user.has_perm('add_global_filter')):
+        header_html = HTML_MUTATION_TABLE_EXPERIMENT_HEADER_WITH_DROPDOWN
+
     for seq_experiment_id in reseq_dict:
         reseq = reseq_dict[seq_experiment_id]
         sample_name = reseq.exp_ale_flask_isolate_str
         current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep_id)
-        table_header_list += [HTML_MUTATION_TABLE_EXPERIMENT_HEADER % (experiment_urls[seq_experiment_id],
-                                                                       sample_name,
-                                                                       TAGS_IMAGE % (dropdown_html, current_tags))]
+        if(request.user.has_perm('add_global_filter')):
+            table_header_list += [header_html % (experiment_urls[seq_experiment_id],
+                                                                 sample_name,
+                                                                 TAGS_IMAGE % (dropdown_html, current_tags))]
+        else:
+            table_header_list += [header_html % (experiment_urls[seq_experiment_id], sample_name,)]
     return base_table_header + table_header_list
 
 
