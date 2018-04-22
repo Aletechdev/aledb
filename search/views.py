@@ -24,7 +24,7 @@ def search(request):
                                                "experiments": get_all_ale_exps(),
                                                "recent_experiments": get_recent_ale_exps()})
 
-    table_header = mutation_table_builder.get_table_header(reseq_dict)
+    table_header = mutation_table_builder.get_table_header(request, reseq_dict)
     table_body = mutation_table_builder.get_table_body(request,
                                                        reseq_dict,
                                                        obs_mut_qryset,

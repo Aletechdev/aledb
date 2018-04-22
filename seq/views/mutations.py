@@ -24,7 +24,7 @@ def mutation_table(request):
 
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no, request)
 
-    table_header = mutation_table_builder.get_table_header(ordered_reseq_dict)
+    table_header = mutation_table_builder.get_table_header(request, ordered_reseq_dict)
 
     table_body = _get_table_body(ordered_reseq_dict, request)
 
