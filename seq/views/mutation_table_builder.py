@@ -222,30 +222,14 @@ def _get_experiment_id_idx_mapping_dict(seq_experiment_dict):
 
 
 def _get_table_mutation_entry(observed_mutation, experiment_url_dict):
-
     table_entry = ""
-
     if observed_mutation.breseq_present and observed_mutation.sequencing_experiment_id in experiment_url_dict:
-
         url = experiment_url_dict[observed_mutation.sequencing_experiment_id]
-
-        if observed_mutation.mutation.mutation_type == "DUP":
-
-            base_name = os.path.basename(os.path.dirname(os.path.dirname(url)))
-
-            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(url)))
-
-            dup_url = base_dir + "/dups/" + base_name + "/" + base_name + ".html"
-
-            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (dup_url, float(observed_mutation.frequency))
-
-        else:
-            evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
-            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency))
+        evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
+        table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency))
 
     # TODO: Figure out what this is supposed to do.
     elif observed_mutation.present is False:
-
         table_entry = HTML_MUTATION_PRESENT_FALSE_CELL_HTML % (observed_mutation.mutated_reads,
                                                                observed_mutation.wt_reads)
 

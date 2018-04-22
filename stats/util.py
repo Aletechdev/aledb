@@ -151,17 +151,3 @@ def set_gene_bar_chart_colors(genes):
         else:
             gene['color'] = DEFAULT_COLOR
     return genes
-
-'''
-def set_sequence_change_bar_chart_colors(sequence_changes):
-    for seq_change in sequence_changes:
-        has_match = False
-        for protein in FUNCTIONAL_CHANGE_TYPE_LIST:
-            if protein in seq_change['mutation__protein_change']:
-                seq_change['color'] = COLORS[FUNCTIONAL_CHANGE_TYPE_LIST.index(protein)]
-                has_match = True
-                break
-        if has_match is False:
-            seq_change['color'] = DEFAULT_COLOR
-        seq_change['mutation__protein_change'] = re.compile(r'<[^>]+>').sub('', seq_change['mutation__protein_change'])
-    return sequence_changes'''

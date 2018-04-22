@@ -102,7 +102,6 @@ COMBINE_TEMPLATE_PATH = os.path.join(BASE_DIR, 'combine/templates')
 COMMON_TEMPLATE_PATH = os.path.join(BASE_DIR, 'common/templates')
 DASHBOARD_TEMPLATE_PATH = os.path.join(BASE_DIR, 'dashboard/templates')
 SEARCH_TEMPLATE_PATH = os.path.join(BASE_DIR, 'search/templates')
-DUPLICATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'duplications/templates')
 GENES_TEMPLATE_PATH = os.path.join(BASE_DIR, 'genes/templates')
 METADATA_TEMPLATE_PATH = os.path.join(BASE_DIR, 'metadata/templates')
 ABOUT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'about/templates')
@@ -119,7 +118,6 @@ TEMPLATES = [
                  COMMON_TEMPLATE_PATH,
                  DASHBOARD_TEMPLATE_PATH,
                  SEARCH_TEMPLATE_PATH,
-                 DUPLICATION_TEMPLATE_PATH,
                  GENES_TEMPLATE_PATH,
                  METADATA_TEMPLATE_PATH,
                  ABOUT_TEMPLATE_PATH,
@@ -186,7 +184,6 @@ INSTALLED_APPS = (
     'common',
     'dashboard',
     'search',
-    'duplications',
     'genes',
     'bibliome',
     'debug_toolbar',
