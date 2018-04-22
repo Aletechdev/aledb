@@ -15,15 +15,10 @@ def get_histogram_jsons(observed_mutation_queryset, histogram_item_count):
     observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='-')
     observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='–, –')
     gene_bar_chart_list = get_gene_bar_chart_list(observed_mutation_queryset)
-    sequence_change_query = observed_mutation_queryset.values('mutation__gene', 'mutation__protein_change').annotate(
-        the_count=Count('mutation__gene')).order_by('-the_count')
     genes = set_gene_bar_chart_colors(gene_bar_chart_list)
-    sequence_changes = set_sequence_change_bar_chart_colors(sequence_change_query)
 
     genes_json = list(genes[:histogram_item_count])
-    sequence_change_json = list(sequence_changes[:histogram_item_count])
-
-    return genes_json, sequence_change_json
+    return genes_json
 
 
 def get_needle_plot_data(obs_mut_queryset):
@@ -157,7 +152,7 @@ def set_gene_bar_chart_colors(genes):
             gene['color'] = DEFAULT_COLOR
     return genes
 
-
+'''
 def set_sequence_change_bar_chart_colors(sequence_changes):
     for seq_change in sequence_changes:
         has_match = False
@@ -169,4 +164,4 @@ def set_sequence_change_bar_chart_colors(sequence_changes):
         if has_match is False:
             seq_change['color'] = DEFAULT_COLOR
         seq_change['mutation__protein_change'] = re.compile(r'<[^>]+>').sub('', seq_change['mutation__protein_change'])
-    return sequence_changes
+    return sequence_changes'''

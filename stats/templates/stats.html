@@ -296,18 +296,6 @@
                         {% include 'bar_chart.js' %}
                     </script>
                 </td>
-                <td>
-                    <script>
-                        var gene_data = {{ sequence_changes }};
-                        var color_set = {{ seq_color_set }};
-                        var mutation_types = {{ protein_types }};
-                        var extra_padding = 100;
-                        function _get_label(datum) {
-                            return datum.mutation__gene + " " + datum.mutation__protein_change;
-                        }
-                        {% include 'bar_chart.js' %}
-                    </script>
-                </td>
             </tr>
         </table>
     </div>
