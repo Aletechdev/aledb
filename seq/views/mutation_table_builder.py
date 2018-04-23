@@ -146,9 +146,7 @@ def get_table_body(request,
     # Populating table body
     table_body = []
     for mutation in mutation_queryset:
-
         if _contains_mutation(table_entry_list[mutation_index_dict[mutation.id]]):
-
             table_row = [HTML_MUTATION_TABLE_ROW]
             if request.user.has_perm('add_global_filter'):
                 table_row.append(_build_table_cell_for_dropdown(request, table_type, mutation.id, ale_experiment_id,))
@@ -213,18 +211,19 @@ def get_experiment_urls(reseq_dict):
 
 
 def _get_experiment_id_idx_mapping_dict(seq_experiment_dict):
-
     experiment_id_idx_mapping = dict((reseq_exp_id, idx) for idx, reseq_exp_id in enumerate(seq_experiment_dict.keys()))
-
     return experiment_id_idx_mapping
 
 
 def _get_table_mutation_entry(observed_mutation, experiment_url_dict):
     table_entry = ""
-    if observed_mutation.breseq_present and observed_mutation.sequencing_experiment_id in experiment_url_dict:
-        url = experiment_url_dict[observed_mutation.sequencing_experiment_id]
-        evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
-        table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency))
+    if observed_mutation.breseq_present:
+        if observed_mutation.sequencing_experiment_id in experiment_url_dict:
+            url = experiment_url_dict[observed_mutation.sequencing_experiment_id]
+            evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
+            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency))
+        else:
+            table_entry = """<span class="true">%.2f</span>""" % observed_mutation.frequency
 
     # TODO: Figure out what this is supposed to do.
     elif observed_mutation.present is False:
@@ -235,13 +234,10 @@ def _get_table_mutation_entry(observed_mutation, experiment_url_dict):
 
 
 def _contains_mutation(filtered_observed_mutations_row):
-
     contains_mutation = False
-
     for observed_mutation_entry in filtered_observed_mutations_row:
         if "true" in observed_mutation_entry:
             contains_mutation = True
-
     return contains_mutation
 
 
