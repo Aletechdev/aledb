@@ -1,0 +1,4 @@
+Sat Feb 10 03:46:44 2018
+
+/home/pphaneuf/breseq/breseq-0.32.0-Linux-x86_64/bin/breseq -j 8 --require-match-fraction 0.95 -r bop27_1_4.gb -o Glucose_ALE_3_FLASK_72_Isolate_1 --consensus-frequency-cutoff 0.75 Glucose_ALE_3_FLASK_72_Isolate_1_S2_L001_R2_001.good.fq Glucose_ALE_3_FLASK_72_Isolate_1_S2_L001_R1_001.good.fq
+
