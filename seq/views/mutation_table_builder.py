@@ -14,8 +14,6 @@ EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/close-icon.gif" width="12" height="11"></a>"""
 HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequence Change", "Gene", "Function", "Product", "GO Process", "GO Component", "Details"]
-HTML_MUTATION_TABLE_EXPERIMENT_HEADER_WITH_DROPDOWN = """<a href="%s">%s</a>%s"""
-HTML_MUTATION_TABLE_EXPERIMENT_HEADER = """<a href="%s">%s</a>"""
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
@@ -91,20 +89,21 @@ def get_table_header(request, reseq_dict, table_type=None):
     experiment_urls = get_experiment_urls(reseq_dict)
     table_header_list = []
 
-    header_html = HTML_MUTATION_TABLE_EXPERIMENT_HEADER
-    if(request.user.has_perm('add_global_filter')):
-        header_html = HTML_MUTATION_TABLE_EXPERIMENT_HEADER_WITH_DROPDOWN
-
-    for seq_experiment_id in reseq_dict:
-        reseq = reseq_dict[seq_experiment_id]
+    for reseq_id in reseq_dict:
+        reseq = reseq_dict[reseq_id]
         sample_name = reseq.exp_ale_flask_isolate_str
         current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep_id)
+
+        sample_header_html = sample_name
+        if reseq_id in experiment_urls.keys():
+            sample_header_html = """<a href="%s">%s</a>"""
+            sample_header_html = sample_header_html % (experiment_urls[reseq_id], sample_name)
+
         if(request.user.has_perm('add_global_filter')):
-            table_header_list += [header_html % (experiment_urls[seq_experiment_id],
-                                                                 sample_name,
-                                                                 TAGS_IMAGE % (dropdown_html, current_tags))]
+            table_header_list.append(sample_header_html + (TAGS_IMAGE % (dropdown_html, current_tags)))
         else:
-            table_header_list += [header_html % (experiment_urls[seq_experiment_id], sample_name)]
+            table_header_list.append(sample_header_html)
+
     return base_table_header + table_header_list
 
 
@@ -205,7 +204,11 @@ def _initialize_table(experiment_id_idx_mapping, mutations):
 
 
 def get_experiment_urls(reseq_dict):
-    experiment_urls = dict((i.id, resequencing_report_url + i.location) for i in reseq_dict.values())
+    # experiment_urls = dict((i.id, resequencing_report_url + i.location) for i in reseq_dict.values())
+    experiment_urls = {}
+    for reseq in reseq_dict.values():
+        if reseq.location != "":
+            experiment_urls[reseq.id] = resequencing_report_url + reseq.location
     return experiment_urls
 
 
