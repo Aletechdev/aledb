@@ -53,8 +53,12 @@
                 {% if multiple %}
                     <td class="name">{{ reseq_info_tuple.12 }}</td>
                 {% endif %}
-                <td class="sample_name"><a href="
-                        {{ reseq_report_url }}{{ reseq_info_tuple.0.location }}">{{ reseq_info_tuple.0.ale_flask_isolate_str }}</a>
+                <td class="sample_name">
+                    {% if reseq_info_tuple.0.location != "" %}
+                        <a href="{{ reseq_report_url }}{{ reseq_info_tuple.0.location }}">{{ reseq_info_tuple.0.ale_flask_isolate_str }}</a>
+                    {% else %}
+                        {{ reseq_info_tuple.0.ale_flask_isolate_str }}
+                    {% endif %}
                 </td>
                 <td class="clonal_or_population">{{ reseq_info_tuple.1 }}</td>
                 <td class="species">{{ reseq_info_tuple.5 }}</td>
