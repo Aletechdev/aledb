@@ -15,7 +15,7 @@ from django.conf import settings
 
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
-HTML_MUTATION_FILE_NAME = "index.html"
+HTML_INDEX_FILE_NAME = "index.html"
 CLONAL_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row"]
 POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row", "polymorphism_table_row"]
 AVERAGE_READ_LENGTH_INDEX = 5
@@ -88,7 +88,7 @@ def _is_missing_coverage_type(evidence_dict):
 
 # Should be able to re-use this with populations.
 def _database_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_folder):
-    mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
+    mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_INDEX_FILE_NAME)
     mutation_rows = _get_unassigned_missing_coverage_rows(mutations_html)
     missing_coverage_dict = {}
     for row_num, row in enumerate(mutation_rows):
@@ -133,22 +133,22 @@ def _database_unassigned_missing_coverage(seq_experiment, evidence_dict, breseq_
 
 
 def _parse_average_read_length(read_row_input):
-
     output = re.findall("\d+.\d+", read_row_input)[0]
-
     return output
 
 
 def _parse_read_count(read_row_input):
-
     return int(read_row_input.replace(",", ""))
 
 
 def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, person):
-
-    reseq, created = ResequencingExperiment.objects.get_or_create(location=breseq_folder[breseq_folder.find(ale_data_root_dir) + len(ale_data_root_dir):],
-                                                                                      tech_rep_id=technical_replicate_id,
-                                                                                      person=person)
+    breseq_path = ""
+    index_file_path = breseq_folder + HTML_INDEX_FILE_NAME
+    if os.path.isfile(index_file_path):
+        breseq_path = breseq_folder[breseq_folder.find(ale_data_root_dir) + len(ale_data_root_dir):]
+    reseq, created = ResequencingExperiment.objects.get_or_create(location=breseq_path,
+            tech_rep_id=technical_replicate_id,
+            person=person)
     statistics_html = _get_beautifulsoup_html(breseq_folder, HTML_SUMMARY_FILE_NAME)
     if statistics_html:
         row_read_info = statistics_html.find("tr", attrs={"class": "highlight_table_row"}).findChildren("td")
@@ -177,7 +177,7 @@ def _database_mutations(sample_type,
                         mutation_dict,
                         experiment,
                         is_wild_type):
-    mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_MUTATION_FILE_NAME)
+    mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_INDEX_FILE_NAME)
     column_type_index_dict = _get_mutation_header_dict(mutations_html)
     html_mut_resultset = _get_html_mutations_resultset(mutations_html, sample_type)
     observed_mutation_list = []
