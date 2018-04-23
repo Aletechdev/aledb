@@ -104,7 +104,7 @@ def get_table_header(request, reseq_dict, table_type=None):
                                                                  sample_name,
                                                                  TAGS_IMAGE % (dropdown_html, current_tags))]
         else:
-            table_header_list += [header_html % (experiment_urls[seq_experiment_id], sample_name,)]
+            table_header_list += [header_html % (experiment_urls[seq_experiment_id], sample_name)]
     return base_table_header + table_header_list
 
 
@@ -205,9 +205,7 @@ def _initialize_table(experiment_id_idx_mapping, mutations):
 
 
 def get_experiment_urls(reseq_dict):
-
     experiment_urls = dict((i.id, resequencing_report_url + i.location) for i in reseq_dict.values())
-
     return experiment_urls
 
 
