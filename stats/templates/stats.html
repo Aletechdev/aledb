@@ -244,6 +244,7 @@
                             {{ experiment_info_tuple.0.ale_flask_isolate_str }}
                         {% endif %}
                     </td>
+                    <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
                     <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
                     <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
                     <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
