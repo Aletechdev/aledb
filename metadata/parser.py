@@ -54,7 +54,6 @@ def _get_media_substrate_description(metadata_dict):
         if media_descriptor in metadata_dict.keys() and metadata_dict[media_descriptor] != '':
             if media_substrate_description != "": media_substrate_description += ', '
             if metadata_dict[media_descriptor] != "none": media_substrate_description += metadata_dict[media_descriptor]
-    media_substrate_description = media_substrate_description[:-2]  # removing the final ', '
     return media_substrate_description
 
 
@@ -98,7 +97,7 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
 
             media_temperature = DEFAULT_TEMPERATURE
             if MEDIA_TEMPERATURE in metadata_dict.keys() and metadata_dict[MEDIA_TEMPERATURE] != "":
-                media_temperature = int(metadata_dict[MEDIA_TEMPERATURE])
+                media_temperature = float(metadata_dict[MEDIA_TEMPERATURE])
 
             experiment_details = ""
             if EXPERIMENT_DETAILS in metadata_dict.keys():
