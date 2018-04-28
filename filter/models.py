@@ -6,6 +6,16 @@ from filter.common import DEFAULT_MUTATION_FREQ_MIN
 from filter.common import DEFAULT_MUTATION_FREQ_MAX
 
 
+def get_default_experiment_filter_params(ale_experiment):
+    default_experiment_filter_params = {
+            'ale_experiment': ale_experiment,
+            'min_cutoff': DEFAULT_MUTATION_FREQ_MIN,
+            'max_cutoff': DEFAULT_MUTATION_FREQ_MAX,
+            'ignored_genes': "",
+            'ignored_mutations': ""}
+    return default_experiment_filter_params
+
+
 class AleExperimentFilter(models.Model):
 
     ale_experiment = models.ForeignKey(AleExperiment, on_delete=models.CASCADE)
