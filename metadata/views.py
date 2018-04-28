@@ -66,7 +66,6 @@ def get_reseq_info_list(reseq_queryset):
                                  reseq.tech_rep.isolate.flask.media.temperature,
                                  reseq.tech_rep.isolate.flask.media.description,
                                  reseq.tech_rep.isolate.flask.media.substrate,
-                                 reseq.tech_rep.isolate.flask.ale_id.species,
                                  reseq.tech_rep.isolate.flask.ale_id.strain,
                                  reseq.tech_rep.isolate.flask.ale_id.description,
                                  reseq.tech_rep.isolate.library_prep,

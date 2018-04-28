@@ -23,7 +23,7 @@
 {% endblock %}
 {% block header %}<b>{{ ale_experiment_name }}</b> Sample Meta Data{% endblock %}
 {% block content %}
-<p><i>Note: </i>The reference genomes that include <a href="https://github.com/SBRG/bop27refseq">"bop27"</a> describe live <a href="http://systemsbiology.ucsd.edu/BOP27_sequence">Escherichia coli K12 MG1655 strains</a>.</p>
+<p><i>Note: </i><a href="https://github.com/SBRG/bop27refseq">"bop27"</a> is a known variant of E. coli K12 MG1655 <a href="http://systemsbiology.ucsd.edu/BOP27_sequence"><i>E. coli</i> K12 MG1655</a>.</p>
 <div class="row">
     <table id="runs" class="table">
         <thead>
@@ -33,7 +33,6 @@
             {% endif %}
             <th>ALE, Flask, Isolate, Technical Replicate</th>
             <th>Clonal or Population</th>
-            <th>Species</th>
             <th>Strain</th>
             <th>Additional Strain Details</th>
             <th>Media</th>
@@ -61,7 +60,6 @@
                     {% endif %}
                 </td>
                 <td class="clonal_or_population">{{ reseq_info_tuple.1 }}</td>
-                <td class="species">{{ reseq_info_tuple.5 }}</td>
                 <td class="strain">{{ reseq_info_tuple.6 }}</td>
                 <td class="knockouts">{{ reseq_info_tuple.7 }}</td>
                 <td class="media_description">{{ reseq_info_tuple.3 }}</td>
