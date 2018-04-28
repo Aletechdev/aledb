@@ -14,6 +14,7 @@ import metadata.parser
 from dashboard.timeline_util import create_event
 from dashboard.util import rebuild_dashboard_data
 from filter.models import AleExperimentFilter
+import filter.models
 
 
 WILD_TYPE_ALE_NUMBER = 0
@@ -219,7 +220,8 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
                                      freezer_box,
                                      is_wild_type=False)
 
-    AleExperimentFilter.objects.create(ale_experiment=experiment)
+    default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
+    AleExperimentFilter.objects.get_or_create(**default_filter_params)
     rebuild_converge_mutations(experiment.ale_id)
     rebuild_fixated_mutations(experiment.ale_id)
     rebuild_dashboard_data()
