@@ -1,22 +1,15 @@
 from django.http import HttpResponse
-
 from django.template import loader
-
 from seq.views import common
-
 from filter.forms.filter import FilterForm
-
 from filter.models import AleExperimentFilter
-
+import filter.models
 from filter.common import DEFAULT_MUTATION_FREQ_MIN, DEFAULT_MUTATION_FREQ_MAX
-
 from django.utils.safestring import mark_safe
-
 from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations, TABLE_HEADER, is_number
-
 from common.util import get_all_ale_exps, get_recent_ale_exps, clear_dashboard_cache
-
 from seq.models import Mutation
+from ale.models import AleExperiment
 
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
@@ -31,14 +24,10 @@ def mutation_filter(request):
     ale_experiment_id = common.get_ale_experiment_id(request)
     template = loader.get_template(FILTER_TEMPLATE)
 
-    default_filter_form_model = {'ale_experiment_id': ale_experiment_id,
-                                 'min_cutoff': DEFAULT_MUTATION_FREQ_MIN,
-                                 'max_cutoff': DEFAULT_MUTATION_FREQ_MAX,
-                                 'ignored_genes': "",
-                                 'ignored_mutations': ""}
-
-    filter_form_model, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=ale_experiment_id,
-                                                                           defaults=default_filter_form_model)
+    experiment = AleExperiment.objects.get(ale_id=ale_experiment_id)
+    filter_form_model, created = AleExperimentFilter.objects.get_or_create(
+            ale_experiment=experiment,
+            defaults=filter.models.get_default_experiment_filter_params(experiment))
 
     if request.method == 'POST':
         clear_dashboard_cache()
