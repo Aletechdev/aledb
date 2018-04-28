@@ -11,6 +11,7 @@ from seq.models import Mutation, \
 import os
 from genes.util import get_annotated_gene_list
 from filter.models import AleExperimentFilter
+import filter.models
 from django.conf import settings
 
 
@@ -183,6 +184,7 @@ def _database_mutations(sample_type,
     observed_mutation_list = []
 
     # Only used if is_wild_type is True. Doesn't affect functionality otherwise
+    # TODO: if this is the case, needs a conditional so not always executed.
     wild_type_mutation_list = []
     for mut_num in mutation_dict.keys():
         breseq_gene_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
@@ -226,7 +228,9 @@ def _database_mutations(sample_type,
     ObservedMutation.objects.bulk_create(observed_mutation_list)
 
     if is_wild_type is True:
-        exp_filter, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=experiment.ale_id)
+        exp_filter, created = AleExperimentFilter.objects.get_or_create(
+                ale_experiment=experiment,
+                defaults=filter.models.get_default_experiment_filter_params(experiment))
         exp_filter.starting_strain_mutations = ','.join(str(mut) for mut in wild_type_mutation_list)
         exp_filter.save()
 
