@@ -27,8 +27,6 @@ ISOLATE_NUMBER = "Isolate-number"
 TECH_REP_NUMBER = "technical-replicate-number"
 EXPERIMENT_DETAILS = "experiment-details"
 
-DEFAULT_STRAIN = "E. Coli"
-
 MEDIA_BASE_DESCRIPTION = "base-media"
 MEDIA_TEMPERATURE = "temperature"
 #  The following media descriptors are consolidated into the ALEdb "substrate" descriptor.
@@ -108,7 +106,7 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
             ale_id = tech_rep.isolate.flask.ale_id
             ale_id.description = ale_id_description
             ale_id.strain = strain
-            if ale_id.species is None: ale_id.species = DEFAULT_STRAIN
+            if ale_id.species is None: ale_id.species = ""
             ale_id.save()
 
             media, created = Media.objects.get_or_create(description=media_description,
