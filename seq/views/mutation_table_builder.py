@@ -36,7 +36,7 @@ def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experim
     NOTE: this is a temporary solution for implementing #425 until the
     mutation table component rendering is refactored
     """
- 
+
     menuitems = ''
     # all tables have a 'Save to Global Filter' menuitem
     menuitems = _menu_item_save_to_global_filter % (mutation_id)
@@ -246,7 +246,7 @@ def _find_between(s, first, last):
         start = s.index(first) + len(first)
         end = s.index(last, start)
         return s[start:end]
-    except ValueError:
+    except:
         return ""
 
 

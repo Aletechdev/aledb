@@ -42,7 +42,9 @@ def get_mutation_type_count_dict(mutation_query_set):
 def get_observed_mutation_type_count_dict(observed_mutation_query_set):
     mutation_type_count_dict = {mutation_type:0 for mutation_type in MUTATION_TYPE_LIST}
     for observed_mutation in observed_mutation_query_set:
-        mutation_type_count_dict[observed_mutation.mutation.mutation_type] += 1
+        mut_type = observed_mutation.mutation.mutation_type
+        if mut_type in mutation_type_count_dict.keys():
+            mutation_type_count_dict[mut_type] += 1
     return mutation_type_count_dict
 
 
