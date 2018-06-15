@@ -1,6 +1,6 @@
 # ALEdb
 # General development
-Every bug fix is a revision change!
+Every bug fix is a revision change in the version number!
 ## Docker Launch
 ### Required docker packages installed on host  
 1. docker (version 17.09.0-ce)
