@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from seq.views import common
 from django.utils.safestring import mark_safe
-from common.util import get_all_ale_exps, get_recent_ale_exps
+from common.util import get_all_ale_exps, get_recent_ale_exps, get_git_hash
 from ale.models import AleExperiment, AleId, Isolate
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from dashboard.timeline_util import get_timeline
@@ -53,7 +53,8 @@ def dashboard(request):
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(),
                "max_histogram_size": MAX_HISTOGRAM_SIZE,
-               "timeline": get_timeline()}
+               "timeline": get_timeline(),
+               "git_hash": get_git_hash()}
 
     return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
 
