@@ -12,6 +12,8 @@ from django.core.cache import cache
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
 
+
+
 # TODO: go in seq.util
 def get_ordered_reseq_queryset(ale_experiment_id, ale_id=None):
     reseq_qryset = ResequencingExperiment.objects.select_related(
@@ -210,3 +212,6 @@ def get_git_hash():
     master_branch_hash_file = open('/var/www/aledb/.git/refs/heads/master','r')
     return master_branch_hash_file.readline().replace("\n","")
 
+common_context = {"experiments": get_all_ale_exps(),
+                  "recent_experiments": get_recent_ale_exps,
+                  "git_hash":get_git_hash()}

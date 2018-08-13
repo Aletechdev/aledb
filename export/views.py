@@ -1,6 +1,6 @@
 from django.template import loader
 from django.http import HttpResponse
-from common.util import get_all_ale_exps, get_recent_ale_exps
+from common.util import common_context
 from ale.models import AleExperiment
 from django.core.serializers.json import DjangoJSONEncoder
 import json
@@ -18,12 +18,11 @@ EXPORT_TEMPLATE = 'export.html'
 def export(request):
     exp_name_str = request.GET.get('download_experiments', None)
     mut_type_str = request.GET.get('mut_type_selected', None)
-    context = {
+    context = common_context.copy()
+    context.update({
         "mut_types_str_list": [MUT_TYPE_STR, CONVERGED_MUT_TYPE_STR, FIXED_MUT_TYPE_STR],
-        "experiments": get_all_ale_exps(),
-        "recent_experiments": get_recent_ale_exps(),
         "is_download": False
-    }
+    })
     if exp_name_str and mut_type_str:
         if exp_name_str == 'All':
             exp_list = [(exp.ale_id, exp.name) for exp in AleExperiment.objects.all()]

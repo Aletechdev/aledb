@@ -10,7 +10,7 @@ import gzip
 import csv
 import json
 import requests
-from common.util import get_all_ale_exps, get_recent_ale_exps, check_hidden_columns_and_filters
+from common.util import common_context, check_hidden_columns_and_filters
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 
@@ -38,7 +38,8 @@ def gene(request):
     hidden_columns = check_hidden_columns_and_filters(request, None)
     template = loader.get_template("gene.html")
 
-    context = {"gene_name": gene_query,
+    context = common_context.copy()
+    context.update({"gene_name": gene_query,
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "title": gene_query + " gene",
                "table_header": mark_safe(table_header),
@@ -49,9 +50,7 @@ def gene(request):
                "has_pdb_file": has_pdb_file,
                "homology_data": mark_safe(json.dumps(homology_data)),
                "has_homology_data": has_homology_data,
-               "hidden_columns": hidden_columns,
-               "experiments": get_all_ale_exps(),
-               "recent_experiments": get_recent_ale_exps()}
+               "hidden_columns": hidden_columns})
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 
