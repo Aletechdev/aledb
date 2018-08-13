@@ -7,7 +7,7 @@ import filter.models
 from filter.common import DEFAULT_MUTATION_FREQ_MIN, DEFAULT_MUTATION_FREQ_MAX
 from django.utils.safestring import mark_safe
 from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations, TABLE_HEADER, is_number
-from common.util import get_all_ale_exps, get_recent_ale_exps, clear_dashboard_cache
+from common.util import common_context, get_recent_ale_exps, clear_dashboard_cache
 from seq.models import Mutation
 from ale.models import AleExperiment
 
@@ -39,15 +39,15 @@ def mutation_filter(request):
 
     starting_strain_body = get_starting_strain_mutations(filter_form_model)
 
-    context = {"form": filter_form,
+    context = common_context.copy()
+    context.update({"form": filter_form,
                "ale_experiment_id": ale_experiment_id,
                "ale_experiment_name": ale_experiment_name,
                "table_body": mark_safe(table_body),
                "table_header": mark_safe(TABLE_HEADER),
-               "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(ale_experiment_id),
                "starting_strain_body": mark_safe(starting_strain_body),
-               "starting_strain_header": mark_safe(STARTING_STRAIN_HEADER)}
+               "starting_strain_header": mark_safe(STARTING_STRAIN_HEADER)})
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 

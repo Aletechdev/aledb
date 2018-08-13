@@ -29,7 +29,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/metisMenu/2.5.2/metisMenu.min.css" rel="stylesheet">
 
     <!-- SBAdmin 2 Theme CSS -->
-    <link href="{% static "dist/css/sb-admin-2.min.css" %}" rel="stylesheet">
+    <link href="{% static "dist/css/sb-admin-2.css" %}" rel="stylesheet">
 
     <!-- Font Awesome CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet"
@@ -37,6 +37,9 @@
 
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/png" href="{% static "fav.png" %}">
+
+    <!-- Common CSS -->
+    <link href="{% static "dist/css/common.css" %}" rel="stylesheet">
 
     <!-- Jquery JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
@@ -77,7 +80,8 @@
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
         <div class="navbar-header">
             <a class="navbar-brand" href="/">ALEdb 1.0.2</a>
-            <a class="git-hash" href="https://github.com/SBRG/aledb/commit/{{ git_hash }}">{{ git_hash }}</a>
+            <br>
+            <a class="git-hash" href="https://github.com/SBRG/aledb/commit/{{ git_hash }}" target="_blank">{{ git_hash }}</a>
         </div>
         <div class="navbar-default sidebar" role="navigation" style="height: 100%">
             <div class="sidebar-nav navbar-collapse pull-left" style="width: 240px">

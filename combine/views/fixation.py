@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 import seq.views.common
 from seq.views import mutation_table_builder
 from fixation.models import FixatedMutation
-from common.util import get_all_ale_exps, get_recent_ale_exps, check_hidden_columns_and_filters
+from common.util import check_hidden_columns_and_filters, common_context
 from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset, get_ales_from_ale_experiment_list
 from common.constants import POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE, TAGS
 import json
@@ -49,7 +49,8 @@ def combined_fixation(request):
 
     template = loader.get_template("base_table_template.html")
 
-    context = {"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
+    context = common_context.copy()
+    context.update({"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
                "ale_no": ale_no,
                "experiment_id": ale_experiment_list,
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
@@ -58,10 +59,8 @@ def combined_fixation(request):
                "is_ascending_freq_filter": is_ascending_freq_filter,
                "template_header": "Fixating Mutations",
                "hidden_columns": hidden_columns,
-               "experiments": get_all_ale_exps(),
-               "recent_experiments": get_recent_ale_exps(None),
                "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
-               "tag_dropdown": TAGS}
+               "tag_dropdown": TAGS})
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 
