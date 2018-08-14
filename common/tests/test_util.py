@@ -2,6 +2,7 @@ import unittest
 
 from common.util import filter_for_ale
 from common.util import filter_for_ale_exp
+from common.util import get_git_hash
 
 __author__ = 'Patrick Phaneuf'
 
@@ -19,3 +20,8 @@ class TestUtil(unittest.TestCase):
         expected = ""
         returned = filter_for_ale_exp(ale_experiment_id)
         self.assertEquals(returned, expected)
+
+    def test_get_hash(self):
+        expected_hash_length = 40
+        returned = len(get_git_hash())
+        self.assertEquals(returned,expected_hash_length)
