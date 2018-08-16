@@ -14,18 +14,21 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-
             'formatter': 'standard',
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'debug.log',
-
         },
         'console':{
             'formatter': 'standard',
             'class': 'logging.StreamHandler',
             'level': 'DEBUG',
         },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'filters': ['special']
+        }
     },
     'loggers': {
         'aledbLogger': {
@@ -46,11 +49,11 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+
     },
     'root':{
         'level': 'INFO',
-        'handlers': ['file', 'console'],
-
+        'handlers': ['file', 'console', 'mail_admins'],
     }
 }
 
@@ -65,4 +68,4 @@ log = logging.getLogger("aledbLogger")
 try:
     1/0
 except ZeroDivisionError as e:
-    log.exception("this is what an exception look like")
+    log.error("this is what an exception look like")
