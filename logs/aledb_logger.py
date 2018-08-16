@@ -9,15 +9,22 @@ LOGGING = {
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format' : "[%(asctime)s] %(levelname)s [%(name)s] %(message)s",
+            'format': "[%(asctime)s] %(levelname)s [%(name)s] %(message)s",
         },
+        'security': {
+            'format': "[%(asctime)s] %(levelname)s [%(name)s] %(clientip)s %(user)-8s %(message)s",
+        },
+
     },
     'handlers': {
         'file': {
             'formatter': 'standard',
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'debug.log',
+            'filename': 'logs/debug.log',
+            'mode': 'a',
+            'maxBytes': 10485760,
+            'backupCount': 10,
         },
         'console':{
             'formatter': 'standard',
@@ -27,7 +34,21 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
-        }
+        },
+        'file-security': {
+            'formatter': 'security',
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/debug.log',
+            'mode': 'a',
+            'maxBytes': 10485760,
+            'backupCount': 10,
+        },
+        'console-security':{
+            'formatter': 'security',
+            'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+        },
     },
     'loggers': {
         'aledbLogger': {
@@ -39,6 +60,7 @@ LOGGING = {
         'security': {
             'level': 'WARNING',
             'propagate': True,
+            'handlers': ['file']
         },
         'performance': {
             'level': 'INFO',
@@ -58,6 +80,14 @@ LOGGING = {
 
 logging.config.dictConfig(LOGGING)
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 def getLogger(logname = None):
     return logging.getLogger(logname)
 
@@ -67,4 +97,4 @@ log = logging.getLogger("aledbLogger")
 try:
     1/0
 except ZeroDivisionError as e:
-    log.error("this is what an exception look like")
+    log.exception("this is what an exception look like. The full trace should be genreated")
