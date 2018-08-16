@@ -9,8 +9,7 @@ LOGGING = {
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format' : "logging things [%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-            'datefmt' : "%d/%b/%Y %H:%M:%S"
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
         },
     },
     'handlers': {
@@ -62,9 +61,3 @@ def getLogger(logname = None):
 
 
 log = logging.getLogger("aledbLogger")
-
-# A simple string logged at the "warning" level
-log.warning("Your log message is here")
-
-# A string with a variable at the "info" level
-log.info("The value of var is %s", "hi")
