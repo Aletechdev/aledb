@@ -29,7 +29,7 @@ LOGGING = {
         'aledbLogger': {
             'level': 'DEBUG',
             'propagate': True,
-            'formatter': 'standard',
+            'format': 'standard',
         },
         'security': {
             'level': 'WARNING',
