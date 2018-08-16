@@ -51,8 +51,6 @@ def getLogger(logname = None):
 
 log = logging.getLogger("aledbLogger")
 
-log.critical()
-
 # A simple string logged at the "warning" level
 log.warning("Your log message is here")
 
