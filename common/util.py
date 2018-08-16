@@ -9,7 +9,7 @@ from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 
-from logs.aledb_logger import getLogger
+from logs.aledb_logger import getLogger, get_client_ip
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
@@ -74,7 +74,7 @@ def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
 # TODO: go in ale.util
 def get_all_ale_exps():
 
-    usage.info("get_all_ale_exps called")
+    usage.info("get_all_ale_exps called from %s", str(get_client_ip(request)))
 
     return AleExperiment.objects.all().order_by('name')
 
