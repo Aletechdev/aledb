@@ -12,7 +12,6 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.RotatingFileHandler',
             'filename': 'debug.log',
-            '':'',
 
         },
         'console':{
