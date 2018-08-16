@@ -9,7 +9,7 @@ LOGGING = {
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s] %(message)s",
         },
     },
     'handlers': {
@@ -61,3 +61,8 @@ def getLogger(logname = None):
 
 
 log = logging.getLogger("aledbLogger")
+
+try:
+    1/0
+except ZeroDivisionError as e:
+    log.exception("this is what an exception look like")
