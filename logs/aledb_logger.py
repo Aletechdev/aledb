@@ -46,6 +46,7 @@ LOGGING = {
     'root':{
         'level': 'INFO',
         'handlers': ['file', 'console'],
+        'formatter': 'standard',
     }
 }
 
