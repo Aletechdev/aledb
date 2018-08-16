@@ -75,10 +75,6 @@ def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
 def get_all_ale_exps():
 
     usage.info("get_all_ale_exps called")
-    try:
-        1 / 0
-    except ZeroDivisionError as e:
-        log.exception("this is what an exception look like")
 
     return AleExperiment.objects.all().order_by('name')
 
