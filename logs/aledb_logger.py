@@ -27,9 +27,10 @@ LOGGING = {
     },
     'loggers': {
         'aledbLogger': {
+            'formatter': 'standard',
             'level': 'DEBUG',
             'propagate': True,
-            'format': 'standard',
+
         },
         'security': {
             'level': 'WARNING',
