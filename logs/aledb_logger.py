@@ -15,19 +15,22 @@ LOGGING = {
     },
     'handlers': {
         'file': {
+
+            'formatter': 'standard',
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'debug.log',
 
         },
         'console':{
+            'formatter': 'standard',
             'class': 'logging.StreamHandler',
             'level': 'DEBUG',
         },
     },
     'loggers': {
         'aledbLogger': {
-            'formatter': 'standard',
+
             'level': 'DEBUG',
             'propagate': True,
 
@@ -41,7 +44,6 @@ LOGGING = {
             'propagate': True,
         },
         'usage': {
-            'formatter': 'standard',
             'level': 'INFO',
             'propagate': True,
         },
