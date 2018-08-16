@@ -6,7 +6,7 @@ import logging.config
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'formatters': {
         'standard': {
             'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
@@ -41,7 +41,6 @@ LOGGING = {
             'propagate': True,
         },
         'usage': {
-
             'formatter': 'standard',
             'level': 'INFO',
             'propagate': True,
