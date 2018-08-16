@@ -21,26 +21,27 @@ LOGGING = {
     },
     'loggers': {
         'aledbLogger': {
-            'handlers': ['file','console'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'security': {
-            'handlers': ['file', 'console'],
             'level': 'WARNING',
             'propagate': True,
         },
         'performance': {
-            'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
         'usage': {
-            'handlers': ['file', 'console'],
             'level': 'INFO',
             'propagate': True,
         },
     },
+    'root':{
+        'level': 'INFO',
+        'handlers': ['file', 'console'],
+
+    }
 }
 
 logging.config.dictConfig(LOGGING)
