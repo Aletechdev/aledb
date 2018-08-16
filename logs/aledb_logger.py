@@ -10,12 +10,12 @@ LOGGING = {
     'handlers': {
         'file': {
             'level': 'DEBUG',
-            'class': 'logging.RotatingFileHandler',
+            'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'debug.log',
 
         },
         'console':{
-            'class': 'logging.StreamHandler',
+            'class': 'logging.handlers.StreamHandler',
             'level': 'DEBUG',
         },
     },
