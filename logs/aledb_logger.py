@@ -41,6 +41,8 @@ LOGGING = {
             'propagate': True,
         },
         'usage': {
+
+            'formatter': 'standard',
             'level': 'INFO',
             'propagate': True,
         },
