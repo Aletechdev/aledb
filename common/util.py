@@ -9,8 +9,12 @@ from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 
+from logs.aledb_logger import getLogger
+
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
+log = getLogger("aledbLogger")
+usage = getLogger("usage")
 
 # TODO: go in seq.util
 def get_ordered_reseq_queryset(ale_experiment_id, ale_id=None):
@@ -69,6 +73,9 @@ def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
 
 # TODO: go in ale.util
 def get_all_ale_exps():
+
+    usage.info("get_all_ale_exps called")
+
     return AleExperiment.objects.all().order_by('name')
 
 
@@ -112,6 +119,7 @@ def get_recent_ale_exps(ale_experiment_id=None):
 
     if recent.fifth is not None:
         recent_experiments = ale_exp_exists(recent.fifth, recent_experiments)
+
 
     return recent_experiments
 
