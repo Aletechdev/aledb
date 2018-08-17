@@ -64,7 +64,7 @@ LOGGING = {
 
 logging.config.dictConfig(LOGGING)
 
-def get_client_ip(request):
+def get_user_ip(request):
     ip, is_routable = get_client_ip(request)
     if ip is None:
         return "Unknown IP"
