@@ -29,11 +29,10 @@ class LoginRequiredMiddleware:
  work, ensure your TEMPLATE_CONTEXT_PROCESSORS setting includes\
  'django.core.context_processors.auth'."
 
-        log = getLogger(__name__)
-        adaptor = UserLoggingAdaptor(log, {'connid': request.user})
-        adaptor.info("User Logged In")
-
         if not request.user.is_authenticated():
             path = request.path_info.lstrip('/')
             if not any(m.match(path) for m in EXEMPT_URLS):
                 return HttpResponseRedirect(settings.LOGIN_URL)
+        log = getLogger(__name__)
+        adaptor = UserLoggingAdaptor(log, {'connid': request.user})
+        adaptor.info("User Logged In")
