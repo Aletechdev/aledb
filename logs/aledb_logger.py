@@ -18,7 +18,7 @@ LOGGING = {
             'formatter': 'standard',
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'debug.log',
+            'filename': 'logs/debug.log',
             'mode': 'a',
             'maxBytes': 10485760,
             'backupCount': 10,
@@ -67,6 +67,11 @@ def getLogger(logname = None):
     logger = logging.getLogger(logname)
     return logger
 
+def get_client_ip(request):
+    ip = request.META.get('HTTP_CF_CONNECTING_IP')
+    if ip is None:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 class JSONMessage(object):
     def __init__(self, message, **kwargs):
@@ -87,4 +92,4 @@ log = logging.getLogger("aledbLogger")
 try:
     1/0
 except ZeroDivisionError as e:
-    log.exception("this is what an exception look like. The full trace should be genreated")
+    log.exception("this is what an exception look like. The full trace should be generated")
