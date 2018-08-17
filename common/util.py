@@ -9,7 +9,7 @@ from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 
-from logs.aledb_logger import getLogger, get_client_ip
+from logs.aledb_logger import getLogger
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
