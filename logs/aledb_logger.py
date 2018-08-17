@@ -1,9 +1,8 @@
 import logging
 import logging.config
-
+import json
 # In a view or a middleware where the `request` object is available
 
-from ipware import get_client_ip
 
 LOGGING = {
     'version': 1,
@@ -67,6 +66,16 @@ logging.config.dictConfig(LOGGING)
 def getLogger(logname = None):
     logger = logging.getLogger(logname)
     return logger
+
+
+class JSONMessage(object):
+    def __init__(self, message, **kwargs):
+        self.message = message
+        self.kwargs = kwargs
+
+    def __str__(self):
+        return '%s >>> %s' % (self.message, json.dumps(self.kwargs))
+
 
 class UserLoggingAdaptor(logging.LoggerAdapter):
     def process(self, msg, kwargs):
