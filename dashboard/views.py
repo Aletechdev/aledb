@@ -18,6 +18,9 @@ __author__ = 'pphaneuf'
 
 
 def dashboard(request):
+    log = getLogger("aledbLogger")
+    adaptor = UserLoggingAdaptor(log, extra="")
+    adaptor.info(JSONMessage("Populating Dashboard"))
 
     general_count_dict = _get_general_count_dict()
     observed_mutation_counts = ObservedMutationCounts.objects.first()
