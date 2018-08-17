@@ -2,17 +2,12 @@ import logging
 import logging.config
 
 
-
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
             'format': "[%(asctime)s] %(levelname)s [%(name)s] %(message)s",
-        },
-        'security': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s] %(clientip)s %(user)-8s %(message)s",
         },
 
     },
@@ -89,10 +84,15 @@ def get_client_ip(request):
     return ip
 
 def getLogger(logname = None):
-    return logging.getLogger(logname)
+    logger = logging.getLogger(logname)
+    return logger
 
+class UserLoggingAdaptor(logging.LoggerAdapter):
+    def process(self, msg, kwargs):
+        return '[%s] %s' % (self.extra['connid'], msg), kwargs
 
 log = logging.getLogger("aledbLogger")
+
 
 try:
     1/0
