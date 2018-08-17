@@ -19,7 +19,7 @@ __author__ = 'pphaneuf'
 
 def dashboard(request):
     log = getLogger("aledbLogger")
-    adaptor = UserLoggingAdaptor(log, {'connid': request.user+"woot"})
+    adaptor = UserLoggingAdaptor(log, {'connid': str(request.user + "ip")})
     adaptor.info("Populating Dashboard")
 
 
