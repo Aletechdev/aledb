@@ -10,7 +10,7 @@ from dashboard.timeline_util import get_timeline
 from stats.views import get_histogram_item_count
 from dashboard.models import BarCharts
 from stats.util import MAX_HISTOGRAM_SIZE
-from logs.aledb_logger import getLogger,JSONMessage
+from logs.aledb_logger import UserLoggingAdaptor,getLogger
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 DASHBOARD_TEMPLATE = "dashboard.html"
@@ -19,8 +19,9 @@ __author__ = 'pphaneuf'
 
 def dashboard(request):
     log = getLogger("aledbLogger")
-    #adaptor = UserLoggingAdaptor(log, extra="")
-    log.info(JSONMessage("Populating Dashboard"))
+    adaptor = UserLoggingAdaptor(log, {'connid': request.user})
+    adaptor.info("Populating Dashboard")
+
 
     general_count_dict = _get_general_count_dict()
     observed_mutation_counts = ObservedMutationCounts.objects.first()
@@ -73,6 +74,7 @@ def _get_general_count_dict():
         count_dict['flask'] = sample_counts.flask_count
         count_dict['isolate'] = sample_counts.isolate_count
     return count_dict
+
 
 def _get_mutation_type_count_dict(observed_mutation_counts, unique_mutation_counts):
     mutation_type_count_dict = {'observed': {}, 'unique': {}}
