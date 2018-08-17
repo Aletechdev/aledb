@@ -11,7 +11,6 @@ LOGGING = {
         'standard': {
             'format': "[%(asctime)s] %(levelname)s [%(name)s] %(message)s",
         },
-
     },
     'handlers': {
         'file': {
@@ -35,10 +34,8 @@ LOGGING = {
     },
     'loggers': {
         'aledbLogger': {
-
             'level': 'DEBUG',
             'propagate': True,
-
         },
         'security': {
             'level': 'WARNING',
@@ -53,7 +50,6 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
-
     },
     'root':{
         'level': 'INFO',
