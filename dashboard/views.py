@@ -22,7 +22,6 @@ def dashboard(request):
     adaptor = UserLoggingAdaptor(log, extra="")
     adaptor.info(JSONMessage("Populating Dashboard"))
 
-
     general_count_dict = _get_general_count_dict()
     observed_mutation_counts = ObservedMutationCounts.objects.first()
     unique_mutation_counts = UniqueMutationCounts.objects.first()

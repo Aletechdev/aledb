@@ -34,5 +34,5 @@ class LoginRequiredMiddleware:
             if not any(m.match(path) for m in EXEMPT_URLS):
                 return HttpResponseRedirect(settings.LOGIN_URL)
         log = getLogger(__name__)
-        adaptor = UserLoggingAdaptor(log, {'connid': request.user})
-        adaptor.info("User Logged In")
+
+        log.info("User Logged In")
