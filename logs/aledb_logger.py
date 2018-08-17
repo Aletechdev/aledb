@@ -30,15 +30,6 @@ LOGGING = {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
         },
-        'file-security': {
-            'formatter': 'security',
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': 'debug.log',
-            'mode': 'a',
-            'maxBytes': 10485760,
-            'backupCount': 10,
-        },
     },
     'loggers': {
         'aledbLogger': {
