@@ -39,11 +39,6 @@ LOGGING = {
             'maxBytes': 10485760,
             'backupCount': 10,
         },
-        'console-security':{
-            'formatter': 'security',
-            'class': 'logging.StreamHandler',
-            'level': 'DEBUG',
-        },
     },
     'loggers': {
         'aledbLogger': {
