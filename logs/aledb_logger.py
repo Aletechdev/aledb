@@ -64,13 +64,6 @@ LOGGING = {
 
 logging.config.dictConfig(LOGGING)
 
-def get_user_ip(request):
-    ip, is_routable = get_client_ip(request)
-    if ip is None:
-        return "Unknown IP"
-    else:
-        return ip
-
 def getLogger(logname = None):
     logger = logging.getLogger(logname)
     return logger
