@@ -21,7 +21,7 @@ class LoginRequiredMiddleware:
     def process_request(self, request):
 
         log = getLogger(__name__)
-        adaptor = UserLoggingAdaptor(log, {'connid':request.user})
+        adaptor = UserLoggingAdaptor(log, {'connid':get_client_ip(request)})
         adaptor.info("User Logged In")
 
         assert hasattr(request, 'user'), "The Login Required middleware\
