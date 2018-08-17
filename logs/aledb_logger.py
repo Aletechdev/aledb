@@ -1,6 +1,9 @@
 import logging
 import logging.config
 
+# In a view or a middleware where the `request` object is available
+
+from ipware import get_client_ip
 
 LOGGING = {
     'version': 1,
@@ -62,12 +65,11 @@ LOGGING = {
 logging.config.dictConfig(LOGGING)
 
 def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+    ip, is_routable = get_client_ip(request)
+    if ip is None:
+        return "Unknown IP"
     else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
+        return ip
 
 def getLogger(logname = None):
     logger = logging.getLogger(logname)
