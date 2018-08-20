@@ -26,6 +26,8 @@ def dashboard(request):
 
     logster = getLogger()
     logster.info("hey hey hey")
+    logster = getLogger(__name__)
+    logster.info("hey hey hey")
 
 
     general_count_dict = _get_general_count_dict()
