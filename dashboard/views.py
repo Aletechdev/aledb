@@ -10,7 +10,7 @@ from dashboard.timeline_util import get_timeline
 from stats.views import get_histogram_item_count
 from dashboard.models import BarCharts
 from stats.util import MAX_HISTOGRAM_SIZE
-from logs.aledb_logger import UserLoggingAdaptor,getLogger,get_client_ip
+from logs.aledb_logger import UserLoggingAdaptor,getLogger,get_client_ip,getUserExtras
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 DASHBOARD_TEMPLATE = "dashboard.html"
@@ -22,12 +22,8 @@ def dashboard(request):
     userdetails = str(request.user) + "@" + str(get_client_ip(request))
     adaptor = UserLoggingAdaptor(log,{'connid': str(userdetails)})
     adaptor.info("Populating Dashboard")
-    log.info("populating dashboard with log", extra = {'connid': str(userdetails)})
+    log.info("populating dashboard with log", extra = getUserExtras(request))
 
-    logster = getLogger()
-    logster.info("hey hey hey")
-    logster = getLogger(__name__)
-    logster.info("hey hey hey")
 
 
     general_count_dict = _get_general_count_dict()
