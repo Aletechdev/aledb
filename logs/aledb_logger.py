@@ -1,6 +1,7 @@
 import logging
 import logging.config
 import json
+from pythonjsonlogger import jsonlogger
 # In a view or a middleware where the `request` object is available
 
 
@@ -14,7 +15,7 @@ LOGGING = {
     },
     'handlers': {
         'file': {
-            'formatter': 'standard',
+            'formatter': 'pythonjsonlogger.jsonlogger.JsonFormatter',
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/debug.log',
@@ -23,7 +24,7 @@ LOGGING = {
             'backupCount': 10,
         },
         'console':{
-            'formatter': 'standard',
+            'formatter': 'pythonjsonlogger.jsonlogger.JsonFormatter',
             'class': 'logging.StreamHandler',
             'level': 'DEBUG',
         },
