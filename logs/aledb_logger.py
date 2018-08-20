@@ -77,7 +77,8 @@ def getUserExtras(request):
             "username": request.user,
             "ip-addr": get_client_ip(request),
             "session-id": request.session.session_key,
-        }
+        },
+        "path":request.path,
     }
     return extras
 
