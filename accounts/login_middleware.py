@@ -35,4 +35,4 @@ class LoginRequiredMiddleware:
                 return HttpResponseRedirect(settings.LOGIN_URL)
         log = getLogger(__name__)
         adaptor = UserLoggingAdaptor(log, {'connid': request.user})
-        log.info("User Logged In")
+        adaptor.info("User Logged In")
