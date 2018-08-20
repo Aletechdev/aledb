@@ -71,14 +71,15 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
-class JSONMessage(object):
-    def __init__(self, message, **kwargs):
-        self.message = message
-        self.kwargs = kwargs
+def getUserExtras(request):
+    extras = {
+        "userinfo":{
+            "username": request.user,
+            "ip-addr": get_client_ip(request),
+        }
 
-    def __str__(self):
-        return '%s >>> %s' % (self.message, json.dumps(self.kwargs))
-
+    }
+    return extras
 
 class UserLoggingAdaptor(logging.LoggerAdapter):
     def process(self, msg, kwargs):
