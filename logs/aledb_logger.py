@@ -82,7 +82,7 @@ class JSONMessage(object):
 
 class UserLoggingAdaptor(logging.LoggerAdapter):
     def process(self, msg, kwargs):
-        return '[%s] %s' % (self.extra['connid'], msg), kwargs
+        return '%s %s' % (self.extra['connid'], msg), kwargs
 
 log = logging.getLogger("aledbLogger")
 
