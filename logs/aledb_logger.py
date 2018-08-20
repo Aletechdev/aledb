@@ -11,11 +11,12 @@ LOGGING = {
     'formatters': {
         'standard': {
             'format': "[%(asctime)s] %(levelname)s [%(name)s] %(message)s",
+            'class': 'pythonjsonlogger.jsonlogger.JsonFormatter'
         },
     },
     'handlers': {
         'file': {
-            'formatter': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'formatter': 'standard',
             'level': 'DEBUG',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/debug.log',
@@ -24,7 +25,7 @@ LOGGING = {
             'backupCount': 10,
         },
         'console':{
-            'formatter': 'pythonjsonlogger.jsonlogger.JsonFormatter',
+            'formatter': 'standard',
             'class': 'logging.StreamHandler',
             'level': 'DEBUG',
         },
