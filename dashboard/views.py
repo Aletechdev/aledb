@@ -20,9 +20,12 @@ __author__ = 'pphaneuf'
 def dashboard(request):
     log = getLogger("aledbLogger")
     userdetails = str(request.user) + "@" + str(get_client_ip(request))
-    adaptor = UserLoggingAdaptor(log,{'connid': str(userdetails)})
+    adaptor = UserLoggingAdaptor(log,extra = {'connid': str(userdetails)})
     adaptor.info("Populating Dashboard")
     log.info("populating dashboard with log", extra = {'connid': str(userdetails)})
+
+    logster = getLogger()
+    logster.info("hey hey hey")
 
 
     general_count_dict = _get_general_count_dict()
