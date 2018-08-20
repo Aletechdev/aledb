@@ -22,7 +22,7 @@ def dashboard(request):
     #userdetails = str(request.user) + "@" + str(get_client_ip(request))
     adaptor = getUserLogger(log, request)
     adaptor.info("Populating Dashboard")
-    log.info("populating dashboard with log", extra = {'connid': str(userdetails)})
+    #log.info("populating dashboard with log", extra = {'connid': str(userdetails)})
 
 
     general_count_dict = _get_general_count_dict()
