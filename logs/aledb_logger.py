@@ -10,7 +10,7 @@ LOGGING = {
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format': "[%(asctime)s] %(levelname)s location: {[%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s]} %(message)s",
+            'format': "[%(asctime)s] %(levelname)s \"location: {[%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s]}\" %(message)s",
             'class': 'pythonjsonlogger.jsonlogger.JsonFormatter'
         },
     },
