@@ -1,8 +1,6 @@
 import logging
 import logging.config
-import json
-from pythonjsonlogger import jsonlogger
-# In a view or a middleware where the `request` object is available
+import sys
 
 
 LOGGING = {
@@ -94,10 +92,23 @@ class UserLoggingAdaptor(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         return '%s %s' % (self.extra['connid'], msg), kwargs
 
-log = logging.getLogger("aledbLogger")
+log = logging.getLogger()
+
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+
+        log.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+
+sys.excepthook = handle_exception
 
 
 try:
     1/0
 except ZeroDivisionError as e:
     log.exception("this is what an exception look like. The full trace should be generated")
+
+
+raise RuntimeError("Test unhandled")
