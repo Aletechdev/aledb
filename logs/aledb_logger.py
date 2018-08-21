@@ -113,5 +113,5 @@ try:
     1 / 0
 except ZeroDivisionError as e:
     log.exception("this is what an exception look like. The full trace should be generated")
-log.info("this is what an exception look like. The full trace should be generated")
+log.info("below me should be an exception logged")
 print(3 / 0)
