@@ -117,6 +117,4 @@ sys.excepthook = handle_exception
 try:
     1 / 0
 except ZeroDivisionError as e:
-    log.exception(e)
-log.info("below me should be an exception logged")
-print(3 / 0)
+    log.exception()
