@@ -21,7 +21,7 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/debug.log',
             'mode': 'a',
-            'maxBytes': 15000,
+            'maxBytes': 10485760,
             'backupCount': 10,
         },
         'console':{
