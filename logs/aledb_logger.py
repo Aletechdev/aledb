@@ -66,7 +66,7 @@ def getLogger(logname = None):
     return logger
 
 def get_client_ip(request):
-    ip = request.META.get('HTTP_CF_CONNECTING_IP')
+    ip = request.META.get('HTTP_X_REAL_IP')
     if ip is None:
         ip = request.META.get('REMOTE_ADDR')
     return ip
