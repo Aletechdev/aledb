@@ -20,6 +20,7 @@ __author__ = 'pphaneuf'
 def dashboard(request):
     log = getLogger("aledbLogger")
     log.info("populating dashboard with log", extra = getUserExtras(request))
+    print(2/0)
 
 
 
