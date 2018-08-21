@@ -63,7 +63,6 @@ logging.config.dictConfig(LOGGING)
 
 def getLogger(logname = None):
     logger = logging.getLogger(logname)
-    logger.
 
     return logger
 
