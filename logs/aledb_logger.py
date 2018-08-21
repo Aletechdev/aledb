@@ -109,7 +109,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
-    uncaughtexcept.error("Uncaught exception"+ exc_traceback)
+    uncaughtexcept.error("Uncaught exception")
 
 
 sys.excepthook = handle_exception
