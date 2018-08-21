@@ -2,7 +2,6 @@ import logging
 import logging.config
 import sys
 
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
@@ -22,7 +21,7 @@ LOGGING = {
             'maxBytes': 10485760,
             'backupCount': 10,
         },
-        'console':{
+        'console': {
             'formatter': 'standard',
             'class': 'logging.StreamHandler',
             'level': 'DEBUG',
@@ -51,7 +50,7 @@ LOGGING = {
             'propagate': True,
         },
     },
-    'root':{
+    'root': {
         'level': 'INFO',
         'handlers': ['file', 'console', 'mail_admins'],
     }
@@ -59,10 +58,12 @@ LOGGING = {
 
 logging.config.dictConfig(LOGGING)
 
-def getLogger(logname = None):
+
+def getLogger(logname=None):
     logger = logging.getLogger(logname)
 
     return logger
+
 
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -77,20 +78,23 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
+
 def getUserExtras(request):
     extras = {
-        "userinfo":{
+        "userinfo": {
             "username": request.user,
             "ip-addr": get_client_ip(request),
             "session-id": request.session.session_key,
         },
-        "path":request.path,
+        "path": request.path,
     }
     return extras
+
 
 class UserLoggingAdaptor(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         return '%s %s' % (self.extra['connid'], msg), kwargs
+
 
 log = logging.getLogger()
 
@@ -102,13 +106,12 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
     log.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
+
 sys.excepthook = handle_exception
 
-
 try:
-    1/0
+    1 / 0
 except ZeroDivisionError as e:
     log.exception("this is what an exception look like. The full trace should be generated")
-
-
-print(1/0)
+log.info("this is what an exception look like. The full trace should be generated")
+print(3 / 0)
