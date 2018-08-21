@@ -117,4 +117,4 @@ sys.excepthook = handle_exception
 try:
     1 / 0
 except ZeroDivisionError as e:
-    log.exception()
+    log.exception(e)
