@@ -111,4 +111,4 @@ except ZeroDivisionError as e:
     log.exception("this is what an exception look like. The full trace should be generated")
 
 
-raise RuntimeError("Test unhandled")
+print(1/0)
