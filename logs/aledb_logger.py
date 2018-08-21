@@ -21,7 +21,7 @@ LOGGING = {
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': 'logs/debug.log',
             'mode': 'a',
-            'maxBytes': 10485760,
+            'maxBytes': 100000,
             'backupCount': 10,
         },
         'console':{
@@ -63,6 +63,8 @@ logging.config.dictConfig(LOGGING)
 
 def getLogger(logname = None):
     logger = logging.getLogger(logname)
+    logger.
+
     return logger
 
 def get_client_ip(request):
