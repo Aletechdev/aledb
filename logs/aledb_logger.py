@@ -49,6 +49,10 @@ LOGGING = {
             'level': 'INFO',
             'propagate': True,
         },
+        'uncaughtexcept': {
+            'level': 'WARNING',
+            'propagate': True,
+        },
     },
     'root': {
         'level': 'INFO',
@@ -97,6 +101,7 @@ class UserLoggingAdaptor(logging.LoggerAdapter):
 
 
 log = logging.getLogger()
+uncaughtexcept = logging.getLogger("uncaughtexcept")
 
 
 def handle_exception(exc_type, exc_value, exc_traceback):
@@ -104,7 +109,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
 
-    log.exception("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+    uncaughtexcept.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
 
 
 sys.excepthook = handle_exception
