@@ -66,7 +66,7 @@ def dashboard(request):
 
     except Exception as e:
         log.exception(e, extra = getUserExtras(request))
-        return e
+        return render(e)
 
 
 def _get_general_count_dict():
