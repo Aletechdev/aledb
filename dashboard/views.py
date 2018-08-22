@@ -10,7 +10,7 @@ from dashboard.timeline_util import get_timeline
 from stats.views import get_histogram_item_count
 from dashboard.models import BarCharts
 from stats.util import MAX_HISTOGRAM_SIZE
-from logs.aledb_logger import getLogger,getUserExtras
+from logs.aledb_logger import UserLoggingAdaptor,getLogger,get_client_ip,getUserExtras
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 DASHBOARD_TEMPLATE = "dashboard.html"
@@ -22,6 +22,7 @@ def dashboard(request):
     log.info("populating dashboard with log", extra = getUserExtras(request))
 
     try:
+        print(2/0)
 
         general_count_dict = _get_general_count_dict()
         observed_mutation_counts = ObservedMutationCounts.objects.first()
