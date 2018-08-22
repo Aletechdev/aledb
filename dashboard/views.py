@@ -22,6 +22,7 @@ def dashboard(request):
     log.info("populating dashboard with log", extra = getUserExtras(request))
 
     try:
+
         print(2/0)
 
         general_count_dict = _get_general_count_dict()
@@ -64,7 +65,8 @@ def dashboard(request):
         return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
 
     except Exception as e:
-        log.exception(e)
+        log.exception(e, extra = getUserExtras(request))
+        return HttpResponse('something broke :')
 
 
 def _get_general_count_dict():
