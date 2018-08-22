@@ -22,6 +22,7 @@ def dashboard(request):
     log.info("populating dashboard with log", extra = getUserExtras(request))
 
     try:
+
         print(2/0)
 
         general_count_dict = _get_general_count_dict()
@@ -65,6 +66,7 @@ def dashboard(request):
 
     except Exception as e:
         log.exception(e, extra = getUserExtras(request))
+        return e
 
 
 def _get_general_count_dict():

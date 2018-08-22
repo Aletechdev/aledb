@@ -109,7 +109,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
     if issubclass(exc_type, KeyboardInterrupt):
         sys.__excepthook__(exc_type, exc_value, exc_traceback)
         return
-    uncaughtexcept.error("Uncaught exception")
+    uncaughtexcept.error("Uncaught exception"+ exc_traceback)
 
 
 sys.excepthook = handle_exception
@@ -117,4 +117,6 @@ sys.excepthook = handle_exception
 try:
     1 / 0
 except ZeroDivisionError as e:
-    log.exception(e)
+    log.exception("this is what an exception look like. The full trace should be generated")
+log.info("below me should be an exception logged")
+print(3 / 0)
