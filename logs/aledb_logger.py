@@ -1,6 +1,8 @@
 import logging
 import logging.config
 
+__author__ = 'Muyao <3'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
