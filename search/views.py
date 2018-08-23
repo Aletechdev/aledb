@@ -13,9 +13,14 @@ from common.util import check_hidden_columns_and_filters, get_all_ale_exps, get_
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from filter.util import get_filtered_observed_mutations_queryset
+from logs.aledb_logger import get_logger,get_user_extras
+
+
+log = get_logger("aledbLogger")
 
 
 def search(request):
+    log.info("search", extra = get_user_extras(request))
     check_hidden_columns_and_filters(request, None)
     obs_mut_qryset = _get_obs_mut_qryset(request)
     reseq_dict = _get_ordered_reseq_dict(obs_mut_qryset)
@@ -39,6 +44,8 @@ def search(request):
                "observed_mutation_count": obs_mut_qryset.count(),
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps()}
+
+    log.info("search terms", extra = locals())
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 
