@@ -21,7 +21,7 @@ log = get_logger("aledbLogger")
 
 def search(request):
 
-    joined_extras = join_extras(all_get_extra(request),user_extra(request))
+    joined_extras = join_extras(all_get_extra(request) , user_extra(request))
 
     log.info("search terms", extra=joined_extras)
     check_hidden_columns_and_filters(request, None)
