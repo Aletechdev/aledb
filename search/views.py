@@ -20,37 +20,39 @@ log = get_logger("aledbLogger")
 
 
 def search(request):
+    try:
+        joined_extras = join_extras(all_get_extra(request) , user_extra(request))
 
-    joined_extras = join_extras(all_get_extra(request) , user_extra(request))
+        log.info("search terms", extra=joined_extras)
+        check_hidden_columns_and_filters(request, None)
+        obs_mut_qryset = _get_obs_mut_qryset(request)
+        reseq_dict = _get_ordered_reseq_dict(obs_mut_qryset)
+        if reseq_dict is None or obs_mut_qryset is None:
+            return render(request, 'search.html', {'error': True,
+                                                   "experiments": get_all_ale_exps(),
+                                                   "recent_experiments": get_recent_ale_exps()})
 
-    log.info("search terms", extra=joined_extras)
-    check_hidden_columns_and_filters(request, None)
-    obs_mut_qryset = _get_obs_mut_qryset(request)
-    reseq_dict = _get_ordered_reseq_dict(obs_mut_qryset)
-    if reseq_dict is None or obs_mut_qryset is None:
-        return render(request, 'search.html', {'error': True,
-                                               "experiments": get_all_ale_exps(),
-                                               "recent_experiments": get_recent_ale_exps()})
-
-    table_header = mutation_table_builder.get_table_header(request, reseq_dict)
-    table_body = mutation_table_builder.get_table_body(request,
-                                                       reseq_dict,
-                                                       obs_mut_qryset,
-                                                       table_type=mutation_table_builder.TableType.SEARCH)
-    last_search = _get_last_search(request)
-    template = loader.get_template("search.html")
-    context = {"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
-               "title": "Search Results",
-               "table_header": mark_safe(table_header),
-               "last_search": last_search,
-               "mutation_count": len(table_body),
-               "observed_mutation_count": obs_mut_qryset.count(),
-               "experiments": get_all_ale_exps(),
-               "recent_experiments": get_recent_ale_exps()}
+        table_header = mutation_table_builder.get_table_header(request, reseq_dict)
+        table_body = mutation_table_builder.get_table_body(request,
+                                                           reseq_dict,
+                                                           obs_mut_qryset,
+                                                           table_type=mutation_table_builder.TableType.SEARCH)
+        last_search = _get_last_search(request)
+        template = loader.get_template("search.html")
+        context = {"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
+                   "title": "Search Results",
+                   "table_header": mark_safe(table_header),
+                   "last_search": last_search,
+                   "mutation_count": len(table_body),
+                   "observed_mutation_count": obs_mut_qryset.count(),
+                   "experiments": get_all_ale_exps(),
+                   "recent_experiments": get_recent_ale_exps()}
 
 
 
-    return HttpResponse(template.render(context, request), content_type="text/html")
+        return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception as e:
+        log.exception("Search Broke")
 
 
 # TODO: roll _get_search_ale_exp_params into _get_search_params.
