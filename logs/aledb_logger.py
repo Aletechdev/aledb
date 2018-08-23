@@ -84,7 +84,7 @@ def get_client_ip(request):
     return ip
 
 
-def get_user_extras(request):
+def user_extra(request):
     extras = {
         "userinfo": {
             "username": request.user,
@@ -94,6 +94,14 @@ def get_user_extras(request):
         "path": request.path,
     }
     return extras
+
+
+def everything_extra(request):
+    return request.__dict__
+
+
+def all_get_extra(request):
+    return request.__dict__['GET']
 
 
 log = logging.getLogger()
