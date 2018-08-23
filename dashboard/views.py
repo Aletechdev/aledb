@@ -19,7 +19,7 @@ __author__ = 'pphaneuf'
 log = get_logger("aledbLogger")
 
 def dashboard(request):
-    log.info("populating dashboard with log", extra = get_user_extras(request))
+    log.info("Hi Robin!", extra = get_user_extras(request))
 
     try:
 

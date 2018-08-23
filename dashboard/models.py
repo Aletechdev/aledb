@@ -19,7 +19,7 @@ class ObservedMutationCounts(models.Model):
     nonsynonymous = models.IntegerField(default=0)
 
     def __str__(self):
-        return locals()
+        return "ObservedMutationCounts Object with the following parameters: "+locals()
 
 
 class UniqueMutationCounts(models.Model):
