@@ -84,6 +84,12 @@ def get_client_ip(request):
     return ip
 
 
+def join_extras(x, y):
+    z = x.copy()   # start with x's keys and values
+    z.update(y)    # modifies z with y's keys and values & returns None
+    return z
+
+
 def user_extra(request):
     extras = {
         "userinfo": {
