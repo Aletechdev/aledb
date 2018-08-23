@@ -2,7 +2,7 @@ from django.http import HttpResponseRedirect
 from django.conf import settings
 from re import compile
 
-from logs.aledb_logger import get_logger, get_user_extras
+from logs.aledb_logger import get_logger, user_extra
 EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip('/'))]
 if hasattr(settings, 'LOGIN_EXEMPT_URLS'):
     EXEMPT_URLS += [compile(expr) for expr in settings.LOGIN_EXEMPT_URLS]
@@ -30,7 +30,7 @@ class LoginRequiredMiddleware:
         if not request.user.is_authenticated():
             path = request.path_info.lstrip('/')
             if not any(m.match(path) for m in EXEMPT_URLS):
-                log.warning("User not log in, redirecting to log-in page", extra=get_user_extras(request))
+                log.warning("User not log in, redirecting to log-in page", extra=user_extra(request))
                 return HttpResponseRedirect(settings.LOGIN_URL)
 
-        log.warning("User Logged In", extra = get_user_extras(request))
+        log.warning("User Logged In", extra = user_extra(request))

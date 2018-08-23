@@ -10,7 +10,7 @@ from dashboard.timeline_util import get_timeline
 from stats.views import get_histogram_item_count
 from dashboard.models import BarCharts
 from stats.util import MAX_HISTOGRAM_SIZE
-from logs.aledb_logger import get_logger,get_user_extras
+from logs.aledb_logger import get_logger,user_extra
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 DASHBOARD_TEMPLATE = "dashboard.html"
@@ -20,7 +20,7 @@ log = get_logger("aledbLogger")
 
 
 def dashboard(request):
-    log.info("populating dashboard", extra=get_user_extras(request))
+    log.info("populating dashboard", extra=user_extra(request))
 
     try:
 
@@ -64,7 +64,7 @@ def dashboard(request):
         return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
 
     except Exception as e:
-        log.exception(e, extra = get_user_extras(request))
+        log.exception(e, extra = user_extra(request))
         return HttpResponse(e)
 
 
