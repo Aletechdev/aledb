@@ -45,7 +45,7 @@ def search(request):
                "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps()}
 
-    log.info("search terms", extra = locals())
+    log.info("search terms", extra = request.__dict__)
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 
