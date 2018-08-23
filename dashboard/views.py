@@ -83,7 +83,8 @@ def _get_general_count_dict():
 def _get_mutation_type_count_dict(observed_mutation_counts, unique_mutation_counts):
 
     logger = get_logger("aledbLogger")
-    logger.info(__name__,extra=locals())
+    logger.info(locals())
+
     mutation_type_count_dict = {'observed': {}, 'unique': {}}
 
     if not (unique_mutation_counts and observed_mutation_counts):
