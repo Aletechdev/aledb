@@ -79,7 +79,10 @@ def get_all_ale_exps():
 # TODO: go in ale.util
 def get_recent_ale_exps(ale_experiment_id=None):
 
-    log.info("get_recent_ale_exps")
+    if ale_experiment_id is not None:
+        log.info("get_recent_ale_exps", extras = locals())
+    else:
+        log.info("get_recent_ale_exps")
 
     recent, created = RecentExperiments.objects.get_or_create(id=1)
 
