@@ -3,7 +3,7 @@ from dashboard.views import dashboard
 from django.template import loader
 from django.http import HttpResponse
 from django.conf import settings
-from logs.aledb_logger import getLogger
+from logs.aledb_logger import get_logger
 
 def login_user(request):
 
@@ -11,7 +11,7 @@ def login_user(request):
     if request.POST:
         username = request.POST['username']
         password = request.POST['password']
-        security = getLogger("security")
+        security = get_logger("security")
         security.info("Log-in attempt from: " + username, extra={'account': username})
         user = authenticate(username=username, password=password)
         if user is not None:

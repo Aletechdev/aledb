@@ -1,6 +1,5 @@
 import logging
 import logging.config
-import sys
 
 LOGGING = {
     'version': 1,
@@ -63,7 +62,7 @@ LOGGING = {
 logging.config.dictConfig(LOGGING)
 
 
-def getLogger(logname=None):
+def get_logger(logname=None):
     logger = logging.getLogger(logname)
 
     return logger
@@ -83,7 +82,7 @@ def get_client_ip(request):
     return ip
 
 
-def getUserExtras(request):
+def get_user_extras(request):
     extras = {
         "userinfo": {
             "username": request.user,
@@ -95,24 +94,7 @@ def getUserExtras(request):
     return extras
 
 
-class UserLoggingAdaptor(logging.LoggerAdapter):
-    def process(self, msg, kwargs):
-        return '%s %s' % (self.extra['connid'], msg), kwargs
-
-
 log = logging.getLogger()
-
-
-
-def handle_exception(exc_type, exc_value, exc_traceback):
-    uncaughtexcept = logging.getLogger("uncaughtexcept")
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-    uncaughtexcept.error("Uncaught exception"+ exc_traceback)
-
-
-sys.excepthook = handle_exception
 
 try:
     1 / 0

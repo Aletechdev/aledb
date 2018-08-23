@@ -2,7 +2,7 @@ from django.http import HttpResponseRedirect
 from django.conf import settings
 from re import compile
 
-from logs.aledb_logger import getLogger, getUserExtras
+from logs.aledb_logger import get_logger, get_user_extras
 EXEMPT_URLS = [compile(settings.LOGIN_URL.lstrip('/'))]
 if hasattr(settings, 'LOGIN_EXEMPT_URLS'):
     EXEMPT_URLS += [compile(expr) for expr in settings.LOGIN_EXEMPT_URLS]
@@ -20,7 +20,7 @@ class LoginRequiredMiddleware:
     """
 
     def process_request(self, request):
-        log = getLogger(__name__)
+        log = get_logger(__name__)
         assert hasattr(request, 'user'), "The Login Required middleware\
  requires authentication middleware to be installed. Edit your\
  MIDDLEWARE_CLASSES setting to insert\
@@ -30,7 +30,7 @@ class LoginRequiredMiddleware:
         if not request.user.is_authenticated():
             path = request.path_info.lstrip('/')
             if not any(m.match(path) for m in EXEMPT_URLS):
-                log.warning("User not log in, redirecting to log-in page", extra=getUserExtras(request))
+                log.warning("User not log in, redirecting to log-in page", extra=get_user_extras(request))
                 return HttpResponseRedirect(settings.LOGIN_URL)
 
-        log.warning("User Logged In", extra = getUserExtras(request))
+        log.warning("User Logged In", extra = get_user_extras(request))
