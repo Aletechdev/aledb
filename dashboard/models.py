@@ -22,6 +22,7 @@ class ObservedMutationCounts(models.Model):
         return "ObservedMutationCounts Object with the following parameters: "+locals()
 
 
+
 class UniqueMutationCounts(models.Model):
     total = models.IntegerField(default=0)
     single_base_substitution = models.IntegerField(default=0)
