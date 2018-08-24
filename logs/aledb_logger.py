@@ -88,6 +88,7 @@ logging.config.dictConfig(LOGGING)
 
 def get_logger(logname=None):
     logger = logging.getLogger(logname)
+    logger.addFilter(UUIDFilter)
 
     return logger
 
