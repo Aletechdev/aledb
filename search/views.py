@@ -22,7 +22,7 @@ log = get_logger("aledbLogger")
 def search(request):
     try:
 
-        log.info("search terms", extra=request.__dict__['GET'])
+        log.info("search terms", extra=request.__dict__)
         check_hidden_columns_and_filters(request, None)
         obs_mut_qryset = _get_obs_mut_qryset(request)
         reseq_dict = _get_ordered_reseq_dict(obs_mut_qryset)
