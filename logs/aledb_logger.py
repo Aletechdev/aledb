@@ -6,6 +6,7 @@ __author__ = 'Muyao <3'
 
 GLOBAL_STUFF = 1
 
+
 class UUIDFilter(logging.Filter):
     def filter(self, record):
         global GLOBAL_STUFF
@@ -17,17 +18,18 @@ class UUIDFilter(logging.Filter):
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
+    'filters': {
+        'uuidfilter': {
+            'class': UUIDFilter,
+        }
+    },
     'formatters': {
         'standard': {
             'format': "[%(asctime)s] %(global_data)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s] %(message)s",
             'class': 'pythonjsonlogger.jsonlogger.JsonFormatter'
         },
     },
-    'filters': {
-        'uuidfilter': {
-            'class': UUIDFilter,
-        }
-    },
+
     'handlers': {
         'file': {
             'formatter': 'standard',
@@ -82,13 +84,11 @@ LOGGING = {
 }
 
 
-
 logging.config.dictConfig(LOGGING)
 
 
 def get_logger(logname=None):
     logger = logging.getLogger(logname)
-    logger.addFilter(UUIDFilter)
 
     return logger
 
