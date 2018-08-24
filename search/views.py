@@ -36,6 +36,10 @@ def search(request):
                                                            obs_mut_qryset,
                                                            table_type=mutation_table_builder.TableType.SEARCH)
         last_search = _get_last_search(request)
+
+
+        log.info("all seach info", extra = locals())
+
         template = loader.get_template("search.html")
         context = {"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                    "title": "Search Results",
