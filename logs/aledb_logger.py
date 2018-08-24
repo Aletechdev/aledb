@@ -24,7 +24,7 @@ LOGGING = {
     },
     'filters': {
         'uuidfilter': {
-            '()': UUIDFilter,
+            'class': UUIDFilter,
         }
     },
     'handlers': {
