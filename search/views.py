@@ -38,7 +38,8 @@ def search(request):
         last_search = _get_last_search(request)
 
 
-        log.info("all seach info", extra = extra_variables(last_search,table_header))
+        #log.info("all seach info", extra = extra_variables(last_search,table_header))
+        log.info("last search as extra",extra = last_search)
 
         template = loader.get_template("search.html")
         context = {"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
