@@ -20,7 +20,7 @@ LOGGING = {
     'disable_existing_loggers': True,
     'filters': {
         'uuidfilter': {
-            'class': UUIDFilter,
+            '()': UUIDFilter,
         }
     },
     'formatters': {
