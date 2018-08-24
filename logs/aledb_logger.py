@@ -3,14 +3,32 @@ import logging.config
 
 __author__ = 'Muyao <3'
 
+
+class UUIDFilter(logging.Filter):
+    def __init__(self, param=None):
+        self.param = param
+
+    def filter(self, record):
+
+        record.uuid = 123
+
+        return True
+
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format': "[%(asctime)s] %(levelname)s [%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s] %(message)s",
+            'format': "[%(asctime)s] %(uuid)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s] %(message)s",
             'class': 'pythonjsonlogger.jsonlogger.JsonFormatter'
         },
+    },
+    'filters': {
+        'uuidfilter': {
+            '()': UUIDFilter,
+            'param': 'noshow',
+        }
     },
     'handlers': {
         'file': {
@@ -21,15 +39,19 @@ LOGGING = {
             'mode': 'a',
             'maxBytes': 10485760,
             'backupCount': 10,
+            'filters': 'uuidfilter',
         },
         'console': {
             'formatter': 'standard',
             'class': 'logging.StreamHandler',
             'level': 'DEBUG',
+            'filters': 'uuidfilter',
+
         },
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
+            'filters': 'uuidfilter',
         },
     },
     'loggers': {
@@ -60,6 +82,8 @@ LOGGING = {
         'handlers': ['file', 'console', 'mail_admins'],
     }
 }
+
+
 
 logging.config.dictConfig(LOGGING)
 
