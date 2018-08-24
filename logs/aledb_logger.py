@@ -4,12 +4,13 @@ import logging.config
 __author__ = 'Muyao <3'
 
 
-class UUIDFilter(logging.Filter):
-    def __init__(self, param=None):
-        self.param = param
+GLOBAL_STUFF = 1
 
+class UUIDFilter(logging.Filter):
     def filter(self, record):
-        record.uuid = "123"
+        global GLOBAL_STUFF
+        GLOBAL_STUFF += 1
+        record.global_data = GLOBAL_STUFF
         return True
 
 
@@ -18,7 +19,7 @@ LOGGING = {
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format': "[%(asctime)s] %(uuid)-15s %(levelname)s [%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s] %(message)s",
+            'format': "[%(asctime)s] %(global_data)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s] %(message)s",
             'class': 'pythonjsonlogger.jsonlogger.JsonFormatter'
         },
     },
