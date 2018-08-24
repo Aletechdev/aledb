@@ -13,7 +13,7 @@ from common.util import check_hidden_columns_and_filters, get_all_ale_exps, get_
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from filter.util import get_filtered_observed_mutations_queryset
-from logs.aledb_logger import get_logger,user_extra,all_get_extra, join_extras,extra_variables
+from logs.aledb_logger import get_logger,user_extra, join_extras
 
 
 log = get_logger("aledbLogger")
@@ -37,8 +37,6 @@ def search(request):
                                                            table_type=mutation_table_builder.TableType.SEARCH)
         last_search = _get_last_search(request)
 
-
-        #log.info("all seach info", extra = extra_variables(last_search,table_header))
         search_extras = join_extras(user_extra(request),{"last_search": last_search})
         log.info("last search as extra", extra = search_extras)
 
