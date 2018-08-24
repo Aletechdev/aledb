@@ -5,6 +5,8 @@ __author__ = 'Muyao <3'
 
 
 class UUIDFilter(logging.Filter):
+    def __init__(self, param=None):
+        self.param = param
 
     def filter(self, record):
 
