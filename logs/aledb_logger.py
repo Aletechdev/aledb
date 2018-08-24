@@ -11,9 +11,7 @@ LOG_COUNTER = 1
 class UUIDFilter(logging.Filter):
     def filter(self, record):
         randomid = uuid.uuid1()
-        global LOG_COUNTER
-        LOG_COUNTER += 1
-        record.uuid = randomid+"-"+LOG_COUNTER
+        record.uuid = randomid
         return True
 
 
