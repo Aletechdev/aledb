@@ -117,6 +117,9 @@ def all_get_extra(request):
     else:
         return {}
 
+def extra_variables(*variables):
+    return locals()
+
 
 log = logging.getLogger()
 
