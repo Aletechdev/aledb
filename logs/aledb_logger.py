@@ -112,7 +112,10 @@ def everything_extra(request):
 
 
 def all_get_extra(request):
-    return request.__dict__['GET']
+    if 'GET' in request.__dict__:
+        return request.__dict__['GET']
+    else:
+        return {}
 
 
 log = logging.getLogger()
