@@ -18,7 +18,7 @@ LOGGING = {
     'disable_existing_loggers': True,
     'formatters': {
         'standard': {
-            'format': "[%(asctime)s] %(uuid)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s] %(message)s",
+            'format': "[%(asctime)s] %(uuid)-15s %(levelname)s [%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s] %(message)s",
             'class': 'pythonjsonlogger.jsonlogger.JsonFormatter'
         },
     },
