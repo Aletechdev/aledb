@@ -4,14 +4,14 @@ import logging.config
 __author__ = 'Muyao <3'
 
 
-GLOBAL_STUFF = 1
+LOG_COUNTER = 1
 
 
 class UUIDFilter(logging.Filter):
     def filter(self, record):
-        global GLOBAL_STUFF
-        GLOBAL_STUFF += 1
-        record.global_data = GLOBAL_STUFF
+        global LOG_COUNTER
+        LOG_COUNTER += 1
+        record.uuid = LOG_COUNTER
         return True
 
 
@@ -25,7 +25,7 @@ LOGGING = {
     },
     'formatters': {
         'standard': {
-            'format': "[%(asctime)s] %(global_data)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s] %(message)s",
+            'format': "[%(asctime)s] %(uuid)s %(levelname)s [%(name)s] [%(filename)s:%(lineno)s - %(funcName)20s] %(message)s",
             'class': 'pythonjsonlogger.jsonlogger.JsonFormatter'
         },
     },
@@ -79,7 +79,7 @@ LOGGING = {
     },
     'root': {
         'level': 'INFO',
-        'handlers': ['file', 'console', 'mail_admins'],
+        'handlers': ['console'],
     }
 }
 
