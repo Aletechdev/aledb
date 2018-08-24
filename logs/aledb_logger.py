@@ -5,7 +5,8 @@ __author__ = 'Muyao <3'
 
 
 class UUIDFilter(logging.Filter):
-
+    def __init__(self, param=None):
+        self.param = param
     def filter(self, record):
 
         record.uuid = 123
@@ -36,19 +37,19 @@ LOGGING = {
             'mode': 'a',
             'maxBytes': 10485760,
             'backupCount': 10,
-            'filters': 'uuidfilter',
+            'filters': ['uuidfilter'],
         },
         'console': {
             'formatter': 'standard',
             'class': 'logging.StreamHandler',
             'level': 'DEBUG',
-            'filters': 'uuidfilter',
+            'filters': ['uuidfilter'],
 
         },
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
-            'filters': 'uuidfilter',
+            'filters': ['uuidfilter'],
         },
     },
     'loggers': {
