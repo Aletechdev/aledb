@@ -79,7 +79,7 @@ LOGGING = {
     },
     'root': {
         'level': 'INFO',
-        'handlers': ['console'],
+        'handlers': ['file'],
     }
 }
 
