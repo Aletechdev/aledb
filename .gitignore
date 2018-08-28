@@ -13,7 +13,7 @@ config.sh
 .DS_Store
 .builder/
 
-/logs/debug.log
+/logs/debug.log*
 
 # PyCharm
 .idea
