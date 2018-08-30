@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 import seq.views.common
 from seq.views import mutation_table_builder
 from seq.util import get_all_observed_mutations
-from common.util import get_all_ale_exps, get_recent_ale_exps, get_reseq_ordered_dict
+from common.util import common_context, get_recent_ale_exps, get_reseq_ordered_dict
 from common.util import check_hidden_columns_and_filters
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from django.core.serializers.json import DjangoJSONEncoder
@@ -32,7 +32,8 @@ def mutation_table(request):
 
     template = loader.get_template("base_table_template.html")
 
-    context = {"ales": ale_queryset,
+    context = common_context.copy()
+    context.update({"ales": ale_queryset,
                "ale_experiment_name": exp_name,
                "ale_no": ale_no,
                "ale_experiment_id": ale_experiment_id,
@@ -41,11 +42,10 @@ def mutation_table(request):
                "table_header": table_header,
                "template_header": "Mutations",
                "hidden_columns": hidden_columns,
-               "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(ale_experiment_id),
                "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
                "tag_dropdown": common.constants.TAGS
-               }
+               })
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 

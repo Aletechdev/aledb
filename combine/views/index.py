@@ -4,8 +4,8 @@ from django.utils.safestring import mark_safe
 from ale.models import AleExperiment
 from common.util import check_hidden_columns_and_filters,\
     get_all_ale_exps,\
-    get_recent_ale_exps, \
-    get_mut_queryset_from_obs_mut_queryset
+    get_mut_queryset_from_obs_mut_queryset, \
+    common_context
 from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
 from seq.views import common
 from stats.util import get_histogram_jsons,\
@@ -57,7 +57,8 @@ def handle_combine_report(request, ale_experiment_names):
     barchart_item_count = get_histogram_item_count(request)
     genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
 
-    context = {"experiments": all_ale_exp_qryset,
+    context = common_context.copy()
+    context.update({"experiments": all_ale_exp_qryset,
                "has_comparison": True,
                "ale_experiment_id": ale_exp_id_list,
                "header": header,
@@ -75,9 +76,8 @@ def handle_combine_report(request, ale_experiment_names):
                "mutation_type_count_dict": mutation_type_count_dict,
                "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
                "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
-               "recent_experiments": get_recent_ale_exps(),
                "download_experiments": ale_experiment_names,
-               "max_histogram_size": MAX_HISTOGRAM_SIZE}
+               "max_histogram_size": MAX_HISTOGRAM_SIZE})
 
     template = loader.get_template(COMBINE_TEMPLATE)
 

@@ -9,7 +9,7 @@ import operator, collections
 from seq.models import ResequencingExperiment
 from functools import reduce
 from seq.views import mutation_table_builder
-from common.util import check_hidden_columns_and_filters, get_all_ale_exps, get_recent_ale_exps
+from common.util import check_hidden_columns_and_filters, common_context
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from filter.util import get_filtered_observed_mutations_queryset

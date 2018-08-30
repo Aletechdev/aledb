@@ -6,7 +6,7 @@ from django.conf import settings
 
 from seq.views import common
 
-from common.util import get_ordered_reseq_queryset, get_all_ale_exps, get_recent_ale_exps
+from common.util import get_ordered_reseq_queryset, common_context, get_recent_ale_exps
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 
@@ -39,14 +39,14 @@ def metadata(request):
 
     ale_experiment_name = common.get_ale_experiment_name(request)
 
-    context = {"reseq_info_list": reseq_info_list,
+    context = common_context.copy()
+    context.update({"reseq_info_list": reseq_info_list,
                "reseq_report_url": reseq_report_url,
                "ale_experiment_name": ale_experiment_name,
-               "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                "multiple": False,
                "ale_experiment_id": ale_experiment_id
-               }
+               })
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 

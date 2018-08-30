@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
-from common.util import get_all_ale_exps, get_recent_ale_exps
+from common.util import common_context
 import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
 from enrichment.models import EnrichmentMutation
@@ -35,7 +35,9 @@ def combined_enrichment_mutations(request):
     hidden_columns = check_hidden_columns_and_filters(request, None)
 
     template = loader.get_template('base_table_template.html')
-    context = {"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
+
+    context = common_context.copy()
+    context.update({"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
                "ale_no": ale_no,
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                "experiment_id": ale_experiment_list,
@@ -43,11 +45,9 @@ def combined_enrichment_mutations(request):
                "table_header": mark_safe(table_header),
                "template_header": "Enrichment Mutations",
                "hidden_columns": hidden_columns,
-               "experiments": get_all_ale_exps(),
-               "recent_experiments": get_recent_ale_exps(),
                "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                "tag_dropdown": TAGS
-               }
+               })
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 

@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from seq.views import common
 from django.utils.safestring import mark_safe
-from common.util import get_all_ale_exps, get_recent_ale_exps
+from common.util import common_context
 from ale.models import AleExperiment, AleId, Isolate
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from dashboard.timeline_util import get_timeline
