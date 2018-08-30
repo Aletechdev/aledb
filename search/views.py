@@ -13,10 +13,10 @@ from common.util import check_hidden_columns_and_filters, get_all_ale_exps, get_
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from filter.util import get_filtered_observed_mutations_queryset
-from logs.aledb_logger import get_logger,user_extra, join_extras
+from logs.aledb_logger import get_logger, user_extra, join_extras
 
 
-log = get_logger("aledbLogger")
+log = get_logger("usage")
 
 
 def search(request):
