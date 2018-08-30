@@ -200,9 +200,13 @@ def _get_search_ale_exp_params(request):
         ale_experiment_list = request.GET['ale'].replace(" ", "").split(',')
         for ale_experiment in ale_experiment_list:
             if str(ale_experiment).startswith("-"):
-                ale_experiments_to_exclude.append(AleExperiment.objects.get(name__contains=str(ale_experiment)[1:]).ale_id)
+                ale_experiment_query_set = AleExperiment.objects.filter(name__contains=str(ale_experiment)[1:])
+                for obj in ale_experiment_query_set:
+                    ale_experiments_to_exclude.append(obj.ale_id)
             else:
-                ale_experiments_to_include.append(AleExperiment.objects.get(name__contains=str(ale_experiment)).ale_id)
+                ale_experiment_query_set = AleExperiment.objects.filter(name__contains=str(ale_experiment))
+                for obj in ale_experiment_query_set:
+                    ale_experiments_to_include.append(obj.ale_id)
     return ale_experiments_to_include, ale_experiments_to_exclude
 
 
