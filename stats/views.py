@@ -15,7 +15,7 @@ from stats.util import get_histogram_jsons,\
     MAX_HISTOGRAM_SIZE
 from common.util import get_ordered_reseq_queryset,\
     get_reseq_ordered_dict, get_mut_queryset_from_obs_mut_queryset, \
-    get_all_ale_exps, get_recent_ale_exps
+    common_context, get_recent_ale_exps
 from filter.util import get_filtered_observed_mutations_queryset
 import ale.models
 from bibliome.models import Publication
@@ -64,7 +64,8 @@ def stats(request):
     genes_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
 
     needle_plot_data = get_needle_plot_data(obs_mut_qryset)
-    context = {"protein_change_type_count_dict": protein_change_type_count_dict,
+    context = common_context.copy()
+    context.update({"protein_change_type_count_dict": protein_change_type_count_dict,
                "protein_change_sum": sum(protein_change_type_count_dict.values()),
                "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
                "observed_protein_change_sum": sum(observed_protein_change_type_count_dict.values()),
@@ -87,12 +88,11 @@ def stats(request):
                "ale_sum": ale_sum,
                "flask_sum": flask_sum,
                "isolate_sum": isolate_sum,
-               "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(ale_experiment_id),
                "max_histogram_size": MAX_HISTOGRAM_SIZE,
                "pub_qryset": pub_qryset,
                "notes": exp.notes,
-               }
+               })
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 
