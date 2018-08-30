@@ -31,7 +31,7 @@ LOGGING = {
         'file': {
             'formatter': 'standard',
             'level': 'DEBUG',
-            'class': 'logging.handlers.TimedFileHandler',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': 'logs/debug.log',
             'when': 'W0',
             'backupCount': 10,
