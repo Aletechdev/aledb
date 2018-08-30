@@ -23,7 +23,6 @@ def dashboard(request):
     log.info("populating dashboard", extra=user_extra(request))
 
     try:
-
         general_count_dict = _get_general_count_dict()
         observed_mutation_counts = ObservedMutationCounts.objects.first()
         unique_mutation_counts = UniqueMutationCounts.objects.first()
@@ -46,26 +45,26 @@ def dashboard(request):
             gene_histogram_data = []
             gene_mut_histogram_data = []
 
-        context = {"functional_change_type_count_dict": functional_change_type_count_dict,
-                   "count_dict": general_count_dict,
-                   "mutation_type_count_dict": mutation_type_count_dict,
-                   "genes": mark_safe(gene_histogram_data),
-                   "sequence_changes": mark_safe(gene_mut_histogram_data),
-                   "gene_color_set": mark_safe(common.GENE_COLORS),
-                   "seq_color_set": mark_safe(common.SEQ_COLORS),
-                   "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
-                   "protein_types": mark_safe(common.FUNCTIONAL_CHANGE_TYPE_LIST),
-                   "number_of_genes_to_show": barchart_item_count,
-                   "experiments": get_all_ale_exps(),
-                   "recent_experiments": get_recent_ale_exps(),
-                   "max_histogram_size": MAX_HISTOGRAM_SIZE,
-                   "timeline": get_timeline()}
+        context = common_context.copy()
+        context.update({"functional_change_type_count_dict": functional_change_type_count_dict,
+                        "count_dict": general_count_dict,
+                        "mutation_type_count_dict": mutation_type_count_dict,
+                        "genes": mark_safe(gene_histogram_data),
+                        "sequence_changes": mark_safe(gene_mut_histogram_data),
+                        "gene_color_set": mark_safe(common.GENE_COLORS),
+                        "seq_color_set": mark_safe(common.SEQ_COLORS),
+                        "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
+                        "protein_types": mark_safe(common.FUNCTIONAL_CHANGE_TYPE_LIST),
+                        "number_of_genes_to_show": barchart_item_count,
+                        "max_histogram_size": MAX_HISTOGRAM_SIZE,
+                        "timeline": get_timeline()})
 
         return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
 
     except Exception as e:
         log.exception(e, extra = user_extra(request))
         return HttpResponse(e)
+
 
 
 def _get_general_count_dict():
