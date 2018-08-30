@@ -5,9 +5,6 @@ import uuid
 __author__ = 'Muyao <3'
 
 
-LOG_COUNTER = 1
-
-
 class UUIDFilter(logging.Filter):
     def filter(self, record):
         randomid = uuid.uuid1()
@@ -34,10 +31,9 @@ LOGGING = {
         'file': {
             'formatter': 'standard',
             'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
+            'class': 'logging.handlers.TimedFileHandler',
             'filename': 'logs/debug.log',
-            'mode': 'a',
-            'maxBytes': 10485760,
+            'when': 'W0',
             'backupCount': 10,
             'filters': ['uuidfilter'],
         },
@@ -55,24 +51,19 @@ LOGGING = {
         },
     },
     'loggers': {
-        'aledbLogger': {
-            'level': 'DEBUG',
-            'propagate': True,
-        },
         'security': {
             'level': 'WARNING',
-            'propagate': True,
-            'handlers': ['file']
-        },
-        'performance': {
-            'level': 'INFO',
             'propagate': True,
         },
         'usage': {
             'level': 'INFO',
             'propagate': True,
         },
-        'uncaughtexcept': {
+        'performance': {
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'exceptions': {
             'level': 'WARNING',
             'propagate': True,
         },
@@ -93,17 +84,6 @@ def get_logger(logname=None):
     return logger
 
 
-def get_client_ip(request):
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[-1].strip()
-    elif request.META.get('HTTP_X_REAL_IP'):
-        ip = request.META.get('HTTP_X_REAL_IP')
-    else:
-        ip = request.META.get('REMOTE_ADDR')
-    return ip
-
-
 def join_extras(*dict_args):
     """
         Given any number of dicts, shallow copy and merge into a new dict,
@@ -113,6 +93,17 @@ def join_extras(*dict_args):
     for dictionary in dict_args:
         result.update(dictionary)
     return result
+
+
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[-1].strip()
+    elif request.META.get('HTTP_X_REAL_IP'):
+        ip = request.META.get('HTTP_X_REAL_IP')
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 
 def user_extra(request):
@@ -137,13 +128,6 @@ def all_get_extra(request):
     else:
         return {}
 
+
 def extra_variables(*variables):
     return locals()
-
-
-log = logging.getLogger()
-
-try:
-    1 / 0
-except ZeroDivisionError as e:
-    log.exception("this is what an exception look like. The full trace should be generated")

@@ -50,8 +50,6 @@ def search(request):
                    "experiments": get_all_ale_exps(),
                    "recent_experiments": get_recent_ale_exps()}
 
-
-
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
         log.exception("Search Broke")
