@@ -3,7 +3,7 @@ from django.template import loader
 from filter.forms.filter import FilterForm
 from django.utils.safestring import mark_safe
 from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations, TABLE_HEADER, get_global_filter
-from common.util import get_all_ale_exps, get_recent_ale_exps, clear_dashboard_cache
+from common.util import common_context, clear_dashboard_cache
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -26,11 +26,10 @@ def global_filter(request):
 
     table_body, ignored_mutation_id_list = get_ignored_mutations(filter_form_model)
 
-    context = {"form": filter_form,
+    context = common_context.copy()
+    context.update({"form": filter_form,
                "table_body": mark_safe(table_body),
-               "table_header": mark_safe(TABLE_HEADER),
-               "experiments": get_all_ale_exps(),
-               "recent_experiments": get_recent_ale_exps()}
+               "table_header": mark_safe(TABLE_HEADER)})
 
     return HttpResponse(template.render(context, request), content_type="text/html")
 

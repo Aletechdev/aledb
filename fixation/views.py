@@ -7,7 +7,7 @@ from common.constants import \
     REQUEST_MUTATION_ID, \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
 from common.util import get_reseq_ordered_dict,\
-    get_all_ale_exps,\
+    common_context,\
     get_recent_ale_exps,\
     check_hidden_columns_and_filters
 from fixation.util import get_exp_fixed_obs_mut_qryset
@@ -39,7 +39,8 @@ def fixating_mutations(request):
 
     template = loader.get_template("base_table_template.html")
 
-    context = {"ales": ale_qryset,
+    context = common_context.copy()
+    context.update({"ales": ale_qryset,
                "ale_experiment_name": exp_name,
                "ale_no": ale_number,
                "ale_experiment_id": ale_experiment_id,
@@ -48,9 +49,8 @@ def fixating_mutations(request):
                "table_header": mark_safe(table_header),
                "template_header": "Fixating Mutations",
                "hidden_columns": hidden_columns,
-               "experiments": get_all_ale_exps(),
                "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
-               "tag_dropdown": common.constants.TAGS}
+               "tag_dropdown": common.constants.TAGS})
 
     return HttpResponse(template.render(context, request), content_type="text/html")
