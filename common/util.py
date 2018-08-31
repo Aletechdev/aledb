@@ -1,3 +1,5 @@
+import subprocess
+
 from common.constants import REQUEST_ALL
 from filter.models import AleExperimentFilter
 from filter.util import get_global_filter
@@ -209,9 +211,9 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
 
 def get_git_hash():
-    master_branch_hash_file = open('/var/www/aledb/.git/refs/heads/master','r')
-    return master_branch_hash_file.readline().replace("\n","")
+
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
 
 common_context = {"experiments": get_all_ale_exps(),
                   "recent_experiments": get_recent_ale_exps,
-                  "git_hash":get_git_hash()}
+                  "git_hash": get_git_hash()}
