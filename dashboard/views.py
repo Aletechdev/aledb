@@ -16,11 +16,11 @@ DEFAULT_IGNORED_MUTATIONS = "[]"
 DASHBOARD_TEMPLATE = "dashboard.html"
 __author__ = 'pphaneuf'
 
-log = get_logger("aledbLogger")
-
+usage = get_logger("usage")
+exception = get_logger("exceptions")
 
 def dashboard(request):
-    log.info("populating dashboard", extra=user_extra(request))
+    usage.info("populating dashboard", extra=user_extra(request))
 
     try:
         general_count_dict = _get_general_count_dict()
@@ -62,8 +62,7 @@ def dashboard(request):
         return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
 
     except Exception as e:
-        log.exception(e, extra = user_extra(request))
-        return HttpResponse(e)
+        exception.exception(e, extra = user_extra(request))
 
 
 
@@ -82,7 +81,7 @@ def _get_general_count_dict():
 
 def _get_mutation_type_count_dict(observed_mutation_counts, unique_mutation_counts):
 
-    log.info("running _get_mutation_type_count_dict", extra=locals())
+    usage.info("running _get_mutation_type_count_dict", extra=locals())
 
     mutation_type_count_dict = {'observed': {}, 'unique': {}}
 

@@ -29,6 +29,7 @@ def login_user(request):
         if user is not None:
             if user.is_active:
                 login(request, user)
+                security.info("Log-in success: " + username, extra={'account': username})
                 return dashboard(request)
 
     template = loader.get_template('login.html')

@@ -20,7 +20,7 @@ class LoginRequiredMiddleware:
     """
 
     def process_request(self, request):
-        log = get_logger(__name__)
+        security = get_logger("security")
         assert hasattr(request, 'user'), "The Login Required middleware\
  requires authentication middleware to be installed. Edit your\
  MIDDLEWARE_CLASSES setting to insert\
@@ -30,7 +30,7 @@ class LoginRequiredMiddleware:
         if not request.user.is_authenticated():
             path = request.path_info.lstrip('/')
             if not any(m.match(path) for m in EXEMPT_URLS):
-                log.warning("User not log in, redirecting to log-in page", extra=user_extra(request))
+                security.warning("User not log in, redirecting to log-in page", extra=user_extra(request))
                 return HttpResponseRedirect(settings.LOGIN_URL)
 
-        log.warning("User Logged In", extra = user_extra(request))
+        security.warning("User Logged In", extra = user_extra(request))
