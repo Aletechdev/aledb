@@ -1,3 +1,5 @@
+import time
+
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.template import loader
@@ -17,10 +19,11 @@ from logs.aledb_logger import get_logger, user_extra, join_extras
 
 
 log = get_logger("usage")
-
+performance = get_logger("performance")
 
 def search(request):
     try:
+        start_time = time.clock()
         log.info("search", extra=user_extra(request))
         check_hidden_columns_and_filters(request, None)
         obs_mut_qryset = _get_obs_mut_qryset(request)
@@ -45,6 +48,7 @@ def search(request):
                         "mutation_count": len(table_body),
                         "observed_mutation_count": obs_mut_qryset.count()
                         })
+        performance.log("search performance", extra={"time taken":time.clock()-start_time})
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
         log.exception("Search Broke")
