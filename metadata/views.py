@@ -9,7 +9,10 @@ from seq.views import common
 from common.util import get_ordered_reseq_queryset, common_context, get_recent_ale_exps
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
+from logs.aledb_logger import get_logger,user_extra
 
+exception = get_logger("exceptions")
+usage = get_logger("usage")
 
 __author__ = 'Patrick Phaneuf'
 

@@ -20,7 +20,7 @@ from logs.aledb_logger import get_logger, user_extra, join_extras
 
 log = get_logger("usage")
 performance = get_logger("performance")
-
+exception = get_logger("exceptions")
 def search(request):
     try:
         start_time = time.clock()
@@ -51,7 +51,7 @@ def search(request):
         performance.info("search performance", extra={"time taken":time.clock()-start_time})
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
-        log.exception("Search Broke")
+        exception.exception("Search Broke")
 
 
 
