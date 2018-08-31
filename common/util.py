@@ -211,8 +211,8 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
 
 def get_git_hash():
-
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+
 
 common_context = {"experiments": get_all_ale_exps(),
                   "recent_experiments": get_recent_ale_exps,
