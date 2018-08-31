@@ -10,7 +10,10 @@ from common.constants import \
 from common.util import check_hidden_columns_and_filters
 import common.constants
 from enrichment.util import get_enrich_obs_mut_qryset
+from logs.aledb_logger import get_logger,user_extra
 
+exception = get_logger("exceptions")
+usage = get_logger("usage")
 
 __author__ = 'Patrick Phaneuf'
 

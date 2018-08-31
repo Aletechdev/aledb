@@ -19,7 +19,10 @@ from common.util import get_ordered_reseq_queryset,\
 from filter.util import get_filtered_observed_mutations_queryset
 import ale.models
 from bibliome.models import Publication
+from logs.aledb_logger import get_logger,user_extra
 
+exception = get_logger("exceptions")
+usage = get_logger("usage")
 
 __author__ = 'pphaneuf'
 STATS_TEMPLATE = "stats.html"

@@ -12,7 +12,10 @@ from common.util import get_reseq_ordered_dict,\
     check_hidden_columns_and_filters
 from fixation.util import get_exp_fixed_obs_mut_qryset
 import common.constants
+from logs.aledb_logger import get_logger,user_extra
 
+exception = get_logger("exceptions")
+usage = get_logger("usage")
 
 __author__ = 'Patrick Phaneuf'
 

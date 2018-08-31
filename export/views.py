@@ -10,7 +10,10 @@ from export.util import \
     MUT_TYPE_STR, \
     FIXED_MUT_TYPE_STR, \
     CONVERGED_MUT_TYPE_STR
+from logs.aledb_logger import get_logger,user_extra
 
+exception = get_logger("exceptions")
+usage = get_logger("usage")
 
 EXPORT_TEMPLATE = 'export.html'
 

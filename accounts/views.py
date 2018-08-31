@@ -7,6 +7,7 @@ from logs.aledb_logger import get_logger
 
 def login_user(request):
 
+
     logout(request)
     if request.POST:
         username = request.POST['username']
