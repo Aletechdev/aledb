@@ -13,7 +13,8 @@ def about(request):
 
     # TODO: use the template location described within settings.py
 
-    usage.info("Populating about page", extra=user_extra(request))
+    usage.info("about", extra=user_extra(request))
+
     try:
         template = loader.get_template("about/index.html")
 

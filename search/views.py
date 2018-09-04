@@ -18,13 +18,15 @@ from filter.util import get_filtered_observed_mutations_queryset
 from logs.aledb_logger import get_logger, user_extra, join_extras
 
 
-log = get_logger("usage")
+usage = get_logger("usage")
 performance = get_logger("performance")
 exception = get_logger("exceptions")
+
 def search(request):
+    usage.info("search", extra=user_extra(request))
     try:
         start_time = time.clock()
-        log.info("search", extra=user_extra(request))
+
         check_hidden_columns_and_filters(request, None)
         obs_mut_qryset = _get_obs_mut_qryset(request)
         reseq_dict = _get_ordered_reseq_dict(obs_mut_qryset)
@@ -51,7 +53,7 @@ def search(request):
         performance.info("search performance", extra={"time taken":time.clock()-start_time})
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
-        exception.exception("Search Broke")
+        exception.exception("search broke", extra = user_extra(request))
 
 
 

@@ -28,31 +28,35 @@ else:
 
 
 def metadata(request):
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    ale_id = request.GET.get(REQUEST_ALE_ID)
-    reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
+    usage.info("fixation", extra = user_extra(request))
 
-    # Would rather want to use something like a dictionary since an experiment is
-    # unique, though an experiment is currently a structure and an integral type
-    # that can be used as a key.
+    try:
+        ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+        ale_id = request.GET.get(REQUEST_ALE_ID)
+        reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
 
-    reseq_info_list = get_reseq_info_list(reseq_queryset)
+        # Would rather want to use something like a dictionary since an experiment is
+        # unique, though an experiment is currently a structure and an integral type
+        # that can be used as a key.
 
-    template = loader.get_template(META_DATA_TEMPLATE)
+        reseq_info_list = get_reseq_info_list(reseq_queryset)
 
-    ale_experiment_name = common.get_ale_experiment_name(request)
+        template = loader.get_template(META_DATA_TEMPLATE)
 
-    context = common_context.copy()
-    context.update({"reseq_info_list": reseq_info_list,
-               "reseq_report_url": reseq_report_url,
-               "ale_experiment_name": ale_experiment_name,
-               "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
-               "multiple": False,
-               "ale_experiment_id": ale_experiment_id
-               })
+        ale_experiment_name = common.get_ale_experiment_name(request)
 
-    return HttpResponse(template.render(context, request), content_type="text/html")
+        context = common_context.copy()
+        context.update({"reseq_info_list": reseq_info_list,
+                   "reseq_report_url": reseq_report_url,
+                   "ale_experiment_name": ale_experiment_name,
+                   "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
+                   "multiple": False,
+                   "ale_experiment_id": ale_experiment_id
+                   })
 
+        return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception:
+        exception.exception("metadata broke", extra = user_extra(request))
 
 def get_reseq_info_list(reseq_queryset):
 
