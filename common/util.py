@@ -215,7 +215,6 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
 
 def get_git_hash():
-    1/0
     master_branch_hash_file = open('./.git/refs/heads/master','r')
     return master_branch_hash_file.readline().replace("\n","")
 
