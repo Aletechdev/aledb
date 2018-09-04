@@ -8,6 +8,7 @@ from seq.models import Mutation
 from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
+from logs.aledb_logger import get_logger
 
 
 
@@ -214,9 +215,16 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 
 
 def get_git_hash():
+    1/0
     master_branch_hash_file = open('./.git/refs/heads/master','r')
     return master_branch_hash_file.readline().replace("\n","")
 
-common_context = {"experiments": get_all_ale_exps(),
+
+exception = get_logger("exception")
+
+try:
+    common_context = {"experiments": get_all_ale_exps(),
                   "recent_experiments": get_recent_ale_exps,
                   "git_hash":get_git_hash()}
+except Exception:
+    exception.exception("common_context broke")
