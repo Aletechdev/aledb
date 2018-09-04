@@ -14,7 +14,6 @@ CONVERGED_MUT_TYPE_STR = "converged_mut"
 
 
 def get_csv_str(exp_id, mut_type_str):
-    1/0
     if mut_type_str == FIXED_MUT_TYPE_STR:
         reseq_ordered_dict = get_reseq_ordered_dict(exp_id)
         obs_mut_qryset = get_exp_fixed_obs_mut_qryset(reseq_ordered_dict)
