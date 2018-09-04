@@ -121,7 +121,7 @@ def _get_search_params(request):
 
     _add_protein_change_to_query(request, include_argument_list, exclude_argument_list)
 
-    log.info("search parameters", extra = locals())
+    usage.info("search parameters", extra = locals())
 
     return include_argument_list, exclude_argument_list
 
