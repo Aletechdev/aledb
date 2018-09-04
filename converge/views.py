@@ -19,38 +19,44 @@ __author__ = 'Patrick Phaneuf'
 
 
 def converge_mutations(request):
-    ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-    exp_name = seq.views.common.get_ale_experiment_name(request)
-    ale_number = seq.views.common.get_ale_id(request)
-    ale_qrtset = seq.views.common.get_ales(ale_experiment_id, True)
+    usage.info("converge", extra = user_extra(request))
 
-    reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
+    try:
 
-    table_header = mutation_table_builder.get_table_header(request, reseq_dict=reseq_ordered_dict,
-                                                           table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
+        ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
+        exp_name = seq.views.common.get_ale_experiment_name(request)
+        ale_number = seq.views.common.get_ale_id(request)
+        ale_qrtset = seq.views.common.get_ales(ale_experiment_id, True)
 
-    table_body = _get_table_body(reseq_ordered_dict, request)
+        reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
 
-    hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
+        table_header = mutation_table_builder.get_table_header(request, reseq_dict=reseq_ordered_dict,
+                                                               table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
 
-    template = loader.get_template('base_table_template.html')
+        table_body = _get_table_body(reseq_ordered_dict, request)
 
-    context = common_context.copy()
-    context.update({"ales": ale_qrtset,
-               "ale_experiment_name": exp_name,
-               "ale_no": ale_number,
-               "ale_experiment_id": ale_experiment_id,
-               "table_body": mark_safe(table_body),
-               "title": exp_name + " Converged Mutations",
-               "table_header": mark_safe(table_header),
-               "template_header": "Converged Mutations",
-               "hidden_columns": hidden_columns,
-               "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
-               "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
-               "tag_dropdown": common.constants.TAGS
-               })
+        hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
-    return HttpResponse(template.render(context, request), content_type="text/html")
+        template = loader.get_template('base_table_template.html')
+
+        context = common_context.copy()
+        context.update({"ales": ale_qrtset,
+                   "ale_experiment_name": exp_name,
+                   "ale_no": ale_number,
+                   "ale_experiment_id": ale_experiment_id,
+                   "table_body": mark_safe(table_body),
+                   "title": exp_name + " Converged Mutations",
+                   "table_header": mark_safe(table_header),
+                   "template_header": "Converged Mutations",
+                   "hidden_columns": hidden_columns,
+                   "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
+                   "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
+                   "tag_dropdown": common.constants.TAGS
+                   })
+
+        return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception:
+        exception.exception("converge broke", extra = user_extra(request))
 
 
 # TODO: refactor

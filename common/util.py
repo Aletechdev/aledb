@@ -8,12 +8,11 @@ from seq.models import Mutation
 from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
-from logs.aledb_logger import get_logger
+
 
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
-log = get_logger("aledbLogger")
 
 
 
@@ -80,9 +79,6 @@ def get_all_ale_exps():
 
 # TODO: go in ale.util
 def get_recent_ale_exps(ale_experiment_id=None):
-
-    log.info("get_recent_ale_exps", extra = locals())
-
 
     recent, created = RecentExperiments.objects.get_or_create(id=1)
 
@@ -211,6 +207,7 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
                 replicate.tags = ','.join(tag_list)
             else:
                 replicate.tags = request.POST.get('tag_name')
+            replicate.save()
             replicate.save()
 
     return hidden_columns
