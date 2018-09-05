@@ -1,3 +1,4 @@
+import time
 from django.shortcuts import render
 
 from django.http import HttpResponse
@@ -10,7 +11,7 @@ from dashboard.timeline_util import get_timeline
 from stats.views import get_histogram_item_count
 from dashboard.models import BarCharts
 from stats.util import MAX_HISTOGRAM_SIZE
-from logs.aledb_logger import get_logger,user_extra
+from logs.aledb_logger import get_logger, user_extra, join_extras
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 DASHBOARD_TEMPLATE = "dashboard.html"
@@ -18,11 +19,14 @@ __author__ = 'pphaneuf'
 
 usage = get_logger("usage")
 exception = get_logger("exceptions")
+performance = get_logger("performance")
+
 
 def dashboard(request):
     usage.info("populating dashboard", extra=user_extra(request))
 
     try:
+        start_time = time.clock()
         general_count_dict = _get_general_count_dict()
         observed_mutation_counts = ObservedMutationCounts.objects.first()
         unique_mutation_counts = UniqueMutationCounts.objects.first()
@@ -58,6 +62,7 @@ def dashboard(request):
                         "number_of_genes_to_show": barchart_item_count,
                         "max_histogram_size": MAX_HISTOGRAM_SIZE,
                         "timeline": get_timeline()})
+        performance.info("dashboard performance", extra=join_extras(user_extra(request), {"time taken": time.clock()-start_time}))
 
         return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
 

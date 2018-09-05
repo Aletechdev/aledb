@@ -56,7 +56,6 @@ def search(request):
         exception.exception("search broke", extra = user_extra(request))
 
 
-
 # TODO: roll _get_search_ale_exp_params into _get_search_params.
 def _get_obs_mut_qryset(request):
 

@@ -1,3 +1,4 @@
+import time
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.template import loader
@@ -13,10 +14,11 @@ import requests
 from common.util import common_context, check_hidden_columns_and_filters
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
-from logs.aledb_logger import get_logger,user_extra
+from logs.aledb_logger import get_logger, user_extra, join_extras
 
 exception = get_logger("exceptions")
 usage = get_logger("usage")
+performance = get_logger("performance")
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     aledata_url = settings.SEQUENCING_URL
@@ -32,6 +34,7 @@ def gene(request):
     usage.info("gene", extra = user_extra(request))
 
     try:
+        time_start = time.clock()
         gene_query = request.GET['g']
         reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request, gene_query)
         table_header = mutation_table_builder.get_table_header(reseq_dict)
@@ -57,6 +60,7 @@ def gene(request):
                    "homology_data": mark_safe(json.dumps(homology_data)),
                    "has_homology_data": has_homology_data,
                    "hidden_columns": hidden_columns})
+        performance.info("genes performance", extra=join_extras(user_extra(request), {"time taken": time.clock()-start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
