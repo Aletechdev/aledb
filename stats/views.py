@@ -1,3 +1,4 @@
+import time
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
@@ -19,10 +20,11 @@ from common.util import get_ordered_reseq_queryset,\
 from filter.util import get_filtered_observed_mutations_queryset
 import ale.models
 from bibliome.models import Publication
-from logs.aledb_logger import get_logger,user_extra
+from logs.aledb_logger import get_logger, user_extra, join_extras
 
 exception = get_logger("exceptions")
 usage = get_logger("usage")
+performance = get_logger("performance")
 
 __author__ = 'pphaneuf'
 STATS_TEMPLATE = "stats.html"
@@ -35,9 +37,8 @@ if hasattr(settings, "SEQUENCING_URL"):
 
 def stats(request):
     usage.info("stats", extra = user_extra(request))
-
     try:
-
+        start_time = time.clock()
         ale_experiment_id = common.get_ale_experiment_id(request)
 
         exp = ale.models.AleExperiment.objects.get(pk=ale_experiment_id)
@@ -100,6 +101,7 @@ def stats(request):
                    "pub_qryset": pub_qryset,
                    "notes": exp.notes,
                    })
+        performance.info("stats performance", extra=join_extras(user_extra(request), {"time taken": time.clock()-start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
 

@@ -1,3 +1,4 @@
+import time
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
@@ -10,17 +11,18 @@ from common.constants import \
 from common.util import check_hidden_columns_and_filters
 import common.constants
 from enrichment.util import get_enrich_obs_mut_qryset
-from logs.aledb_logger import get_logger,user_extra
+from logs.aledb_logger import get_logger, user_extra, join_extras
 
 exception = get_logger("exceptions")
 usage = get_logger("usage")
-
+performance = get_logger("performance")
 __author__ = 'Patrick Phaneuf'
 
 
 def enrichment_mutations(request):
     usage.info("enrichment", extra = user_extra(request))
     try:
+        start_time = time.clock()
         ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
         exp_name = seq.views.common.get_ale_experiment_name(request)
         ale_number = seq.views.common.get_ale_id(request)
@@ -50,6 +52,7 @@ def enrichment_mutations(request):
                    "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                    "tag_dropdown": common.constants.TAGS
                    }
+        performance.info("enrichment performance", extra=join_extras(user_extra(request), {"time taken": time.clock()-start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
