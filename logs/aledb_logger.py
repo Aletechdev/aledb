@@ -34,7 +34,7 @@ LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': 'logs/debug.log',
             'when': 'W0',
-            'backupCount': 10,
+            'backupCount': 5,
             'filters': ['uuidfilter'],
         },
         'console': {

@@ -33,4 +33,4 @@ class LoginRequiredMiddleware:
                 security.warning("User not log in, redirecting to log-in page", extra=user_extra(request))
                 return HttpResponseRedirect(settings.LOGIN_URL)
 
-        security.warning("User Logged In", extra = user_extra(request))
+        security.warning("User Logged In", extra=user_extra(request))
