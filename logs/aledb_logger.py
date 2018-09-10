@@ -33,8 +33,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': 'logs/debug.log',
-            'when': 's',
-            'interval': 10,
+            'when': 'W0',
             'backupCount': 5,
             'filters': ['uuidfilter'],
         },
@@ -53,15 +52,15 @@ LOGGING = {
     },
     'loggers': {
         'security': {
-            'level': 'WARNING',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'usage': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'performance': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'propagate': True,
         },
         'exceptions': {
@@ -70,7 +69,7 @@ LOGGING = {
         },
     },
     'root': {
-        'level': 'INFO',
+        'level': 'DEBUG',
         'handlers': ['file'],
     }
 }
