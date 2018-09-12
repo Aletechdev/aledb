@@ -22,6 +22,7 @@ usage = get_logger("usage")
 performance = get_logger("performance")
 exception = get_logger("exceptions")
 
+
 def search(request):
     usage.info("search", extra=user_extra(request))
     try:
