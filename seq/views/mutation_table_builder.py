@@ -9,6 +9,7 @@ from common.util import get_mut_queryset_from_obs_mut_queryset
 from genes.util import get_gene_list
 from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS
 from ale.models import TechnicalReplicate
+from logs.aledb_logger import get_logger
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
@@ -188,8 +189,11 @@ def get_table_body(request,
 
 
 def get_ecocyc_gene_list(gene_list):
+
     url_list = []
     for each in gene_list:
+        if each.startswith("<"):
+            each = each.split(">")[-1]
         url_list.append(HTML_ECOCYC.format(gene=each))
     return url_list
 
