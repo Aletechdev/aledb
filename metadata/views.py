@@ -13,9 +13,9 @@ from common.util import get_ordered_reseq_queryset, common_context, get_recent_a
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 from logs.aledb_logger import get_logger, user_extra, join_extras
 
-exception = get_logger("exceptions")
-usage = get_logger("usage")
-performance = get_logger("performance")
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
 __author__ = 'Patrick Phaneuf'
 
 # TODO: use the template location described within settings.py
@@ -30,7 +30,7 @@ else:
 
 
 def metadata(request):
-    usage.info("fixation", extra=user_extra(request))
+    usage_lgr.info("fixation", extra=user_extra(request))
 
     try:
         start_time = time.clock()
@@ -57,11 +57,11 @@ def metadata(request):
                    "ale_experiment_id": ale_experiment_id
                    })
 
-        performance.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock()-start_time}))
+        performance_lgr.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
-        exception.exception("metadata broke", extra=user_extra(request))
+        exception_lgr.exception("metadata broke", extra=user_extra(request))
 
 
 def get_reseq_info_list(reseq_queryset):

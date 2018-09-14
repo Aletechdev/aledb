@@ -22,9 +22,9 @@ import ale.models
 from bibliome.models import Publication
 from logs.aledb_logger import get_logger, user_extra, join_extras
 
-exception = get_logger("exceptions")
-usage = get_logger("usage")
-performance = get_logger("performance")
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
 
 __author__ = 'pphaneuf'
 STATS_TEMPLATE = "stats.html"
@@ -36,7 +36,7 @@ if hasattr(settings, "SEQUENCING_URL"):
 
 
 def stats(request):
-    usage.info("stats", extra = user_extra(request))
+    usage_lgr.info("stats", extra = user_extra(request))
     try:
         start_time = time.clock()
         ale_experiment_id = common.get_ale_experiment_id(request)
@@ -101,12 +101,12 @@ def stats(request):
                    "pub_qryset": pub_qryset,
                    "notes": exp.notes,
                    })
-        performance.info("stats performance", extra=join_extras(user_extra(request), {"time taken": time.clock()-start_time}))
+        performance_lgr.info("stats performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
 
     except Exception:
-        exception.exception("stats broke", extra = user_extra(request))
+        exception_lgr.exception("stats broke", extra = user_extra(request))
 
 
 def get_histogram_item_count(request):

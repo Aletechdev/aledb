@@ -16,9 +16,9 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from logs.aledb_logger import get_logger, user_extra, join_extras
 
-exception = get_logger("exceptions")
-usage = get_logger("usage")
-performance = get_logger("performance")
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     aledata_url = settings.SEQUENCING_URL
@@ -31,10 +31,10 @@ else:
 
 
 def gene(request):
-    usage.info("gene", extra = user_extra(request))
+    usage_lgr.info("gene", extra = user_extra(request))
 
     try:
-        time_start = time.clock()
+        start_time = time.clock()
         gene_query = request.GET['g']
         reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request, gene_query)
         table_header = mutation_table_builder.get_table_header(reseq_dict)
@@ -60,11 +60,11 @@ def gene(request):
                    "homology_data": mark_safe(json.dumps(homology_data)),
                    "has_homology_data": has_homology_data,
                    "hidden_columns": hidden_columns})
-        performance.info("genes performance", extra=join_extras(user_extra(request), {"time taken": time.clock()-start_time}))
+        performance_lgr.info("genes performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
-        exception.exception("genes broke", extra = user_extra(request))
+        exception_lgr.exception("genes broke", extra = user_extra(request))
 
 # TODO: This is the same implementation as found within seq.views.search.py; need to consolidate.
 def _get_seq_exp(request, mutated_gene):

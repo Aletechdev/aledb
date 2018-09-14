@@ -12,14 +12,14 @@ from export.util import \
     CONVERGED_MUT_TYPE_STR
 from logs.aledb_logger import get_logger,user_extra
 
-exception = get_logger("exceptions")
-usage = get_logger("usage")
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
 
 EXPORT_TEMPLATE = 'export.html'
 
 
 def export(request):
-    usage.info("export", extra = user_extra(request))
+    usage_lgr.info("export", extra = user_extra(request))
     try:
         exp_name_str = request.GET.get('download_experiments', None)
         mut_type_str = request.GET.get('mut_type_selected', None)
@@ -43,5 +43,5 @@ def export(request):
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
-        exception.exception("export broke", extra = user_extra(request))
+        exception_lgr.exception("export broke", extra = user_extra(request))
 

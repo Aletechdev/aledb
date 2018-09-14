@@ -12,9 +12,9 @@ from seq.models import Mutation
 from ale.models import AleExperiment
 from logs.aledb_logger import get_logger, user_extra
 
-exception = get_logger("exceptions")
-usage = get_logger("usage")
-performance = get_logger("performance")
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -24,7 +24,7 @@ STARTING_STRAIN_HEADER = """<tr><td>Position</td><td>Mutation Type</td><td>Seque
 
 
 def mutation_filter(request):
-	usage.info("mutation filter", extra=user_extra(request))
+	usage_lgr.info("mutation filter", extra=user_extra(request))
 	try:
 		ale_experiment_name = common.get_ale_experiment_name(request)
 		ale_experiment_id = common.get_ale_experiment_id(request)
@@ -57,7 +57,7 @@ def mutation_filter(request):
 			"starting_strain_header": mark_safe(STARTING_STRAIN_HEADER)})
 		return HttpResponse(template.render(context, request), content_type="text/html")
 	except Exception:
-		exception.exception("mutation filter broke", extra=user_extra(request))
+		exception_lgr.exception("mutation filter broke", extra=user_extra(request))
 
 
 def _handle_POST(request, filter_form_model, ale_experiment_id):
