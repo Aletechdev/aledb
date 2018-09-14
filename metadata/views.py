@@ -1,3 +1,5 @@
+import time
+
 from django.http import HttpResponse
 
 from django.template import loader
@@ -9,8 +11,11 @@ from seq.views import common
 from common.util import get_ordered_reseq_queryset, common_context, get_recent_ale_exps
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
+from logs.aledb_logger import get_logger, user_extra, join_extras
 
-
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
 __author__ = 'Patrick Phaneuf'
 
 # TODO: use the template location described within settings.py
@@ -25,30 +30,38 @@ else:
 
 
 def metadata(request):
-    ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    ale_id = request.GET.get(REQUEST_ALE_ID)
-    reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
+    usage_lgr.info("fixation", extra=user_extra(request))
 
-    # Would rather want to use something like a dictionary since an experiment is
-    # unique, though an experiment is currently a structure and an integral type
-    # that can be used as a key.
+    try:
+        start_time = time.clock()
+        ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+        ale_id = request.GET.get(REQUEST_ALE_ID)
+        reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
 
-    reseq_info_list = get_reseq_info_list(reseq_queryset)
+        # Would rather want to use something like a dictionary since an experiment is
+        # unique, though an experiment is currently a structure and an integral type
+        # that can be used as a key.
 
-    template = loader.get_template(META_DATA_TEMPLATE)
+        reseq_info_list = get_reseq_info_list(reseq_queryset)
 
-    ale_experiment_name = common.get_ale_experiment_name(request)
+        template = loader.get_template(META_DATA_TEMPLATE)
 
-    context = common_context.copy()
-    context.update({"reseq_info_list": reseq_info_list,
-               "reseq_report_url": reseq_report_url,
-               "ale_experiment_name": ale_experiment_name,
-               "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
-               "multiple": False,
-               "ale_experiment_id": ale_experiment_id
-               })
+        ale_experiment_name = common.get_ale_experiment_name(request)
 
-    return HttpResponse(template.render(context, request), content_type="text/html")
+        context = common_context.copy()
+        context.update({"reseq_info_list": reseq_info_list,
+                   "reseq_report_url": reseq_report_url,
+                   "ale_experiment_name": ale_experiment_name,
+                   "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
+                   "multiple": False,
+                   "ale_experiment_id": ale_experiment_id
+                   })
+
+        performance_lgr.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+
+        return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception:
+        exception_lgr.exception("metadata broke", extra=user_extra(request))
 
 
 def get_reseq_info_list(reseq_queryset):

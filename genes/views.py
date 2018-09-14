@@ -1,3 +1,4 @@
+import time
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.template import loader
@@ -13,7 +14,11 @@ import requests
 from common.util import common_context, check_hidden_columns_and_filters
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
+from logs.aledb_logger import get_logger, user_extra, join_extras
 
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     aledata_url = settings.SEQUENCING_URL
@@ -26,34 +31,40 @@ else:
 
 
 def gene(request):
-    gene_query = request.GET['g']
-    reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request, gene_query)
-    table_header = mutation_table_builder.get_table_header(reseq_dict)
-    table_body, protein_changes = mutation_table_builder.get_table_body(request, reseq_dict,
-                                                                        observed_mutations_with_gene_queryset,
-                                                                        table_type=mutation_table_builder.TableType.GENE_TABLE)
+    usage_lgr.info("gene", extra = user_extra(request))
 
-    pdb_url, residue_mappings, has_pdb_file = _get_pdb_info(gene_query)
-    homology_data, has_homology_data = _get_homology_data(gene_query)
-    hidden_columns = check_hidden_columns_and_filters(request, None)
-    template = loader.get_template("gene.html")
+    try:
+        start_time = time.clock()
+        gene_query = request.GET['g']
+        reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request, gene_query)
+        table_header = mutation_table_builder.get_table_header(reseq_dict)
+        table_body, protein_changes = mutation_table_builder.get_table_body(request, reseq_dict,
+                                                                            observed_mutations_with_gene_queryset,
+                                                                            table_type=mutation_table_builder.TableType.GENE_TABLE)
 
-    context = common_context.copy()
-    context.update({"gene_name": gene_query,
-               "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
-               "title": gene_query + " gene",
-               "table_header": mark_safe(table_header),
-               "pdb_url": pdb_url,
-               "residue_mappings": mark_safe(residue_mappings),
-               "protein_changes": protein_changes,
-               "pdb_id": _get_pdb_url(gene_query)[0],
-               "has_pdb_file": has_pdb_file,
-               "homology_data": mark_safe(json.dumps(homology_data)),
-               "has_homology_data": has_homology_data,
-               "hidden_columns": hidden_columns})
+        pdb_url, residue_mappings, has_pdb_file = _get_pdb_info(gene_query)
+        homology_data, has_homology_data = _get_homology_data(gene_query)
+        hidden_columns = check_hidden_columns_and_filters(request, None)
+        template = loader.get_template("gene.html")
 
-    return HttpResponse(template.render(context, request), content_type="text/html")
+        context = common_context.copy()
+        context.update({"gene_name": gene_query,
+                   "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
+                   "title": gene_query + " gene",
+                   "table_header": mark_safe(table_header),
+                   "pdb_url": pdb_url,
+                   "residue_mappings": mark_safe(residue_mappings),
+                   "protein_changes": protein_changes,
+                   "pdb_id": _get_pdb_url(gene_query)[0],
+                   "has_pdb_file": has_pdb_file,
+                   "homology_data": mark_safe(json.dumps(homology_data)),
+                   "has_homology_data": has_homology_data,
+                   "hidden_columns": hidden_columns})
+        performance_lgr.info("genes performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
+        return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception:
+        exception_lgr.exception("genes broke", extra = user_extra(request))
 
 # TODO: This is the same implementation as found within seq.views.search.py; need to consolidate.
 def _get_seq_exp(request, mutated_gene):

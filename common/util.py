@@ -10,6 +10,9 @@ from seq.models import Mutation
 from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
+from logs.aledb_logger import get_logger
+
+
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
@@ -73,6 +76,7 @@ def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
 
 # TODO: go in ale.util
 def get_all_ale_exps():
+
     return AleExperiment.objects.all().order_by('name')
 
 
@@ -116,6 +120,7 @@ def get_recent_ale_exps(ale_experiment_id=None):
 
     if recent.fifth is not None:
         recent_experiments = ale_exp_exists(recent.fifth, recent_experiments)
+
 
     return recent_experiments
 
@@ -206,6 +211,7 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
             else:
                 replicate.tags = request.POST.get('tag_name')
             replicate.save()
+            replicate.save()
 
     return hidden_columns
 
@@ -214,6 +220,12 @@ def get_git_hash():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
 
 
-common_context = {"experiments": get_all_ale_exps(),
+
+exception = get_logger("exception")
+
+try:
+    common_context = {"experiments": get_all_ale_exps(),
                   "recent_experiments": get_recent_ale_exps,
-                  "git_hash": get_git_hash()}
+                  "git_hash":get_git_hash()}
+except Exception:
+    exception.exception("common_context broke")

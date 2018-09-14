@@ -1,3 +1,4 @@
+import time
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
@@ -19,7 +20,11 @@ from common.util import get_ordered_reseq_queryset,\
 from filter.util import get_filtered_observed_mutations_queryset
 import ale.models
 from bibliome.models import Publication
+from logs.aledb_logger import get_logger, user_extra, join_extras
 
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
 
 __author__ = 'pphaneuf'
 STATS_TEMPLATE = "stats.html"
@@ -31,70 +36,77 @@ if hasattr(settings, "SEQUENCING_URL"):
 
 
 def stats(request):
-    ale_experiment_id = common.get_ale_experiment_id(request)
-
-    exp = ale.models.AleExperiment.objects.get(pk=ale_experiment_id)
-
+    usage_lgr.info("stats", extra = user_extra(request))
     try:
-        pub_qryset = Publication.objects.filter(ale_experiment=exp)
-    except Publication.DoesNotExist:
-        pub_qryset = None
+        start_time = time.clock()
+        ale_experiment_id = common.get_ale_experiment_id(request)
 
-    ale_id = common.get_ale_id(request)
-    reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
-    ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(reseq_queryset)
-    ale_sum = len(ale_flask_isolate_count_list)
-    flask_sum = 0
-    isolate_sum = 0
-    for l in ale_flask_isolate_count_list:
-        flask_sum += l[1]
-        isolate_sum += l[2]
+        exp = ale.models.AleExperiment.objects.get(pk=ale_experiment_id)
 
-    experiments_info_list = get_reseq_experiment_info_list(reseq_queryset)
-    obs_mut_qryset = _get_observed_mutation_queryset(request, ale_experiment_id)
-    mutation_query_set = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
-    mutation_type_count_dict = get_mutation_type_count_dict(mutation_query_set)
-    observed_mutation_type_count_dict = get_observed_mutation_type_count_dict(obs_mut_qryset)
-    protein_change_type_count_dict = get_protein_change_type_count_dict(mutation_query_set)
-    observed_protein_change_type_count_dict = get_observed_protein_change_type_count_dict(obs_mut_qryset)
-    template = loader.get_template(STATS_TEMPLATE)
-    ale_exp_name = common.get_ale_experiment_name(request)
+        try:
+            pub_qryset = Publication.objects.filter(ale_experiment=exp)
+        except Publication.DoesNotExist:
+            pub_qryset = None
 
-    barchart_item_count = get_histogram_item_count(request)
-    genes_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
+        ale_id = common.get_ale_id(request)
+        reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
+        ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(reseq_queryset)
+        ale_sum = len(ale_flask_isolate_count_list)
+        flask_sum = 0
+        isolate_sum = 0
+        for l in ale_flask_isolate_count_list:
+            flask_sum += l[1]
+            isolate_sum += l[2]
 
-    needle_plot_data = get_needle_plot_data(obs_mut_qryset)
-    context = common_context.copy()
-    context.update({"protein_change_type_count_dict": protein_change_type_count_dict,
-               "protein_change_sum": sum(protein_change_type_count_dict.values()),
-               "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
-               "observed_protein_change_sum": sum(observed_protein_change_type_count_dict.values()),
-               "mutation_type_count_dict": mutation_type_count_dict,
-               "mutation_sum": sum(mutation_type_count_dict.values()),
-               "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
-               "observed_mutation_sum": sum(observed_mutation_type_count_dict.values()),
-               "experiments_info_list": experiments_info_list,
-               "resequencing_report_url": resequencing_report_url,
-               "ale_experiment_name": ale_exp_name,
-               "needle_plot_data": mark_safe(list(needle_plot_data)),
-               "genes": mark_safe(genes_json),
-               "gene_color_set": mark_safe(common.GENE_COLORS),
-               "seq_color_set": mark_safe(common.SEQ_COLORS),
-               "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
-               "protein_types": mark_safe(common.FUNCTIONAL_CHANGE_TYPE_LIST),
-               "number_of_genes_to_show": barchart_item_count,
-               "ale_experiment_id": ale_experiment_id,
-               "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
-               "ale_sum": ale_sum,
-               "flask_sum": flask_sum,
-               "isolate_sum": isolate_sum,
-               "recent_experiments": get_recent_ale_exps(ale_experiment_id),
-               "max_histogram_size": MAX_HISTOGRAM_SIZE,
-               "pub_qryset": pub_qryset,
-               "notes": exp.notes,
-               })
+        experiments_info_list = get_reseq_experiment_info_list(reseq_queryset)
+        obs_mut_qryset = _get_observed_mutation_queryset(request, ale_experiment_id)
+        mutation_query_set = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
+        mutation_type_count_dict = get_mutation_type_count_dict(mutation_query_set)
+        observed_mutation_type_count_dict = get_observed_mutation_type_count_dict(obs_mut_qryset)
+        protein_change_type_count_dict = get_protein_change_type_count_dict(mutation_query_set)
+        observed_protein_change_type_count_dict = get_observed_protein_change_type_count_dict(obs_mut_qryset)
+        template = loader.get_template(STATS_TEMPLATE)
+        ale_exp_name = common.get_ale_experiment_name(request)
 
-    return HttpResponse(template.render(context, request), content_type="text/html")
+        barchart_item_count = get_histogram_item_count(request)
+        genes_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
+
+        needle_plot_data = get_needle_plot_data(obs_mut_qryset)
+        context = common_context.copy()
+        context.update({"protein_change_type_count_dict": protein_change_type_count_dict,
+                   "protein_change_sum": sum(protein_change_type_count_dict.values()),
+                   "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
+                   "observed_protein_change_sum": sum(observed_protein_change_type_count_dict.values()),
+                   "mutation_type_count_dict": mutation_type_count_dict,
+                   "mutation_sum": sum(mutation_type_count_dict.values()),
+                   "observed_mutation_type_count_dict": observed_mutation_type_count_dict,
+                   "observed_mutation_sum": sum(observed_mutation_type_count_dict.values()),
+                   "experiments_info_list": experiments_info_list,
+                   "resequencing_report_url": resequencing_report_url,
+                   "ale_experiment_name": ale_exp_name,
+                   "needle_plot_data": mark_safe(list(needle_plot_data)),
+                   "genes": mark_safe(genes_json),
+                   "gene_color_set": mark_safe(common.GENE_COLORS),
+                   "seq_color_set": mark_safe(common.SEQ_COLORS),
+                   "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
+                   "protein_types": mark_safe(common.FUNCTIONAL_CHANGE_TYPE_LIST),
+                   "number_of_genes_to_show": barchart_item_count,
+                   "ale_experiment_id": ale_experiment_id,
+                   "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
+                   "ale_sum": ale_sum,
+                   "flask_sum": flask_sum,
+                   "isolate_sum": isolate_sum,
+                   "recent_experiments": get_recent_ale_exps(ale_experiment_id),
+                   "max_histogram_size": MAX_HISTOGRAM_SIZE,
+                   "pub_qryset": pub_qryset,
+                   "notes": exp.notes,
+                   })
+        performance_lgr.info("stats performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+
+        return HttpResponse(template.render(context, request), content_type="text/html")
+
+    except Exception:
+        exception_lgr.exception("stats broke", extra = user_extra(request))
 
 
 def get_histogram_item_count(request):

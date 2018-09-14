@@ -4,34 +4,44 @@ from filter.forms.filter import FilterForm
 from django.utils.safestring import mark_safe
 from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations, TABLE_HEADER, get_global_filter
 from common.util import common_context, clear_dashboard_cache
+from logs.aledb_logger import get_logger, user_extra
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 GLOBAL_FILTER_TEMPLATE = "filter/global_filter.html"
 
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
+
 
 def global_filter(request):
+    usage_lgr.info("global filter", extra=user_extra(request))
+    try:
+        template = loader.get_template(GLOBAL_FILTER_TEMPLATE)
 
-    template = loader.get_template(GLOBAL_FILTER_TEMPLATE)
+        filter_form_model = get_global_filter()
 
-    filter_form_model = get_global_filter()
+        if request.method == 'POST':
+            clear_dashboard_cache()
+            _handle_POST(request, filter_form_model)
 
-    if request.method == 'POST':
-        clear_dashboard_cache()
-        _handle_POST(request, filter_form_model)
+        initial_filter_form_data = {"ignored_genes": filter_form_model.ignored_genes}
 
-    initial_filter_form_data = {"ignored_genes": filter_form_model.ignored_genes}
+        filter_form = FilterForm(initial=initial_filter_form_data)
 
-    filter_form = FilterForm(initial=initial_filter_form_data)
+        table_body, ignored_mutation_id_list = get_ignored_mutations(filter_form_model)
 
-    table_body, ignored_mutation_id_list = get_ignored_mutations(filter_form_model)
+        context = common_context.copy()
+        context.update({
+            "form": filter_form,
+            "table_body": mark_safe(table_body),
+            "table_header": mark_safe(TABLE_HEADER)})
 
-    context = common_context.copy()
-    context.update({"form": filter_form,
-               "table_body": mark_safe(table_body),
-               "table_header": mark_safe(TABLE_HEADER)})
+        return HttpResponse(template.render(context, request), content_type="text/html")
 
-    return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception:
+        exception_lgr.exception("global filter broke", extra=user_extra(request))
 
 
 def _handle_POST(request, filter_form_model):

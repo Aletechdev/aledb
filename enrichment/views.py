@@ -1,3 +1,4 @@
+import time
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
@@ -10,44 +11,52 @@ from common.constants import \
 from common.util import check_hidden_columns_and_filters
 import common.constants
 from enrichment.util import get_enrich_obs_mut_qryset
+from logs.aledb_logger import get_logger, user_extra, join_extras
 
-
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
 __author__ = 'Patrick Phaneuf'
 
 
 def enrichment_mutations(request):
-    ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
-    exp_name = seq.views.common.get_ale_experiment_name(request)
-    ale_number = seq.views.common.get_ale_id(request)
-    ale_qrtset = seq.views.common.get_ales(ale_experiment_id, True)
+    usage_lgr.info("enrichment", extra = user_extra(request))
+    try:
+        start_time = time.clock()
+        ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
+        exp_name = seq.views.common.get_ale_experiment_name(request)
+        ale_number = seq.views.common.get_ale_id(request)
+        ale_qrtset = seq.views.common.get_ales(ale_experiment_id, True)
 
-    reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
+        reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
 
-    table_header = mutation_table_builder.get_table_header(reseq_dict=reseq_ordered_dict,
-                                                           table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
+        table_header = mutation_table_builder.get_table_header(reseq_dict=reseq_ordered_dict,
+                                                               table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
 
-    table_body = _get_table_body(reseq_ordered_dict, request)
+        table_body = _get_table_body(reseq_ordered_dict, request)
 
-    hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
+        hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
-    template = loader.get_template('base_table_template.html')
-    context = {"ales": ale_qrtset,
-               "ale_experiment_name": exp_name,
-               "ale_no": ale_number,
-               "ale_experiment_id": ale_experiment_id,
-               "table_body": mark_safe(table_body),
-               "title": exp_name + " Enrichment Mutations",
-               "table_header": mark_safe(table_header),
-               "template_header": "Enrichment Mutations",
-               "hidden_columns": hidden_columns,
-               "experiments": get_all_ale_exps(),
-               "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
-               "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
-               "tag_dropdown": common.constants.TAGS
-               }
+        template = loader.get_template('base_table_template.html')
+        context = {"ales": ale_qrtset,
+                   "ale_experiment_name": exp_name,
+                   "ale_no": ale_number,
+                   "ale_experiment_id": ale_experiment_id,
+                   "table_body": mark_safe(table_body),
+                   "title": exp_name + " Enrichment Mutations",
+                   "table_header": mark_safe(table_header),
+                   "template_header": "Enrichment Mutations",
+                   "hidden_columns": hidden_columns,
+                   "experiments": get_all_ale_exps(),
+                   "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
+                   "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
+                   "tag_dropdown": common.constants.TAGS
+                   }
+        performance_lgr.info("enrichment performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
-    return HttpResponse(template.render(context, request), content_type="text/html")
-
+        return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception:
+        exception_lgr.exception("enrichment broke", extra = user_extra(request))
 
 # TODO: refactor
 def _get_table_body(reseq_dict, request):
