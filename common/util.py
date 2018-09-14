@@ -220,7 +220,6 @@ def get_git_hash():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
 
 
-
 exception = get_logger("exception")
 
 try:
