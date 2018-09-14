@@ -9,6 +9,7 @@ from common.util import get_mut_queryset_from_obs_mut_queryset
 from genes.util import get_gene_list
 from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS
 from ale.models import TechnicalReplicate
+from logs.aledb_logger import get_logger
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
@@ -17,6 +18,7 @@ HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequ
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
+HTML_ECOCYC = """<a href = "https://ecocyc.org/ECOLI/substring-search?type=GENE&object={gene}">{gene}</a>"""
 
 # the dropdown cell in the mutation table
 _menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
@@ -186,9 +188,20 @@ def get_table_body(request,
     return table_body
 
 
+def get_ecocyc_gene_list(gene_list):
+
+    url_list = []
+    for each in gene_list:
+        if each.startswith("<"):
+            each = each.split(">")[-1]
+        url_list.append(HTML_ECOCYC.format(gene=each))
+    return url_list
+
+
 def get_gene_table_entry(mutation):
     table_entry = """<div style="width:150px">"""
-    cleaned_gene_list = get_gene_list(mutation.gene)
+    cleaned_gene_list = get_ecocyc_gene_list(get_gene_list(mutation.gene))
+
     if len(cleaned_gene_list) > 10:
         table_entry += EXPANDABLE_COLUMN_PLUS_SIGN % str(mutation.id)
         table_entry += EXPANDABLE_GENE_ENTRY % (str(mutation.id), ", ".join(cleaned_gene_list))
