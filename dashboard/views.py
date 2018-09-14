@@ -17,13 +17,13 @@ DEFAULT_IGNORED_MUTATIONS = "[]"
 DASHBOARD_TEMPLATE = "dashboard.html"
 __author__ = 'pphaneuf'
 
-usage = get_logger("usage")
-exception = get_logger("exceptions")
-performance = get_logger("performance")
+usage_lgr = get_logger("usage")
+exception_lgr = get_logger("exceptions")
+performance_lgr = get_logger("performance")
 
 
 def dashboard(request):
-    usage.info("populating dashboard", extra=user_extra(request))
+    usage_lgr.info("populating dashboard", extra=user_extra(request))
 
     try:
         start_time = time.clock()
@@ -62,12 +62,12 @@ def dashboard(request):
                         "number_of_genes_to_show": barchart_item_count,
                         "max_histogram_size": MAX_HISTOGRAM_SIZE,
                         "timeline": get_timeline()})
-        performance.info("dashboard performance", extra=join_extras(user_extra(request), {"time taken": time.clock()-start_time}))
+        performance_lgr.info("dashboard performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
 
     except Exception as e:
-        exception.exception(e, extra = user_extra(request))
+        exception_lgr.exception(e, extra = user_extra(request))
 
 
 

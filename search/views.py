@@ -18,13 +18,13 @@ from filter.util import get_filtered_observed_mutations_queryset
 from logs.aledb_logger import get_logger, user_extra, join_extras
 
 
-usage = get_logger("usage")
-performance = get_logger("performance")
-exception = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
+exception_lgr = get_logger("exceptions")
 
 
 def search(request):
-    usage.info("search", extra=user_extra(request))
+    usage_lgr.info("search", extra=user_extra(request))
     try:
         start_time = time.clock()
 
@@ -51,10 +51,10 @@ def search(request):
                         "mutation_count": len(table_body),
                         "observed_mutation_count": obs_mut_qryset.count()
                         })
-        performance.info("search performance", extra=join_extras({"parameters":last_search},{"time taken":time.clock()-start_time}))
+        performance_lgr.info("search performance", extra=join_extras({"parameters":last_search}, {"time taken": time.clock() - start_time}))
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
-        exception.exception("search broke", extra = user_extra(request))
+        exception_lgr.exception("search broke", extra = user_extra(request))
 
 
 # TODO: roll _get_search_ale_exp_params into _get_search_params.
@@ -121,7 +121,7 @@ def _get_search_params(request):
 
     _add_protein_change_to_query(request, include_argument_list, exclude_argument_list)
 
-    usage.info("search parameters", extra = locals())
+    usage_lgr.info("search parameters", extra = locals())
 
     return include_argument_list, exclude_argument_list
 

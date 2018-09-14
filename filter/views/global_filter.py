@@ -10,13 +10,13 @@ __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 GLOBAL_FILTER_TEMPLATE = "filter/global_filter.html"
 
-exception = get_logger("exceptions")
-usage = get_logger("usage")
-performance = get_logger("performance")
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
 
 
 def global_filter(request):
-    usage.info("global filter", extra=user_extra(request))
+    usage_lgr.info("global filter", extra=user_extra(request))
     try:
         template = loader.get_template(GLOBAL_FILTER_TEMPLATE)
 
@@ -41,7 +41,7 @@ def global_filter(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
 
     except Exception:
-        exception.exception("global filter broke", extra=user_extra(request))
+        exception_lgr.exception("global filter broke", extra=user_extra(request))
 
 
 def _handle_POST(request, filter_form_model):
