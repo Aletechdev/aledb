@@ -1,3 +1,4 @@
+import time
 from django.shortcuts import render
 
 from django.http import HttpResponse
@@ -10,51 +11,64 @@ from dashboard.timeline_util import get_timeline
 from stats.views import get_histogram_item_count
 from dashboard.models import BarCharts
 from stats.util import MAX_HISTOGRAM_SIZE
-
+from logs.aledb_logger import get_logger, user_extra, join_extras
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 DASHBOARD_TEMPLATE = "dashboard.html"
 __author__ = 'pphaneuf'
 
+usage_lgr = get_logger("usage")
+exception_lgr = get_logger("exceptions")
+performance_lgr = get_logger("performance")
+
 
 def dashboard(request):
-    general_count_dict = _get_general_count_dict()
-    observed_mutation_counts = ObservedMutationCounts.objects.first()
-    unique_mutation_counts = UniqueMutationCounts.objects.first()
+    usage_lgr.info("populating dashboard", extra=user_extra(request))
 
-    if unique_mutation_counts and observed_mutation_counts:
-        general_count_dict['observed'] = observed_mutation_counts.total
-        general_count_dict['unique'] = unique_mutation_counts.total
+    try:
+        start_time = time.clock()
+        general_count_dict = _get_general_count_dict()
+        observed_mutation_counts = ObservedMutationCounts.objects.first()
+        unique_mutation_counts = UniqueMutationCounts.objects.first()
 
-    mutation_type_count_dict = _get_mutation_type_count_dict(observed_mutation_counts,
-                                                             unique_mutation_counts)
-    functional_change_type_count_dict = _get_functional_change_type_count_dict(observed_mutation_counts,
-                                                                               unique_mutation_counts)
-    barchart_item_count = get_histogram_item_count(request)
-    histogram_data = BarCharts.objects.first()
+        if unique_mutation_counts and observed_mutation_counts:
+            general_count_dict['observed'] = observed_mutation_counts.total
+            general_count_dict['unique'] = unique_mutation_counts.total
 
-    if histogram_data:
-        gene_histogram_data = histogram_data.mut_gene_json[:barchart_item_count]
-        gene_mut_histogram_data = histogram_data.mut_json[:barchart_item_count]
-    else:
-        gene_histogram_data = []
-        gene_mut_histogram_data = []
+        mutation_type_count_dict = _get_mutation_type_count_dict(observed_mutation_counts,
+                                                                 unique_mutation_counts)
+        functional_change_type_count_dict = _get_functional_change_type_count_dict(observed_mutation_counts,
+                                                                                   unique_mutation_counts)
+        barchart_item_count = get_histogram_item_count(request)
+        histogram_data = BarCharts.objects.first()
 
-    context = common_context.copy()
-    context.update({"functional_change_type_count_dict": functional_change_type_count_dict,
-               "count_dict": general_count_dict,
-               "mutation_type_count_dict": mutation_type_count_dict,
-               "genes": mark_safe(gene_histogram_data),
-               "sequence_changes": mark_safe(gene_mut_histogram_data),
-               "gene_color_set": mark_safe(common.GENE_COLORS),
-               "seq_color_set": mark_safe(common.SEQ_COLORS),
-               "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
-               "protein_types": mark_safe(common.FUNCTIONAL_CHANGE_TYPE_LIST),
-               "number_of_genes_to_show": barchart_item_count,
-               "max_histogram_size": MAX_HISTOGRAM_SIZE,
-               "timeline": get_timeline()})
+        if histogram_data:
+            gene_histogram_data = histogram_data.mut_gene_json[:barchart_item_count]
+            gene_mut_histogram_data = histogram_data.mut_json[:barchart_item_count]
+        else:
+            gene_histogram_data = []
+            gene_mut_histogram_data = []
 
-    return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
+        context = common_context.copy()
+        context.update({"functional_change_type_count_dict": functional_change_type_count_dict,
+                        "count_dict": general_count_dict,
+                        "mutation_type_count_dict": mutation_type_count_dict,
+                        "genes": mark_safe(gene_histogram_data),
+                        "sequence_changes": mark_safe(gene_mut_histogram_data),
+                        "gene_color_set": mark_safe(common.GENE_COLORS),
+                        "seq_color_set": mark_safe(common.SEQ_COLORS),
+                        "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
+                        "protein_types": mark_safe(common.FUNCTIONAL_CHANGE_TYPE_LIST),
+                        "number_of_genes_to_show": barchart_item_count,
+                        "max_histogram_size": MAX_HISTOGRAM_SIZE,
+                        "timeline": get_timeline()})
+        performance_lgr.info("dashboard performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+
+        return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
+
+    except Exception as e:
+        exception_lgr.exception(e, extra = user_extra(request))
+
 
 
 def _get_general_count_dict():
@@ -71,6 +85,7 @@ def _get_general_count_dict():
 
 
 def _get_mutation_type_count_dict(observed_mutation_counts, unique_mutation_counts):
+
     mutation_type_count_dict = {'observed': {}, 'unique': {}}
 
     if not (unique_mutation_counts and observed_mutation_counts):

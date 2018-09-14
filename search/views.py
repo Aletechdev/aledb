@@ -1,3 +1,5 @@
+import time
+
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.template import loader
@@ -13,34 +15,46 @@ from common.util import check_hidden_columns_and_filters, common_context
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from filter.util import get_filtered_observed_mutations_queryset
+from logs.aledb_logger import get_logger, user_extra, join_extras
+
+
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
+exception_lgr = get_logger("exceptions")
 
 
 def search(request):
-    check_hidden_columns_and_filters(request, None)
-    obs_mut_qryset = _get_obs_mut_qryset(request)
-    reseq_dict = _get_ordered_reseq_dict(obs_mut_qryset)
-    if reseq_dict is None or obs_mut_qryset is None:
+    usage_lgr.info("search", extra=user_extra(request))
+    try:
+        start_time = time.clock()
+
+        check_hidden_columns_and_filters(request, None)
+        obs_mut_qryset = _get_obs_mut_qryset(request)
+        reseq_dict = _get_ordered_reseq_dict(obs_mut_qryset)
+        if reseq_dict is None or obs_mut_qryset is None:
+            context = common_context.copy()
+            context.update({'error': True})
+            return render(request, 'search.html', context)
+
+        table_header = mutation_table_builder.get_table_header(request, reseq_dict)
+        table_body = mutation_table_builder.get_table_body(request,
+                                                           reseq_dict,
+                                                           obs_mut_qryset,
+                                                           table_type=mutation_table_builder.TableType.SEARCH)
+        last_search = _get_last_search(request)
+        template = loader.get_template("search.html")
         context = common_context.copy()
-        context.update({'error': True})
-        return render(request, 'search.html', context)
-
-    table_header = mutation_table_builder.get_table_header(request, reseq_dict)
-    table_body = mutation_table_builder.get_table_body(request,
-                                                       reseq_dict,
-                                                       obs_mut_qryset,
-                                                       table_type=mutation_table_builder.TableType.SEARCH)
-    last_search = _get_last_search(request)
-    template = loader.get_template("search.html")
-    context = common_context.copy()
-    context.update({"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
-               "title": "Search Results",
-               "table_header": mark_safe(table_header),
-               "last_search": last_search,
-               "mutation_count": len(table_body),
-               "observed_mutation_count": obs_mut_qryset.count()
-               })
-
-    return HttpResponse(template.render(context, request), content_type="text/html")
+        context.update({"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
+                        "title": "Search Results",
+                        "table_header": mark_safe(table_header),
+                        "last_search": last_search,
+                        "mutation_count": len(table_body),
+                        "observed_mutation_count": obs_mut_qryset.count()
+                        })
+        performance_lgr.info("search performance", extra=join_extras({"parameters":last_search}, {"time taken": time.clock() - start_time}))
+        return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception:
+        exception_lgr.exception("search broke", extra = user_extra(request))
 
 
 # TODO: roll _get_search_ale_exp_params into _get_search_params.
@@ -106,6 +120,8 @@ def _get_search_params(request):
     _add_sequence_change_to_query(request, include_argument_list, exclude_argument_list)
 
     _add_protein_change_to_query(request, include_argument_list, exclude_argument_list)
+
+    usage_lgr.info("search parameters", extra = locals())
 
     return include_argument_list, exclude_argument_list
 
