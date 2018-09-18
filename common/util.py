@@ -6,7 +6,7 @@ from filter.util import get_global_filter
 from ale.models import TechnicalReplicate
 import collections
 from seq.models import ResequencingExperiment
-from seq.models import Mutation
+from seq.models import Mutation, ObservedMutation
 from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
@@ -73,6 +73,15 @@ def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, request=None):
 def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
     return Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
 
+
+def get_unique_obs_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
+    unique_obs_mut = []
+    found_muts = []
+    for observed_mutation in observed_mutations_queryset:
+        if observed_mutation.mutation not in found_muts:
+            unique_obs_mut.append(observed_mutation)
+            found_muts.append(observed_mutation.mutation)
+    return unique_obs_mut
 
 # TODO: go in ale.util
 def get_all_ale_exps():
