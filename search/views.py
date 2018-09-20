@@ -51,7 +51,9 @@ def search(request):
                         "mutation_count": len(table_body),
                         "observed_mutation_count": obs_mut_qryset.count()
                         })
-        performance_lgr.info("search performance", extra=join_extras({"parameters":last_search}, {"time taken": time.clock() - start_time}))
+        performance_lgr.info("search performance", extra=join_extras(
+            {"parameters":last_search},
+            {"time taken": time.clock() - start_time}))
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
         exception_lgr.exception("search broke", extra = user_extra(request))
