@@ -7,3 +7,4 @@ beautifulsoup4==4.6.0
 configparser==3.5.0
 django_mysql==2.1.1
 lxml==4.1.0
+python-json-logger==0.1.5
