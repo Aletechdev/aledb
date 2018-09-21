@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./config.sh
+source ./config_docker.sh
 python manage.py migrate
 python manage.py createcachetable
 python manage.py collectstatic --no-input

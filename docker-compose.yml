@@ -1,22 +1,27 @@
 version: "3.2"
 services:
   db:
-    image: mysql
+    container_name: aledb-database
+    image: mysql:5.7
+    volumes:
+      - /tmp/docker:/tmp/shared
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
-      - MYSQL_USER=composetest
-      - MYSQL_PASSWORD=testpassword
-      - MYSQL_DATABASE=composetest
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_USER=ale
+      - MYSQL_PASSWORD=ale
+      - MYSQL_DATABASE=ale-db
+      - MYSQL_HOST=db
   web:
+    container_name: aledb-web
     build: .
     command: "./docker-runserver.sh"
     environment:
       - DEBUG=1
-      - DJANGO_SERVER_HOST=localhost
+      - DJANGO_SERVER_HOST=127.0.0.1
       - DJANGO_SETTINGS_MODULE=aleinfo.settings_public
-      - MYSQL_USER=composetest
-      - MYSQL_PASSWORD=testpassword
-      - MYSQL_DATABASE=composetest
+      - MYSQL_USER=ale
+      - MYSQL_PASSWORD=ale
+      - MYSQL_DATABASE=ale-db
     volumes:
       - .:/app
       - static:/app/static
@@ -25,6 +30,7 @@ services:
     depends_on:
       - db
   nginx:
+    container_name: aledb-nginx
     image: nginx
     links:
       - web
