@@ -24,6 +24,7 @@ WILD_TYPE_TECH_REP_NUMBER = 1
 WILD_TYPE_USER_NAME = "BOP27"
 BRESEQ_OUTPUT_REPORT_DIR = "output/"
 BRESEQ_LOG_FILE = "log.txt"
+EVIDENCE_DIR = "evidence/"
 ANNOTATION_GENOMIC_DIFF_FILE_NAME = 'annotated.gd'
 METADATA_RELATIVE_PATH = 'metadata/'
 REF_RELATIVE_PATH = 'ref/'
@@ -316,7 +317,7 @@ def _create_and_commit_ale_entry(person,
     ale_id, created = ale.models.AleId.objects.get_or_create(ale_experiment=experiment, ale_id=ale_number)
     flask, created = ale.models.Flask.objects.get_or_create(flask_number=flask_number, ale_id=ale_id, media=media)
 
-    with open(os.path.join(breseq_output_dir_path, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
+    with open(os.path.join(breseq_output_dir_path, EVIDENCE_DIR, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
         mutation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
     reseq_ref_name = ""
@@ -382,6 +383,7 @@ def _get_sample_report_list(experiment_breseq_output_path):
         sample_breseq_output_report = sample_path\
                                       + '/'\
                                       + BRESEQ_OUTPUT_REPORT_DIR \
+				      + EVIDENCE_DIR \
                                       + ANNOTATION_GENOMIC_DIFF_FILE_NAME
 
         if os.path.isdir(sample_path) and os.path.isfile(sample_breseq_output_report):
