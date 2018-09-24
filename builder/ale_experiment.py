@@ -151,12 +151,12 @@ def _insert_starting_strain_flask(staring_strain_breseq_output_abs_path,
 def create_ale_experiments(exp_files_dict_list):
     """
     Executed from Django ipython shell.
-    """ 
+    """
     for exp_files_dict in exp_files_dict_list:
         create_ale_experiment(exp_files_dict["breseq_output_group_root_abs_path"],
                               exp_files_dict["ale_exp_user"],
                               exp_files_dict["ale_exp_name"],
-                              exp_files_dict["breseq_starting_strain_output_abs_path"]) 
+                              exp_files_dict["breseq_starting_strain_output_abs_path"])
 
 
 # For wild_type, expecting directory with output.gd in it.
@@ -383,7 +383,7 @@ def _get_sample_report_list(experiment_breseq_output_path):
         sample_breseq_output_report = sample_path\
                                       + '/'\
                                       + BRESEQ_OUTPUT_REPORT_DIR \
-				      + EVIDENCE_DIR \
+                                      + EVIDENCE_DIR \
                                       + ANNOTATION_GENOMIC_DIFF_FILE_NAME
 
         if os.path.isdir(sample_path) and os.path.isfile(sample_breseq_output_report):
