@@ -1,3 +1,4 @@
+
 FROM python:3.5
 
 # Ensure that Python outputs everything that's printed inside
@@ -15,9 +16,9 @@ ADD . /app
 VOLUME /app/static
 VOLUME /app/settings
 
-EXPOSE 80
+#EXPOSE 80
 
-ENV DJANGO_SETTINGS_MODULE=aleinfo.settings_dockerfile
+#ENV DJANGO_SETTINGS_MODULE=aleinfo.settings_dockerfile
 
-CMD ["./docker-runserver.sh"]
+#CMD ["./docker-runserver.sh"]
 
