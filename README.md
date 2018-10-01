@@ -3,20 +3,34 @@
 Every bug fix is a revision change in the version number!
 ## Docker Launch
 ### Required docker packages installed on host 
-1. docker (version 17.09.0-ce)
-2. docker-compose (version 1.17.0)
+```
+Install docker
+https://www.docker.com/products/docker-desktop
+```
 ### Quick-start steps for ALEdb docker deployment
-1. `$docker-compose up`
-2. Load database backup (dump) file to db container:
-  * Copy aledb database dump file (e.g. aledb_dump.sql) to /tmp/docker
-  * Login to db container and load data:
-  ```
-    $docker-compose exec db bash
-    $mysql -u root -p
-    $use ale-db
-    $source /tmp/shared/aledb_dump.sql 
-   ```
-3. Add super user and password to log into a live instance of ALEdb
-    ```
-    $docker-compose run web python manage.py createsuperuser
-    ```
+ ```
+ docker-compose up -d
+ ```
+
+### Bring all containers down
+```
+docker-compose down
+```
+
+### See log files
+```
+docker-compose logs
+OR
+docker-compse logs <service>
+```
+
+### Load test data from new database dump file
+1. Replace dump file in .docker/data folder. 
+2. Remove database image
+```
+docker rmi mysql:5.7
+```
+3. Restart 
+```
+docker-compose up -d
+```
