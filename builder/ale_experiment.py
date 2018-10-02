@@ -24,7 +24,6 @@ WILD_TYPE_TECH_REP_NUMBER = 1
 WILD_TYPE_USER_NAME = "BOP27"
 BRESEQ_OUTPUT_REPORT_DIR = "output/"
 BRESEQ_LOG_FILE = "log.txt"
-EVIDENCE_DIR = "evidence/"
 ANNOTATION_GENOMIC_DIFF_FILE_NAME = 'annotated.gd'
 METADATA_RELATIVE_PATH = 'metadata/'
 REF_RELATIVE_PATH = 'ref/'
@@ -151,12 +150,12 @@ def _insert_starting_strain_flask(staring_strain_breseq_output_abs_path,
 def create_ale_experiments(exp_files_dict_list):
     """
     Executed from Django ipython shell.
-    """
+    """ 
     for exp_files_dict in exp_files_dict_list:
         create_ale_experiment(exp_files_dict["breseq_output_group_root_abs_path"],
                               exp_files_dict["ale_exp_user"],
                               exp_files_dict["ale_exp_name"],
-                              exp_files_dict["breseq_starting_strain_output_abs_path"])
+                              exp_files_dict["breseq_starting_strain_output_abs_path"]) 
 
 
 # For wild_type, expecting directory with output.gd in it.
@@ -317,7 +316,7 @@ def _create_and_commit_ale_entry(person,
     ale_id, created = ale.models.AleId.objects.get_or_create(ale_experiment=experiment, ale_id=ale_number)
     flask, created = ale.models.Flask.objects.get_or_create(flask_number=flask_number, ale_id=ale_id, media=media)
 
-    with open(os.path.join(breseq_output_dir_path, EVIDENCE_DIR, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
+    with open(os.path.join(breseq_output_dir_path, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
         mutation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
     reseq_ref_name = ""
@@ -383,7 +382,6 @@ def _get_sample_report_list(experiment_breseq_output_path):
         sample_breseq_output_report = sample_path\
                                       + '/'\
                                       + BRESEQ_OUTPUT_REPORT_DIR \
-                                      + EVIDENCE_DIR \
                                       + ANNOTATION_GENOMIC_DIFF_FILE_NAME
 
         if os.path.isdir(sample_path) and os.path.isfile(sample_breseq_output_report):
