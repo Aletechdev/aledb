@@ -8,17 +8,18 @@ ENV PYTHONUNBUFFERED 1
 RUN mkdir /app
 WORKDIR /app
 
-ADD requirements.txt /app
+COPY requirements.txt /app
 RUN pip install -r requirements.txt
 
-ADD . /app
+COPY . /app
 
 VOLUME /app/static
 VOLUME /app/settings
 
-#EXPOSE 80
+ENV DJANGO_SETTINGS_MODULE=aleinfo.settings_private
+RUN python manage.py collectstatic --no-input
 
-#ENV DJANGO_SETTINGS_MODULE=aleinfo.settings_dockerfile
+#EXPOSE 80
 
 #CMD ["./docker-runserver.sh"]
 
