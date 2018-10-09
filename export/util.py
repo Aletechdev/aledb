@@ -31,7 +31,8 @@ def get_csv_str(exp_id, mut_type_str):
 
     mut_qryset,\
     table_entry_list,\
-    mut_index_dict = get_mutation_table_queryset_and_entry_list(reseq_ordered_dict, obs_mut_qryset)
+    mut_index_dict, \
+    filtered_observed_mutations = get_mutation_table_queryset_and_entry_list(reseq_ordered_dict, obs_mut_qryset)
 
     mut_pos_index = 3
     # TODO: harden below against an empty reseq_ordered_dict
