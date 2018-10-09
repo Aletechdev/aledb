@@ -13,13 +13,13 @@ RUN pip install -r requirements.txt
 
 COPY . /app
 
-VOLUME /app/static
-VOLUME /app/settings
+#VOLUME /app/static
+#VOLUME /app/aleinfo
 
-ENV DJANGO_SETTINGS_MODULE=aleinfo.settings_private
-RUN python manage.py collectstatic --no-input
+#ENV DJANGO_SETTINGS_MODULE=aleinfo.settings_private
+#RUN python manage.py collectstatic --no-input
 
-#EXPOSE 80
-
-#CMD ["./docker-runserver.sh"]
+#EXPOSE 8000
+#
+#CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
 
