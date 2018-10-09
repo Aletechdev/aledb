@@ -13,11 +13,11 @@ services:
     container_name: aledb-web
     build: .
     env_file:
-      - ./.docker/app.env
+      - .docker/app.env
     volumes:
       - .:/app
       - static:/app/static
-    command: "gunicorn aleinfo.wsgi -b 0.0.0.0:80 --reload"
+    command: bash -c "python manage.py collectstatic --no-input && gunicorn aleinfo.wsgi -b 0.0.0.0:80 --reload"
     links:
       - db
     depends_on:
