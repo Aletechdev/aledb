@@ -14,7 +14,7 @@ class Instrument(models.Model):
 
 class AleExperiment(models.Model):
     ale_id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=40)
+    name = models.CharField(max_length=200)
     person = models.CharField(max_length=200)
     date = models.DateTimeField(auto_now_add=True)
     instrument = models.ForeignKey(Instrument)
