@@ -96,7 +96,7 @@ def get_table_header(request, reseq_dict, table_type=None):
     for reseq_id in reseq_dict:
         reseq = reseq_dict[reseq_id]
         sample_name = reseq.exp_ale_flask_isolate_str
-        current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep_id)
+        current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep)
 
         sample_header_html = sample_name
         if reseq_id in experiment_urls.keys():
@@ -111,7 +111,44 @@ def get_table_header(request, reseq_dict, table_type=None):
     return base_table_header + table_header_list
 
 
-def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset):
+def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset, do_filter=True):
+    print("reseq_dict", len(reseq_dict))
+    obs_mut_qryset = observed_mutations_queryset
+    if do_filter:
+        obs_mut_qryset = get_filtered_observed_mutations_queryset(observed_mutations_queryset)
+    mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
+    mutation_index_dict = dict(
+        (mutation_id, i) for i, mutation_id in enumerate(mut_qryset.values_list("id", flat=True)))
+    experiment_url_dict = get_experiment_urls(reseq_dict)
+    experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
+
+    # Initialize all sample mutation table cells as empty.
+    table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mut_qryset)
+
+    # Populating table_entry_list
+    unique_mut_obs_mut_dict = dict()  # hold one obs mutation for each mutation
+    for observed_mutation in obs_mut_qryset:
+        new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
+        if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
+            table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
+                experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
+        mutation_id = observed_mutation.mutation_id
+        if mutation_id not in unique_mut_obs_mut_dict:
+            unique_mut_obs_mut_dict[observed_mutation.mutation.id] = observed_mutation
+    # return mut_qryset, table_entry_list, mutation_index_dict, get_unique_obs_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
+    return mut_qryset, table_entry_list, mutation_index_dict, unique_mut_obs_mut_dict
+
+
+def get_mutation_table_queryset_and_entry_list_for_export(reseq_dict, observed_mutations_queryset):
+    """
+    By R. Cai
+    Add function specifically for mutation export.  It does not need to get observed mutations
+    that is used to extract strain information to decide if gene link is needed)
+    :param reseq_dict:
+    :param observed_mutations_queryset:
+    :return:
+    """
+    obs_mut_qryset = observed_mutations_queryset
     obs_mut_qryset = get_filtered_observed_mutations_queryset(observed_mutations_queryset)
     mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
     mutation_index_dict = dict(
@@ -128,8 +165,7 @@ def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_qu
         if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
             table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
                 experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
-    return mut_qryset, table_entry_list, mutation_index_dict, get_unique_obs_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
-
+    return mut_qryset, table_entry_list, mutation_index_dict
 
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
@@ -137,21 +173,22 @@ def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_qu
 def get_table_body(request,
                    reseq_dict,
                    observed_mutations_queryset,
+                   do_filter=True,
                    ale_experiment_id=None,
                    table_type=None):
     mutation_queryset,\
     table_entry_list,\
     mutation_index_dict,\
-    filtered_observed_mutations = get_mutation_table_queryset_and_entry_list(
-        reseq_dict, observed_mutations_queryset)
+    filtered_observed_mutation_dict = get_mutation_table_queryset_and_entry_list(
+        reseq_dict, observed_mutations_queryset, do_filter=do_filter)
 
     protein_changes = {}  # For calculating distances on the genes page only
 
     # Populating table body
     table_body = []
-    for observed_mutation in filtered_observed_mutations:
+    for mut_id, observed_mutation in filtered_observed_mutation_dict.items():
         mutation = observed_mutation.mutation
-        if _contains_mutation(table_entry_list[mutation_index_dict[mutation.id]]):
+        if _contains_mutation(table_entry_list[mutation_index_dict[mut_id]]):
             table_row = [HTML_MUTATION_TABLE_ROW]
             if request.user.has_perm('add_global_filter'):
                 table_row.append(_build_table_cell_for_dropdown(request, table_type, mutation.id, ale_experiment_id, ))
@@ -206,6 +243,7 @@ def get_gene_table_entry(observed_mutation):
 
     need_links = True
     strain = observed_mutation.sequencing_experiment.tech_rep.isolate.flask.ale_id.strain
+    # RC - hard coded???
     if strain != "511145":
         need_links = False
 
@@ -300,9 +338,10 @@ def _get_tag_filter_dropdown_entries(mutation_id):
     return html
 
 
-def _get_tag_replicate_dropdown_entries(replicate_id):
+def _get_tag_replicate_dropdown_entries(replicate: TechnicalReplicate):
 
-    tags = TechnicalReplicate.objects.get(id=replicate_id).tags
+    # tags = TechnicalReplicate.objects.get(id=replicate_id).tags
+    tags = replicate.tags;
 
     current_tags = ''
 
@@ -312,7 +351,7 @@ def _get_tag_replicate_dropdown_entries(replicate_id):
 
         image = TAGS[tag]
 
-        dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d, this)">Toggle Tag: %s %s</a></li>' % (tag, replicate_id, tag, image)
+        dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d, this)">Toggle Tag: %s %s</a></li>' % (tag, replicate.id, tag, image)
 
         if tags and tag in tags:
 
