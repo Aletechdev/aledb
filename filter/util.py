@@ -21,56 +21,54 @@ TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence
 
 def get_filtered_observed_mutations_queryset(observed_mutation_queryset, filter_settings=None):
     if filter_settings is None:
-        return _filter_observed_mutations(observed_mutation_queryset)
+        return filter_observed_mutations(observed_mutation_queryset)
     else:  # Ideally, we don't use the else, though have it for backwards compatibility.
         return _filter_observed_mutations_given_filter_settings(observed_mutation_queryset, filter_settings)
 
 
-# TODO: refactor get_filtered_observed_mutations_dict() and _filter_observed_mutations(); identical logic.
-def get_filtered_observed_mutations_dict(observed_mutation_queryset):
-    ale_exp_qryset = AleExperiment.objects.filter(
-        ale_id__in=observed_mutation_queryset.values(
-            "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"))
-    filt_obs_mut_dict = {}
-    for exp in ale_exp_qryset:
-        exp_filter_settings = AleExperimentFilter.objects.filter(ale_experiment__ale_id=exp.ale_id).first()
-        exp_obs_mut_qryset = _get_obs_mut_qryset_of_ale_exp(observed_mutation_queryset, exp.ale_id)
-        exp_obs_mut_qryset = _filter_observed_mutations_given_filter_settings(exp_obs_mut_qryset,
-                                                                                  exp_filter_settings)
-        filt_obs_mut_dict[exp.name] = exp_obs_mut_qryset
-    return filt_obs_mut_dict
-
-
-def _filter_observed_mutations(observed_mutation_queryset):
+def filter_observed_mutations(observed_mutation_queryset):
+    """
+    filter queryset based on AleExperimentFilters and GlobalFilter
+    :param observed_mutation_queryset:
+    :return: observed_mut queryset with all experiment filters
+    """
     exp_qryset = AleExperiment.objects.filter(
         ale_id__in=observed_mutation_queryset.values(
             "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment"))
     output_obs_mut_qryset = ObservedMutation.objects.none()
+    global_filter = get_global_filter()
+    exp_filter_qryset = AleExperimentFilter.objects.all()
+    exp_filter_dict = {exp_filter.ale_experiment_id: exp_filter for exp_filter in exp_filter_qryset}
     for exp in exp_qryset:
-        exp_filter_settings = AleExperimentFilter.objects.filter(ale_experiment__ale_id=exp.ale_id).first()
-        exp_obs_mut_qryset = _get_obs_mut_qryset_of_ale_exp(observed_mutation_queryset, exp.ale_id)
+        if exp.ale_id == 410:
+            print(exp.ale_id)
+        exp_filter_settings = exp_filter_dict.get(exp.ale_id)
+        exp_obs_mut_qryset = observed_mutation_queryset.filter(
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp.ale_id)
         exp_obs_mut_qryset = _filter_observed_mutations_given_filter_settings(exp_obs_mut_qryset,
-                                                                                  exp_filter_settings)
+                                                                              exp_filter_settings,
+                                                                              global_filter)
         output_obs_mut_qryset = output_obs_mut_qryset | exp_obs_mut_qryset
     return output_obs_mut_qryset
 
 
-def _get_obs_mut_qryset_of_ale_exp(obs_mut_qryset, ale_exp_id):
-    return obs_mut_qryset.filter(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=ale_exp_id)
-
-
-def _filter_observed_mutations_given_filter_settings(observed_mutation_queryset, filter_settings):
+def _filter_observed_mutations_given_filter_settings(observed_mutation_queryset, filter_settings, global_filter=None):
     ignored_gene_list = _get_ignored_gene_list(filter_settings)
     ignored_mut_list = _get_ignored_mut_list(filter_settings)
-
+    if not global_filter:
+        global_filter = get_global_filter()
+    global_ignore_gene_list = _get_ignored_gene_list_from_str(global_filter.ignored_genes)
+    global_ignore_mut_list = _get_ignored_gene_list_from_str(global_filter.ignored_mutations)
+    ignored_mut_list += global_ignore_mut_list
+    ignored_gene_list += global_ignore_gene_list
     min_cutoff = 0
     max_cutoff = 100
     if filter_settings is not None:
         min_cutoff = filter_settings.min_cutoff
         max_cutoff = filter_settings.max_cutoff
 
-    observed_mutation_queryset = _ignored_genes_filter(observed_mutation_queryset, ignored_gene_list)
+    ignored_gene_mut_list = _get_ignored_genes_mutation_id_list(observed_mutation_queryset, ignored_gene_list)
+    ignored_mut_list += ignored_gene_mut_list
     observed_mutation_queryset = _ignored_muts_filter(observed_mutation_queryset, ignored_mut_list)
     observed_mutation_queryset = _frequency_filter(observed_mutation_queryset, min_cutoff, max_cutoff)
 
@@ -82,55 +80,32 @@ def _get_ignored_mut_list(filter_settings):
     if filter_settings is not None:
         ignored_mut_str = filter_settings.ignored_mutations
         ignored_mut_list = get_ignored_mut_id_list_from_str(ignored_mut_str)
-
-    starting_strain_mut_list = []
-    if filter_settings is not None:
-        starting_strain_mut_list = filter_settings.starting_strain_mutations.split(',')
-        if starting_strain_mut_list == ['']: starting_strain_mut_list = []
-
-    global_ignored_mut_str = get_global_filter().ignored_mutations
-    global_ignored_mut_list = get_ignored_mut_id_list_from_str(global_ignored_mut_str)
-
-    ignored_mut_list = global_ignored_mut_list + ignored_mut_list + starting_strain_mut_list
+        starting_strain_mut_list = get_ignored_mut_id_list_from_str(filter_settings.starting_strain_mutations)
+        ignored_mut_list += starting_strain_mut_list
     return ignored_mut_list
 
 
-def  _get_ignored_gene_list(filter_settings):
-    ignored_genes_str = ""
-    if filter_settings is not None:
-        ignored_genes_str = filter_settings.ignored_genes
-    ignored_genes_list = _get_full_ignored_gene_list(ignored_genes_str)
-    return ignored_genes_list
+def _get_ignored_gene_list(filter_settings):
+    if filter_settings:
+        return _get_ignored_gene_list_from_str(filter_settings.ignored_genes)
+    return []
 
 
-def _get_full_ignored_gene_list(ignored_genes):
-    ignored_genes = _get_ignored_gene_list_from_str(ignored_genes)
-    global_filter = get_global_filter()
-    global_ignored_genes = global_filter.ignored_genes.replace(' ', '').replace('\n', '').replace('\r', '').split(',')
-
-    if ignored_genes == ['']:
-        if global_ignored_genes != ['']:
-            ignored_genes = global_ignored_genes
-        else:
-            ignored_genes = []
-    else:
-        if global_ignored_genes != ['']:
-            ignored_genes += global_ignored_genes
-
-    return ignored_genes
-
-
-def _ignored_genes_filter(observed_mutation_queryset, ignored_genes):
+def _get_ignored_genes_mutation_id_list(observed_mutation_queryset, ignored_genes):
+    """
+    Check gene names, and return list of ignored mutation_ids
+    :param observed_mutation_queryset:
+    :param ignored_genes:
+    :return:
+    """
+    ignored_mutation_id_list = []
     if ignored_genes:
         if len(ignored_genes) > 0 and ignored_genes[0] is not '':
-            ignored_mutation_id_list = []
             for observed_mutation in observed_mutation_queryset:
                 gene_list = get_gene_list(observed_mutation.mutation.gene)
                 if set(gene_list).issubset(set(ignored_genes)):
                     ignored_mutation_id_list.append(observed_mutation.mutation.id)
-            if ignored_mutation_id_list:
-                observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__id__in=ignored_mutation_id_list)
-    return observed_mutation_queryset
+    return ignored_mutation_id_list
 
 
 def _ignored_muts_filter(observed_mutation_queryset, ignored_mutation_list):
@@ -170,7 +145,7 @@ def get_ignored_mut_id_list_from_str(ignored_mutation_id_str, deleted_mutation_i
 
     for mut_id in ignored_mutation_id_str:
 
-        if mut_id in new_list or is_number(mut_id) is False or not _mutation_exists(mut_id):
+        if mut_id in new_list or is_number(mut_id) is False:
             continue
 
         if deleted_mutation_id is None or mut_id != deleted_mutation_id:

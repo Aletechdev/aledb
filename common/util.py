@@ -75,13 +75,21 @@ def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
 
 
 def get_unique_obs_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
-    unique_obs_mut = []
-    # make sure to use ids for comparison instead of mutation objects
-    found_mut_ids = []
-    for observed_mutation in observed_mutations_queryset:
-        if observed_mutation.mutation.id not in found_mut_ids:
-            unique_obs_mut.append(observed_mutation)
-            found_mut_ids.append(observed_mutation.mutation.id)
+    """
+    Updated by R. Cai
+    This method get one observed mutation for each mutation (??). The observed mutation is used
+    to extract strain information to decide if a 'gene linked' is need for display
+    :param observed_mutations_queryset:
+    :return: dict that map mutation_id to one observed mutation
+    """
+    # unique_obs_mut = []
+    # # make sure to use ids for comparison instead of mutation objects
+    # found_mut_ids = []
+    # for observed_mutation in observed_mutations_queryset:
+    #     if observed_mutation.mutation.id not in found_mut_ids:
+    #         unique_obs_mut.append(observed_mutation)
+    #         found_mut_ids.append(observed_mutation.mutation.id)
+    unique_obs_mut = {observed_mutation.mutation.id: observed_mutation for observed_mutation in observed_mutations_queryset}
     return unique_obs_mut
 
 # TODO: go in ale.util
