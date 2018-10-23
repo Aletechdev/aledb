@@ -76,12 +76,11 @@ def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
 
 def get_unique_obs_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
     unique_obs_mut = []
-    # make sure to use ids for comparison instead of mutation objects
-    found_mut_ids = []
+    found_muts = []
     for observed_mutation in observed_mutations_queryset:
-        if observed_mutation.mutation.id not in found_mut_ids:
+        if observed_mutation.mutation not in found_muts:
             unique_obs_mut.append(observed_mutation)
-            found_mut_ids.append(observed_mutation.mutation.id)
+            found_muts.append(observed_mutation.mutation)
     return unique_obs_mut
 
 # TODO: go in ale.util
