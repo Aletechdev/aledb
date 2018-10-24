@@ -178,9 +178,9 @@ def get_mutation_table_queryset_and_entry_list_for_export(reseq_dict, observed_m
 def get_table_body(request,
                    reseq_dict,
                    observed_mutations_queryset,
-                   do_filter=True,
                    ale_experiment_id=None,
-                   table_type=None):
+                   table_type=None,
+                   do_filter=True):
     mutation_queryset, \
     table_entry_list, \
     mutation_index_dict, \
