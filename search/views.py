@@ -71,13 +71,14 @@ def search(request):
 
 # TODO: roll _get_search_ale_exp_params into _get_search_params.
 def _get_obs_mut_qryset(request):
-
+    """
+    :param request:
+    :return: mutation_queryset and observed_mutation_queryset based on user request
+    """
     search_include_param_list, search_exclude_param_list = _get_search_params(request)
     if not search_include_param_list: return None
     mut_qryset = _get_mut_qryset(search_include_param_list, search_exclude_param_list)
-    obs_mut_qryset = ObservedMutation.objects.filter(mutation__in=mut_qryset).select_related(
-        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment', 'mutation'
-    )
+    obs_mut_qryset = ObservedMutation.objects.filter(mutation__in=mut_qryset)
 
     ale_exp_to_include, ale_exp_to_exclude = _get_search_ale_exp_params(request)
     if ale_exp_to_exclude:
@@ -87,7 +88,7 @@ def _get_obs_mut_qryset(request):
         obs_mut_qryset = obs_mut_qryset.filter(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_exp_to_include)
 
-    obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset)
+    obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset, mut_queryset=mut_qryset)
 
     return obs_mut_qryset
 
@@ -103,16 +104,17 @@ def _get_ordered_reseq_dict(obs_muts_qryset):
     #     'tech_rep__tech_rep_number'
     # ).filter(mutations__observedmutation__in=obs_muts_qryset)
 
-    obs_muts_qryset = obs_muts_qryset.order_by(
+    obs_muts_qryset = obs_muts_qryset.select_related(
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment', 'mutation'
+    ).order_by(
         'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__name',
         'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_id',
         'sequencing_experiment__tech_rep__isolate__flask__flask_number',
         'sequencing_experiment__tech_rep__isolate__isolate_number',
         'sequencing_experiment__tech_rep__tech_rep_number'
     )
-    reseq_ordered_dict = collections.OrderedDict()
-    for obs_mut in obs_muts_qryset:
-        reseq_ordered_dict[obs_mut.sequencing_experiment.id] = obs_mut.sequencing_experiment
+    reseq_ordered_dict = collections.OrderedDict({obs_mut.sequencing_experiment.id: obs_mut.sequencing_experiment
+                                                  for obs_mut in obs_muts_qryset})
     return reseq_ordered_dict, obs_muts_qryset
 
 
