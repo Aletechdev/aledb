@@ -207,7 +207,7 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
         isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
         technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.TechnicalReplicate)
-        print(ale_number, flask_number, isolate_number, technical_replicate_number)
+        # print(ale_number, flask_number, isolate_number, technical_replicate_number)
         output_path = breseq_output_group_root_abs_path + ale_isolate_name + "/" + BRESEQ_OUTPUT_REPORT_DIR
         _create_and_commit_ale_entry(ale_exp_user,
                                      output_path,
