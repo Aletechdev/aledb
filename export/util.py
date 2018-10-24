@@ -14,7 +14,7 @@ CONVERGED_MUT_TYPE_STR = "converged_mut"
 
 
 def get_csv_str(exp_id, mut_type_str):
-    print(str(datetime.now()), exp_id, mut_type_str)
+    # print(str(datetime.now()), exp_id, mut_type_str)
     filtered = False
     if mut_type_str == FIXED_MUT_TYPE_STR:
         reseq_ordered_dict = get_reseq_ordered_dict(exp_id)
@@ -54,7 +54,7 @@ def get_csv_str(exp_id, mut_type_str):
               strip_tags(mutation.protein_change)] + _strip_tags_from_list(
         table_entry_list[mut_index_dict[mutation.id]])
              for mutation in mut_qryset)
-    print(str(datetime.now()), "after get rows")
+    # print(str(datetime.now()), "after get rows")
     return rows
 
 

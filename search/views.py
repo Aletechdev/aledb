@@ -63,10 +63,10 @@ def search(request):
     except Exception as ex:
         exception_lgr.exception("search broke", extra = user_extra(request))
         exc_type, exc_value, exc_tb = sys.exc_info()
-        pprint(
-            traceback.format_exception(exc_type, exc_value, exc_tb),
-            width=65,
-        )
+        # pprint(
+        #     traceback.format_exception(exc_type, exc_value, exc_tb),
+        #     width=65,
+        # )
 
 
 # TODO: roll _get_search_ale_exp_params into _get_search_params.

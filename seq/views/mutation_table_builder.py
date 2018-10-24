@@ -113,7 +113,7 @@ def get_table_header(request, reseq_dict, table_type=None):
 
 
 def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset, do_filter=True):
-    print("reseq_dict", len(reseq_dict))
+    # print("reseq_dict", len(reseq_dict))
     obs_mut_qryset = observed_mutations_queryset
     if do_filter:
         obs_mut_qryset = get_filtered_observed_mutations_queryset(observed_mutations_queryset)
