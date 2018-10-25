@@ -1,5 +1,4 @@
 from django.conf import settings
-import os
 import seq.views.common
 from filter.util import get_filtered_observed_mutations_queryset
 import re
@@ -9,12 +8,14 @@ from common.util import get_mut_queryset_from_obs_mut_queryset, get_unique_obs_m
 from genes.util import get_gene_list
 from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS
 from ale.models import TechnicalReplicate
+from filter.models import AleExperimentFilter
 from logs.aledb_logger import get_logger
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/close-icon.gif" width="12" height="11"></a>"""
-HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequence Change", "Gene", "Function", "Product", "GO Process", "GO Component", "Details"]
+HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequence Change", "Gene", "Function",
+                              "Product", "GO Process", "GO Component", "Details"]
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
@@ -46,13 +47,13 @@ def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experim
     menuitems = _menu_item_save_to_global_filter % (mutation_id)
 
     # some other tables have a 'Save to Experiment Filter' menuitem
-    if (not table_type in [ TableType.GENE_TABLE \
-                        , TableType.SEARCH \
-                        , TableType.SHARED \
-                        , TableType.COMBINE \
-                        , TableType.COMBINE_ENRICHMENT_MUTATIONS \
-                        , TableType.COMBINE_FIXATION_MUTATIONS \
-    ]):
+    if (not table_type in [TableType.GENE_TABLE \
+            , TableType.SEARCH \
+            , TableType.SHARED \
+            , TableType.COMBINE \
+            , TableType.COMBINE_ENRICHMENT_MUTATIONS \
+            , TableType.COMBINE_FIXATION_MUTATIONS \
+                           ]):
         menuitems += _menu_item_save_to_experiment_filter % (ale_experiment_id, mutation_id)
 
     return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation_id))
@@ -63,12 +64,12 @@ EXPANDABLE_GENE_ENTRY = """<div class="collapse pull-left" id="%s">%s</div>"""
 non_decimal = re.compile(r'[^\d.]+')
 evidence = re.compile(r'[A-Z]\d+[A-Z]')
 TAGS_IMAGE = '<div class="dropdown tag_dropdown"><button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">' \
-    '<i class="fa fa-tags" aria-hidden="true"></i>' \
-    '</button>' \
-    '<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">'\
-    '%s' \
-    '</ul>' \
-    '</div><div class="tag_dropdown">%s</div>'
+             '<i class="fa fa-tags" aria-hidden="true"></i>' \
+             '</button>' \
+             '<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">' \
+             '%s' \
+             '</ul>' \
+             '</div><div class="tag_dropdown">%s</div>'
 
 
 class TableType(Enum):
@@ -96,14 +97,14 @@ def get_table_header(request, reseq_dict, table_type=None):
     for reseq_id in reseq_dict:
         reseq = reseq_dict[reseq_id]
         sample_name = reseq.exp_ale_flask_isolate_str
-        current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep_id)
+        current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep)
 
         sample_header_html = sample_name
         if reseq_id in experiment_urls.keys():
             sample_header_html = """<a href="%s">%s</a>"""
             sample_header_html = sample_header_html % (experiment_urls[reseq_id], sample_name)
 
-        if(request.user.has_perm('add_global_filter')):
+        if (request.user.has_perm('add_global_filter')):
             table_header_list.append(sample_header_html + (TAGS_IMAGE % (dropdown_html, current_tags)))
         else:
             table_header_list.append(sample_header_html)
@@ -111,8 +112,48 @@ def get_table_header(request, reseq_dict, table_type=None):
     return base_table_header + table_header_list
 
 
-def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset):
-    obs_mut_qryset = get_filtered_observed_mutations_queryset(observed_mutations_queryset)
+def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset, do_filter=True):
+    # print("reseq_dict", len(reseq_dict))
+    obs_mut_qryset = observed_mutations_queryset
+    if do_filter:
+        obs_mut_qryset = get_filtered_observed_mutations_queryset(observed_mutations_queryset)
+    mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
+    mutation_index_dict = dict(
+        (mutation_id, i) for i, mutation_id in enumerate(mut_qryset.values_list("id", flat=True)))
+    experiment_url_dict = get_experiment_urls(reseq_dict)
+    experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
+
+    # Initialize all sample mutation table cells as empty.
+    table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mut_qryset)
+
+    # Populating table_entry_list
+    unique_mut_obs_mut_dict = dict()  # hold one obs mutation for each mutation
+    for observed_mutation in obs_mut_qryset:
+        new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
+        if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
+            table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
+                experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
+        mutation_id = observed_mutation.mutation_id
+        if mutation_id not in unique_mut_obs_mut_dict:
+            unique_mut_obs_mut_dict[observed_mutation.mutation.id] = observed_mutation
+    # return mut_qryset, table_entry_list, mutation_index_dict, get_unique_obs_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
+    return mut_qryset, table_entry_list, mutation_index_dict, unique_mut_obs_mut_dict
+
+
+def get_mutation_table_queryset_and_entry_list_for_export(reseq_dict, observed_mutations_queryset, exp_id, do_filter=True):
+    """
+    By R. Cai
+    Add function specifically for mutation export.  It does not need to get observed mutations
+    that is used to extract strain information to decide if gene link is needed)
+    :param reseq_dict:
+    :param observed_mutations_queryset:
+    :param do_filter
+    :return:
+    """
+    obs_mut_qryset = observed_mutations_queryset
+    if do_filter:
+        filter_settings = AleExperimentFilter.objects.filter(ale_experiment__ale_id=exp_id).first()
+        obs_mut_qryset = get_filtered_observed_mutations_queryset(observed_mutations_queryset, filter_settings)
     mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
     mutation_index_dict = dict(
         (mutation_id, i) for i, mutation_id in enumerate(mut_qryset.values_list("id", flat=True)))
@@ -128,7 +169,7 @@ def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_qu
         if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
             table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
                 experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
-    return mut_qryset, table_entry_list, mutation_index_dict, get_unique_obs_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
+    return mut_qryset, table_entry_list, mutation_index_dict
 
 
 # TODO: Refactor. The observed mutations argument may
@@ -138,20 +179,21 @@ def get_table_body(request,
                    reseq_dict,
                    observed_mutations_queryset,
                    ale_experiment_id=None,
-                   table_type=None):
-    mutation_queryset,\
-    table_entry_list,\
-    mutation_index_dict,\
-    filtered_observed_mutations = get_mutation_table_queryset_and_entry_list(
-        reseq_dict, observed_mutations_queryset)
+                   table_type=None,
+                   do_filter=True):
+    mutation_queryset, \
+    table_entry_list, \
+    mutation_index_dict, \
+    filtered_observed_mutation_dict = get_mutation_table_queryset_and_entry_list(
+        reseq_dict, observed_mutations_queryset, do_filter=do_filter)
 
     protein_changes = {}  # For calculating distances on the genes page only
 
     # Populating table body
     table_body = []
-    for observed_mutation in filtered_observed_mutations:
+    for mut_id, observed_mutation in filtered_observed_mutation_dict.items():
         mutation = observed_mutation.mutation
-        if _contains_mutation(table_entry_list[mutation_index_dict[mutation.id]]):
+        if _contains_mutation(table_entry_list[mutation_index_dict[mut_id]]):
             table_row = [HTML_MUTATION_TABLE_ROW]
             if request.user.has_perm('add_global_filter'):
                 table_row.append(_build_table_cell_for_dropdown(request, table_type, mutation.id, ale_experiment_id, ))
@@ -193,7 +235,6 @@ def get_table_body(request,
 
 
 def get_ecocyc_gene_list(gene_list):
-
     url_list = []
     for each in gene_list:
         if each.startswith("<"):
@@ -203,12 +244,11 @@ def get_ecocyc_gene_list(gene_list):
 
 
 def get_gene_table_entry(observed_mutation):
-
     need_links = True
     strain = observed_mutation.sequencing_experiment.tech_rep.isolate.flask.ale_id.strain
+    # RC - hard coded???
     if strain != "511145":
         need_links = False
-
 
     table_entry = """<div style="width:150px">"""
     cleaned_gene_list = get_gene_list(observed_mutation.mutation.gene)
@@ -277,32 +317,29 @@ def _find_between(s, first, last):
 
 
 def _get_mutation_tags(tags):
-
     html = ''
 
     if tags:
 
         for tag in tags.split(','):
-
             html += '<span class="fa-stack">%s<font style="font-size:0px">%s</font></span>' % (TAGS[tag], tag)
 
     return html
 
 
 def _get_tag_filter_dropdown_entries(mutation_id):
-
     html = ''
 
     for tag in ROW_TAGS:
-
-        html += '<li><a onclick="add_tag(\'%s\', %d, this)" style="cursor:pointer">Toggle Tag: %s %s</a></li>' % (tag, mutation_id, tag, TAGS[tag])
+        html += '<li><a onclick="add_tag(\'%s\', %d, this)" style="cursor:pointer">Toggle Tag: %s %s</a></li>' % (
+        tag, mutation_id, tag, TAGS[tag])
 
     return html
 
 
-def _get_tag_replicate_dropdown_entries(replicate_id):
-
-    tags = TechnicalReplicate.objects.get(id=replicate_id).tags
+def _get_tag_replicate_dropdown_entries(replicate: TechnicalReplicate):
+    # tags = TechnicalReplicate.objects.get(id=replicate_id).tags
+    tags = replicate.tags;
 
     current_tags = ''
 
@@ -312,7 +349,8 @@ def _get_tag_replicate_dropdown_entries(replicate_id):
 
         image = TAGS[tag]
 
-        dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d, this)">Toggle Tag: %s %s</a></li>' % (tag, replicate_id, tag, image)
+        dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d, this)">Toggle Tag: %s %s</a></li>' % (
+        tag, replicate.id, tag, image)
 
         if tags and tag in tags:
 
@@ -320,6 +358,7 @@ def _get_tag_replicate_dropdown_entries(replicate_id):
 
         else:
 
-            current_tags += '<span class="fa-stack" style="display:none">%s<font style="font-size:0px">%s</font></span>' % (image, tag)
+            current_tags += '<span class="fa-stack" style="display:none">%s<font style="font-size:0px">%s</font></span>' % (
+            image, tag)
 
     return current_tags, dropdown_html

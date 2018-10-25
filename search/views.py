@@ -8,7 +8,6 @@ from seq.models import ObservedMutation, Mutation
 from ale.models import AleExperiment
 from django.db.models import Q
 import operator, collections
-from seq.models import ResequencingExperiment
 from functools import reduce
 from seq.views import mutation_table_builder
 from common.util import check_hidden_columns_and_filters, common_context
@@ -16,7 +15,9 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json
 from filter.util import get_filtered_observed_mutations_queryset
 from logs.aledb_logger import get_logger, user_extra, join_extras
-
+import traceback
+import sys
+from pprint import pprint
 
 usage_lgr = get_logger("usage")
 performance_lgr = get_logger("performance")
@@ -30,16 +31,20 @@ def search(request):
 
         check_hidden_columns_and_filters(request, None)
         obs_mut_qryset = _get_obs_mut_qryset(request)
-        reseq_dict = _get_ordered_reseq_dict(obs_mut_qryset)
-        if reseq_dict is None or obs_mut_qryset is None:
+
+        if obs_mut_qryset is None:
             context = common_context.copy()
             context.update({'error': True})
             return render(request, 'search.html', context)
 
+        reseq_dict, obs_mut_qryset = _get_ordered_reseq_dict(obs_mut_qryset)
+
         table_header = mutation_table_builder.get_table_header(request, reseq_dict)
+        # obs_mut_qryset is already filtered
         table_body = mutation_table_builder.get_table_body(request,
                                                            reseq_dict,
                                                            obs_mut_qryset,
+                                                           do_filter=False,
                                                            table_type=mutation_table_builder.TableType.SEARCH)
         last_search = _get_last_search(request)
         template = loader.get_template("search.html")
@@ -55,13 +60,21 @@ def search(request):
             {"parameters":last_search},
             {"time taken": time.clock() - start_time}))
         return HttpResponse(template.render(context, request), content_type="text/html")
-    except Exception:
+    except Exception as ex:
         exception_lgr.exception("search broke", extra = user_extra(request))
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        # pprint(
+        #     traceback.format_exception(exc_type, exc_value, exc_tb),
+        #     width=65,
+        # )
 
 
 # TODO: roll _get_search_ale_exp_params into _get_search_params.
 def _get_obs_mut_qryset(request):
-
+    """
+    :param request:
+    :return: mutation_queryset and observed_mutation_queryset based on user request
+    """
     search_include_param_list, search_exclude_param_list = _get_search_params(request)
     if not search_include_param_list: return None
     mut_qryset = _get_mut_qryset(search_include_param_list, search_exclude_param_list)
@@ -75,24 +88,34 @@ def _get_obs_mut_qryset(request):
         obs_mut_qryset = obs_mut_qryset.filter(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_exp_to_include)
 
-    obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset)
+    obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset, mut_queryset=mut_qryset)
 
     return obs_mut_qryset
 
 
 def _get_ordered_reseq_dict(obs_muts_qryset):
-    if not obs_muts_qryset: return None
-    reseq_qryset = ResequencingExperiment.objects.select_related(
-        'tech_rep__isolate__flask__ale_id__ale_experiment'
+    # reseq_qryset = ResequencingExperiment.objects.select_related(
+    #     'tech_rep__isolate__flask__ale_id__ale_experiment'
+    # ).order_by(
+    #     'tech_rep__isolate__flask__ale_id__ale_experiment__name',
+    #     'tech_rep__isolate__flask__ale_id__ale_id',
+    #     'tech_rep__isolate__flask__flask_number',
+    #     'tech_rep__isolate__isolate_number',
+    #     'tech_rep__tech_rep_number'
+    # ).filter(mutations__observedmutation__in=obs_muts_qryset)
+
+    obs_muts_qryset = obs_muts_qryset.select_related(
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment', 'mutation'
     ).order_by(
-        'tech_rep__isolate__flask__ale_id__ale_experiment__name',
-        'tech_rep__isolate__flask__ale_id__ale_id',
-        'tech_rep__isolate__flask__flask_number',
-        'tech_rep__isolate__isolate_number',
-        'tech_rep__tech_rep_number'
-    ).filter(mutations__observedmutation__in=obs_muts_qryset)
-    reseq_ordered_dict = collections.OrderedDict((reseq.id, reseq) for reseq in reseq_qryset)
-    return reseq_ordered_dict
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__name',
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_id',
+        'sequencing_experiment__tech_rep__isolate__flask__flask_number',
+        'sequencing_experiment__tech_rep__isolate__isolate_number',
+        'sequencing_experiment__tech_rep__tech_rep_number'
+    )
+    reseq_ordered_dict = collections.OrderedDict({obs_mut.sequencing_experiment.id: obs_mut.sequencing_experiment
+                                                  for obs_mut in obs_muts_qryset})
+    return reseq_ordered_dict, obs_muts_qryset
 
 
 def _get_last_search(request):
