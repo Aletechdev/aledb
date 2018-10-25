@@ -1,5 +1,5 @@
-from seq.models import ObservedMutation
-from filter.util import get_filtered_observed_mutations_dict
+from seq.models import ObservedMutation, Mutation
+from filter.util import get_filtered_observed_mutations_queryset
 
 
 __author__ = 'Patrick Phaneuf'
@@ -38,5 +38,5 @@ def get_ale_isolate_name_from_path(breseq_report_path):
 
 def get_all_obs_mut_exp_dict():
     raw_obs_mut_qryset = ObservedMutation.objects.all()
-    exp_to_obs_mut_qryset_dict = get_filtered_observed_mutations_dict(raw_obs_mut_qryset)
+    exp_to_obs_mut_qryset_dict = get_filtered_observed_mutations_queryset(raw_obs_mut_qryset)
     return exp_to_obs_mut_qryset_dict

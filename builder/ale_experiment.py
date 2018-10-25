@@ -242,8 +242,6 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         rebuild_fixated_mutations(experiment.ale_id)
         generate_static_data(experiment.ale_id)
         rebuild_dashboard_data()
-
-
     except Exception as e:
         exception_lgr.exception(e)
 
