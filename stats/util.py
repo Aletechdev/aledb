@@ -4,24 +4,45 @@ from genes.util import get_gene_list
 from operator import itemgetter
 from collections import Counter
 from seq.models import UnassignedMissingCoverageEvidence
+from seq.util import get_all_observed_mutations
 from seq.views.common import MUTATION_TYPE_LIST, COLORS, DEFAULT_COLOR, FUNCTIONAL_CHANGE_TYPE_LIST
+from stats.models import StaticData
+from logs.aledb_logger import get_logger
+from common.util import get_reseq_ordered_dict
+from filter.util import get_filtered_observed_mutations_queryset
+import stats.models
 
 
 MAX_HISTOGRAM_SIZE = 50
+exception_lgr = get_logger("exceptions")
+usage_lgr = get_logger("usage")
+performance_lgr = get_logger("performance")
 
 
-def get_histogram_jsons(observed_mutation_queryset, histogram_item_count):
+def get_observed_mutation_queryset(ale_experiment_id):
+    ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id)
+    observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
+    observed_mutation_query_set = get_filtered_observed_mutations_queryset(observed_mutation_query_set)
+    return observed_mutation_query_set
+
+
+def get_histogram_jsons(ale_experiment_id, histogram_item_count):
+    genes = StaticData.objects.get(id=ale_experiment_id).histogram_data[:histogram_item_count]
+    return genes
+
+
+def generate_histogram_jsons(observed_mutation_queryset):
     observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='')
     observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='-')
     observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='–, –')
     gene_bar_chart_list = get_gene_bar_chart_list(observed_mutation_queryset)
     genes = set_gene_bar_chart_colors(gene_bar_chart_list)
 
-    genes_json = list(genes[:histogram_item_count])
+    genes_json = list(genes)
     return genes_json
 
 
-def get_needle_plot_data(obs_mut_queryset):
+def generate_needle_plot_data(obs_mut_queryset):
     needle_plot_data = []
     for observed_mutation in obs_mut_queryset:
         needle_plot_data.append(
@@ -29,6 +50,20 @@ def get_needle_plot_data(obs_mut_queryset):
              'category': observed_mutation.mutation.mutation_type,
              'value': 1})
     return needle_plot_data
+
+
+def get_needle_plot_data(experiment_id):
+    data = StaticData.objects.get(id=experiment_id).mut_needle_data
+    return data
+
+
+def generate_static_data(ale_id):
+    observed_mutation_queryset = get_observed_mutation_queryset(ale_id)
+    mutation_needle_data = generate_needle_plot_data(observed_mutation_queryset)
+    static_data_orm, created = stats.models.StaticData.objects.get_or_create(id=ale_id)
+    static_data_orm.mut_needle_data = mutation_needle_data
+    static_data_orm.histogram_data = generate_histogram_jsons(observed_mutation_queryset)
+    static_data_orm.save()
 
 
 def get_mutation_type_count_dict(mutation_query_set):
@@ -143,7 +178,6 @@ def get_gene_bar_chart_list(observed_mutation_queryset):
     final_sorted_list = sorted(final_list, key=itemgetter('the_count'), reverse=True)
 
     return final_sorted_list
-
 
 
 def set_gene_bar_chart_colors(genes):

@@ -5,7 +5,7 @@ from common.util import get_mut_queryset_from_obs_mut_queryset
 from seq.views.common import MUTATION_TYPE_LIST, FUNCTIONAL_CHANGE_TYPE_LIST
 from ale.models import AleId, Isolate, Flask
 from django.db.models import Q
-from stats.util import get_histogram_jsons, MAX_HISTOGRAM_SIZE
+from stats.util import generate_histogram_jsons, MAX_HISTOGRAM_SIZE
 
 
 def rebuild_dashboard_data():
@@ -19,7 +19,7 @@ def rebuild_mut_histogram_data():
         ObservedMutation.objects.create()
     raw_obs_mut_qryset = ObservedMutation.objects.all()
     obs_mut_qryset = get_filtered_observed_mutations_queryset(raw_obs_mut_qryset)
-    genes_json = get_histogram_jsons(obs_mut_qryset, MAX_HISTOGRAM_SIZE)
+    genes_json = generate_histogram_jsons(obs_mut_qryset)
     if BarCharts.objects.all().count() == 0:
         BarCharts.objects.create()
     histogram_data = BarCharts.objects.all()
