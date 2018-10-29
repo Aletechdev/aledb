@@ -3,116 +3,14 @@
 {% block header %}About{% endblock %}
 {% block content %}
     <h1>ALEdb</h1>
-    <p class="lead">This web platform has been built to support the report generation and consolidation of adaptive
-        mutations from Experimental Evolutions and Adaptive Laboratory Evolution (ALE) experiments.
-    </p>
-    <h2>Publication</h2>
-    <p>The initial in-depth review of ALEdb was published as a <a
-            href="https://escholarship.org/content/qt056243b5/qt056243b5.pdf">masters thesis</a>.</p>
-    <p>A manuscript has been prepared to describe ALEdb and can be used for citations:<br/>
-    Patrick V Phaneuf, Dennis Gosting, Bernhard O Palsson, Adam M Feist. ALEdb 1.0: A Database of Mutations from Adaptive Laboratory Evolution. bioRxiv doi: <a href="https://doi.org/10.1101/320747">https://doi.org/10.1101/320747</a>
-    </p>
+    <p>ALEdb (i) is a web-based platform that comprehensively reports on ALE acquired mutations and their conditions, (ii) reports key mutations using previously established trends, (iii) enables a search-driven workflow to enhance user mutation functional analysis through mutation cross-reference, (iv) allows exporting of mutation query results for custom analysis, (v) includes a bibliome describing the databased experiment publications and (vi) contains experimental evolution mutations from multiple model organisms.</p>
+    <p>ALEdb is freely available for non-commercial use. It is hosted and maintained by the Systems Biology Research Group at the University of California, San Diego.</p>
+    <p>If you have questions, comments, or find any bugs with ALEdb, please contact Patrick Phaneuf (pphaneuf-AT-eng-DOT-ucsd-DOT-edu).</p>
     <h2>Data Submission</h2>
-    <p>For data submission, please complete the the following submission <a href="https://goo.gl/forms/RzPc44dBd6rmTRDs2">form</a> and contact pphaneuf 'at' eng 'dot' ucsd 'dot' edu with any questions.
-    </p>
-    <h2>Feature Overview</h2>
-    <img src="/static/ALEdb_flow.png" style="width: 70%; height: 70%; padding-bottom: 20px">
-    <p>The ALEdb web platform maintains two categories of features: those that describe individual ALE
-        experiments, and those that describe all consolidated ALE experiment data (Figure 2B). To describe individual
-        ALE
-        experiments, ALEdb generates reports that describe the mutation lineage of ALEs, potential key
-        mutations, and
-        metadata reports describing the conditions for experiment isolates. To describe the consolidated ALE experiment
-        database,
-        ALEdb provides a mutation search feature, an automated ALE experiment comparison feature, and the
-        ability to
-        export the mutation data from one or more ALE experiments in a flat file format.</p>
-    <h3>ALE Experiment</h3>
-    <p>The foundational work to which this thesis builds on are the ALE experimental wet lab methodologies. Beginning
-        with a well known starting strain, an ALE experiment is commonly executed by serially passing a selected cell
-        culture to a fresh flask of media, enabling the particular strain passed to continue evolving under the
-        experimental conditions. The selection of cells to pass on to the next flask is often based on growth rate since
-        we assume that the most adapted strain population will outgrow their competition. ALE experiments can also
-        involve replicate ALEs, which are identical experimental evolutions that execute in parallel. This approach
-        reveals additional mutational data on the dynamics of adaptation and evolution for an organism and can describe
-        a convergence of adaptations across multiple ALEs. ALE experiments can involve multiple ALEs with multiple
-        flasks and isolates. In addition, each isolate can have one or more technical replicates, which are used to
-        serialize duplicate isolates with the goal of increasing the quality of a previous isolate. The work described
-        by this thesis serializes each sample with an abbreviation for each ALE layer and a count value representing a
-        sample’s identity within an ALE layer’s sequence. For example, the serialization A6 F21 I2 R1 represents the
-        first technical replicate of the second isolate from the 21st flask of the 6th ALE in an ALE experiment. The
-        output of an ALE experiment are populations or clonal isolates which were derived from the original strain and
-        additionally include the mutations in the cells according to the environmental stresses introduced in the ALE
-        experiment. This output is then processed by additional foundational technologies leveraged with ALE: the DNA
-        sequencer and mutation identifying software. The output sample to be analyzed is sequenced, typically by an
-        Illumina platform, and resequenced primarily using the BreSeq computational pipeline. BreSeq’s resequencing
-        process aligns all of the DNA reads to a provided genome reference and reports single-nucleotide mutations,
-        point insertions and deletions, large deletions, missing coverage and new junctions according to the differences
-        between the aligned reads and the reference genome.</p>
-    <img src="/static/ale_exp.png" style="width: 40%; height: 40%; padding-bottom: 20px">
-    <p>Generally, researchers compare the mutations from each ALE’s
-        endpoint samples to identify genomic regions with many alleles. If a researcher sequenced ALE midpoint or
-        intermediate samples, an ALE’s mutations can be organized in chronological order to identify mutations that fix.
-        The mutations that are involved in multiple alleles of a genomic region or are shown to fix from starting or
-        midpoint to endpoint samples are considered the key mutation sets and are investigated for their possible
-        fitness benefit according to the genomic region they affect.</p>
-    <h3>Mutation tables</h3>
-    <p>The primary focus of the ALEdb web platform is ALE mutation report generation. Each ALE experiment can be
-        described as a series of isolate mutation sets in relation to an ALE’s starting strain. Ordering sample mutation
-        sets as columns from earliest to latest in an ALE serves as a visualization to grant intuition on mutational
-        trends. The occurrence of a mutation in a sample is annotated with an allele frequency within the cell of a
-        mutation row for the sample.</p>
-    <img src="/static/mut_table.png" style="padding-bottom: 20px">
-    <p>Above is an example mutation table. This mutation table represents an ALE lineage report, where samples are
-        represented as columns, ordered from left to right
-        as earliest to latest in an ALE. Rows describe the specific mutations manifested within the sample set, and
-        values contained within cells represent the allele frequency.This format enables researchers to intuitively
-        identify important mutational patterns, such as the fixed mutations with <i>corA</i> and the <i>hns/tdk</i>
-        intergenic region.</p>
-    <p>Mutation lineage reports enable researchers to recognize patterns of key adaptive mutations. Among the many
-        mutations that manifest within an ALE experiment, mutation rows that describe multiple alleles of a gene will
-        cluster together with the sorting of mutations according to their positions on the genome. This is illustrated
-        with the mutated <i>corA</i> within the example table. Due to the chronological sorting of the sample columns
-        per ALE,
-        a mutation that fixes across samples will manifest as an unbroken sequence of cells in a mutation row annotated
-        with an allele frequency. This is illustrated with both the <i>hns/tdk</i> and <i>corA</i> mutations in the
-        example table.
-        These two patterns are obvious to an observer and serve well to describe the mutational trends in ALE
-        experiments.
-    </p>
-    <h2>Key mutation reporting</h2>
-    <p>Using the ALEdb mutation reporting mechanism, we have implemented features that automate the
-        identification and reporting of mutations which describe significant mutational patterns within an ALE
-        experiment. These features describe key and potentially adaptive mutation patterns which we refer to as
-        <i>converged</i> and <i>fixed mutations</i>. The methods encapsulated in the converged and fixed mutation
-        analysis are those
-        which have been developed to manually identify adaptive mutations within the results of published ALE
-        experiments (PGI) (C13) (42C) (GLU) and are therefore considered common
-        ALE experiment key mutation analysis. Once an experiment’s initial set of key mutations are identified,
-        additional validation experiments and functional analysis are executed to validate that they are adaptive.
-        As with the manual consolidation of ALE experiment mutation data, the analysis of adaptive mutations can be
-        prone to human error, inconsistent between researchers and time consuming. The automation of these common
-        analyses will contribute to more accurate results, more consistent analysis and the shortening of turnaround
-        time from ALE experiment execution to results interpretation.
-    </p>
-    <img src="/static/key_mutations_ALEdb.png" style="width: 40%; height: 40%; padding-bottom: 20px">
-    <p>A <i>fixed</i> mutation is one in which manifests in an ALE’s midpoint, or intermediate sample, and is propagated to all
-        following samples in the ALE. The propagation of a mutation from their emergence to an ALE’s endpoint may
-        describe the selection of a mutation due to its fitness benefits. This analysis is only possible if an ALE
-        experiment includes midpoint samples, providing the possibility of more than one data point per ALE mutation.
-        The identification of fixed mutations is accomplished by organizing mutations according to the ALE’s sample
-        chronology and identifying mutations that emerge in a midpoint and manifest in all following samples of the same
-        ALE.</p>
-    <p>A <i>converged</i> mutation is one in which manifests in a genetic region seen to be mutated in multiple replicate ALEs.
-        This phenomenon describes evidence of a potential common adaptive trajectory between microbes
-        exposed to the same conditions and has been leveraged in ALE analysis methods to more quickly identify mutations
-        causal for adaptive phenotypes.</p>
-    <h2>Bibliome</h2>
-    <p>A key component in the utility of ALEdb is the per experiment knowledge built from the databased mutations. The Bibliome feature itemizes the publications that studied the ALE mutations databased within ALEdb. Users can leverage the mutation functional analysis within these publications toward understanding any similar mutations in their experimental evolutions.</p>
-    <h2>Export</h2>
-    <p>ALEdb implements an Export feature to give users the freedom to perform any analysis of interest on the hosted data. This feature enables users to extract one or more experiment mutation sets into comma separated value files. Users can then leverage custom analysis pipelines on the ALEdb’s data towards generating novel results.</p>
-    <h2>Files</h2>
-    <p>Gives access to all raw data databased into ALEdb.</p>
+    <p>For data submission, please complete the the following submission <a href="https://goo.gl/forms/RzPc44dBd6rmTRDs2">form</a> and contact Patrick Phaneuf (pphaneuf-AT-eng-DOT-ucsd-DOT-edu) with any questions.</p>
+    <h2>How do I cite ALEdb?</h2>
+    <p>When using ALEdb in your research, we kindly ask that you cite the latest publication. Your citation of ALEdb will help us to apply for ongoing funding to maintain this resource.</p>
+    <p>Phaneuf PV, Gosting D, Palsson BO, Feist AM. ALEdb 1.0: a database of mutations from adaptive laboratory evolution experimentation. Nucleic Acids Res. 2018; <a href="https://doi.org/10.1093/nar/gky983">doi:10.1093/nar/gky983</a></p>
     <h2>Mutation data generation</h2>
     <p>The mutation data presented on this platform was generated using the <a
             href=https://github.com/barricklab/breseq>BreSeq</a> resquencing pipeline.</p>
@@ -120,13 +18,12 @@
         next-generation sequencing data using BreSeq. Methods Mol. Biol.</p>
     <h2>3rd party packages used</h2>
     <p>mutation-needle-plot: http://dx.doi.org/10.5281/zenodo.14561</p>
-    <p>webGL protein viewer: http://dx.doi.org/10.5281/zenodo.20980</p>
-    <h2>Acknowledgements</h2>
-    <p>This work is developed by UCSD's Systems Biology Research Group and is supported by a grant from the Novo Nordisk
-        Foundation Center for Biosustainability (NNF16CC0021858).</p>
-    <h2>Contact</h2>
-    <p>Please send comments or report issues to:</p>
-    <p>pphaneuf 'at' eng 'dot' ucsd 'dot' edu</p>
+    <h2>License</h2>
+    <p>Copyright © 2017 The Regents of the University of California</p>
+    <p>Permission to use, copy, modify and distribute any part of ALEdb for educational, research and non-profit purposes, without fee, and without a written agreement is hereby granted, provided that the above copyright notice, this paragraph and the following three paragraphs appear in all copies.</p>
+    <p>Those desiring to incorporate ALEdb Models into commercial products or use for commercial purposes should contact the Technology Transfer & Intellectual Property Services, University of California, San Diego, 9500 Gilman Drive, Mail Code 0910, La Jolla, CA 92093-0910, Ph: (858) 534-5815, FAX: (858) 534-7345, e-mail: invent@ucsd.edu.</p>
+    <p>In no event shall the University of California be liable to any party for direct, indirect, special, incidental, or consequential damages, including lost profits, arising out of the use of ALEdb, even if the University of California has been advised of the possibility of such damage.</p>
+    <p>ALEdb provided herein is on an "as is" basis, and the University of California has no obligation to provide maintenance, support, updates, enhancements, or modifications. The University of California makes no representations and extends no warranties of any kind, either implied or express, including, but not limited to, the implied warranties of merchantability or fitness for a particular purpose, or that the use of ALEdb will not infringe any patent, trademark or other rights.</p>
     <hr>
     <div class="container">
         <p class="text-muted" align="center">ALEdb is hosted and maintained by the Systems Biology Research
