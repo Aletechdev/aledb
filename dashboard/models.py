@@ -22,7 +22,6 @@ class ObservedMutationCounts(models.Model):
         return "ObservedMutationCounts Object with the following parameters: "+locals()
 
 
-
 class UniqueMutationCounts(models.Model):
     total = models.IntegerField(default=0)
     single_base_substitution = models.IntegerField(default=0)
@@ -53,7 +52,10 @@ class SampleCounts(models.Model):
     isolate_count = models.IntegerField(default=0)
     flask_count = models.IntegerField(default=0)
 
+
 def bar_chart_json_default(): return {"":""}
+
+
 class BarCharts(Model):
     mut_gene_json = JSONField(default=bar_chart_json_default)
     mut_json = JSONField(default=bar_chart_json_default)

@@ -15,7 +15,9 @@ from dashboard.timeline_util import create_event
 from dashboard.util import rebuild_dashboard_data
 from filter.models import AleExperimentFilter
 import filter.models
+from stats.util import generate_static_data
 
+from logs.aledb_logger import get_logger
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -27,6 +29,10 @@ BRESEQ_LOG_FILE = "log.txt"
 ANNOTATION_GENOMIC_DIFF_FILE_NAME = 'annotated.gd'
 METADATA_RELATIVE_PATH = 'metadata/'
 REF_RELATIVE_PATH = 'ref/'
+
+usage_lgr = get_logger("usage")
+exception_lgr = get_logger("exceptions")
+performance_lgr = get_logger("performance")
 
 
 def integrate_metadata(ale_exp_path, ref_file_name, ale_exp_primary_key):
@@ -61,9 +67,9 @@ def delete_ale_experiments(ale_experiment_primary_key_list):
         _delete_all_orphaned_mutations()
         rebuild_dashboard_data()
         create_event(title="Experiment Deleted",
-                    message=message,
-                    icon='<i class="fa fa-times" aria-hidden="true"></i>',
-                    color="danger")
+                     message=message,
+                     icon='<i class="fa fa-times" aria-hidden="true"></i>',
+                     color="danger")
 
 
 def _delete_all_orphaned_mutations():
@@ -132,13 +138,18 @@ def rebuild_all_converged_mutations():
         rebuild_converge_mutations(ale_experiment.ale_id)
 
 
+def rebuild_all_static_data():
+    ale_experiment_queryset = ale.models.AleExperiment.objects.all()
+    for ale_experiment in ale_experiment_queryset:
+        generate_static_data(ale_experiment.ale_id)
+
+
 def _insert_starting_strain_flask(staring_strain_breseq_output_abs_path,
                                   ale_exp_user,
                                   ale_exp_name,
                                   experiment_orm,
                                   media_orm,
                                   freezer_box_orm):
-
     sanitized_breseq_output_wild_type_abs_path = builder.util.sanitize_path(staring_strain_breseq_output_abs_path)
 
     _create_and_commit_wild_type_ale_entry(sanitized_breseq_output_wild_type_abs_path,
@@ -150,12 +161,12 @@ def _insert_starting_strain_flask(staring_strain_breseq_output_abs_path,
 def create_ale_experiments(exp_files_dict_list):
     """
     Executed from Django ipython shell.
-    """ 
+    """
     for exp_files_dict in exp_files_dict_list:
         create_ale_experiment(exp_files_dict["breseq_output_group_root_abs_path"],
                               exp_files_dict["ale_exp_user"],
                               exp_files_dict["ale_exp_name"],
-                              exp_files_dict["breseq_starting_strain_output_abs_path"]) 
+                              exp_files_dict["breseq_starting_strain_output_abs_path"])
 
 
 # For wild_type, expecting directory with output.gd in it.
@@ -163,68 +174,76 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
                           ale_exp_user,
                           ale_exp_name,
                           breseq_starting_strain_output_abs_path=None):
+    usage_lgr.info("Creating Ale Experiment", extra=locals())
 
-    """
-    Executed from Django ipython shell.
-    """
+    try:
 
-    clear_dashboard_cache() #TODO: remove, since no longer using cache.
+        """
+        Executed from Django ipython shell.
+        """
 
-    breseq_output_group_root_abs_path = builder.util.sanitize_path(breseq_output_group_root_abs_path)
+        clear_dashboard_cache()  # TODO: remove, since no longer using cache.
 
-    instrument, created = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
-    experiment, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
-                                                                         instrument=instrument,
-                                                                         person=ale_exp_user)
+        breseq_output_group_root_abs_path = builder.util.sanitize_path(breseq_output_group_root_abs_path)
 
-    create_event(title="Experiment Created",
-                 message="Experiment %s was created" % experiment.name,
-                 icon='<i class="fa fa-flask" aria-hidden="true"></i>',
-                 color="success")
+        instrument, created = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
+        experiment, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
+                                                                             instrument=instrument,
+                                                                             person=ale_exp_user)
 
-    default_media, \
-    created = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
-                                                                    substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
-                                                                    temperature=metadata.parser.DEFAULT_TEMPERATURE,
-                                                                    volume=metadata.parser.DEFAULT_VOLUME,
-                                                                    stirring_speed=metadata.parser.DEFAULT_STIRRING_SPEED)
+        create_event(title="Experiment Created",
+                     message="Experiment %s was created" % experiment.name,
+                     icon='<i class="fa fa-flask" aria-hidden="true"></i>',
+                     color="success")
 
-    freezer_box, created = ale.models.FreezerBox.objects.get_or_create(name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
-                                                                       number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
+        default_media, \
+        created = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
+                                                         substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
+                                                         temperature=metadata.parser.DEFAULT_TEMPERATURE,
+                                                         volume=metadata.parser.DEFAULT_VOLUME,
+                                                         stirring_speed=metadata.parser.DEFAULT_STIRRING_SPEED)
 
-    if breseq_starting_strain_output_abs_path is not None:
-        _insert_starting_strain_flask(breseq_starting_strain_output_abs_path,
-                                      ale_exp_user,
-                                      ale_exp_name,
-                                      experiment,
-                                      default_media,
-                                      freezer_box)
+        freezer_box, created = ale.models.FreezerBox.objects.get_or_create(
+            name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
+            number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
 
-    # Might need to explicitly sort this list in the future.
-    breseq_sample_report_list = _get_sample_report_list(breseq_output_group_root_abs_path)
-    for ale_isolate_name in breseq_sample_report_list:
-        ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
-        flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
-        isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
-        technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.TechnicalReplicate)
-        # print(ale_number, flask_number, isolate_number, technical_replicate_number)
-        output_path = breseq_output_group_root_abs_path + ale_isolate_name + "/" + BRESEQ_OUTPUT_REPORT_DIR
-        _create_and_commit_ale_entry(ale_exp_user,
-                                     output_path,
-                                     ale_number,
-                                     flask_number,
-                                     isolate_number,
-                                     technical_replicate_number,
-                                     experiment,
-                                     default_media,
-                                     freezer_box,
-                                     is_wild_type=False)
+        if breseq_starting_strain_output_abs_path is not None:
+            _insert_starting_strain_flask(breseq_starting_strain_output_abs_path,
+                                          ale_exp_user,
+                                          ale_exp_name,
+                                          experiment,
+                                          default_media,
+                                          freezer_box)
 
-    default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
-    AleExperimentFilter.objects.get_or_create(**default_filter_params)
-    rebuild_converge_mutations(experiment.ale_id)
-    rebuild_fixated_mutations(experiment.ale_id)
-    rebuild_dashboard_data()
+        # Might need to explicitly sort this list in the future.
+        breseq_sample_report_list = _get_sample_report_list(breseq_output_group_root_abs_path)
+        for ale_isolate_name in breseq_sample_report_list:
+            ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
+            flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
+            isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
+            technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name,
+                                                                     builder.util.AleName.TechnicalReplicate)
+            print(ale_number, flask_number, isolate_number, technical_replicate_number)
+            output_path = breseq_output_group_root_abs_path + ale_isolate_name + "/" + BRESEQ_OUTPUT_REPORT_DIR
+            _create_and_commit_ale_entry(ale_exp_user,
+                                         output_path,
+                                         ale_number,
+                                         flask_number,
+                                         isolate_number,
+                                         technical_replicate_number,
+                                         experiment,
+                                         default_media,
+                                         freezer_box,
+                                         is_wild_type=False)
+
+        default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
+        AleExperimentFilter.objects.get_or_create(**default_filter_params)
+        rebuild_converge_mutations(experiment.ale_id)
+        rebuild_fixated_mutations(experiment.ale_id)
+        generate_static_data(experiment.ale_id)
+        rebuild_dashboard_data()
+    except Exception as e:
+        exception_lgr.exception(e)
 
 
 def rebuild_fixated_mutations(ale_experiment_id):
@@ -244,7 +263,8 @@ def _create_fixated_mutations(ale_experiment_id):
     ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
     fixed_mut_dict = fixation.util.get_fixed_mut_dict(ale_experiment_id)
     for fixed_mut, fixed_obs_mut_series_list in fixed_mut_dict.items():
-        FixatedMutation.objects.create(ale_experiment=ale_experiment, mutation=fixed_mut, fixed_observed_mutation_series=str(fixed_obs_mut_series_list))
+        FixatedMutation.objects.create(ale_experiment=ale_experiment, mutation=fixed_mut,
+                                       fixed_observed_mutation_series=str(fixed_obs_mut_series_list))
 
 
 def rebuild_converge_mutations(ale_experiment_id):
@@ -259,7 +279,7 @@ def _delete_converge_mutations(ale_experiment_id):
 def _create_converge_mutations(ale_experiment_id):
     ale_experiment = ale.models.AleExperiment.objects.get(ale_id=ale_experiment_id)
     converge_mut_list = converge.util.get_converge_mutation_list(ale_experiment_id)
-    for mut in converge_mut_list :
+    for mut in converge_mut_list:
         ConvergeMutation.objects.create(ale_experiment=ale_experiment, mutation=mut)
 
 
@@ -267,7 +287,6 @@ def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
                                            experiment,
                                            media,
                                            freezer_box):
-
     # Setting the "is_wild_type" flag to true hides the mutation information.
     # This was implemented because originally, the implementers didn't want to
     # view the wild type mutations along with the actual mutations.
@@ -297,7 +316,6 @@ def _create_and_commit_ale_entry(person,
                                  media,
                                  freezer_box,
                                  is_wild_type):
-
     """
     is_wild_type was implemented because initially, we wanted to ignore
     mutations that were already thought to be in the wild type strain,
@@ -316,7 +334,8 @@ def _create_and_commit_ale_entry(person,
     ale_id, created = ale.models.AleId.objects.get_or_create(ale_experiment=experiment, ale_id=ale_number)
     flask, created = ale.models.Flask.objects.get_or_create(flask_number=flask_number, ale_id=ale_id, media=media)
 
-    with open(os.path.join(breseq_output_dir_path, ANNOTATION_GENOMIC_DIFF_FILE_NAME), 'rb') as annotation_genomic_diff_file:
+    with open(os.path.join(breseq_output_dir_path, ANNOTATION_GENOMIC_DIFF_FILE_NAME),
+              'rb') as annotation_genomic_diff_file:
         mutation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
     reseq_ref_name = ""
@@ -352,7 +371,7 @@ def _create_and_commit_ale_entry(person,
 
     technical_replicate, \
     created = ale.models.TechnicalReplicate.objects.get_or_create(tech_rep_number=technical_replicate_number,
-                                                                                       isolate=isolate)
+                                                                  isolate=isolate)
 
     builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
                                       person=person,
@@ -373,14 +392,13 @@ def _get_reseq_type(breseq_folder_path):
 
 
 def _get_sample_report_list(experiment_breseq_output_path):
-
     breseq_sample_report_list = []
 
     for breseq_sample_names in os.listdir(experiment_breseq_output_path):
 
         sample_path = experiment_breseq_output_path + breseq_sample_names
-        sample_breseq_output_report = sample_path\
-                                      + '/'\
+        sample_breseq_output_report = sample_path \
+                                      + '/' \
                                       + BRESEQ_OUTPUT_REPORT_DIR \
                                       + ANNOTATION_GENOMIC_DIFF_FILE_NAME
 
@@ -391,17 +409,19 @@ def _get_sample_report_list(experiment_breseq_output_path):
 
 
 def create_functional_annotations(genbank_path, ale_experiment_id):
-
     gene_dict = _parse_genbank(genbank_path)
 
-    observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
+    observed_mutations = seq.models.ObservedMutation.objects.filter(
+        sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment=ale_experiment_id)
 
     for observed_mutation in observed_mutations:
 
         mutation = observed_mutation.mutation
-        mutation_genes= ""
+        mutation_genes = ""
         if mutation.gene is not None:
-            mutation_genes = mutation.gene.replace("[", "").replace("]", "").replace(u"\u2013", "/").replace("-", "/").split("/")
+            mutation_genes = mutation.gene.replace("[", "").replace("]", "").replace(u"\u2013", "/").replace("-",
+                                                                                                             "/").split(
+                "/")
 
         gene_info_start = {"product": "", "function": "", "go_process": "", "go_component": ""}
 
@@ -438,7 +458,6 @@ def create_functional_annotations(genbank_path, ale_experiment_id):
 
 
 def _parse_genbank(genbank_path):
-
     gene_info_start = {"product": "", "function": "", "go_process": "", "go_component": ""}
 
     gene_dict = {}
@@ -470,7 +489,6 @@ def _parse_genbank(genbank_path):
             elif line.startswith("ORIGIN"):
 
                 if record is True:
-
                     gene_dict[current_gene] = gene_info
 
                 break

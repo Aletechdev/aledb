@@ -36,7 +36,7 @@ if hasattr(settings, "SEQUENCING_URL"):
 
 
 def stats(request):
-    usage_lgr.info("stats", extra = user_extra(request))
+    usage_lgr.info("stats", extra=user_extra(request))
     try:
         start_time = time.clock()
         ale_experiment_id = common.get_ale_experiment_id(request)
@@ -59,7 +59,7 @@ def stats(request):
             isolate_sum += l[2]
 
         experiments_info_list = get_reseq_experiment_info_list(reseq_queryset)
-        obs_mut_qryset = _get_observed_mutation_queryset(request, ale_experiment_id)
+        obs_mut_qryset = get_observed_mutation_queryset(ale_experiment_id)
         mutation_query_set = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
         mutation_type_count_dict = get_mutation_type_count_dict(mutation_query_set)
         observed_mutation_type_count_dict = get_observed_mutation_type_count_dict(obs_mut_qryset)
@@ -69,9 +69,9 @@ def stats(request):
         ale_exp_name = common.get_ale_experiment_name(request)
 
         barchart_item_count = get_histogram_item_count(request)
-        genes_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
+        genes_json = get_histogram_jsons(ale_experiment_id, barchart_item_count)
 
-        needle_plot_data = get_needle_plot_data(obs_mut_qryset)
+        needle_plot_data = get_needle_plot_data(ale_experiment_id)
         context = common_context.copy()
         context.update({"protein_change_type_count_dict": protein_change_type_count_dict,
                    "protein_change_sum": sum(protein_change_type_count_dict.values()),
@@ -101,12 +101,13 @@ def stats(request):
                    "pub_qryset": pub_qryset,
                    "notes": exp.notes,
                    })
+
         performance_lgr.info("stats performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
 
     except Exception:
-        exception_lgr.exception("stats broke", extra = user_extra(request))
+        exception_lgr.exception("stats broke", extra=user_extra(request))
 
 
 def get_histogram_item_count(request):
@@ -118,7 +119,7 @@ def get_histogram_item_count(request):
     return barchart_item_count
 
 
-def _get_observed_mutation_queryset(request, ale_experiment_id):
+def get_observed_mutation_queryset(ale_experiment_id):
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id)
     observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
     observed_mutation_query_set = get_filtered_observed_mutations_queryset(observed_mutation_query_set)
