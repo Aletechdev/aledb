@@ -7,7 +7,7 @@ GOOGLE_ANALYTICS_TAG = os.environ.get('GOOGLE_ANALYTICS_TAG', 'no-google-analyti
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'http://sbrg.ucsd.edu')
+SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'http://sbrg.ucsd.edu/')
 
 ADMINS = ()
 

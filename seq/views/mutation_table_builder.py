@@ -120,6 +120,7 @@ def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_qu
     mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
     mutation_index_dict = dict(
         (mutation_id, i) for i, mutation_id in enumerate(mut_qryset.values_list("id", flat=True)))
+    # resequencing_experiment urls
     experiment_url_dict = get_experiment_urls(reseq_dict)
     experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
 
@@ -128,6 +129,11 @@ def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_qu
 
     # Populating table_entry_list
     unique_mut_obs_mut_dict = dict()  # hold one obs mutation for each mutation
+    # make sure related objects loaded
+    obs_mut_qryset = obs_mut_qryset.select_related(
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment',
+        'mutation'
+    )
     for observed_mutation in obs_mut_qryset:
         new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
         if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
@@ -148,7 +154,7 @@ def get_mutation_table_queryset_and_entry_list_for_export(reseq_dict, observed_m
     :param reseq_dict:
     :param observed_mutations_queryset:
     :param do_filter
-    :return:
+    :return: mut_qryset, table_entry_list, mutation_index_dict
     """
     obs_mut_qryset = observed_mutations_queryset
     if do_filter:
@@ -266,7 +272,7 @@ def get_gene_table_entry(observed_mutation):
 def _initialize_table(experiment_id_idx_mapping, mutations):
     return [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
 
-
+# get resequencing_experiment urls
 def get_experiment_urls(reseq_dict):
     # experiment_urls = dict((i.id, resequencing_report_url + i.location) for i in reseq_dict.values())
     experiment_urls = {}

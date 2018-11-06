@@ -30,7 +30,7 @@ def fixating_mutations(request):
         exp_name = seq.views.common.get_ale_experiment_name(request)
         ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
         ale_number = seq.views.common.get_ale_id(request)
-        ale_qryset = seq.views.common.get_ales(ale_experiment_id, True)
+        ale_qryset = seq.views.common.get_aleid_ale_id_list(ale_experiment_id, True)
 
         reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
 

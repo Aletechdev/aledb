@@ -29,7 +29,7 @@ def mutation_table(request):
         ale_experiment_id = seq.views.common.get_ale_experiment_id(request)
         exp_name = seq.views.common.get_ale_experiment_name(request)
         ale_no = seq.views.common.get_ale_id(request)
-        ale_queryset = seq.views.common.get_ales(ale_experiment_id, True)
+        aleid_ale_id_list = seq.views.common.get_aleid_ale_id_list(ale_experiment_id, True)
 
         ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id, ale_no, request)
 
@@ -42,7 +42,7 @@ def mutation_table(request):
         template = loader.get_template("base_table_template.html")
 
         context = common_context.copy()
-        context.update({"ales": ale_queryset,
+        context.update({"ales": aleid_ale_id_list,
                    "ale_experiment_name": exp_name,
                    "ale_no": ale_no,
                    "ale_experiment_id": ale_experiment_id,

@@ -31,25 +31,15 @@ SEQ_COLORS = _set_colors(len(FUNCTIONAL_CHANGE_TYPE_LIST) - 1)
 # TODO: change all instance of 'seq_experiment' to 'reseq'
 
 
-def get_ales(experiment_ids, exclude_starting_strain=False):
-
-    if experiment_ids is not None:
-
-        experiment = ale.models.AleExperiment.objects.get(ale_id=experiment_ids)
-
-        experiment_queryset = experiment.aleid_set.only("ale_id")
-
+def get_aleid_ale_id_list(experiment_id, exclude_starting_strain=False):
+    if experiment_id:
+        aleid_queryset = ale.models.AleId.objects.filter(ale_experiment__ale_id=experiment_id)
     else:
-
-        experiment_queryset = seq.models.ResequencingExperiment.objects.all()
+        aleid_queryset = ale.models.AleId.objects.all()
 
     if exclude_starting_strain:
-
-        experiment_queryset = experiment_queryset.exclude(ale_id=ale.common.STARTING_STRAIN_ALE_ID)
-
-    experiment_queryset_list = [exp.ale_id for exp in experiment_queryset]
-
-    return experiment_queryset_list
+        aleid_queryset = aleid_queryset.exclude(ale_id=ale.common.STARTING_STRAIN_ALE_ID)
+    return aleid_queryset.values_list("ale_id", flat=True)
 
 
 def get_ale_id(request):
