@@ -4,6 +4,8 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from ale.models import AleExperiment
 from genes.util import get_gene_list
+from common import util as common_util
+from datetime import datetime
 
 __author__ = 'Patrick Phaneuf'
 
@@ -34,13 +36,10 @@ def get_filtered_observed_mutations_queryset(observed_mutation_queryset, filter_
     if filter_settings:
         return _get_filtered_observed_mutations_queryset(observed_mutation_queryset, filter_settings, mut_queryset)
 
-    if mut_queryset:
-        mut_dict = {mutation.id: mutation for mutation in mut_queryset}
-    else:
-        # make sure mutations loaded
-        observed_mutation_queryset = observed_mutation_queryset.select_related('mutation')
-        mut_dict = {observed_mutation.mutation.id: observed_mutation.mutation for observed_mutation in
-                    observed_mutation_queryset}
+    if mut_queryset is None:
+        mut_queryset = common_util.get_mut_queryset_from_obs_mut_queryset(observed_mutation_queryset)
+    mut_dict = {mutation.id: mutation for mutation in mut_queryset}
+
     global_filter = get_global_filter()
     # get experiment filters based on observed_mutations_queryset
     exp_qryset = AleExperiment.objects.filter(

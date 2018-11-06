@@ -22,7 +22,7 @@ __author__ = 'Patrick Phaneuf, Denny Gosting'
 # TODO: go in seq.util
 def get_ordered_reseq_queryset(ale_experiment_id, ale_id=None):
     reseq_qryset = ResequencingExperiment.objects.select_related(
-        'tech_rep__isolate__flask__ale_id__ale_experiment'
+        'tech_rep__isolate__flask__ale_id__ale_experiment', 'tech_rep__isolate__flask__media'
     ).order_by(
         'tech_rep__isolate__flask__ale_id__ale_experiment__name',
         'tech_rep__isolate__flask__ale_id__ale_id',

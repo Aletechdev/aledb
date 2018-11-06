@@ -60,6 +60,7 @@ def stats(request):
 
         experiments_info_list = get_reseq_experiment_info_list(reseq_queryset)
         obs_mut_qryset = get_observed_mutation_queryset(ale_experiment_id)
+        obs_mut_qryset = obs_mut_qryset.select_related("mutation")
         mutation_query_set = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
         mutation_type_count_dict = get_mutation_type_count_dict(mutation_query_set)
         observed_mutation_type_count_dict = get_observed_mutation_type_count_dict(obs_mut_qryset)
