@@ -2,21 +2,18 @@ import subprocess
 
 from common.constants import REQUEST_ALL
 from filter.models import AleExperimentFilter
-from filter.util import get_global_filter
+import filter.util
 from ale.models import TechnicalReplicate
 import collections
 from seq.models import ResequencingExperiment
-from seq.models import Mutation, ObservedMutation
+from seq.models import Mutation
 from ale.models import AleExperiment, RecentExperiments
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from logs.aledb_logger import get_logger
 
 
-
 __author__ = 'Patrick Phaneuf, Denny Gosting'
-
-
 
 
 # TODO: go in seq.util
@@ -181,7 +178,7 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
         mut_id = request.POST.get('mut_id')
 
         if save_method == 'global':
-            global_filter = get_global_filter()
+            global_filter = filter.util.get_global_filter()
             global_filter_ignored_mutations = global_filter.ignored_mutations
             global_filter_ignored_mutations += "," + mut_id
             global_filter.ignored_mutations = global_filter_ignored_mutations
