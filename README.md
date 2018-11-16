@@ -34,3 +34,39 @@ docker rmi mysql:5.7
 ```
 docker-compose up -d
 ```
+
+
+### Run Scripts within the container
+
+The general syntax is:
+
+```
+docker exec -it <name of container> <command(s)>
+```
+
+To access the django python shell:
+
+```
+docker exec -it aledb-web python3 manage.py shell
+```
+
+To make migrations and then migrate:
+
+```
+docker exec -it aledb-web python3 manage.py makemigrations
+```
+```
+docker exec -it aledb-web python3 manage.py migrate
+```
+
+To collect static files for django:
+
+```
+docker exec -it aledb-web python3 manage.py collectstatic
+```
+
+To browse the database:
+
+```
+sudo docker exec -it aledb-database mysql -u ale -p
+```
