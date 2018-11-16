@@ -17,6 +17,7 @@ services:
     volumes:
       - .:/app
       - static:/app/static
+      - /var/www/ale_analytics_data:/var/www/ale_analytics_data
     command: bash -c "python manage.py collectstatic --no-input && gunicorn aleinfo.wsgi -b 0.0.0.0:80 --reload"
     links:
       - db
