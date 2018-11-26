@@ -2,7 +2,8 @@ import time
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
-from common.util import get_reseq_ordered_dict, get_recent_ale_exps, common_context
+from ale.utils import get_recent_ale_exps
+from common.util import get_reseq_ordered_dict, get_all_ale_exps
 import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
 from common.constants import \
@@ -40,8 +41,9 @@ def converge_mutations(request):
 
         template = loader.get_template('base_table_template.html')
 
-        context = common_context.copy()
-        context.update({"ales": ale_qrtset,
+        # context = common_context.copy()
+        context = {"experiments": get_all_ale_exps(request.user),
+                   "ales": ale_qrtset,
                    "ale_experiment_name": exp_name,
                    "ale_no": ale_number,
                    "ale_experiment_id": ale_experiment_id,
@@ -53,7 +55,7 @@ def converge_mutations(request):
                    "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                    "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                    "tag_dropdown": common.constants.TAGS
-                   })
+                   }
         performance_lgr.info("converge performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")

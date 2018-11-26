@@ -81,6 +81,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'common/staticfiles'),
 )
+GUARDIAN_RAISE_403 = True
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -154,8 +155,19 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-LOGIN_URL = '/accounts/login/'
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+)
 
+# GUARDIAN_GET_INIT_ANONYMOUS_USER = 'core.models.get_custom_anon_user'
+
+PASSWORD_HASHERS = (
+    'django.contrib.auth.hashers.MD5PasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',
+)
+
+LOGIN_URL = '/accounts/login/'
 ROOT_URLCONF = 'aleinfo.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -187,7 +199,10 @@ INSTALLED_APPS = (
     'genes',
     'bibliome',
     'debug_toolbar',
+    'guardian',
 )
+
+
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -235,3 +250,21 @@ CACHES = {
 PUBLIC = os.environ.get('PUBLIC', '0') == '1'
 PUBLIC_USERNAME = os.environ.get('PUBLIC_USERNAME', 'public')
 PUBLIC_PASSWORD = os.environ.get('PUBLIC_PASSWORD', 'public_password')
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 9,
+        }
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]

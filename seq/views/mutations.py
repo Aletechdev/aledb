@@ -5,8 +5,8 @@ from django.utils.safestring import mark_safe
 import seq.views.common
 from seq.views import mutation_table_builder
 from seq.util import get_all_observed_mutations
-from common.util import common_context, get_recent_ale_exps, get_reseq_ordered_dict
-from common.util import check_hidden_columns_and_filters
+from ale.utils import get_recent_ale_exps, get_all_ale_exps
+from common.util import check_hidden_columns_and_filters, get_reseq_ordered_dict
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from django.core.serializers.json import DjangoJSONEncoder
 import json
@@ -41,20 +41,21 @@ def mutation_table(request):
 
         template = loader.get_template("base_table_template.html")
 
-        context = common_context.copy()
+        experiments = get_all_ale_exps(request.user)
+        context = {"experiments", experiments}
         context.update({"ales": aleid_ale_id_list,
-                   "ale_experiment_name": exp_name,
-                   "ale_no": ale_no,
-                   "ale_experiment_id": ale_experiment_id,
-                   "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
-                   "title": exp_name + " Mutation Table",
-                   "table_header": table_header,
-                   "template_header": "Mutations",
-                   "hidden_columns": hidden_columns,
-                   "recent_experiments": get_recent_ale_exps(ale_experiment_id),
-                   "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
-                   "tag_dropdown": common.constants.TAGS
-                   })
+                        "ale_experiment_name": exp_name,
+                        "ale_no": ale_no,
+                        "ale_experiment_id": ale_experiment_id,
+                        "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
+                        "title": exp_name + " Mutation Table",
+                        "table_header": table_header,
+                        "template_header": "Mutations",
+                        "hidden_columns": hidden_columns,
+                        "recent_experiments": get_recent_ale_exps(ale_experiment_id),
+                        "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
+                        "tag_dropdown": common.constants.TAGS
+                        })
         performance_lgr.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")

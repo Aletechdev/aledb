@@ -1,6 +1,9 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 blank_field = {"blank": True, "null": True}
+
+VIEW_PROJECT = 'view_project'
 
 
 class Instrument(models.Model):
@@ -8,8 +11,38 @@ class Instrument(models.Model):
     name = models.CharField(max_length=200)
 
     def __unicode__(self):
-
         return self.name
+
+    def __str__(self):
+        return self.name
+
+
+class Project(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=300)
+    user = models.ForeignKey(User, default=None, on_delete=models.DO_NOTHING, help_text="project owner")
+    date = models.DateTimeField(auto_now_add=True, help_text="project created date")
+    is_public = models.BooleanField(default=False)
+
+    PROJECT_STATUS = (('new', 'New'), ('in progress', 'In progress'), ('completed', 'Completed'))
+    status = models.CharField(max_length=25, default='new', blank=True, choices=PROJECT_STATUS)
+
+    class Meta:
+        permissions = (
+            (VIEW_PROJECT, 'View project'),
+        )
+
+
+    def __str__(self):
+        return self.name
+
+    def get_projects(self, user: User):
+        project_queryset = Project.objects.all()
+        projects = []
+        for project in project_queryset:
+            if project.is_public or user.has_perm(VIEW_PROJECT, project):
+                projects.append(project)
+        return projects
 
 
 class AleExperiment(models.Model):
@@ -19,13 +52,16 @@ class AleExperiment(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     instrument = models.ForeignKey(Instrument)
     notes = models.TextField(**blank_field)
-
-    def __unicode__(self):
-            return "#%d-%s" % (self.ale_id, self.name)
-
+    project = models.ForeignKey(Project, default=None, **blank_field, on_delete=models.DO_NOTHING)
 
     class Meta:
         verbose_name_plural = "ALE Experiments"
+
+    def __unicode__(self):
+        return "#%d-%s" % (self.ale_id, self.name)
+
+    def __str__(self):
+        return self.name
 
 
 # TODO: this model should be called "Ale".

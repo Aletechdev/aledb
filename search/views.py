@@ -10,14 +10,13 @@ from django.db.models import Q
 import operator, collections
 from functools import reduce
 from seq.views import mutation_table_builder
+from ale.utils import get_all_ale_exps
 from common.util import check_hidden_columns_and_filters, common_context
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from filter.util import get_filtered_observed_mutations_queryset
 from logs.aledb_logger import get_logger, user_extra, join_extras
-import traceback
 import sys
-from pprint import pprint
 
 usage_lgr = get_logger("usage")
 performance_lgr = get_logger("performance")
@@ -32,8 +31,9 @@ def search(request):
         check_hidden_columns_and_filters(request, None)
         obs_mut_qryset = _get_obs_mut_qryset(request)
 
+        context = {"experiments": get_all_ale_exps(request.user)}
         if obs_mut_qryset is None:
-            context = common_context.copy()
+            # context = common_context.copy()
             context.update({'error': True})
             return render(request, 'search.html', context)
 
@@ -48,7 +48,6 @@ def search(request):
                                                            table_type=mutation_table_builder.TableType.SEARCH)
         last_search = _get_last_search(request)
         template = loader.get_template("search.html")
-        context = common_context.copy()
         context.update({"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                         "title": "Search Results",
                         "table_header": mark_safe(table_header),

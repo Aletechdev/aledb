@@ -1,6 +1,6 @@
 from django.template import loader
 from django.http import HttpResponse
-from common.util import common_context
+from ale.utils import get_all_ale_exps
 from ale.models import AleExperiment
 from django.core.serializers.json import DjangoJSONEncoder
 import json
@@ -24,7 +24,10 @@ def export(request):
     try:
         exp_name_str = request.GET.get('download_experiments', None)
         mut_type_str = request.GET.get('mut_type_selected', None)
-        context = common_context.copy()
+
+        experiments = get_all_ale_exps(request.user)
+        context = dict()
+        context['experiments'] = experiments
         context.update({
             "mut_types_str_list": [MUT_TYPE_STR, CONVERGED_MUT_TYPE_STR, FIXED_MUT_TYPE_STR],
             "is_download": False
@@ -32,7 +35,7 @@ def export(request):
         if exp_name_str and mut_type_str:
             # print(str(datetime.now()), exp_name_str, mut_type_str)
             if exp_name_str == 'All':
-                exp_list = [(exp.ale_id, exp.name) for exp in AleExperiment.objects.all()]
+                exp_list = [(exp.ale_id, exp.name) for exp in experiments]
             else:
                 exp_name_list = exp_name_str.split(',')
                 exp_list = [(AleExperiment.objects.get(name=exp_name).ale_id, exp_name) for exp_name in exp_name_list]

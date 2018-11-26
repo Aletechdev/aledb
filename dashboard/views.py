@@ -5,6 +5,7 @@ from django.http import HttpResponse
 from seq.views import common
 from django.utils.safestring import mark_safe
 from common.util import common_context
+from ale.utils import get_all_ale_exps
 from ale.models import AleExperiment, AleId, Isolate
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from dashboard.timeline_util import get_timeline
@@ -50,7 +51,8 @@ def dashboard(request):
             gene_mut_histogram_data = []
 
         context = common_context.copy()
-        context.update({"functional_change_type_count_dict": functional_change_type_count_dict,
+        context.update({"experiments": get_all_ale_exps(request.user),
+                        "functional_change_type_count_dict": functional_change_type_count_dict,
                         "count_dict": general_count_dict,
                         "mutation_type_count_dict": mutation_type_count_dict,
                         "genes": mark_safe(gene_histogram_data),

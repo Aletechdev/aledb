@@ -5,10 +5,9 @@ from django.http import HttpResponse
 from django.template import loader
 
 from django.conf import settings
-
 from seq.views import common
-
-from common.util import get_ordered_reseq_queryset, common_context, get_recent_ale_exps
+from ale.utils import get_recent_ale_exps, get_all_ale_exps
+from common.util import get_ordered_reseq_queryset, common_context
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 from logs.aledb_logger import get_logger, user_extra, join_extras
@@ -48,14 +47,15 @@ def metadata(request):
 
         ale_experiment_name = common.get_ale_experiment_name(request)
 
-        context = common_context.copy()
+        # context = common_context.copy()
+        context = {"experiments": get_all_ale_exps(request.user)}
         context.update({"reseq_info_list": reseq_info_list,
-                   "reseq_report_url": reseq_report_url,
-                   "ale_experiment_name": ale_experiment_name,
-                   "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
-                   "multiple": False,
-                   "ale_experiment_id": ale_experiment_id
-                   })
+                        "reseq_report_url": reseq_report_url,
+                        "ale_experiment_name": ale_experiment_name,
+                        "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
+                        "multiple": False,
+                        "ale_experiment_id": ale_experiment_id
+                        })
 
         performance_lgr.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 

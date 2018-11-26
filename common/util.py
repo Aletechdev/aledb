@@ -3,12 +3,11 @@ import subprocess
 from common.constants import REQUEST_ALL
 from filter.models import AleExperimentFilter
 import filter.util
+from ale.utils import get_all_ale_exps, get_recent_ale_exps
 from ale.models import TechnicalReplicate
 import collections
 from seq.models import ResequencingExperiment
 from seq.models import Mutation
-from ale.models import AleExperiment, RecentExperiments
-from django.core.exceptions import ObjectDoesNotExist
 from django.core.cache import cache
 from logs.aledb_logger import get_logger
 
@@ -81,66 +80,6 @@ def get_unique_obs_mut_queryset_from_obs_mut_queryset(observed_mutations_queryse
     """
     unique_obs_mut = {observed_mutation.mutation.id: observed_mutation for observed_mutation in observed_mutations_queryset}
     return unique_obs_mut
-
-# TODO: go in ale.util
-def get_all_ale_exps():
-
-    return AleExperiment.objects.all().order_by('name')
-
-
-# TODO: go in ale.util
-def get_recent_ale_exps(ale_experiment_id=None):
-
-    recent, created = RecentExperiments.objects.get_or_create(id=1)
-
-    if ale_experiment_id is not None:
-        recent_list = [recent.first, recent.second, recent.third, recent.fourth, recent.fifth]
-
-        if ale_experiment_id not in recent_list:
-            recent.fifth = recent.fourth
-            recent.fourth = recent.third
-            recent.third = recent.second
-            recent.second = recent.first
-            recent.first = ale_experiment_id
-        else:
-            temp = [x for x in recent_list if x != ale_experiment_id]
-            recent.fifth = temp[3]
-            recent.fourth = temp[2]
-            recent.third = temp[1]
-            recent.second = temp[0]
-            recent.first = ale_experiment_id
-
-        recent.save()
-
-    recent_experiments = []
-
-    if recent.first is not None:
-        recent_experiments = ale_exp_exists(recent.first, recent_experiments)
-
-    if recent.second is not None:
-        recent_experiments = ale_exp_exists(recent.second, recent_experiments)
-
-    if recent.third is not None:
-        recent_experiments = ale_exp_exists(recent.third, recent_experiments)
-
-    if recent.fourth is not None:
-        recent_experiments = ale_exp_exists(recent.fourth, recent_experiments)
-
-    if recent.fifth is not None:
-        recent_experiments = ale_exp_exists(recent.fifth, recent_experiments)
-
-
-    return recent_experiments
-
-
-def ale_exp_exists(ale_id, recent_experiments):
-
-    try:
-        recent_experiments.append(AleExperiment.objects.get(ale_id=ale_id))
-    except ObjectDoesNotExist:
-        pass
-
-    return recent_experiments
 
 
 def clear_dashboard_cache():
@@ -231,8 +170,7 @@ def get_git_hash():
 exception = get_logger("exception")
 
 try:
-    common_context = {"experiments": get_all_ale_exps(),
-                  "recent_experiments": get_recent_ale_exps,
-                  "git_hash":get_git_hash()}
+    common_context = {"recent_experiments": get_recent_ale_exps,
+                      "git_hash": get_git_hash()}
 except Exception:
     exception.exception("common_context broke")
