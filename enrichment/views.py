@@ -2,7 +2,8 @@ import time
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
-from common.util import get_reseq_ordered_dict, get_all_ale_exps, get_recent_ale_exps
+from common.util import get_reseq_ordered_dict
+from ale.utils import get_all_ale_exps, get_recent_ale_exps
 import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
 from common.constants import \
@@ -47,7 +48,7 @@ def enrichment_mutations(request):
                    "table_header": mark_safe(table_header),
                    "template_header": "Enrichment Mutations",
                    "hidden_columns": hidden_columns,
-                   "experiments": get_all_ale_exps(),
+                   "experiments": get_all_ale_exps(request.user),
                    "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                    "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                    "tag_dropdown": common.constants.TAGS

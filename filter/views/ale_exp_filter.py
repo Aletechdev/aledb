@@ -7,7 +7,8 @@ import filter.models
 from filter.common import DEFAULT_MUTATION_FREQ_MIN, DEFAULT_MUTATION_FREQ_MAX
 from django.utils.safestring import mark_safe
 from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations, TABLE_HEADER, is_number
-from common.util import common_context, get_recent_ale_exps, clear_dashboard_cache
+from ale.utils import get_recent_ale_exps, get_all_ale_exps
+from common.util import clear_dashboard_cache
 from seq.models import Mutation
 from ale.models import AleExperiment
 from logs.aledb_logger import get_logger, user_extra
@@ -45,8 +46,9 @@ def mutation_filter(request):
 
 		starting_strain_body = get_starting_strain_mutations(filter_form_model)
 
-		context = common_context.copy()
-		context.update({
+		# context = common_context.copy()
+		context = {
+			"experiments": get_all_ale_exps(request.user),
 			"form": filter_form,
 			"ale_experiment_id": ale_experiment_id,
 			"ale_experiment_name": ale_experiment_name,
@@ -54,7 +56,7 @@ def mutation_filter(request):
 			"table_header": mark_safe(TABLE_HEADER),
 			"recent_experiments": get_recent_ale_exps(ale_experiment_id),
 			"starting_strain_body": mark_safe(starting_strain_body),
-			"starting_strain_header": mark_safe(STARTING_STRAIN_HEADER)})
+			"starting_strain_header": mark_safe(STARTING_STRAIN_HEADER)}
 		return HttpResponse(template.render(context, request), content_type="text/html")
 	except Exception:
 		exception_lgr.exception("mutation filter broke", extra=user_extra(request))

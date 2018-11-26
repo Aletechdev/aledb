@@ -2,8 +2,8 @@ from django.template import loader
 from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from ale.models import AleExperiment
+from ale.utils import get_all_ale_exps, get_recent_ale_exps
 from common.util import check_hidden_columns_and_filters,\
-    get_all_ale_exps,\
     get_mut_queryset_from_obs_mut_queryset, \
     common_context
 from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
@@ -32,7 +32,7 @@ def combine(request):
 
 
 def handle_combine_report(request, ale_experiment_names):
-    all_ale_exp_qryset = get_all_ale_exps()
+    all_ale_exp_qryset = get_all_ale_exps(request.user)
 
     # Else it is a valid request
     if ale_experiment_names == 'All':
@@ -85,7 +85,7 @@ def handle_combine_report(request, ale_experiment_names):
 
 
 def handle_initial_combine_form(request):
-    all_ale_exp_qryset = get_all_ale_exps()
+    all_ale_exp_qryset = get_all_ale_exps(request.user)
     hidden_columns = check_hidden_columns_and_filters(request, None)
     context = {"experiments": all_ale_exp_qryset,
                "has_comparison": False,

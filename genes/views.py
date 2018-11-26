@@ -11,7 +11,8 @@ import gzip
 import csv
 import json
 import requests
-from common.util import common_context, check_hidden_columns_and_filters
+from ale.utils import get_all_ale_exps
+from common.util import check_hidden_columns_and_filters
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from logs.aledb_logger import get_logger, user_extra, join_extras
@@ -47,7 +48,8 @@ def gene(request):
         hidden_columns = check_hidden_columns_and_filters(request, None)
         template = loader.get_template("gene.html")
 
-        context = common_context.copy()
+        experiments = get_all_ale_exps(request.user)
+        context = {"experiments", experiments}
         context.update({"gene_name": gene_query,
                    "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                    "title": gene_query + " gene",
