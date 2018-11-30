@@ -22,6 +22,7 @@ def login_user(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 if user.is_active:
+                    # request.session.set_expiry(86400)  # sets the exp. value of the session for 24 hrs
                     login(request, user)
                     security_lgr.info("Log-in success: " + username, extra={'account': username})
                     return dashboard(request)

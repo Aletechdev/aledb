@@ -7,10 +7,8 @@ from seq.views import mutation_table_builder
 from common.constants import \
     REQUEST_MUTATION_ID, \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
-from ale.utils import get_recent_ale_exps, get_all_ale_exps
-from common.util import get_reseq_ordered_dict,\
-    common_context,\
-    check_hidden_columns_and_filters
+from ale.utils import get_recent_ale_exps
+from common.util import get_reseq_ordered_dict, get_user_context, check_hidden_columns_and_filters
 from fixation.util import get_exp_fixed_obs_mut_qryset
 import common.constants
 from logs.aledb_logger import get_logger, user_extra, join_extras
@@ -48,9 +46,8 @@ def fixating_mutations(request):
 
         template = loader.get_template("base_table_template.html")
 
-        # context = common_context.copy()
-        context = {"experiments": get_all_ale_exps(request.user),
-                   "ales": ale_qryset,
+        context = get_user_context(request.user)
+        context = {"ales": ale_qryset,
                    "ale_experiment_name": exp_name,
                    "ale_no": ale_number,
                    "ale_experiment_id": ale_experiment_id,

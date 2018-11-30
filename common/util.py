@@ -174,3 +174,10 @@ try:
                       "git_hash": get_git_hash()}
 except Exception:
     exception.exception("common_context broke")
+
+
+def get_user_context(user):
+    context = common_context.copy()
+    context.update({"experiments": get_all_ale_exps(user)})
+    return context
+

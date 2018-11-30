@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 
-from common.util import common_context
+from common.util import get_user_context
 
 from django.template import loader
 from logs.aledb_logger import get_logger,user_extra
@@ -18,6 +18,6 @@ def about(request):
     try:
         template = loader.get_template("about/index.html")
 
-        return HttpResponse(template.render(common_context, request), content_type="text/html")
+        return HttpResponse(template.render(get_user_context(request.user), request), content_type="text/html")
     except Exception:
         exception_lgr.exception("about broke", extra=user_extra(request))

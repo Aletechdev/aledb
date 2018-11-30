@@ -4,8 +4,7 @@ from django.utils.safestring import mark_safe
 from ale.models import AleExperiment
 from ale.utils import get_all_ale_exps, get_recent_ale_exps
 from common.util import check_hidden_columns_and_filters,\
-    get_mut_queryset_from_obs_mut_queryset, \
-    common_context
+    get_mut_queryset_from_obs_mut_queryset, get_user_context
 from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset
 from seq.views import common
 from stats.util import get_histogram_jsons,\
@@ -57,9 +56,8 @@ def handle_combine_report(request, ale_experiment_names):
     barchart_item_count = get_histogram_item_count(request)
     genes_json, sequence_change_json = get_histogram_jsons(obs_mut_qryset, barchart_item_count)
 
-    context = common_context.copy()
-    context.update({"experiments": all_ale_exp_qryset,
-               "has_comparison": True,
+    context = get_user_context(request.user)
+    context.update({"has_comparison": True,
                "ale_experiment_id": ale_exp_id_list,
                "header": header,
                "genes": mark_safe(genes_json),

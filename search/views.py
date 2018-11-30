@@ -10,8 +10,8 @@ from django.db.models import Q
 import operator, collections
 from functools import reduce
 from seq.views import mutation_table_builder
-from ale.utils import get_all_ale_exps
-from common.util import check_hidden_columns_and_filters, common_context
+from ale.utils import get_user_projects
+from common.util import check_hidden_columns_and_filters, get_user_context
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from filter.util import get_filtered_observed_mutations_queryset
@@ -31,9 +31,9 @@ def search(request):
         check_hidden_columns_and_filters(request, None)
         obs_mut_qryset = _get_obs_mut_qryset(request)
 
-        context = {"experiments": get_all_ale_exps(request.user)}
+        context = get_user_context(request.user)
         if obs_mut_qryset is None:
-            # context = common_context.copy()
+            context = get_user_context(request.user)
             context.update({'error': True})
             return render(request, 'search.html', context)
 
@@ -56,7 +56,7 @@ def search(request):
                         "observed_mutation_count": obs_mut_qryset.count()
                         })
         performance_lgr.info("search performance", extra=join_extras(
-            {"parameters":last_search},
+            {"parameters": last_search},
             {"time taken": time.clock() - start_time}))
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as ex:
@@ -72,10 +72,11 @@ def search(request):
 def _get_obs_mut_qryset(request):
     """
     :param request:
-    :return: mutation_queryset and observed_mutation_queryset based on user request
+    :return: mutation_queryset and observed_mutation_queryset based on user request and user permission
     """
     search_include_param_list, search_exclude_param_list = _get_search_params(request)
-    if not search_include_param_list: return None
+    if not search_include_param_list:
+        return None
     mut_qryset = _get_mut_qryset(search_include_param_list, search_exclude_param_list)
     obs_mut_qryset = ObservedMutation.objects.filter(mutation__in=mut_qryset)
 
@@ -86,6 +87,9 @@ def _get_obs_mut_qryset(request):
     if ale_exp_to_include:
         obs_mut_qryset = obs_mut_qryset.filter(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_exp_to_include)
+
+    projects = get_user_projects(request.user)
+    obs_mut_qryset = obs_mut_qryset.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=projects)
 
     obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset, mut_queryset=mut_qryset)
 
@@ -253,7 +257,8 @@ def _get_search_ale_exp_params(request):
 def _get_mut_qryset(include_argument_list, exclude_argument_list):
     if len(include_argument_list) > 0:
         include_argument_list = reduce(operator.and_, include_argument_list)
-    else: return None
+    else:
+        return None
 
     if len(exclude_argument_list) > 0:
         mut_qryset = Mutation.objects.filter(include_argument_list).exclude(

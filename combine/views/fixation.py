@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 import seq.views.common
 from seq.views import mutation_table_builder
 from fixation.models import FixatedMutation
-from common.util import check_hidden_columns_and_filters, common_context
+from common.util import check_hidden_columns_and_filters, get_user_context
 from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset, get_ales_from_ale_experiment_list
 from common.constants import POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE, TAGS
 import json
@@ -49,7 +49,7 @@ def combined_fixation(request):
 
     template = loader.get_template("base_table_template.html")
 
-    context = common_context.copy()
+    context = get_user_context(request.user)
     context.update({"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
                "ale_no": ale_no,
                "experiment_id": ale_experiment_list,
