@@ -1,12 +1,10 @@
 import time
 from django.shortcuts import render
 
-from django.http import HttpResponse
 from seq.views import common
 from django.utils.safestring import mark_safe
-from common.util import common_context
-from ale.utils import get_all_ale_exps
-from ale.models import AleExperiment, AleId, Isolate
+from common.util import get_user_context
+from ale.models import AleExperiment
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from dashboard.timeline_util import get_timeline
 from stats.views import get_histogram_item_count
@@ -50,9 +48,8 @@ def dashboard(request):
             gene_histogram_data = []
             gene_mut_histogram_data = []
 
-        context = common_context.copy()
-        context.update({"experiments": get_all_ale_exps(request.user),
-                        "functional_change_type_count_dict": functional_change_type_count_dict,
+        context = get_user_context(request.user)
+        context.update({"functional_change_type_count_dict": functional_change_type_count_dict,
                         "count_dict": general_count_dict,
                         "mutation_type_count_dict": mutation_type_count_dict,
                         "genes": mark_safe(gene_histogram_data),

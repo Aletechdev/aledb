@@ -4,7 +4,7 @@ from django.utils.safestring import mark_safe
 from ale.models import AleExperiment
 from ale.utils import get_all_ale_exps
 from seq.views import mutation_table_builder, common
-from common.util import check_hidden_columns_and_filters, common_context
+from common.util import check_hidden_columns_and_filters, get_user_context
 from combine.views.common import get_ordered_reseq_dict_and_obs_mut_queryset, get_ales_from_ale_experiment_list
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE, TAGS
 import json
@@ -34,8 +34,7 @@ def combined_mutations(request):
 
     title = "%s Mutations" % (", ".join([AleExperiment.objects.get(ale_id=ale_exp_id).name for ale_exp_id in ale_experiment_list]))
 
-    # context = common_context.copy()
-    context = {"experiments": get_all_ale_exps(request.user)}
+    context = get_user_context(request.user)
     context.update({"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
                "ale_no": ale_no,
                "experiment_id": ale_experiment_list,

@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
 from ale.utils import get_recent_ale_exps
-from common.util import get_reseq_ordered_dict, get_all_ale_exps
+from common.util import get_reseq_ordered_dict, get_user_context
 import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
 from common.constants import \
@@ -41,9 +41,8 @@ def converge_mutations(request):
 
         template = loader.get_template('base_table_template.html')
 
-        # context = common_context.copy()
-        context = {"experiments": get_all_ale_exps(request.user),
-                   "ales": ale_qrtset,
+        context = get_user_context(request.user)
+        context = {"ales": ale_qrtset,
                    "ale_experiment_name": exp_name,
                    "ale_no": ale_number,
                    "ale_experiment_id": ale_experiment_id,

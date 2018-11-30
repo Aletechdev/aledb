@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
-from common.util import common_context
+from common.util import get_user_context
 import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
 from enrichment.models import EnrichmentMutation
@@ -36,7 +36,7 @@ def combined_enrichment_mutations(request):
 
     template = loader.get_template('base_table_template.html')
 
-    context = common_context.copy()
+    context = get_user_context(request.user)
     context.update({"ales": get_ales_from_ale_experiment_list(ale_experiment_list),
                "ale_no": ale_no,
                "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),

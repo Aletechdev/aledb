@@ -17,7 +17,7 @@ from stats.util import get_histogram_jsons,\
 from ale.utils import get_recent_ale_exps, get_all_ale_exps
 from common.util import get_ordered_reseq_queryset,\
     get_reseq_ordered_dict, get_mut_queryset_from_obs_mut_queryset, \
-    common_context
+    get_user_context
 from filter.util import get_filtered_observed_mutations_queryset
 import ale.models
 from bibliome.models import Publication
@@ -74,8 +74,7 @@ def stats(request):
         genes_json = get_histogram_jsons(ale_experiment_id, barchart_item_count)
 
         needle_plot_data = get_needle_plot_data(ale_experiment_id)
-        # context = common_context.copy()
-        context = {"experiments", get_all_ale_exps(request.user)}
+        context = get_user_context(request.user)
         context.update({"protein_change_type_count_dict": protein_change_type_count_dict,
                    "protein_change_sum": sum(protein_change_type_count_dict.values()),
                    "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,

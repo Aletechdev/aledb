@@ -4,7 +4,7 @@ from django.http import HttpResponse
 
 from ale.models import AleExperiment
 
-from common.util import common_context
+from common.util import get_user_context
 
 from metadata.views import get_reseq_info_list
 
@@ -35,7 +35,7 @@ def combined_metadata(request):
 
     template = loader.get_template(META_DATA_TEMPLATE)
 
-    context = common_context.copy()
+    context = get_user_context(request.user)
     context.update({"ale_experiment_name": header,
                "reseq_info_list": reseq_info_list,
                "reseq_report_url": reseq_report_url,
