@@ -6,7 +6,7 @@ import seq.views.common
 from seq.views import mutation_table_builder
 from seq.util import get_all_observed_mutations
 from ale.utils import get_recent_ale_exps, get_all_ale_exps
-from common.util import check_hidden_columns_and_filters, get_reseq_ordered_dict
+from common.util import check_hidden_columns_and_filters, get_reseq_ordered_dict, get_user_context
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from django.core.serializers.json import DjangoJSONEncoder
 import json
@@ -41,8 +41,7 @@ def mutation_table(request):
 
         template = loader.get_template("base_table_template.html")
 
-        experiments = get_all_ale_exps(request.user)
-        context = {"experiments", experiments}
+        context = get_user_context(request.user)
         context.update({"ales": aleid_ale_id_list,
                         "ale_experiment_name": exp_name,
                         "ale_no": ale_no,
