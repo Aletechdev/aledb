@@ -16,6 +16,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         filename = options['file']
         df = pd.read_excel(filename)
+        print(df.columns)
 
         experiment_name_map = {exp.name.lower(): exp for exp in AleExperiment.objects.all()}
         project_name_map = {proj.name.lower(): proj for proj in Project.objects.all()}
@@ -26,7 +27,7 @@ class Command(BaseCommand):
             owner = row['owner'].strip()
             proj_name = row['project'].strip()
             email = str(row['email'])
-            pub_flag = row['public'].strip()
+            pub_flag = row['public']
             if email is None or email =='nan':
                 email = ''
             print("row", index, exp_name)
@@ -60,9 +61,7 @@ def _create_user(user_full_name: str, email: str):
                                is_active=True, is_staff=True, date_joined=datetime.now())
 
 
-def _create_project(project_name: str, owner: User, pub_flag: bool):
-    is_pub = False
-    if pub_flag == 1:
-        is_pub = True
+def _create_project(project_name: str, owner: User, pub_flag):
+    is_pub = (pub_flag == 1)
     return Project.objects.create(name=project_name, user=owner, date=datetime.now(),
                                   status="In progress", is_public=is_pub)
