@@ -1,3 +1,4 @@
+import seq.util
 from filter.models import AleExperimentFilter, GlobalFilter
 from seq.models import Mutation, ObservedMutation
 from django.db.models import Q
@@ -36,7 +37,7 @@ def get_filtered_observed_mutations_queryset(observed_mutation_queryset, filter_
         return _get_filtered_observed_mutations_queryset(observed_mutation_queryset, filter_settings, mut_queryset)
 
     if mut_queryset is None:
-        mut_queryset = common.util.get_mut_queryset_from_obs_mut_queryset(observed_mutation_queryset)
+        mut_queryset = seq.util.get_mut_queryset_from_obs_mut_queryset(observed_mutation_queryset)
     mut_dict = {mutation.id: mutation for mutation in mut_queryset}
 
     global_filter = get_global_filter()

@@ -58,11 +58,11 @@
 
     </style>
 {% endblock %}
-{% block header %}<b> {{ ale_experiment_name }} </b> / Mutation Filtering Options{% endblock %}
+{% block header %}<b> {{ experiment.name }} </b> Mutation Filtering Options{% endblock %}
 {% block content %}
 <div class="row">
     <form action="" method="POST">
-
+        {% csrf_token %}
         <h4>Frequency Filtering Thresholds</h4>
         Minimum Cutoff: {{ form.min_cutoff }}
         <br>
@@ -84,7 +84,9 @@
         </table>
         <br>
         <input type="hidden" id="id_ignored_mutations" value="{{ ignored_mutations }}" name="ignored_mutations">
+        {% if perms.filter.add_globalfilter or experiment.project.user_id == user.id%}
         <input type="submit" class="btn btn-default btn-primary" value="Save" name="save">
+        {% endif %}
     </form>
 </div>
 <div class="row">

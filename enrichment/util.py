@@ -1,5 +1,4 @@
-from common.util import get_reseq_ordered_dict
-from seq.util import get_all_observed_mutations
+from seq.util import get_all_observed_mutations, get_reseq_ordered_dict
 from seq.models import ObservedMutation
 from enrichment import enrichment
 from enrichment.models import EnrichmentMutation

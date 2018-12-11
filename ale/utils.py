@@ -2,21 +2,20 @@ from django.contrib.auth.models import User, Group
 from ale.models import Project, AleExperiment, RecentExperiments
 from guardian.models import GroupObjectPermission, UserObjectPermission
 from django.core.exceptions import ObjectDoesNotExist
+from ale.permissions import VIEW_PROJECT
 
 
-VIEW_PROJECT = 'view_project'
-
-def get_projects_with_permissions():
+def _get_projects_with_permissions(permission_codename):
     """
     get set of projects that have object-level permissions set
     :return: set of project ids (set of str)
     """
     group_permissions = GroupObjectPermission.objects.filter(content_type__app_label='ale',
                                                              content_type__model='project',
-                                                             permission__codename='view_project')
+                                                             permission__codename=permission_codename)
     user_permissions = UserObjectPermission.objects.filter(content_type__app_label='ale',
                                                            content_type__model='project',
-                                                           permission__codename=VIEW_PROJECT)
+                                                           permission__codename=permission_codename)
     project_ids = {p.object_pk for p in group_permissions} | {p.object_pk for p in user_permissions}
     return project_ids
 
@@ -32,7 +31,7 @@ def get_user_projects(user: User):
     if not user.is_staff:
         return Project.objects.filter(is_public=True)
     else:
-        restricted_proj_ids = get_projects_with_permissions()
+        restricted_proj_ids = _get_projects_with_permissions(VIEW_PROJECT)
         all_projects = Project.objects.all()
         if restricted_proj_ids is None or len(restricted_proj_ids) == 0:
             return all_projects
@@ -101,10 +100,8 @@ def get_recent_ale_exps(ale_experiment_id=None):
 
 
 def _ale_exp_exists(ale_id, recent_experiments):
-
     try:
         recent_experiments.append(AleExperiment.objects.get(ale_id=ale_id))
     except ObjectDoesNotExist:
         pass
-
     return recent_experiments

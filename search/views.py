@@ -39,7 +39,7 @@ def search(request):
 
         reseq_dict, obs_mut_qryset = _get_ordered_reseq_dict(obs_mut_qryset)
 
-        table_header = mutation_table_builder.get_table_header(request, reseq_dict)
+        table_header = mutation_table_builder.get_table_header(request.user, reseq_dict)
         # obs_mut_qryset is already filtered
         table_body = mutation_table_builder.get_table_body(request,
                                                            reseq_dict,

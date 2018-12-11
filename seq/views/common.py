@@ -1,7 +1,9 @@
 import ale.common
 import ale.models
-import seq.models
+from ale.models import AleExperiment
+from ale.permissions import can_view_project
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
+from django.http import Http404, HttpResponseForbidden, HttpResponseBadRequest
 
 
 __author__ = 'Patrick Phaneuf'
@@ -48,11 +50,18 @@ def get_ale_id(request):
     return ale_id
 
 
-def get_ale_experiment_id(request):
-    # Get the full list of ale experiments for the ale number of interest
+def get_ale_experiment(request):
+    """
+    Parse experiment id and validate permission
+    :param request:
+    :return: experiment or raise exception
+    """
     exp_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
-    exp_id = None if exp_id is None or exp_id == "all" else int(exp_id)
-    return exp_id
+    experiment = AleExperiment.objects.get(ale_id=exp_id)
+    if experiment:
+        if can_view_project(request.user, experiment.project):
+            return experiment
+    raise ValueError("You don't have permission to view the experiment")
 
 
 def get_ale_experiment_name(request):
