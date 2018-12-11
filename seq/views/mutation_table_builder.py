@@ -1,15 +1,17 @@
 from django.conf import settings
+from django.contrib.auth.models import User
 import seq.views.common
 from filter.util import get_filtered_observed_mutations_queryset
 import re
 from enum import Enum
 from django.utils.html import strip_tags
-from common.util import get_mut_queryset_from_obs_mut_queryset, get_unique_obs_mut_queryset_from_obs_mut_queryset
+from seq.util import get_mut_queryset_from_obs_mut_queryset, get_unique_obs_mut_queryset_from_obs_mut_queryset
 from genes.util import get_gene_list
 from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS
 from ale.models import TechnicalReplicate
 from filter.models import AleExperimentFilter
-from logs.aledb_logger import get_logger
+from ale.permissions import can_add_global_filter
+
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
@@ -34,7 +36,7 @@ _table_cell_dropdown_template = """<div class="dropdown">
 </div>"""
 
 
-def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experiment_id):
+def _build_table_cell_for_dropdown(table_type, mutation_id, ale_experiment_id):
     """Returns a <div> element containing the drop down menu for each row
     in the mutation table.
 
@@ -50,9 +52,9 @@ def _build_table_cell_for_dropdown(request, table_type, mutation_id, ale_experim
     if (not table_type in [TableType.GENE_TABLE \
             , TableType.SEARCH \
             , TableType.SHARED \
-            , TableType.COMBINE \
-            , TableType.COMBINE_ENRICHMENT_MUTATIONS \
-            , TableType.COMBINE_FIXATION_MUTATIONS \
+            # , TableType.COMBINE \
+            # , TableType.COMBINE_ENRICHMENT_MUTATIONS \
+            # , TableType.COMBINE_FIXATION_MUTATIONS \
                            ]):
         menuitems += _menu_item_save_to_experiment_filter % (ale_experiment_id, mutation_id)
 
@@ -78,9 +80,9 @@ class TableType(Enum):
     FIXATING_MUTATIONS = 3
     SEARCH = 4
     SHARED = 5
-    COMBINE = 6
-    COMBINE_ENRICHMENT_MUTATIONS = 7
-    COMBINE_FIXATION_MUTATIONS = 8
+    # COMBINE = 6
+    # COMBINE_ENRICHMENT_MUTATIONS = 7
+    # COMBINE_FIXATION_MUTATIONS = 8
 
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
@@ -89,7 +91,7 @@ else:
     resequencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
 
 
-def get_table_header(request, reseq_dict, table_type=None):
+def get_table_header(user, reseq_dict, table_type=None):
     base_table_header = HTML_MUTATION_TABLE_HEADER
     experiment_urls = get_experiment_urls(reseq_dict)
     table_header_list = []
@@ -104,7 +106,7 @@ def get_table_header(request, reseq_dict, table_type=None):
             sample_header_html = """<a href="%s">%s</a>"""
             sample_header_html = sample_header_html % (experiment_urls[reseq_id], sample_name)
 
-        if (request.user.has_perm('add_global_filter')):
+        if can_add_global_filter(user):
             table_header_list.append(sample_header_html + (TAGS_IMAGE % (dropdown_html, current_tags)))
         else:
             table_header_list.append(sample_header_html)
@@ -181,7 +183,7 @@ def get_mutation_table_queryset_and_entry_list_for_export(reseq_dict, observed_m
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
-def get_table_body(request,
+def get_table_body(user: User,
                    reseq_dict,
                    observed_mutations_queryset,
                    ale_experiment_id=None,
@@ -201,8 +203,8 @@ def get_table_body(request,
         mutation = observed_mutation.mutation
         if _contains_mutation(table_entry_list[mutation_index_dict[mut_id]]):
             table_row = [HTML_MUTATION_TABLE_ROW]
-            if request.user.has_perm('add_global_filter'):
-                table_row.append(_build_table_cell_for_dropdown(request, table_type, mutation.id, ale_experiment_id, ))
+            if can_add_global_filter(user):
+                table_row.append(_build_table_cell_for_dropdown(table_type, mutation.id, ale_experiment_id, ))
             else:
                 table_row.append("""""")
 

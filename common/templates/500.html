@@ -1,16 +1,16 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="en">
-<head>
-    <title>Page unavailable</title>
-    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/style.css" />
-</head>
-<body>
-    <h1>Page unavailable</h1>
 
-    <p>Sorry, but the requested page is unavailable due to a
-    server hiccup.</p>
+{% extends 'dashboard_base.html' %}
+{% block title %}{% endblock %}
 
-    <p>Our engineers have been notified, so check back later.</p>
-</body>
-</html>
-
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="span12">
+            <div class="hero-unit">
+                <h1>Page not available</h1>
+                <h4>{{ err_message }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

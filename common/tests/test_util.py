@@ -1,7 +1,6 @@
 import unittest
 
-from common.util import filter_for_ale
-from common.util import filter_for_ale_exp
+from seq.util import filter_for_ale, filter_for_ale_exp
 from common.util import get_git_hash
 
 __author__ = 'Patrick Phaneuf'

@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.template import loader
+from django.contrib.auth.decorators import login_required, permission_required
 from filter.forms.filter import FilterForm
 from django.utils.safestring import mark_safe
 from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations, TABLE_HEADER, get_global_filter

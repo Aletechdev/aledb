@@ -63,7 +63,7 @@
                                 value="{{ ale }}">{{ ale }}</option>
                     {% endfor %}
                 </select>
-                {% if perms.filter.add_global_filter %}
+                {% if perms.filter.add_globalfilter %}
                 <select name="tag_select" class="selectpicker">
                     <option value="All Tags">All Tags</option>
                     {% for key, value in tag_dropdown.items %}
@@ -81,7 +81,7 @@
         <div><i>Note: You must select the Apply button when selecting specific ALEs or show/hide of columns according to
             tags.</i></div>
         <br>
-        {% if perms.filter.add_global_filter %}
+        {% if perms.filter.add_globalfilter %}
         <div class="row"> <!-- Rows -->
             <b>Rows: </b>
             <div class="btn-group" role="group">

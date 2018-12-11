@@ -1,12 +1,15 @@
-from common.util import get_reseq_ordered_dict
+from seq.util import get_reseq_ordered_dict
 from fixation.util import get_exp_fixed_obs_mut_qryset
 from seq.views.mutation_table_builder import \
     get_mutation_table_queryset_and_entry_list_for_export, \
     HTML_MUTATION_TABLE_HEADER
 from django.utils.html import strip_tags
-from combine.views.common import get_exp_ordered_reseq_dict_and_obs_mut_queryset
 from converge.util import get_converge_obs_mut_qryset
-from datetime import datetime
+
+import collections
+from filter.util import get_filtered_observed_mutations_queryset
+from seq.models import ObservedMutation
+from filter.models import AleExperimentFilter
 
 MUT_TYPE_STR = "mut"
 FIXED_MUT_TYPE_STR = "fixed_mut"
@@ -14,7 +17,6 @@ CONVERGED_MUT_TYPE_STR = "converged_mut"
 
 
 def get_csv_str(exp_id, mut_type_str):
-    # print(str(datetime.now()), exp_id, mut_type_str)
     filtered = False
     if mut_type_str == FIXED_MUT_TYPE_STR:
         reseq_ordered_dict = get_reseq_ordered_dict(exp_id)
@@ -63,3 +65,25 @@ def _strip_tags_from_list(frequencies):
     for frequency in frequencies:
         temp.append(strip_tags(frequency))
     return temp
+
+
+def get_exp_ordered_reseq_dict_and_obs_mut_queryset(exp_id):
+    raw_obs_mut_qryset = ObservedMutation.objects.exclude(
+        mutation__gene=''
+    ).filter(
+        sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp_id
+    )
+    exp_filter = AleExperimentFilter.objects.filter(ale_experiment__ale_id=exp_id).first()
+    obs_mut_qryset = get_filtered_observed_mutations_queryset(raw_obs_mut_qryset, exp_filter).select_related(
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment',
+        'mutation'
+    )
+    ordered_reseq_dict = _get_ordered_reseq_dict(obs_mut_qryset)
+    return ordered_reseq_dict, obs_mut_qryset
+
+
+def _get_ordered_reseq_dict(filtered_obs_mut_queryset):
+    seq_experiment_ordered_dict = collections.OrderedDict()
+    for observed_mutation in filtered_obs_mut_queryset:
+        seq_experiment_ordered_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
+    return seq_experiment_ordered_dict

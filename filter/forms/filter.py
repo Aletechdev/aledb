@@ -12,7 +12,7 @@ class FilterForm(forms.ModelForm):
     # Simply initializes form.
     min_cutoff = forms.IntegerField(min_value=0, max_value=100, required=False, initial=DEFAULT_MUTATION_FREQ_MIN)
     max_cutoff = forms.IntegerField(min_value=0, max_value=100, required=False, initial=DEFAULT_MUTATION_FREQ_MAX)
-    ignored_genes = forms.CharField(widget=forms.Textarea, required=False, initial="")
+    ignored_genes = forms.CharField(widget=forms.Textarea(attrs={'rows':3, 'cols':100}), required=False, initial="")
     ignored_mutations = forms.CharField(widget=forms.Textarea, required=False, initial="")
 
     def has_changed(self):

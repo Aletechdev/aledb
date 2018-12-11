@@ -95,11 +95,8 @@
                     <li><a href="/about">About</a></li>
                     <li {% block search %}{% endblock %}><a href="/search">Search</a></li>
                     <li><a href="/bibliome">Bibliome</a></li>
-                    {% if perms.filter.add_global_filter %}
                     <li {% block filter %}{% endblock %}><a href="/filter/global_filter">Global Filter</a></li>
-                    {% endif %}
                     <li><a href="/export">Export</a></li>
-{#                    <li><a href="/combine">Combine</a></li>#}
                     <li><a href="/aledata">Files</a></li>
                     {% if ale_experiment_id %}
                         <li><a href="/stats?ale_experiment_id={{ ale_experiment_id }}"><b>{{ ale_experiment_name }}</b></a></li>
@@ -107,9 +104,7 @@
                         <li><a href="/mutations?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Mutations</a></li>
                         <li><a href="/converge?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Converged Mutations</a></li>
                         <li><a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Fixed Mutations</a></li>
-                        {% if perms.filter.add_global_filter %}
-                            <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Filter</a></li>
-                        {% endif %}
+                        <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Filter</a></li>
                     {% endif %}
                     <li>
                         <select onchange="window.location.href=this.value" style="width: 100%;" id="quick_select">

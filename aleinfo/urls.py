@@ -19,7 +19,6 @@ urlpatterns = [
     url(r'^enrichment/', include('enrichment.urls')),
     url(r'^converge/', include('converge.urls')),
     url(r'^export', include('export.urls')),
-    url(r'^combine/', include('combine.urls')),
     url(r'^search/', include('search.urls')),
     url(r'^bibliome/', include('bibliome.urls')),
     url(r'^gene/', include('genes.urls'))

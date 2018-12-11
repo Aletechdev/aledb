@@ -7,7 +7,8 @@ from django.template import loader
 from django.conf import settings
 from seq.views import common
 from ale.utils import get_recent_ale_exps
-from common.util import get_ordered_reseq_queryset, get_user_context
+from common.util import get_user_context
+from seq.util import get_ordered_reseq_queryset
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
 from logs.aledb_logger import get_logger, user_extra, join_extras
@@ -33,34 +34,32 @@ def metadata(request):
 
     try:
         start_time = time.clock()
-        ale_experiment_id = request.GET.get(REQUEST_ALE_EXPERIMENT_ID)
+        context = get_user_context(request.user)
+        experiment = common.get_ale_experiment(request)
+        ale_experiment_id = experiment.ale_id
         ale_id = request.GET.get(REQUEST_ALE_ID)
+
         reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_id)
 
-        # Would rather want to use something like a dictionary since an experiment is
-        # unique, though an experiment is currently a structure and an integral type
-        # that can be used as a key.
-
         reseq_info_list = get_reseq_info_list(reseq_queryset)
-
-        template = loader.get_template(META_DATA_TEMPLATE)
-
-        ale_experiment_name = common.get_ale_experiment_name(request)
 
         context = get_user_context(request.user)
         context.update({"reseq_info_list": reseq_info_list,
                         "reseq_report_url": reseq_report_url,
-                        "ale_experiment_name": ale_experiment_name,
+                        "ale_experiment_name": experiment.name,
                         "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                         "multiple": False,
                         "ale_experiment_id": ale_experiment_id
                         })
 
+        template = loader.get_template(META_DATA_TEMPLATE)
         performance_lgr.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
-
         return HttpResponse(template.render(context, request), content_type="text/html")
-    except Exception:
-        exception_lgr.exception("metadata broke", extra=user_extra(request))
+    except Exception as e:
+        exception_lgr.exception("stats broke", extra=user_extra(request))
+        template = loader.get_template("500.html")
+        context['err_message'] = str(e)
+        return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def get_reseq_info_list(reseq_queryset):

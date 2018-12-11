@@ -1,5 +1,4 @@
-from common.util import get_mut_queryset_from_obs_mut_queryset
-from seq.util import get_all_observed_mutations
+from seq.util import get_all_observed_mutations, get_mut_queryset_from_obs_mut_queryset
 from filter.util import get_filtered_observed_mutations_queryset
 
 __author__ = "Patrick Phaneuf"

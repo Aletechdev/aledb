@@ -99,7 +99,6 @@ FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
 FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
 LOGIN_TEMPLATE_PATH = os.path.join(BASE_DIR, 'accounts/templates')
 EXPORT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'export/templates')
-COMBINE_TEMPLATE_PATH = os.path.join(BASE_DIR, 'combine/templates')
 COMMON_TEMPLATE_PATH = os.path.join(BASE_DIR, 'common/templates')
 DASHBOARD_TEMPLATE_PATH = os.path.join(BASE_DIR, 'dashboard/templates')
 SEARCH_TEMPLATE_PATH = os.path.join(BASE_DIR, 'search/templates')
@@ -114,7 +113,6 @@ TEMPLATES = [
                  FILTER_TEMPLATE_PATH,
                  FIXATION_TEMPLATE_PATH,
                  LOGIN_TEMPLATE_PATH,
-                 COMBINE_TEMPLATE_PATH,
                  EXPORT_TEMPLATE_PATH,
                  COMMON_TEMPLATE_PATH,
                  DASHBOARD_TEMPLATE_PATH,
@@ -186,7 +184,6 @@ INSTALLED_APPS = (
     'enrichment',
     'converge',
     'accounts',
-    'combine',
     'export',
     'common',
     'dashboard',

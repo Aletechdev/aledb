@@ -4,11 +4,10 @@ from genes.util import get_gene_list
 from operator import itemgetter
 from collections import Counter
 from seq.models import UnassignedMissingCoverageEvidence
-from seq.util import get_all_observed_mutations
+from seq.util import get_all_observed_mutations, get_reseq_ordered_dict
 from seq.views.common import MUTATION_TYPE_LIST, COLORS, DEFAULT_COLOR, FUNCTIONAL_CHANGE_TYPE_LIST
 from stats.models import StaticData
 from logs.aledb_logger import get_logger
-from common.util import get_reseq_ordered_dict
 from filter.util import get_filtered_observed_mutations_queryset
 import stats.models
 

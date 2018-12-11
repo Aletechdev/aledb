@@ -1,4 +1,4 @@
-from common.util import get_reseq_ordered_dict
+from seq.util import get_reseq_ordered_dict
 from fixation import fixation
 from fixation.models import FixatedMutation
 from seq.models import ObservedMutation
