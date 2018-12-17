@@ -33,7 +33,6 @@ def search(request):
 
         context = get_user_context(request.user)
         if obs_mut_qryset is None:
-            context = get_user_context(request.user)
             context.update({'error': True})
             return render(request, 'search.html', context)
 
@@ -41,7 +40,7 @@ def search(request):
 
         table_header = mutation_table_builder.get_table_header(request.user, reseq_dict)
         # obs_mut_qryset is already filtered
-        table_body = mutation_table_builder.get_table_body(request,
+        table_body = mutation_table_builder.get_table_body(request.user,
                                                            reseq_dict,
                                                            obs_mut_qryset,
                                                            do_filter=False,
