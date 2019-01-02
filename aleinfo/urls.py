@@ -8,6 +8,7 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^', include('dashboard.urls')),
     url(r'^admin/', admin.site.urls),
+    url(r'^admin/defender/', include('defender.urls')),  # defender admin
     url(r'^accounts/', include('accounts.urls', namespace="accounts")),
     # url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^mutations', include('seq.urls')),

@@ -2,6 +2,7 @@ beautifulsoup4==4.6.0
 configparser==3.5.0
 Django==1.11.7
 django-debug-toolbar==1.8
+django-defender==0.5.5
 django-guardian==1.4.9
 django_mysql==2.1.1
 gunicorn==19.7.1
@@ -11,6 +12,7 @@ numpy==1.15.4
 pandas==0.23.4
 python-dateutil==2.7.5
 python-json-logger==0.1.5
+redis==2.10.6
 requests==2.18.4
 six==1.11.0
 xlrd==1.1.0
