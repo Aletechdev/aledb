@@ -1,6 +1,5 @@
 from django.http import HttpResponse
 from django.template import loader
-from django.contrib.auth.decorators import login_required, permission_required
 from seq.views import common
 from filter.forms.filter import FilterForm
 from filter.models import AleExperimentFilter
@@ -12,6 +11,7 @@ from ale.utils import get_recent_ale_exps
 from common.util import clear_dashboard_cache, get_user_context
 from seq.models import Mutation
 from logs.aledb_logger import get_logger, user_extra
+from ale import permissions
 
 exception_lgr = get_logger("exceptions")
 usage_lgr = get_logger("usage")
@@ -24,15 +24,11 @@ FILTER_TEMPLATE = "filter/index.html"
 STARTING_STRAIN_HEADER = """<tr><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Details</td></tr>"""
 
 
-@login_required
 def mutation_filter(request):
 	usage_lgr.info("mutation filter", extra=user_extra(request))
 	try:
 		context = get_user_context(request.user)
 		experiment = common.get_ale_experiment(request)
-
-		ale_experiment_name = experiment.name
-		ale_experiment_id = experiment.ale_id
 
 		template = loader.get_template(FILTER_TEMPLATE)
 
@@ -41,8 +37,9 @@ def mutation_filter(request):
 			defaults=filter.models.get_default_experiment_filter_params(experiment))
 
 		if request.method == 'POST':
+			# check user permissions
 			clear_dashboard_cache()
-			_handle_POST(request, filter_form_model, ale_experiment_id)
+			_handle_POST(request, filter_form_model, experiment)
 
 		filter_form = FilterForm(filter_form_model.__dict__)
 
@@ -55,7 +52,7 @@ def mutation_filter(request):
 			"experiment": experiment,
 			"table_body": mark_safe(table_body),
 			"table_header": mark_safe(TABLE_HEADER),
-			"recent_experiments": get_recent_ale_exps(ale_experiment_id),
+			"recent_experiments": get_recent_ale_exps(experiment.ale_id),
 			"starting_strain_body": mark_safe(starting_strain_body),
 			"starting_strain_header": mark_safe(STARTING_STRAIN_HEADER)})
 		return HttpResponse(template.render(context, request), content_type="text/html")
@@ -66,19 +63,20 @@ def mutation_filter(request):
 		return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-def _handle_POST(request, filter_form_model, ale_experiment_id):
+def _handle_POST(request, filter_form_model, experiment):
 	filter_form = FilterForm(request.POST)
-
-	if filter_form.is_valid():
+	if permissions.can_add_project_filter(request.user, experiment.project) and filter_form.is_valid():
 		filter_form_model.min_cutoff = request.POST.get("min_cutoff", DEFAULT_MUTATION_FREQ_MIN)
 		filter_form_model.max_cutoff = request.POST.get("max_cutoff", DEFAULT_MUTATION_FREQ_MAX)
 		filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
 		deleted_mut_id = request.POST.get('mut_id', None)
 		ignored_mutation_id_list = get_ignored_mut_id_list_from_str(
-			AleExperimentFilter.objects.get(ale_experiment_id=ale_experiment_id).ignored_mutations, deleted_mut_id)
+			AleExperimentFilter.objects.get(ale_experiment_id=experiment.ale_id).ignored_mutations, deleted_mut_id)
 		cleaned_list = get_ignored_mut_id_list_from_str(",".join(ignored_mutation_id_list))
 		filter_form_model.ignored_mutations = ",".join(cleaned_list)
 		filter_form_model.save()
+	elif filter_form.is_valid():
+		raise Exception("User doesn't have permission to edit experiment filter")
 	else:
 		print(filter_form.errors)
 

@@ -1,11 +1,11 @@
 from django.http import HttpResponse
 from django.template import loader
-from django.contrib.auth.decorators import login_required, permission_required
 from filter.forms.filter import FilterForm
 from django.utils.safestring import mark_safe
 from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations, TABLE_HEADER, get_global_filter
 from common.util import clear_dashboard_cache, get_user_context
 from logs.aledb_logger import get_logger, user_extra
+from ale import permissions
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -41,17 +41,22 @@ def global_filter(request):
 
         return HttpResponse(template.render(context, request), content_type="text/html")
 
-    except Exception:
+    except Exception as e:
         exception_lgr.exception("global filter broke", extra=user_extra(request))
+        template = loader.get_template("500.html")
+        context['err_message'] = str(e)
+        return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def _handle_POST(request, filter_form_model):
-
-    filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
-    deleted_mut_id = request.POST.get('mut_id', None)
-    ignored_mutation_id_list = get_ignored_mut_id_list_from_str(get_global_filter().ignored_mutations, deleted_mut_id)
-    cleaned_list = get_ignored_mut_id_list_from_str(",".join(ignored_mutation_id_list))
-    filter_form_model.ignored_mutations = ",".join(cleaned_list)
-    filter_form_model.save()
+    if permissions.can_add_global_filter(request.user):
+        filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
+        deleted_mut_id = request.POST.get('mut_id', None)
+        ignored_mutation_id_list = get_ignored_mut_id_list_from_str(get_global_filter().ignored_mutations, deleted_mut_id)
+        cleaned_list = get_ignored_mut_id_list_from_str(",".join(ignored_mutation_id_list))
+        filter_form_model.ignored_mutations = ",".join(cleaned_list)
+        filter_form_model.save()
+    else:
+        raise Exception("User doesn't have permission to edit global filter")
 
 

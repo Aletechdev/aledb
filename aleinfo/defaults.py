@@ -1,17 +1,58 @@
 import os
 import sys
 
+
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 DEBUG = os.environ.get('DEBUG', '0') == '1'
 
 GOOGLE_ANALYTICS_TAG = os.environ.get('GOOGLE_ANALYTICS_TAG', 'no-google-analytics-tag')
-
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
 SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'http://sbrg.ucsd.edu/')
+ALE_DATA_ROOT_DIR = os.environ.get('ALE_DATA_ROOT_DIR', 'ale_data_root_dir')
 
-ADMINS = ()
 
-MANAGERS = ADMINS
+ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), '127.0.0.1', '35.236.92.37']
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 3600  # in seconds, 1hr
+SESSION_SAVE_EVERY_REQUEST = True
+
+
+
+# ADMINS = ()
+#
+# MANAGERS = ADMINS
+
+INSTALLED_APPS = (
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.sites',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'defender',
+    # 'crispy_forms',
+
+    'ale',
+    'seq',
+    'filter',
+    'fixation',
+    'stats',
+    'metadata',
+    'about',
+    'enrichment',
+    'converge',
+    'accounts',
+    'export',
+    'common',
+    'dashboard',
+    'search',
+    'genes',
+    'bibliome',
+    'debug_toolbar',
+    'guardian',
+)
 
 DATABASES = {
     'default': {
@@ -24,13 +65,43 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',
+    }
+}
+
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'defender.middleware.FailedLoginMiddleware',
+    # Uncomment the next line for simple clickjacking protection:
+    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+)
+
+AUTHENTICATION_BACKENDS = (
+    # 'axes.backends.AxesModelBackend',
+    'django.contrib.auth.backends.ModelBackend',
+    'guardian.backends.ObjectPermissionBackend',
+)
+
+
+LOGIN_URL = '/accounts/login/'
+ROOT_URLCONF = 'aleinfo.urls'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
+# Python dotted path to the WSGI application used by Django's runserver.
+WSGI_APPLICATION = 'aleinfo.wsgi.application'
+
+
 # XXX(lyschoening) what does this refer to?
 OTHER_USERNAME = os.environ.get('OTHER_DATABASE_USERNAME', 'other_database_username')
 OTHER_PASSWORD = os.environ.get('OTHER_DATABASE_', 'other_database_password')
-
-ALE_DATA_ROOT_DIR = os.environ.get('ALE_DATA_ROOT_DIR', 'ale_data_root_dir')
-
-ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), '127.0.0.1', '35.236.92.37']
 
 USE_X_FORWARDED_PORT = os.environ.get('USE_X_FORWARDED_PORT', '0') == '1'
 
@@ -44,7 +115,7 @@ if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing an
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
 # In a Windows environment this must be set to your system time zone.
-TIME_ZONE = os.environ.get('TIME_ZONE', 'America/Los_Angeles')
+TIME_ZONE = 'America/Los_Angeles'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -81,7 +152,6 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'common/staticfiles'),
 )
-GUARDIAN_RAISE_403 = True
 
 # List of finder classes that know how to find static files in
 # various locations.
@@ -91,43 +161,23 @@ STATICFILES_FINDERS = (
     #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
+GUARDIAN_RAISE_403 = True
+
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = os.environ.get('SECRET_KEY', '<DJANGO_KEY_REDACTED>')
 
-SEQ_TEMPLATE_PATH = os.path.join(BASE_DIR, 'seq/templates')
-FILTER_TEMPLATE_PATH = os.path.join(BASE_DIR, 'filter/templates')
-FIXATION_TEMPLATE_PATH = os.path.join(BASE_DIR, 'fixation/templates')
-LOGIN_TEMPLATE_PATH = os.path.join(BASE_DIR, 'accounts/templates')
-EXPORT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'export/templates')
-COMMON_TEMPLATE_PATH = os.path.join(BASE_DIR, 'common/templates')
-DASHBOARD_TEMPLATE_PATH = os.path.join(BASE_DIR, 'dashboard/templates')
-SEARCH_TEMPLATE_PATH = os.path.join(BASE_DIR, 'search/templates')
-GENES_TEMPLATE_PATH = os.path.join(BASE_DIR, 'genes/templates')
-METADATA_TEMPLATE_PATH = os.path.join(BASE_DIR, 'metadata/templates')
-ABOUT_TEMPLATE_PATH = os.path.join(BASE_DIR, 'about/templates')
-BIBLIOME_TEMPLATE_PATH = os.path.join(BASE_DIR, 'bibliome/templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [SEQ_TEMPLATE_PATH,
-                 FILTER_TEMPLATE_PATH,
-                 FIXATION_TEMPLATE_PATH,
-                 LOGIN_TEMPLATE_PATH,
-                 EXPORT_TEMPLATE_PATH,
-                 COMMON_TEMPLATE_PATH,
-                 DASHBOARD_TEMPLATE_PATH,
-                 SEARCH_TEMPLATE_PATH,
-                 GENES_TEMPLATE_PATH,
-                 METADATA_TEMPLATE_PATH,
-                 ABOUT_TEMPLATE_PATH,
-                 BIBLIOME_TEMPLATE_PATH
-                 ],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
                 # list if you haven't customized them:
                 'django.contrib.auth.context_processors.auth',
                 'django.template.context_processors.debug',
+                'django.template.context_processors.request',
                 'django.template.context_processors.i18n',
                 'django.template.context_processors.media',
                 'django.template.context_processors.static',
@@ -136,64 +186,9 @@ TEMPLATES = [
                 'aleinfo.context_processors.global_settings',
             ],
             'debug': DEBUG,
-            'loaders': ['django.template.loaders.filesystem.Loader',
-                        'django.template.loaders.app_directories.Loader'],
         },
     },
 ]
-
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
-
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'guardian.backends.ObjectPermissionBackend',
-)
-
-# GUARDIAN_GET_INIT_ANONYMOUS_USER = 'core.models.get_custom_anon_user'
-
-LOGIN_URL = '/accounts/login/'
-ROOT_URLCONF = 'aleinfo.urls'
-
-# Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'aleinfo.wsgi.application'
-
-INSTALLED_APPS = (
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'django.contrib.admin',
-    'ale',
-    'seq',
-    'filter',
-    'fixation',
-    'stats',
-    'metadata',
-    'about',
-    'enrichment',
-    'converge',
-    'accounts',
-    'export',
-    'common',
-    'dashboard',
-    'search',
-    'genes',
-    'bibliome',
-    'debug_toolbar',
-    'guardian',
-)
-
 
 
 # A sample logging configuration. The only tangible logging
@@ -232,16 +227,13 @@ LOGGING = {
     }
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'cache_table',
-    }
-}
 
 PUBLIC = os.environ.get('PUBLIC', '0') == '1'
 PUBLIC_USERNAME = os.environ.get('PUBLIC_USERNAME', 'public')
 PUBLIC_PASSWORD = os.environ.get('PUBLIC_PASSWORD', 'public_password')
+
+# EMAIL_ACCOUNT = os.environ.get('EMAIL_ACCOUNT', 'aledbsoftware@gmail.com')
+# EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD', 'aledb email password')
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -260,3 +252,19 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+# DEFENDER_LOGIN_FAILURE_LIMIT = 3
+DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME = 3
+DEFENDER_LOGIN_FAILURE_LIMIT_IP = 5
+
+DEFENDER_COOLOFF_TIME = 3600  # seconds
+DEFENDER_REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/1')
+
+# Crispy Form Theme - Bootstrap 3
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
+
+# For Bootstrap 3, change error alert to 'danger'
+from django.contrib import messages
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger'
+}
