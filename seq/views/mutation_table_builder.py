@@ -280,7 +280,7 @@ def get_experiment_urls(reseq_dict):
     experiment_urls = {}
     for reseq in reseq_dict.values():
         if reseq.location != "":
-            experiment_urls[reseq.id] = resequencing_report_url + reseq.location
+            experiment_urls[reseq.id] = resequencing_report_url + reseq.location + "index.html"
     return experiment_urls
 
 
