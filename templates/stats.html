@@ -240,7 +240,7 @@
                 <tr class="experiment_stats">
                     <td class="sample_name">
                         {% if experiment_info_tuple.0.location != "" %}
-                            <a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
+                            <a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}index.html">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
                         {% else %}
                             {{ experiment_info_tuple.0.ale_flask_isolate_str }}
                         {% endif %}

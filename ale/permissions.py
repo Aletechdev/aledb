@@ -1,4 +1,6 @@
 from guardian.models import GroupObjectPermission, UserObjectPermission
+from ale.models import AleExperiment
+from seq.models import ResequencingExperiment
 
 VIEW_PROJECT = 'view_project'
 
@@ -36,10 +38,20 @@ def can_view_project(user, project):
     return ok
 
 
+def can_view_experiment(user, resequence_data_location):
+    reseqs = ResequencingExperiment.objects.filter(location=resequence_data_location).select_related("tech_rep__isolate__flask__ale_id__ale_experiment__project")
+    if reseqs:
+        for reseq in reseqs:
+            project = reseq.ale_experiment.project
+            ok = can_view_project(user, project)
+            if ok:
+                return True
+    return False
+
+
 def can_add_global_filter(user):
     return user.is_superuser
 
 
 def can_add_project_filter(user, project):
     return user.is_superuser or user.id == project.user_id
-
