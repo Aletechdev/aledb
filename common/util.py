@@ -1,15 +1,15 @@
 import subprocess
 
 from filter.models import AleExperimentFilter
-import filter.util
+import filter.util, logging
 from ale.utils import get_all_ale_exps, get_recent_ale_exps
 from ale.models import TechnicalReplicate
 from seq.models import Mutation
 from django.core.cache import cache
-from logs.aledb_logger import get_logger
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
 
+logger = logging.getLogger(__name__)
 
 def clear_dashboard_cache():
 
@@ -80,14 +80,11 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
 def get_git_hash():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
 
-
-exception = get_logger("exception")
-
 try:
     common_context = {"recent_experiments": get_recent_ale_exps,
                       "git_hash": get_git_hash()}
 except Exception:
-    exception.exception("common_context broke")
+    logger.exception("common_context broke")
 
 
 def get_user_context(user):

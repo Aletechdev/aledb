@@ -18,13 +18,11 @@ from stats.util import get_histogram_jsons,\
 from ale.utils import get_recent_ale_exps, get_all_ale_exps
 from common.util import get_user_context
 from filter.util import get_filtered_observed_mutations_queryset
-import ale.models
+import logging
 from bibliome.models import Publication
-from logs.aledb_logger import get_logger, user_extra, join_extras
+from logs.aledb_logger import user_extra, join_extras
 
-exception_lgr = get_logger("exceptions")
-usage_lgr = get_logger("usage")
-performance_lgr = get_logger("performance")
+logger = logging.getLogger(__name__)
 
 __author__ = 'pphaneuf'
 STATS_TEMPLATE = "stats.html"
@@ -36,7 +34,7 @@ if hasattr(settings, "SEQUENCING_URL"):
 
 
 def stats(request):
-    usage_lgr.info("stats", extra=user_extra(request))
+    logger.info("stats usage", extra=user_extra(request))
     try:
         start_time = time.clock()
 
@@ -102,13 +100,13 @@ def stats(request):
                         "notes": experiment.notes,
                         })
 
-        performance_lgr.info("stats performance",
+        logger.info("stats performance",
                              extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
 
     except Exception as e:
-        exception_lgr.exception("stats broke", extra=user_extra(request))
+        logger.exception("stats broke", extra=user_extra(request))
         template = loader.get_template("500.html")
         context['err_message'] = str(e)
         return HttpResponse(template.render(context, request), content_type="text/html")

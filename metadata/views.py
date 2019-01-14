@@ -11,11 +11,11 @@ from common.util import get_user_context
 from seq.util import get_ordered_reseq_queryset
 
 from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
-from logs.aledb_logger import get_logger, user_extra, join_extras
+from logs.aledb_logger import user_extra, join_extras
+import logging
 
-exception_lgr = get_logger("exceptions")
-usage_lgr = get_logger("usage")
-performance_lgr = get_logger("performance")
+logger = logging.getLogger(__name__)
+
 __author__ = 'Patrick Phaneuf'
 
 # TODO: use the template location described within settings.py
@@ -30,7 +30,7 @@ else:
 
 
 def metadata(request):
-    usage_lgr.info("fixation", extra=user_extra(request))
+    logger.info("fixation usage", extra=user_extra(request))
 
     try:
         start_time = time.clock()
@@ -53,10 +53,10 @@ def metadata(request):
                         })
 
         template = loader.get_template(META_DATA_TEMPLATE)
-        performance_lgr.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+        logger.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
-        exception_lgr.exception("stats broke", extra=user_extra(request))
+        logger.exception("stats broke", extra=user_extra(request))
         template = loader.get_template("500.html")
         context['err_message'] = str(e)
         return HttpResponse(template.render(context, request), content_type="text/html")

@@ -15,11 +15,10 @@ from ale.utils import get_all_ale_exps
 from common.util import check_hidden_columns_and_filters
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
-from logs.aledb_logger import get_logger, user_extra, join_extras
+from logs.aledb_logger import user_extra, join_extras
+import logging
 
-exception_lgr = get_logger("exceptions")
-usage_lgr = get_logger("usage")
-performance_lgr = get_logger("performance")
+logger = logging.getLogger(__name__)
 
 if hasattr(settings, seq.views.common.SETTINGS_SEQUENCING_URL):
     aledata_url = settings.SEQUENCING_URL
@@ -32,7 +31,7 @@ else:
 
 
 def gene(request):
-    usage_lgr.info("gene", extra = user_extra(request))
+    logger.info("gene usage", extra = user_extra(request))
 
     try:
         start_time = time.clock()
@@ -62,11 +61,14 @@ def gene(request):
                    "homology_data": mark_safe(json.dumps(homology_data)),
                    "has_homology_data": has_homology_data,
                    "hidden_columns": hidden_columns})
-        performance_lgr.info("genes performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
-
+        logger.info("genes performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
         return HttpResponse(template.render(context, request), content_type="text/html")
-    except Exception:
-        exception_lgr.exception("genes broke", extra = user_extra(request))
+    except Exception as e:
+        logger.exception("genes broke", extra = user_extra(request))
+        template = loader.get_template("500.html")
+        context['err_message'] = str(e)
+        return HttpResponse(template.render(context, request), content_type="text/html")
+
 
 # TODO: This is the same implementation as found within seq.views.search.py; need to consolidate.
 def _get_seq_exp(request, mutated_gene):
