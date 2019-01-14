@@ -18,11 +18,6 @@ SESSION_COOKIE_AGE = 3600  # in seconds, 1hr
 SESSION_SAVE_EVERY_REQUEST = True
 
 
-
-# ADMINS = ()
-#
-# MANAGERS = ADMINS
-
 INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -73,13 +68,14 @@ CACHES = {
 }
 
 MIDDLEWARE_CLASSES = (
+    'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'defender.middleware.FailedLoginMiddleware',
+    'accounts.defender_middleware.FailedLoginMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
@@ -191,40 +187,73 @@ TEMPLATES = [
 ]
 
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+###########
+# LOGGING #
+###########
+
+# Default exception reporter filter class used in case none has been
+# specifically assigned to the HttpRequest instance.
+DEFAULT_EXCEPTION_REPORTER_FILTER = 'django.views.debug.SafeExceptionReporterFilter'
+
+# Custom logging configuration.
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        },
+        'uuidfilter': {
+            '()': 'logs.aledb_logger.UUIDFilter'
         }
     },
+    'formatters': {
+        'simple': {
+            'format': '{levelname} {asctime} {name}:{lineno} - {message}',
+            'style': '{',
+        },
+        'standard': {
+            'format': "[%(asctime)s] %(uuid)s %(levelname)s [%(name)s:%(lineno)s - %(funcName)20s] %(message)s",
+            'class': 'pythonjsonlogger.jsonlogger.JsonFormatter'
+        },
+    },
     'handlers': {
+        'file': {
+            'formatter': 'standard',
+            'level': 'INFO',
+            'class': 'logging.handlers.TimedRotatingFileHandler',
+            'filename': 'logs/info.log',
+            'when': 'W0',
+            'backupCount': 5,
+            'filters': ['uuidfilter'],
+        },
         'console': {
+            'formatter': 'simple',
             'class': 'logging.StreamHandler',
+            'level': 'DEBUG',
+            'filters': ['uuidfilter', 'require_debug_true'],
         },
         'mail_admins': {
             'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
+            'class': 'django.utils.log.AdminEmailHandler',
+            'filters': ['uuidfilter', 'require_debug_false'],
+        },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-        },
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
+        '': {
+            'handlers': ['console', 'file', 'mail_admins'],
+            'level': 'DEBUG',
             'propagate': True,
         },
-    }
+        'django': {
+            'level': 'WARNING',
+            'handlers': ['console', 'file', 'mail_admins'],
+            'propagate': False,
+        }
+    },
 }
 
 
@@ -232,8 +261,17 @@ PUBLIC = os.environ.get('PUBLIC', '0') == '1'
 PUBLIC_USERNAME = os.environ.get('PUBLIC_USERNAME', 'public')
 PUBLIC_PASSWORD = os.environ.get('PUBLIC_PASSWORD', 'public_password')
 
-# EMAIL_ACCOUNT = os.environ.get('EMAIL_ACCOUNT', 'aledbsoftware@gmail.com')
-# EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD', 'aledb email password')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'aledbsoftware'
+EMAIL_HOST_PASSWORD = 'ucsd system biology group'
+
+SERVER_EMAIL = os.environ.get('SERVER_EMAIL', 'aledbsoftware+admin@gmail.com')
+DEFAULT_FROM_EMAIL = 'aledbsoftware+default@gmail.com'
+MAILER_LIST = ['rcai@eng.ucsd.edu']
+ADMINS = [('Robin Cai', 'rcai@ucsd.edu'), ('Patrick Phaneuf', 'pphaneuf@eng.ucsd.edu'), ('Muyao Wu', 'muw006@eng.ucsd.edu')]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -257,7 +295,7 @@ AUTH_PASSWORD_VALIDATORS = [
 DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME = 3
 DEFENDER_LOGIN_FAILURE_LIMIT_IP = 5
 
-DEFENDER_COOLOFF_TIME = 3600  # seconds
+DEFENDER_COOLOFF_TIME = 30  # seconds
 DEFENDER_REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/1')
 
 # Crispy Form Theme - Bootstrap 3

@@ -10,12 +10,11 @@ from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations,
 from ale.utils import get_recent_ale_exps
 from common.util import clear_dashboard_cache, get_user_context
 from seq.models import Mutation
-from logs.aledb_logger import get_logger, user_extra
+from logs.aledb_logger import user_extra
 from ale import permissions
+import logging
 
-exception_lgr = get_logger("exceptions")
-usage_lgr = get_logger("usage")
-performance_lgr = get_logger("performance")
+logger = logging.getLogger(__name__)
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -25,7 +24,7 @@ STARTING_STRAIN_HEADER = """<tr><td>Position</td><td>Mutation Type</td><td>Seque
 
 
 def mutation_filter(request):
-	usage_lgr.info("mutation filter", extra=user_extra(request))
+	logger.info("mutation filter", extra=user_extra(request))
 	try:
 		context = get_user_context(request.user)
 		experiment = common.get_ale_experiment(request)
@@ -59,7 +58,7 @@ def mutation_filter(request):
 			"starting_strain_header": mark_safe(STARTING_STRAIN_HEADER)})
 		return HttpResponse(template.render(context, request), content_type="text/html")
 	except Exception as e:
-		exception_lgr.exception("stats broke", extra=user_extra(request))
+		logger.exception("stats broke", extra=user_extra(request))
 		template = loader.get_template("500.html")
 		context['err_message'] = str(e)
 		return HttpResponse(template.render(context, request), content_type="text/html")

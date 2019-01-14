@@ -16,8 +16,8 @@ from dashboard.util import rebuild_dashboard_data
 from filter.models import AleExperimentFilter
 import filter.models
 from stats.util import generate_static_data
+import logging
 
-from logs.aledb_logger import get_logger
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -30,10 +30,7 @@ ANNOTATION_GENOMIC_DIFF_FILE_NAME = 'annotated.gd'
 METADATA_RELATIVE_PATH = 'metadata/'
 REF_RELATIVE_PATH = 'ref/'
 
-usage_lgr = get_logger("usage")
-exception_lgr = get_logger("exceptions")
-performance_lgr = get_logger("performance")
-
+logger = logging.getLogger(__name__)
 
 def integrate_metadata(ale_exp_path, ref_file_name, ale_exp_primary_key):
     """
@@ -174,7 +171,7 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
                           ale_exp_user,
                           ale_exp_name,
                           breseq_starting_strain_output_abs_path=None):
-    usage_lgr.info("Creating Ale Experiment", extra=locals())
+    logger.info("Creating Ale Experiment", extra=locals())
 
     try:
 
@@ -243,7 +240,7 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         generate_static_data(experiment.ale_id)
         rebuild_dashboard_data()
     except Exception as e:
-        exception_lgr.exception(e)
+        logger.exception(e)
 
 
 def rebuild_fixated_mutations(ale_experiment_id):

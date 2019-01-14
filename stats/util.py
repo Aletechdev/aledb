@@ -7,15 +7,13 @@ from seq.models import UnassignedMissingCoverageEvidence
 from seq.util import get_all_observed_mutations, get_reseq_ordered_dict
 from seq.views.common import MUTATION_TYPE_LIST, COLORS, DEFAULT_COLOR, FUNCTIONAL_CHANGE_TYPE_LIST
 from stats.models import StaticData
-from logs.aledb_logger import get_logger
 from filter.util import get_filtered_observed_mutations_queryset
 import stats.models
+import logging
 
 
 MAX_HISTOGRAM_SIZE = 50
-exception_lgr = get_logger("exceptions")
-usage_lgr = get_logger("usage")
-performance_lgr = get_logger("performance")
+logger = logging.getLogger(__name__)
 
 
 def get_observed_mutation_queryset(ale_experiment_id):

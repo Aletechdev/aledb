@@ -11,19 +11,17 @@ from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 import common.constants
-from logs.aledb_logger import get_logger, user_extra, join_extras
+from logs.aledb_logger import user_extra, join_extras
+import logging
 
 __author__ = 'pphaneuf'
 
 
-exception_lgr = get_logger("exceptions")
-usage_lgr = get_logger("usage")
-performance_lgr = get_logger("performance")
+logger = logging.getLogger(__name__)
 
 
 def mutation_table(request):
-    usage_lgr.info("mutation", extra=user_extra(request))
-
+    logger.info("mutation usage", user_extra(request))
     try:
         start_time = time.clock()
         context = get_user_context(request.user)
@@ -56,12 +54,11 @@ def mutation_table(request):
                         "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
                         "tag_dropdown": common.constants.TAGS
                         })
-        performance_lgr.info("metadata performance",
-                             extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+        logger.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
-        exception_lgr.exception("stats broke", extra=user_extra(request))
+        logger.exception("stats broke", extra=user_extra(request))
         template = loader.get_template("500.html")
         context['err_message'] = str(e)
         return HttpResponse(template.render(context, request), content_type="text/html")

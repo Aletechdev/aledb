@@ -11,18 +11,18 @@ from common.constants import \
     REQUEST_MUTATION_ID, \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
 from common.util import check_hidden_columns_and_filters
-import common.constants
+import common.constants, logging
 from enrichment.util import get_enrich_obs_mut_qryset
-from logs.aledb_logger import get_logger, user_extra, join_extras
+from logs.aledb_logger import user_extra, join_extras
 
-exception_lgr = get_logger("exceptions")
-usage_lgr = get_logger("usage")
-performance_lgr = get_logger("performance")
+
+logger = logging.getLogger(__name__)
+
 __author__ = 'Patrick Phaneuf'
 
 
 def enrichment_mutations(request):
-    usage_lgr.info("enrichment", extra = user_extra(request))
+    logger.info("enrichment usage", extra = user_extra(request))
     try:
         start_time = time.clock()
         context = get_user_context(request.user)
@@ -57,12 +57,12 @@ def enrichment_mutations(request):
                         "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                         "tag_dropdown": common.constants.TAGS
                         })
-        performance_lgr.info("enrichment performance",
+        logger.info("enrichment performance",
                              extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
-        exception_lgr.exception("stats broke", extra=user_extra(request))
+        logger.exception("stats broke", extra=user_extra(request))
         template = loader.get_template("500.html")
         context['err_message'] = str(e)
         return HttpResponse(template.render(context, request), content_type="text/html")

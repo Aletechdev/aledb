@@ -10,19 +10,18 @@ from dashboard.timeline_util import get_timeline
 from stats.views import get_histogram_item_count
 from dashboard.models import BarCharts
 from stats.util import MAX_HISTOGRAM_SIZE
-from logs.aledb_logger import get_logger, user_extra, join_extras
+from logs.aledb_logger import user_extra, join_extras
+import logging
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
 DASHBOARD_TEMPLATE = "dashboard.html"
 __author__ = 'pphaneuf'
 
-usage_lgr = get_logger("usage")
-exception_lgr = get_logger("exceptions")
-performance_lgr = get_logger("performance")
+logger = logging.getLogger(__name__)
 
 
 def dashboard(request):
-    usage_lgr.info("populating dashboard", extra=user_extra(request))
+    logger.info("populating dashboard", extra=user_extra(request))
 
     try:
         start_time = time.clock()
@@ -61,12 +60,12 @@ def dashboard(request):
                         "number_of_genes_to_show": barchart_item_count,
                         "max_histogram_size": MAX_HISTOGRAM_SIZE,
                         "timeline": get_timeline()})
-        performance_lgr.info("dashboard performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+        logger.info("dashboard performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
 
     except Exception as e:
-        exception_lgr.exception(e, extra = user_extra(request))
+        logger.exception(e, extra = user_extra(request))
 
 
 

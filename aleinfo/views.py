@@ -1,16 +1,15 @@
-from django.views.static import serve
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.shortcuts import render_to_response
 from common.util import get_user_context
 from ale.permissions import can_view_experiment
-from logs.aledb_logger import get_logger
 import logging
 import os
 
 DOC_ROOT = settings.ALE_DATA_ROOT_DIR
-exception_lgr = get_logger("exceptions")
+
 logger = logging.getLogger(__name__)
+
 
 def protected_file_serve(request, page_name: str):
     user = request.user

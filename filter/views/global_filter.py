@@ -4,20 +4,19 @@ from filter.forms.filter import FilterForm
 from django.utils.safestring import mark_safe
 from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations, TABLE_HEADER, get_global_filter
 from common.util import clear_dashboard_cache, get_user_context
-from logs.aledb_logger import get_logger, user_extra
+from logs.aledb_logger import user_extra
 from ale import permissions
+import logging
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
 GLOBAL_FILTER_TEMPLATE = "filter/global_filter.html"
 
-exception_lgr = get_logger("exceptions")
-usage_lgr = get_logger("usage")
-performance_lgr = get_logger("performance")
+logger = logging.getLogger(__name__)
 
 
 def global_filter(request):
-    usage_lgr.info("global filter", extra=user_extra(request))
+    logger.info("global filter usage", extra=user_extra(request))
     try:
         template = loader.get_template(GLOBAL_FILTER_TEMPLATE)
 
@@ -42,7 +41,7 @@ def global_filter(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
 
     except Exception as e:
-        exception_lgr.exception("global filter broke", extra=user_extra(request))
+        logger.exception("global filter broke", extra=user_extra(request))
         template = loader.get_template("500.html")
         context['err_message'] = str(e)
         return HttpResponse(template.render(context, request), content_type="text/html")

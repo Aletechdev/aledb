@@ -1,20 +1,13 @@
 from django.shortcuts import render
 
 from common.util import get_user_context
-from logs.aledb_logger import get_logger,user_extra
+from logs.aledb_logger import user_extra
+import logging
 
-exception_lgr = get_logger("exceptions")
-usage_lgr = get_logger("usage")
-
-
+logger = logging.getLogger(__name__)
 def bibliome(request):
-
-    # TODO: use the template location described within settings.py
-
-    usage_lgr.info("bibliome", extra = user_extra(request))
+    logger.info("bibliome usage", extra = user_extra(request))
     try:
-
         return render(request, "bibliome/index.html", get_user_context(request.user), content_type="text/html")
-
-    except Exception:
-        exception_lgr.exception("bibliome broke", extra = user_extra(request))
+    except Exception as e:
+        logger.exception("bibliome broke", extra = user_extra(request))
