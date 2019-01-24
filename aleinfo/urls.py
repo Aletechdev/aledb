@@ -13,6 +13,7 @@ urlpatterns = [
     url(r'^accounts/', include('accounts.urls', namespace="accounts")),
     # url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^about', include('about.urls')),
+    url(r'^ale/', include('ale.urls')),
     url(r'^bibliome/', include('bibliome.urls')),
     url(r'^converge/', include('converge.urls')),
     url(r'^enrichment/', include('enrichment.urls')),

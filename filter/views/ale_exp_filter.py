@@ -50,7 +50,7 @@ def mutation_filter(request):
 			"form": filter_form,
 			"experiment": experiment,
 			"ale_experiment_id": experiment.ale_id,
-			"ale_experiment_name": experiment.name,
+			"ale_experiment_name": experiment.project.name + ": " + experiment.name,
 			"table_body": mark_safe(table_body),
 			"table_header": mark_safe(TABLE_HEADER),
 			"recent_experiments": get_recent_ale_exps(experiment.ale_id),

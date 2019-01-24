@@ -27,7 +27,7 @@ def mutation_table(request):
         context = get_user_context(request.user)
         experiment= seq.views.common.get_ale_experiment(request)
 
-        exp_name = experiment.name
+        exp_name = experiment.project.name + ": " + experiment.name
         ale_no = seq.views.common.get_ale_id(request)
         aleid_ale_id_list = seq.views.common.get_aleid_ale_id_list(experiment.ale_id, True)
 
@@ -46,7 +46,7 @@ def mutation_table(request):
                         "ale_no": ale_no,
                         "ale_experiment_id": experiment.ale_id,
                         "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
-                        "title": exp_name + " Mutation Table",
+                        "title": exp_name + " Mutations",
                         "table_header": table_header,
                         "template_header": "Mutations",
                         "hidden_columns": hidden_columns,
@@ -54,7 +54,7 @@ def mutation_table(request):
                         "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
                         "tag_dropdown": common.constants.TAGS
                         })
-        logger.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+        logger.info("mutation performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:

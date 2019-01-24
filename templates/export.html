@@ -1,7 +1,8 @@
-{% extends 'dashboard_base.html' %}
+{% extends 'base.html' %}
+{% load static %}
 {% block title %}<title>ALEdb Export</title>{% endblock %}
 {% block scripts_and_style %}
-    <script type="text/javascript">{% include 'experiment_selector.js' %}</script>
+    <script type="text/javascript">{% static 'experiment_selector.js' %}</script>
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
@@ -93,7 +94,7 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
         <script type="text/javascript">
             var data = {{ data }};
-            {% include 'download_zip.js' %}
+            {% static 'download_zip.js' %}
         </script>
     {% endif %}
 {% endblock %}

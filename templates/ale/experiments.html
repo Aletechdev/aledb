@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+{% block title %}<title>ALED - Experiments</title>{% endblock %}
+{% block header %}Experiments{% endblock %}
+{% block content %}
+
+    <div class="row">
+        {% if filter %}
+            <div class="col-sm-10">
+                <form action="" method="get" class="form form-inline">
+                    {% bootstrap_form filter.form layout='inline' %}
+                    {% bootstrap_button 'Filter' %}
+                    {% bootstrap_button 'Export' %}
+                </form>
+            </div>
+        {% endif %}
+        <div class="col-sm-10">
+            {% render_table table %}
+        </div>
+    </div>
+
+{% endblock %}

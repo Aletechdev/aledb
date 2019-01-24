@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load render_table from django_tables2 %}
+{% block title %}<title>ALEDB - Project</title>{% endblock %}
+{% block header %}Project Detail{% endblock %}
+{% block content %}
+
+    <div class="row">
+        <h2>{{ project.name }}</h2>
+        <h4>Experiments in the Project:</h4>
+        {% render_table table %}
+    </div>
+
+{% endblock %}
