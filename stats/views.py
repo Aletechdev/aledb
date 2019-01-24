@@ -65,7 +65,7 @@ def stats(request):
         protein_change_type_count_dict = get_protein_change_type_count_dict(mutation_query_set)
         observed_protein_change_type_count_dict = get_observed_protein_change_type_count_dict(obs_mut_qryset)
         template = loader.get_template(STATS_TEMPLATE)
-        ale_exp_name = experiment.name
+        ale_exp_name = experiment.project.name + ": " + experiment.name
 
         barchart_item_count = get_histogram_item_count(request)
         genes_json = get_histogram_jsons(experiment.ale_id, barchart_item_count)

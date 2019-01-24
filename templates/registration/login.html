@@ -4,7 +4,7 @@
 {% block content %}
       <form class="form-signin" action="/accounts/login/" method="post">
       {% csrf_token %}
-          <img src="{% static "aledb_header.png" %}" style="max-width: 100%; max-height: 100%; margin: 0 auto;">
+          <img src="{% static "img/aledb_header.png" %}" style="max-width: 100%; max-height: 100%; margin: 0 auto;">
         <h2 style="text-align: center" class="form-signin-heading">Please sign in</h2>
         <label for="username" class="sr-only">Email address</label>
         <input name="username" id="username" class="form-control" placeholder="Username" required="" autofocus="">

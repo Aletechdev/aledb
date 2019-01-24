@@ -29,17 +29,17 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/metisMenu/2.5.2/metisMenu.min.css" rel="stylesheet">
 
     <!-- SBAdmin 2 Theme CSS -->
-    <link href="{% static "dist/css/sb-admin-2.css" %}" rel="stylesheet">
+    <link href="{% static "css/sb-admin-2.css" %}" rel="stylesheet">
 
     <!-- Font Awesome CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet"
           integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
 
     <!-- Favicon -->
-    <link rel="shortcut icon" type="image/png" href="{% static "fav.png" %}">
+    <link rel="shortcut icon" type="image/png" href="{% static "img/fav.png" %}">
 
     <!-- Common CSS -->
-    <link href="{% static "dist/css/common.css" %}" rel="stylesheet">
+    <link href="{% static "css/common.css" %}" rel="stylesheet">
 
     <!-- Jquery JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
@@ -77,11 +77,10 @@
 </head>
 <body style="background-color: white">
 <div id="wrapper">
-    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px">
         <div class="navbar-header">
             <a class="navbar-brand" href="/">ALEdb 1.0.2</a>
-            <br>
-            <h6 class="git-hash" >{{ git_hash }}</h6>
+
         </div>
         <div class="navbar-default sidebar" role="navigation" style="height: 100%">
             <div class="sidebar-nav navbar-collapse pull-left" style="width: 240px">
@@ -96,7 +95,8 @@
                     <li {% block search %}{% endblock %}><a href="/search">Search</a></li>
                     <li><a href="/bibliome">Bibliome</a></li>
                     <li {% block filter %}{% endblock %}><a href="/filter/global_filter">Global Filter</a></li>
-                    <li><a href="/export">Export</a></li>
+                    <li><a href="/ale/projects/">Projects</a></li>
+                    <li><a href="/ale/experiments/">Experiments</a></li>
                     {% if ale_experiment_id %}
                         <li><a href="/stats?ale_experiment_id={{ ale_experiment_id }}"><b>{{ ale_experiment_name }}</b></a></li>
                         <li><a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Metadata</a></li>
@@ -136,7 +136,7 @@
                 <div class="col-lg-12">
                     <div class="page-header">
                         <h1>{% block header %}{% endblock %}
-                            <img src="{% static "aledb_header.png" %}"
+                            <img src="{% static "img/aledb_header.png" %}"
                                  style="max-width: 10%; max-height: 10%; float: right">
                         </h1>
                     </div>
@@ -144,10 +144,38 @@
             </div>
             {% block content %}{% endblock %}
         </div>
+    <hr>
+        <div class="container">
+             <div class="row">
+                <div class="col-sm-12m text-muted" align="center">
+                    ALEdb is hosted and maintained by the Systems Biology Research Group at the University of California,
+                San Diego.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-1"></div>
+                <div class="col-sm-3">
+                    <a href="http://systemsbiology.ucsd.edu/">
+                        <img class="img-responsive footer-image" src="/static/img/sbrg-logo.png" height="60%" width="60%">
+                    </a>
+                </div>
+                <div class="col-sm-2">
+                    <a href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
+                                                             src="/static/img/cfb-logo.png" height="30%" width="30%"></a>
+                </div>
+                <div class="col-sm-4">
+                    <a href="http://www.ucsd.edu/"><img class="img-responsive footer-image"
+                                                        src="/static/img/ucsd-logo.png" height="40%" width="40%"></a>
+                </div>
+                <div class="col-sm-2">
+                <h6 class="git-hash" >{{ git_hash }}</h6></div>
+            </div>
+        </div>
     </nav>
 </div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/metisMenu/2.5.2/metisMenu.min.js"></script>
-<script src="{% static "dist/js/sb-admin-2.min.js" %}"></script>
+<script src="{% static "js/sb-admin-2.min.js" %}"></script>
 
 <!-- DataTables Bootstrap JS -->
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>

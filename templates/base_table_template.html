@@ -1,5 +1,5 @@
-{% extends 'dashboard_base.html' %}
-{% block title %}<title>{{ title }}</title>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}<title>ALEDB - data</title>{% endblock %}
 {% block scripts_and_style %}
     <link rel="stylesheet" type="text/css"
           href="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.css"/>
@@ -47,7 +47,7 @@
     </style>
 
 {% endblock %}
-{% block header %}<b>{{ ale_experiment_name }}</b> {{ template_header }}{% endblock %}
+{% block header %}<b>{{ ale_experiment_name }}</b>-{{ template_header }}{% endblock %}
 {% block content %}
     {% if ale_experiment_id %}
         <div class="row"> <!-- Columns -->

@@ -170,6 +170,7 @@ def create_ale_experiments(exp_files_dict_list):
 def create_ale_experiment(breseq_output_group_root_abs_path,
                           ale_exp_user,
                           ale_exp_name,
+                          ale_proj_name,
                           breseq_starting_strain_output_abs_path=None):
     logger.info("Creating Ale Experiment", extra=locals())
 
@@ -182,7 +183,6 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         clear_dashboard_cache()  # TODO: remove, since no longer using cache.
 
         breseq_output_group_root_abs_path = builder.util.sanitize_path(breseq_output_group_root_abs_path)
-
         instrument, created = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
         experiment, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
                                                                              instrument=instrument,
