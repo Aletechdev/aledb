@@ -56,7 +56,7 @@ def fixating_mutations(request):
                         "table_body": mark_safe(table_body),
                         "title": exp_name + " Fixating Mutations",
                         "table_header": mark_safe(table_header),
-                        "template_header": "- Fixating Mutations",
+                        "template_header": "Fixating Mutations",
                         "hidden_columns": hidden_columns,
                         "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                         "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,

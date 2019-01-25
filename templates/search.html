@@ -35,7 +35,6 @@
             }
         </style>
         {% if table_body %}
-            {% load static %}
             <script type="text/javascript">
                 var sorted_column = 3;
                 var table_data = {{ table_body }};
@@ -46,7 +45,7 @@
                     table_heads.push({title: table_titles[x]});
                     number_of_columns += 1;
                 }
-                {% static 'table_template.js' %}
+                {% include 'table_template.js' %}
             </script>
         {% endif %}
         <script type="text/javascript">

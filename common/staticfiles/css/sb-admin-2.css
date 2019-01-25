@@ -157,6 +157,11 @@ body {
     color: #428bca
 }
 
+.btn-primary2.btn-outline {
+    color: #428bca;
+    background-color: transparent;
+}
+
 .btn-success.btn-outline {
     color: #5cb85c
 }

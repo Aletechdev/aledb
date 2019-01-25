@@ -40,6 +40,12 @@ def stats(request):
 
         context = get_user_context(request.user)
         experiment = common.get_ale_experiment(request)
+        if experiment:
+            ale_exp_name = experiment.project.name + ": " + experiment.name
+            context.update({
+                "ale_experiment_name": ale_exp_name,
+                "ale_experiment_id": experiment.ale_id,
+            })
 
         try:
             pub_qryset = Publication.objects.filter(ale_experiment=experiment)
@@ -65,7 +71,6 @@ def stats(request):
         protein_change_type_count_dict = get_protein_change_type_count_dict(mutation_query_set)
         observed_protein_change_type_count_dict = get_observed_protein_change_type_count_dict(obs_mut_qryset)
         template = loader.get_template(STATS_TEMPLATE)
-        ale_exp_name = experiment.project.name + ": " + experiment.name
 
         barchart_item_count = get_histogram_item_count(request)
         genes_json = get_histogram_jsons(experiment.ale_id, barchart_item_count)
@@ -81,7 +86,6 @@ def stats(request):
                         "observed_mutation_sum": sum(observed_mutation_type_count_dict.values()),
                         "experiments_info_list": experiments_info_list,
                         "resequencing_report_url": resequencing_report_url,
-                        "ale_experiment_name": ale_exp_name,
                         "needle_plot_data": mark_safe(list(needle_plot_data)),
                         "genes": mark_safe(genes_json),
                         "gene_color_set": mark_safe(common.GENE_COLORS),
@@ -89,7 +93,6 @@ def stats(request):
                         "mutation_types": mark_safe(common.MUTATION_TYPE_LIST),
                         "protein_types": mark_safe(common.FUNCTIONAL_CHANGE_TYPE_LIST),
                         "number_of_genes_to_show": barchart_item_count,
-                        "ale_experiment_id": experiment.ale_id,
                         "ale_flask_isolate_count_list": ale_flask_isolate_count_list,
                         "ale_sum": ale_sum,
                         "flask_sum": flask_sum,
