@@ -105,25 +105,7 @@
                         <li><a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Fixed Mutations</a></li>
                         <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Filter</a></li>
                     {% endif %}
-                    <li>
-                        <select onchange="window.location.href=this.value" style="width: 100%;" id="quick_select">
-                            <option></option>
-                            {% for exp in experiments %}
-                                <option value="/stats?ale_experiment_id={{ exp.ale_id }}"> {{ exp.name }}</option>
-                            {% endfor %}
-                        </select>
 
-                        <script type="text/javascript">
-                            $(document).ready(function () {
-                                $("#quick_select").select2({
-                                    placeholder: '<span style="color:#337ab7">Select an Experiment</span>',
-                                    escapeMarkup: function (m) {
-                                        return m;
-                                    }
-                                });
-                            });
-                        </script>
-                    </li>
                 </ul>
             </div>
             <div id="sidebarbutton" title="Collapse sidebar" onclick="toggle_sidebar()"
@@ -135,10 +117,18 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="page-header">
-                        <h1>{% block header %}{% endblock %}
+                        <h2>{% block header %}<b>{{ ale_experiment_name }}</b>{% endblock %}
                             <img src="{% static "img/aledb_header.png" %}"
                                  style="max-width: 10%; max-height: 10%; float: right">
-                        </h1>
+                        </h2>
+                    {% if ale_experiment_id %}
+                        <a href="/stats?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Stats</a> |
+                        <a href="/metadata?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Metadata</a> |
+                        <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Mutations</a> |
+                        <a href="/converge?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Converged Mutations</a> |
+                        <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Fixed Mutations</a> |
+                        <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Filter</a>
+                    {% endif %}
                     </div>
                 </div>
             </div>
