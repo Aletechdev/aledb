@@ -2,11 +2,36 @@
 {% load static %}
 {% load render_table from django_tables2 %}
 {% block title %}<title>ALEDB - Project</title>{% endblock %}
-{% block header %}Project Detail{% endblock %}
+{% block header %}Project: {{ project.name }}{% endblock %}
 {% block content %}
 
+{#    <div class="row">#}
+{#        <form enctype="multipart/form-data" action="" method="post" id="project_form" novalidate>#}
+{#        <div>#}
+{#            <fieldset class="module aligned">#}
+{#                <div class="form-row field-name">#}
+{#                <div>#}
+{#                    <label class="required" for="id_name">Name:</label>#}
+{#                    <input type="text" name="name" value="{{ project.name }}" required   width="2000" id="id_name" />#}
+{#                </div>#}
+{#                </div>#}
+{#                <div class="form-row field-user">#}
+{#                    <div>#}
+{#                        <label class="required" for="id_user">User:</label>#}
+{#                        <input type="text" name="user" value="{{ project.owner }}"  width="200" id="id_user" />#}
+{#                    </div>#}
+{#                </div>#}
+{#                <div class="form-row ">#}
+{#                    <div>#}
+{#                        <label class="required" for="id_date">Date:</label>#}
+{#                        <input type="text" name="date" value="{{ project.date }}"  width="200" id="id_date" />#}
+{#                    </div>#}
+{#                </div>#}
+{#            </fieldset>#}
+{#        </div>#}
+{#    </form>#}
+{#    </div>#}
     <div class="row">
-        <h2>{{ project.name }}</h2>
         <h4>Experiments in the Project:</h4>
         {% render_table table %}
     </div>

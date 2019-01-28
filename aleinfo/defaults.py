@@ -31,7 +31,7 @@ INSTALLED_APPS = (
     "bootstrap3",
     "bootstrap4",
     'defender',
-    # 'crispy_forms',
+    'crispy_forms',
 
     'ale',
     'seq',
@@ -190,7 +190,7 @@ TEMPLATES = [
     },
 ]
 
-
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 ###########
 # LOGGING #
 ###########
@@ -248,7 +248,7 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': ['console', 'file', 'mail_admins'],
+            'handlers': ['console', 'file',],
             'level': 'DEBUG',
             'propagate': True,
         },
