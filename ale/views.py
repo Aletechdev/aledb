@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, render
 from django_filters.views import FilterView
 from django_tables2 import SingleTableMixin
 from django.shortcuts import redirect
+from django.views.generic import DetailView, CreateView
 from .filters import AleExperimentFilter, ProjectFilter
 from .models import Project, AleExperiment
 from .tables import ProjectTable, ExperimentTable
@@ -55,3 +56,13 @@ def experiment_detail(request, pk):
     # }
     url = "/stats?ale_experiment_id="+pk
     return redirect(url)
+
+
+class ExperimentDetailView(DetailView):
+    queryset = AleExperiment.objects.all()
+
+
+class ProjectCreateView(CreateView):
+    model = Project
+    fields = ('name', 'discription', 'user', 'status', 'is_public')
+
