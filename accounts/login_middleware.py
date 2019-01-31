@@ -19,7 +19,6 @@ class LoginRequiredMiddleware:
     Requires authentication middleware and template context processors to be
     loaded. You'll get an error if they aren't.
     """
-    logger = logging.getLogger(__name__)
 
     def process_request(self, request):
         logger = logging.getLogger(__name__)
