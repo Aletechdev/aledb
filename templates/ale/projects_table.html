@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts_and_style %}
+<script type="text/javascript">
+     $(document).ready(function() {
+            $('#project_table').DataTable({
+                select: {
+                    style: 'multi'
+                }
+            });
+        } );
+</script>
+
+{% endblock %}
+{% block title %}Project List{% endblock %}
+{% block header %}Project List{% endblock %}
+{% block content %}
+
+    <table id="project_table" class="table table-bordered" style="width: 100%;">
+        <thead class="alert-success">
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>User</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td>
+                    <a href="/ale/project/{{ project.id }}">{{ project.name }}</a>
+                    </td>
+                <td>{{ project.description }}</td>
+                <td>{{ project.owner }}</td>
+                <td>{{ project.date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+

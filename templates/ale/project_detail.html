@@ -1,39 +1,63 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load render_table from django_tables2 %}
-{% block title %}<title>ALEDB - Project</title>{% endblock %}
+{% block title %}Project {{ project.name }}{% endblock %}
 {% block header %}Project: {{ project.name }}{% endblock %}
 {% block content %}
 
-{#    <div class="row">#}
-{#        <form enctype="multipart/form-data" action="" method="post" id="project_form" novalidate>#}
-{#        <div>#}
-{#            <fieldset class="module aligned">#}
-{#                <div class="form-row field-name">#}
-{#                <div>#}
-{#                    <label class="required" for="id_name">Name:</label>#}
-{#                    <input type="text" name="name" value="{{ project.name }}" required   width="2000" id="id_name" />#}
-{#                </div>#}
-{#                </div>#}
-{#                <div class="form-row field-user">#}
-{#                    <div>#}
-{#                        <label class="required" for="id_user">User:</label>#}
-{#                        <input type="text" name="user" value="{{ project.owner }}"  width="200" id="id_user" />#}
-{#                    </div>#}
-{#                </div>#}
-{#                <div class="form-row ">#}
-{#                    <div>#}
-{#                        <label class="required" for="id_date">Date:</label>#}
-{#                        <input type="text" name="date" value="{{ project.date }}"  width="200" id="id_date" />#}
-{#                    </div>#}
-{#                </div>#}
-{#            </fieldset>#}
-{#        </div>#}
-{#    </form>#}
-{#    </div>#}
+    <div class="row">
+        <form class="container" action="/search" method="get" >
+            <div class="form-group row">
+                <label for="name" class="col-sm-2 col-form-label text-lg-right">Project Name</label>
+                <div class="col-sm-3">
+                  <input type="text" value="{{ project.name }}" name="name" class="form-control" id="name">
+                </div>
+                <label for="date" class="col-sm-2 col-form-label text-lg-right">Created Date:</label>
+                <div class="col-sm-3">
+                  <input type="date" value="{{ project.date }}" name="user" class="form-control" id="date">
+                </div>
+            </div>
+            <div class="form-group row">
+                <label for="user" class="col-sm-2 col-form-label text-lg-right">User Name:</label>
+                <div class="col-sm-3">
+                  <input type="text" value="{{ project.owner }}" name="user" class="form-control" id="user">
+                </div>
+                <label for="public" class="col-sm-2 col-form-label text-lg-right">Is public?</label>
+                <div class="col-sm-3">
+                  <input type="text" value="{{ project.is_public}}" name="public" class="form-control" id="public">
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div class="row">
         <h4>Experiments in the Project:</h4>
-        {% render_table table %}
+        <table id="exp_table" class="table table-striped table-bordered" style="width: 100%;">
+        <thead class="alert-success">
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Project</th>
+                <th>Person</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for experiment in experiments %}
+            <tr>
+                <td></td>
+                <td>
+                    <a href="/ale/experiment/{{ experiment.ale_id }}">{{ experiment.name }}</a>
+                </td>
+                <td>
+                    <a href="/ale/project/{{ experiment.project.id }}">{{ experiment.project.name }}</a>
+                </td>
+                <td>{{ experiment.person }}</td>
+                <td>{{ experiment.date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     </div>
 
 {% endblock %}
