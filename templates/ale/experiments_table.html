@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts_and_style %}
+<script type="text/javascript">
+     $(document).ready(function() {
+        $('#exp_table').DataTable( {
+
+            select: true,
+
+            order: [[ 1, 'asc' ]]
+        } );
+} );
+</script>
+    <script src="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"></script>
+    <script src="https://cdn.datatables.net/select/1.2.7/css/select.dataTables.min.css"></script>
+
+{% endblock %}
+{% block title %}Experiment List{% endblock %}
+{% block header %}Experiment List{% endblock %}
+{% block content %}
+
+    <table id="exp_table" class="table table-striped table-bordered" style="width: 100%;">
+        <thead class="alert-success">
+            <tr>
+                <th></th>
+                <th>Name</th>
+                <th>Project</th>
+                <th>Person</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for experiment in experiments %}
+            <tr>
+                <td></td>
+                <td>
+                    <a href="/ale/experiment/{{ experiment.ale_id }}">{{ experiment.name }}</a>
+                </td>
+                <td>
+                    <a href="/ale/project/{{ experiment.project.id }}">{{ experiment.project.name }}</a>
+                </td>
+                <td>{{ experiment.person }}</td>
+                <td>{{ experiment.date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+

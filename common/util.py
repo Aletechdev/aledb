@@ -2,7 +2,7 @@ import subprocess
 
 from filter.models import AleExperimentFilter
 import filter.util, logging
-from ale.utils import get_all_ale_exps, get_recent_ale_exps
+from ale.utils import get_all_user_exps, get_recent_ale_exps
 from ale.models import TechnicalReplicate
 from seq.models import Mutation
 from django.core.cache import cache
@@ -89,6 +89,6 @@ except Exception:
 
 def get_user_context(user):
     context = common_context.copy()
-    context.update({"experiments": get_all_ale_exps(user)})
+    context.update({"experiments": get_all_user_exps(user)})
     return context
 

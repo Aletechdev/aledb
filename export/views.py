@@ -1,6 +1,6 @@
 from django.template import loader
 from django.http import HttpResponse
-from ale.utils import get_all_ale_exps
+from ale.utils import get_all_user_exps
 from ale.models import AleExperiment
 from django.core.serializers.json import DjangoJSONEncoder
 import json
@@ -24,7 +24,7 @@ def export(request):
         exp_name_str = request.GET.get('download_experiments', None)
         mut_type_str = request.GET.get('mut_type_selected', None)
 
-        experiments = get_all_ale_exps(request.user)
+        experiments = get_all_user_exps(request.user)
         context = dict()
         context['experiments'] = experiments
         context.update({

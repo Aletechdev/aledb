@@ -1,30 +1,129 @@
 <!doctype html>
 <html lang="en">
+{% load static %}
 <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+
+    <!-- SBAdmin 2 Theme CSS -->
+    <link rel="stylesheet" href="{% static "css/style.css" %}">
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
           integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
-    {% load static %}
+
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/png" href="{% static "img/fav.png" %}">
 
     <!-- Common CSS -->
-    <link href="{% static "css/common.css" %}" rel="stylesheet">
+    {#    <link href="{% static "css/common.css" %}" rel="stylesheet">#}
     {% block scripts_and_style %}{% endblock %}
-    {% block title %}{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+
 </head>
 <body>
-<div class="container">
-    {% block content %}
-    {% endblock %}
+<nav class="navbar navbar-expand-sm navbar-light" style="background-color: #e3f2fd;">
+    <a class="navbar-brand" href="/">
+        <img src="{% static "img/aledb_header.png" %}" style="width: 120px;">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav mr-auto">
+            <a class="nav-item nav-link active" href="/dashboard">Dashboard</a>
+            <a class="nav-item nav-link active" href="/about">About</a>
+            <a class="nav-item nav-link active" href="/bibliome">Bibliome</a>
+            <a class="nav-item nav-link active" href="/ale/projects">Projects</a>
+            <a class="nav-item nav-link active" href="/ale/experiments">Experiments</a>
+            <a class="nav-item nav-link active" href="/search">Search</a>
+            {#      <a class="nav-item nav-link" href="#">Global Filter</a>#}
+        </div>
+        <ul class="navbar-nav">
+            {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-info" href="#" id="navbarDropdownMenuLink" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {{ user.username }}
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item small" href="#">change password</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-info" href="{% url 'accounts:logout' %}">Logout</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link text-info" href="{% url 'accounts:login' %}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-info" href="#">Sign up</a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </div>
+</nav>
+
+<div class="wrapper">
+
+    <div class="card border-bottom-0">
+        <div class="card-header">
+            <div class="page-header text-center">
+                    <h2>{% block header %}<b>{{ ale_experiment_name }}</b>{% endblock %}
+                    </h2>
+                    {% if ale_experiment_id %}
+                        <a href="/stats?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                           role="button">Stats</a> |
+                        <a href="/metadata?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Metadata</a>
+                        |
+                        <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Mutations</a>
+                        |
+                        <a href="/converge?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Converged
+                            Mutations</a> |
+                        <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Fixed
+                            Mutations</a> |
+                        <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Filter</a>
+                    {% endif %}
+            </div>
+        </div>
+        <div class="card-body small border-bottom-0">
+            {% block content %}{% endblock %}
+
+        </div>
+
+    </div>
+
 </div>
 
+<footer class="footer text-center">
+    <div class="text-muted text-center"> ALEdb is hosted and maintained by the Systems Biology Research Group at the University of California,
+                San Diego.</div>
+
+        <div class="navbar navbar-expand-sm">
+            <a class="nav-item nav-link" href="http://systemsbiology.ucsd.edu/">
+                <img class="img-responsive footer-image" src="/static/img/sbrg-logo.png" height="40%" width="40%">
+            </a>
+            <a class="nav-item nav-link" href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
+                                                                                   src="/static/img/cfb-logo.png" height="30%"
+                                                                                   width="30%"></a>
+            <a class="nav-item nav-link" href="http://www.ucsd.edu/"><img class="img-responsive footer-image"
+                                                                          src="/static/img/ucsd-logo.png" height="30%"
+                                                                          width="30%"></a>
+            <span class="text-muted small" >{{ git_hash }}</span>
+        </div>
+</footer>
+
+
 <!-- Optional JavaScript -->
+<!-- DataTables Bootstrap JS -->
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
+
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"

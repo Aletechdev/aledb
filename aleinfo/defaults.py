@@ -229,7 +229,7 @@ LOGGING = {
             'formatter': 'standard',
             'level': 'INFO',
             'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': 'logs/info.log',
+            'filename': 'logs/debug.log',
             'when': 'W0',
             'backupCount': 5,
             'filters': ['uuidfilter'],

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}<title>Dashboard</title>{% endblock %}
+{% block title %}Dashboard{% endblock %}
 {% block scripts_and_style %}
     <style>
 
@@ -201,4 +201,31 @@
 
     </div>
 
+        <hr>
+        <div class="container">
+             <div class="row">
+                <div class="col-sm-12m text-muted" align="center">
+                    ALEdb is hosted and maintained by the Systems Biology Research Group at the University of California,
+                San Diego.
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-1"></div>
+                <div class="col-sm-3">
+                    <a href="http://systemsbiology.ucsd.edu/">
+                        <img class="img-responsive footer-image" src="/static/img/sbrg-logo.png" height="60%" width="60%">
+                    </a>
+                </div>
+                <div class="col-sm-2">
+                    <a href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
+                                                             src="/static/img/cfb-logo.png" height="30%" width="30%"></a>
+                </div>
+                <div class="col-sm-4">
+                    <a href="http://www.ucsd.edu/"><img class="img-responsive footer-image"
+                                                        src="/static/img/ucsd-logo.png" height="40%" width="40%"></a>
+                </div>
+                <div class="col-sm-2">
+                <h6 class="git-hash" >{{ git_hash }}</h6></div>
+            </div>
+        </div>
 {% endblock %}

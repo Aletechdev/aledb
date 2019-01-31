@@ -8,6 +8,7 @@ from aleinfo.views import protected_file_serve
 # TODO: remove all final '/' for apps that don't need it (enrichment, converge, fixed need because of shared app.)
 urlpatterns = [
     url(r'^', include('dashboard.urls')),
+    url(r'^dashboard', include('dashboard.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^admin/defender/', include('defender.urls')),  # defender admin
     url(r'^accounts/', include('accounts.urls', namespace="accounts")),
