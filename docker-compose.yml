@@ -39,6 +39,6 @@ services:
       - /var/www/ale_analytics_data:/var/www/ale_analytics_data:ro
     command: [nginx-debug, '-g', 'daemon off;']
     ports:
-      - 80:80
+      - 8000:80
 volumes:
   static:
