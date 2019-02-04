@@ -67,7 +67,10 @@ DEJANGO_SETTINGS_MODULE: aleinfo.settings_public or aleinfo.settings_private
 
 Moving forward, default/public settings module should be enough
 
-### start the database with:
+### Change the database dump file to the desired dump file
+
+
+### start the webapp with:
 
 Either the quick start:
 ```
