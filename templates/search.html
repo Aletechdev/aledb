@@ -66,43 +66,53 @@
 {% block content %}
 
 <div class="row">
-    <form class="container" action="/search" method="get" >
+    <form action="/search" method="get" >
         <input class="form-control" type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
         <div class="form-group row">
-            <label for="p" class="col-sm-2 col-form-label text-lg-right">Gene</label>
+            <label for="p" class="col-sm-2 col-form-label text-right">Gene</label>
             <div class="col-sm-3">
               <input type="text" value="{{ last_search.q }}" name="q" class="form-control" id="q" autofocus>
             </div>
-            <label for="mut" class="col-sm-2 col-form-label text-lg-right">Mutation Type:</label>
+            <label for="mut" class="col-sm-2 col-form-label text-right">Mutation Type:</label>
             <div class="col-sm-3">
-              <input type="text" value="{{ last_search.mut }}" name="mut" class="form-control" id="mut">
+                <select class="form-control" name="mut" id="mut">
+                        <option></option>
+                        {% for mut_type in mut_types %}
+                            <option {% if mut_type == last_search.mut %}selected{% endif %}>{{ mut_type}}</option>
+                        {% endfor %}
+                </select>
             </div>
         </div>
         <div class="form-group row">
-            <label for="min" class="col-sm-2 col-form-label text-lg-right">Start Position:</label>
+            <label for="min" class="col-sm-2 col-form-label text-right">Start Position:</label>
             <div class="col-sm-3">
               <input type="number" value="{{ last_search.min }}" name="min" class="form-control" id="min">
             </div>
-            <label for="max" class="col-sm-2 col-form-label text-lg-right">End Position:</label>
+            <label for="max" class="col-sm-2 col-form-label text-right">End Position:</label>
             <div class="col-sm-3">
               <input type="number" value="{{ last_search.max }}" name="max" class="form-control" id="max">
             </div>
         </div>
         <div class="form-group row">
-            <label for="seq" class="col-sm-2 col-form-label text-lg-right">Sequence Change:</label>
+            <label for="seq" class="col-sm-2 col-form-label text-right">Sequence Change:</label>
             <div class="col-sm-3">
               <input type="text" value="{{ last_search.seq }}" name="seq" class="form-control" id="seq">
             </div>
-            <label for="prot" class="col-sm-2 col-form-label text-lg-right">Protein Change:</label>
+            <label for="prot" class="col-sm-2 col-form-label text-right">Protein Change:</label>
             <div class="col-sm-3">
               <input type="text" value="{{ last_search.prot }}" name="prot" class="form-control" id="prot">
             </div>
         </div>
 
         <div class="form-group row">
-            <label for="ale" class="col-sm-2 col-form-label text-lg-right">Experiment:</label>
+            <label for="project" class="col-sm-2 col-form-label text-right">Project:</label>
             <div class="col-sm-8">
-              <input type="text" value="{{ last_search.ale }}" name="ale" class="form-control" id="ale">
+                <select class="form-control" name="project" id="project">
+                        <option></option>
+                        {% for proj in projects %}
+                            <option {% if proj.name == last_search.project %}selected{% endif %}>{{ proj.name}}</option>
+                        {% endfor %}
+                </select>
             </div>
         </div>
         <div class="form-group row">

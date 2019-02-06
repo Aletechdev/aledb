@@ -2,18 +2,58 @@
 {% load static %}
 
 {% block scripts_and_style %}
-<script type="text/javascript">
-     $(document).ready(function() {
-        $('#exp_table').DataTable( {
-
-            select: true,
-
-            order: [[ 1, 'asc' ]]
+    <style type = "text/css">
+        .dt-button.red {
+        color: red;
+        }
+    </style>
+    <script type="text/javascript">
+         $(document).ready(function() {
+            $('#exp_table').DataTable( {
+                scrollY: 600,
+                paging: false,
+                dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
+                buttons: [
+                    {
+                        text: 'Export',
+                        className: 'red',
+                        action: function () {
+                            var count = table.rows( { selected: true } ).count();
+                            events.prepend( '<div>'+count+' row(s) selected</div>' );
+                        }
+                    },
+                    'csv',
+                    'pdf'
+                ],
+                deferRender: true,
+                fixedColumns:   {
+                    leftColumns: 2
+                },
+                columnDefs: [ {
+                        orderable: false,
+                        className: 'select-checkbox',
+                        targets:   0
+                    }],
+                select: {
+                    style:    'multi',
+                    selector: 'td:first-child'
+                },
+                order: [[ 1, 'asc' ]]
+                } );
         } );
-} );
-</script>
-    <script src="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"></script>
-    <script src="https://cdn.datatables.net/select/1.2.7/css/select.dataTables.min.css"></script>
+    </script>
+
+    <link rel="stylesheet" src="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"></link>
+    <link rel="stylesheet" src="https://cdn.datatables.net/select/1.2.7/css/select.dataTables.min.css"></link>
+    <link rel="stylesheet" src="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css"></link>
+
+    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
+{#    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.flash.min.js"></script>#}
+{#    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>#}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+{#    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.html5.min.js"></script>#}
+{#    <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>#}
 
 {% endblock %}
 {% block title %}Experiment List{% endblock %}
@@ -41,7 +81,7 @@
                     <a href="/ale/project/{{ experiment.project.id }}">{{ experiment.project.name }}</a>
                 </td>
                 <td>{{ experiment.person }}</td>
-                <td>{{ experiment.date }}</td>
+                <td>{{ experiment.date_str}}</td>
             </tr>
             {% endfor %}
         </tbody>

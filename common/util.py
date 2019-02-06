@@ -89,6 +89,6 @@ except Exception:
 
 def get_user_context(user):
     context = common_context.copy()
-    context.update({"experiments": get_all_user_exps(user)})
+    # context.update({"experiments": get_all_user_exps(user)})
     return context
 

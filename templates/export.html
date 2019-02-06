@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}<title>ALEdb Export</title>{% endblock %}
+{% block title %}Expor{% endblock %}
 {% block scripts_and_style %}
     <script type="text/javascript">{% static 'experiment_selector.js' %}</script>
     <link rel="stylesheet"
@@ -23,12 +23,12 @@
                     <span class="caret"></span>
                     <span class="sr-only">Toggle Dropdown</span>
                 </button>
-                <ul class="dropdown-menu" id="experiment_selector">
-                    <li><a href="#/">All</a></li>
+                <select class="selectpicker" name="experiment_selector" id="experiment_selector">
+                    <option>All</option>
                     {% for exp in experiments %}
-                        <li><a href="#/">{{ exp.name }}</a></li>
+                        <option>{{ exp.name }}</option>
                     {% endfor %}
-                </ul>
+                </select>
             </div>
             <br><br>
             <div class="btn-group">

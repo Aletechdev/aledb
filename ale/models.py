@@ -44,6 +44,11 @@ class Project(models.Model):
     def get_absolute_url(self):
         return reverse("project_detail", args=(self.pk,))
 
+    def date_str(self):
+        if self.date:
+            return self.date.strftime("%Y-%m-%d")
+        return ''
+
 
 def get_projects(user: User):
     project_queryset = Project.objects.all()
@@ -74,6 +79,11 @@ class AleExperiment(models.Model):
 
     def get_absolute_url(self):
         return reverse("experiment_detail", args=(self.pk,))
+
+    def date_str(self):
+        if self.date:
+            return self.date.strftime("%Y-%m-%d")
+        return ''
 
 
 # TODO: this model should be called "Ale".
