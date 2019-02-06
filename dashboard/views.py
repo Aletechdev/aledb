@@ -14,7 +14,7 @@ from logs.aledb_logger import user_extra, join_extras
 import logging
 
 DEFAULT_IGNORED_MUTATIONS = "[]"
-DASHBOARD_TEMPLATE = "dashboard.html"
+DASHBOARD_TEMPLATE = "dashboard/dashboard.html"
 __author__ = 'pphaneuf'
 
 logger = logging.getLogger(__name__)

@@ -66,7 +66,7 @@ def gene(request):
     except Exception as e:
         logger.exception("genes broke", extra = user_extra(request))
         template = loader.get_template("500.html")
-        context['err_message'] = str(e)
+        context = {'err_message', str(e)}
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 

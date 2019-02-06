@@ -5,9 +5,8 @@
 <script type="text/javascript">
      $(document).ready(function() {
             $('#project_table').DataTable({
-                select: {
-                    style: 'multi'
-                }
+                scrollY: 600,
+                paging: false,
             });
         } );
 </script>
@@ -34,7 +33,7 @@
                     </td>
                 <td>{{ project.description }}</td>
                 <td>{{ project.owner }}</td>
-                <td>{{ project.date }}</td>
+                <td>{{ project.date_str }}</td>
             </tr>
             {% endfor %}
         </tbody>

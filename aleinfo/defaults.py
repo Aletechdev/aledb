@@ -253,7 +253,7 @@ LOGGING = {
             'propagate': True,
         },
         'django': {
-            'level': 'WARNING',
+            'level': 'ERROR',
             'handlers': ['console', 'file', 'mail_admins'],
             'propagate': False,
         }
@@ -296,8 +296,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # DEFENDER_LOGIN_FAILURE_LIMIT = 3
-DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME = os.environ.get('DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME', 3)
-DEFENDER_LOGIN_FAILURE_LIMIT_IP = os.environ.get('DEFENDER_LOGIN_FAILURE_LIMIT_IP', 5)
+DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME = os.environ.get('DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME', 4)
+DEFENDER_LOGIN_FAILURE_LIMIT_IP = os.environ.get('DEFENDER_LOGIN_FAILURE_LIMIT_IP', 6)
 
 DEFENDER_COOLOFF_TIME = os.environ.get('DEFENDER_COOLOFF_TIME', 30)  # seconds
 DEFENDER_REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/1')
