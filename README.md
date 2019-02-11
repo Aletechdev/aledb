@@ -2,12 +2,99 @@
 # General development
 Every bug fix is a revision change in the version number!
 ## Docker Launch
-### Required docker packages installed on host 
+
+
+### clone repo to /var/www/
+
+### Install Docker
 ```
-Install docker
 https://www.docker.com/products/docker-desktop
+
+or for ubuntu systems:
+
+https://docs.docker.com/install/
 ```
-### Quick-start steps for ALEdb docker deployment
+
+Then docker-compose:
+
+```
+https://docs.docker.com/compose/install/
+```
+
+
+### Set up host nginx
+
+To install nginx:
+
+```
+sudo apt update
+sudo apt install nginx
+```
+
+add the following to /etc/nginx/sites-enabled:
+
+```
+server {
+    server_name aledb.org www.aledb.org;
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+    }
+    location /aledata {
+        alias /var/www/ale_analytics_data;
+        autoindex on;
+        satisfy any;
+    }
+    location /static {
+        alias /var/www/aledb/static;
+    }
+}
+```
+
+### Make necessary configuration changes:
+
+
+#### aleinfo/defaults.py
+```
+Add IP address to ALLOWED_HOSTS in aleinfo/defaults.py
+```
+#### .docker/app.env
+Key values to modify:
+```
+DEBUG: 1 or 0
+PUBLIC: 1 or 0
+DEJANGO_SETTINGS_MODULE: aleinfo.settings_public or aleinfo.settings_private
+```
+
+Moving forward, default/public settings module should be enough
+
+### Change the database dump file to the desired dump file
+
+
+### start the webapp with:
+
+Either the quick start:
+```
+docker-compose up -d
+```
+ 
+Or in a tmux session:
+
+```
+tmux -s new aledb
+docker-compose up
+```
+
+### Static files should be collected automatically but in case they weren't, collect existing static files:
+
+```
+rm -r static
+```
+
+```
+docker exec -it aledb-web python3 manage.py collectstatic
+```
+
+## Quick-start steps for ALEdb docker deployment
  ```
  docker-compose up -d
  ```
@@ -36,7 +123,7 @@ docker-compose up -d
 ```
 
 
-### Run Scripts within the container
+### To run scripts within containers
 
 The general syntax is:
 
