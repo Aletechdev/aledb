@@ -248,13 +248,13 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': ['console', 'file',],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'django': {
             'level': 'ERROR',
-            'handlers': ['console', 'file', 'mail_admins'],
+            'handlers': ['console', 'file'],
             'propagate': False,
         }
     },

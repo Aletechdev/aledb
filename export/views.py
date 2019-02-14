@@ -1,52 +1,59 @@
-from django.template import loader
 from django.http import HttpResponse
-from ale.utils import get_all_user_exps
-from ale.models import AleExperiment
-from django.core.serializers.json import DjangoJSONEncoder
-import json
+from django.shortcuts import render, get_object_or_404
 from django.utils.safestring import mark_safe
-from export.util import \
-    get_csv_str, \
-    MUT_TYPE_STR, \
-    FIXED_MUT_TYPE_STR, \
-    CONVERGED_MUT_TYPE_STR
+from django.core.serializers.json import DjangoJSONEncoder
+from ale.utils import get_all_user_exps
+from ale.permissions import can_view_project
+from ale.models import AleExperiment, Project
+import json
+from export.util import get_csv_str
 from logs.aledb_logger import user_extra
 import logging
 
 logger = logging.getLogger(__name__)
 
-EXPORT_TEMPLATE = 'export.html'
-
 
 def export(request):
     logger.info("export", extra = user_extra(request))
     try:
-        exp_name_str = request.GET.get('download_experiments', None)
-        mut_type_str = request.GET.get('mut_type_selected', None)
+        exp_id_str = request.GET.get('experiment_ids', None)
+        mut_type_str = request.GET.get('mut_type', None)
+        project_id = request.GET.get('project_id', None)
 
-        experiments = get_all_user_exps(request.user)
-        context = dict()
-        context['experiments'] = experiments
-        context.update({
-            "mut_types_str_list": [MUT_TYPE_STR, CONVERGED_MUT_TYPE_STR, FIXED_MUT_TYPE_STR],
-            "is_download": False
-        })
-        if exp_name_str and mut_type_str:
-            # print(str(datetime.now()), exp_name_str, mut_type_str)
-            if exp_name_str == 'All':
-                exp_list = [(exp.ale_id, exp.name) for exp in experiments]
+        if project_id:
+            project = get_object_or_404(Project, pk=project_id)
+            if project and can_view_project(request.user, project):
+                experiments = project.aleexperiment_set.all()
+                context = {"project": project, "experiments": experiments}
+                template = "ale/project_detail.html"
             else:
-                exp_name_list = exp_name_str.split(',')
-                exp_list = [(AleExperiment.objects.get(name=exp_name).ale_id, exp_name) for exp_name in exp_name_list]
+                return HttpResponse(status=403)
+        else:
+            experiments = get_all_user_exps(request.user)
+            context = {"experiments": experiments}
+            template = "ale/experiments_table.html"
 
-            csv_str = [(get_csv_str(exp_id, mut_type_str), exp_name) for exp_id, exp_name in exp_list]
-            # print(str(datetime.now()), "after get csv_str")
-            context['data'] = mark_safe(json.dumps(csv_str, cls=DjangoJSONEncoder))
-            context['is_download'] = True
+        if mut_type_str and (project_id or exp_id_str):
+            if exp_id_str:
+                # print(str(datetime.now()), exp_name_str, mut_type_str)
+                exp_id_list = exp_id_str.split(',')
+                exp_list = []
+                for exp_id in exp_id_list:
+                    if len(exp_id) > 0:
+                        exp = AleExperiment.objects.select_related("project").get(ale_id=exp_id)
+                        if exp and can_view_project(request.user, exp.project):
+                            exp_list.append(exp)
+            elif project_id:
+                exp_list = experiments
 
-        template = loader.get_template(EXPORT_TEMPLATE)
+            if len(exp_list) > 0:
+                    csv_str = [(get_csv_str(experiment.ale_id, mut_type_str), experiment.name + '_' + mut_type_str) for experiment in exp_list]
+                    context['data'] = mark_safe(json.dumps(csv_str, cls=DjangoJSONEncoder))
+                    context['is_download'] = True
+                    return render(request, template, context)
 
-        return HttpResponse(template.render(context, request), content_type="text/html")
+        return HttpResponse(status=403)
+
     except Exception:
         logger.exception("export broke", extra = user_extra(request))
 
