@@ -1,20 +1,23 @@
 from django.shortcuts import get_object_or_404, render
 from django.shortcuts import redirect
-from django.views.generic import DetailView, CreateView
 from .models import Project, AleExperiment
 from .utils import get_user_projects, get_all_user_exps
 from .permissions import can_view_project
+from logs.aledb_logger import user_extra
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def projects(request):
     project_list = get_user_projects(request.user)
-    template_name = "ale/projects_table.html"
+    template_name = "ale/projects.html"
     return render(request, template_name, {'projects': project_list})
 
 
 def experiments(request):
     experiment_list = get_all_user_exps(request.user)
-    template_name = "ale/experiments_table.html"
+    template_name = "ale/experiments.html"
     return render(request, template_name, {'experiments': experiment_list})
 
 
@@ -35,13 +38,5 @@ def experiment_detail(request, pk):
     url = "/stats?ale_experiment_id="+pk
     return redirect(url)
 
-
-class ExperimentDetailView(DetailView):
-    queryset = AleExperiment.objects.all()
-
-
-class ProjectCreateView(CreateView):
-    model = Project
-    fields = ('name', 'discription', 'user', 'status', 'is_public')
 
 

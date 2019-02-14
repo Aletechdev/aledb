@@ -1,4 +1,7 @@
 from django.db import models
+from genes.util import get_gene_list
+from seq.util import get_ecocyc_gene_list
+from django.utils.safestring import mark_safe
 
 blank_field = {"blank": True, "null": True}
 
@@ -100,6 +103,13 @@ class Mutation(models.Model):
     def __unicode__(self):
         return u"%d %s" % (self.position,
                            self.sequence_change)
+
+    def ecocyc_gene_urls(self):
+        """
+        get gene links string for table cell display
+        :return: gene links for display in mutation table
+        """
+        return mark_safe(", ".join(get_ecocyc_gene_list(get_gene_list(self.gene))))
 
 
 class ObservedMutation(models.Model):
