@@ -1,5 +1,5 @@
-{% extends 'dashboard_base.html' %}
-{% block title %}<title>Resequencing Runs</title>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Resequencing Runs{% endblock %}
 {% block scripts_and_style %}
     <style type="text/css">
         table.dataTable tr.odd { background-color: lightgrey; }
@@ -21,7 +21,7 @@
         })
     </script>
 {% endblock %}
-{% block header %}<b>{{ ale_experiment_name }}</b> Sample Meta Data{% endblock %}
+{% block header %}<b>{{ ale_experiment_name }}</b> - Sample Meta Data{% endblock %}
 {% block content %}
 <p><i>Note: </i> the reference genome <a href="https://github.com/SBRG/bop27refseq">BOP27</a> is a known variant of E. coli K12 MG1655 <a href="http://systemsbiology.ucsd.edu/BOP27_sequence"><i>E. coli</i> K12 MG1655</a>.</p>
 <div class="row">

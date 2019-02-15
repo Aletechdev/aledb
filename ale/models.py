@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 blank_field = {"blank": True, "null": True}
 
@@ -19,30 +20,43 @@ class Instrument(models.Model):
 
 class Project(models.Model):
     name = models.CharField(max_length=50)
-    description = models.CharField(max_length=300)
     user = models.ForeignKey(User, default=None, on_delete=models.DO_NOTHING, help_text="project owner")
     date = models.DateTimeField(auto_now_add=True, help_text="project created date")
     is_public = models.BooleanField(default=False)
-
     PROJECT_STATUS = (('new', 'New'), ('in progress', 'In progress'), ('completed', 'Completed'))
     status = models.CharField(max_length=25, default='new', blank=True, choices=PROJECT_STATUS)
+    description = models.CharField(max_length=300)
 
     class Meta:
         permissions = (
             (VIEW_PROJECT, 'View project'),
         )
 
+    def owner(self):
+        return self.user.get_full_name()
+
+    def experiments(self):
+        return AleExperiment.objects.filter(project=self)
 
     def __str__(self):
         return self.name
 
-    def get_projects(self, user: User):
-        project_queryset = Project.objects.all()
-        projects = []
-        for project in project_queryset:
-            if project.is_public or user.has_perm(VIEW_PROJECT, project):
-                projects.append(project)
-        return projects
+    def get_absolute_url(self):
+        return reverse("project_detail", args=(self.pk,))
+
+    def date_str(self):
+        if self.date:
+            return self.date.strftime("%Y-%m-%d")
+        return ''
+
+
+def get_projects(user: User):
+    project_queryset = Project.objects.all()
+    projects = []
+    for project in project_queryset:
+        if project.is_public or user.has_perm(VIEW_PROJECT, project):
+            projects.append(project)
+    return projects
 
 
 class AleExperiment(models.Model):
@@ -55,13 +69,21 @@ class AleExperiment(models.Model):
     project = models.ForeignKey(Project, default=None, **blank_field, on_delete=models.DO_NOTHING)
 
     class Meta:
-        verbose_name_plural = "ALE Experiments"
+        verbose_name_plural = "experiments"
 
     def __unicode__(self):
         return "#%d-%s" % (self.ale_id, self.name)
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("experiment_detail", args=(self.pk,))
+
+    def date_str(self):
+        if self.date:
+            return self.date.strftime("%Y-%m-%d")
+        return ''
 
 
 # TODO: this model should be called "Ale".

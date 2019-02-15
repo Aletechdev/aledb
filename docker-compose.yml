@@ -4,16 +4,16 @@ services:
     container_name: aledb-database
     image: mysql:5.7
     env_file:
-      - ./.docker/db.env
-    expose:
-      - 3306
+      - .docker/db.env
+    ports:
+      - 3306:3306
     volumes:
       - ./.docker/data:/docker-entrypoint-initdb.d
   redis:
     container_name: aledb-redis
     image: redis
-    expose:
-      - 6379
+    ports:
+      - 6379:6379
   web:
     container_name: aledb-web
     build: .

@@ -5,12 +5,13 @@ from django.utils.safestring import mark_safe
 from django.template import loader
 from django.shortcuts import render
 from seq.models import ObservedMutation, Mutation
-from ale.models import AleExperiment
+from ale.models import AleExperiment, Project
 from django.db.models import Q
 import operator, collections
 from functools import reduce
 from seq.views import mutation_table_builder
 from ale.utils import get_user_projects
+from ale.permissions import can_view_project
 from common.util import check_hidden_columns_and_filters, get_user_context
 from django.core.serializers.json import DjangoJSONEncoder
 import json
@@ -20,6 +21,8 @@ import sys
 import logging
 
 logger = logging.getLogger(__name__)
+
+MUT_TYPES = ['AMP', 'CON', 'DEL', 'DUP', 'INS', 'INV', 'MOB', 'SNP', 'SUB']
 
 
 def search(request):
@@ -31,6 +34,8 @@ def search(request):
         obs_mut_qryset = _get_obs_mut_qryset(request)
 
         context = get_user_context(request.user)
+        user_projects = get_user_projects(request.user)
+        context.update({"mut_types": MUT_TYPES, "projects": user_projects})
         if obs_mut_qryset is None:
             context.update({'error': True})
             return render(request, 'search.html', context)
@@ -76,16 +81,30 @@ def _get_obs_mut_qryset(request):
     mut_qryset = _get_mut_qryset(search_include_param_list, search_exclude_param_list)
     obs_mut_qryset = ObservedMutation.objects.filter(mutation__in=mut_qryset)
 
-    ale_exp_to_include, ale_exp_to_exclude = _get_search_ale_exp_params(request)
-    if ale_exp_to_exclude:
-        obs_mut_qryset = obs_mut_qryset.exclude(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_exp_to_exclude)
-    if ale_exp_to_include:
+    project_to_include = _get_search_project_params(request)
+    if project_to_include:
+        ok = can_view_project(request.user, project_to_include)
+        if not ok:
+            raise Exception("No permission for " + project_to_include.name)
+        else:
+            obs_mut_qryset = obs_mut_qryset.filter(
+                sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id=project_to_include.id)
+    elif not request.user.is_superuser:
+        user_projects =  get_user_projects(request.user)
         obs_mut_qryset = obs_mut_qryset.filter(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_exp_to_include)
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=user_projects)
 
-    projects = get_user_projects(request.user)
-    obs_mut_qryset = obs_mut_qryset.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=projects)
+    #
+    # ale_exp_to_include, ale_exp_to_exclude = _get_search_ale_exp_params(request)
+    # if ale_exp_to_exclude:
+    #     obs_mut_qryset = obs_mut_qryset.exclude(
+    #         sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_exp_to_exclude)
+    # if ale_exp_to_include:
+    #     obs_mut_qryset = obs_mut_qryset.filter(
+    #         sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id__in=ale_exp_to_include)
+    #
+    # projects = get_user_projects(request.user)
+    # obs_mut_qryset = obs_mut_qryset.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=projects)
 
     obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset, mut_queryset=mut_qryset)
 
@@ -93,15 +112,6 @@ def _get_obs_mut_qryset(request):
 
 
 def _get_ordered_reseq_dict(obs_muts_qryset):
-    # reseq_qryset = ResequencingExperiment.objects.select_related(
-    #     'tech_rep__isolate__flask__ale_id__ale_experiment'
-    # ).order_by(
-    #     'tech_rep__isolate__flask__ale_id__ale_experiment__name',
-    #     'tech_rep__isolate__flask__ale_id__ale_id',
-    #     'tech_rep__isolate__flask__flask_number',
-    #     'tech_rep__isolate__isolate_number',
-    #     'tech_rep__tech_rep_number'
-    # ).filter(mutations__observedmutation__in=obs_muts_qryset)
 
     obs_muts_qryset = obs_muts_qryset.select_related(
         'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment', 'mutation'
@@ -125,7 +135,7 @@ def _get_last_search(request):
         'mut': request.GET['mut'],
         'seq': request.GET['seq'],
         'prot': request.GET['prot'],
-        'ale': request.GET['ale']
+        'project': request.GET['project']
     }
     return last_search
 
@@ -231,6 +241,14 @@ def _add_protein_change_to_query(request, include_argument_list, exclude_argumen
 
         if len(protein_change_exclude) > 0:
             exclude_argument_list.append(reduce(operator.or_, protein_change_exclude))
+
+
+def _get_search_project_params(request):
+    project = None
+    if 'project' in request.GET and request.GET['project']:
+        project_name = request.GET['project']
+        project = Project.objects.get(name=project_name)
+    return project
 
 
 def _get_search_ale_exp_params(request):

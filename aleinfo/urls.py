@@ -8,11 +8,13 @@ from aleinfo.views import protected_file_serve
 # TODO: remove all final '/' for apps that don't need it (enrichment, converge, fixed need because of shared app.)
 urlpatterns = [
     url(r'^', include('dashboard.urls')),
+    url(r'^dashboard', include('dashboard.urls')),
     url(r'^admin/', admin.site.urls),
     url(r'^admin/defender/', include('defender.urls')),  # defender admin
     url(r'^accounts/', include('accounts.urls', namespace="accounts")),
     # url(r'^accounts/', include('django.contrib.auth.urls')),
     url(r'^about', include('about.urls')),
+    url(r'^ale/', include('ale.urls')),
     url(r'^bibliome/', include('bibliome.urls')),
     url(r'^converge/', include('converge.urls')),
     url(r'^enrichment/', include('enrichment.urls')),
