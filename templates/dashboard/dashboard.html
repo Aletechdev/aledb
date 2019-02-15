@@ -1,5 +1,5 @@
-{% extends 'dashboard_base.html' %}
-{% block title %}<title>Dashboard</title>{% endblock %}
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
 {% block scripts_and_style %}
     <style>
 
@@ -32,7 +32,7 @@
 {% block header %}Dashboard{% endblock %}
 {% block content %}
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">ALEdb Total Mutation Counts</h3>
@@ -108,8 +108,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-        <div class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">ALEdb Mutation Type Counts</h3>
@@ -167,79 +165,67 @@
                 </table>
             </div>
         </div>
-        <div class="col-md-4">
-            <ul class="timeline">
-                {% for event in timeline %}
-                    <li class="timeline-inverted">
-                        <div class="timeline-badge {{ event.color }}">{{ event.icon | safe }}</div>
-                        <div class="timeline-panel">
-                            <div class="timeline-heading">
-                                <h4 class="timeline-title">{{ event.title }}</h4>
-                                <p>
-                                    <small class="text-muted"><i
-                                            class="glyphicon glyphicon-time"></i> {{ event.timestamp }}</small>
-                                </p>
-                            </div>
-                            <div class="timeline-body">
-                                <p>{{ event.message }}</p>
-                            </div>
-                        </div>
-                    </li>
+        <div class="col-md-6">
+            <script src="//d3js.org/d3.v3.min.js"></script>
+            <h2>Mutation Targets</h2>
+            <form action="" method="get">
+                <input type="number"
+                       name="number_of_top_genes"
+                       min="1"
+                       max="{{ max_histogram_size }}"
+                       value="{{ number_of_genes_to_show }}">
+                Entries to show
+                <input type="submit"
+                       class="btn btn-default"
+                       value="Show"><br>
+            </form>
+            <br>
+            <div class="chart"></div>
+            <table>
+                <tr>
+                    <td>
+                        <script>
+                            var gene_data = {{ genes }};
+                            var color_set = {{ gene_color_set }};
+                            var mutation_types = {{ mutation_types }};
+                            var extra_padding = 0;
+                            function _get_label(datum) {
+                                return datum.mutation__gene;
+                            }
+                            {% include 'bar_chart.js' %}
+                        </script>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-                {% endfor %}
-            </ul>
-        </div>
     </div>
-    <hr>
-    <script src="//d3js.org/d3.v3.min.js"></script>
-    <h2>Mutation Targets</h2>
-    <form action="" method="get">
-        <input type="number"
-               name="number_of_top_genes"
-               min="1"
-               max="{{ max_histogram_size }}"
-               value="{{ number_of_genes_to_show }}">
-        Entries to show
-        <input type="submit"
-               class="btn btn-default"
-               value="Show"><br>
-    </form>
-    <br>
-    <div class="chart"></div>
-    <table>
-        <tr>
-            <td>
-                <script>
-                    var gene_data = {{ genes }};
-                    var color_set = {{ gene_color_set }};
-                    var mutation_types = {{ mutation_types }};
-                    var extra_padding = 0;
-                    function _get_label(datum) {
-                        return datum.mutation__gene;
-                    }
-                    {% include 'bar_chart.js' %}
-                </script>
-            </td>
-        </tr>
-    </table>
-    <br><br><br>
-    <hr>
-    <div class="container">
-        <p class="text-muted" align="center">ALEdb is hosted and maintained by the Systems Biology Research Group at the University of California,
-            San Diego.</p>
-        <div class="row">
-            <div class="col-sm-5">
-                <a href="http://systemsbiology.ucsd.edu/">
-                    <img class="img-responsive footer-image" src="/static/sbrg-logo.png">
-                </a>
+
+        <hr>
+        <div class="container">
+             <div class="row">
+                <div class="col-sm-12m text-muted" align="center">
+                    ALEdb is hosted and maintained by the Systems Biology Research Group at the University of California,
+                San Diego.
+                </div>
             </div>
-            <div class="col-sm-2">
-                <a href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
-                                                         src="/static/cfb-logo.png"></a>
-            </div>
-            <div class="col-sm-5">
-                <a href="http://www.ucsd.edu/"><img class="img-responsive footer-image" src="/static/ucsd-logo.png"></a>
+            <div class="row">
+                <div class="col-sm-1"></div>
+                <div class="col-sm-3">
+                    <a href="http://systemsbiology.ucsd.edu/">
+                        <img class="img-responsive footer-image" src="/static/img/sbrg-logo.png" height="60%" width="60%">
+                    </a>
+                </div>
+                <div class="col-sm-2">
+                    <a href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
+                                                             src="/static/img/cfb-logo.png" height="30%" width="30%"></a>
+                </div>
+                <div class="col-sm-4">
+                    <a href="http://www.ucsd.edu/"><img class="img-responsive footer-image"
+                                                        src="/static/img/ucsd-logo.png" height="40%" width="40%"></a>
+                </div>
+                <div class="col-sm-2">
+                <h6 class="git-hash" >{{ git_hash }}</h6></div>
             </div>
         </div>
-    </div>
 {% endblock %}

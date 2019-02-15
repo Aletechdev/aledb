@@ -187,12 +187,16 @@ function filter_dups() {
 }
 
 function save_to_global_filter(mutation_id) {
+    alert("save global");
     $.ajax({
         type: "POST",
         url: "",
         data: { mut_id: mutation_id,
                 save_method: "global"
-        }
+        },
+        error: function(e) {
+            console.log(e)
+        },
     })
 }
 

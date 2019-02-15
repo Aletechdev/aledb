@@ -26,8 +26,11 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_tables2',
+    "django_filters",
+    "bootstrap3",
+    "bootstrap4",
     'defender',
-    # 'crispy_forms',
 
     'ale',
     'seq',
@@ -186,7 +189,6 @@ TEMPLATES = [
     },
 ]
 
-
 ###########
 # LOGGING #
 ###########
@@ -225,7 +227,7 @@ LOGGING = {
             'formatter': 'standard',
             'level': 'INFO',
             'class': 'logging.handlers.TimedRotatingFileHandler',
-            'filename': 'logs/info.log',
+            'filename': 'logs/debug.log',
             'when': 'W0',
             'backupCount': 5,
             'filters': ['uuidfilter'],
@@ -244,13 +246,13 @@ LOGGING = {
     },
     'loggers': {
         '': {
-            'handlers': ['console', 'file', 'mail_admins'],
+            'handlers': ['console', 'file'],
             'level': 'DEBUG',
             'propagate': True,
         },
         'django': {
-            'level': 'WARNING',
-            'handlers': ['console', 'file', 'mail_admins'],
+            'level': 'ERROR',
+            'handlers': ['console', 'file'],
             'propagate': False,
         }
     },
@@ -265,13 +267,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'aledbsoftware'
-EMAIL_HOST_PASSWORD = 'ucsd system biology group'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'aledbsoftware')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'ucsd system biology group')
 
 SERVER_EMAIL = os.environ.get('SERVER_EMAIL', 'aledbsoftware+admin@gmail.com')
 DEFAULT_FROM_EMAIL = 'aledbsoftware+default@gmail.com'
 MAILER_LIST = ['rcai@eng.ucsd.edu']
-ADMINS = [('Robin Cai', 'rcai@ucsd.edu'), ('Patrick Phaneuf', 'pphaneuf@eng.ucsd.edu'), ('Muyao Wu', 'muw006@eng.ucsd.edu')]
+ADMINS = [('Robin Cai', 'rcai@ucsd.edu')]
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -292,14 +294,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # DEFENDER_LOGIN_FAILURE_LIMIT = 3
-DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME = 3
-DEFENDER_LOGIN_FAILURE_LIMIT_IP = 5
+DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME = os.environ.get('DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME', 4)
+DEFENDER_LOGIN_FAILURE_LIMIT_IP = os.environ.get('DEFENDER_LOGIN_FAILURE_LIMIT_IP', 6)
 
-DEFENDER_COOLOFF_TIME = 30  # seconds
+DEFENDER_COOLOFF_TIME = os.environ.get('DEFENDER_COOLOFF_TIME', 30)  # sec
 DEFENDER_REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/1')
 
-# Crispy Form Theme - Bootstrap 3
-CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # For Bootstrap 3, change error alert to 'danger'
 from django.contrib import messages
