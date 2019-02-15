@@ -1,14 +1,16 @@
 import collections
 
-from seq.models import ObservedMutation, ResequencingExperiment, Mutation
+import seq.models
+
+HTML_ECOCYC = """<a href = "https://ecocyc.org/ECOLI/substring-search?type=GENE&object={gene}">{gene}</a>"""
 
 
 def get_all_observed_mutations(reseq_id_list):
-    return ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
+    return seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
 
 
 def get_ordered_reseq_queryset(ale_experiment_id, ale_id=None):
-    reseq_qryset = ResequencingExperiment.objects.select_related(
+    reseq_qryset = seq.models.ResequencingExperiment.objects.select_related(
         'tech_rep__isolate__flask__ale_id__ale_experiment', 'tech_rep__isolate__flask__media'
     ).order_by(
         'tech_rep__isolate__flask__ale_id__ale_experiment__name',
@@ -49,7 +51,7 @@ def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, request=None):
 
 
 def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
-    return Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
+    return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
 
 
 def get_unique_obs_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
@@ -62,3 +64,25 @@ def get_unique_obs_mut_queryset_from_obs_mut_queryset(observed_mutations_queryse
     """
     unique_obs_mut = {observed_mutation.mutation.id: observed_mutation for observed_mutation in observed_mutations_queryset}
     return unique_obs_mut
+
+
+def get_ecocyc_gene_list(gene_list):
+    url_list = []
+    for each in gene_list:
+        if each.startswith("<"):
+            each = each.split(">")[-1]
+        url_list.append(HTML_ECOCYC.format(gene=each))
+    return url_list
+
+
+def get_mutation_objects(mutations_id_str):
+    """
+    Get list of mutations for the ids
+    :param mutations_id_str: mutation ids, in string, separated by ','
+    :return: list of mutations from database
+    """
+    mutations = []
+    if mutations_id_str and len(mutations_id_str)>0:
+        mutations_ids = mutations_id_str.split(',')
+        mutations = [mutation for mutation in seq.models.Mutation.objects.filter(id__in=mutations_ids)]
+    return mutations
