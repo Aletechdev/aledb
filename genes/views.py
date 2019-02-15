@@ -11,7 +11,7 @@ import gzip
 import csv
 import json
 import requests
-from ale.utils import get_all_ale_exps
+from ale.utils import get_all_user_exps
 from common.util import check_hidden_columns_and_filters
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
@@ -38,7 +38,7 @@ def gene(request):
         gene_query = request.GET['g']
         reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request, gene_query)
         table_header = mutation_table_builder.get_table_header(request.user, reseq_dict)
-        table_body, protein_changes = mutation_table_builder.get_table_body(request, reseq_dict,
+        table_body, protein_changes = mutation_table_builder.get_table_body(request.user, reseq_dict,
                                                                             observed_mutations_with_gene_queryset,
                                                                             table_type=mutation_table_builder.TableType.GENE_TABLE)
 
@@ -47,8 +47,8 @@ def gene(request):
         hidden_columns = check_hidden_columns_and_filters(request, None)
         template = loader.get_template("gene.html")
 
-        experiments = get_all_ale_exps(request.user)
-        context = {"experiments", experiments}
+        experiments = get_all_user_exps(request.user)
+        context = {"experiments": experiments}
         context.update({"gene_name": gene_query,
                    "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                    "title": gene_query + " gene",
@@ -66,7 +66,7 @@ def gene(request):
     except Exception as e:
         logger.exception("genes broke", extra = user_extra(request))
         template = loader.get_template("500.html")
-        context['err_message'] = str(e)
+        context = {'err_message': str(e)}
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 

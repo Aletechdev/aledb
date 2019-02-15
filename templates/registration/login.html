@@ -1,15 +1,24 @@
-{% extends 'login_base.html' %}
-{% load static %}
+{% extends 'base.html' %}
 
+{% load static %}
+{% block title %}Login{% endblock %}
+{% block header %}Please Login{% endblock %}
 {% block content %}
-      <form class="form-signin" action="/accounts/login/" method="post">
-      {% csrf_token %}
-          <img src="{% static "aledb_header.png" %}" style="max-width: 100%; max-height: 100%; margin: 0 auto;">
-        <h2 style="text-align: center" class="form-signin-heading">Please sign in</h2>
-        <label for="username" class="sr-only">Email address</label>
-        <input name="username" id="username" class="form-control" placeholder="Username" required="" autofocus="">
-        <label for="password" class="sr-only">Password</label>
-        <input name="password" type="password" id="password" class="form-control" placeholder="Password" required="">
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-      </form>
+    <div class="row >
+        <div class="col-sm-2"></div>
+        <form class="form-signin col-sm-5 align-content-lg-center" action="/accounts/login/" method="post">
+            {% csrf_token %}
+            <div class="form-label-group">
+                <input name="username" id="username" class="form-control" placeholder="Username" required autofocus>
+                <label for="username" class="sr-only">Username</label>
+            </div>
+            <div class="form-label-group">
+                <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
+                <label for="password" class="sr-only">Password</label>
+            </div>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+        </form>
+    </div>
+
+
 {% endblock %}

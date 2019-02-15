@@ -5,7 +5,7 @@ from filter.util import get_filtered_observed_mutations_queryset
 import re
 from enum import Enum
 from django.utils.html import strip_tags
-from seq.util import get_mut_queryset_from_obs_mut_queryset, get_unique_obs_mut_queryset_from_obs_mut_queryset
+from seq.util import get_mut_queryset_from_obs_mut_queryset, get_ecocyc_gene_list
 from genes.util import get_gene_list
 from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS
 from ale.models import TechnicalReplicate
@@ -15,13 +15,12 @@ from ale.permissions import can_add_global_filter
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
-HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/close-icon.gif" width="12" height="11"></a>"""
+HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/img/close-icon.gif" width="12" height="11"></a>"""
 HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequence Change", "Gene", "Function",
                               "Product", "GO Process", "GO Component", "Details"]
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
-HTML_ECOCYC = """<a href = "https://ecocyc.org/ECOLI/substring-search?type=GENE&object={gene}">{gene}</a>"""
 
 # the dropdown cell in the mutation table
 _menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
@@ -240,15 +239,6 @@ def get_table_body(user: User,
         return table_body, protein_changes
 
     return table_body
-
-
-def get_ecocyc_gene_list(gene_list):
-    url_list = []
-    for each in gene_list:
-        if each.startswith("<"):
-            each = each.split(">")[-1]
-        url_list.append(HTML_ECOCYC.format(gene=each))
-    return url_list
 
 
 def get_gene_table_entry(observed_mutation):

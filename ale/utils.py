@@ -48,7 +48,7 @@ def get_user_projects(user: User):
         return myprojects
 
 
-def get_all_ale_exps(user):
+def get_all_user_exps(user):
     """
     Get all experiments that the user can view
     :param user: given login user

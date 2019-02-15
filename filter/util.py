@@ -1,25 +1,14 @@
 import seq.util
 from filter.models import AleExperimentFilter, GlobalFilter
-from seq.models import Mutation, ObservedMutation
+from seq.models import Mutation
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from ale.models import AleExperiment
 from genes.util import get_gene_list
-import common.util
 
 __author__ = 'Patrick Phaneuf'
 
 NO_BREAK_STRING_CODE = u'\xa0'
-
-MODEL_TO_FILTER_MAPPINGS = {"protein": "protein_change",
-                            "type": "mutation_type",
-                            "sequence": "sequence_change",
-                            "position": "position",
-                            "gene": "gene"}
-
-DELETE_ROW_BOX = """<td><img src="/static/close-icon.gif" onclick="delete_row(%d)" width="12" height="11" style="float:right; cursor:pointer"></td>"""
-
-TABLE_HEADER = "<tr><td></td><td>Position</td><td>Mutation Type</td><td>Sequence Change</td><td>Gene</td><td>Function</td><td>Product</td><td>GO Process</td><td>GO Component</td><td>Details</td></tr>"
 
 
 def get_filtered_observed_mutations_queryset(observed_mutation_queryset, filter_settings=None, mut_queryset=None):
@@ -169,16 +158,19 @@ def get_ignored_mut_id_list_from_str(ignored_mutation_id_str, deleted_mutation_i
     if ignored_mutation_id_str.startswith(','):
         ignored_mutation_id_str = ignored_mutation_id_str[1:]
 
-    ignored_mutation_id_str = ignored_mutation_id_str.split(",")
+    ignored_mutation_ids = ignored_mutation_id_str.split(",")
+    deleted_mutation_ids = []
+    if deleted_mutation_id:
+        deleted_mutation_ids = deleted_mutation_id.split(",")
 
     new_list = []
 
-    for mut_id in ignored_mutation_id_str:
+    for mut_id in ignored_mutation_ids:
 
         if mut_id in new_list or is_number(mut_id) is False:
             continue
 
-        if deleted_mutation_id is None or mut_id != deleted_mutation_id:
+        if deleted_mutation_id is None or mut_id not in deleted_mutation_ids:
             new_list.append(mut_id)
 
     return new_list
@@ -206,40 +198,6 @@ def _get_ignored_gene_list_from_str(ignored_genes):
         cleaned_list.append(gene)
 
     return cleaned_list
-
-
-def get_ignored_mutations(filter_form_model):
-
-    table_body = ""
-
-    ignored_mutation_id_str = filter_form_model.ignored_mutations
-
-    ignored_mutation_id_list = get_ignored_mut_id_list_from_str(ignored_mutation_id_str)
-
-    for mut_id in ignored_mutation_id_list:
-        try:
-            mutation = Mutation.objects.get(id=mut_id)
-        except ObjectDoesNotExist:
-            continue
-
-        table_row = '<tr id="%s">' % mutation.id
-        table_row += DELETE_ROW_BOX % mutation.id
-        table_row += "<td>%s</td>" % format(int(mutation.position), ',d')
-        table_row += "<td>%s</td>" % mutation.mutation_type
-        table_row += "<td>%s</td>" % mutation.sequence_change
-        table_row += "<td><a href=/gene?g=%s>%s</a></td>" % (mutation.gene, mutation.gene)
-        table_row += "<td>%s</td>" % ("" if mutation.function is None else mutation.function)
-        table_row += "<td>%s</td>" % ("" if mutation.product is None else mutation.product)
-        table_row += "<td>%s</td>" % ("" if mutation.go_process is None else mutation.go_process)
-        table_row += "<td>%s</td>" % ("" if mutation.go_component is None else mutation.go_component)
-        table_row += "<td>%s</td>" % mutation.protein_change
-        table_row += "</tr>"
-        table_body += table_row
-
-    if table_body is None:
-        table_body = []
-
-    return table_body, ignored_mutation_id_list
 
 
 def _mutation_exists(mut_id):

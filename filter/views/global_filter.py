@@ -1,9 +1,9 @@
 from django.http import HttpResponse
 from django.template import loader
 from filter.forms.filter import FilterForm
-from django.utils.safestring import mark_safe
-from filter.util import get_ignored_mut_id_list_from_str, get_ignored_mutations, TABLE_HEADER, get_global_filter
+from filter.util import get_ignored_mut_id_list_from_str, get_global_filter
 from common.util import clear_dashboard_cache, get_user_context
+from seq.util import get_mutation_objects
 from logs.aledb_logger import user_extra
 from ale import permissions
 import logging
@@ -30,13 +30,12 @@ def global_filter(request):
 
         filter_form = FilterForm(initial=initial_filter_form_data)
 
-        table_body, ignored_mutation_id_list = get_ignored_mutations(filter_form_model)
+        ignored_mutations = get_mutation_objects(filter_form_model.ignored_mutations)
 
         context = get_user_context(request.user)
         context.update({
             "form": filter_form,
-            "table_body": mark_safe(table_body),
-            "table_header": mark_safe(TABLE_HEADER)})
+            "ignored_mutations": ignored_mutations})
 
         return HttpResponse(template.render(context, request), content_type="text/html")
 
@@ -50,7 +49,7 @@ def global_filter(request):
 def _handle_POST(request, filter_form_model):
     if permissions.can_add_global_filter(request.user):
         filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
-        deleted_mut_id = request.POST.get('mut_id', None)
+        deleted_mut_id = request.POST.get('deleted_mut_id', None)
         ignored_mutation_id_list = get_ignored_mut_id_list_from_str(get_global_filter().ignored_mutations, deleted_mut_id)
         cleaned_list = get_ignored_mut_id_list_from_str(",".join(ignored_mutation_id_list))
         filter_form_model.ignored_mutations = ",".join(cleaned_list)
