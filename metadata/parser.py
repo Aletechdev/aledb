@@ -4,7 +4,8 @@ import csv
 
 from ale.models import TechnicalReplicate
 from ale.models import Media
-
+from ale.models import Project
+from metadata.xpmdvalidator.validate import is_valid
 
 __author__ = 'Denny Gosting, Patrick Phaneuf'
 
@@ -16,6 +17,8 @@ DEFAULT_VOLUME = 15
 DEFAULT_STIRRING_SPEED = 1100
 DEFAULT_FREEZER_BOX_NAME = "ALE box"
 DEFAULT_FREEZER_BOX_NUMBER = 1
+
+PROJECT = "project"
 
 STRAIN = "taxonomy-id"
 STRAIN_DESCRIPTION = "strain-description"
@@ -58,6 +61,9 @@ def _get_media_substrate_description(metadata_dict):
 def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_key):
     for f in os.listdir(metadata_path):
         if f.endswith(".csv") or f.endswith(".CSV"):
+            if not is_valid(f,"/app/metadata/xpmdvalidator/Json_schema.json"):
+                print ("Invalid metadata!", f)
+                continue
 
             with open(os.path.join(metadata_path, f), 'rt') as csvfile:
                 metadata_dict = dict(csv.reader(csvfile, delimiter=','))
@@ -125,3 +131,5 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
 
             tech_rep.description = experiment_details
             tech_rep.save()
+
+            project, created = Project.objects.get_or_create(name=metadata_dict[PROJECT])

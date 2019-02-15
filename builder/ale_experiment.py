@@ -17,7 +17,7 @@ from filter.models import AleExperimentFilter
 import filter.models
 from stats.util import generate_static_data
 import logging
-
+from metadata.xpmdvalidator.validate import is_valid
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -166,18 +166,28 @@ def create_ale_experiments(exp_files_dict_list):
                               exp_files_dict["breseq_starting_strain_output_abs_path"])
 
 
+
+
 # For wild_type, expecting directory with output.gd in it.
 def create_ale_experiment(breseq_output_group_root_abs_path,
                           ale_exp_user,
                           ale_exp_name,
                           breseq_starting_strain_output_abs_path=None):
+
     logger.info("Creating Ale Experiment", extra=locals())
+
+    if not os.path.isdir(breseq_output_group_root_abs_path):
+        logger.info("invalid path")
+        print("invalid path:", breseq_output_group_root_abs_path)
+        return
 
     try:
 
         """
         Executed from Django ipython shell.
         """
+
+        root_abs_path = breseq_output_group_root_abs_path.replace("/breseq","")
 
         clear_dashboard_cache()  # TODO: remove, since no longer using cache.
 
@@ -239,6 +249,9 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         rebuild_fixated_mutations(experiment.ale_id)
         generate_static_data(experiment.ale_id)
         rebuild_dashboard_data()
+
+        metadata.parser.parse_metadata_post_experiment_upload(root_abs_path+"/metadata", experiment.ale_id)
+
     except Exception as e:
         logger.exception(e)
 
