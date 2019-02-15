@@ -31,7 +31,6 @@ INSTALLED_APPS = (
     "bootstrap3",
     "bootstrap4",
     'defender',
-    'crispy_forms',
 
     'ale',
     'seq',
@@ -190,7 +189,6 @@ TEMPLATES = [
     },
 ]
 
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
 ###########
 # LOGGING #
 ###########
@@ -299,11 +297,9 @@ AUTH_PASSWORD_VALIDATORS = [
 DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME = os.environ.get('DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME', 4)
 DEFENDER_LOGIN_FAILURE_LIMIT_IP = os.environ.get('DEFENDER_LOGIN_FAILURE_LIMIT_IP', 6)
 
-DEFENDER_COOLOFF_TIME = os.environ.get('DEFENDER_COOLOFF_TIME', 30)  # seconds
+DEFENDER_COOLOFF_TIME = os.environ.get('DEFENDER_COOLOFF_TIME', 30)  # sec
 DEFENDER_REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/1')
 
-# Crispy Form Theme - Bootstrap 3
-CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
 # For Bootstrap 3, change error alert to 'danger'
 from django.contrib import messages
