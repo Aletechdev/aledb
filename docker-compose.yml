@@ -22,7 +22,7 @@ services:
     volumes:
       - .:/app
       - static:/app/static
-      - /var/www/ale_analytics_data:/var/www/ale_analytics_data
+      - /data2/aledata:/var/www/ale_analytics_data
     command: bash -c "python manage.py collectstatic --no-input && gunicorn aleinfo.wsgi -b 0.0.0.0:80 --reload"
     links:
       - db
@@ -36,7 +36,7 @@ services:
     volumes:
       - static:/usr/share/nginx/static:ro
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - /var/www/ale_analytics_data:/var/www/ale_analytics_data:ro
+      - /data2/aledata:/var/www/ale_analytics_data:ro
     command: [nginx-debug, '-g', 'daemon off;']
     ports:
       - 8000:80
