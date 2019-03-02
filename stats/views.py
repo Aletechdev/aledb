@@ -15,7 +15,6 @@ from stats.util import get_histogram_jsons,\
     get_ale_flask_isolate_count_list,\
     get_reseq_experiment_info_list,\
     MAX_HISTOGRAM_SIZE
-from ale.utils import get_recent_ale_exps, get_all_user_exps
 from common.util import get_user_context
 from filter.util import get_filtered_observed_mutations_queryset
 import logging
@@ -97,7 +96,6 @@ def stats(request):
                         "ale_sum": ale_sum,
                         "flask_sum": flask_sum,
                         "isolate_sum": isolate_sum,
-                        "recent_experiments": get_recent_ale_exps(experiment.ale_id),
                         "max_histogram_size": MAX_HISTOGRAM_SIZE,
                         "pub_qryset": pub_qryset,
                         "notes": experiment.notes,

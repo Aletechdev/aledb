@@ -5,7 +5,6 @@ from django.utils.safestring import mark_safe
 import seq.views.common
 from seq.views import mutation_table_builder
 from seq.util import get_all_observed_mutations, get_reseq_ordered_dict
-from ale.utils import get_recent_ale_exps, get_all_user_exps
 from common.util import check_hidden_columns_and_filters, get_user_context
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from django.core.serializers.json import DjangoJSONEncoder
@@ -50,7 +49,6 @@ def mutation_table(request):
                         "table_header": table_header,
                         "template_header": "Mutations",
                         "hidden_columns": hidden_columns,
-                        "recent_experiments": get_recent_ale_exps(experiment.ale_id),
                         "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
                         "tag_dropdown": common.constants.TAGS
                         })

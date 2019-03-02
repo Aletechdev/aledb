@@ -103,7 +103,7 @@ def get_table_header(user, reseq_dict, table_type=None):
         sample_header_html = sample_name
         if reseq_id in experiment_urls.keys():
             sample_header_html = """<a href="%s">%s</a>"""
-            sample_header_html = sample_header_html % (experiment_urls[reseq_id]+"index.html", sample_name)
+            sample_header_html = sample_header_html % (experiment_urls[reseq_id], sample_name)
 
         if can_add_global_filter(user):
             table_header_list.append(sample_header_html + (TAGS_IMAGE % (dropdown_html, current_tags)))
