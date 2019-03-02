@@ -1,7 +1,5 @@
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseForbidden
-from django.shortcuts import render_to_response
-from common.util import get_user_context
 from ale.permissions import can_view_experiment
 import logging
 import os
@@ -20,15 +18,11 @@ def protected_file_serve(request, page_name: str):
         if not ok:
             logger.error("file path error: " + "Cannot view the link " + page_name)
             raise HttpResponseForbidden
+    if page_name.endswith('/'):
+        page_name = page_name + "index.html"
     logger.info("display file " + page_name)
     file_path = DOC_ROOT + page_name
-    if os.path.isdir(file_path):
-        file_list = os.listdir(file_path)
-        template = 'file_list.html'
-        context = get_user_context(user)
-        context.update({'file_list': file_list})
-        return render_to_response(template, context)
-    elif os.path.isfile(file_path):
+    if os.path.isfile(file_path):
         with open(DOC_ROOT + page_name) as f:
             response = HttpResponse(f.read())
         return response
