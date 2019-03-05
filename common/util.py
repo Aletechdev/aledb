@@ -2,7 +2,6 @@ import subprocess
 
 from filter.models import AleExperimentFilter
 import filter.util, logging
-from ale.utils import get_all_user_exps, get_recent_ale_exps
 from ale.models import TechnicalReplicate
 from seq.models import Mutation
 from django.core.cache import cache
@@ -81,8 +80,7 @@ def get_git_hash():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
 
 try:
-    common_context = {"recent_experiments": get_recent_ale_exps,
-                      "git_hash": get_git_hash()}
+    common_context = {"git_hash": get_git_hash()}
 except Exception:
     logger.exception("common_context broke")
 
