@@ -97,6 +97,8 @@ docker exec -it aledb-web python3 manage.py collectstatic
 ## Quick-start steps for ALEdb docker deployment
  ```
  docker-compose up -d
+ docker-compose -f docker-compose-private.yml up -d
+ docker-compose -f docker-compose-public.yml up -d
  ```
 
 ### Bring all containers down
