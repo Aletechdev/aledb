@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group
-from ale.models import Project, AleExperiment, RecentExperiments
+from ale.models import Project, AleExperiment, RecentExperiments, AleId
 from guardian.models import GroupObjectPermission, UserObjectPermission
 from django.core.exceptions import ObjectDoesNotExist
 from ale.permissions import VIEW_PROJECT
@@ -58,50 +58,17 @@ def get_all_user_exps(user):
     return AleExperiment.objects.filter(project_id__in=projects).order_by('name')
 
 
-def get_recent_ale_exps(ale_experiment_id=None):
-
-    recent, created = RecentExperiments.objects.get_or_create(id=1)
-
-    if ale_experiment_id is not None:
-        recent_list = [recent.first, recent.second, recent.third, recent.fourth, recent.fifth]
-
-        if ale_experiment_id not in recent_list:
-            recent.fifth = recent.fourth
-            recent.fourth = recent.third
-            recent.third = recent.second
-            recent.second = recent.first
-            recent.first = ale_experiment_id
-        else:
-            temp = [x for x in recent_list if x != ale_experiment_id]
-            recent.fifth = temp[3]
-            recent.fourth = temp[2]
-            recent.third = temp[1]
-            recent.second = temp[0]
-            recent.first = ale_experiment_id
-
-        recent.save()
-
-    recent_experiments = []
-    if recent.first is not None:
-        recent_experiments = _ale_exp_exists(recent.first, recent_experiments)
-
-    if recent.second is not None:
-        recent_experiments = _ale_exp_exists(recent.second, recent_experiments)
-
-    if recent.third is not None:
-        recent_experiments = _ale_exp_exists(recent.third, recent_experiments)
-
-    if recent.fourth is not None:
-        recent_experiments = _ale_exp_exists(recent.fourth, recent_experiments)
-
-    if recent.fifth is not None:
-        recent_experiments = _ale_exp_exists(recent.fifth, recent_experiments)
-    return recent_experiments
-
-
 def _ale_exp_exists(ale_id, recent_experiments):
     try:
         recent_experiments.append(AleExperiment.objects.get(ale_id=ale_id))
     except ObjectDoesNotExist:
         pass
     return recent_experiments
+
+
+def get_strains():
+    """return list of sorted strains"""
+    ale_ids = AleId.objects.all()
+    strain_sets = {obj.strain for obj in ale_ids}
+    strains = [strain for strain in strain_sets if strain]
+    return sorted(strains)

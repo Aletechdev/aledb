@@ -6,7 +6,6 @@ from django.template import loader
 
 from django.conf import settings
 from seq.views import common
-from ale.utils import get_recent_ale_exps
 from common.util import get_user_context
 from seq.util import get_ordered_reseq_queryset
 
@@ -47,7 +46,6 @@ def metadata(request):
         context.update({"reseq_info_list": reseq_info_list,
                         "reseq_report_url": reseq_report_url,
                         "ale_experiment_name": experiment.project.name + ": " + experiment.name,
-                        "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                         "multiple": False,
                         "ale_experiment_id": ale_experiment_id
                         })

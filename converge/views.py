@@ -2,7 +2,6 @@ import time
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
-from ale.utils import get_recent_ale_exps
 from common.util import get_user_context
 from seq.util import get_reseq_ordered_dict
 import seq.views.common
@@ -52,7 +51,6 @@ def converge_mutations(request):
                         "table_header": mark_safe(table_header),
                         "template_header": "Converged Mutations",
                         "hidden_columns": hidden_columns,
-                        "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                         "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                         "tag_dropdown": common.constants.TAGS
                         })

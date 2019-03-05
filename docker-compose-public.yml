@@ -9,7 +9,7 @@ services:
     container_name: aledb-web
     build: .
     env_file:
-      - .docker/app-prod.env
+      - .docker/app-public.env
     volumes:
       - .:/app
       - /var/www/ale_analytics_data:/var/www/ale_analytics_data
