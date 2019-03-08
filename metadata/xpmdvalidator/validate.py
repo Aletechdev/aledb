@@ -25,46 +25,38 @@ def is_valid(csv_directory_path, schema_file_path):
                 reader = csv.DictReader(f)
                 rows = list(reader)
 
-
             jsonobj = json.dumps(rows)
             jsonarray = json.loads(jsonobj)
 
             validator = Draft4Validator(schema)
-            
 
             if (len(sorted(validator.iter_errors(jsonarray), key=str))) > 0:
-                with open(filename +'-XMPD_ValidatorLOGFILE.txt', 'w') as f:
-                    Valdation = False
+                Valdation = False
 
-                    print("ERROR - Metadata File " + filename + " Does not Pass Valdation. Error Logfile generated.")
-                    orig_stdout = sys.stdout
-                    sys.stdout = f
-                    i=0
+                print("ERROR - Metadata File " + filename + " Does not Pass Valdation. Error Logfile generated.")
 
-                    print("Please fix all errors below for Metadata File " + filename + " in order to run file on ALE mutation Pipeline")
+                i=0
 
-                    for error in sorted(validator.iter_errors(jsonarray), key=str):
-                        i+=1
-                        if error.validator == "pattern":
-                            if ((error.path[1] == 'ALE-number') or (error.path[1] == 'Flask-number') or (error.path[1] == 'Isolate-number') or
-                                (error.path[1] == 'technical-replicate-number') or (error.path[1] == 'sample-time') or (error.path[1] == "temperature(Celcius")):
-                                print('['+str(i)+'] - ' + 'Invalid input, numerical value only for field: ' + error.path[1])
-                            else:
-                                print('['+str(i)+'] - ' +'Invalid input for field: ' + error.path[1])
-                        
+                print("Please fix all errors below for Metadata File " + filename + " in order to run file on ALE mutation Pipeline")
 
-                        if error.validator == "enum":
-                            print('['+str(i)+'] - Field: ' + str(error.path[1]) + ", " + error.message)
+                for error in sorted(validator.iter_errors(jsonarray), key=str):
+                    i+=1
+                    if error.validator == "pattern":
+                        if (not (not (error.path[1] == 'ALE-number') and not (error.path[1] == 'Flask-number') and not (
+                                error.path[1] == 'Isolate-number') and not (
+                                error.path[1] == 'technical-replicate-number')) or (error.path[1] == 'sample-time') or (error.path[1] == "temperature(Celcius")):
+                            print('['+str(i)+'] - ' + 'Invalid input, numerical value only for field: ' + error.path[1])
+                        else:
+                            print('['+str(i)+'] - ' +'Invalid input for field: ' + error.path[1])
 
-                        if error.validator == "required":
-                            print('['+str(i)+'] - ' + error.message)
+                    if error.validator == "enum":
+                        print('['+str(i)+'] - Field: ' + str(error.path[1]) + ", " + error.message)
 
-                        elif (error.validator == "required") and (error.validator == "enum") and (error.validator == "pattern"):
-                            print('['+str(i)+'] - ' + error.message)
+                    if error.validator == "required":
+                        print('['+str(i)+'] - ' + error.message)
 
-                    sys.stdout.close()
-                    sys.stdout=orig_stdout
-
+                    elif (error.validator == "required") and (error.validator == "enum") and (error.validator == "pattern"):
+                        print('['+str(i)+'] - ' + error.message)
      
     try:
         os.remove("transposedFile.csv")
