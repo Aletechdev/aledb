@@ -1,5 +1,5 @@
 import os
-
+import re
 import csv
 
 from ale.models import TechnicalReplicate
@@ -48,6 +48,74 @@ MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
                          # MEDIA_SUPPLEMENT,
                          MEDIA_ANTIBIOTIC]
 
+def multiple_replace(text):
+    word_dict = {
+        ' ': "_"
+    }
+    for key in word_dict:
+        text = text.replace(key, word_dict[key])
+    text = re.sub(r'[^A-Za-z0-9_-]+', '', text)
+    return text
+
+def extract_experiment_parameters(metadata_path):
+    # need to ensure all the csv files give the same parameters
+    project = "N/A"
+    creator = "N/A"
+    experiment = "N/A"
+    naming_labels = ["experiment",
+                     "reference-file-list",
+                     "environment",
+                     "strain-description",
+                     "growth-stage",
+                     "temperature(Celsius)",
+                     "base-media",
+                     "carbon-source(g/L)",
+                     "nitrogen-source(g/L)",
+                     "phosphorous-source(g/L)",
+                     "sulfur-source(g/L)",
+                     "electron-acceptor",
+                     "antibiotic(ug/mL)"]
+
+    for f in os.listdir(metadata_path):
+        if f.endswith(".csv") or f.endswith(".CSV"):
+            with open(os.path.join(metadata_path, f), 'rt') as csvfile:
+                csv_reader = csv.reader(csvfile)
+
+                experiment_details = []
+                for row in csv_reader:
+                    if row[0] == "project":
+                        if len(row[1]) > 0:
+                            descr = row[1]
+                            if project == "N/A":
+                                project = descr
+                            elif project != descr:
+                                print("Project Mismatch: Please ensure all project fields within one experiment share the same value", f)
+                                return False
+                        else:
+                            print("Field Missing: project in " + str(os.path.join(metadata_path, f)))
+                    if row[0] == "creator":
+                        if len(row[1]) > 0:
+                            descr = row[1]
+                            if creator == "N/A":
+                                creator = descr
+                            elif creator != descr:
+                                print("Creator Mismatch: Please ensure all creator fields within one experiment share the same value", f)
+                                return False
+                    elif row[0] in naming_labels:
+                        if len(row[1]) > 0:
+                            label = row[1].split(",")
+                            label = '-'.join(label)
+                            experiment_details.append(label)
+                curr_experiment = "-".join(experiment_details)
+                curr_experiment = multiple_replace(curr_experiment)
+                if experiment == "N/A":
+                    experiment = curr_experiment
+                elif experiment != curr_experiment:
+                    print("Experiment Mismatch: Please ensure all experiment specific parameters share the same values", f)
+                    return False
+
+    return creator, experiment, project
+
 
 def _get_media_substrate_description(metadata_dict):
     media_substrate_description = ''
@@ -59,11 +127,11 @@ def _get_media_substrate_description(metadata_dict):
 
 
 def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_key):
+    if not is_valid(metadata_path, "/app/metadata/xpmdvalidator/Json_schema.json"):
+        print ("Invalid metadata!", metadata_path)
+
     for f in os.listdir(metadata_path):
         if f.endswith(".csv") or f.endswith(".CSV"):
-            if not is_valid(f,"/app/metadata/xpmdvalidator/Json_schema.json"):
-                print ("Invalid metadata!", f)
-                continue
 
             with open(os.path.join(metadata_path, f), 'rt') as csvfile:
                 metadata_dict = dict(csv.reader(csvfile, delimiter=','))
@@ -133,3 +201,5 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
             tech_rep.save()
 
             project, created = Project.objects.get_or_create(name=metadata_dict[PROJECT])
+
+
