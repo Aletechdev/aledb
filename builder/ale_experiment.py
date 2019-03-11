@@ -177,6 +177,8 @@ def upload_ale_experiments(exp_files_path_list):
 
 
 def find_experiment_paths(root_path):
+    if not os.path.isdir(root_path):
+        logger.info("invalid path:", root_path)
     paths = [x[0] for x in os.walk(root_path)]
     paths = set(paths)
     experiment_paths = []
@@ -256,8 +258,6 @@ def try_creating_project(project, owner_name, is_pub=False):
     owner = find_user(owner_name)
     return Project.objects.create(name=project, user=owner, date=datetime.now(),
                            status="In progress", is_public=is_pub)
-
-
 
 
 # For wild_type, expecting directory with output.gd in it.
