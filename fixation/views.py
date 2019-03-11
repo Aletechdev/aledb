@@ -7,7 +7,6 @@ from seq.views import mutation_table_builder
 from common.constants import \
     REQUEST_MUTATION_ID, \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
-from ale.utils import get_recent_ale_exps
 from common.util import get_user_context, check_hidden_columns_and_filters
 from seq.util import get_reseq_ordered_dict
 from fixation.util import get_exp_fixed_obs_mut_qryset
@@ -58,7 +57,6 @@ def fixating_mutations(request):
                         "table_header": mark_safe(table_header),
                         "template_header": "Fixating Mutations",
                         "hidden_columns": hidden_columns,
-                        "recent_experiments": get_recent_ale_exps(int(ale_experiment_id)),
                         "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
                         "tag_dropdown": common.constants.TAGS})
 
