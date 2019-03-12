@@ -12,6 +12,7 @@ config.sh
 .htpasswd
 .DS_Store
 .builder/
+.docker/data
 
 /logs/debug.log*
 /logs/info.log*

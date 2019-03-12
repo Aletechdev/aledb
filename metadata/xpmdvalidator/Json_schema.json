@@ -1,0 +1,252 @@
+{
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "creator": {
+        "$id": "creator",
+        "type": "string",
+        "pattern": ".*\\S.*"
+      },
+      "creator-email": {
+        "$id": "creator-email",
+        "type": "string",
+        "pattern": ".*\\S.*"
+      },
+      "project": {
+        "$id": "project",
+        "type": "string",
+        "pattern": ".*\\S.*"
+      },
+      "data-type": {
+        "$id": "data-type",
+        "type": "string",
+        "enum": ["DNA-seq", "RNA-seq", "ChIP-seq", "ChIP-exo", "Ribo-seq"]
+      },
+      "run-date": {
+        "$id": "run-date",
+        "type": "string",
+        "pattern": "^\\d{1,4}[\/\\-]*\\d{1,2}[\/\\-]*\\d{2,4}$"
+      },
+      "taxonomy-id": {
+        "$id": "taxonomy-id",
+        "type": "string",
+        "enum": ["413997", "511145", "668369", "511693", "679895", "243274", "451516", "2144189", "867914", "1219067","451515","160490","1116234","400667","301447"]
+      },
+      "Accession": {
+        "$id": "Accession",
+        "type": "string",
+        "enum": ["NC_012967", "CP000819.1", "NC_000913", "CP025268.1", "NZ_JRYM00000000", "KT943377", "NZ_CP009273", "CP009273", "NZ_CP011107.1", "NC_023151.1", "NC_021214.1", "NC_010079", "CP016816", "PRJNA50719", "NZ_CP016346.1", "CP000255", "NC_002737","PRJNA77021","PRJNA17477","CP008776.1"]
+      },
+      "strain-description": {
+        "$id": "strain-description",
+        "type": "string",
+        "pattern": ".*\\S.*"
+      },
+      "base-media": {
+        "$id": "base-media",
+        "type": "string",
+        "enum": ["M9", "LB", "DM25", "RPMI", "MHB", "SMM", "TH", "THY"]
+      },
+      "isolate-type": {
+        "$id": "isolate-type",
+        "type": "string",
+        "enum": ["clonal", "population"]
+      },
+      "ALE-number": {
+        "$id": "ALE-number",
+        "type": "string",
+        "pattern": "^\\d+\\.?\\d*$"
+      },
+      "Flask-number": {
+        "$id": "Flask-number",
+        "type": "string",
+        "pattern": "^\\d+\\.?\\d*$"
+      },
+      "Isolate-number": {
+        "$id": "Isolate-number",
+        "type": "string",
+        "pattern": "^\\d+\\.?\\d*$"
+      },
+      "technical-replicate-number": {
+        "$id": "technical-replicate-number",
+        "type": "string",
+        "pattern": "^\\d+\\.?\\d*$"
+      },
+      "sample-time": {
+        "$id": "sample-time",
+        "type": "string",
+        "pattern": "^\\d*\\.?\\d*$"
+      },
+      "Link-to-reference-sequence": {
+        "$id": "Link-to-reference-sequence",
+        "type": "string",
+        "pattern": ".*\\S.*"
+      },
+      "reference-file-list": {
+        "$id": "reference-file-list",
+        "type": "string",
+        "pattern": "^([^\\s]*)$"
+      },
+      "read-files": {
+        "$id": "read-files",
+        "type": "string",
+        "pattern": "^([^\\s]*)$"
+      },
+      "index-files": {
+        "$id": "index-files",
+        "type": "string",
+        "pattern": "^([^\\s]*)$"
+      },
+      "serial-number": {
+        "$id": "serial-number",
+        "type": "string"
+      },
+      "growth-stage": {
+        "$id": "growth-stage",
+        "type": "string"
+      },
+      "antibody": {
+        "$id": "antibody",
+        "type": "string"
+      },
+      "temperature(Celsius)": {
+        "$id": "temperature",
+        "type": "string",
+        "pattern": "^\\d*\\.?\\d*$"
+      },
+      "carbon-source(g/L)": {
+        "$id": "carbon-source",
+        "type": "string",
+        "pattern": "^(^$)|(.*)(?=\\\b|)\\(-?[0-9]\\d*(\\.\\d+)?\\)$"
+      },
+      "nitrogen-source(g/L)": {
+        "$id": "nitrogen-source",
+        "type": "string",
+        "pattern": "^(^$)|(.*)(?=\\\b|)\\(-?[0-9]\\d*(\\.\\d+)?\\)$"
+      },
+      "phosphorous-source(g/L)": {
+        "$id": "phosphorous-source",
+        "type": "string",
+        "pattern": "^(^$)|(.*)\\(-?[0-9]\\d*(\\.\\d+)?\\)$"
+      },
+      "sulfur-source(g/L)": {
+        "$id": "sulfur-source",
+        "type": "string",
+        "pattern": "^(^$)|(.*)\\(-?[0-9]\\d*(\\.\\d+)?\\)$"
+      },
+      "electron-acceptor": {
+        "$id": "electron-acceptor",
+        "type": "string"
+      },
+      "supplement(g/L)": {
+        "$id": "supplement",
+        "type": "string",
+        "pattern": "^(^$)|(.*)\\(-?[0-9]\\d*(\\.\\d+)?\\)$"
+      },
+      "antibiotic(ug/mL)": {
+        "$id": "antibiotic",
+        "type": "string",
+        "pattern": "^(^$)|(.*)\\(-?[0-9]\\d*(\\.\\d+)?\\)$"
+      },
+      "machine": {
+        "$id": "machine",
+        "type": "string",
+        "enum": ["MiSeq", "NextSeq", "HiSeq", ""]
+      },
+      "library-prep-kit-manufacturer": {
+        "$id": "library-prep-kit-manufacturer",
+        "type": "string",
+        "enum": ["Illumina", "Kapa", ""]
+      },
+      "library-prep-kit": {
+        "$id": "library-prep-kit",
+        "type": "string",
+        "enum": ["Nextera XT", "KAPA HyperPlus", "KAPA Stranded RNA-seq", ""]
+      },
+      "library-prep-kit-cycles": {
+        "$id": "library-prep-kit-cycles",
+        "type": "string",
+        "enum": ["50", "76", "150", "300", "500", "600", ""]
+      },
+      "read-type": {
+        "$id": "read-type",
+        "type": "string",
+        "enum": ["Single-end", "Paired-end", ""]
+      },
+      "read-length": {
+        "$id": "read-length",
+        "type": "string",
+        "enum": ["31", "36", "50", "62", "76", "100", "151", "251", "301", ""]
+      },
+      "experiment-details": {
+        "$id": "experiment-details",
+        "type": "string"
+      },
+      "Pre-culture-details": {
+        "$id": "Pre-culture-details",
+        "type": "string"
+      },
+      "Cultivation-details": {
+        "$id": "Cultivation-details",
+        "type": "string"
+      },
+      "environment": {
+        "$id": "environment",
+        "type": "string"
+      },
+      "biological-replicates": {
+        "$id": "biological-replicates",
+        "type": "string",
+        "pattern": "^\\d*\\.?\\d*$"
+      },
+      "technical-replicates": {
+        "$id": "technical-replicates",
+        "type": "string",
+        "pattern": "^\\d*\\.?\\d*$"
+      }
+    },
+    "required": [
+      "creator",
+      "creator-email",
+      "project",
+      "data-type",
+      "run-date",
+      "taxonomy-id",
+      "Accession",
+      "strain-description",
+      "base-media",
+      "isolate-type",
+      "ALE-number",
+      "Flask-number",
+      "Isolate-number",
+      "technical-replicate-number",
+      "sample-time",
+      "Link-to-reference-sequence",
+      "reference-file-list",
+      "read-files",
+      "index-files",
+      "serial-number",
+      "growth-stage",
+      "antibody",
+      "temperature(Celsius)",
+      "carbon-source(g/L)",
+      "nitrogen-source(g/L)",
+      "phosphorous-source(g/L)",
+      "sulfur-source(g/L)",
+      "electron-acceptor",
+      "supplement(g/L)",
+      "antibiotic(ug/mL)",
+      "machine",
+      "library-prep-kit-manufacturer",
+      "library-prep-kit",
+      "library-prep-kit-cycles",
+      "read-type",
+      "read-length",
+      "experiment-details",
+      "Pre-culture-details",
+      "Cultivation-details",
+      "environment"
+    ]
+  }
+}

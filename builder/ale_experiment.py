@@ -17,7 +17,10 @@ from filter.models import AleExperimentFilter
 import filter.models
 from stats.util import generate_static_data
 import logging
-
+from metadata.xpmdvalidator.validate import is_valid
+from ale.models import AleExperiment, Project
+from django.contrib.auth.models import User
+from datetime import datetime
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -31,6 +34,7 @@ METADATA_RELATIVE_PATH = 'metadata/'
 REF_RELATIVE_PATH = 'ref/'
 
 logger = logging.getLogger(__name__)
+
 
 def integrate_metadata(ale_exp_path, ref_file_name, ale_exp_primary_key):
     """
@@ -59,6 +63,7 @@ def delete_ale_experiments(ale_experiment_primary_key_list):
     """
     for exp_id in ale_experiment_primary_key_list:
         ale_experiment_to_delete = ale.models.AleExperiment.objects.get(pk=exp_id)
+        print("Deleting Experiment #" + str(exp_id) + ":", ale_experiment_to_delete.name)
         message = "Experiment %s was deleted" % ale_experiment_to_delete.name
         ale_experiment_to_delete.delete()
         _delete_all_orphaned_mutations()
@@ -67,6 +72,7 @@ def delete_ale_experiments(ale_experiment_primary_key_list):
                      message=message,
                      icon='<i class="fa fa-times" aria-hidden="true"></i>',
                      color="danger")
+        print(message)
 
 
 def _delete_all_orphaned_mutations():
@@ -148,11 +154,42 @@ def _insert_starting_strain_flask(staring_strain_breseq_output_abs_path,
                                   media_orm,
                                   freezer_box_orm):
     sanitized_breseq_output_wild_type_abs_path = builder.util.sanitize_path(staring_strain_breseq_output_abs_path)
-
     _create_and_commit_wild_type_ale_entry(sanitized_breseq_output_wild_type_abs_path,
                                            experiment_orm,
                                            media_orm,
                                            freezer_box_orm)
+
+
+def upload_ale_experiment(experiment_path):
+    k = check_and_extract_parameters_from_metadata(experiment_path + "/metadata")
+    if k:
+        print(experiment_path, k[0], k[1], k[2])
+        create_ale_experiment(experiment_path, k[0], k[1], k[2])
+    else:
+        return k
+
+
+def upload_ale_collection(root_path):
+    upload_ale_experiments(find_experiment_paths(root_path))
+
+
+def upload_ale_experiments(exp_files_path_list):
+    for each in exp_files_path_list:
+        upload_ale_experiment(each)
+
+
+def find_experiment_paths(root_path):
+    if not os.path.isdir(root_path):
+        logger.info("invalid path:", root_path)
+    paths = [x[0] for x in os.walk(root_path)]
+    paths = set(paths)
+    experiment_paths = []
+    for path in paths:
+        if path.endswith('/breseq'):
+            root_path = path.replace('/breseq', '')
+            if os.path.isdir(root_path+'/metadata'):
+                experiment_paths.append(root_path)
+    return experiment_paths
 
 
 def create_ale_experiments(exp_files_dict_list):
@@ -163,7 +200,66 @@ def create_ale_experiments(exp_files_dict_list):
         create_ale_experiment(exp_files_dict["breseq_output_group_root_abs_path"],
                               exp_files_dict["ale_exp_user"],
                               exp_files_dict["ale_exp_name"],
+                              exp_files_dict["ale_exp_proj"],
                               exp_files_dict["breseq_starting_strain_output_abs_path"])
+
+
+def check_and_extract_parameters_from_metadata(metadata_path):
+    if not os.path.isdir(metadata_path):
+        logger.info("invalid metadata path")
+        print("invalid path:", metadata_path)
+        return False
+    if not is_valid(metadata_path,"/app/metadata/xpmdvalidator/Json_schema.json"):
+        return False
+    return metadata.parser.extract_experiment_parameters(metadata_path)
+
+
+def find_user(user):
+    potential_user_list = []
+    while len(potential_user_list) == 0:
+        try:
+            return User.objects.get(username=user)
+        except User.DoesNotExist:
+            name_parts = user.split(' ')
+
+            potential_user_list = User.objects.filter(first_name__iexact=name_parts[0]).filter(last_name__iexact=name_parts[len(name_parts)-1])
+            if len(potential_user_list) == 1:
+                return potential_user_list[0]
+            potential_user_list = []
+
+            print ("User",user,"can't be found. Querying name parts individually.")
+
+            for each in name_parts:
+                potential_user_list=potential_user_list+list(User.objects.filter(first_name__icontains=each))
+                potential_user_list=potential_user_list+list(User.objects.filter(last_name__icontains=each))
+            potential_user_list = (list(set(potential_user_list)))
+            if len(potential_user_list) == 1:
+                return potential_user_list[0]
+            if len(potential_user_list) == 0:
+                user = input("No matches found for " + user + ". Please enter another name:")
+
+    print("Multiple matches found for", user)
+    while True:
+        nb = input(
+            "Please select one of the following users:\n" + str(dict(enumerate(potential_user_list))).replace(",",
+                                                                                                               "\n").replace("{"," ").replace("}","\n"))
+        try:
+            selected = potential_user_list[int(nb)]
+            print("you've selected:", selected)
+            nb = input("is that correct? Yn\n")
+            if nb == "Y" or nb == "y" or nb == "\n":
+                return selected
+            continue
+        except ValueError as e:
+            print(e.__class__.__name__ + ": please select a value between 0 and", len(potential_user_list))
+            continue
+
+
+def try_creating_project(project, owner_name, is_pub=False):
+    print("Creating", project, "project with owner", owner_name, "public:", is_pub)
+    owner = find_user(owner_name)
+    return Project.objects.create(name=project, user=owner, date=datetime.now(),
+                           status="In progress", is_public=is_pub)
 
 
 # For wild_type, expecting directory with output.gd in it.
@@ -172,7 +268,13 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
                           ale_exp_name,
                           proj_name,
                           breseq_starting_strain_output_abs_path=None):
+
     logger.info("Creating Ale Experiment", extra=locals())
+
+    if not os.path.isdir(breseq_output_group_root_abs_path):
+        logger.info("invalid path")
+        print("invalid path:", breseq_output_group_root_abs_path)
+        return
 
     try:
 
@@ -180,13 +282,19 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         Executed from Django ipython shell.
         """
 
+        root_abs_path = breseq_output_group_root_abs_path.replace("/breseq","")
+        breseq_output_group_root_abs_path = root_abs_path + "/breseq"
+
+
         clear_dashboard_cache()  # TODO: remove, since no longer using cache.
 
         breseq_output_group_root_abs_path = builder.util.sanitize_path(breseq_output_group_root_abs_path)
-        project = ale.models.Project.objects.get(name=proj_name)
-
-        if not project:
-            raise Exception("Please create project " + proj_name + " first before adding experiments")
+        try:
+            project = ale.models.Project.objects.get(name=proj_name)
+        except Exception:
+            print("Project not found: ", proj_name)
+            try_creating_project(proj_name, ale_exp_user)
+            project = ale.models.Project.objects.get(name=proj_name)
 
         instrument, created = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
         experiment, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
@@ -245,6 +353,9 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         rebuild_fixated_mutations(experiment.ale_id)
         generate_static_data(experiment.ale_id)
         rebuild_dashboard_data()
+
+        metadata.parser.parse_metadata_post_experiment_upload(root_abs_path+"/metadata", experiment.ale_id)
+
     except Exception as e:
         logger.exception(e)
 
