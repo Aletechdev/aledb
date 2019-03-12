@@ -11,6 +11,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         paths = options['path(s)']
-        for each in paths:
-            print("Uploading", each)
-            upload_ale_collection(each)
+        for path in paths:
+            print("Uploading", path)
+            upload_ale_collection(path)
