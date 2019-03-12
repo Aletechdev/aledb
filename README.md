@@ -139,6 +139,20 @@ To access the django python shell:
 docker exec -it aledb-web python3 manage.py shell
 ```
 
+To upload collections of experiments using root path(s):
+
+```
+docker exec -it aledb-web python3 manage.py upload path1 path2 path3...
+```
+
+*Remember the paths inside the containers may not be the same as the paths on the host machine!
+
+To delete experiments using their individual ids:
+
+```
+docker exec -it aledb-web python3 manage.py delete 4 20 19 96...
+```
+
 To make migrations and then migrate:
 
 ```
