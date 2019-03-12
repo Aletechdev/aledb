@@ -9,47 +9,40 @@
         {% include "./experiment_datatables.js" %}
     </script>
 
-    <link rel="stylesheet" src="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"></link>
-    <link rel="stylesheet" src="https://cdn.datatables.net/select/1.2.7/css/select.dataTables.min.css"></link>
-    <link rel="stylesheet" src="https://cdn.datatables.net/buttons/1.5.2/css/buttons.dataTables.min.css"></link>
-    <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/dt/jszip-2.5.0/dt-1.10.18/b-1.5.6/b-colvis-1.5.6/b-html5-1.5.6/fc-3.2.5/fh-3.1.4/rg-1.1.0/sl-1.3.0/datatables.min.js"></script>
+
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.js"></script>
     <script type="text/javascript" src="{% static "js/csv.min.js" %}"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
-
-    {% if is_download %}
-    {% load static %}
-    <script type="text/javascript">
-        var data = {{ data }};
-        {% include './download_zip.js' %}
-    </script>
-    {% endif %}
+    {# For alert#}
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 {% endblock %}
 
 {% block content %}
 
     <div class="row">
-        <form class="container" >
+        <form class="container">
             <div class="form-group row">
                 <label for="name" class="col-sm-2 col-form-label text-right">Project Name:</label>
                 <div class="col-sm-3">
-                  <input type="text" value="{{ project.name }}" name="name" class="form-control" id="name">
+                    <input type="text" value="{{ project.name }}" name="name" class="form-control" id="name">
                 </div>
                 <label for="date" class="col-sm-2 col-form-label text-right">Created Date:</label>
                 <div class="col-sm-3">
-                  <input type="date" value="{{ project.date_str }}" name="user" class="form-control" id="date">
+                    <input type="date" value="{{ project.date_str }}" name="user" class="form-control" id="date">
                 </div>
             </div>
             <div class="form-group row">
                 <label for="user" class="col-sm-2 col-form-label text-right">User Name:</label>
                 <div class="col-sm-3">
-                  <input type="text" value="{{ project.owner }}" name="user" class="form-control" id="user">
+                    <input type="text" value="{{ project.owner }}" name="user" class="form-control" id="user">
                 </div>
                 <label for="public" class="col-sm-2 col-form-label text-right">Is public?</label>
                 <div class="col-sm-3">
-                  <input type="text" value="{{ project.is_public}}" name="public" class="form-control" id="public">
+                    <input type="text" value="{{ project.is_public }}" name="public" class="form-control" id="public">
                 </div>
             </div>
         </form>
@@ -58,35 +51,38 @@
     <div class="row">
         <br>
         <h4>Experiments in the Project:</h4>
+        <div id='loadingmessage' style='display:none'>
+            <img src='{% static "img/ajax-loader.gif" %}'>
+        </div>
         <br>
         <table id="exp_table" class="table table-striped table-bordered" style="width: 100%;">
-        <thead class="alert-success">
+            <thead class="alert-success">
             <tr>
                 <th></th>
-                <th>ExpID</th>
-                <th>Name</th>
+                <th>Exp ID</th>
+                <th>Exp Name</th>
                 <th>Project</th>
                 <th>Person</th>
                 <th>Date</th>
             </tr>
-        </thead>
-        <tbody>
+            </thead>
+            <tbody>
             {% for experiment in experiments %}
-            <tr>
-                <td></td>
-                <td width="50">{{ experiment.ale_id }}</td>
-                <td>
-                    <a href="/ale/experiment/{{ experiment.ale_id }}">{{ experiment.name }}</a>
-                </td>
-                <td>
-                    <a href="/ale/project/{{ experiment.project.id }}">{{ experiment.project.name }}</a>
-                </td>
-                <td>{{ experiment.person }}</td>
-                <td>{{ experiment.date }}</td>
-            </tr>
+                <tr>
+                    <td></td>
+                    <td width="90">{{ experiment.ale_id }}</td>
+                    <td>
+                        <a href="/ale/experiment/{{ experiment.ale_id }}">{{ experiment.name }}</a>
+                    </td>
+                    <td>
+                        <a href="/ale/project/{{ experiment.project.id }}">{{ experiment.project.name }}</a>
+                    </td>
+                    <td>{{ experiment.person }}</td>
+                    <td>{{ experiment.date }}</td>
+                </tr>
             {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
     </div>
 
 {% endblock %}
