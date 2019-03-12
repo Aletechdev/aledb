@@ -239,7 +239,7 @@ LOGGING = {
             'filters': ['uuidfilter', 'require_debug_true'],
         },
         'mail_admins': {
-            'level': 'ERROR',
+            'level': 'CRITICAL',
             'class': 'django.utils.log.AdminEmailHandler',
             'filters': ['uuidfilter', 'require_debug_false'],
         },
@@ -252,7 +252,7 @@ LOGGING = {
         },
         'django': {
             'level': 'ERROR',
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'file', 'mail_admins'],
             'propagate': False,
         }
     },
