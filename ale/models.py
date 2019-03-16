@@ -85,6 +85,20 @@ class AleExperiment(models.Model):
             return self.date.strftime("%Y-%m-%d")
         return ''
 
+class Sample(models.Model):
+    name = models.CharField(max_length=200)
+    tech_rep_number = models.IntegerField()
+    reseq_reference = models.CharField(max_length=200)
+    strain = models.CharField(max_length=200)
+    temperature = models.IntegerField()
+    substrate = models.CharField(max_length=200)
+    project = models.ForeignKey(Project, default=None, **blank_field, on_delete=models.DO_NOTHING)
+    experiment = models.ForeignKey(AleExperiment, default=None, on_delete=models.DO_NOTHING)
+
+    class Meta:
+        managed = False   # don't create table. It is a view in database
+        db_table = 'vw_sample'
+
 
 # TODO: this model should be called "Ale".
 class AleId(models.Model):
