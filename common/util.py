@@ -25,7 +25,7 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
     if request.method == "GET":
         hidden_columns = request.GET.get('hidden_columns', "")
     else:
-        hidden_columns = ""
+        hidden_columns = request.POST.get('hidden_columns', "")
         save_method = request.POST.get('save_method')
         mut_id = request.POST.get('mut_id')
 
