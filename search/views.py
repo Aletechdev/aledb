@@ -4,20 +4,18 @@ from django.http import HttpResponse
 from django.utils.safestring import mark_safe
 from django.template import loader
 from django.shortcuts import render
-from seq.models import ObservedMutation, Mutation
-from ale.models import AleExperiment, Project
+from seq.models import ObservedMutation
 from django.db.models import Q
+from filter.models import GlobalFilter, AleExperimentFilter
 import operator, collections
 from functools import reduce
 from seq.views import mutation_table_builder
 from ale.utils import get_user_projects, get_strains
-from ale.permissions import can_view_project
 from common.util import check_hidden_columns_and_filters, get_user_context
 from django.core.serializers.json import DjangoJSONEncoder
 import json
-from filter.util import get_filtered_observed_mutations_queryset
+
 from logs.aledb_logger import user_extra, join_extras
-import sys
 import logging
 
 logger = logging.getLogger(__name__)
@@ -48,6 +46,7 @@ def search(request):
             context.update({'message': message})
             return render(request, 'search/search.html', context)
 
+        check_hidden_columns_and_filters(request, None)
         obs_mut_qryset = _get_obs_mut_qryset(search_include_param_list, search_exclude_param_list)
         reseq_dict, obs_mut_qryset = _get_ordered_reseq_dict(obs_mut_qryset)
 
@@ -76,13 +75,13 @@ def search(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-# TODO: roll _get_search_ale_exp_params into _get_search_params.
 def _get_obs_mut_qryset(search_include_param_list, search_exclude_param_list):
     """
     :param request:
     :return: mutation_queryset and observed_mutation_queryset based on user request and user permission
     """
     obs_mut_qryset = _get_mut_qryset(search_include_param_list, search_exclude_param_list)
+    obs_mut_qryset = _apply_filters(obs_mut_qryset)
     # obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset, mut_queryset=mut_qryset)
     return obs_mut_qryset
 
@@ -117,8 +116,7 @@ def _get_last_search(request):
     return last_search
 
 
-def _get_search_params(request, projects):
-
+def _get_search_params(request, user_projects):
     include_argument_list = []
     exclude_argument_list = []
 
@@ -128,6 +126,8 @@ def _get_search_params(request, projects):
     if not message:
         _add_genes_to_query(request, include_argument_list, exclude_argument_list)
         _add_mutation_change_to_query(request, include_argument_list)
+        _add_project_to_query(request, include_argument_list, user_projects)
+        _add_strain_to_query(request, include_argument_list)
 
     if len(include_argument_list) == 0:
         message = 'Please enter search criteria'
@@ -196,27 +196,93 @@ def _add_freq_to_query(request, include_argument_list):
 
 
 def _add_mutation_change_to_query(request, include_argument_list):
-    if 'mut' in request.POST and request.POST['mut_type']:
-        mut_type = request.POST['mut']
-        include_argument_list.append(Q(**{'mutation__mutation_type': str(mut_type).upper()}))
+    mut_type = request.POST['mut_type']
+    if mut_type and len(mut_type) > 0:
+        include_argument_list.append(Q(mutation__mutation_type=str(mut_type).upper()))
 
 
-def _get_search_project_params(request):
-    project = None
-    if 'project' in request.POST and request.POST['project']:
-        project_name = request.POST['project']
-        project = Project.objects.get(name=project_name)
-    return project
+def _add_project_to_query(request, include_argument_list, user_projects):
+    if request.POST['project']:
+        project_id = request.POST['project']
+        include_argument_list.append(Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id=project_id))
+    elif not request.user.is_superuser:
+        project_ids = [proj.id for proj in user_projects]
+        include_argument_list.append(
+            Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=project_ids))
+
+
+def _add_strain_to_query(request, include_argument_list):
+    strain = request.POST['strain']
+    if strain and len(strain) > 0:
+        include_argument_list.append(Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__strain=strain))
 
 
 def _get_mut_qryset(include_argument_list, exclude_argument_list):
     include_argument_list = reduce(operator.and_, include_argument_list)
-
     if len(exclude_argument_list) > 0:
-        mut_qryset = ObservedMutation.objects.filter(include_argument_list).exclude(
-            reduce(operator.or_, exclude_argument_list))
+        exclude_argument_list = reduce(operator.or_, exclude_argument_list)
+        mut_qryset = ObservedMutation.objects.filter(include_argument_list).exclude(exclude_argument_list)
     else:
         mut_qryset = ObservedMutation.objects.filter(include_argument_list)
 
     return mut_qryset
 
+
+def _apply_filters(observed_mutation_queryset):
+    query_filters = _get_global_filters()
+    _get_experiment_filters(observed_mutation_queryset, query_filters)
+    observed_mutation_queryset.exclude(query_filters)
+    return observed_mutation_queryset
+
+
+def _get_global_filters():
+    filters = GlobalFilter.objects.all()
+    ignored_genes = []
+    ignored_mutations = []
+    q_queris = Q()
+    for f in filters:
+        if f.ignored_genes:
+            ignored_genes = ignored_genes + f.ignored_genes.split(',')
+        if f.ignored_mutations:
+            ignored_mutations = ignored_mutations + f.ignored_mutations.split(',')
+    for ignored_gene in ignored_genes:
+        if len(ignored_genes) > 0:
+            q_queris.add(Q(mutation__gene__contains=ignored_gene), Q.OR)
+    q_queris.add(Q(mutation__id__in=ignored_mutations), Q.OR)
+    return q_queris
+
+
+def _get_experiment_filters(observed_mutation_queryset, query_filters):
+    exp_filters = AleExperimentFilter.objects.filter(ale_experiment_id__in=observed_mutation_queryset.values(
+        "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment_id"))
+
+    for exp_filter in exp_filters:
+        q_queries = Q(
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp_filter.ale_experiment_id)
+        q_filters = Q()
+        if exp_filter.min_cutoff and exp_filter.min_cutoff > 0:
+            q_filters.add(Q(frequency__lt=exp_filter.min_cutoff / 100), Q.OR)
+        if exp_filter.max_cutoff and exp_filter.max_cutoff < 100:
+            q_filters.add(Q(frequency__gt=exp_filter.max_cutoff / 100), Q.OR)
+
+        ignored_mutations = []
+        if exp_filter.ignored_mutations and len(exp_filter.ignored_mutations) > 0:
+            ignored_mutations += exp_filter.ignored_mutations.split(',')
+        if exp_filter.starting_strain_mutations and len(exp_filter.starting_strain_mutations) > 0:
+            ignored_mutations += exp_filter.starting_strain_mutations.split(',')
+        ignored_mutations = _clean_mut_list(ignored_mutations)
+        if len(ignored_mutations) > 0:
+            q_filters.add(Q(mutation__id__in=ignored_mutations), Q.OR)
+        if exp_filter.ignored_genes and len(exp_filter.ignored_genes) > 0:
+            ignored_genes = exp_filter.ignored_genes.split(',')
+            for ignored_gene in ignored_genes:
+                if len(ignored_genes) > 0:
+                    q_filters.add(Q(mutation__gene__contains=ignored_gene), Q.OR)
+        q_queries.add(q_filters, Q.AND)
+        query_filters.add(q_queries, Q.OR)
+
+    return query_filters
+
+
+def _clean_mut_list(mut_id_list):
+    return [mut_id for mut_id in mut_id_list if len(mut_id)>0]
