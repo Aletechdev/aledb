@@ -6,11 +6,11 @@ from django.template import loader
 from django.shortcuts import render
 from seq.models import ObservedMutation
 from django.db.models import Q
-from filter.models import GlobalFilter, AleExperimentFilter
 import operator, collections
 from functools import reduce
 from seq.views import mutation_table_builder
 from ale.utils import get_user_projects, get_strains
+from filter.util import filter_observed_mutations
 from common.util import check_hidden_columns_and_filters, get_user_context
 from django.core.serializers.json import DjangoJSONEncoder
 import json
@@ -34,35 +34,36 @@ def search(request):
                         "projects": user_projects})
         template = loader.get_template("search/search.html")
 
-        if not request.POST:
-            return HttpResponse(template.render(context, request), content_type="text/html")
+        if not request.GET:
+            return render(request, 'search/search.html', context)
 
         start_time = time.clock()
         last_search = _get_last_search(request)
         context.update({"last_search": last_search})
 
         search_include_param_list, search_exclude_param_list, message = _get_search_params(request, user_projects)
-        if message and len(message)>0:
+
+        if len(search_include_param_list) == 0 or (message and len(message) > 0):
             context.update({'message': message})
             return render(request, 'search/search.html', context)
 
         check_hidden_columns_and_filters(request, None)
-        obs_mut_qryset = _get_obs_mut_qryset(search_include_param_list, search_exclude_param_list)
-        reseq_dict, obs_mut_qryset = _get_ordered_reseq_dict(obs_mut_qryset)
+        observed_mutations = _get_observed_mutations(search_include_param_list, search_exclude_param_list)
+        reseq_dict = collections.OrderedDict({obs_mut.sequencing_experiment.id: obs_mut.sequencing_experiment
+                                                  for obs_mut in observed_mutations})
 
         table_header = mutation_table_builder.get_table_header(request.user, reseq_dict)
         # obs_mut_qryset is already filtered
-        table_body = mutation_table_builder.get_table_body(request.user,
-                                                           reseq_dict,
-                                                           obs_mut_qryset,
-                                                           do_filter=False,
-                                                           table_type=mutation_table_builder.TableType.SEARCH)
+        table_body = mutation_table_builder.get_mutation_table_body(request.user,
+                                                                    observed_mutations,
+                                                                    reseq_dict,
+                                                                    table_type=mutation_table_builder.TableType.SEARCH)
 
         context.update({"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                         "title": "Search Results",
                         "table_header": mark_safe(table_header),
                         "mutation_count": len(table_body),
-                        "observed_mutation_count": obs_mut_qryset.count()
+                        "observed_mutation_count": len(observed_mutations)
                         })
         logger.info("search performance", extra=join_extras(
             {"parameters": last_search},
@@ -75,68 +76,51 @@ def search(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-def _get_obs_mut_qryset(search_include_param_list, search_exclude_param_list):
+def _get_observed_mutations(search_include_param_list, search_exclude_param_list):
     """
     :param request:
     :return: mutation_queryset and observed_mutation_queryset based on user request and user permission
     """
     obs_mut_qryset = _get_mut_qryset(search_include_param_list, search_exclude_param_list)
-    obs_mut_qryset = _apply_filters(obs_mut_qryset)
-    # obs_mut_qryset = get_filtered_observed_mutations_queryset(obs_mut_qryset, mut_queryset=mut_qryset)
-    return obs_mut_qryset
-
-
-def _get_ordered_reseq_dict(obs_muts_qryset):
-
-    obs_muts_qryset = obs_muts_qryset.select_related(
-        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment', 'mutation'
-    ).order_by(
-        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__name',
-        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_id',
-        'sequencing_experiment__tech_rep__isolate__flask__flask_number',
-        'sequencing_experiment__tech_rep__isolate__isolate_number',
-        'sequencing_experiment__tech_rep__tech_rep_number'
-    )
-    reseq_ordered_dict = collections.OrderedDict({obs_mut.sequencing_experiment.id: obs_mut.sequencing_experiment
-                                                  for obs_mut in obs_muts_qryset})
-    return reseq_ordered_dict, obs_muts_qryset
+    observed_mutations = filter_observed_mutations(obs_mut_qryset)
+    return observed_mutations
 
 
 def _get_last_search(request):
-    last_search = {
-        'gene': request.POST['gene'],
-        'min_freq': request.POST['min_freq'],
-        'max_freq': request.POST['max_freq'],
-        'min_pos': request.POST['min_pos'],
-        'max_pos': request.POST['max_pos'],
-        'mut_type': request.POST['mut_type'],
-        'project': request.POST['project'],
-        'strain': request.POST['strain']
-    }
+    last_search = {}
+    if request.GET:
+        last_search = {
+            'gene': request.GET['gene'],
+            'min_freq': request.GET['min_freq'],
+            'max_freq': request.GET['max_freq'],
+            'min_pos': request.GET['min_pos'],
+            'max_pos': request.GET['max_pos'],
+            'mut_type': request.GET['mut_type'],
+            'project': request.GET['project'],
+            'strain': request.GET['strain']
+        }
     return last_search
 
 
 def _get_search_params(request, user_projects):
     include_argument_list = []
     exclude_argument_list = []
-
     message = _add_position_to_query(request, include_argument_list)
     if not message:
         message = _add_freq_to_query(request, include_argument_list)
     if not message:
         _add_genes_to_query(request, include_argument_list, exclude_argument_list)
         _add_mutation_change_to_query(request, include_argument_list)
-        _add_project_to_query(request, include_argument_list, user_projects)
         _add_strain_to_query(request, include_argument_list)
-
-    if len(include_argument_list) == 0:
-        message = 'Please enter search criteria'
+        project_ok = _add_project_to_query(request, include_argument_list, user_projects)
+        if not project_ok and len(include_argument_list) <= 1:
+            message = 'Please enter search criteria'
     return include_argument_list, exclude_argument_list, message
 
 
 def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
-    if 'gene' in request.POST:
-        gene_list = request.POST['gene'].replace(" ", "").split(',')
+    if 'gene' in request.GET:
+        gene_list = request.GET['gene'].replace(" ", "").split(',')
 
         for mutated_gene in gene_list:
             if mutated_gene == '':
@@ -164,10 +148,10 @@ def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
 def _add_position_to_query(request, include_argument_list):
     min, max = None, None
     try:
-        if 'min_pos' in request.POST and len(request.POST['min_pos'])>0:
-            min = int(request.POST['min_pos'])
-        if 'max_pos' in request.POST and len(request.POST['max_pos'])>0:
-            max = int(request.POST['max_pos'])
+        if 'min_pos' in request.GET and len(request.GET['min_pos'])>0:
+            min = int(request.GET['min_pos'])
+        if 'max_pos' in request.GET and len(request.GET['max_pos'])>0:
+            max = int(request.GET['max_pos'])
         if min and max and min > max:
             return 'Invalid position: min > max'
         if min:
@@ -181,10 +165,10 @@ def _add_position_to_query(request, include_argument_list):
 def _add_freq_to_query(request, include_argument_list):
     min, max = None, None
     try:
-        if 'min_freq' in request.POST and len(request.POST['min_freq'])>0:
-            min = float(request.POST['min_freq'])
-        if 'max_freq' in request.POST and len(request.POST['max_freq'])>0:
-            max = float(request.POST['max_freq'])
+        if 'min_freq' in request.GET and len(request.GET['min_freq'])>0:
+            min = float(request.GET['min_freq'])
+        if 'max_freq' in request.GET and len(request.GET['max_freq'])>0:
+            max = float(request.GET['max_freq'])
         if min and max and min > max:
             return 'Invalid frequency: min > max'
         if min:
@@ -196,23 +180,35 @@ def _add_freq_to_query(request, include_argument_list):
 
 
 def _add_mutation_change_to_query(request, include_argument_list):
-    mut_type = request.POST['mut_type']
+    mut_type = request.GET['mut_type']
     if mut_type and len(mut_type) > 0:
         include_argument_list.append(Q(mutation__mutation_type=str(mut_type).upper()))
 
 
 def _add_project_to_query(request, include_argument_list, user_projects):
-    if request.POST['project']:
-        project_id = request.POST['project']
-        include_argument_list.append(Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id=project_id))
+    """
+    :param request:
+    :param include_argument_list:
+    :param user_projects:
+    :return: True if there is project param and the project is valid, else FALSE
+    """
+    if request.GET['project']:
+        project_id = request.GET['project']
+        ok = request.user.is_superuser
+        if not ok:
+            ok = project_id in [proj.id for proj in user_projects]
+        if ok:
+            include_argument_list.append(Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id=project_id))
+        return ok
     elif not request.user.is_superuser:
         project_ids = [proj.id for proj in user_projects]
         include_argument_list.append(
             Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=project_ids))
+    return False
 
 
 def _add_strain_to_query(request, include_argument_list):
-    strain = request.POST['strain']
+    strain = request.GET['strain']
     if strain and len(strain) > 0:
         include_argument_list.append(Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__strain=strain))
 
@@ -227,62 +223,3 @@ def _get_mut_qryset(include_argument_list, exclude_argument_list):
 
     return mut_qryset
 
-
-def _apply_filters(observed_mutation_queryset):
-    query_filters = _get_global_filters()
-    _get_experiment_filters(observed_mutation_queryset, query_filters)
-    observed_mutation_queryset.exclude(query_filters)
-    return observed_mutation_queryset
-
-
-def _get_global_filters():
-    filters = GlobalFilter.objects.all()
-    ignored_genes = []
-    ignored_mutations = []
-    q_queris = Q()
-    for f in filters:
-        if f.ignored_genes:
-            ignored_genes = ignored_genes + f.ignored_genes.split(',')
-        if f.ignored_mutations:
-            ignored_mutations = ignored_mutations + f.ignored_mutations.split(',')
-    for ignored_gene in ignored_genes:
-        if len(ignored_genes) > 0:
-            q_queris.add(Q(mutation__gene__contains=ignored_gene), Q.OR)
-    q_queris.add(Q(mutation__id__in=ignored_mutations), Q.OR)
-    return q_queris
-
-
-def _get_experiment_filters(observed_mutation_queryset, query_filters):
-    exp_filters = AleExperimentFilter.objects.filter(ale_experiment_id__in=observed_mutation_queryset.values(
-        "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment_id"))
-
-    for exp_filter in exp_filters:
-        q_queries = Q(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp_filter.ale_experiment_id)
-        q_filters = Q()
-        if exp_filter.min_cutoff and exp_filter.min_cutoff > 0:
-            q_filters.add(Q(frequency__lt=exp_filter.min_cutoff / 100), Q.OR)
-        if exp_filter.max_cutoff and exp_filter.max_cutoff < 100:
-            q_filters.add(Q(frequency__gt=exp_filter.max_cutoff / 100), Q.OR)
-
-        ignored_mutations = []
-        if exp_filter.ignored_mutations and len(exp_filter.ignored_mutations) > 0:
-            ignored_mutations += exp_filter.ignored_mutations.split(',')
-        if exp_filter.starting_strain_mutations and len(exp_filter.starting_strain_mutations) > 0:
-            ignored_mutations += exp_filter.starting_strain_mutations.split(',')
-        ignored_mutations = _clean_mut_list(ignored_mutations)
-        if len(ignored_mutations) > 0:
-            q_filters.add(Q(mutation__id__in=ignored_mutations), Q.OR)
-        if exp_filter.ignored_genes and len(exp_filter.ignored_genes) > 0:
-            ignored_genes = exp_filter.ignored_genes.split(',')
-            for ignored_gene in ignored_genes:
-                if len(ignored_genes) > 0:
-                    q_filters.add(Q(mutation__gene__contains=ignored_gene), Q.OR)
-        q_queries.add(q_filters, Q.AND)
-        query_filters.add(q_queries, Q.OR)
-
-    return query_filters
-
-
-def _clean_mut_list(mut_id_list):
-    return [mut_id for mut_id in mut_id_list if len(mut_id)>0]

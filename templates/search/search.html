@@ -68,8 +68,7 @@
 {% block content %}
 
 <div class="row">
-    <form action="/search/" method="post" >
-        {% csrf_token %}
+    <form action="/search/" method="get" >
         <input class="form-control" type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
         <div class="form-group row">
             <label for="gene" class="col-sm-2 col-form-label text-right">Genetic Target:</label>

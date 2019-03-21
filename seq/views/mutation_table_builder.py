@@ -112,6 +112,21 @@ def get_table_header(user, reseq_dict, table_type=None):
 
     return base_table_header + table_header_list
 
+def get_mutation_table_data(reseq_dict, observed_mutations):
+    mutation_map = {obs_mut.mutation.id: obs_mut.mutation for obs_mut in observed_mutations}
+    mutation_index_dict = dict((mutation_id, i) for i, mutation_id in enumerate(mutation_map.keys()))
+    # resequencing_experiment urls
+    experiment_url_dict = get_experiment_urls(reseq_dict)
+    experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
+    # Initialize all sample mutation table cells as empty.
+    table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mutation_index_dict)
+    for observed_mutation in observed_mutations:
+        new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
+        if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
+            table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
+                experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
+    return mutation_map.values(), table_entry_list, mutation_index_dict
+
 
 def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset, do_filter=True):
     # print("reseq_dict", len(reseq_dict))
@@ -177,6 +192,54 @@ def get_mutation_table_queryset_and_entry_list_for_export(reseq_dict, observed_m
             table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
                 experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
     return mut_qryset, table_entry_list, mutation_index_dict
+
+
+def get_mutation_table_body(user: User, observed_mutations: [], reseq_dict, table_type: str):
+    mutations, table_entry_list, mutation_index_dict = get_mutation_table_data(reseq_dict, observed_mutations)
+
+    protein_changes = {}
+    table_body = []
+    for observed_mutation in observed_mutations:
+        mutation = observed_mutation.mutation
+        if _contains_mutation(table_entry_list[mutation_index_dict[observed_mutation.mutation.id]]):
+            table_row = [HTML_MUTATION_TABLE_ROW]
+            if can_add_global_filter(user):
+                table_row.append(_build_table_cell_for_dropdown(table_type, mutation.id, observed_mutation.get_experiment_id(), ))
+            else:
+                table_row.append("""""")
+
+            table_row.append(_get_mutation_tags(mutation.tags))
+            table_row.append(format(mutation.position, ',d'))
+            table_row.append(mutation.mutation_type)
+            table_row.append(mutation.sequence_change)
+            table_row.append(get_gene_table_entry(observed_mutation))
+            table_row.append("" if mutation.function is None else mutation.function)
+            table_row.append("" if mutation.product is None else mutation.product)
+            table_row.append("" if mutation.go_process is None else mutation.go_process)
+            table_row.append("" if mutation.go_component is None else mutation.go_component)
+
+            if table_type is TableType.GENE_TABLE:
+                if evidence.search(mutation.protein_change):
+                    try:
+                        table_row.append("<a id=\"%s\" onclick=\"highlight_mutation(%d,%d)\">%s</a>" %
+                                         ("mutation_" + str(mutation.id),
+                                          int(non_decimal.sub('', mutation.protein_change)),
+                                          int(mutation.id), mutation.protein_change))
+                        protein_changes[mutation.id] = strip_tags(mutation.protein_change)
+                    except:
+                        table_row.append(mutation.protein_change)
+                else:
+                    table_row.append(mutation.protein_change)
+            else:
+                table_row.append(mutation.protein_change)
+            table_row += table_entry_list[mutation_index_dict[mutation.id]]
+
+            table_body.append(table_row)
+
+    if table_type is TableType.GENE_TABLE:
+        return table_body, protein_changes
+
+    return table_body
 
 
 # TODO: Refactor. The observed mutations argument may
