@@ -2,7 +2,8 @@ from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from ale.permissions import can_view_experiment
 import logging
-import os, io
+import os
+
 
 DOC_ROOT = settings.ALE_DATA_ROOT_DIR
 
@@ -32,8 +33,15 @@ def protected_file_serve(request, page_name: str):
         logger.info("display file " + page_name)
         file_path = DOC_ROOT + page_name
         if os.path.isfile(file_path):
+            mine_type = 'application/octet-stream'
+            if file_path.endswith('txt') or file_path.endswith('.html') or file_path.endswith('.htm'):
+                mine_type = 'text/html'
+            elif file_path.endswith('.png'):
+                mine_type = 'image/png'
+            elif file_path.endswith('.pdf'):
+                mine_type = 'application/pdf'
             with open(DOC_ROOT + page_name, 'rb') as f:
-                response = HttpResponse(f.read())
+                response = HttpResponse(f.read(), content_type=mine_type)
             return response
     else:
         logger.error("file path error: " + "page not available - " + page_name)
