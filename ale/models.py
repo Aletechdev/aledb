@@ -107,7 +107,7 @@ class AleId(models.Model):
     description = models.CharField(max_length=300, **blank_field)
     species = models.CharField(max_length=300, **blank_field)
     strain = models.CharField(max_length=300, **blank_field)
-    ale_experiment = models.ForeignKey(AleExperiment)
+    ale_experiment = models.ForeignKey(AleExperiment, on_delete=models.DO_NOTHING)
     starting_strain = models.ForeignKey("Isolate",
                                         default=None,
                                         **blank_field)

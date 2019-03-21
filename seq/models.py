@@ -127,3 +127,7 @@ class ObservedMutation(models.Model):
     frequency = models.DecimalField(null=True,
                                     max_digits=5,
                                     decimal_places=4)
+
+    def get_experiment_id(self):
+        return self.sequencing_experiment.tech_rep.isolate.flask.ale_id.ale_experiment_id
+
