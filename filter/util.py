@@ -46,12 +46,12 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_filter=None
             q_exp.add(Q(mutation__id__in=exp_filter_muts), Q.OR)
         exp_q_query = Q(
             sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp_filter.ale_experiment_id)
-        exp_q_query.add(q_exp, Q.OR)
+        exp_q_query.add(q_exp, Q.AND)
         q_queries.add(exp_q_query, Q.OR)
     observed_mutation_queryset.exclude(q_queries)
 
     # filter genes
-    obs_muts_qryset = observed_mutation_queryset.select_related(
+    observed_mutation_queryset = observed_mutation_queryset.select_related(
         'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment', 'mutation'
     ).order_by(
         'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__name',
@@ -76,6 +76,8 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_filter=None
                         deleted = True
             if not deleted:
                 observed_mutations.append(obs_mut)
+    else:
+        observed_mutations = [obs_mut for obs_mut in observed_mutation_queryset]
     return observed_mutations
 
 
