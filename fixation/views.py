@@ -41,7 +41,7 @@ def fixating_mutations(request):
 
         table_body = mutation_table_builder.get_table_body(request.user, reseq_dict=reseq_ordered_dict,
                                                            observed_mutations_queryset=obs_mut_qryset,
-                                                           ale_experiment_id=int(ale_experiment_id),
+                                                           ale_experiment=experiment,
                                                            table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS)
 
         hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)

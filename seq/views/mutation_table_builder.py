@@ -8,15 +8,15 @@ from django.utils.html import strip_tags
 from seq.util import get_mut_queryset_from_obs_mut_queryset, get_ecocyc_gene_list
 from genes.util import get_gene_list
 from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS
-from ale.models import TechnicalReplicate
+from ale.models import TechnicalReplicate, AleExperiment
 from filter.models import AleExperimentFilter
-from ale.permissions import can_add_global_filter
+from ale.permissions import can_add_global_filter, can_add_experiment_filter
 
 
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/img/close-icon.gif" width="12" height="11"></a>"""
-HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Position", "Mutation Type", "Sequence Change", "Gene", "Function",
+HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Reference Seq", "Position", "Mutation Type", "Sequence Change", "Gene", "Function",
                               "Product", "GO Process", "GO Component", "Details"]
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
@@ -35,7 +35,7 @@ _table_cell_dropdown_template = """<div class="dropdown">
 </div>"""
 
 
-def _build_table_cell_for_dropdown(table_type, mutation_id, ale_experiment_id):
+def _build_table_cell_for_dropdown(mutation, ale_experiment):
     """Returns a <div> element containing the drop down menu for each row
     in the mutation table.
 
@@ -45,19 +45,13 @@ def _build_table_cell_for_dropdown(table_type, mutation_id, ale_experiment_id):
 
     menuitems = ''
     # all tables have a 'Save to Global Filter' menuitem
-    menuitems = _menu_item_save_to_global_filter % (mutation_id)
+    menuitems = _menu_item_save_to_global_filter % (mutation.id)
 
     # some other tables have a 'Save to Experiment Filter' menuitem
-    if (not table_type in [TableType.GENE_TABLE \
-            , TableType.SEARCH \
-            , TableType.SHARED \
-            # , TableType.COMBINE \
-            # , TableType.COMBINE_ENRICHMENT_MUTATIONS \
-            # , TableType.COMBINE_FIXATION_MUTATIONS \
-                           ]):
-        menuitems += _menu_item_save_to_experiment_filter % (ale_experiment_id, mutation_id)
+    if ale_experiment:
+        menuitems += _menu_item_save_to_experiment_filter % (ale_experiment.id, mutation.id)
 
-    return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation_id))
+    return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation.id))
 
 
 EXPANDABLE_COLUMN_PLUS_SIGN = """<i onclick="expand_collapse_gene_entry(this)" class="fa fa-plus pull-left" aria-hidden="true" data-toggle="collapse" data-target="#%s"></i>"""
@@ -90,27 +84,72 @@ else:
     resequencing_report_url = seq.views.common.DEFAULT_RESEQ_REPORT_URL
 
 
-def get_table_header(user, reseq_dict, table_type=None):
+def get_table_header(user, reseq_dict, experiment: AleExperiment = None):
     base_table_header = HTML_MUTATION_TABLE_HEADER
     experiment_urls = get_experiment_urls(reseq_dict)
     table_header_list = []
 
     for reseq_id in reseq_dict:
         reseq = reseq_dict[reseq_id]
-        sample_name = reseq.exp_ale_flask_isolate_str
+        sample_name = reseq.ale_flask_isolate_str
+        if not experiment:
+            sample_name = reseq.exp_ale_flask_isolate_str
         current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep)
 
         sample_header_html = sample_name
         if reseq_id in experiment_urls.keys():
             sample_header_html = """<a href="%s">%s</a>"""
             sample_header_html = sample_header_html % (experiment_urls[reseq_id], sample_name)
-
-        if can_add_global_filter(user):
             table_header_list.append(sample_header_html + (TAGS_IMAGE % (dropdown_html, current_tags)))
-        else:
-            table_header_list.append(sample_header_html)
-
     return base_table_header + table_header_list
+
+
+def get_mutation_table_body(user: User, observed_mutations: [], reseq_dict, experiment: AleExperiment = None, is_gene_table: bool = False):
+    mutations, table_entry_list, mutation_index_dict = get_mutation_table_data(reseq_dict, observed_mutations)
+
+    protein_changes = {}
+    table_body = []
+    for mutation in mutations:
+        if _contains_mutation(table_entry_list[mutation_index_dict[mutation.id]]):
+            table_row = [HTML_MUTATION_TABLE_ROW]
+            if can_add_global_filter(user) or can_add_experiment_filter(user, experiment):
+                table_row.append(_build_table_cell_for_dropdown(mutation, experiment))
+            else:
+                table_row.append("""""")
+
+            table_row.append(_get_mutation_tags(mutation.tags))
+            table_row.append(_get_mutation_tags(mutation.tags))
+            table_row.append(format(mutation.position, ',d'))
+            table_row.append(mutation.mutation_type)
+            table_row.append(mutation.sequence_change)
+            table_row.append(get_gene_table_entry(mutation))
+            table_row.append("" if mutation.function is None else mutation.function)
+            table_row.append("" if mutation.product is None else mutation.product)
+            table_row.append("" if mutation.go_process is None else mutation.go_process)
+            table_row.append("" if mutation.go_component is None else mutation.go_component)
+
+            if is_gene_table:
+                if evidence.search(mutation.protein_change):
+                    try:
+                        table_row.append("<a id=\"%s\" onclick=\"highlight_mutation(%d,%d)\">%s</a>" %
+                                         ("mutation_" + str(mutation.id),
+                                          int(non_decimal.sub('', mutation.protein_change)),
+                                          int(mutation.id), mutation.protein_change))
+                        protein_changes[mutation.id] = strip_tags(mutation.protein_change)
+                    except:
+                        table_row.append(mutation.protein_change)
+                else:
+                    table_row.append(mutation.protein_change)
+            else:
+                table_row.append(mutation.protein_change)
+            table_row += table_entry_list[mutation_index_dict[mutation.id]]
+
+            table_body.append(table_row)
+
+    if is_gene_table:
+        return table_body, protein_changes
+
+    return table_body
 
 def get_mutation_table_data(reseq_dict, observed_mutations):
     mutation_map = {obs_mut.mutation.id: obs_mut.mutation for obs_mut in observed_mutations}
@@ -194,61 +233,13 @@ def get_mutation_table_queryset_and_entry_list_for_export(reseq_dict, observed_m
     return mut_qryset, table_entry_list, mutation_index_dict
 
 
-def get_mutation_table_body(user: User, observed_mutations: [], reseq_dict, table_type: str):
-    mutations, table_entry_list, mutation_index_dict = get_mutation_table_data(reseq_dict, observed_mutations)
-
-    protein_changes = {}
-    table_body = []
-    for observed_mutation in observed_mutations:
-        mutation = observed_mutation.mutation
-        if _contains_mutation(table_entry_list[mutation_index_dict[observed_mutation.mutation.id]]):
-            table_row = [HTML_MUTATION_TABLE_ROW]
-            if can_add_global_filter(user):
-                table_row.append(_build_table_cell_for_dropdown(table_type, mutation.id, observed_mutation.get_experiment_id(), ))
-            else:
-                table_row.append("""""")
-
-            table_row.append(_get_mutation_tags(mutation.tags))
-            table_row.append(format(mutation.position, ',d'))
-            table_row.append(mutation.mutation_type)
-            table_row.append(mutation.sequence_change)
-            table_row.append(get_gene_table_entry(observed_mutation))
-            table_row.append("" if mutation.function is None else mutation.function)
-            table_row.append("" if mutation.product is None else mutation.product)
-            table_row.append("" if mutation.go_process is None else mutation.go_process)
-            table_row.append("" if mutation.go_component is None else mutation.go_component)
-
-            if table_type is TableType.GENE_TABLE:
-                if evidence.search(mutation.protein_change):
-                    try:
-                        table_row.append("<a id=\"%s\" onclick=\"highlight_mutation(%d,%d)\">%s</a>" %
-                                         ("mutation_" + str(mutation.id),
-                                          int(non_decimal.sub('', mutation.protein_change)),
-                                          int(mutation.id), mutation.protein_change))
-                        protein_changes[mutation.id] = strip_tags(mutation.protein_change)
-                    except:
-                        table_row.append(mutation.protein_change)
-                else:
-                    table_row.append(mutation.protein_change)
-            else:
-                table_row.append(mutation.protein_change)
-            table_row += table_entry_list[mutation_index_dict[mutation.id]]
-
-            table_body.append(table_row)
-
-    if table_type is TableType.GENE_TABLE:
-        return table_body, protein_changes
-
-    return table_body
-
-
 # TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
 def get_table_body(user: User,
                    reseq_dict,
                    observed_mutations_queryset,
-                   ale_experiment_id=None,
+                   ale_experiment=None,
                    table_type=None,
                    do_filter=True):
     mutation_queryset, \
@@ -265,16 +256,17 @@ def get_table_body(user: User,
         mutation = observed_mutation.mutation
         if _contains_mutation(table_entry_list[mutation_index_dict[mut_id]]):
             table_row = [HTML_MUTATION_TABLE_ROW]
-            if can_add_global_filter(user):
-                table_row.append(_build_table_cell_for_dropdown(table_type, mutation.id, ale_experiment_id, ))
+            if can_add_global_filter(user) or can_add_experiment_filter(user, ale_experiment):
+                table_row.append(_build_table_cell_for_dropdown(mutation, ale_experiment, ))
             else:
                 table_row.append("""""")
 
             table_row.append(_get_mutation_tags(mutation.tags))
+            table_row.append("" if not mutation.reseq_reference else mutation.reseq_reference)
             table_row.append(format(mutation.position, ',d'))
             table_row.append(mutation.mutation_type)
             table_row.append(mutation.sequence_change)
-            table_row.append(get_gene_table_entry(observed_mutation))
+            table_row.append(get_gene_table_entry(mutation))
             table_row.append("" if mutation.function is None else mutation.function)
             table_row.append("" if mutation.product is None else mutation.product)
             table_row.append("" if mutation.go_process is None else mutation.go_process)
@@ -304,21 +296,13 @@ def get_table_body(user: User,
     return table_body
 
 
-def get_gene_table_entry(observed_mutation):
-    need_links = True
-    strain = observed_mutation.sequencing_experiment.tech_rep.isolate.flask.ale_id.strain
-    # RC - hard coded???
-    if strain != "511145":
-        need_links = False
-
+def get_gene_table_entry(mutation):
     table_entry = """<div style="width:150px">"""
-    cleaned_gene_list = get_gene_list(observed_mutation.mutation.gene)
-    if need_links:
-        cleaned_gene_list = get_ecocyc_gene_list(get_gene_list(observed_mutation.mutation.gene))
+    cleaned_gene_list = get_ecocyc_gene_list(get_gene_list(mutation.gene))
 
     if len(cleaned_gene_list) > 10:
-        table_entry += EXPANDABLE_COLUMN_PLUS_SIGN % str(observed_mutation.mutation.id)
-        table_entry += EXPANDABLE_GENE_ENTRY % (str(observed_mutation.mutation.id), ", ".join(cleaned_gene_list))
+        table_entry += EXPANDABLE_COLUMN_PLUS_SIGN % str(mutation.id)
+        table_entry += EXPANDABLE_GENE_ENTRY % (str(mutation.id), ", ".join(cleaned_gene_list))
     else:
         table_entry += ", ".join(cleaned_gene_list) + "</div>"
     return table_entry
@@ -379,7 +363,6 @@ def _find_between(s, first, last):
 
 def _get_mutation_tags(tags):
     html = ''
-
     if tags:
 
         for tag in tags.split(','):
@@ -401,25 +384,16 @@ def _get_tag_filter_dropdown_entries(mutation_id):
 def _get_tag_replicate_dropdown_entries(replicate: TechnicalReplicate):
     # tags = TechnicalReplicate.objects.get(id=replicate_id).tags
     tags = replicate.tags;
-
     current_tags = ''
-
     dropdown_html = ''
 
     for tag in COLUMN_TAGS:
-
         image = TAGS[tag]
-
         dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d, this)">Toggle Tag: %s %s</a></li>' % (
         tag, replicate.id, tag, image)
-
         if tags and tag in tags:
-
             current_tags += '<span class="fa-stack">%s<font style="font-size:0px">%s</font></span>' % (image, tag)
-
         else:
-
             current_tags += '<span class="fa-stack" style="display:none">%s<font style="font-size:0px">%s</font></span>' % (
             image, tag)
-
     return current_tags, dropdown_html

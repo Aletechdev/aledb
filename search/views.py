@@ -56,8 +56,7 @@ def search(request):
         # obs_mut_qryset is already filtered
         table_body = mutation_table_builder.get_mutation_table_body(request.user,
                                                                     observed_mutations,
-                                                                    reseq_dict,
-                                                                    table_type=mutation_table_builder.TableType.SEARCH)
+                                                                    reseq_dict)
 
         context.update({"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                         "title": "Search Results",
