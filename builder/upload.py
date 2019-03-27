@@ -293,27 +293,3 @@ def _find_between(s, first, last):
         return s[start:end]
     except ValueError:
         return ""
-
-
-def upload_references(ale_id):
-    # first, find a way to get to annotated.gd using the aleid. The experiment root path is reseq.location
-    reseq_experiments = get_ordered_reseq_queryset(ale_id)
-    if hasattr(settings, "ALE_DATA_ROOT_DIR"):
-        reseq_report_url = settings.ALE_DATA_ROOT_DIR
-    else:
-        print("sequencing_url not found")
-    for reseq_experiment in reseq_experiments:
-        path = os.path.join(reseq_report_url, reseq_experiment.location + "annotated.gd")
-        if os.path.exists(path):
-            print(path)
-        else:
-            print("path not found:", path)
-    all_observed_mutations = ObservedMutation.objects.all()
-    ctr = len(all_observed_mutations)
-    for observed_mutation in all_observed_mutations:
-        mutation = Mutation.objects.get(id=observed_mutation.mutation_id)
-        reseq_experiment = observed_mutation.sequencing_experiment
-        print(observed_mutation.id, ctr-1)
-        ctr -=1
-        mutation.reseq_reference = str(Isolate.objects.get(id=TechnicalReplicate.objects.get(id=reseq_experiment.tech_rep_id).isolate_id).reseq_reference).replace(".gbk","").replace(".gb")
-        mutation.save()
