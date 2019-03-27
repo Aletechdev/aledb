@@ -9,6 +9,8 @@
           href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
 
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
     <style type="text/css">
 
         .FixedHeader_Cloned th {
@@ -48,6 +50,7 @@
     {% if ale_experiment_id %}
         <div class="row"> <!-- Columns -->
             <form action="" method="get">
+            {% csrf_token %}
                 <br>
                 <b>Columns: </b>
                 <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id  }}"/>

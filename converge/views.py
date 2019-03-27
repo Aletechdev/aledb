@@ -66,9 +66,8 @@ def converge_mutations(request):
 
 # TODO: refactor
 def _get_table_body(reseq_dict, experiment, user):
-    obs_mut_qryset = get_converge_obs_mut_qryset(reseq_dict)
+    obs_mut_qryset = get_converge_obs_mut_qryset(experiment.ale_id)
     return mutation_table_builder.get_table_body(user=user,
                                                  reseq_dict=reseq_dict,
                                                  observed_mutations_queryset=obs_mut_qryset,
-                                                 ale_experiment=experiment,
-                                                 table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
+                                                 ale_experiment=experiment)

@@ -1,9 +1,9 @@
 import subprocess
 
 from filter.models import AleExperimentFilter
-import filter.util, logging
+import logging
 from ale.models import TechnicalReplicate
-from seq.models import Mutation
+import seq.models
 from django.core.cache import cache
 
 __author__ = 'Patrick Phaneuf, Denny Gosting'
@@ -44,7 +44,7 @@ def check_hidden_columns_and_filters(request, ale_experiment_id):
             ale_exp_filter.save()
 
         elif save_method == 'tag_mut':
-            mutation = Mutation.objects.get(id=mut_id)
+            mutation = seq.models.Mutation.objects.get(id=mut_id)
             if mutation.tags:
                 selected_tag = request.POST.get('tag_name')
                 tag_list = mutation.tags.split(',')
@@ -90,3 +90,10 @@ def get_user_context(user):
     # context.update({"experiments": get_all_user_exps(user)})
     return context
 
+
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False

@@ -95,7 +95,7 @@ def _get_last_search(request):
             'min_pos': request.GET['min_pos'],
             'max_pos': request.GET['max_pos'],
             'mut_type': request.GET['mut_type'],
-            'project': request.GET['project'],
+            'project': int(request.GET['project']),
             'strain': request.GET['strain']
         }
     return last_search
@@ -193,9 +193,7 @@ def _add_project_to_query(request, include_argument_list, user_projects):
     """
     if request.GET['project']:
         project_id = request.GET['project']
-        ok = request.user.is_superuser
-        if not ok:
-            ok = project_id in [proj.id for proj in user_projects]
+        ok = int(project_id) in [proj.id for proj in user_projects]
         if ok:
             include_argument_list.append(Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id=project_id))
         return ok

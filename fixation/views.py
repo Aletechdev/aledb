@@ -9,7 +9,7 @@ from common.constants import \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
 from common.util import get_user_context, check_hidden_columns_and_filters
 from seq.util import get_reseq_ordered_dict
-from fixation.util import get_exp_fixed_obs_mut_qryset
+from fixation.util import get_fixed_obs_mut_qryset
 import common.constants
 from logs.aledb_logger import user_extra, join_extras
 import logging
@@ -34,15 +34,14 @@ def fixating_mutations(request):
 
         reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
 
-        table_header = mutation_table_builder.get_table_header(request.user, reseq_ordered_dict,
-                                                               mutation_table_builder.TableType.FIXATING_MUTATIONS)
+        table_header = mutation_table_builder.get_table_header(request.user, reseq_ordered_dict)
 
-        obs_mut_qryset = get_exp_fixed_obs_mut_qryset(reseq_ordered_dict)
+        obs_mut_qryset = get_fixed_obs_mut_qryset(ale_experiment_id)
 
         table_body = mutation_table_builder.get_table_body(request.user, reseq_dict=reseq_ordered_dict,
                                                            observed_mutations_queryset=obs_mut_qryset,
                                                            ale_experiment=experiment,
-                                                           table_type=mutation_table_builder.TableType.FIXATING_MUTATIONS)
+                                                           is_gene_table=False)
 
         hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
 
