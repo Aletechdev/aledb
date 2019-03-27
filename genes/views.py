@@ -40,7 +40,7 @@ def gene(request):
         table_header = mutation_table_builder.get_table_header(request.user, reseq_dict)
         table_body, protein_changes = mutation_table_builder.get_table_body(request.user, reseq_dict,
                                                                             observed_mutations_with_gene_queryset,
-                                                                            table_type=mutation_table_builder.TableType.GENE_TABLE)
+                                                                            is_gene_table=True)
 
         pdb_url, residue_mappings, has_pdb_file = _get_pdb_info(gene_query)
         homology_data, has_homology_data = _get_homology_data(gene_query)

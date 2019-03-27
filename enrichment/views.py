@@ -34,8 +34,7 @@ def enrichment_mutations(request):
         reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
 
         table_header = mutation_table_builder.get_table_header(request.user,
-                                                               reseq_dict=reseq_ordered_dict,
-                                                               table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
+                                                               reseq_dict=reseq_ordered_dict)
 
         table_body = _get_table_body(reseq_ordered_dict, experiment, request.user)
 
@@ -70,5 +69,4 @@ def _get_table_body(reseq_dict, experiment, user):
     return mutation_table_builder.get_table_body(user=user,
                                                  reseq_dict=reseq_dict,
                                                  observed_mutations_queryset=obs_mut_qryset,
-                                                 ale_experiment=experiment,
-                                                 table_type=mutation_table_builder.TableType.ENRICHMENT_MUTATIONS)
+                                                 ale_experiment=experiment)

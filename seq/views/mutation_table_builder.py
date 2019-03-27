@@ -1,15 +1,14 @@
 from django.conf import settings
 from django.contrib.auth.models import User
 import seq.views.common
-from filter.util import get_filtered_observed_mutations_queryset
 import re
 from enum import Enum
 from django.utils.html import strip_tags
-from seq.util import get_mut_queryset_from_obs_mut_queryset, get_ecocyc_gene_list
+from seq.util import get_ecocyc_gene_list
+from filter.util import filter_observed_mutations
 from genes.util import get_gene_list
 from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS
 from ale.models import TechnicalReplicate, AleExperiment
-from filter.models import AleExperimentFilter
 from ale.permissions import can_add_global_filter, can_add_experiment_filter
 
 
@@ -49,7 +48,7 @@ def _build_table_cell_for_dropdown(mutation, ale_experiment):
 
     # some other tables have a 'Save to Experiment Filter' menuitem
     if ale_experiment:
-        menuitems += _menu_item_save_to_experiment_filter % (ale_experiment.id, mutation.id)
+        menuitems += _menu_item_save_to_experiment_filter % (ale_experiment.ale_id, mutation.id)
 
     return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation.id))
 
@@ -94,13 +93,15 @@ def get_table_header(user, reseq_dict, experiment: AleExperiment = None):
         sample_name = reseq.ale_flask_isolate_str
         if not experiment:
             sample_name = reseq.exp_ale_flask_isolate_str
-        current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep)
 
         sample_header_html = sample_name
         if reseq_id in experiment_urls.keys():
             sample_header_html = """<a href="%s">%s</a>"""
             sample_header_html = sample_header_html % (experiment_urls[reseq_id], sample_name)
-            table_header_list.append(sample_header_html + (TAGS_IMAGE % (dropdown_html, current_tags)))
+        if can_add_global_filter(user) or can_add_experiment_filter(user, experiment):
+            current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep)
+            sample_header_html += (TAGS_IMAGE % (dropdown_html, current_tags))
+        table_header_list.append(sample_header_html)
     return base_table_header + table_header_list
 
 
@@ -118,7 +119,7 @@ def get_mutation_table_body(user: User, observed_mutations: [], reseq_dict, expe
                 table_row.append("""""")
 
             table_row.append(_get_mutation_tags(mutation.tags))
-            table_row.append(_get_mutation_tags(mutation.tags))
+            table_row.append("" if mutation.reseq_reference is None else mutation.reseq_reference)
             table_row.append(format(mutation.position, ',d'))
             table_row.append(mutation.mutation_type)
             table_row.append(mutation.sequence_change)
@@ -151,6 +152,7 @@ def get_mutation_table_body(user: User, observed_mutations: [], reseq_dict, expe
 
     return table_body
 
+
 def get_mutation_table_data(reseq_dict, observed_mutations):
     mutation_map = {obs_mut.mutation.id: obs_mut.mutation for obs_mut in observed_mutations}
     mutation_index_dict = dict((mutation_id, i) for i, mutation_id in enumerate(mutation_map.keys()))
@@ -167,133 +169,15 @@ def get_mutation_table_data(reseq_dict, observed_mutations):
     return mutation_map.values(), table_entry_list, mutation_index_dict
 
 
-def get_mutation_table_queryset_and_entry_list(reseq_dict, observed_mutations_queryset, do_filter=True):
-    # print("reseq_dict", len(reseq_dict))
-    obs_mut_qryset = observed_mutations_queryset
-    if do_filter:
-        obs_mut_qryset = get_filtered_observed_mutations_queryset(observed_mutations_queryset)
-    mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
-    mutation_index_dict = dict(
-        (mutation_id, i) for i, mutation_id in enumerate(mut_qryset.values_list("id", flat=True)))
-    # resequencing_experiment urls
-    experiment_url_dict = get_experiment_urls(reseq_dict)
-    experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
-
-    # Initialize all sample mutation table cells as empty.
-    table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mut_qryset)
-
-    # Populating table_entry_list
-    unique_mut_obs_mut_dict = dict()  # hold one obs mutation for each mutation
-    # make sure related objects loaded
-    obs_mut_qryset = obs_mut_qryset.select_related(
-        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment',
-        'mutation'
-    )
-    for observed_mutation in obs_mut_qryset:
-        new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
-        if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
-            table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
-                experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
-        mutation_id = observed_mutation.mutation_id
-        if mutation_id not in unique_mut_obs_mut_dict:
-            unique_mut_obs_mut_dict[observed_mutation.mutation.id] = observed_mutation
-    # return mut_qryset, table_entry_list, mutation_index_dict, get_unique_obs_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
-    return mut_qryset, table_entry_list, mutation_index_dict, unique_mut_obs_mut_dict
-
-
-def get_mutation_table_queryset_and_entry_list_for_export(reseq_dict, observed_mutations_queryset, exp_id, do_filter=True):
-    """
-    By R. Cai
-    Add function specifically for mutation export.  It does not need to get observed mutations
-    that is used to extract strain information to decide if gene link is needed)
-    :param reseq_dict:
-    :param observed_mutations_queryset:
-    :param do_filter
-    :return: mut_qryset, table_entry_list, mutation_index_dict
-    """
-    obs_mut_qryset = observed_mutations_queryset
-    if do_filter:
-        filter_settings = AleExperimentFilter.objects.filter(ale_experiment__ale_id=exp_id).first()
-        obs_mut_qryset = get_filtered_observed_mutations_queryset(observed_mutations_queryset, filter_settings)
-    mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
-    mutation_index_dict = dict(
-        (mutation_id, i) for i, mutation_id in enumerate(mut_qryset.values_list("id", flat=True)))
-    experiment_url_dict = get_experiment_urls(reseq_dict)
-    experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
-
-    # Initialize all sample mutation table cells as empty.
-    table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mut_qryset)
-
-    # Populating table_entry_list
-    for observed_mutation in obs_mut_qryset:
-        new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
-        if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
-            table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
-                experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
-    return mut_qryset, table_entry_list, mutation_index_dict
-
-
-# TODO: Refactor. The observed mutations argument may
 # reference to a seq_experiment that doesn't exist due to checkbox filtering.
 # This makes this function very confusing.
 def get_table_body(user: User,
                    reseq_dict,
                    observed_mutations_queryset,
                    ale_experiment=None,
-                   table_type=None,
-                   do_filter=True):
-    mutation_queryset, \
-    table_entry_list, \
-    mutation_index_dict, \
-    filtered_observed_mutation_dict = get_mutation_table_queryset_and_entry_list(
-        reseq_dict, observed_mutations_queryset, do_filter=do_filter)
-
-    protein_changes = {}  # For calculating distances on the genes page only
-
-    # Populating table body
-    table_body = []
-    for mut_id, observed_mutation in filtered_observed_mutation_dict.items():
-        mutation = observed_mutation.mutation
-        if _contains_mutation(table_entry_list[mutation_index_dict[mut_id]]):
-            table_row = [HTML_MUTATION_TABLE_ROW]
-            if can_add_global_filter(user) or can_add_experiment_filter(user, ale_experiment):
-                table_row.append(_build_table_cell_for_dropdown(mutation, ale_experiment, ))
-            else:
-                table_row.append("""""")
-
-            table_row.append(_get_mutation_tags(mutation.tags))
-            table_row.append("" if not mutation.reseq_reference else mutation.reseq_reference)
-            table_row.append(format(mutation.position, ',d'))
-            table_row.append(mutation.mutation_type)
-            table_row.append(mutation.sequence_change)
-            table_row.append(get_gene_table_entry(mutation))
-            table_row.append("" if mutation.function is None else mutation.function)
-            table_row.append("" if mutation.product is None else mutation.product)
-            table_row.append("" if mutation.go_process is None else mutation.go_process)
-            table_row.append("" if mutation.go_component is None else mutation.go_component)
-
-            if table_type is TableType.GENE_TABLE:
-                if evidence.search(mutation.protein_change):
-                    try:
-                        table_row.append("<a id=\"%s\" onclick=\"highlight_mutation(%d,%d)\">%s</a>" %
-                                         ("mutation_" + str(mutation.id),
-                                          int(non_decimal.sub('', mutation.protein_change)),
-                                          int(mutation.id), mutation.protein_change))
-                        protein_changes[mutation.id] = strip_tags(mutation.protein_change)
-                    except:
-                        table_row.append(mutation.protein_change)
-                else:
-                    table_row.append(mutation.protein_change)
-            else:
-                table_row.append(mutation.protein_change)
-            table_row += table_entry_list[mutation_index_dict[mutation.id]]
-
-            table_body.append(table_row)
-
-    if table_type is TableType.GENE_TABLE:
-        return table_body, protein_changes
-
-    return table_body
+                   is_gene_table=False):
+    observed_mutations = filter_observed_mutations(observed_mutations_queryset)
+    return get_mutation_table_body(user, observed_mutations, reseq_dict, ale_experiment, is_gene_table)
 
 
 def get_gene_table_entry(mutation):
@@ -310,6 +194,7 @@ def get_gene_table_entry(mutation):
 
 def _initialize_table(experiment_id_idx_mapping, mutations):
     return [[HTML_EMPTY_MUTATION_CELL] * len(experiment_id_idx_mapping) for _ in range(len(mutations))]
+
 
 # get resequencing_experiment urls
 def get_experiment_urls(reseq_dict):

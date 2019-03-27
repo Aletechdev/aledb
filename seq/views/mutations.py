@@ -2,12 +2,16 @@ import time
 from django.http import HttpResponse
 from django.template import loader
 from django.utils.safestring import mark_safe
+from django.core.serializers.json import DjangoJSONEncoder
+from django_ajax.decorators import ajax
 import seq.views.common
 from seq.views import mutation_table_builder
-from seq.util import get_all_observed_mutations, get_reseq_ordered_dict
+from seq.util import get_all_observed_muations_filtered, get_reseq_ordered_dict
 from common.util import check_hidden_columns_and_filters, get_user_context
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
-from django.core.serializers.json import DjangoJSONEncoder
+from ale import permissions, models
+from filter.models import AleExperimentFilter
+from filter.util import get_global_filter
 import json
 import common.constants
 from logs.aledb_logger import user_extra, join_extras
@@ -24,7 +28,7 @@ def mutation_table(request):
     try:
         start_time = time.clock()
         context = get_user_context(request.user)
-        experiment= seq.views.common.get_ale_experiment(request)
+        experiment = seq.views.common.get_ale_experiment(request)
 
         exp_name = experiment.project.name + ": " + experiment.name
         ale_no = seq.views.common.get_ale_id(request)
@@ -34,7 +38,7 @@ def mutation_table(request):
 
         table_header = mutation_table_builder.get_table_header(request.user, ordered_reseq_dict)
 
-        table_body = _get_table_body(ordered_reseq_dict, experiment, request.user)
+        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user)
 
         hidden_columns = check_hidden_columns_and_filters(request, experiment.ale_id)
 
@@ -62,8 +66,72 @@ def mutation_table(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-def _get_table_body(reseq_dict, experiment, user):
-    obs_mut_qryset = get_all_observed_mutations(list(reseq_dict.keys()))
-    return mutation_table_builder.get_table_body(user, reseq_dict,
-                                                 obs_mut_qryset,
-                                                 experiment)
+def _get_table_body(experiment, ordered_reseq_dict, user):
+    obs_mutations = get_all_observed_muations_filtered(experiment.ale_id)
+    return mutation_table_builder.get_mutation_table_body(user, obs_mutations, ordered_reseq_dict, experiment)
+
+
+@ajax
+def add_to_global_filter(request):
+    if permissions.can_add_global_filter(request.user):
+        mut_id = request.POST['mut_id']
+        gfilter = get_global_filter()
+        global_filter_ignored_mutations = gfilter.ignored_mutations + "," + mut_id
+        gfilter.ignored_mutations = global_filter_ignored_mutations
+        gfilter.save()
+        return 'ok'
+    else:
+        return "User doesn't have permission to edit global filter"
+
+
+@ajax
+def add_to_exp_filter(request):
+    try:
+        mut_id = request.POST['mut_id']
+        experiment_id = request.POST['experiment_id']
+        if permissions.can_add_experiment_filter(request.user, experiment_id):
+            ale_exp_filter, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=experiment_id)
+            ale_exp_filter.ignored_mutations = ale_exp_filter.ignored_mutations + "," + mut_id
+            ale_exp_filter.save()
+            return 'ok'
+        else:
+            return "User doesn't have permission to edit experiment filter"
+    except Exception as ex:
+        return ex
+
+
+@ajax
+def save_mut_tag(request):
+    mut_id = request.POST['mut_id']
+    selected_tag = request.POST.get('tag_name')
+    mutation = seq.models.Mutation.objects.get(id=mut_id)
+    if mutation.tags:
+        tag_list = mutation.tags.split(',')
+        if selected_tag in tag_list:
+            tag_list.remove(selected_tag)
+        else:
+            tag_list.append(selected_tag)
+        mutation.tags = ','.join(tag_list)
+    else:
+        mutation.tags = selected_tag
+    mutation.save()
+    return 'ok'
+
+
+@ajax
+def save_rep_tag(request):
+    rep_id = request.POST.get('rep_id')
+    replicate = models.TechnicalReplicate.objects.get(id=rep_id)
+    if replicate.tags:
+        selected_tag = request.POST.get('tag_name')
+        tag_list = replicate.tags.split(',')
+        if selected_tag in tag_list:
+            tag_list.remove(selected_tag)
+        else:
+            tag_list.append(selected_tag)
+        replicate.tags = ','.join(tag_list)
+    else:
+        replicate.tags = request.POST.get('tag_name')
+    replicate.save()
+    replicate.save()
+    return 'ok'

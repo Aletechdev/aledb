@@ -3,8 +3,7 @@ from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.template import loader
 from django.utils.safestring import mark_safe
 from django.conf import settings
-from seq.util import get_all_observed_mutations, get_ordered_reseq_queryset, get_reseq_ordered_dict, \
-    get_mut_queryset_from_obs_mut_queryset
+from seq.util import get_ordered_reseq_queryset
 from seq.views import common
 from stats.util import get_histogram_jsons,\
     get_needle_plot_data,\
@@ -16,7 +15,7 @@ from stats.util import get_histogram_jsons,\
     get_reseq_experiment_info_list,\
     MAX_HISTOGRAM_SIZE
 from common.util import get_user_context
-from filter.util import get_filtered_observed_mutations_queryset
+from stats.util import get_observed_mutation_list
 import logging
 from bibliome.models import Publication
 from logs.aledb_logger import user_extra, join_extras
@@ -62,13 +61,13 @@ def stats(request):
             isolate_sum += l[2]
 
         experiments_info_list = get_reseq_experiment_info_list(reseq_queryset)
-        obs_mut_qryset = get_observed_mutation_queryset(experiment.ale_id)
-        obs_mut_qryset = obs_mut_qryset.select_related("mutation")
-        mutation_query_set = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
-        mutation_type_count_dict = get_mutation_type_count_dict(mutation_query_set)
-        observed_mutation_type_count_dict = get_observed_mutation_type_count_dict(obs_mut_qryset)
-        protein_change_type_count_dict = get_protein_change_type_count_dict(mutation_query_set)
-        observed_protein_change_type_count_dict = get_observed_protein_change_type_count_dict(obs_mut_qryset)
+        obs_mutations = get_observed_mutation_list(experiment.ale_id)
+        mutations_dict = {obs_mut.mutation.id: obs_mut.mutation for obs_mut in obs_mutations}
+        mutations = mutations_dict.values()
+        mutation_type_count_dict = get_mutation_type_count_dict(mutations)
+        observed_mutation_type_count_dict = get_observed_mutation_type_count_dict(obs_mutations)
+        protein_change_type_count_dict = get_protein_change_type_count_dict(mutations)
+        observed_protein_change_type_count_dict = get_observed_protein_change_type_count_dict(obs_mutations)
         template = loader.get_template(STATS_TEMPLATE)
 
         barchart_item_count = get_histogram_item_count(request)
@@ -120,10 +119,3 @@ def get_histogram_item_count(request):
         if barchart_item_count_str and barchart_item_count_str.isdigit():
             barchart_item_count = int(barchart_item_count_str)
     return barchart_item_count
-
-
-def get_observed_mutation_queryset(ale_experiment_id):
-    ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id)
-    observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
-    observed_mutation_query_set = get_filtered_observed_mutations_queryset(observed_mutation_query_set)
-    return observed_mutation_query_set

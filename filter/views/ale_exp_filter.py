@@ -72,4 +72,3 @@ def _handle_POST(request, filter_form_model, experiment):
         raise Exception("User doesn't have permission to edit experiment filter")
     else:
         print(filter_form.errors)
-
