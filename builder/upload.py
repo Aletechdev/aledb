@@ -1,8 +1,6 @@
 from os.path import join
 import re
 from bs4 import BeautifulSoup
-
-from ale.models import AleExperiment, Isolate, TechnicalReplicate
 from builder.gdparse.gdparse import gdparse
 import collections
 import numbers
@@ -15,8 +13,6 @@ from genes.util import get_annotated_gene_list
 from filter.models import AleExperimentFilter
 import filter.models
 from django.conf import settings
-from seq.util import get_ordered_reseq_queryset
-
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
 HTML_INDEX_FILE_NAME = "index.html"
