@@ -7,7 +7,7 @@ from django_ajax.decorators import ajax
 import seq.views.common
 from seq.views import mutation_table_builder
 from seq.util import get_all_observed_muations_filtered, get_reseq_ordered_dict
-from common.util import check_hidden_columns_and_filters, get_user_context
+from common.util import get_user_context
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from ale import permissions, models
 from filter.models import AleExperimentFilter
@@ -36,11 +36,11 @@ def mutation_table(request):
 
         ordered_reseq_dict = get_reseq_ordered_dict(experiment.ale_id, ale_no, request)
 
-        table_header = mutation_table_builder.get_table_header(request.user, ordered_reseq_dict)
+        table_header = mutation_table_builder.get_table_header(request.user, ordered_reseq_dict, experiment)
 
         table_body = _get_table_body(experiment, ordered_reseq_dict, request.user)
 
-        hidden_columns = check_hidden_columns_and_filters(request, experiment.ale_id)
+        hidden_columns = request.GET.get('hidden_columns', "")
 
         template = loader.get_template("base_table_template.html")
 

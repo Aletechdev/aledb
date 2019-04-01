@@ -9,7 +9,6 @@ from seq.views import mutation_table_builder  # TODO: The mutation table build s
 from common.constants import \
     REQUEST_MUTATION_ID, \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
-from common.util import check_hidden_columns_and_filters
 import common.constants
 from converge.util import get_converge_obs_mut_qryset
 from logs.aledb_logger import user_extra, join_extras
@@ -34,11 +33,11 @@ def converge_mutations(request):
 
         reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
 
-        table_header = mutation_table_builder.get_table_header(request.user, reseq_dict=reseq_ordered_dict)
+        table_header = mutation_table_builder.get_table_header(request.user, reseq_ordered_dict, experiment)
 
         table_body = _get_table_body(reseq_ordered_dict, experiment, request.user)
 
-        hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
+        hidden_columns = request.GET.get('hidden_columns', "")
 
         template = loader.get_template('base_table_template.html')
 

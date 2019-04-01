@@ -21,6 +21,18 @@ HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
 
+EXPANDABLE_COLUMN_PLUS_SIGN = """<i onclick="expand_collapse_gene_entry(this)" class="fa fa-plus pull-left" aria-hidden="true" data-toggle="collapse" data-target="#%s"></i>"""
+EXPANDABLE_GENE_ENTRY = """<div class="collapse pull-left" id="%s">%s</div>"""
+non_decimal = re.compile(r'[^\d.]+')
+evidence = re.compile(r'[A-Z]\d+[A-Z]')
+REP_DROPDOWN = '<div class="dropdown tag_dropdown"><button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">' \
+             '<i class="fa fa-tags" aria-hidden="true"></i>' \
+             '</button>' \
+             '<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">' \
+             '%s' \
+             '</ul>'
+REP_TAG = '</div><div class="tag_dropdown">%s</div>'
+
 # the dropdown cell in the mutation table
 _menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
 _menu_item_save_to_experiment_filter = """<li><a onclick="save_to_experiment_filter(%d, %d)" style="cursor:pointer">Save to Experiment Filter</a></li>"""
@@ -51,19 +63,6 @@ def _build_table_cell_for_dropdown(mutation, ale_experiment):
         menuitems += _menu_item_save_to_experiment_filter % (ale_experiment.ale_id, mutation.id)
 
     return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation.id))
-
-
-EXPANDABLE_COLUMN_PLUS_SIGN = """<i onclick="expand_collapse_gene_entry(this)" class="fa fa-plus pull-left" aria-hidden="true" data-toggle="collapse" data-target="#%s"></i>"""
-EXPANDABLE_GENE_ENTRY = """<div class="collapse pull-left" id="%s">%s</div>"""
-non_decimal = re.compile(r'[^\d.]+')
-evidence = re.compile(r'[A-Z]\d+[A-Z]')
-TAGS_IMAGE = '<div class="dropdown tag_dropdown"><button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">' \
-             '<i class="fa fa-tags" aria-hidden="true"></i>' \
-             '</button>' \
-             '<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">' \
-             '%s' \
-             '</ul>' \
-             '</div><div class="tag_dropdown">%s</div>'
 
 
 class TableType(Enum):
@@ -99,8 +98,10 @@ def get_table_header(user, reseq_dict, experiment: AleExperiment = None):
             sample_header_html = """<a href="%s">%s</a>"""
             sample_header_html = sample_header_html % (experiment_urls[reseq_id], sample_name)
         if can_add_global_filter(user) or can_add_experiment_filter(user, experiment):
-            current_tags, dropdown_html = _get_tag_replicate_dropdown_entries(reseq.tech_rep)
-            sample_header_html += (TAGS_IMAGE % (dropdown_html, current_tags))
+            dropdown_html = _get_replicate_tag_dropdown_entries(reseq.tech_rep)
+            sample_header_html += (REP_DROPDOWN % dropdown_html)
+        current_tags = _get_rep_tags(reseq.tech_rep)
+        sample_header_html += (REP_TAG % current_tags)
         table_header_list.append(sample_header_html)
     return base_table_header + table_header_list
 
@@ -249,16 +250,13 @@ def _find_between(s, first, last):
 def _get_mutation_tags(tags):
     html = ''
     if tags:
-
         for tag in tags.split(','):
             html += '<span class="fa-stack">%s<font style="font-size:0px">%s</font></span>' % (TAGS[tag], tag)
-
     return html
 
 
 def _get_tag_filter_dropdown_entries(mutation_id):
     html = ''
-
     for tag in ROW_TAGS:
         html += '<li><a onclick="add_tag(\'%s\', %d, this)" style="cursor:pointer">Toggle Tag: %s %s</a></li>' % (
         tag, mutation_id, tag, TAGS[tag])
@@ -266,19 +264,23 @@ def _get_tag_filter_dropdown_entries(mutation_id):
     return html
 
 
-def _get_tag_replicate_dropdown_entries(replicate: TechnicalReplicate):
-    # tags = TechnicalReplicate.objects.get(id=replicate_id).tags
-    tags = replicate.tags;
-    current_tags = ''
+def _get_replicate_tag_dropdown_entries(replicate: TechnicalReplicate):
     dropdown_html = ''
-
     for tag in COLUMN_TAGS:
         image = TAGS[tag]
         dropdown_html += '<li><a onclick="add_tag_to_replicate(\'%s\', %d, this)">Toggle Tag: %s %s</a></li>' % (
         tag, replicate.id, tag, image)
-        if tags and tag in tags:
-            current_tags += '<span class="fa-stack">%s<font style="font-size:0px">%s</font></span>' % (image, tag)
-        else:
-            current_tags += '<span class="fa-stack" style="display:none">%s<font style="font-size:0px">%s</font></span>' % (
-            image, tag)
-    return current_tags, dropdown_html
+    return dropdown_html
+
+
+def _get_rep_tags(replicate: TechnicalReplicate):
+    tags = replicate.tags;
+    current_tags = ''
+    if tags:
+        for tag in COLUMN_TAGS:
+            if tag in tags:
+                image = TAGS[tag]
+                current_tags += '<span class="fa-stack">%s<font style="font-size:0px">%s</font></span>' % (image, tag)
+    return current_tags
+
+
