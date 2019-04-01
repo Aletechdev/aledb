@@ -2,8 +2,10 @@
 {% block title %}Search{% endblock %}
 {% block scripts_and_style%}
 
-        <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.js"></script>
-        <style type="text/css" title="currentStyle">
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.js"></script>
+    {# For alert#}
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <style type="text/css" title="currentStyle">
             .intergenic {
                 font-style: italic;
             }
@@ -42,12 +44,14 @@
                 var table_titles = {{ table_header | safe }};
                 var table_heads = [];
                 var number_of_columns = 0;
+                var tag_list = {{ tag_dropdown | safe}};
                 for(var x in table_titles) {
                     table_heads.push({title: table_titles[x]});
                     number_of_columns += 1;
                 }
                 {% include '../table_template.js' %}
             </script>
+
         {% endif %}
 
         <script type="text/javascript">

@@ -7,7 +7,7 @@ from seq.views import mutation_table_builder
 from common.constants import \
     REQUEST_MUTATION_ID, \
     POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
-from common.util import get_user_context, check_hidden_columns_and_filters
+from common.util import get_user_context
 from seq.util import get_reseq_ordered_dict
 from fixation.util import get_fixed_obs_mut_qryset
 import common.constants
@@ -34,7 +34,7 @@ def fixating_mutations(request):
 
         reseq_ordered_dict = get_reseq_ordered_dict(ale_experiment_id, ale_number, request)
 
-        table_header = mutation_table_builder.get_table_header(request.user, reseq_ordered_dict)
+        table_header = mutation_table_builder.get_table_header(request.user, reseq_ordered_dict, experiment)
 
         obs_mut_qryset = get_fixed_obs_mut_qryset(ale_experiment_id)
 
@@ -43,7 +43,7 @@ def fixating_mutations(request):
                                                            ale_experiment=experiment,
                                                            is_gene_table=False)
 
-        hidden_columns = check_hidden_columns_and_filters(request, ale_experiment_id)
+        hidden_columns = request.GET.get('hidden_columns', "")
 
         template = loader.get_template("base_table_template.html")
 

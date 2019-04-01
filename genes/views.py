@@ -12,7 +12,6 @@ import csv
 import json
 import requests
 from ale.utils import get_all_user_exps
-from common.util import check_hidden_columns_and_filters
 from django.core.serializers.json import DjangoJSONEncoder
 from django.conf import settings
 from logs.aledb_logger import user_extra, join_extras
@@ -44,7 +43,7 @@ def gene(request):
 
         pdb_url, residue_mappings, has_pdb_file = _get_pdb_info(gene_query)
         homology_data, has_homology_data = _get_homology_data(gene_query)
-        hidden_columns = check_hidden_columns_and_filters(request, None)
+        hidden_columns = request.GET.get('hidden_columns', "")
         template = loader.get_template("gene.html")
 
         experiments = get_all_user_exps(request.user)

@@ -6,12 +6,12 @@ from django.template import loader
 from django.shortcuts import render
 from seq.models import ObservedMutation
 from django.db.models import Q
-import operator, collections
+import operator, collections, common
 from functools import reduce
 from seq.views import mutation_table_builder
 from ale.utils import get_user_projects, get_strains
 from filter.util import filter_observed_mutations
-from common.util import check_hidden_columns_and_filters, get_user_context
+from common.util import get_user_context
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 
@@ -47,7 +47,7 @@ def search(request):
             context.update({'message': message})
             return render(request, 'search/search.html', context)
 
-        check_hidden_columns_and_filters(request, None)
+        hidden_columns = request.GET.get('hidden_columns', "")
         observed_mutations = _get_observed_mutations(search_include_param_list, search_exclude_param_list)
         reseq_dict = collections.OrderedDict({obs_mut.sequencing_experiment.id: obs_mut.sequencing_experiment
                                                   for obs_mut in observed_mutations})
@@ -62,7 +62,8 @@ def search(request):
                         "title": "Search Results",
                         "table_header": mark_safe(table_header),
                         "mutation_count": len(table_body),
-                        "observed_mutation_count": len(observed_mutations)
+                        "observed_mutation_count": len(observed_mutations),
+                        "tag_dropdown": common.constants.TAGS
                         })
         logger.info("search performance", extra=join_extras(
             {"parameters": last_search},
@@ -87,6 +88,10 @@ def _get_observed_mutations(search_include_param_list, search_exclude_param_list
 
 def _get_last_search(request):
     last_search = {}
+    if request.GET['project']:
+        project = int(request.GET['project'])
+    else:
+        project = ''
     if request.GET:
         last_search = {
             'gene': request.GET['gene'],
@@ -95,7 +100,7 @@ def _get_last_search(request):
             'min_pos': request.GET['min_pos'],
             'max_pos': request.GET['max_pos'],
             'mut_type': request.GET['mut_type'],
-            'project': int(request.GET['project']),
+            'project': project,
             'strain': request.GET['strain']
         }
     return last_search
@@ -108,19 +113,18 @@ def _get_search_params(request, user_projects):
     if not message:
         message = _add_freq_to_query(request, include_argument_list)
     if not message:
-        _add_genes_to_query(request, include_argument_list, exclude_argument_list)
+        has_gene = _add_genes_to_query(request, include_argument_list, exclude_argument_list)
         _add_mutation_change_to_query(request, include_argument_list)
         _add_strain_to_query(request, include_argument_list)
-        project_ok = _add_project_to_query(request, include_argument_list, user_projects)
-        if not project_ok and len(include_argument_list) <= 1:
-            message = 'Please enter search criteria'
+        has_project = _add_project_to_query(request, include_argument_list, user_projects)
+        if not has_project and not has_gene:
+            message = 'Please enter search criteria - genetic target or project'
     return include_argument_list, exclude_argument_list, message
 
 
 def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
     if 'gene' in request.GET:
         gene_list = request.GET['gene'].replace(" ", "").split(',')
-
         for mutated_gene in gene_list:
             if mutated_gene == '':
                 continue
@@ -142,6 +146,8 @@ def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
 
                 else:
                     include_argument_list.append(Q(**{'mutation__gene__contains': str(mutated_gene)}))
+        return True
+    return False
 
 
 def _add_position_to_query(request, include_argument_list):
