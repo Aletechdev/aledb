@@ -58,7 +58,7 @@ def mutation_filter(request):
 
 def _handle_POST(request, filter_form_model, experiment):
     filter_form = FilterForm(request.POST)
-    if permissions.can_add_project_filter(request.user, experiment.project) and filter_form.is_valid():
+    if permissions.can_add_experiment_filter(request.user, experiment) and filter_form.is_valid():
         filter_form_model.min_cutoff = request.POST.get("min_cutoff", DEFAULT_MUTATION_FREQ_MIN)
         filter_form_model.max_cutoff = request.POST.get("max_cutoff", DEFAULT_MUTATION_FREQ_MAX)
         filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
@@ -72,4 +72,3 @@ def _handle_POST(request, filter_form_model, experiment):
         raise Exception("User doesn't have permission to edit experiment filter")
     else:
         print(filter_form.errors)
-

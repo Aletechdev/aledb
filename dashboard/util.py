@@ -39,8 +39,8 @@ def rebuild_sample_counts():
 
 def rebuild_mutation_counts():
     raw_obs_mut_qryset = ObservedMutation.objects.all()
-    obs_mut_qryset = get_filtered_observed_mutations_queryset(raw_obs_mut_qryset)
-    mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
+    # obs_mut_qryset = get_filtered_observed_mutations_queryset(raw_obs_mut_qryset)
+    # mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
 
     if ObservedMutationCounts.objects.all().count() == 0:
         ObservedMutationCounts.objects.create()

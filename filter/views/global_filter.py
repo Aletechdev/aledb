@@ -24,7 +24,7 @@ def global_filter(request):
 
         if request.method == 'POST':
             clear_dashboard_cache()
-            _handle_POST(request, filter_form_model)
+            _handle_post(request, filter_form_model)
 
         initial_filter_form_data = {"ignored_genes": filter_form_model.ignored_genes}
 
@@ -46,7 +46,7 @@ def global_filter(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-def _handle_POST(request, filter_form_model):
+def _handle_post(request, filter_form_model):
     if permissions.can_add_global_filter(request.user):
         filter_form_model.ignored_genes = request.POST.get("ignored_genes", "")
         deleted_mut_id = request.POST.get('deleted_mut_id', None)
@@ -56,5 +56,4 @@ def _handle_POST(request, filter_form_model):
         filter_form_model.save()
     else:
         raise Exception("User doesn't have permission to edit global filter")
-
 
