@@ -25,10 +25,12 @@
             });
         });
 
-         function delete_row (mut_id) {
+         var deleteRow = function () {
+            var row = $(this).closest("tr").get(0);
+            var rowData = $('#data').DataTable().row(row).data();
+            var mut_id = rowData[1];
             var val = $('#deleted_mut_id').val() + mut_id + ",";
             $('#deleted_mut_id').val(val);
-            var row = $(this).closest("tr").get(0);
             $('#data').DataTable().row(row).remove().draw();
         };
     </script>
@@ -50,6 +52,7 @@
             <thead class="alert-success">
                 <tr>
                     <td></td>
+                    <td>Mut ID</td>
                     <td>Position</td>
                     <td>Mutation Type</td>
                     <td>Sequence Change</td>
@@ -65,9 +68,10 @@
                 <tr>
                     <td>
                         {% if perms.filter.add_globalfilter or experiment.project.user_id == user.id%}
-                        <img src="/static/img/close-icon.gif" onclick="delete_row({{ mutation.id }})" width="12" height="11" style="float:right; cursor:pointer">
+                        <img src="/static/img/close-icon.gif" onclick="deleteRow.call(this)" width="12" height="11" style="float:right; cursor:pointer">
                         {% endif %}
                     </td>
+                    <td>{{ mutation.id }}</td>
                     <td>{{ mutation.position }}</td>
                     <td>{{ mutation.mutation_type }}</td>
                     <td>{{ mutation.sequence_change }}</td>
@@ -93,6 +97,7 @@
     <table id="starting_strain" class="table table-striped table-bordered" style="width: 100%;">
         <thead class="alert-success">
             <tr>
+                <td>Mut ID</td>
                 <td>Position</td>
                 <td>Mutation Type</td>
                 <td>Sequence Change</td>
@@ -107,6 +112,7 @@
         <tbody>
             {% for mutation in starting_strain_mutations %}
                 <tr>
+                    <td>{{ mutation.id }}</td>
                     <td>{{ mutation.position }}</td>
                     <td>{{ mutation.mutation_type }}</td>
                     <td>{{ mutation.sequence_change }}</td>
