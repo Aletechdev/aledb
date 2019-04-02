@@ -31,7 +31,9 @@ def get_csv_str(exp_id, mut_type_str):
         HTML_MUTATION_TABLE_HEADER[mut_pos_index:] + [reseq_ordered_dict[reseq].exp_ale_flask_isolate_str for reseq in
                                                       reseq_ordered_dict]]
 
-    rows += ([format(mutation.position, ',d'),
+    rows += ([mutation.id,
+              "" if mutation.reseq_reference is None else mutation.reseq_reference,
+              format(mutation.position, ',d'),
               mutation.mutation_type,
               mutation.sequence_change,
               mutation.gene,

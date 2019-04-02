@@ -97,6 +97,7 @@
     <table id="starting_strain" class="table table-striped table-bordered" style="width: 100%;">
         <thead class="alert-success">
             <tr>
+                <td>Mut ID</td>
                 <td>Position</td>
                 <td>Mutation Type</td>
                 <td>Sequence Change</td>
@@ -111,6 +112,7 @@
         <tbody>
             {% for mutation in starting_strain_mutations %}
                 <tr>
+                    <td>{{ mutation.id }}</td>
                     <td>{{ mutation.position }}</td>
                     <td>{{ mutation.mutation_type }}</td>
                     <td>{{ mutation.sequence_change }}</td>

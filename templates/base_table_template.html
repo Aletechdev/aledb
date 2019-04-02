@@ -62,15 +62,13 @@
                                 value="{{ ale }}">{{ ale }}</option>
                     {% endfor %}
                 </select>
-                {% if perms.filter.add_globalfilter %}
                 <select name="tag_select" class="selectpicker">
                     <option value="All Tags">All Tags</option>
                     {% for key, value in tag_dropdown.items %}
-                        <option>Show Tag: {{ key }}</option>
+                        <option>Show Tag: {{ key }} </option>
                         <option>Hide Tag: {{ key }}</option>
                     {% endfor %}
                 </select>
-                {% endif %}
                 <input type="submit" class="btn btn-default btn-primary" value="Apply"/>
                 <button type="button" class="btn btn-default" onclick="column_sort_from_right()"><i
                         class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i>Column Sort from Right
@@ -80,7 +78,6 @@
         <div><i>Note: You must select the Apply button when selecting specific ALEs or show/hide of columns according to
             tags.</i></div>
         <br>
-        {% if perms.filter.add_globalfilter %}
         <div class="row"> <!-- Rows -->
             <b>Rows: </b>
             <div class="btn-group" role="group">
@@ -106,7 +103,6 @@
 	    <b style="margin-left: 3%">Duplications: </b>
 	    <input id="show_dups" type="checkbox" name="checkbox" value="value" checked data-toggle="toggle" data-on="Show" data-off="Hide">
         </div>
-        {% endif %}
         <!-- Mutation table -->
         <form action="" method="get">
             <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id  }}"/>
