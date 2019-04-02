@@ -89,7 +89,10 @@ def add_to_exp_filter(request):
     try:
         mut_id = request.POST['mut_id']
         experiment_id = request.POST['experiment_id']
-        if permissions.can_add_experiment_filter(request.user, experiment_id):
+        experiment = models.AleExperiment.objects.get(ale_id=experiment_id)
+        if not experiment:
+            return "Invalid experiment id: " + experiment_id
+        if permissions.can_add_experiment_filter(request.user, experiment):
             ale_exp_filter, created = AleExperimentFilter.objects.get_or_create(ale_experiment_id=experiment_id)
             ale_exp_filter.ignored_mutations = ale_exp_filter.ignored_mutations + "," + mut_id
             ale_exp_filter.save()

@@ -60,7 +60,7 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_id=None):
         'sequencing_experiment__tech_rep__tech_rep_number'
     )
     observed_mutations = []
-    deleted_global_mutations = {}
+    deleted_global_mutations = set()
     if len(global_filter_genes) > 0 or len(exp_filter_genes_map) > 0:
         for obs_mut in queryset:
             deleted = obs_mut.mutation.id in deleted_global_mutations

@@ -115,14 +115,15 @@ def _get_search_params(request, user_projects):
     if not message:
         has_gene = _add_genes_to_query(request, include_argument_list, exclude_argument_list)
         _add_mutation_change_to_query(request, include_argument_list)
-        _add_strain_to_query(request, include_argument_list)
+        has_strain =_add_strain_to_query(request, include_argument_list)
         has_project = _add_project_to_query(request, include_argument_list, user_projects)
-        if not has_project and not has_gene:
-            message = 'Please enter search criteria - genetic target or project'
+        if not has_project and not has_gene and not has_strain:
+            message = 'Please enter search criteria - genetic target, project or strain'
     return include_argument_list, exclude_argument_list, message
 
 
 def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
+    has_gene = False
     if 'gene' in request.GET:
         gene_list = request.GET['gene'].replace(" ", "").split(',')
         for mutated_gene in gene_list:
@@ -143,11 +144,10 @@ def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
 
                 elif str(mutated_gene).startswith("*"):
                     include_argument_list.append(Q(**{'mutation__gene__endswith': str(mutated_gene)[1:]}))
-
                 else:
                     include_argument_list.append(Q(**{'mutation__gene__contains': str(mutated_gene)}))
-        return True
-    return False
+                has_gene = True
+    return has_gene
 
 
 def _add_position_to_query(request, include_argument_list):
@@ -214,6 +214,8 @@ def _add_strain_to_query(request, include_argument_list):
     strain = request.GET['strain']
     if strain and len(strain) > 0:
         include_argument_list.append(Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__strain=strain))
+        return True
+    return False
 
 
 def _get_mut_qryset(include_argument_list, exclude_argument_list):
