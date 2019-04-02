@@ -22,13 +22,13 @@ class TestEnrichment(TestCase):
 
     def test_create_ALE_experiment(self):
         test_report_path = os.path.dirname(os.path.realpath(__file__))+"/breseq/"
-        create_ale_experiment(test_report_path, "Patrick", "test")
+        create_ale_experiment(test_report_path, "Patrick", "test", "test_project")
         expected_mutation_count = 27
         self.assertEqual(expected_mutation_count, Mutation.objects.all().count())
 
     def test_reseq_URL(self):
         test_report_path = os.path.dirname(os.path.realpath(__file__))+"/test_reseq_url/"
-        create_ale_experiment(test_report_path, "Patrick", "test")
+        create_ale_experiment(test_report_path, "Patrick", "test", "test_project")
         reseq_qryset = ResequencingExperiment.objects.all()
         empty_count = 0
         not_empty_count = 0
