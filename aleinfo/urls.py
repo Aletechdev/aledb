@@ -21,11 +21,10 @@ urlpatterns = [
     url(r'^export', include('export.urls')),
     url(r'^filter/', include('filter.urls')),
     url(r'^fixation/', include('fixation.urls')),
-    url(r'^gene/', include('genes.urls')),
-    url(r'^metadata', include('metadata.urls')),
-    url(r'^mutations', include('seq.urls')),
+    url(r'^metadata/', include('metadata.urls')),
+    url(r'^mutations/', include('seq.urls')),
     url(r'^search/', include('search.urls')),
-    url(r'^stats', include('stats.urls')),
+    url(r'^stats/', include('stats.urls')),
     url(r'^aledata/(?P<page_name>.*)$', protected_file_serve)
 ]
 
