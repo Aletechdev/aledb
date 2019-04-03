@@ -32,7 +32,7 @@ class TestUtil(unittest.TestCase):
     def test_get_annotated_gene_list_mutation_gene_annotation_is_None(self):
         mutation_gene_annotation = None
         returned = get_annotated_gene_list(mutation_gene_annotation)
-        expected = []
+        expected = ['None']
         self.assertEquals(returned, expected)
 
     def test_get_gene_list_intragenic(self):
