@@ -1,5 +1,5 @@
 import collections
-from filter.util import get_filtered_observed_mutations_queryset
+from filter.util import filter_observed_mutations
 from genes.util import get_gene_list
 
 __author__ = "Patrick Phaneuf"
@@ -13,8 +13,8 @@ def get_converge_mutation_list(reseq_obs_mut_queryset_list):
 def _get_mut_gene_ale_dict(reseq_obs_mut_queryset_list):
     mut_gene_ale_dict = collections.defaultdict(set)
     for reseq_obs_mut_qryset in reseq_obs_mut_queryset_list:
-        reseq_obs_mut_qryset = get_filtered_observed_mutations_queryset(reseq_obs_mut_qryset)
-        for obs_mut in reseq_obs_mut_qryset:
+        obs_mutations = filter_observed_mutations(reseq_obs_mut_qryset)
+        for obs_mut in obs_mutations:
             mut_gene_list = get_gene_list(obs_mut.mutation.gene)
             for gene in mut_gene_list:
                 mut_gene_ale_dict[gene].add(obs_mut.sequencing_experiment.ale_id)
@@ -25,8 +25,8 @@ def _get_converge_mut_list(reseq_obs_mut_queryset_list,
                            mutation_gene_ale_dict):
     converge_mut_list = []
     for reseq_obs_mut_queryset in reseq_obs_mut_queryset_list:
-        reseq_obs_mut_queryset = get_filtered_observed_mutations_queryset(reseq_obs_mut_queryset)
-        for observed_mutation in reseq_obs_mut_queryset:
+        reseq_obs_mutions = filter_observed_mutations(reseq_obs_mut_queryset)
+        for observed_mutation in reseq_obs_mutions:
             mutation_gene_list = get_gene_list(observed_mutation.mutation.gene)
             for gene in mutation_gene_list:
                 # This condition will keep intergenic mutations from being added twice since

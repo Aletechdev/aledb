@@ -14,9 +14,8 @@ def get_fixed_mut_dict(ale_experiment_id):
     return ale_exp_fixed_mut_dict
 
 
-def get_exp_fixed_obs_mut_qryset(reseq_ordered_dict):
-    exp_id = reseq_ordered_dict[next(iter(reseq_ordered_dict))].ale_experiment.ale_id
-    fixed_mut_qryset = FixatedMutation.objects.filter(ale_experiment_id=exp_id)
+def get_fixed_obs_mut_qryset(experiment_id):
+    fixed_mut_qryset = FixatedMutation.objects.filter(ale_experiment_id=experiment_id)
     fixed_obs_mut_qryset = ObservedMutation.objects.none()
     # TODO: filter out mutations from samples that were removed from table.
     for fixed_mut in fixed_mut_qryset:

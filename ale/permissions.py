@@ -53,5 +53,7 @@ def can_add_global_filter(user):
     return user.is_superuser
 
 
-def can_add_project_filter(user, project):
-    return user.is_superuser or user.id == project.user_id
+def can_add_experiment_filter(user, experiment):
+    if experiment:
+        return user.is_superuser or user.id == experiment.project.user_id
+    return False
