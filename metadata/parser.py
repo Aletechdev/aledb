@@ -31,15 +31,15 @@ TECH_REP_NUMBER = "technical-replicate-number"
 EXPERIMENT_DETAILS = "experiment-details"
 
 MEDIA_BASE_DESCRIPTION = "base-media"
-MEDIA_TEMPERATURE = "temperature"
+MEDIA_TEMPERATURE = "temperature(Celsius)"
 #  The following media descriptors are consolidated into the ALEdb "substrate" descriptor.
-MEDIA_CARBON_SOURCE = "carbon-source"
-MEDIA_NITROGEN_SOURCE = "nitrogen-source"
-MEDIA_PHOSPHOROUS_SOURCE = "phosphorous-source"
-MEDIA_SULFUR_SOURCE = "Sulfur-source"
+MEDIA_CARBON_SOURCE = "carbon-source(g/L)"
+MEDIA_NITROGEN_SOURCE = "nitrogen-source(g/L)"
+MEDIA_PHOSPHOROUS_SOURCE = "phosphorous-source(g/L)"
+MEDIA_SULFUR_SOURCE = "sulfur-source(g/L)"
 MEDIA_ELECTRON_ACCEPTOR = "electron-acceptor"
-MEDIA_SUPPLEMENT = "supplement"
-MEDIA_ANTIBIOTIC = "antibiotic"
+MEDIA_SUPPLEMENT = "supplement(g/L)"
+MEDIA_ANTIBIOTIC = "antibiotic(ug/mL)"
 MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
                          MEDIA_NITROGEN_SOURCE,
                          MEDIA_PHOSPHOROUS_SOURCE,
@@ -121,8 +121,10 @@ def _get_media_substrate_description(metadata_dict):
     media_substrate_description = ''
     for media_descriptor in MEDIA_DESCRIPTOR_LIST:
         if media_descriptor in metadata_dict.keys() and metadata_dict[media_descriptor] != '':
-            if media_substrate_description != "": media_substrate_description += ', '
-            if metadata_dict[media_descriptor] != "none": media_substrate_description += metadata_dict[media_descriptor]
+            if media_substrate_description != "":
+                media_substrate_description += ', '
+            if metadata_dict[media_descriptor] != "none":
+                media_substrate_description += metadata_dict[media_descriptor]
     return media_substrate_description
 
 
