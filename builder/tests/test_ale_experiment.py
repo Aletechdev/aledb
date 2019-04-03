@@ -1,5 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
+from ale.models import Project
 from seq.models import Mutation, ResequencingExperiment
 from builder.ale_experiment import rebuild_dashboard_data, create_ale_experiment
 from datetime import datetime
@@ -22,9 +23,12 @@ class TestEnrichment(TestCase):
 
     def setUp(self):
         print("Creating test user Patrick")
-        User.objects.create(username="Patrick", password="test123",
+
+        self.user = User.objects.create(username="Patrick", password="test123",
                             first_name="Patrick", last_name="Phaneuf", email="email@email.com",
                             is_active=True, is_staff=True, date_joined=datetime.now())
+        Project.objects.create(name="test_project", user=self.user, date=datetime.now(),
+                               status="In progress", is_public=False)
 
     def test_create_ALE_experiment(self):
         test_report_path = os.path.dirname(os.path.realpath(__file__)) + "/breseq/"
@@ -36,6 +40,7 @@ class TestEnrichment(TestCase):
         test_report_path = os.path.dirname(os.path.realpath(__file__)) + "/test_reseq_url/"
         create_ale_experiment(test_report_path, "Patrick", "test", "test_project")
         reseq_qryset = ResequencingExperiment.objects.all()
+        print("YOOO", reseq_qryset)
         empty_count = 0
         not_empty_count = 0
         for reseq in reseq_qryset:
