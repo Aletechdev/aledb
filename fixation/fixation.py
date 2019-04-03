@@ -1,5 +1,5 @@
-from seq.util import get_all_observed_mutations, get_mut_queryset_from_obs_mut_queryset
-from filter.util import get_filtered_observed_mutations_queryset
+from seq.util import get_all_observed_mutations, get_mutations_from_observed_muations
+from filter.util import filter_observed_mutations
 
 __author__ = "Patrick Phaneuf"
 
@@ -36,8 +36,8 @@ def _get_ale_fixed_mut_dict(flask_obs_mut_dict):
         last_flask_number = ordered_flask_number_list[-1]
 
         first_flask_obs_mut_queryset = flask_obs_mut_dict[first_flask_number]
-        first_flask_obs_mut_queryset = get_filtered_observed_mutations_queryset(first_flask_obs_mut_queryset)
-        fixed_mutation_queryset = get_mut_queryset_from_obs_mut_queryset(first_flask_obs_mut_queryset)
+        first_flask_obs_muts = filter_observed_mutations(first_flask_obs_mut_queryset)
+        fixed_mutations = get_mutations_from_observed_muations(first_flask_obs_muts)
 
         for flask_number in ordered_flask_number_list:
             flask_obs_mut_queryset = flask_obs_mut_dict[flask_number]
