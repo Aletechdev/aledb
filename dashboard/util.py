@@ -50,8 +50,8 @@ def rebuild_mutation_counts():
     mut_count_qryset = UniqueMutationCounts.objects.all()
 
     # TODO: there has to be a better way than the below. It's full of unnecessary repetition.
-    obs_mut_count_qryset.update(total=obs_muts.count())
-    mut_count_qryset.update(total=muts.count())
+    obs_mut_count_qryset.update(total=len(obs_muts))
+    mut_count_qryset.update(total=len(muts))
     for mutation_type in MUTATION_TYPE_LIST:
         observed_mutation_type_count = len([obs_mut for obs_mut in obs_muts if obs_mut.mutation.mutation_type==mutation_type])
         unique_mutation_type_count = len([mut for mut in muts if mut.mutation_type==mutation_type])
