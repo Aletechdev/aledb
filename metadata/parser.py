@@ -129,7 +129,7 @@ def _get_media_substrate_description(metadata_dict):
 
 
 def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_key):
-    if not is_valid(metadata_path, "/app/metadata/xpmdvalidator/Json_schema.json"):
+    if not is_valid(metadata_path, "metadata/xpmdvalidator/Json_schema.json"):
         print ("Invalid metadata!", metadata_path)
 
     for f in os.listdir(metadata_path):
