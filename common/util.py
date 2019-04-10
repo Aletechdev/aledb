@@ -20,7 +20,7 @@ def clear_dashboard_cache():
 
 
 def get_git_hash():
-    return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+    return subprocess.check_output(['git', 'rev-parse', 'HEAD']).rstrip()
 
 try:
     common_context = {"git_hash": get_git_hash()}
