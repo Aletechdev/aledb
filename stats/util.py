@@ -34,12 +34,12 @@ def get_histogram_jsons(ale_experiment_id, histogram_item_count):
 
 
 def generate_histogram_jsons(observed_mutation_list):
-    mutations = {obs_mut.mutation.id: obs_mut.mutation for obs_mut in observed_mutation_list
+    mutations_dict = {obs_mut.mutation_id: obs_mut.mutation for obs_mut in observed_mutation_list
                  if not (obs_mut.mutation.gene == '' or obs_mut.mutation.gene == '-' or obs_mut.mutation.gene == '-, -')}
     # observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='')
     # observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='-')
     # observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='–, –')
-    gene_bar_chart_list = get_gene_bar_chart_list(mutations)
+    gene_bar_chart_list = get_gene_bar_chart_list(mutations_dict.values())
     genes = set_gene_bar_chart_colors(gene_bar_chart_list)
 
     genes_json = list(genes)

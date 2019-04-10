@@ -1,7 +1,7 @@
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts, BarCharts
 from seq.models import ObservedMutation
-from filter.util import get_filtered_observed_mutations_queryset
-from seq.util import get_mut_queryset_from_obs_mut_queryset
+from filter.util import filter_observed_mutations
+from seq.util import get_mutations_from_observed_muations
 from seq.views.common import MUTATION_TYPE_LIST, FUNCTIONAL_CHANGE_TYPE_LIST
 from ale.models import AleId, Isolate, Flask
 from django.db.models import Q
@@ -18,8 +18,8 @@ def rebuild_mut_histogram_data():
     if ObservedMutation.objects.all().count() == 0:
         ObservedMutation.objects.create()
     raw_obs_mut_qryset = ObservedMutation.objects.all()
-    obs_mut_qryset = get_filtered_observed_mutations_queryset(raw_obs_mut_qryset)
-    genes_json = generate_histogram_jsons(obs_mut_qryset)
+    obs_mutations = filter_observed_mutations(raw_obs_mut_qryset)
+    genes_json = generate_histogram_jsons(obs_mutations)
     if BarCharts.objects.all().count() == 0:
         BarCharts.objects.create()
     histogram_data = BarCharts.objects.all()
@@ -39,8 +39,8 @@ def rebuild_sample_counts():
 
 def rebuild_mutation_counts():
     raw_obs_mut_qryset = ObservedMutation.objects.all()
-    # obs_mut_qryset = get_filtered_observed_mutations_queryset(raw_obs_mut_qryset)
-    # mut_qryset = get_mut_queryset_from_obs_mut_queryset(obs_mut_qryset)
+    obs_muts = filter_observed_mutations(raw_obs_mut_qryset)
+    muts = get_mutations_from_observed_muations(obs_muts)
 
     if ObservedMutationCounts.objects.all().count() == 0:
         ObservedMutationCounts.objects.create()
@@ -50,11 +50,11 @@ def rebuild_mutation_counts():
     mut_count_qryset = UniqueMutationCounts.objects.all()
 
     # TODO: there has to be a better way than the below. It's full of unnecessary repetition.
-    obs_mut_count_qryset.update(total=obs_mut_qryset.count())
-    mut_count_qryset.update(total=mut_qryset.count())
+    obs_mut_count_qryset.update(total=len(obs_muts))
+    mut_count_qryset.update(total=len(muts))
     for mutation_type in MUTATION_TYPE_LIST:
-        observed_mutation_type_count = obs_mut_qryset.filter(mutation__mutation_type=mutation_type).count()
-        unique_mutation_type_count = mut_qryset.filter(mutation_type=mutation_type).count()
+        observed_mutation_type_count = len([obs_mut for obs_mut in obs_muts if obs_mut.mutation.mutation_type==mutation_type])
+        unique_mutation_type_count = len([mut for mut in muts if mut.mutation_type==mutation_type])
         if mutation_type == 'SNP':
             obs_mut_count_qryset.update(single_base_substitution=observed_mutation_type_count)
             mut_count_qryset.update(single_base_substitution=unique_mutation_type_count)
@@ -81,8 +81,8 @@ def rebuild_mutation_counts():
             mut_count_qryset.update(inversion=unique_mutation_type_count)
 
     for functional_change_type in FUNCTIONAL_CHANGE_TYPE_LIST:
-        observed_mutation_type_count = obs_mut_qryset.filter(mutation__protein_change__contains=functional_change_type).count()
-        unique_mutation_type_count = mut_qryset.filter(protein_change__contains=functional_change_type).count()
+        observed_mutation_type_count = len([obs_mut.mutation for obs_mut in obs_muts if functional_change_type in obs_mut.mutation.protein_change])
+        unique_mutation_type_count = len([mut for mut in muts if functional_change_type in mut.protein_change])
         if functional_change_type == 'intergenic':
             obs_mut_count_qryset.update(intergenic=observed_mutation_type_count)
             mut_count_qryset.update(intergenic=unique_mutation_type_count)

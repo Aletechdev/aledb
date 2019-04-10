@@ -168,8 +168,8 @@ To collect static files for django:
 docker exec -it aledb-web python3 manage.py collectstatic
 ```
 
-To browse the database:
+To run all unit tests:
 
 ```
-sudo docker exec -it aledb-database mysql -u ale -p
+docker exec -it aledb-web bash -c "./manage.py test"
 ```
