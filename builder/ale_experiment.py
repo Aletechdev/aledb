@@ -192,18 +192,6 @@ def find_experiment_paths(root_path):
     return experiment_paths
 
 
-def create_ale_experiments(exp_files_dict_list):
-    """
-    Executed from Django ipython shell.
-    """
-    for exp_files_dict in exp_files_dict_list:
-        create_ale_experiment(exp_files_dict["breseq_output_group_root_abs_path"],
-                              exp_files_dict["ale_exp_user"],
-                              exp_files_dict["ale_exp_name"],
-                              exp_files_dict["ale_exp_proj"],
-                              exp_files_dict["breseq_starting_strain_output_abs_path"])
-
-
 def check_and_extract_parameters_from_metadata(metadata_path):
     if not os.path.isdir(metadata_path):
         logger.info("invalid metadata path")
