@@ -78,6 +78,7 @@
         <div><i>Note: You must select the Apply button when selecting specific ALEs or show/hide of columns according to
             tags.</i></div>
         <br>
+        {% if user.id %}
         <div class="row"> <!-- Rows -->
             <b>Rows: </b>
             <div class="btn-group" role="group">
@@ -103,6 +104,8 @@
 	    <b style="margin-left: 3%">Duplications: </b>
 	    <input id="show_dups" type="checkbox" name="checkbox" value="value" checked data-toggle="toggle" data-on="Show" data-off="Hide">
         </div>
+        {% endif %}
+
         <!-- Mutation table -->
         <form action="" method="get">
             <input type="hidden" name="ale_experiment_id" value="{{ ale_experiment_id  }}"/>
