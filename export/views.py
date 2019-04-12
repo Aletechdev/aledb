@@ -1,5 +1,5 @@
-from django.http import HttpResponse, StreamingHttpResponse
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 from ale.utils import get_all_user_exps
 from ale.permissions import can_view_project
 from ale.models import Project
@@ -35,15 +35,17 @@ def export(request):
                 if str(exp.ale_id) in exp_id_list:
                     exp_list.append(exp)
             if len(exp_list) > 0:
-                response = HttpResponse(content_type='application/octet-stream')
-                response['Content-Disposition'] = 'attachment; filename="download.zip"'
-                zip_file = ZipFile(response, 'w')
+                zip_data = io.BytesIO()
+                zip_file = ZipFile(zip_data, 'w')
                 for experiment in exp_list:
                     csv_data = io.StringIO()
                     writer = csv.writer(csv_data)
                     writer.writerows(get_csv_str(experiment.ale_id, mut_type_str))
                     csv_data.seek(0)
                     zip_file.writestr(experiment.name + '_' + mut_type_str + '.csv', csv_data.read())
+                zip_file.close()
+                response = HttpResponse(zip_data.getvalue(), content_type='application/x-zip-compressed')
+                response['Content-Disposition'] = 'attachment; filename="download.zip"'
                 return response
         return HttpResponse(status=403)
     except Exception :
