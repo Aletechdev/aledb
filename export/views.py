@@ -1,12 +1,10 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import render, get_object_or_404
-from django.utils.safestring import mark_safe
-from django.core.serializers.json import DjangoJSONEncoder
-from django_ajax.decorators import ajax
 from ale.utils import get_all_user_exps
 from ale.permissions import can_view_project
-from ale.models import AleExperiment, Project
-import json
+from ale.models import Project
+from zipfile import ZipFile
+import io, csv
 from export.util import get_csv_str
 from logs.aledb_logger import user_extra
 import logging
@@ -14,7 +12,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-@ajax
 def export(request):
     logger.info("export", extra = user_extra(request))
     try:
@@ -22,8 +19,8 @@ def export(request):
         mut_type_str = request.GET.get('mut_type', None)
         project_id = request.GET.get('project_id', None)
 
-        if project_id:
-            project = get_object_or_404(Project, pk=project_id)
+        if project_id != 'null':
+            project = get_object_or_404(Project, pk=int(project_id))
             if project and can_view_project(request.user, project):
                 experiments = project.aleexperiment_set.all()
             else:
@@ -38,9 +35,16 @@ def export(request):
                 if str(exp.ale_id) in exp_id_list:
                     exp_list.append(exp)
             if len(exp_list) > 0:
-                csv_str = [(experiment.name + '_' + mut_type_str, get_csv_str(experiment.ale_id, mut_type_str))for experiment in exp_list]
-                text = mark_safe(json.dumps(csv_str, cls=DjangoJSONEncoder))
-                return text
-        return None
-    except Exception:
+                response = HttpResponse(content_type='application/octet-stream')
+                response['Content-Disposition'] = 'attachment; filename="download.zip"'
+                zip_file = ZipFile(response, 'w')
+                for experiment in exp_list:
+                    csv_data = io.StringIO()
+                    writer = csv.writer(csv_data)
+                    writer.writerows(get_csv_str(experiment.ale_id, mut_type_str))
+                    csv_data.seek(0)
+                    zip_file.writestr(experiment.name + '_' + mut_type_str + '.csv', csv_data.read())
+                return response
+        return HttpResponse(status=403)
+    except Exception :
         logger.exception("export broke", extra = user_extra(request))

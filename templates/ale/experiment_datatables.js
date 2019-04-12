@@ -98,31 +98,17 @@
             swal("", "Please select experiments and try again.", "warning");
             return;
         }
-        $('#loadingmessage').show();
-         $.ajax(
-            {
-                type: 'GET',
-                url: "/export",
-                data: {
+        var url = "/export";
+        var params = {
                     'mut_type': mutation_type,
                     'project_id': project_id,
                     'experiment_ids': exp_ids
-                },
-                success: function (result) {
-                    var content = result['content'];
-                    if (content == null) {
-                        swal("", "No data available for downlaod", "error");
-                    } else {
-                        $('#loadingmessage').hide();
-                        var obj = JSON.parse(content);
-                        download_zip(obj);
-                        swal("", "Data download completed", "success");
-                    }
-                },
-                error: function (xhr, ajaxOptions, thrownError) {
-                    $('#loadingmessage').hide();
-                    swal("", "Download failed", "error");
-                }
-            }
-        )
+                };
+        var form = $('<form method="GET" action="' + url + '">');
+        $.each(params, function(k, v) {
+            form.append($('<input type="hidden" name="' + k +
+                    '" value="' + v + '">'));
+        });
+        $('body').append(form);
+        form.submit();
     }
