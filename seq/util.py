@@ -97,3 +97,11 @@ def get_mutation_objects(mutations_id_str):
         mutations_ids = [mut_id for mut_id in mutations_id_str.split(',') if is_int(mut_id)]
         mutations = [mutation for mutation in seq.models.Mutation.objects.filter(id__in=mutations_ids)]
     return mutations
+
+
+def get_ref_sequences():
+    muts = seq.models.Mutation.objects.all()
+    ref_seq_set = {mut.reseq_reference for mut in muts}
+    ref_seq_list = [ref_seq for ref_seq in ref_seq_set if ref_seq]
+    return sorted(ref_seq_list)
+
