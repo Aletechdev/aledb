@@ -10,6 +10,7 @@ import operator, collections, common
 from functools import reduce
 from seq.views import mutation_table_builder
 from ale.utils import get_user_projects, get_strains
+from seq.util import get_ref_sequences
 from filter.util import filter_observed_mutations
 from common.util import get_user_context
 from django.core.serializers.json import DjangoJSONEncoder
@@ -21,7 +22,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 MUT_TYPES = ['AMP', 'CON', 'DEL', 'DUP', 'INS', 'INV', 'MOB', 'SNP', 'SUB']
+MUT_TYPES_DISPLAY = ["Amplification", "Conversion", "Deletion", "Duplication", "Insersion", "Inversion", "Mobil", "SNP", "Substitution"]
 STRAINS = get_strains()
+REF_SEQS = get_ref_sequences()
 
 
 def search(request):
@@ -31,6 +34,7 @@ def search(request):
         user_projects = get_user_projects(request.user)
         context.update({"mut_types": MUT_TYPES,
                         "strains": STRAINS,
+                        "ref_seqs": REF_SEQS,
                         "projects": user_projects})
         template = loader.get_template("search/search.html")
 
@@ -101,7 +105,8 @@ def _get_last_search(request):
             'max_pos': request.GET['max_pos'],
             'mut_type': request.GET['mut_type'],
             'project': project,
-            'strain': request.GET['strain']
+            'strain': request.GET['strain'],
+            'ref_seq': request.GET['ref_seq']
         }
     return last_search
 
@@ -115,10 +120,11 @@ def _get_search_params(request, user_projects):
     if not message:
         has_gene = _add_genes_to_query(request, include_argument_list, exclude_argument_list)
         _add_mutation_change_to_query(request, include_argument_list)
+        has_refseq = _add_ref_seq_to_query(request, include_argument_list)
         has_strain =_add_strain_to_query(request, include_argument_list)
         has_project = _add_project_to_query(request, include_argument_list, user_projects)
-        if not has_project and not has_gene and not has_strain:
-            message = 'Please enter search criteria - genetic target, project or strain'
+        if not has_project and not has_gene and not has_strain and not has_refseq:
+            message = 'Please enter search criteria - genetic target, project or ref sequence or strain'
     return include_argument_list, exclude_argument_list, message
 
 
@@ -214,6 +220,14 @@ def _add_strain_to_query(request, include_argument_list):
     strain = request.GET['strain']
     if strain and len(strain) > 0:
         include_argument_list.append(Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__strain=strain))
+        return True
+    return False
+
+
+def _add_ref_seq_to_query(request, include_argument_list):
+    ref_seq = request.GET['ref_seq']
+    if ref_seq and len(ref_seq)>0:
+        include_argument_list.append(Q(mutation__reseq_reference=ref_seq))
         return True
     return False
 

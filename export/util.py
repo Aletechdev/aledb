@@ -26,7 +26,6 @@ def get_csv_str(exp_id, mut_type_str):
     mutations, table_entry_list, mutation_index_dict = get_mutation_table_data(reseq_ordered_dict, observed_mutations)
 
     mut_pos_index = 3
-    # TODO: harden below against an empty reseq_ordered_dict
     rows = [
         HTML_MUTATION_TABLE_HEADER[mut_pos_index:] + [reseq_ordered_dict[reseq].exp_ale_flask_isolate_str for reseq in
                                                       reseq_ordered_dict]]
