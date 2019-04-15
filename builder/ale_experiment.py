@@ -272,7 +272,7 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         root_abs_path = breseq_output_group_root_abs_path
         if "/breseq" in breseq_output_group_root_abs_path:
             root_abs_path = breseq_output_group_root_abs_path.replace("/breseq","")
-        breseq_output_group_root_abs_path = root_abs_path + "breseq/"
+        breseq_output_group_root_abs_path = root_abs_path + "/breseq/"
 
 
         clear_dashboard_cache()  # TODO: remove, since no longer using cache.
