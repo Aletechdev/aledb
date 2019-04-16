@@ -25,3 +25,5 @@ class TestBibliome(TestCase):
         expected_publication_count = 1
         create_publication("test_publication_journal", "aledb.org", 1)
         self.assertEqual(expected_publication_count, Publication.objects.all().count())
+        self.assertEqual("test_publication_journal", Publication.objects.get(id=1).title)
+        self.assertEqual("aledb.org", Publication.objects.get(id=1).url)
