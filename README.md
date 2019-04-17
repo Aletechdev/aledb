@@ -153,6 +153,16 @@ To delete experiments using their individual ids:
 docker exec -it aledb-web python3 manage.py delete 4 20 19 96...
 ```
 
+To add publications for experiments using their ids:
+
+```
+docker exec -it aledb-web python3 manage.py add_publication 3 14 159... 
+
+
+Please enter the publication title: Name of Publication Here
+Please enter the publication URL: Full URL of Publication Here.
+```
+
 To make migrations and then migrate:
 
 ```
