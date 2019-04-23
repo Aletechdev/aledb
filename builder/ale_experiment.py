@@ -21,6 +21,7 @@ from metadata.xpmdvalidator.validate import is_valid
 from ale.models import AleExperiment, Project
 from django.contrib.auth.models import User
 from datetime import datetime
+from stats.models import StaticData
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -66,13 +67,23 @@ def delete_ale_experiments(ale_experiment_primary_key_list):
         print("Deleting Experiment #" + str(exp_id) + ":", ale_experiment_to_delete.name)
         message = "Experiment %s was deleted" % ale_experiment_to_delete.name
         ale_experiment_to_delete.delete()
+        _delete_all_orphaned_observed_mutations()
         _delete_all_orphaned_mutations()
+        StaticData.objects.get(id=exp_id).delete()
         rebuild_dashboard_data()
         create_event(title="Experiment Deleted",
                      message=message,
                      icon='<i class="fa fa-times" aria-hidden="true"></i>',
                      color="danger")
         print(message)
+
+
+def _delete_all_orphaned_observed_mutations():
+    all_mutations = seq.models.ObservedMutation.objects.all()
+    for mutation in all_mutations:
+        mutation_experiment = mutation.get_experiment_id()
+        if len(AleExperiment.objects.filter(ale_id = mutation_experiment)) == 0:
+            mutation.delete()
 
 
 def _delete_all_orphaned_mutations():
@@ -161,7 +172,7 @@ def _insert_starting_strain_flask(staring_strain_breseq_output_abs_path,
 
 
 def upload_ale_experiment(experiment_path):
-    k = check_and_extract_parameters_from_metadata(experiment_path + "/metadata")
+    k = _check_and_extract_parameters_from_metadata(experiment_path + "/metadata")
     if k:
         print(experiment_path, k[0], k[1], k[2])
         create_ale_experiment(experiment_path, k[0], k[1], k[2])
@@ -192,7 +203,7 @@ def find_experiment_paths(root_path):
     return experiment_paths
 
 
-def check_and_extract_parameters_from_metadata(metadata_path):
+def _check_and_extract_parameters_from_metadata(metadata_path):
     if not os.path.isdir(metadata_path):
         logger.info("invalid metadata path")
         print("invalid path:", metadata_path)
@@ -215,7 +226,7 @@ def find_user(user):
                 return potential_user_list[0]
             potential_user_list = []
 
-            print ("User",user,"can't be found. Querying name parts individually.")
+            print("User", user, "can't be found. Querying name parts individually.")
 
             for each in name_parts:
                 potential_user_list=potential_user_list+list(User.objects.filter(first_name__icontains=each))
@@ -238,7 +249,7 @@ def find_user(user):
             if nb == "Y" or nb == "y" or nb == "\n":
                 return selected
             continue
-        except ValueError as e:
+        except (IndexError, ValueError) as e:
             print(e.__class__.__name__ + ": please select a value between 0 and", len(potential_user_list))
             continue
 
@@ -262,7 +273,7 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
     if not os.path.isdir(breseq_output_group_root_abs_path):
         logger.info("invalid path")
         print("invalid path:", breseq_output_group_root_abs_path)
-        return
+        return False
 
     try:
 
@@ -344,7 +355,8 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         rebuild_dashboard_data()
 
         metadata.parser.parse_metadata_post_experiment_upload(root_abs_path+"/metadata", experiment.ale_id)
-
+        #integrate_metadata(root_abs_path, ref_file_name, ale_exp_primary_key)
+        return True
     except Exception as e:
         logger.exception(e)
 
