@@ -183,3 +183,12 @@ To run all unit tests:
 ```
 docker exec -it aledb-web bash -c "./manage.py test"
 ```
+
+To generate coverage data from the containers:
+
+```
+docker exec -it aledb-web coverage run manage.py test
+
+docker exec -it aledb-web coverage report
+
+```

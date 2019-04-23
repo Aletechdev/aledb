@@ -16,14 +16,13 @@ def rebuild_dashboard_data():
 
 def rebuild_mut_histogram_data():
     if ObservedMutation.objects.all().count() == 0:
-        ObservedMutation.objects.create()
+        ObservedMutation.objects.create(mutation_id=-1)
     raw_obs_mut_qryset = ObservedMutation.objects.all()
     obs_mutations = filter_observed_mutations(raw_obs_mut_qryset)
     genes_json = generate_histogram_jsons(obs_mutations)
     if BarCharts.objects.all().count() == 0:
         BarCharts.objects.create()
-    histogram_data = BarCharts.objects.all()
-    histogram_data.update(mut_gene_json=genes_json)
+    BarCharts.objects.all().update(mut_gene_json=genes_json)
 
 
 def rebuild_sample_counts():

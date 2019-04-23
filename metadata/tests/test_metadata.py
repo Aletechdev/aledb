@@ -12,7 +12,7 @@ from ale.models import AleExperiment,\
 from metadata.parser import parse_metadata_post_experiment_upload
 from datetime import datetime
 import os
-
+from metadata.xpmdvalidator.validate import is_valid
 
 ALE_EXP_PRIMARY_EXP = 1  # I'm assuming will always be 1 due to rebuild of DB with the unit testing.
 
@@ -145,3 +145,9 @@ class TestParser(TestCase):
         self.assertEqual(2, tech_rep_queryset.count())
         for tech_rep in tech_rep_queryset:
             self.assertEqual("Acetate(4)", tech_rep.isolate.flask.media.substrate)
+
+    def test_xpmd_validator(self):
+        path = os.path.dirname(os.path.realpath(__file__)) + "/"
+        self.assertTrue(is_valid(path + "test1/", path + "../xpmdvalidator/Json_schema.json"))
+        self.assertFalse(is_valid(path + "test_bad_metadata/", path + "../xpmdvalidator/Json_schema.json"))
+
