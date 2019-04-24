@@ -73,17 +73,9 @@ def delete_ale_experiments(ale_experiment_primary_key_list):
                      icon='<i class="fa fa-times" aria-hidden="true"></i>',
                      color="danger")
         print(message)
-    _delete_all_orphaned_observed_mutations()
     _delete_all_orphaned_mutations()
+    print("deleted orphaned mutations")
     rebuild_dashboard_data()
-
-
-def _delete_all_orphaned_observed_mutations():
-    all_mutations = seq.models.ObservedMutation.objects.all()
-    for mutation in all_mutations:
-        mutation_experiment = mutation.get_experiment_id()
-        if len(AleExperiment.objects.filter(ale_id = mutation_experiment)) == 0:
-            mutation.delete()
 
 
 def _delete_all_orphaned_mutations():
@@ -91,7 +83,6 @@ def _delete_all_orphaned_mutations():
     Retrieving observed mutations for each mutation to check if it is orphane is very expensive
     """
     orphans = seq.models.Mutation.objects.raw('select * from seq_mutation m where not exists (select * from seq_observedmutation ob where ob.mutation_id = m.id)')
-    # all_mutations = seq.models.Mutation.objects.all()
     for mutation in orphans:
         mutation.delete()
 
