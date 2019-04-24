@@ -8,7 +8,7 @@ from datetime import datetime
 
 class Command(BaseCommand):
     # command: manage.py load_projects "/Users/rcai/Downloads/ALEdb exp proj map.xlsx"
-    help = "This function is used to load projects and associate exeperiments from file"
+    help = "This function is used to load projects and associate experiments from file"
 
     def add_arguments(self, parser):
         parser.add_argument('file', help='path to input file')
