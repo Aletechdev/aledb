@@ -70,12 +70,12 @@ def delete_ale_experiments(ale_experiment_primary_key_list):
         _delete_all_orphaned_observed_mutations()
         _delete_all_orphaned_mutations()
         StaticData.objects.get(id=exp_id).delete()
-        rebuild_dashboard_data()
         create_event(title="Experiment Deleted",
                      message=message,
                      icon='<i class="fa fa-times" aria-hidden="true"></i>',
                      color="danger")
         print(message)
+    rebuild_dashboard_data()
 
 
 def _delete_all_orphaned_observed_mutations():
@@ -87,10 +87,13 @@ def _delete_all_orphaned_observed_mutations():
 
 
 def _delete_all_orphaned_mutations():
-    all_mutations = seq.models.Mutation.objects.all()
-    for mutation in all_mutations:
-        if len(mutation.observedmutation_set.all()) == 0:
-            mutation.delete()
+    """Find the orphaned muations that don't have associated observed mutations.
+    Retrieving observed mutations for each mutation to check if it is orphane is very expensive
+    """
+    orphans = seq.models.Mutation.objects.raw('select * from seq_mutation m where not exists (select * from seq_observedmutation ob where ob.mutation_id = m.id)')
+    # all_mutations = seq.models.Mutation.objects.all()
+    for mutation in orphans:
+        mutation.delete()
 
 
 def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate_number):

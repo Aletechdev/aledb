@@ -109,12 +109,15 @@ class Mutation(models.Model):
         get gene links string for table cell display
         :return: gene links for display in mutation table
         """
-        return mark_safe(", ".join(get_ecocyc_gene_list(get_gene_list(self.gene))))
+        show_ecocyc_link = (self.reseq_reference == 'NC_000913')
+
+        return mark_safe(", ".join(get_ecocyc_gene_list(get_gene_list(self.gene), show_ecocyc_link)))
 
 
 class ObservedMutation(models.Model):
     sequencing_experiment = models.ForeignKey(ResequencingExperiment, null=True)
-    mutation = models.ForeignKey(Mutation)
+    # make sure not delete mutation if there is associated observed mutations
+    mutation = models.ForeignKey(Mutation, on_delete=models.DO_NOTHING)
     present = models.NullBooleanField()
     breseq_present = models.NullBooleanField()
     wt_reads = models.IntegerField(null=True)
