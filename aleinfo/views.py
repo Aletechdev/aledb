@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from ale.permissions import can_view_experiment
+from logs.aledb_logger import user_extra
 import logging
 import os
 
@@ -30,7 +31,7 @@ def protected_file_serve(request, page_name: str):
             raise HttpResponseForbidden
         if page_name.endswith('/'):
             page_name = page_name + "index.html"
-        logger.info("display file " + page_name)
+        logger.info("display file " + page_name, extra=user_extra(request))
         file_path = DOC_ROOT + page_name
         if os.path.isfile(file_path):
             mine_type = 'application/octet-stream'

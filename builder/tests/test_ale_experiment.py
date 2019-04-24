@@ -1,12 +1,11 @@
 from django.test import TestCase
-from django.db import transaction
 from django.contrib.auth.models import User
 
 from stats.models import StaticData
 from ale.models import Project, AleExperiment
-from seq.models import Mutation, ResequencingExperiment
+from seq.models import Mutation, ResequencingExperiment, ObservedMutation
 from builder.ale_experiment import find_user, create_ale_experiment, try_creating_project, find_experiment_paths, \
-    upload_ale_collection, upload_ale_experiment
+    delete_ale_experiments, upload_ale_collection
 from datetime import datetime
 import os
 import sys
@@ -27,7 +26,6 @@ class TestEnrichment(TestCase):
     """
 
     def setUp(self):
-        print("Creating test user Patrick")
         self.user = User.objects.create(username="pphaneuf", password="test123",
                                         first_name="Patrick", last_name="Phaneuf", email="email@email.com",
                                         is_active = True, is_staff = True, date_joined = datetime.now())
@@ -36,7 +34,24 @@ class TestEnrichment(TestCase):
 
     def test_create_ALE_experiment(self):
         test_report_path = os.path.dirname(os.path.realpath(__file__)) + "/breseq/"
+        self.assertFalse(create_ale_experiment(test_report_path+"/invalid_part", "Patrick", "test", "test_project"))
         create_ale_experiment(test_report_path, "Patrick", "test", "test_project")
+        expected_mutation_count = 27
+        self.assertEqual(expected_mutation_count, Mutation.objects.all().count())
+        expected_experiment_count = 1
+        self.assertEqual(expected_experiment_count, AleExperiment.objects.all().count())
+        expected_histogram_length = 68
+        self.assertEquals(expected_histogram_length, len(StaticData.objects.get(id=1).histogram_data))
+
+    def test_create_ALE_experiment_with_wildtype(self):
+        test_report_path = os.path.dirname(os.path.realpath(__file__)) + "/breseq/"
+        create_ale_experiment(test_report_path, "Patrick", "test", "test_project", os.path.dirname(os.path.realpath(__file__)) + "/breseq/1-10000-1-1")
+        expected_mutation_count = 0
+        self.assertEqual(expected_mutation_count, Mutation.objects.all().count())
+
+    def test_upload_ALE_collection(self):
+        test_path = os.path.dirname(os.path.realpath(__file__)) + "/test_file_structure/messy"
+        upload_ale_collection(test_path)
         expected_mutation_count = 27
         self.assertEqual(expected_mutation_count, Mutation.objects.all().count())
         expected_experiment_count = 1
@@ -62,7 +77,17 @@ class TestEnrichment(TestCase):
         self.assertEquals(self.user, find_user("pphaneuf"))
         self.assertEquals(self.user, find_user("Patrick"))
         f1 = sys.stdin
-        f = io.StringIO('patrick')
+        f = io.StringIO('who\npatrick')
+        sys.stdin = f
+        self.assertEquals(self.user, find_user("Krusty Krab"))
+        f.close()
+        sys.stdin = f1
+
+        self.user2 = User.objects.create(username="krusty", password="test123",
+                                        first_name="Patrick", last_name="Faneuph", email="email2@email2.com",
+                                        is_active=True, is_staff=True, date_joined=datetime.now())
+        f1 = sys.stdin
+        f = io.StringIO('patrick\n-1\n0\nY\n0\nY')
         sys.stdin = f
         self.assertEquals(self.user, find_user("Krusty Krab"))
         f.close()
@@ -82,3 +107,17 @@ class TestEnrichment(TestCase):
                           ['/app/builder/tests/test_file_structure',
                            '/app/builder/tests/test_file_structure/messy'].sort())
 
+    def test_delete_experiments(self):
+        test_report_path = os.path.dirname(os.path.realpath(__file__)) + "/breseq/"
+        expected_observed_mutation_count = 0
+        self.assertEqual(expected_observed_mutation_count, ObservedMutation.objects.all().count())
+        create_ale_experiment(test_report_path, "Patrick", "test", "test_project")
+        delete_ale_experiments([1])
+        expected_observed_mutation_count = 1  # 1 because of rebuild_mut_histogram_data creates one when 0
+        self.assertEqual(expected_observed_mutation_count, ObservedMutation.objects.all().count())
+        expected_mutation_count = 0
+        self.assertEqual(expected_mutation_count, Mutation.objects.all().count())
+        expected_experiment_count = 0
+        self.assertEqual(expected_experiment_count, AleExperiment.objects.all().count())
+        expected_histogram_count = 0
+        self.assertEquals(expected_histogram_count, StaticData.objects.all().count())

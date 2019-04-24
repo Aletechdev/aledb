@@ -14,8 +14,11 @@ config.sh
 .builder/
 .docker/data
 
+
 /logs/debug.log*
 /logs/info.log*
 
 # PyCharm
 .idea
+.coverage
+coverage.xml
