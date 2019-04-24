@@ -18,12 +18,12 @@ $(document).ready(function () {
 
     var styling_targets = [];
 
-    for (var l = number_of_columns - 1; l > sorted_column + 8; l--) {
+    for (var l = number_of_columns - 1; l > sorted_column + 10; l--) {
         styling_targets.push(l)
     }
     var hidden_cols = document.getElementById('hidden_columns').value.split(',');
     if(hidden_cols[0] == "") {
-        hidden_cols = [sorted_column + 4, sorted_column + 5, sorted_column + 6, sorted_column + 7]
+        hidden_cols = [sorted_column + 6, sorted_column + 7, sorted_column + 8, sorted_column + 9]
     }
 
     var oTable = $("#data").DataTable({
@@ -133,7 +133,7 @@ $(document).ready(function () {
 
     if(localStorage && localStorage['dups'] == 'false') {
         $('#show_dups').bootstrapToggle('off');
-        oTable.column(sorted_column + 1).search("^((?!DUP).)*$", true, false).draw();
+        oTable.column(sorted_column + 3).search("^((?!DUP).)*$", true, false).draw();
     }
     $('#show_dups').change(function () {
         filter_dups()
@@ -161,7 +161,7 @@ function column_sort_from_right() {
     var table = $("#data").DataTable();
     var visible_columns = table.columns().visible();
 
-    for (var i = sorted_column + 9; i < number_of_columns; i++) {
+    for (var i = sorted_column + 11; i < number_of_columns; i++) {
         if(visible_columns[i] == true) {
             sorting_array.push([i, 'desc'])
         }
@@ -178,37 +178,14 @@ var deleteRow = function () {
 function filter_dups() {
     var table = $('#data').DataTable();
     if ($('#show_dups').is(":checked")) {
-        table.column(sorted_column + 1).search('').draw();
+        table.column(sorted_column + 3).search('').draw();
         localStorage['dups'] = true;
     } else {
-        table.column(sorted_column + 1).search("^((?!DUP).)*$", true, false).draw();
+        table.column(sorted_column + 3).search("^((?!DUP).)*$", true, false).draw();
         localStorage['dups'] = false;
     }
 }
 
-function save_to_global_filter(mutation_id) {
-    alert("save global");
-    $.ajax({
-        type: "POST",
-        url: "",
-        data: { mut_id: mutation_id,
-                save_method: "global"
-        },
-        error: function(e) {
-            console.log(e)
-        },
-    })
-}
-
-function save_to_experiment_filter(ale_experiment_id, mutation_id) {
-    $.ajax({
-        type: "POST",
-        url: "",
-        data: { mut_id: mutation_id,
-                save_method: "experiment"
-        }
-    })
-}
 
 function expand_collapse_gene_entry(sign) {
     if(sign.className.includes('plus')) {
@@ -219,6 +196,34 @@ function expand_collapse_gene_entry(sign) {
 }
 
 function add_tag(tag_type, mutation_id, row) {
+    var token = '{{csrf_token}}';
+    $.ajax(
+        {
+            type: 'POST',
+            headers: { "X-CSRFToken": token },
+            url: '/mutations/toggle-mut-tag/',
+            data: {
+                mut_id: mutation_id,
+                tag_name: tag_type,
+            },
+            success: function (result) {
+                var message = result['content'];
+                if (message == 'ok') {
+                    // swal("", "Tag updated in database", "success");
+                    update_tag_column(tag_type, row)
+                }
+                else {
+                    swal("", message, "info")
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                swal("", "Save tag failed", "error");
+            }
+        }
+    )
+}
+
+function update_tag_column(tag_type, row) {
     var row_id = $(row).closest('tr')[0]._DT_RowIndex;
     var cell = $('#data').DataTable().cell(row_id, sorted_column-1);
     var span_html = '<span class="fa-stack">' + tag_list[tag_type] + '<font style="font-size:0px">' + tag_type + '</font></span>';
@@ -228,15 +233,8 @@ function add_tag(tag_type, mutation_id, row) {
         cell.data(cell.data() + span_html);
     }
     cell.invalidate().draw();
-    $.ajax({
-        type: "POST",
-        url: "",
-        data: { mut_id: mutation_id,
-                save_method: "tag_mut",
-                tag_name: tag_type
-        }
-    })
 }
+
 
 function filter_tag(tag_type, is_show, tag_text) {
 
@@ -253,31 +251,101 @@ function filter_tag(tag_type, is_show, tag_text) {
             var regex = '^((?!' + tag_type + ').)*$';
             tag_column.search(regex, true, false).draw();
         }
+
     }
 }
 
 function add_tag_to_replicate(tag_type, replicate_id, header) {
-    var cell = $(header).closest('th')[0];
-    $('#data').DataTable().columns().every(function () {
-        if(this.header() == cell) {
-            var header_cell = $(this.header());
-            $(header_cell.children()[header_cell.children().length-1]).children().each(function (idx, obj) {
-                if(obj.innerText.includes(tag_type)) {
-                    if(obj.style.display == 'none') {
-                        obj.style.display = ''
-                    } else {
-                        obj.style.display = 'none'
-                    }
+    var token = '{{csrf_token}}';
+    $.ajax(
+        {
+            type: 'POST',
+            headers: { "X-CSRFToken": token },
+            url: '/mutations/toggle-rep-tag/',
+            data: {
+                rep_id: replicate_id,
+                tag_name: tag_type,
+            },
+            success: function (result) {
+                var message = result['content'];
+                if (message == 'ok') {
+                    var cell = $(header).closest('th')[0];
+                    $('#data').DataTable().columns().every(function () {
+                        if(this.header() == cell) {
+                            var header_cell = $(this.header());
+                            $(header_cell.children()[header_cell.children().length-1]).children().each(function (idx, obj) {
+                                if(obj.innerText.includes(tag_type)) {
+                                    if(obj.style.display == 'none') {
+                                        obj.style.display = ''
+                                    } else {
+                                        obj.style.display = 'none'
+                                    }
+                                }
+                            });
+                        }
+                    });
                 }
-            });
+                else {
+                    swal("", message, "info")
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                swal("", "Save tag failed", "error");
+            }
         }
-    });
-    $.ajax({
-        type: "POST",
-        url: "",
-        data: { rep_id: replicate_id,
-                save_method: "tag_rep",
-                tag_name: tag_type
-        }
-    });
+    )
 }
+
+function save_to_global_filter(mutation_id) {
+    var token = '{{csrf_token}}';
+    $.ajax(
+        {
+            type: 'POST',
+            headers: { "X-CSRFToken": token },
+            url: "/mutations/add_to_global_filter",
+            data: { mut_id: mutation_id,
+                    save_method: "global"
+        },
+        success: function (result) {
+            var message = result['content'];
+            if (message == 'ok') {
+                swal("", 'Added mutation to global filter', "success");
+            }
+            else {
+                swal("", message, "info")
+            }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+            swal("", "Save-tag failed", "error");
+        }
+    })
+}
+
+function save_to_experiment_filter(ale_experiment_id, mutation_id) {
+    var token = '{{csrf_token}}';
+    $.ajax(
+        {
+            type: 'POST',
+            headers: { "X-CSRFToken": token },
+            url: "/mutations/add_to_exp_filter",
+            data: {
+                mut_id: mutation_id,
+                experiment_id: ale_experiment_id,
+                save_method: "experiment"
+            },
+            success: function (result) {
+                var message = result['content'];
+                if (message == 'ok') {
+                    swal("", "Added mutation to experiment filter", "success");
+                }
+                else {
+                    swal("", message, "info")
+                }
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                swal("", "Save-tag failed", "error");
+            }
+    })
+}
+
+

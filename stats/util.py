@@ -7,7 +7,7 @@ from seq.models import UnassignedMissingCoverageEvidence
 from seq.util import get_all_observed_mutations, get_reseq_ordered_dict
 from seq.views.common import MUTATION_TYPE_LIST, COLORS, DEFAULT_COLOR, FUNCTIONAL_CHANGE_TYPE_LIST
 from stats.models import StaticData
-from filter.util import get_filtered_observed_mutations_queryset
+from filter.util import filter_observed_mutations
 import stats.models
 import logging
 
@@ -16,11 +16,16 @@ MAX_HISTOGRAM_SIZE = 50
 logger = logging.getLogger(__name__)
 
 
-def get_observed_mutation_queryset(ale_experiment_id):
+def get_observed_mutation_list(ale_experiment_id):
+    """
+    updated by R. Cai
+    :param ale_experiment_id:
+    :return: list of observed mutations for given experiment, filtered and data loaded
+    """
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id)
     observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
-    observed_mutation_query_set = get_filtered_observed_mutations_queryset(observed_mutation_query_set)
-    return observed_mutation_query_set
+    observed_mutation_list = filter_observed_mutations(observed_mutation_query_set, ale_experiment_id)
+    return observed_mutation_list
 
 
 def get_histogram_jsons(ale_experiment_id, histogram_item_count):
@@ -28,20 +33,22 @@ def get_histogram_jsons(ale_experiment_id, histogram_item_count):
     return genes
 
 
-def generate_histogram_jsons(observed_mutation_queryset):
-    observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='')
-    observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='-')
-    observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='–, –')
-    gene_bar_chart_list = get_gene_bar_chart_list(observed_mutation_queryset)
+def generate_histogram_jsons(observed_mutation_list):
+    mutations_dict = {obs_mut.mutation_id: obs_mut.mutation for obs_mut in observed_mutation_list
+                 if not (obs_mut.mutation.gene == '' or obs_mut.mutation.gene == '-' or obs_mut.mutation.gene == '-, -')}
+    # observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='')
+    # observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='-')
+    # observed_mutation_queryset = observed_mutation_queryset.exclude(mutation__gene='–, –')
+    gene_bar_chart_list = get_gene_bar_chart_list(mutations_dict.values())
     genes = set_gene_bar_chart_colors(gene_bar_chart_list)
 
     genes_json = list(genes)
     return genes_json
 
 
-def generate_needle_plot_data(obs_mut_queryset):
+def generate_needle_plot_data(obs_mut_list):
     needle_plot_data = []
-    for observed_mutation in obs_mut_queryset:
+    for observed_mutation in obs_mut_list:
         needle_plot_data.append(
             {'coord': str(observed_mutation.mutation.position),
              'category': observed_mutation.mutation.mutation_type,
@@ -55,42 +62,44 @@ def get_needle_plot_data(experiment_id):
 
 
 def generate_static_data(ale_id):
-    observed_mutation_queryset = get_observed_mutation_queryset(ale_id)
-    mutation_needle_data = generate_needle_plot_data(observed_mutation_queryset)
+    observed_mutation_list = get_observed_mutation_list(ale_id)
+    mutation_needle_data = generate_needle_plot_data(observed_mutation_list)
     static_data_orm, created = stats.models.StaticData.objects.get_or_create(id=ale_id)
     static_data_orm.mut_needle_data = mutation_needle_data
-    static_data_orm.histogram_data = generate_histogram_jsons(observed_mutation_queryset)
+    static_data_orm.histogram_data = generate_histogram_jsons(observed_mutation_list)
     static_data_orm.save()
 
 
-def get_mutation_type_count_dict(mutation_query_set):
-    mutation_type_count_dict = {}
-    for mutation_type in MUTATION_TYPE_LIST:
-        mutation_type_count = mutation_query_set.filter(mutation_type=mutation_type).count()
-        mutation_type_count_dict[mutation_type] = mutation_type_count
+def get_mutation_type_count_dict(mutations):
+    mutation_type_count_dict = {mut_type: 0 for mut_type in MUTATION_TYPE_LIST}
+    for mutation in mutations:
+        mutation_type = mutation.mutation_type
+        if mutation_type in MUTATION_TYPE_LIST:
+            mutation_type_count_dict[mutation.mutation_type] += 1
     return mutation_type_count_dict
 
 
-def get_observed_mutation_type_count_dict(observed_mutation_query_set):
+def get_observed_mutation_type_count_dict(obs_mutations):
     mutation_type_count_dict = {mutation_type:0 for mutation_type in MUTATION_TYPE_LIST}
-    for observed_mutation in observed_mutation_query_set:
+    for observed_mutation in obs_mutations:
         mut_type = observed_mutation.mutation.mutation_type
         if mut_type in mutation_type_count_dict.keys():
             mutation_type_count_dict[mut_type] += 1
     return mutation_type_count_dict
 
 
-def get_protein_change_type_count_dict(mutation_query_set):
-    protein_change_type_count_dict = {}
-    for protein_change_type in FUNCTIONAL_CHANGE_TYPE_LIST:
-        protein_change_count = mutation_query_set.filter(protein_change__contains=protein_change_type).count()
-        protein_change_type_count_dict[protein_change_type] = protein_change_count
+def get_protein_change_type_count_dict(mutations):
+    protein_change_type_count_dict = {prot_change_type: 0 for prot_change_type in FUNCTIONAL_CHANGE_TYPE_LIST}
+    for mut in mutations:
+        for protein_change_type in FUNCTIONAL_CHANGE_TYPE_LIST:
+            if protein_change_type in mut.protein_change:
+                protein_change_type_count_dict[protein_change_type] += 1
     return protein_change_type_count_dict
 
 
-def get_observed_protein_change_type_count_dict(observed_mutations_query_set):
+def get_observed_protein_change_type_count_dict(observed_mutations):
     protein_change_type_count_dict = {protein_change_type:0 for protein_change_type in FUNCTIONAL_CHANGE_TYPE_LIST}
-    for observed_mutation in observed_mutations_query_set:
+    for observed_mutation in observed_mutations:
         for protein_change_type in FUNCTIONAL_CHANGE_TYPE_LIST:
             if protein_change_type in observed_mutation.mutation.protein_change:
                 protein_change_type_count_dict[protein_change_type] += 1
@@ -150,10 +159,10 @@ def get_reseq_experiment_info_list(reseq_experiments):
     return reseq_experiments_info_list
 
 
-def get_gene_bar_chart_list(observed_mutation_queryset):
+def get_gene_bar_chart_list(mutations):
 
-    gene_list = [[get_gene_list(gene['mutation__gene']), gene['mutation__mutation_type']] for
-                 gene in observed_mutation_queryset.values('mutation__gene', 'mutation__mutation_type')]
+    gene_list = [[get_gene_list(mut.gene), mut.mutation_type]
+                 for mut in mutations]
 
     mutation_type_gene_dict = {}
 

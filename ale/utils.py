@@ -72,3 +72,4 @@ def get_strains():
     strain_sets = {obj.strain for obj in ale_ids}
     strains = [strain for strain in strain_sets if strain]
     return sorted(strains)
+

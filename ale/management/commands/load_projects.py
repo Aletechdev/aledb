@@ -18,36 +18,35 @@ class Command(BaseCommand):
         df = pd.read_excel(filename)
         print(df.columns)
 
-        experiment_name_map = {exp.name.lower(): exp for exp in AleExperiment.objects.all()}
+        experiment_name_map = {exp.name.strip().lower(): exp for exp in AleExperiment.objects.all()}
         project_name_map = {proj.name.lower(): proj for proj in Project.objects.all()}
         user_name_map = {user.get_full_name(): user for user in User.objects.filter(first_name__isnull=False)}
 
         for index, row in df.iterrows():
             exp_name = row['experiment'].strip()
-            owner = row['owner'].strip()
-            proj_name = row['project'].strip()
-            email = str(row['email'])
-            pub_flag = row['public']
-            if email is None or email =='nan':
-                email = ''
-            print("row", index, exp_name)
-
-            user = user_name_map.get(owner)
-            if user is None:
-                user = _create_user(owner, email)
-                user_name_map[owner] = user
-
-            project = project_name_map.get(proj_name.lower())
-            if project is None:
-                project = _create_project(proj_name, user, pub_flag)
-                project_name_map[proj_name.lower()] = project
-
             experiment = experiment_name_map.get(exp_name.lower())
-            if experiment is None:
-                print("experiment does not exit: ", exp_name)
-            else:
+            if experiment:
+                owner = row['owner'].strip()
+                proj_name = row['project'].strip()
+                email = str(row['email'])
+                pub_flag = row['public']
+                if email is None or email =='nan':
+                    email = ''
+                print("row", index, exp_name)
+
+                user = user_name_map.get(owner)
+                if user is None:
+                    user = _create_user(owner, email)
+                    user_name_map[owner] = user
+
+                project = project_name_map.get(proj_name.lower())
+                if project is None:
+                    project = _create_project(proj_name, user, pub_flag)
+                    project_name_map[proj_name.lower()] = project
                 experiment.project = project
                 experiment.save()
+            else:
+                print("experiment does not exit: ", exp_name)
 
 
 def _create_user(user_full_name: str, email: str):
