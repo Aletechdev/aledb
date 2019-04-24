@@ -67,14 +67,14 @@ def delete_ale_experiments(ale_experiment_primary_key_list):
         print("Deleting Experiment #" + str(exp_id) + ":", ale_experiment_to_delete.name)
         message = "Experiment %s was deleted" % ale_experiment_to_delete.name
         ale_experiment_to_delete.delete()
-        _delete_all_orphaned_observed_mutations()
-        _delete_all_orphaned_mutations()
         StaticData.objects.get(id=exp_id).delete()
         create_event(title="Experiment Deleted",
                      message=message,
                      icon='<i class="fa fa-times" aria-hidden="true"></i>',
                      color="danger")
         print(message)
+    _delete_all_orphaned_observed_mutations()
+    _delete_all_orphaned_mutations()
     rebuild_dashboard_data()
 
 
