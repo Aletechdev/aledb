@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.contrib.auth.models import User
 from ale.models import AleExperiment,\
     Instrument,\
     Isolate,\
@@ -6,8 +7,10 @@ from ale.models import AleExperiment,\
     Media,\
     Flask,\
     AleId,\
-    FreezerBox
+    FreezerBox,\
+    Project
 from metadata.parser import parse_metadata_post_experiment_upload
+from datetime import datetime
 import os
 
 
@@ -19,6 +22,10 @@ __author__ = 'Patrick Phaneuf'
 class TestParser(TestCase):
 
     def setUp(self):
+        self.user = User.objects.create(username="Troy", password="test123",
+                                        first_name="Troy", last_name="Sandberg", email="email@email.com",
+                                        is_active=True, is_staff=True, date_joined=datetime.now())
+        self.project = Project.objects.create(name="SSW Glu Ac", user = self.user)
         self.instrument = Instrument.objects.create()
         self.freezerbox = FreezerBox.objects.create()
         self.ale_exp = AleExperiment.objects.create(instrument=self.instrument)

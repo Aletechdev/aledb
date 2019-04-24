@@ -1,8 +1,18 @@
 import collections
-
 import seq.models
+from common.util import is_int
+from filter.util import filter_observed_mutations
 
 HTML_ECOCYC = """<a href = "https://ecocyc.org/ECOLI/substring-search?type=GENE&object={gene}">{gene}</a>"""
+
+
+def get_observed_mutation_queryset(experiment_id):
+    return seq.models.ObservedMutation.objects.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=experiment_id)
+
+
+def get_all_observed_muations_filtered(experiment_id):
+    queryset = get_observed_mutation_queryset(experiment_id)
+    return filter_observed_mutations(queryset, experiment_id)
 
 
 def get_all_observed_mutations(reseq_id_list):
@@ -50,20 +60,21 @@ def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, request=None):
     return reseq_ordered_dict
 
 
-def get_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
-    return seq.models.Mutation.objects.filter(pk__in=observed_mutations_queryset.values_list("mutation", flat=True))
+def get_mutations_from_observed_muations(observed_mutations):
+    mut_map = {obs_mut.mutation.id: obs_mut.mutation for obs_mut in observed_mutations}
+    return mut_map.values()
 
 
-def get_unique_obs_mut_queryset_from_obs_mut_queryset(observed_mutations_queryset):
+def get_ordered_reseq_dict(observed_mutations):
     """
-    Updated by R. Cai
-    This method get one observed mutation for each mutation (??). The observed mutation is used
-    to extract strain information to decide if a 'gene linked' is need for display
-    :param observed_mutations_queryset:
-    :return: dict that map mutation_id to one observed mutation
+    Get reseq {id: reseq} map
+    :param observed_mutations:
+    :return: ordered map
     """
-    unique_obs_mut = {observed_mutation.mutation.id: observed_mutation for observed_mutation in observed_mutations_queryset}
-    return unique_obs_mut
+    seq_experiment_ordered_dict = collections.OrderedDict()
+    for observed_mutation in observed_mutations:
+        seq_experiment_ordered_dict[observed_mutation.sequencing_experiment.id] = observed_mutation.sequencing_experiment
+    return seq_experiment_ordered_dict
 
 
 def get_ecocyc_gene_list(gene_list):
@@ -83,6 +94,14 @@ def get_mutation_objects(mutations_id_str):
     """
     mutations = []
     if mutations_id_str and len(mutations_id_str)>0:
-        mutations_ids = mutations_id_str.split(',')
+        mutations_ids = [mut_id for mut_id in mutations_id_str.split(',') if is_int(mut_id)]
         mutations = [mutation for mutation in seq.models.Mutation.objects.filter(id__in=mutations_ids)]
     return mutations
+
+
+def get_ref_sequences():
+    muts = seq.models.Mutation.objects.all()
+    ref_seq_set = {mut.reseq_reference for mut in muts}
+    ref_seq_list = [ref_seq for ref_seq in ref_seq_set if ref_seq]
+    return sorted(ref_seq_list)
+

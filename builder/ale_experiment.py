@@ -192,24 +192,12 @@ def find_experiment_paths(root_path):
     return experiment_paths
 
 
-def create_ale_experiments(exp_files_dict_list):
-    """
-    Executed from Django ipython shell.
-    """
-    for exp_files_dict in exp_files_dict_list:
-        create_ale_experiment(exp_files_dict["breseq_output_group_root_abs_path"],
-                              exp_files_dict["ale_exp_user"],
-                              exp_files_dict["ale_exp_name"],
-                              exp_files_dict["ale_exp_proj"],
-                              exp_files_dict["breseq_starting_strain_output_abs_path"])
-
-
 def check_and_extract_parameters_from_metadata(metadata_path):
     if not os.path.isdir(metadata_path):
         logger.info("invalid metadata path")
         print("invalid path:", metadata_path)
         return False
-    if not is_valid(metadata_path,"/app/metadata/xpmdvalidator/Json_schema.json"):
+    if not is_valid(metadata_path,"metadata/xpmdvalidator/Json_schema.json"):
         return False
     return metadata.parser.extract_experiment_parameters(metadata_path)
 
@@ -281,9 +269,10 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         """
         Executed from Django ipython shell.
         """
-
-        root_abs_path = breseq_output_group_root_abs_path.replace("/breseq","")
-        breseq_output_group_root_abs_path = root_abs_path + "/breseq"
+        root_abs_path = breseq_output_group_root_abs_path
+        if "/breseq" in breseq_output_group_root_abs_path:
+            root_abs_path = breseq_output_group_root_abs_path.replace("/breseq","")
+        breseq_output_group_root_abs_path = root_abs_path + "/breseq/"
 
 
         clear_dashboard_cache()  # TODO: remove, since no longer using cache.

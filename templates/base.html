@@ -97,10 +97,10 @@
                         <li><a href="{% url 'accounts:login' %}">Login</a></li>
                     {% endif %}
                     <li {% block dash %}{% endblock %}><a href="/">Dashboard</a></li>
-                    <li {% block search %}{% endblock %}><a href="/search">Search</a></li>
+                    <li {% block search %}{% endblock %}><a href="/search/">Search</a></li>
                     <li><a href="/ale/projects/">Projects</a></li>
                     <li><a href="/ale/experiments/">Experiments</a></li>
-                    <li {% block filter %}{% endblock %}><a href="/filter/global_filter">Global Filter</a></li>
+                    <li {% block filter %}{% endblock %}><a href="/filter/global_filter/">Global Filter</a></li>
                     <li><a href="/about">About</a></li>
                     <li><a href="/bibliome">Bibliome</a></li>
                     {% if ale_experiment_id %}
