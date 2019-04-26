@@ -1,9 +1,8 @@
 from django.shortcuts import get_object_or_404, render
 from django.shortcuts import redirect
-from .models import Project, AleExperiment
+from .models import Project
 from .utils import get_user_projects, get_all_user_exps
 from .permissions import can_view_project
-from logs.aledb_logger import user_extra
 import logging
 
 logger = logging.getLogger(__name__)

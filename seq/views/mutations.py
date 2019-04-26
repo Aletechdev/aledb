@@ -7,11 +7,13 @@ from django_ajax.decorators import ajax
 import seq.views.common
 from seq.views import mutation_table_builder
 from seq.util import get_all_observed_muations_filtered, get_reseq_ordered_dict
+from seq.models import ResequencingExperiment
 from common.util import get_user_context
 from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
 from ale import permissions, models
 from filter.models import AleExperimentFilter
 from filter.util import get_global_filter
+from aleinfo.views import show_amplifiction_data
 import json
 import common.constants
 from logs.aledb_logger import user_extra, join_extras
@@ -21,6 +23,10 @@ __author__ = 'pphaneuf'
 
 
 logger = logging.getLogger(__name__)
+
+
+def amplification_data(request):
+    return show_amplifiction_data(request)
 
 
 def mutation_table(request):

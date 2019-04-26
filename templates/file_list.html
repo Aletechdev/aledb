@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}<title>File list</title>{% endblock %}
-{% block header %}files{% endblock %}
+{% block title %}{{ title }}{% endblock %}
+{% block header %}<b>{{ ale_experiment_name }}</b> -{{ subtitle }}{% endblock %}
 {% block content %}
-    {% for file in file_list %}
-        <a href="/aledata/{{ file }}">{{ file }}</a>
-        <br>
-    {% endfor %}
+    <ul>
+        {% for file, url in file_urls.items %}
+            <li><a href="{{ url }}">{{ file }}</a></li>
+        {% endfor %}
+    </ul>
 {% endblock %}

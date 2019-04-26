@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+       <!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -111,7 +111,9 @@
                         <li><a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Fixed Mutations</a></li>
                         <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Filter</a></li>
                     {% endif %}
-
+                    {% if ale_experiment_id and user.is_authenticated %}
+                        <li><a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Amplifications</a></li>
+                    {% endif %}
                 </ul>
             </div>
             <div id="sidebarbutton" title="Collapse sidebar" onclick="toggle_sidebar()"
@@ -134,6 +136,9 @@
                         <a href="/converge?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Converged Mutations</a> |
                         <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Fixed Mutations</a> |
                         <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Filter</a>
+                    {% endif %}
+                    {% if ale_experiment_id and user.is_authenticated %}
+                        | <a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Amplifications</a>
                     {% endif %}
                     </div>
                 </div>

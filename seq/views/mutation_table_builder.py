@@ -184,7 +184,7 @@ def get_table_body(user: User,
 
 def get_gene_table_entry(mutation):
     table_entry = """<div style="width:150px">"""
-    cleaned_gene_list = get_ecocyc_gene_list(get_gene_list(mutation.gene))
+    cleaned_gene_list = get_ecocyc_gene_list(get_gene_list(mutation.gene), mutation.is_ecocyc_gene())
 
     if len(cleaned_gene_list) > 10:
         table_entry += EXPANDABLE_COLUMN_PLUS_SIGN % str(mutation.id)

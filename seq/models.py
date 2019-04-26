@@ -104,14 +104,15 @@ class Mutation(models.Model):
         return u"%d %s" % (self.position,
                            self.sequence_change)
 
-    def ecocyc_gene_urls(self):
+    def is_ecocyc_gene(self) -> bool:
+        return self.reseq_reference == 'NC_000913'
+
+    def ecocyc_gene_urls(self) -> str:
         """
         get gene links string for table cell display
         :return: gene links for display in mutation table
         """
-        show_ecocyc_link = (self.reseq_reference == 'NC_000913')
-
-        return mark_safe(", ".join(get_ecocyc_gene_list(get_gene_list(self.gene), show_ecocyc_link)))
+        return mark_safe(", ".join(get_ecocyc_gene_list(get_gene_list(self.gene), self.is_ecocyc_gene())))
 
 
 class ObservedMutation(models.Model):
