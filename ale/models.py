@@ -85,6 +85,13 @@ class AleExperiment(models.Model):
             return self.date.strftime("%Y-%m-%d")
         return ''
 
+    def experiment_context(self) -> dict:
+        ale_exp_name = self.project.name + ": " + self.name
+        return {
+            "ale_experiment_name": ale_exp_name,
+            "ale_experiment_id": self.ale_id,
+        }
+
 
 # TODO: this model should be called "Ale".
 class AleId(models.Model):

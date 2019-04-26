@@ -77,12 +77,15 @@ def get_ordered_reseq_dict(observed_mutations):
     return seq_experiment_ordered_dict
 
 
-def get_ecocyc_gene_list(gene_list):
+def get_ecocyc_gene_list(gene_list, is_ecocyc_gene: bool = False):
     url_list = []
     for each in gene_list:
         if each.startswith("<"):
             each = each.split(">")[-1]
-        url_list.append(HTML_ECOCYC.format(gene=each))
+        if is_ecocyc_gene:
+            url_list.append(HTML_ECOCYC.format(gene=each))
+        else:
+            url_list.append(each)
     return url_list
 
 

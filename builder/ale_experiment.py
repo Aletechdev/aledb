@@ -80,7 +80,7 @@ def delete_ale_experiments(ale_experiment_primary_key_list):
 
 def _delete_all_orphaned_mutations():
     """Find the orphaned muations that don't have associated observed mutations.
-    Retrieving observed mutations for each mutation to check if it is orphane is very expensive
+    Retrieving observed mutations for each mutation to check if it is orphan is very expensive
     """
     orphans = seq.models.Mutation.objects.raw('select * from seq_mutation m where not exists (select * from seq_observedmutation ob where ob.mutation_id = m.id)')
     for mutation in orphans:

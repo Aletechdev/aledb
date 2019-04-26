@@ -39,11 +39,7 @@ def stats(request):
         context = get_user_context(request.user)
         experiment = common.get_ale_experiment(request)
         if experiment:
-            ale_exp_name = experiment.project.name + ": " + experiment.name
-            context.update({
-                "ale_experiment_name": ale_exp_name,
-                "ale_experiment_id": experiment.ale_id,
-            })
+            context.update(experiment.experiment_context())
 
         try:
             pub_qryset = Publication.objects.filter(ale_experiment=experiment)
