@@ -31,12 +31,12 @@
       "taxonomy-id": {
         "$id": "taxonomy-id",
         "type": "string",
-        "enum": ["413997", "511145", "668369", "511693", "679895", "243274", "451516", "2144189", "867914", "1219067","451515","160490","1116234","400667","301447"]
+        "enum": ["413997", "511145", "668369", "511693", "679895", "243274", "451516", "2144189", "867914", "1219067","451515","160490","1116234","400667","301447", "203119"]
       },
       "Accession": {
         "$id": "Accession",
         "type": "string",
-        "enum": ["NC_012967", "CP000819.1", "NC_000913", "CP025268.1", "NZ_JRYM00000000", "KT943377", "NZ_CP009273", "CP009273", "NZ_CP011107.1", "NC_023151.1", "NC_021214.1", "NC_010079", "CP016816", "PRJNA50719", "NZ_CP016346.1", "CP000255", "NC_002737","PRJNA77021","PRJNA17477","CP008776.1"]
+        "enum": ["NC_012967", "CP000819.1", "NC_000913", "CP025268.1", "NZ_JRYM00000000", "KT943377", "NZ_CP009273", "CP009273", "NZ_CP011107.1", "NC_023151.1", "NC_021214.1", "NC_010079", "CP016816", "PRJNA50719", "NZ_CP016346.1", "CP000255", "NC_002737","PRJNA77021","PRJNA17477","CP008776.1", "CP000568"]
       },
       "strain-description": {
         "$id": "strain-description",
@@ -46,7 +46,7 @@
       "base-media": {
         "$id": "base-media",
         "type": "string",
-        "enum": ["M9", "LB", "DM25", "RPMI", "MHB", "SMM", "TH", "THY"]
+        "enum": ["M9", "LB", "DM25", "RPMI", "MHB", "SMM", "TH", "THY", "MTC"]
       },
       "isolate-type": {
         "$id": "isolate-type",
@@ -157,17 +157,17 @@
       "library-prep-kit-manufacturer": {
         "$id": "library-prep-kit-manufacturer",
         "type": "string",
-        "enum": ["Illumina", "Kapa", ""]
+        "enum": ["Illumina", "Kapa", "Qiagen", ""]
       },
       "library-prep-kit": {
         "$id": "library-prep-kit",
         "type": "string",
-        "enum": ["Nextera XT", "KAPA HyperPlus", "KAPA Stranded RNA-seq", "TruSeq DNA LT Sample Prep Kit", ""]
+        "enum": ["Nextera XT", "KAPA HyperPlus", "KAPA Stranded RNA-seq", "TruSeq DNA LT Sample Prep Kit", "DNeasy", ""]
       },
       "library-prep-kit-cycles": {
         "$id": "library-prep-kit-cycles",
         "type": "string",
-        "enum": ["50", "76", "150", "300", "500", "600", ""]
+        "enum": ["N/A", "50", "76", "150", "300", "500", "600", ""]
       },
       "read-type": {
         "$id": "read-type",
