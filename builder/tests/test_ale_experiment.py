@@ -45,7 +45,8 @@ class TestEnrichment(TestCase):
 
     def test_create_ALE_experiment_with_wildtype(self):
         test_report_path = os.path.dirname(os.path.realpath(__file__)) + "/breseq/"
-        create_ale_experiment(test_report_path, "Patrick", "test", "test_project", os.path.dirname(os.path.realpath(__file__)) + "/breseq/1-10000-1-1")
+        create_ale_experiment(test_report_path, "Patrick", "test", "test_project",
+                              os.path.dirname(os.path.realpath(__file__)) + "/breseq/1-10000-1-1")
         expected_mutation_count = 0
         self.assertEqual(expected_mutation_count, Mutation.objects.all().count())
 
