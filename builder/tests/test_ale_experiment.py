@@ -94,7 +94,6 @@ class TestEnrichment(TestCase):
         sys.stdin = f1
 
     def test_try_creating_project(self):
-        100/0
         patrick = self.user
         try_creating_project("Created Project", "Patrick Phaneuf", is_pub=False)
         created_project = Project.objects.get(name="Created Project")
