@@ -33,7 +33,6 @@ class TestEnrichment(TestCase):
         status = "In progress", is_public = False)
 
     def test_create_ALE_experiment(self):
-        1/0
         test_report_path = os.path.dirname(os.path.realpath(__file__)) + "/breseq/"
         self.assertFalse(create_ale_experiment(test_report_path+"/invalid_part", "Patrick", "test", "test_project"))
         create_ale_experiment(test_report_path, "Patrick", "test", "test_project")
