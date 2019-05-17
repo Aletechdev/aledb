@@ -130,7 +130,7 @@ docker-compose up -d
 The general syntax is:
 
 ```
-docker exec -it <name of container> <command(s)>
+docker exec -it <name of container> <command>
 ```
 
 To access the django python shell:
