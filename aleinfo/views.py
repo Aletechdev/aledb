@@ -117,7 +117,7 @@ def _get_exp_data_folder_name(experiment: AleExperiment) -> []:
     dirs = []
     for reseq in reseqs:
         if '/' in reseq.location:
-            dir = reseq.location[:reseq.location.find('/')]
+            dir = reseq.location[:reseq.location.find('/breseq')]
             if dir not in dirs:
                 dirs.append(dir)
     return dirs
