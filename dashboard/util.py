@@ -1,17 +1,17 @@
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts, BarCharts
-from seq.models import ObservedMutation
+from seq.models import ObservedMutation, Mutation
 from filter.util import filter_observed_mutations
 from seq.util import get_mutations_from_observed_muations
-from seq.views.common import MUTATION_TYPE_LIST, FUNCTIONAL_CHANGE_TYPE_LIST
+from seq.views.common import MUTATION_TYPE_LIST, FUNCTIONAL_CHANGE_TYPE_LIST, UNANNOTATED
 from ale.models import AleId, Isolate, Flask
 from django.db.models import Q
 from stats.util import generate_histogram_jsons, MAX_HISTOGRAM_SIZE
 
 
 def rebuild_dashboard_data():
-    rebuild_mutation_counts()
     rebuild_sample_counts()
-    rebuild_mut_histogram_data()
+    rebuild_mutation_counts()
+    # rebuild_mut_histogram_data()
 
 
 def rebuild_mut_histogram_data():
@@ -34,6 +34,7 @@ def rebuild_sample_counts():
     SampleCounts.objects.all().update(flask_count=flask_count)
     isolate_count = Isolate.objects.filter(~Q(flask__ale_id__ale_id=0)).count()
     SampleCounts.objects.all().update(isolate_count=isolate_count)
+    print(ale_count, flask_count, isolate_count)
 
 
 def rebuild_mutation_counts():
@@ -48,12 +49,35 @@ def rebuild_mutation_counts():
         UniqueMutationCounts.objects.create()
     mut_count_qryset = UniqueMutationCounts.objects.all()
 
-    # TODO: there has to be a better way than the below. It's full of unnecessary repetition.
+    print("obs_mut ", len(obs_muts))
     obs_mut_count_qryset.update(total=len(obs_muts))
+    print('muts', len(muts))
     mut_count_qryset.update(total=len(muts))
+
+    mut_count_dict = {mut_type: 0 for mut_type in MUTATION_TYPE_LIST}
+    mut_func_change_type_dict = {func_change_type: 0 for func_change_type in FUNCTIONAL_CHANGE_TYPE_LIST}
+    for mut in muts:
+        mutation_type = _find_mutation_type(mut)
+        mut_count_dict[mutation_type] = mut_count_dict[mutation_type] + 1
+        functional_change_type = _find_functional_change_type(mut)
+        mut_func_change_type_dict[functional_change_type] = mut_func_change_type_dict[functional_change_type] + 1
+
+    obs_mut_count_dict = {mut_type: 0 for mut_type in MUTATION_TYPE_LIST}
+    obs_mut_func_change_type_dict = {func_change_type: 0 for func_change_type in FUNCTIONAL_CHANGE_TYPE_LIST}
+    for obs_mut in obs_muts:
+        mutation_type = _find_mutation_type(obs_mut.mutation)
+        obs_mut_count_dict[mutation_type] = obs_mut_count_dict[mutation_type] + 1
+        functional_change_type = _find_functional_change_type(obs_mut.mutation)
+        obs_mut_func_change_type_dict[functional_change_type] = obs_mut_func_change_type_dict[functional_change_type] + 1
+
+    total_mut_cnt = 0
+    total_obs_mut_cnt = 0
     for mutation_type in MUTATION_TYPE_LIST:
-        observed_mutation_type_count = len([obs_mut for obs_mut in obs_muts if obs_mut.mutation.mutation_type==mutation_type])
-        unique_mutation_type_count = len([mut for mut in muts if mut.mutation_type==mutation_type])
+        observed_mutation_type_count = obs_mut_count_dict[mutation_type]
+        unique_mutation_type_count = mut_count_dict[mutation_type]
+        print(mutation_type, observed_mutation_type_count, unique_mutation_type_count)
+        total_obs_mut_cnt += observed_mutation_type_count
+        total_mut_cnt += unique_mutation_type_count
         if mutation_type == 'SNP':
             obs_mut_count_qryset.update(single_base_substitution=observed_mutation_type_count)
             mut_count_qryset.update(single_base_substitution=unique_mutation_type_count)
@@ -78,10 +102,14 @@ def rebuild_mutation_counts():
         elif mutation_type == 'INV':
             obs_mut_count_qryset.update(inversion=observed_mutation_type_count)
             mut_count_qryset.update(inversion=unique_mutation_type_count)
+    if total_mut_cnt != len(muts):
+        print("mut count does not match", total_mut_cnt, len(muts))
+    if total_obs_mut_cnt != len(obs_muts):
+        print("obs mut count does not match: ", total_obs_mut_cnt, len(obs_muts))
 
     for functional_change_type in FUNCTIONAL_CHANGE_TYPE_LIST:
-        observed_mutation_type_count = len([obs_mut.mutation for obs_mut in obs_muts if functional_change_type in obs_mut.mutation.protein_change])
-        unique_mutation_type_count = len([mut for mut in muts if functional_change_type in mut.protein_change])
+        observed_mutation_type_count = obs_mut_func_change_type_dict[functional_change_type]
+        unique_mutation_type_count = mut_func_change_type_dict[functional_change_type]
         if functional_change_type == 'intergenic':
             obs_mut_count_qryset.update(intergenic=observed_mutation_type_count)
             mut_count_qryset.update(intergenic=unique_mutation_type_count)
@@ -97,3 +125,19 @@ def rebuild_mutation_counts():
         elif functional_change_type == 'snp_type_nonsynonymous':
             obs_mut_count_qryset.update(nonsynonymous=observed_mutation_type_count)
             mut_count_qryset.update(nonsynonymous=unique_mutation_type_count)
+        elif functional_change_type == UNANNOTATED:
+            obs_mut_count_qryset.update(unannotated=observed_mutation_type_count)
+            mut_count_qryset.update(unannotated=unique_mutation_type_count)
+
+
+def _find_functional_change_type(mutation:Mutation)->str:
+    for functional_change_type in FUNCTIONAL_CHANGE_TYPE_LIST:
+        if functional_change_type in mutation.protein_change:
+            return functional_change_type;
+    return UNANNOTATED
+
+
+def _find_mutation_type(mutation:Mutation)->str:
+    if mutation.mutation_type in MUTATION_TYPE_LIST:
+        return mutation.mutation_type
+    return UNANNOTATED

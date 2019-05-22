@@ -32,13 +32,17 @@
 {% block header %}Dashboard{% endblock %}
 {% block content %}
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-10">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h3 class="panel-title">ALEdb Total Mutation Counts</h3>
                 </div>
                 <table class="table">
                     <tbody>
+                    <tr>
+                        <td>Projects</td>
+                        <td>{{ count_dict.project }}</td>
+                    </tr>
                     <tr>
                         <td>ALE Experiments</td>
                         <td>{{ count_dict.ale_exp }}</td>
@@ -57,11 +61,11 @@
                     </tr>
                     <tr>
                         <td>Unique Mutations</td>
-                        <td>{{ count_dict.unique }}</td>
+                        <td>{{ unique_mutation_counts.total }}</td>
                     </tr>
                     <tr>
                         <td>Observed Mutations</td>
-                        <td>{{ count_dict.observed }}</td>
+                        <td>{{ observed_mutation_counts.total }}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -82,28 +86,33 @@
                     <tbody>
                     <tr>
                         <td>Intergenic</td>
-                        <td>{{ functional_change_type_count_dict.observed.intergenic }}</td>
-                        <td>{{ functional_change_type_count_dict.unique.intergenic }}</td>
+                        <td>{{ observed_mutation_counts.intergenic }}</td>
+                        <td>{{ unique_mutation_counts.intergenic }}</td>
                     </tr>
                     <tr>
                         <td>Noncoding</td>
-                        <td>{{ functional_change_type_count_dict.observed.noncoding }}</td>
-                        <td>{{ functional_change_type_count_dict.unique.noncoding }}</td>
+                        <td>{{ observed_mutation_counts.noncoding }}</td>
+                        <td>{{ unique_mutation_counts.noncoding }}</td>
                     </tr>
                     <tr>
                         <td>Pseudogene</td>
-                        <td>{{ functional_change_type_count_dict.observed.pseudogene }}</td>
-                        <td>{{ functional_change_type_count_dict.unique.pseudogene }}</td>
+                        <td>{{ observed_mutation_counts.pseudogene }}</td>
+                        <td>{{ unique_mutation_counts.pseudogene }}</td>
                     </tr>
                     <tr>
                         <td>Synonymous</td>
-                        <td>{{ functional_change_type_count_dict.observed.snp_type_synonymous }}</td>
-                        <td>{{ functional_change_type_count_dict.unique.snp_type_synonymous }}</td>
+                        <td>{{ observed_mutation_counts.synonymous }}</td>
+                        <td>{{ unique_mutation_counts.synonymous }}</td>
                     </tr>
                     <tr>
                         <td>Nonsynonymous</td>
-                        <td>{{ functional_change_type_count_dict.observed.snp_type_nonsynonymous }}</td>
-                        <td>{{ functional_change_type_count_dict.unique.snp_type_nonsynonymous }}</td>
+                        <td>{{ observed_mutation_counts.nonsynonymous }}</td>
+                        <td>{{ unique_mutation_counts.nonsynonymous }}</td>
+                    </tr>
+                    <tr>
+                        <td>Unannotated</td>
+                        <td>{{ observed_mutation_counts.unannotated }}</td>
+                        <td>{{ unique_mutation_counts.unannotated }}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -123,80 +132,47 @@
                     <tbody>
                     <tr>
                         <td>Single Base Substitutions</td>
-                        <td>{{ mutation_type_count_dict.observed.SNP }}</td>
-                        <td>{{ mutation_type_count_dict.unique.SNP }}</td>
+                        <td>{{ observed_mutation_counts.single_base_substitution }}</td>
+                        <td>{{ unique_mutation_counts.single_base_substitution }}</td>
                     </tr>
                     <tr>
                         <td>Multiple Base Substitutions</td>
-                        <td>{{ mutation_type_count_dict.observed.SUB }}</td>
-                        <td>{{ mutation_type_count_dict.unique.SUB }}</td>
+                        <td>{{ observed_mutation_counts.multiple_base_substitution }}</td>
+                        <td>{{ unique_mutation_counts.multiple_base_substitution }}</td>
                     </tr>
                     <tr>
                         <td>Deletions</td>
-                        <td>{{ mutation_type_count_dict.observed.DEL }}</td>
-                        <td>{{ mutation_type_count_dict.unique.DEL }}</td>
+                        <td>{{ observed_mutation_counts.deletion }}</td>
+                        <td>{{ unique_mutation_counts.deletion }}</td>
                     </tr>
                     <tr>
                         <td>Insertions</td>
-                        <td>{{ mutation_type_count_dict.observed.INS }}</td>
-                        <td>{{ mutation_type_count_dict.unique.INS }}</td>
+                        <td>{{ observed_mutation_counts.insertion }}</td>
+                        <td>{{ unique_mutation_counts.insertion }}</td>
                     </tr>
                     <tr>
                         <td>Mobile Element Insertions</td>
-                        <td>{{ mutation_type_count_dict.observed.MOB }}</td>
-                        <td>{{ mutation_type_count_dict.unique.MOB }}</td>
+                        <td>{{ observed_mutation_counts.mobile_element_insertion }}</td>
+                        <td>{{ unique_mutation_counts.mobile_element_insertion }}</td>
                     </tr>
                     <tr>
                         <td>Amplifications</td>
-                        <td>{{ mutation_type_count_dict.observed.AMP }}</td>
-                        <td>{{ mutation_type_count_dict.unique.AMP }}</td>
+                        <td>{{ observed_mutation_counts.amplification }}</td>
+                        <td>{{ unique_mutation_counts.amplification }}</td>
                     </tr>
                     <tr>
                         <td>Gene Conversions</td>
-                        <td>{{ mutation_type_count_dict.observed.CON }}</td>
-                        <td>{{ mutation_type_count_dict.unique.CON }}</td>
+                        <td>{{ observed_mutation_counts.gene_conversion }}</td>
+                        <td>{{ unique_mutation_counts.gene_conversion }}</td>
                     </tr>
                     <tr>
                         <td>Inversions</td>
-                        <td>{{ mutation_type_count_dict.observed.INV }}</td>
-                        <td>{{ mutation_type_count_dict.unique.INV }}</td>
+                        <td>{{ observed_mutation_counts.inversion }}</td>
+                        <td>{{ unique_mutation_counts.inversion }}</td>
                     </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
-        <div class="col-md-6">
-            <script src="//d3js.org/d3.v3.min.js"></script>
-            <h2>Mutation Targets</h2>
-            <form action="" method="get">
-                <input type="number"
-                       name="number_of_top_genes"
-                       min="1"
-                       max="{{ max_histogram_size }}"
-                       value="{{ number_of_genes_to_show }}">
-                Entries to show
-                <input type="submit"
-                       class="btn btn-default"
-                       value="Show"><br>
-            </form>
-            <br>
-            <div class="chart"></div>
-            <table>
-                <tr>
-                    <td>
-                        <script>
-                            var gene_data = {{ genes }};
-                            var color_set = {{ gene_color_set }};
-                            var mutation_types = {{ mutation_types }};
-                            var extra_padding = 0;
-                            function _get_label(datum) {
-                                return datum.mutation__gene;
-                            }
-                            {% include 'bar_chart.js' %}
-                        </script>
-                    </td>
-                </tr>
-            </table>
         </div>
 
     </div>
