@@ -5,24 +5,11 @@ from seq.util import get_mutations_from_observed_muations
 from seq.views.common import MUTATION_TYPE_LIST, FUNCTIONAL_CHANGE_TYPE_LIST, UNANNOTATED
 from ale.models import AleId, Isolate, Flask
 from django.db.models import Q
-from stats.util import generate_histogram_jsons, MAX_HISTOGRAM_SIZE
 
 
 def rebuild_dashboard_data():
     rebuild_sample_counts()
     rebuild_mutation_counts()
-    # rebuild_mut_histogram_data()
-
-
-def rebuild_mut_histogram_data():
-    if ObservedMutation.objects.all().count() == 0:
-        ObservedMutation.objects.create(mutation_id=-1)
-    raw_obs_mut_qryset = ObservedMutation.objects.all()
-    obs_mutations = filter_observed_mutations(raw_obs_mut_qryset)
-    genes_json = generate_histogram_jsons(obs_mutations)
-    if BarCharts.objects.all().count() == 0:
-        BarCharts.objects.create()
-    BarCharts.objects.all().update(mut_gene_json=genes_json)
 
 
 def rebuild_sample_counts():
