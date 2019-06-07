@@ -114,7 +114,7 @@ class TestEnrichment(TestCase):
         self.assertEqual(expected_observed_mutation_count, ObservedMutation.objects.all().count())
         create_ale_experiment(test_report_path, "Patrick", "test", "test_project")
         delete_ale_experiments([1])
-        expected_observed_mutation_count = 1  # 1 because of rebuild_mut_histogram_data creates one when 0
+        expected_observed_mutation_count = 0
         self.assertEqual(expected_observed_mutation_count, ObservedMutation.objects.all().count())
         expected_mutation_count = 0
         self.assertEqual(expected_mutation_count, Mutation.objects.all().count())

@@ -21,8 +21,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-MUT_TYPES = ['AMP', 'CON', 'DEL', 'DUP', 'INS', 'INV', 'MOB', 'SNP', 'SUB']
-MUT_TYPES_DISPLAY = ["Amplification", "Conversion", "Deletion", "Duplication", "Insersion", "Inversion", "Mobil", "SNP", "Substitution"]
+MUT_TYPES = ['AMP', 'CON', 'DEL', 'INS', 'INV', 'MOB', 'SNP', 'SUB']
+MUT_TYPES_DISPLAY = ["Amplification", "Conversion", "Deletion", "Insersion", "Inversion", "Mobil", "SNP", "Substitution"]
 STRAINS = get_strains()
 REF_SEQS = get_ref_sequences()
 

@@ -162,7 +162,7 @@
       "library-prep-kit": {
         "$id": "library-prep-kit",
         "type": "string",
-        "enum": ["Nextera XT", "KAPA HyperPlus", "KAPA Stranded RNA-seq", "TruSeq DNA LT Sample Prep Kit", "DNeasy", ""]
+        "enum": ["Nextera XT", "KAPA HyperPlus", "KAPA Stranded RNA-seq", "TruSeq DNA LT Sample Prep Kit", "DNeasy", "Genome Analyzer II",""]
       },
       "library-prep-kit-cycles": {
         "$id": "library-prep-kit-cycles",

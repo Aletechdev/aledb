@@ -17,6 +17,7 @@ class ObservedMutationCounts(models.Model):
     pseudogene = models.IntegerField(default=0)
     synonymous = models.IntegerField(default=0)
     nonsynonymous = models.IntegerField(default=0)
+    unannotated = models.IntegerField(default=0)
 
     def __str__(self):
         return "ObservedMutationCounts Object with the following parameters: "+locals()
@@ -37,6 +38,7 @@ class UniqueMutationCounts(models.Model):
     pseudogene = models.IntegerField(default=0)
     synonymous = models.IntegerField(default=0)
     nonsynonymous = models.IntegerField(default=0)
+    unannotated = models.IntegerField(default=0)
 
 
 class TimelineEvent(models.Model):

@@ -11,6 +11,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         ids = options['experiment_id(s)']
-        title = input("Please enter the publication title:")
+        title = input("Please enter the publication citation:")
         url = input("Please enter the publication URL:")
         create_publications(title, url, ids)
