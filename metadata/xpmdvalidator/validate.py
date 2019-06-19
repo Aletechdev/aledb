@@ -60,6 +60,7 @@ def is_valid(csv_directory_path, schema_file_path):
                         elif (error.validator == "required") and (error.validator == "enum") and (error.validator == "pattern"):
                             print('['+str(i)+'] - ' + error.message)
             except Exception as e:
+                print("Issue with CSV:", filename)
                 logger.exception("metadata faulty", extras={"metadata path": filename})
 
     try:
