@@ -9,10 +9,11 @@ from ale.models import AleExperiment,\
     AleId,\
     FreezerBox,\
     Project
-from metadata.parser import parse_metadata_post_experiment_upload
+from metadata.parser import parse_metadata_post_experiment_upload, _get_media_substrate_description
 from datetime import datetime
 import os
 from metadata.xpmdvalidator.validate import is_valid
+import csv
 
 ALE_EXP_PRIMARY_EXP = 1  # I'm assuming will always be 1 due to rebuild of DB with the unit testing.
 
@@ -60,6 +61,15 @@ class TestParser(TestCase):
         test2_media = tech_rep_queryset[0].isolate.flask.media.substrate
         self.assertEquals(test2_media, "Acetate(4)")
 
+    def test_get_media_substrate_description(self):
+        path = os.path.dirname(os.path.realpath(__file__)) + "/"
+        metadata_path = path + "test3/"
+        for f in os.listdir(metadata_path):
+            if f.endswith(".csv") or f.endswith(".CSV"):
+                with open(os.path.join(metadata_path, f), 'rt') as csvfile:
+                    metadata_dict = dict(csv.reader(csvfile, delimiter=','))
+            self.assertRegexpMatches(_get_media_substrate_description(metadata_dict), r'^.* Pimelic acid\(21\)$')
+
     def test_creating_media_with_metadata_upload(self):
         media = Media.objects.create(substrate="nothing")
         ale_id = AleId.objects.create(ale_experiment=self.ale_exp,
@@ -79,6 +89,8 @@ class TestParser(TestCase):
         path = os.path.dirname(os.path.realpath(__file__)) + "/"
         parse_metadata_post_experiment_upload(path + "test3/", ALE_EXP_PRIMARY_EXP)
         media_queryset = Media.objects.all()
+        print("here")
+        print(media_queryset[0].description)
         media_present_dict = {"nothing": False, "Glucose(4)": False, "Acetate(4)": False}
         for media in media_queryset:
             media_present_dict[media.substrate] = True
