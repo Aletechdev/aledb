@@ -1,13 +1,14 @@
 import os
 import re
 import csv
+import json
 
 from ale.models import TechnicalReplicate
 from ale.models import Media
 from ale.models import Project
 from metadata.xpmdvalidator.validate import is_valid
 
-__author__ = 'Denny Gosting, Patrick Phaneuf'
+__author__ = 'Denny Gosting, Patrick Phaneuf, Muyao'
 
 DEFAULT_INSTRUMENT_NAME = ""
 DEFAULT_MEDIA_DESCRIPTION = "M9"
@@ -19,33 +20,38 @@ DEFAULT_FREEZER_BOX_NAME = "ALE box"
 DEFAULT_FREEZER_BOX_NUMBER = 1
 
 PROJECT = "project"
+OWNER = "owner"
+EXPERIMENT_NAME = "experiment/subproject"
 
-STRAIN = "taxonomy-id"
-STRAIN_DESCRIPTION = "strain-description"
-LIBRARY_PREP_KIT_MANUFACTURER = "library-prep-kit-manufacturer"
-LIBRARY_PREP_KIT_CYCLES = "library-prep-kit-cycles"
-ALE_NUMBER = "ALE-number"
-FLASK_NUMBER = "Flask-number"
-ISOLATE_NUMBER = "Isolate-number"
-TECH_REP_NUMBER = "technical-replicate-number"
-EXPERIMENT_DETAILS = "experiment-details"
+STRAIN = "taxonomy id"
+STRAIN_DESCRIPTION = "starting strain"
+LIBRARY_PREP_KIT_MANUFACTURER = "seqencing library prep kit manufacturer"
+LIBRARY_PREP_KIT_CYCLES = "sequencing library prep kit cycles"
+ALE_NUMBER = "A"
+FLASK_NUMBER = "F"
+ISOLATE_NUMBER = "I"
+TECH_REP_NUMBER = "R"
+EXPERIMENT_DETAILS = "medium description"
 
-MEDIA_BASE_DESCRIPTION = "base-media"
-MEDIA_TEMPERATURE = "temperature(Celsius)"
+MEDIA_BASE_DESCRIPTION = "medium derived from"
+
+ENVIRONMENTAL_CONDITIONS = "environmental conditions"
+MEDIA_TEMPERATURE = "temp"
 #  The following media descriptors are consolidated into the ALEdb "substrate" descriptor.
-MEDIA_CARBON_SOURCE = "carbon-source(g/L)"
-MEDIA_NITROGEN_SOURCE = "nitrogen-source(g/L)"
-MEDIA_PHOSPHOROUS_SOURCE = "phosphorous-source(g/L)"
-MEDIA_SULFUR_SOURCE = "sulfur-source(g/L)"
-MEDIA_ELECTRON_ACCEPTOR = "electron-acceptor"
-MEDIA_SUPPLEMENT = "supplement(g/L)"
-MEDIA_ANTIBIOTIC = "antibiotic(ug/mL)"
+MEDIA_COMPONENTS = "media components"
+MEDIA_CARBON_SOURCE = "carbon source"
+MEDIA_NITROGEN_SOURCE = "nitrogen source"
+MEDIA_PHOSPHOROUS_SOURCE = "phosphorous source"
+MEDIA_SULFUR_SOURCE = "sulfur source"
+MEDIA_ELECTRON_ACCEPTOR = "electron acceptor"
+MEDIA_SUPPLEMENT = "supplement"
+MEDIA_ANTIBIOTIC = "antibiotic"
 MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
                          MEDIA_NITROGEN_SOURCE,
                          MEDIA_PHOSPHOROUS_SOURCE,
                          MEDIA_SULFUR_SOURCE,
                          MEDIA_ELECTRON_ACCEPTOR,
-                         # MEDIA_SUPPLEMENT,
+                         MEDIA_SUPPLEMENT,
                          MEDIA_ANTIBIOTIC]
 
 def multiple_replace(text):
@@ -62,19 +68,6 @@ def extract_experiment_parameters(metadata_path):
     project = "N/A"
     creator = "N/A"
     experiment = "N/A"
-    naming_labels = ["experiment",
-                     "reference-file-list",
-                     "environment",
-                     "strain-description",
-                     "growth-stage",
-                     "temperature(Celsius)",
-                     "base-media",
-                     "carbon-source(g/L)",
-                     "nitrogen-source(g/L)",
-                     "phosphorous-source(g/L)",
-                     "sulfur-source(g/L)",
-                     "electron-acceptor",
-                     "antibiotic(ug/mL)"]
 
     for f in os.listdir(metadata_path):
         if f.endswith(".csv") or f.endswith(".CSV"):
@@ -83,7 +76,7 @@ def extract_experiment_parameters(metadata_path):
 
                 experiment_details = []
                 for row in csv_reader:
-                    if row[0] == "project":
+                    if row[0] == PROJECT:
                         if len(row[1]) > 0:
                             descr = row[1]
                             if project == "N/A":
@@ -93,7 +86,7 @@ def extract_experiment_parameters(metadata_path):
                                 return False
                         else:
                             print("Field Missing: project in " + str(os.path.join(metadata_path, f)))
-                    if row[0] == "creator":
+                    if row[0] == OWNER:
                         if len(row[1]) > 0:
                             descr = row[1]
                             if creator == "N/A":
@@ -101,7 +94,7 @@ def extract_experiment_parameters(metadata_path):
                             elif creator != descr:
                                 print("Creator Mismatch: Please ensure all creator fields within one experiment share the same value", f)
                                 return False
-                    elif row[0] in naming_labels:
+                    elif row[0] == EXPERIMENT_NAME:
                         if len(row[1]) > 0:
                             label = row[1].split(",")
                             label = '-'.join(label)
@@ -119,12 +112,17 @@ def extract_experiment_parameters(metadata_path):
 
 def _get_media_substrate_description(metadata_dict):
     media_substrate_description = ''
+
+    media_components_dict = json.loads(metadata_dict[MEDIA_COMPONENTS])
+
     for media_descriptor in MEDIA_DESCRIPTOR_LIST:
         if media_descriptor in metadata_dict.keys() and metadata_dict[media_descriptor] != '':
             if media_substrate_description != "":
                 media_substrate_description += ', '
             if metadata_dict[media_descriptor] != "none":
                 media_substrate_description += metadata_dict[media_descriptor]
+    for item in media_components_dict.items():
+        media_substrate_description = media_substrate_description + ", " + str(item[1])
     return media_substrate_description
 
 
@@ -170,8 +168,9 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
                 library_prep += metadata_dict[LIBRARY_PREP_KIT_CYCLES]
 
             media_temperature = DEFAULT_TEMPERATURE
-            if MEDIA_TEMPERATURE in metadata_dict.keys() and metadata_dict[MEDIA_TEMPERATURE] != "":
-                media_temperature = float(metadata_dict[MEDIA_TEMPERATURE])
+            environmental_conditions_dict = json.loads(metadata_dict[ENVIRONMENTAL_CONDITIONS])
+            if MEDIA_TEMPERATURE in environmental_conditions_dict.keys() and environmental_conditions_dict[MEDIA_TEMPERATURE] != "":
+                media_temperature = float(environmental_conditions_dict[MEDIA_TEMPERATURE])
 
             experiment_details = ""
             if EXPERIMENT_DETAILS in metadata_dict.keys():
