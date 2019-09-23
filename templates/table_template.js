@@ -6,8 +6,8 @@ $(document).ready(function () {
 
     var non_sortable_columns = [0, 1];
 
-    if(sorted_column == 3) {
-        non_sortable_columns = [0, 1, 2];
+    if(sorted_column == 4) {
+        non_sortable_columns = [0, 1, 2, 3];
     }
 
     var columns_to_export = [];
@@ -18,12 +18,12 @@ $(document).ready(function () {
 
     var styling_targets = [];
 
-    for (var l = number_of_columns - 1; l > sorted_column + 10; l--) {
+    for (var l = number_of_columns - 1; l > sorted_column + 9; l--) {
         styling_targets.push(l)
     }
     var hidden_cols = document.getElementById('hidden_columns').value.split(',');
     if(hidden_cols[0] == "") {
-        hidden_cols = [sorted_column + 6, sorted_column + 7, sorted_column + 8, sorted_column + 9]
+        hidden_cols = [sorted_column + 4, sorted_column + 5, sorted_column + 6, sorted_column + 7, sorted_column+8]
     }
 
     var oTable = $("#data").DataTable({
@@ -63,7 +63,26 @@ $(document).ready(function () {
                 columnText: function ( dt, idx, title ) {
                     return title.split("Toggle Tag:")[0]
                 }
-            }, {
+            },
+            {
+                text: 'Show all samples',
+                action: function(e, dt, node, config) {
+                    var colcount = dt.columns().header().length
+                    for (var i = 14; i<colcount; i++){
+                        dt.columns(i).visible(true)
+                    }
+                }
+            },
+            {
+                text: 'Hide all samples',
+                action: function(e, dt, node, config) {
+                    var colcount = dt.columns().header().length
+                    for (var i = 14; i<colcount; i++){
+                        dt.columns(i).visible(false)
+                    }
+                }
+            },
+            {
                 extend: 'csv',
                 text: 'CSV',
                 exportOptions: {
@@ -155,9 +174,7 @@ $(document).ready(function () {
 });
 
 function column_sort_from_right() {
-
     var sorting_array = [];
-
     var table = $("#data").DataTable();
     var visible_columns = table.columns().visible();
 
@@ -166,7 +183,6 @@ function column_sort_from_right() {
             sorting_array.push([i, 'desc'])
         }
     }
-
     table.order(sorting_array).draw();
 }
 

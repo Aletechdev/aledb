@@ -15,8 +15,8 @@ from ale.permissions import can_add_global_filter, can_add_experiment_filter
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/img/close-icon.gif" width="12" height="11"></a>"""
-HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Mut ID", "Reference Seq", "Position", "Mutation Type", "Sequence Change", "Gene", "Function",
-                              "Product", "GO Process", "GO Component", "Details"]
+HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Reference Seq", "Position", "Mutation Type", "Sequence Change", "Gene", "Function",
+                              "Product", "GO Process", "GO Component", "Mut ID", "Details"]
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
@@ -120,7 +120,6 @@ def get_mutation_table_body(user: User, observed_mutations: [], reseq_dict, expe
                 table_row.append("""""")
 
             table_row.append(_get_mutation_tags(mutation.tags))
-            table_row.append(mutation.id)
             table_row.append("" if mutation.reseq_reference is None else mutation.reseq_reference)
             table_row.append(format(mutation.position, ',d'))
             table_row.append(mutation.mutation_type)
@@ -130,7 +129,7 @@ def get_mutation_table_body(user: User, observed_mutations: [], reseq_dict, expe
             table_row.append("" if mutation.product is None else mutation.product)
             table_row.append("" if mutation.go_process is None else mutation.go_process)
             table_row.append("" if mutation.go_component is None else mutation.go_component)
-
+            table_row.append(mutation.id)
             if is_gene_table:
                 if evidence.search(mutation.protein_change):
                     try:
