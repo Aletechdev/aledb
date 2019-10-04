@@ -4,8 +4,9 @@ REQUEST_ALL = "all"
 REQUEST_MUTATION_ID = "mutation_id"
 REQUEST_ALE_EXPERIMENT_ID = "ale_experiment_id"
 REQUEST_ALE_ID = "ale_no"
-POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE = 4
-POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE = 4
+REFSEQ_COLUMN_IN_MUT_TABLE = 3
+HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Reference Seq", "Position", "Mutation Type", "Sequence Change", "Gene",
+                              "Function", "Product", "GO Process", "GO Component", "Mut ID", "Details"]
 
 TAGS = {
     "contaminated": '<i class="fa fa-random fa-fw" aria-hidden="true"></i>',
