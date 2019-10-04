@@ -39,7 +39,8 @@
 
         {% if table_body %}
             <script type="text/javascript">
-                var sorted_column = 3;
+                var refseq_column = {{ refseq_column }}
+                var sorted_column = refseq_column;
                 var table_data = {{ table_body }};
                 var table_titles = {{ table_header | safe }};
                 var table_heads = [];

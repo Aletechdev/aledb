@@ -9,7 +9,7 @@ from seq.views import mutation_table_builder
 from seq.util import get_all_observed_muations_filtered, get_reseq_ordered_dict
 from seq.models import ResequencingExperiment
 from common.util import get_user_context
-from common.constants import POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE
+from common.constants import REFSEQ_COLUMN_IN_MUT_TABLE
 from ale import permissions, models
 from filter.models import AleExperimentFilter
 from filter.util import get_global_filter
@@ -59,7 +59,7 @@ def mutation_table(request):
                         "table_header": table_header,
                         "template_header": "Mutations",
                         "hidden_columns": hidden_columns,
-                        "sorted_column": POSITION_COLUMN_IN_REGULAR_MUTATION_TABLE,
+                        "refseq_column": REFSEQ_COLUMN_IN_MUT_TABLE,
                         "tag_dropdown": common.constants.TAGS
                         })
         logger.info("mutation performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))

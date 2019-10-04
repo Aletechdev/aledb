@@ -7,7 +7,7 @@ from django.utils.html import strip_tags
 from seq.util import get_ecocyc_gene_list
 from filter.util import filter_observed_mutations
 from genes.util import get_gene_list
-from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS
+from common.constants import TAGS, ROW_TAGS, COLUMN_TAGS, HTML_MUTATION_TABLE_HEADER
 from ale.models import TechnicalReplicate, AleExperiment
 from ale.permissions import can_add_global_filter, can_add_experiment_filter
 
@@ -15,8 +15,6 @@ from ale.permissions import can_add_global_filter, can_add_experiment_filter
 EXPERIMENT_MAPPING_FILTERING_SHOW_FLAG = "show"
 EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/img/close-icon.gif" width="12" height="11"></a>"""
-HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Reference Seq", "Position", "Mutation Type", "Sequence Change", "Gene", "Function",
-                              "Product", "GO Process", "GO Component", "Mut ID", "Details"]
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
 HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""

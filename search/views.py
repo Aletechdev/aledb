@@ -13,6 +13,7 @@ from ale.utils import get_user_projects, get_strains
 from seq.util import get_ref_sequences
 from filter.util import filter_observed_mutations
 from common.util import get_user_context
+from common.constants import REFSEQ_COLUMN_IN_MUT_TABLE
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 
@@ -67,7 +68,8 @@ def search(request):
                         "table_header": mark_safe(table_header),
                         "mutation_count": len(table_body),
                         "observed_mutation_count": len(observed_mutations),
-                        "tag_dropdown": common.constants.TAGS
+                        "tag_dropdown": common.constants.TAGS,
+                        "refseq_column": REFSEQ_COLUMN_IN_MUT_TABLE,
                         })
         logger.info("search performance", extra=join_extras(
             {"parameters": last_search},

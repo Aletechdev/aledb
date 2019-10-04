@@ -4,26 +4,20 @@
 
 $(document).ready(function () {
 
-    var non_sortable_columns = [0, 1];
-
-    if(sorted_column == 4) {
-        non_sortable_columns = [0, 1, 2, 3];
-    }
-
+    var non_sortable_columns = Array.from(Array(sorted_column+1).keys())
     var columns_to_export = [];
-
-    for(var k = sorted_column; k < number_of_columns; k++) {
+    for(var k = refseq_column; k < number_of_columns; k++) {
         columns_to_export.push(k)
     }
 
     var styling_targets = [];
 
-    for (var l = number_of_columns - 1; l > sorted_column + 9; l--) {
+    for (var l = number_of_columns - 1; l > refseq_column + 10; l--) {
         styling_targets.push(l)
     }
     var hidden_cols = document.getElementById('hidden_columns').value.split(',');
     if(hidden_cols[0] == "") {
-        hidden_cols = [sorted_column + 4, sorted_column + 5, sorted_column + 6, sorted_column + 7, sorted_column+8]
+        hidden_cols = [refseq_column + 5, refseq_column + 6, refseq_column + 7, refseq_column+8, refseq_column+9]
     }
 
     var oTable = $("#data").DataTable({
