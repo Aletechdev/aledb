@@ -8,7 +8,7 @@ import seq.views.common
 from seq.views import mutation_table_builder  # TODO: The mutation table build should use the factory pattern.
 from common.constants import \
     REQUEST_MUTATION_ID, \
-    POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE
+    REFSEQ_COLUMN_IN_MUT_TABLE
 import common.constants
 from converge.util import get_converge_obs_mut_qryset
 from logs.aledb_logger import user_extra, join_extras
@@ -49,7 +49,7 @@ def converge_mutations(request):
                         "table_header": mark_safe(table_header),
                         "template_header": "Converged Mutations",
                         "hidden_columns": hidden_columns,
-                        "sorted_column": POSITION_COLUMN_IN_ENRICH_OR_FIXED_MUT_TABLE,
+                        "refseq_column": REFSEQ_COLUMN_IN_MUT_TABLE,
                         "tag_dropdown": common.constants.TAGS
                         })
         logger.info("converge performance",
