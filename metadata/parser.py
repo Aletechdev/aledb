@@ -41,14 +41,14 @@ MEDIA_TEMPERATURE = "temp"
 MEDIA_COMPONENTS = "media components"
 MEDIA_CARBON_SOURCE = "carbon source"
 MEDIA_NITROGEN_SOURCE = "nitrogen source"
-MEDIA_PHOSPHOROUS_SOURCE = "phosphorus source"
+MEDIA_PHOSPHORUS_SOURCE = "phosphorus source"
 MEDIA_SULFUR_SOURCE = "sulfur source"
 MEDIA_ELECTRON_ACCEPTOR = "electron acceptor"
 MEDIA_SUPPLEMENT = "supplement"
 MEDIA_ANTIBIOTIC = "antibiotic"
 MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
                          MEDIA_NITROGEN_SOURCE,
-                         MEDIA_PHOSPHOROUS_SOURCE,
+                         MEDIA_PHOSPHORUS_SOURCE,
                          MEDIA_SULFUR_SOURCE,
                          MEDIA_ELECTRON_ACCEPTOR,
                          MEDIA_SUPPLEMENT,
