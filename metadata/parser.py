@@ -41,7 +41,7 @@ MEDIA_TEMPERATURE = "temp"
 MEDIA_COMPONENTS = "media components"
 MEDIA_CARBON_SOURCE = "carbon source"
 MEDIA_NITROGEN_SOURCE = "nitrogen source"
-MEDIA_PHOSPHOROUS_SOURCE = "phosphorous source"
+MEDIA_PHOSPHOROUS_SOURCE = "phosphorus source"
 MEDIA_SULFUR_SOURCE = "sulfur source"
 MEDIA_ELECTRON_ACCEPTOR = "electron acceptor"
 MEDIA_SUPPLEMENT = "supplement"
@@ -123,7 +123,7 @@ def _get_media_substrate_description(metadata_dict):
                 media_substrate_description += metadata_dict[media_descriptor]
     for item in media_components_dict.items():
         media_substrate_description = media_substrate_description + ", " + str(item[1])
-    return media_substrate_description
+    return media_substrate_description,media_components_dict
 
 
 def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_key):
@@ -162,6 +162,11 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
             library_prep = ""
             if LIBRARY_PREP_KIT_MANUFACTURER in metadata_dict.keys():
                 library_prep = metadata_dict[LIBRARY_PREP_KIT_MANUFACTURER]
+
+            if MEDIA_CARBON_SOURCE in metadata_dict.keys():
+                carbon_source = metadata_dict[MEDIA_CARBON_SOURCE]
+
+
             if LIBRARY_PREP_KIT_CYCLES in metadata_dict.keys():
                 if library_prep != "":
                     library_prep += "/ "
@@ -176,7 +181,7 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
             if EXPERIMENT_DETAILS in metadata_dict.keys():
                 experiment_details = metadata_dict[EXPERIMENT_DETAILS]
 
-            media_substrate_description = _get_media_substrate_description(metadata_dict)
+            media_substrate_description, media_components_dict = _get_media_substrate_description(metadata_dict)
 
             ale_id = tech_rep.isolate.flask.ale_id
             ale_id.description = ale_id_description
@@ -188,7 +193,16 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
                                                          substrate=media_substrate_description,
                                                          temperature=media_temperature,
                                                          volume=DEFAULT_VOLUME,
-                                                         stirring_speed=DEFAULT_STIRRING_SPEED)
+                                                         stirring_speed=DEFAULT_STIRRING_SPEED,
+                                                         carbon_source=carbon_source)
+
+            for component in MEDIA_DESCRIPTOR_LIST:
+                if component in media_components_dict.keys():
+                    remove_spaces = component.replace(' ', '_')
+                    setattr(media, remove_spaces, media_components_dict[component])
+
+
+            media.save()
 
             flask = tech_rep.isolate.flask
             flask.media = media

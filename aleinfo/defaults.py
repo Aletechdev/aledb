@@ -12,7 +12,7 @@ SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'http://sbrg.ucsd.edu/')
 ALE_DATA_ROOT_DIR = os.environ.get('ALE_DATA_ROOT_DIR', 'ale_data_root_dir')
 
 
-ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), '127.0.0.1', '35.236.92.37']
+ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), '127.0.0.1', '35.236.92.37', 'muyao.ucsd.edu']
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 3600  # in seconds, 1hr
 SESSION_SAVE_EVERY_REQUEST = True
