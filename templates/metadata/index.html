@@ -27,17 +27,25 @@
 <div class="row">
     <table id="runs" class="table">
         <thead>
-        <tr>
-            <th>ALE, Flask, Isolate, Technical Replicate</th>
-            <th>Clonal or Population</th>
-            <th>Strain</th>
-            <th>Additional Strain Details</th>
-            <th>Media</th>
-            <th>Substrate (g/L)</th>
-            <th>Temperature (Celsius)</th>
-            <th>ALE Sample Details</th>
-            <th>Reference Genome</th>
-        </tr>
+            <tr>
+                <th>ALE, Flask, Isolate, Technical Replicate</th>
+                <th>Clonal or Population</th>
+                <th>ALE Sample Details</th>
+                <th>Media</th>
+                <th>Carbon Source</th>
+                <th>Nitrogen Source</th>
+                <th>Phosphorous Source</th>
+                <th>Sulfur Source</th>
+                <th>Supplement</th>
+                <th>Other Substrates (g/L)</th>
+                <th>Temperature (Celsius)</th>
+                <th>Strain</th>
+                <th>Additional Strain Details</th>
+                <th>Taxonomy ID</th>
+                <th>Reference Genome</th>
+
+
+            </tr>
         </thead>
         <tbody>
         {% for reseq_info_tuple in reseq_info_list %}
@@ -50,17 +58,24 @@
                     {% endif %}
                 </td>
                 <td class="clonal_or_population">{{ reseq_info_tuple.1 }}</td>
-                <td class="strain">{{ reseq_info_tuple.5 }}</td>
-                <td class="knockouts">{{ reseq_info_tuple.6 }}</td>
+                <td class="tech_rep_description">{{ reseq_info_tuple.2 }}</td>
                 <td class="media_description">{{ reseq_info_tuple.3 }}</td>
-                <td class="substrate">{{ reseq_info_tuple.4 }}</td>
-                <td class="temperature">{{ reseq_info_tuple.2 }}</td>
-                <td class="tech_rep_description">{{ reseq_info_tuple.12 }}</td>
-                <td class="reseq_reference">{{ reseq_info_tuple.8 }}</td>
+                <td class="carbon_source">{{ reseq_info_tuple.4 }}</td>
+                <td class="nitrogen_source">{{ reseq_info_tuple.5 }}</td>
+                <td class="phosphorous_source">{{ reseq_info_tuple.6 }}</td>
+                <td class="sulfur_source">{{ reseq_info_tuple.7 }}</td>
+                <td class="supplement">{{ reseq_info_tuple.8 }}</td>
+                <td class="substrate">{{ reseq_info_tuple.9 }}</td>
+                <td class="temperature">{{ reseq_info_tuple.10 }}</td>
+                <td class="strain">{{ reseq_info_tuple.11 }}</td>
+                <td class="knockouts">{{ reseq_info_tuple.12 }}</td>
+                <td class="taxonomy_id">{{ reseq_info_tuple.13 }}</td>
+                <td class="reseq_reference">{{ reseq_info_tuple.14 }}</td>
             </tr>
 
         {% endfor %}
         </tbody>
     </table>
+
 </div>
 {% endblock %}

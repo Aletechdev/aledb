@@ -72,9 +72,15 @@ def get_reseq_info_list(reseq_queryset):
 
         experiment_info_tuple = (reseq,
                                  clonal_or_population,
-                                 reseq.tech_rep.isolate.flask.media.temperature,
+                                 reseq.tech_rep.description,
                                  reseq.tech_rep.isolate.flask.media.description,
+                                 reseq.tech_rep.isolate.flask.media.carbon_source,
+                                 reseq.tech_rep.isolate.flask.media.nitrogen_source,
+                                 reseq.tech_rep.isolate.flask.media.phosphorous_source,
+                                 reseq.tech_rep.isolate.flask.media.sulfur_source,
+                                 reseq.tech_rep.isolate.flask.media.supplement,
                                  reseq.tech_rep.isolate.flask.media.substrate,
+                                 reseq.tech_rep.isolate.flask.media.temperature,
                                  reseq.tech_rep.isolate.flask.ale_id.strain,
                                  reseq.tech_rep.isolate.flask.ale_id.description,
                                  reseq.tech_rep.isolate.library_prep,
@@ -82,7 +88,7 @@ def get_reseq_info_list(reseq_queryset):
                                  reseq.tech_rep.isolate.breseq_version,
                                  reseq.tech_rep.isolate.reseq_date,
                                  reseq.tech_rep.isolate.flask.ale_id.ale_experiment.name,
-                                 reseq.tech_rep.description)
+                                 )
 
         reseq_info_list.append(experiment_info_tuple)
 
