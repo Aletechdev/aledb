@@ -126,6 +126,21 @@ class Media(models.Model):
     substrate = models.CharField(max_length=200,
                                  default=None,
                                  **blank_field)
+    carbon_source = models.CharField(max_length=200,
+                                 default=None,
+                                 **blank_field)
+    nitrogen_source = models.CharField(max_length=200,
+                                 default=None,
+                                 **blank_field)
+    phosphorus_source = models.CharField(max_length=200,
+                                 default=None,
+                                 **blank_field)
+    sulfur_source = models.CharField(max_length=200,
+                                 default=None,
+                                 **blank_field)
+    supplement = models.CharField(max_length=200,
+                                     default=None,
+                                     **blank_field)
     other = models.TextField(**blank_field)
 
     # TODO: figure out components
