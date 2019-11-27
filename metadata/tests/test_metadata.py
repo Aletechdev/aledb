@@ -9,7 +9,7 @@ from ale.models import AleExperiment,\
     AleId,\
     FreezerBox,\
     Project
-from metadata.parser import parse_metadata_post_experiment_upload, _get_media_substrate_description
+from metadata.parser import parse_metadata_post_experiment_upload, _get_media_supplement_description
 from datetime import datetime
 import os
 from metadata.xpmdvalidator.validate import is_valid
@@ -61,14 +61,14 @@ class TestParser(TestCase):
         test2_media = tech_rep_queryset[0].isolate.flask.media.substrate
         self.assertEquals(test2_media, "Acetate(4)")
 
-    def test_get_media_substrate_description(self):
+    def test_get_media_supplement_description(self):
         path = os.path.dirname(os.path.realpath(__file__)) + "/"
         metadata_path = path + "test3/"
         for f in os.listdir(metadata_path):
             if f.endswith(".csv") or f.endswith(".CSV"):
                 with open(os.path.join(metadata_path, f), 'rt') as csvfile:
                     metadata_dict = dict(csv.reader(csvfile, delimiter=','))
-            self.assertRegexpMatches(_get_media_substrate_description(metadata_dict), r'^.* Pimelic acid\(21\)$')
+            self.assertRegexpMatches(_get_media_supplement_description(metadata_dict), r'^.* Pimelic acid\(21\)$')
 
     def test_creating_media_with_metadata_upload(self):
         media = Media.objects.create(substrate="nothing")

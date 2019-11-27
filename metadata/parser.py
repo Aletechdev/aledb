@@ -44,14 +44,12 @@ MEDIA_NITROGEN_SOURCE = "nitrogen source"
 MEDIA_PHOSPHORUS_SOURCE = "phosphorus source"
 MEDIA_SULFUR_SOURCE = "sulfur source"
 MEDIA_ELECTRON_ACCEPTOR = "electron acceptor"
-MEDIA_SUPPLEMENT = "supplement"
 MEDIA_ANTIBIOTIC = "antibiotic"
 MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
                          MEDIA_NITROGEN_SOURCE,
                          MEDIA_PHOSPHORUS_SOURCE,
                          MEDIA_SULFUR_SOURCE,
                          MEDIA_ELECTRON_ACCEPTOR,
-                         MEDIA_SUPPLEMENT,
                          MEDIA_ANTIBIOTIC]
 
 def multiple_replace(text):
@@ -110,19 +108,19 @@ def extract_experiment_parameters(metadata_path):
     return creator, experiment, project
 
 
-def _get_media_substrate_description(metadata_dict):
-    media_substrate_description = ''
+def _get_media_supplement_description(metadata_dict):
+    media_supplement_description = ''
 
     media_components_dict = json.loads(metadata_dict[MEDIA_COMPONENTS])
 
     for media_descriptor in media_components_dict.keys():
         if media_descriptor not in MEDIA_DESCRIPTOR_LIST and media_components_dict[media_descriptor] != '':
-            if media_substrate_description != "":
-                media_substrate_description += ', '
+            if media_supplement_description != "":
+                media_supplement_description += ', '
             if media_components_dict[media_descriptor] != "none":
-                media_substrate_description += media_components_dict[media_descriptor]
+                media_supplement_description += media_components_dict[media_descriptor]
 
-    return media_substrate_description, media_components_dict
+    return media_supplement_description, media_components_dict
 
 
 def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_key):
@@ -180,16 +178,17 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
             if EXPERIMENT_DETAILS in metadata_dict.keys():
                 experiment_details = metadata_dict[EXPERIMENT_DETAILS]
 
-            media_substrate_description, media_components_dict = _get_media_substrate_description(metadata_dict)
+            media_supplement_description, media_components_dict = _get_media_supplement_description(metadata_dict)
 
             ale_id = tech_rep.isolate.flask.ale_id
             ale_id.description = ale_id_description
             ale_id.strain = strain
-            if ale_id.species is None: ale_id.species = ""
+            if ale_id.species is None:
+                ale_id.species = ""
             ale_id.save()
 
             media, created = Media.objects.get_or_create(description=media_description,
-                                                         substrate=media_substrate_description,
+                                                         supplement=media_supplement_description,
                                                          temperature=media_temperature,
                                                          volume=DEFAULT_VOLUME,
                                                          stirring_speed=DEFAULT_STIRRING_SPEED,
