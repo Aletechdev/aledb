@@ -83,11 +83,6 @@
         "type": "string",
         "pattern": ".*\\S.*"
       },
-      "sequencing date": {
-        "$id": "run-date",
-        "type": "string",
-        "pattern": "^\\d{1,4}[\/\\-]*\\d{1,2}[\/\\-]*\\d{2,4}$"
-      },
       "environmental conditions": {
         "$id": "run-date",
         "type": "string",
@@ -116,7 +111,6 @@
       "accession",
       "owner",
       "owner email",
-      "sequencing date",
       "environmental conditions",
       "media components"
     ]
