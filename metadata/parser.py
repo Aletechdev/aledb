@@ -115,14 +115,13 @@ def _get_media_substrate_description(metadata_dict):
 
     media_components_dict = json.loads(metadata_dict[MEDIA_COMPONENTS])
 
-    for media_descriptor in MEDIA_DESCRIPTOR_LIST:
-        if media_descriptor in metadata_dict.keys() and metadata_dict[media_descriptor] != '':
+    for media_descriptor in metadata_dict.keys():
+        if media_descriptor not in MEDIA_DESCRIPTOR_LIST and metadata_dict[media_descriptor] != '':
             if media_substrate_description != "":
                 media_substrate_description += ', '
             if metadata_dict[media_descriptor] != "none":
                 media_substrate_description += metadata_dict[media_descriptor]
-    for item in media_components_dict.items():
-        media_substrate_description = media_substrate_description + ", " + str(item[1])
+
     return media_substrate_description,media_components_dict
 
 
@@ -200,7 +199,6 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
                 if component in media_components_dict.keys():
                     remove_spaces = component.replace(' ', '_')
                     setattr(media, remove_spaces, media_components_dict[component])
-
 
             media.save()
 
