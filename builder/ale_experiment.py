@@ -349,7 +349,6 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
         rebuild_dashboard_data()
 
         metadata.parser.parse_metadata_post_experiment_upload(root_abs_path+"/metadata", experiment.ale_id)
-        #integrate_metadata(root_abs_path, ref_file_name, ale_exp_primary_key)
         return True
     except Exception as e:
         logger.exception(e)
