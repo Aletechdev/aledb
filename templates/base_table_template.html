@@ -62,6 +62,13 @@
                                 value="{{ ale }}">{{ ale }}</option>
                     {% endfor %}
                 </select>
+                <select name="sample_type" class="selectpicker">
+                    <option value="all">All sample types</option>
+                    <option {% if sample_type == "clonal" %}selected="selected" {% endif %}
+                            value="clonal">Clonal samples</option>
+                    <option {% if sample_type == "population" %}selected="selected" {% endif %}
+                            value="population">Population samples</option>
+                </select>
                 <select name="tag_select" class="selectpicker">
                     <option value="All Tags">All Tags</option>
                     {% for key, value in tag_dropdown.items %}

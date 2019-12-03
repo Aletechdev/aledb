@@ -2,7 +2,7 @@ import ale.common
 import ale.models
 from ale.models import AleExperiment
 from ale.permissions import can_view_project
-from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID
+from common.constants import REQUEST_ALE_EXPERIMENT_ID, REQUEST_ALE_ID, REQUEST_SAMPLE_TYPE
 from django.http import Http404, HttpResponseForbidden, HttpResponseBadRequest
 
 
@@ -50,6 +50,11 @@ def get_ale_id(request):
     ale_id = None if ale_id is None or ale_id == "all" else int(ale_id)
     return ale_id
 
+def get_sample_type(request):
+    sample_type = request.GET.get(REQUEST_SAMPLE_TYPE)
+    if sample_type == "all":
+        sample_type = None
+    return sample_type
 
 def get_ale_experiment(request):
     """
