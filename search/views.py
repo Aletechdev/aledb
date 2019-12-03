@@ -116,7 +116,7 @@ def _get_last_search(request):
 def _get_search_params(request, user_projects):
     include_argument_list = []
     exclude_argument_list = []
-    message = _add_position_to_query(request, include_argument_list)
+    message, small_range = _add_position_to_query(request, include_argument_list)
     if not message:
         message = _add_freq_to_query(request, include_argument_list)
     if not message:
@@ -125,7 +125,7 @@ def _get_search_params(request, user_projects):
         has_refseq = _add_ref_seq_to_query(request, include_argument_list)
         has_strain =_add_strain_to_query(request, include_argument_list)
         has_project = _add_project_to_query(request, include_argument_list, user_projects)
-        if not has_project and not has_gene and not has_strain and not has_refseq:
+        if not has_project and not has_gene and not has_strain and not has_refseq and not small_range:
             message = 'Please enter search criteria - genetic target, project or ref sequence or strain'
     return include_argument_list, exclude_argument_list, message
 
@@ -160,19 +160,25 @@ def _add_genes_to_query(request, include_argument_list, exclude_argument_list):
 
 def _add_position_to_query(request, include_argument_list):
     min, max = None, None
+    small_range = False
+    msg = ''
     try:
         if 'min_pos' in request.GET and len(request.GET['min_pos'])>0:
-            min = int(request.GET['min_pos'])
+            min = int(request.GET['min_pos'].replace(',', ''))
         if 'max_pos' in request.GET and len(request.GET['max_pos'])>0:
-            max = int(request.GET['max_pos'])
-        if min and max and min > max:
-            return 'Invalid position: min > max'
+            max = int(request.GET['max_pos'].replace(',', ''))
+        if min and max:
+            if min > max:
+                msg= 'Invalid position: min > max'
+            else:
+                small_range = max - max < 1000
         if min:
             include_argument_list.append(Q(**{'mutation__position__gte': min}))
         if max:
             include_argument_list.append(Q(**{'mutation__position__lte': max}))
     except Exception as ex:
-        return "Invalid positions. Please enter an integer!"
+        msg = "Invalid positions. Please enter an integer!"
+    return msg, small_range
 
 
 def _add_freq_to_query(request, include_argument_list):
