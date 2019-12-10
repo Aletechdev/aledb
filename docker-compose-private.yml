@@ -3,8 +3,11 @@ services:
   redis:
     container_name: aledb-redis
     image: redis
+    volumes:
+      - .:/app
     ports:
       - 6379:6379
+    command: bash -c "redis-server /app/redis.conf"
   web:
     container_name: aledb-web
     build: .
