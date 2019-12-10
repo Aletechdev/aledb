@@ -19,7 +19,7 @@ def get_all_observed_mutations(reseq_id_list):
     return seq.models.ObservedMutation.objects.filter(sequencing_experiment_id__in=reseq_id_list)
 
 
-def get_ordered_reseq_queryset(ale_experiment_id, ale_id=None):
+def get_ordered_reseq_queryset(ale_experiment_id, ale_id=None, sample_type=None):
     reseq_qryset = seq.models.ResequencingExperiment.objects.select_related(
         'tech_rep__isolate__flask__ale_id__ale_experiment', 'tech_rep__isolate__flask__media'
     ).order_by(
@@ -33,14 +33,20 @@ def get_ordered_reseq_queryset(ale_experiment_id, ale_id=None):
         reseq_qryset = reseq_qryset.filter(tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=ale_experiment_id)
     if ale_id:
         reseq_qryset = reseq_qryset.filter(tech_rep__isolate__flask__ale_id__ale_id=ale_id)
+    if sample_type:
+        flag = 0
+        if sample_type == 'population':
+            flag = 1
+        reseq_qryset = reseq_qryset.filter(tech_rep__isolate__is_population=flag)
     return reseq_qryset
 
 
-def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, request=None):
+def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, sample_type=None, request=None):
     """
     Args:
         ale_experiment_id:
         ale_no:
+        sample_type: population sample
 
     Returns:
         reseq_ordered_dict: a ordered dictionary of reseq values and their ID's as keys.
@@ -49,7 +55,7 @@ def get_reseq_ordered_dict(ale_experiment_id, ale_no=None, request=None):
         :param request:
 
     """
-    reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_no)
+    reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, ale_no, sample_type)
     if request and request.GET.get('tag_select'):
         tag = request.GET.get('tag_select').split(':')
         if tag[0] == 'Hide Tag':

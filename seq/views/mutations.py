@@ -38,9 +38,10 @@ def mutation_table(request):
 
         exp_name = experiment.project.name + ": " + experiment.name
         ale_no = seq.views.common.get_ale_id(request)
+        sample_type = seq.views.common.get_sample_type(request)
         aleid_ale_id_list = seq.views.common.get_aleid_ale_id_list(experiment.ale_id, True)
 
-        ordered_reseq_dict = get_reseq_ordered_dict(experiment.ale_id, ale_no, request)
+        ordered_reseq_dict = get_reseq_ordered_dict(experiment.ale_id, ale_no, sample_type, request)
 
         table_header = mutation_table_builder.get_table_header(request.user, ordered_reseq_dict, experiment)
 
@@ -53,6 +54,7 @@ def mutation_table(request):
         context.update({"ales": aleid_ale_id_list,
                         "ale_experiment_name": exp_name,
                         "ale_no": ale_no,
+                        "sample_type": sample_type,
                         "ale_experiment_id": experiment.ale_id,
                         "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                         "title": exp_name + " Mutations",
