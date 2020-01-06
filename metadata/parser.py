@@ -37,12 +37,12 @@ MEDIA_BASE_DESCRIPTION = "medium derived from"
 
 ENVIRONMENTAL_CONDITIONS = "environmental conditions"
 MEDIA_TEMPERATURE = "temp"
-#  The following media descriptors are consolidated into the ALEdb "substrate" descriptor.
 MEDIA_COMPONENTS = "media components"
 MEDIA_CARBON_SOURCE = "carbon source"
 MEDIA_NITROGEN_SOURCE = "nitrogen source"
 MEDIA_PHOSPHORUS_SOURCE = "phosphorus source"
 MEDIA_SULFUR_SOURCE = "sulfur source"
+MEDIA_CALCIUM_SOURCE = "calcium source"
 MEDIA_ELECTRON_ACCEPTOR = "electron acceptor"
 MEDIA_ANTIBIOTIC = "antibiotic"
 MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
@@ -50,6 +50,7 @@ MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
                          MEDIA_PHOSPHORUS_SOURCE,
                          MEDIA_SULFUR_SOURCE,
                          MEDIA_ELECTRON_ACCEPTOR,
+                         MEDIA_CALCIUM_SOURCE,
                          MEDIA_ANTIBIOTIC]
 
 def multiple_replace(text):

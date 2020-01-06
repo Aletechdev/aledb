@@ -138,6 +138,9 @@ class Media(models.Model):
     sulfur_source = models.CharField(max_length=200,
                                  default=None,
                                  **blank_field)
+    calcium_source = models.CharField(max_length=200,
+                                     default=None,
+                                     **blank_field)
     supplement = models.CharField(max_length=200,
                                      default=None,
                                      **blank_field)
