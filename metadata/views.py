@@ -78,6 +78,7 @@ def get_reseq_info_list(reseq_queryset):
                                  reseq.tech_rep.isolate.flask.media.nitrogen_source,
                                  reseq.tech_rep.isolate.flask.media.phosphorus_source,
                                  reseq.tech_rep.isolate.flask.media.sulfur_source,
+                                 reseq.tech_rep.isolate.flask.media.carbon_source,
                                  reseq.tech_rep.isolate.flask.media.supplement,
                                  reseq.tech_rep.isolate.flask.media.temperature,
                                  reseq.tech_rep.isolate.flask.ale_id.strain,
