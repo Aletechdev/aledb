@@ -7,7 +7,7 @@ REQUEST_ALE_ID = "ale_no"
 REQUEST_SAMPLE_TYPE = "sample_type"
 REFSEQ_COLUMN_IN_MUT_TABLE = 3
 HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Reference Seq", "Position", "Mutation Type", "Sequence Change", "Gene",
-                              "Function", "Product", "GO Process", "GO Component", "Mut ID", "Details"]
+                              "Function", "Product", "GO Process", "GO Component", "Details"]
 
 TAGS = {
     "contaminated": '<i class="fa fa-random fa-fw" aria-hidden="true"></i>',
