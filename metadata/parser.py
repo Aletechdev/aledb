@@ -53,6 +53,7 @@ MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
                          MEDIA_CALCIUM_SOURCE,
                          MEDIA_ANTIBIOTIC]
 
+
 def multiple_replace(text):
     word_dict = {
         ' ': "_"
@@ -61,6 +62,7 @@ def multiple_replace(text):
         text = text.replace(key, word_dict[key])
     text = re.sub(r'[^A-Za-z0-9_-]+', '', text)
     return text
+
 
 def extract_experiment_parameters(metadata_path):
     # need to ensure all the csv files give the same parameters
