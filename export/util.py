@@ -31,16 +31,17 @@ def get_csv_str(exp_id, mut_type_str):
                                                       reseq_ordered_dict]]
 
     rows += ([
-              "" if mutation.reseq_reference is None else mutation.reseq_reference,
-              format(mutation.position, ',d'),
-              mutation.mutation_type,
-              mutation.sequence_change,
-              mutation.gene,
-              "" if mutation.function is None else mutation.function,
-              "" if mutation.product is None else mutation.product,
-              "" if mutation.go_process is None else mutation.go_process,
-              "" if mutation.go_component is None else mutation.go_component,
-              strip_tags(mutation.protein_change)] + _strip_tags_from_list(
+            "" if mutation.reseq_reference is None else mutation.reseq_reference,
+            format(mutation.position, ',d'),
+            mutation.mutation_type,
+            mutation.sequence_change,
+            mutation.gene,
+            "" if mutation.function is None else mutation.function,
+            "" if mutation.product is None else mutation.product,
+            "" if mutation.go_process is None else mutation.go_process,
+            "" if mutation.go_component is None else mutation.go_component,
+            mutation.id,
+            strip_tags(mutation.protein_change)] + _strip_tags_from_list(
         table_entry_list[mutation_index_dict[mutation.id]])
              for mutation in mutations)
     # print(str(datetime.now()), "after get rows")
