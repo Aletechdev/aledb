@@ -2,7 +2,7 @@ from django.contrib.auth.models import User, Group
 from ale.models import Project, AleExperiment, RecentExperiments, AleId
 from guardian.models import GroupObjectPermission, UserObjectPermission
 from django.core.exceptions import ObjectDoesNotExist
-from ale.permissions import VIEW_PROJECT
+from ale.permissions import VIEW_PROJECT, can_view_project
 
 
 def _get_projects_with_permissions(permission_codename):
@@ -28,8 +28,6 @@ def get_user_projects(user: User):
     """
     if user.is_superuser:
         return Project.objects.all()
-    if not user.is_staff:
-        return Project.objects.filter(is_public=True)
     else:
         restricted_proj_ids = _get_projects_with_permissions(VIEW_PROJECT)
         all_projects = Project.objects.all()
@@ -39,9 +37,7 @@ def get_user_projects(user: User):
         for project in all_projects:
             if project.is_public:
                 myprojects.append(project)
-            elif user.id == project.user_id:
-                myprojects.append(project)
-            elif str(project.id) not in restricted_proj_ids:
+            elif can_view_project(user, project):
                 myprojects.append(project)
             elif user.has_perm(VIEW_PROJECT, project):
                 myprojects.append(project)

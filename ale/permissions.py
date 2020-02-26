@@ -1,8 +1,11 @@
 from guardian.models import GroupObjectPermission, UserObjectPermission
 from ale.models import AleExperiment
 from seq.models import ResequencingExperiment
+import logging
 
 VIEW_PROJECT = 'view_project'
+
+logger = logging.getLogger(__name__)
 
 
 def _project_has_permissions(project, permission_codename):
@@ -28,8 +31,16 @@ def _project_has_permissions(project, permission_codename):
     return False
 
 
+def get_users_with_access_to_project(project):
+    users = set([])
+    permissions = UserObjectPermission.objects.filter(object_pk=project.id)
+    for permission in permissions:
+        users.add(permission.user)
+    return users
+
+
 def can_view_project(user, project):
-    ok = user.is_superuser or project.is_public or user.id == project.user_id
+    ok = user.is_superuser or project.is_public or user in get_users_with_access_to_project(project)
     if not ok and user.is_staff:
         if _project_has_permissions(project, VIEW_PROJECT):
             ok = user.has_perm(VIEW_PROJECT, project)
@@ -55,5 +66,5 @@ def can_add_global_filter(user):
 
 def can_add_experiment_filter(user, experiment):
     if experiment:
-        return user.is_superuser or user.id == experiment.project.user_id
+        return user.is_superuser or user.id in get_users_with_access_to_project(experiment.project)
     return False
