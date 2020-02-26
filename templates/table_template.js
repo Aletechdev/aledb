@@ -172,7 +172,7 @@ function column_sort_from_right() {
     var table = $("#data").DataTable();
     var visible_columns = table.columns().visible();
 
-    for (var i = sorted_column + 11; i < number_of_columns; i++) {
+    for (var i = sorted_column + 10; i < number_of_columns; i++) {
         if(visible_columns[i] == true) {
             sorting_array.push([i, 'desc'])
         }
