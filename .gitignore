@@ -15,7 +15,6 @@ config.sh
 .docker/data
 .docker/*.env
 
-
 /logs/debug.log*
 /logs/info.log*
 
