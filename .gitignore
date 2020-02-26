@@ -13,7 +13,7 @@ config.sh
 .DS_Store
 .builder/
 .docker/data
-
+.docker/*.env
 
 /logs/debug.log*
 /logs/info.log*
