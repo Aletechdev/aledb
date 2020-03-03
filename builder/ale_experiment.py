@@ -22,6 +22,7 @@ from ale.models import AleExperiment, Project
 from django.contrib.auth.models import User
 from datetime import datetime
 from stats.models import StaticData
+from ale.permissions import grant_access_to_project
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -251,8 +252,10 @@ def find_user(user):
 def try_creating_project(project, owner_name, is_pub=False):
     print("Creating", project, "project with owner", owner_name, "public:", is_pub)
     owner = find_user(owner_name)
-    return Project.objects.create(name=project, user=owner, date=datetime.now(),
+    new_project = Project.objects.create(name=project, user=owner, date=datetime.now(),
                            status="In progress", is_public=is_pub)
+    grant_access_to_project(new_project, [owner])
+    return new_project
 
 
 # For wild_type, expecting directory with output.gd in it.
