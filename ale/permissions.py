@@ -44,7 +44,7 @@ def get_users_with_access_to_project(project):
 def grant_access_to_project(project, user_list):
     for user in user_list:
         assign_perm(VIEW_PROJECT, user, project)
-    return project.projectuserobjectpermission_set
+    return
 
 
 def can_view_project(user, project):
