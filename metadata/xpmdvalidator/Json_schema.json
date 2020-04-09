@@ -61,7 +61,7 @@
       "carbon source": {
         "$id": "carbon source",
         "type": "string",
-        "pattern": "^(^$)|(.*)(?=\\\b|)\\(-?[0-9]\\d*(\\.+\\)?\\)$"
+        "pattern": "^(^$)|(.*)(?=\\\b|)\\(-?[0-9]\\d*(\\.+\\)?\\))$"
       },
       "taxonomy id": {
         "$id": "taxonomy id",
