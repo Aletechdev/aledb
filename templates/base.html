@@ -102,7 +102,7 @@
                     <li><a href="/ale/experiments/">Experiments</a></li>
                     <li {% block filter %}{% endblock %}><a href="/filter/global_filter/">Global Filter</a></li>
                     <li><a href="/about">About</a></li>
-                    <li><a href="/bibliome">Bibliome</a></li>
+                    {# <li><a href="/bibliome">Bibliome</a></li> #}
                     {% if ale_experiment_id %}
                         <li><a href="/stats?ale_experiment_id={{ ale_experiment_id }}"><b>{{ ale_experiment_name }}</b></a></li>
                         <li><a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Metadata</a></li>
