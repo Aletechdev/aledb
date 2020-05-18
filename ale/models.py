@@ -67,6 +67,7 @@ class AleExperiment(models.Model):
     instrument = models.ForeignKey(Instrument)
     notes = models.TextField(**blank_field)
     project = models.ForeignKey(Project, default=None, **blank_field, on_delete=models.DO_NOTHING)
+    doi = models.TextField(**blank_field)
 
     class Meta:
         verbose_name_plural = "experiments"
@@ -76,6 +77,9 @@ class AleExperiment(models.Model):
 
     def __str__(self):
         return self.name
+
+    def doi_as_list(self):
+        return self.doi.split(' ')
 
     def get_absolute_url(self):
         return reverse("experiment_detail", args=(self.pk,))
@@ -116,7 +120,7 @@ class AleId(models.Model):
 
 
 class Media(models.Model):
-    temperature = models.FloatField(default=37,
+    temperature = models.CharField(max_length=200,default='37',
                                     help_text="Temperature in Celcius")
     volume = models.FloatField(default=25,
                                help_text="Volume of culture in each flask (mL)")

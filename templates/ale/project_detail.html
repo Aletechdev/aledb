@@ -62,7 +62,7 @@
                 <th>Exp ID</th>
                 <th>Exp Name</th>
                 <th>Project</th>
-                <th>Person</th>
+                <th>Publication</th>
                 <th>Date</th>
             </tr>
             </thead>
@@ -77,7 +77,11 @@
                     <td>
                         <a href="/ale/project/{{ experiment.project.id }}">{{ experiment.project.name }}</a>
                     </td>
-                    <td>{{ experiment.person }}</td>
+                    <td>
+                        {% for doi in experiment.doi_as_list %}
+                            <a href="https://doi.org/{{ doi }}">{{ doi }}</a>
+                        {% endfor %}
+                    </td>
                     <td>{{ experiment.date }}</td>
                 </tr>
             {% endfor %}
