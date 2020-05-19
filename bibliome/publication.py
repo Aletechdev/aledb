@@ -14,7 +14,7 @@ def create_publications(title_str, url_str, ale_exp_pk_list):
 
 def add_publication_to_experiment(experiment_ids, doi, replace=False):
     for id in experiment_ids:
-        create_publication(doi, "https://doi.org/"+doi, id)
+
         try:
             curr_experiment = AleExperiment.objects.get(ale_id=id)
             curr_doi = curr_experiment.doi
@@ -25,5 +25,9 @@ def add_publication_to_experiment(experiment_ids, doi, replace=False):
             else:
                 curr_experiment.doi = doi
             curr_experiment.save()
+
+            for bib in curr_experiment.doi_as_list():
+                create_publication(bib, "https://doi.org/" + bib, id)
         except AleExperiment.DoesNotExist:
             continue
+
