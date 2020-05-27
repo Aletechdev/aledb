@@ -175,7 +175,7 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
             media_temperature = DEFAULT_TEMPERATURE
             environmental_conditions_dict = json.loads(metadata_dict[ENVIRONMENTAL_CONDITIONS])
             if MEDIA_TEMPERATURE in environmental_conditions_dict.keys() and environmental_conditions_dict[MEDIA_TEMPERATURE] != "":
-                media_temperature = float(environmental_conditions_dict[MEDIA_TEMPERATURE])
+                media_temperature = environmental_conditions_dict[MEDIA_TEMPERATURE]
 
             experiment_details = ""
             if EXPERIMENT_DETAILS in metadata_dict.keys():
