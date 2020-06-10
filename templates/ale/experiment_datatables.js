@@ -50,6 +50,12 @@
                                 export_data(table, "fixed_mut")
                             }
                         },
+                        {
+                            text: 'Metadata',
+                            action: function () {
+                                export_metadata(table)
+                            }
+                        },
                     ]
                 },
             ],
@@ -60,11 +66,11 @@
 
     function get_selected_experiment_ids(table) {
         var selected_data = table.rows('.selected').data();
-        var exp_ids = '';
+        var experiment_ids = []
         for (var i = 0; i < selected_data.length; i++) {
-            exp_ids += selected_data[i][1] + ",";
+            experiment_ids.push(selected_data[i][1])
         }
-        return exp_ids;
+        return experiment_ids.join(",");
     }
 
 
@@ -77,6 +83,26 @@
         var url = "/export";
         var params = {
                     'mut_type': mutation_type,
+                    'project_id': project_id,
+                    'experiment_ids': exp_ids
+                };
+        var form = $('<form method="GET" action="' + url + '">');
+        $.each(params, function(k, v) {
+            form.append($('<input type="hidden" name="' + k +
+                    '" value="' + v + '">'));
+        });
+        $('body').append(form);
+        form.submit();
+    }
+
+    function export_metadata(table){
+        var exp_ids = get_selected_experiment_ids(table);
+        if (exp_ids == ''){
+            swal("", "Please select experiments and try again.", "warning");
+            return;
+        }
+        var url = "/md_export";
+        var params = {
                     'project_id': project_id,
                     'experiment_ids': exp_ids
                 };

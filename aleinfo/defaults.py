@@ -43,6 +43,7 @@ INSTALLED_APPS = (
     'converge',
     'accounts',
     'export',
+    'md_export',
     'common',
     'dashboard',
     'search',

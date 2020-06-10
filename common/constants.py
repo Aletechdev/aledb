@@ -8,7 +8,7 @@ REQUEST_SAMPLE_TYPE = "sample_type"
 REFSEQ_COLUMN_IN_MUT_TABLE = 3
 HTML_MUTATION_TABLE_HEADER = ["", "", "Tags", "Reference Seq", "Position", "Mutation Type", "Sequence Change", "Gene",
                                             "Function", "Product", "GO Process", "GO Component", "Mut ID", "Details"]
-
+HTML_METADATA_TABLE_HEADER = ["sample_name","clonal_or_population","tech_rep_description","media_description","carbon_source","nitrogen_source","phosphorous_source","sulfur_source","calcium_source","supplement","temperature","strain","strain_details","taxonomy_id","reseq_reference"]
 
 TAGS = {
     "contaminated": '<i class="fa fa-random fa-fw" aria-hidden="true"></i>',
