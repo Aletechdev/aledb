@@ -19,6 +19,7 @@ urlpatterns = [
     url(r'^converge/', include('converge.urls')),
     url(r'^enrichment/', include('enrichment.urls')),
     url(r'^export', include('export.urls')),
+    url(r'^md_export', include('md_export.urls')),
     url(r'^filter/', include('filter.urls')),
     url(r'^fixation/', include('fixation.urls')),
     url(r'^metadata/', include('metadata.urls')),
