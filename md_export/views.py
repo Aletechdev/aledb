@@ -37,7 +37,6 @@ def md_export(request):
                 zip_data = io.BytesIO()
                 zip_file = ZipFile(zip_data, 'w')
                 for experiment in exp_list:
-                    print(experiment.ale_id)
                     csv_data = io.StringIO()
                     writer = csv.writer(csv_data)
                     writer.writerows(get_md_csv_str(experiment.ale_id))
