@@ -39,7 +39,7 @@ def md_export(request):
                 for experiment in exp_list:
                     csv_data = io.StringIO()
                     writer = csv.writer(csv_data)
-                    writer.writerows(get_md_csv_str(experiment.ale_id))
+                    writer.writerows(get_md_csv_str(experiment))
                     csv_data.seek(0)
                     zip_file.writestr(experiment.name + '.csv', csv_data.read())
                 zip_file.close()
