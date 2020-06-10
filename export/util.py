@@ -3,7 +3,6 @@ from seq.views.mutation_table_builder import get_mutation_table_data, HTML_MUTAT
 from django.utils.html import strip_tags
 from converge.util import get_converge_obs_mut_qryset
 
-import collections
 from filter.util import filter_observed_mutations
 from seq.util import get_observed_mutation_queryset, get_ordered_reseq_dict
 
@@ -44,7 +43,6 @@ def get_csv_str(exp_id, mut_type_str):
             strip_tags(mutation.protein_change)] + _strip_tags_from_list(
         table_entry_list[mutation_index_dict[mutation.id]])
              for mutation in mutations)
-    # print(str(datetime.now()), "after get rows")
     return rows
 
 
