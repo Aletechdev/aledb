@@ -79,6 +79,8 @@ class AleExperiment(models.Model):
         return self.name
 
     def doi_as_list(self):
+        if self.doi is None:
+            return []
         return self.doi.split(' ')
 
     def get_absolute_url(self):
