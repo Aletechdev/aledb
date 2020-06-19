@@ -171,11 +171,6 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
             if MEDIA_CARBON_SOURCE in metadata_keys:
                 carbon_source = metadata_dict[MEDIA_CARBON_SOURCE]
 
-            supplement_keys = list(set(metadata_keys) - set(MEDIA_DESCRIPTOR_LIST))
-            supplement_values = []
-            for supplement_key in supplement_keys:
-                supplement_values.append(metadata_dict[supplement_key])
-            supplement = ",".join(supplement_values)
 
             if LIBRARY_PREP_KIT_CYCLES in metadata_keys:
                 if library_prep != "":
@@ -200,6 +195,13 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
                 sulfur_source = media_components_dict[MEDIA_SULFUR_SOURCE]
             if MEDIA_CALCIUM_SOURCE in media_components_dict:
                 calcium_source = media_components_dict[MEDIA_CALCIUM_SOURCE]
+
+            supplement_keys = list(set(media_components_dict) - set(MEDIA_DESCRIPTOR_LIST))
+            supplement_values = []
+            for supplement_key in supplement_keys:
+                supplement_values.append(media_components_dict[supplement_key])
+            supplement = ",".join(supplement_values)
+
             ale_id = tech_rep.isolate.flask.ale_id
             ale_id.description = ale_id_description
             ale_id.strain = strain
