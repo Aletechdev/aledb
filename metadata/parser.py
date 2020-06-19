@@ -192,15 +192,15 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
                 experiment_details = metadata_dict[EXPERIMENT_DETAILS]
 
             media_supplement_description, media_components_dict = _get_media_supplement_description(metadata_dict)
-            if MEDIA_NITROGEN_SOURCE in metadata_keys:
+            if MEDIA_NITROGEN_SOURCE in media_components_dict:
                 nitrogen_source = media_components_dict[MEDIA_NITROGEN_SOURCE]
-            if MEDIA_PHOSPHORUS_SOURCE in metadata_keys:
+            if MEDIA_PHOSPHORUS_SOURCE in media_components_dict:
                 phosphorus_source = media_components_dict[MEDIA_PHOSPHORUS_SOURCE]
-            if MEDIA_SULFUR_SOURCE in metadata_keys:
+            if MEDIA_SULFUR_SOURCE in media_components_dict:
                 sulfur_source = media_components_dict[MEDIA_SULFUR_SOURCE]
-            if MEDIA_ELECTRON_ACCEPTOR in metadata_keys:
+            if MEDIA_ELECTRON_ACCEPTOR in media_components_dict:
                 electron_acceptor = media_components_dict[MEDIA_ELECTRON_ACCEPTOR]
-            if MEDIA_CALCIUM_SOURCE in metadata_keys:
+            if MEDIA_CALCIUM_SOURCE in media_components_dict:
                 calcium_source = media_components_dict[MEDIA_CALCIUM_SOURCE]
             ale_id = tech_rep.isolate.flask.ale_id
             ale_id.description = ale_id_description
