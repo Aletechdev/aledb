@@ -198,8 +198,6 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
                 phosphorus_source = media_components_dict[MEDIA_PHOSPHORUS_SOURCE]
             if MEDIA_SULFUR_SOURCE in media_components_dict:
                 sulfur_source = media_components_dict[MEDIA_SULFUR_SOURCE]
-            if MEDIA_ELECTRON_ACCEPTOR in media_components_dict:
-                electron_acceptor = media_components_dict[MEDIA_ELECTRON_ACCEPTOR]
             if MEDIA_CALCIUM_SOURCE in media_components_dict:
                 calcium_source = media_components_dict[MEDIA_CALCIUM_SOURCE]
             ale_id = tech_rep.isolate.flask.ale_id
@@ -217,7 +215,6 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
                                                          nitrogen_source=nitrogen_source,
                                                          phosphorus_source=phosphorus_source,
                                                          sulfur_source=sulfur_source,
-                                                         electron_acceptor=electron_acceptor,
                                                          calcium_source=calcium_source,
                                                          supplement=supplement
                                                          )
