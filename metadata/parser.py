@@ -44,16 +44,13 @@ MEDIA_PHOSPHORUS_SOURCE = "phosphorus source"
 MEDIA_SULFUR_SOURCE = "sulfur source"
 MEDIA_CALCIUM_SOURCE = "calcium source"
 MEDIA_ELECTRON_ACCEPTOR = "electron acceptor"
-MEDIA_ANTIBIOTIC = "antibiotic"
 MEDIA_SUPPLEMENT = "supplement"
 MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
                          MEDIA_NITROGEN_SOURCE,
                          MEDIA_PHOSPHORUS_SOURCE,
                          MEDIA_SULFUR_SOURCE,
                          MEDIA_ELECTRON_ACCEPTOR,
-                         MEDIA_CALCIUM_SOURCE,
-                         MEDIA_ANTIBIOTIC,
-                         MEDIA_SUPPLEMENT]
+                         MEDIA_CALCIUM_SOURCE]
 
 
 def multiple_replace(text):
@@ -143,7 +140,7 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
 
             with open(os.path.join(metadata_path, f), 'rt') as csvfile:
                 metadata_dict = dict(csv.reader(csvfile, delimiter=','))
-
+            metadata_keys = metadata_dict.keys()
             try:
                 tech_rep = TechnicalReplicate.objects.get(
                     tech_rep_number=metadata_dict[TECH_REP_NUMBER],
@@ -156,25 +153,41 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
                 continue
 
             ale_id_description = ""
-            if STRAIN_DESCRIPTION in metadata_dict.keys():
+            if STRAIN_DESCRIPTION in metadata_keys:
                 ale_id_description = metadata_dict[STRAIN_DESCRIPTION]
 
             strain = ""
-            if STRAIN in metadata_dict.keys():
+            if STRAIN in metadata_keys:
                 strain = metadata_dict[STRAIN]
 
             media_description = ""
-            if MEDIA_BASE_DESCRIPTION in metadata_dict.keys():
+            if MEDIA_BASE_DESCRIPTION in metadata_keys:
                 media_description = metadata_dict[MEDIA_BASE_DESCRIPTION]
 
             library_prep = ""
-            if LIBRARY_PREP_KIT_MANUFACTURER in metadata_dict.keys():
+            if LIBRARY_PREP_KIT_MANUFACTURER in metadata_keys:
                 library_prep = metadata_dict[LIBRARY_PREP_KIT_MANUFACTURER]
 
-            if MEDIA_CARBON_SOURCE in metadata_dict.keys():
+            if MEDIA_CARBON_SOURCE in metadata_keys:
                 carbon_source = metadata_dict[MEDIA_CARBON_SOURCE]
+            if MEDIA_NITROGEN_SOURCE in metadata_keys:
+                nitrogen_source = metadata_dict[MEDIA_NITROGEN_SOURCE]
+            if MEDIA_PHOSPHORUS_SOURCE in metadata_keys:
+                phosphorus_source = metadata_dict[MEDIA_PHOSPHORUS_SOURCE]
+            if MEDIA_SULFUR_SOURCE in metadata_keys:
+                sulfur_source = metadata_dict[MEDIA_SULFUR_SOURCE]
+            if MEDIA_ELECTRON_ACCEPTOR in metadata_keys:
+                electron_acceptor = metadata_dict[MEDIA_ELECTRON_ACCEPTOR]
+            if MEDIA_CALCIUM_SOURCE in metadata_keys:
+                calcium_source = metadata_dict[MEDIA_CALCIUM_SOURCE]
 
-            if LIBRARY_PREP_KIT_CYCLES in metadata_dict.keys():
+            supplement_keys = list(set(metadata_keys) - set(MEDIA_DESCRIPTOR_LIST))
+            supplement_values = []
+            for supplement_key in supplement_keys:
+                supplement_values.append(metadata_dict[supplement_key])
+            supplement = ",".join(supplement_values)
+
+            if LIBRARY_PREP_KIT_CYCLES in metadata_keys:
                 if library_prep != "":
                     library_prep += "/ "
                 library_prep += metadata_dict[LIBRARY_PREP_KIT_CYCLES]
@@ -198,11 +211,17 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
             ale_id.save()
 
             media, created = Media.objects.get_or_create(description=media_description,
-                                                         supplement=media_supplement_description,
                                                          temperature=media_temperature,
                                                          volume=DEFAULT_VOLUME,
                                                          stirring_speed=DEFAULT_STIRRING_SPEED,
-                                                         carbon_source=carbon_source)
+                                                         carbon_source=carbon_source,
+                                                         nitrogen_source=nitrogen_source,
+                                                         phosphorus_source=phosphorus_source,
+                                                         sulfur_source=sulfur_source,
+                                                         electron_acceptor=electron_acceptor,
+                                                         calcium_source=calcium_source,
+                                                         supplement=supplement
+                                                         )
 
             for component in MEDIA_DESCRIPTOR_LIST:
                 if component in media_components_dict.keys():
