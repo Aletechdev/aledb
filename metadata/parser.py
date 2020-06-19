@@ -45,13 +45,15 @@ MEDIA_SULFUR_SOURCE = "sulfur source"
 MEDIA_CALCIUM_SOURCE = "calcium source"
 MEDIA_ELECTRON_ACCEPTOR = "electron acceptor"
 MEDIA_ANTIBIOTIC = "antibiotic"
+MEDIA_SUPPLEMENT = "supplement"
 MEDIA_DESCRIPTOR_LIST = [MEDIA_CARBON_SOURCE,
                          MEDIA_NITROGEN_SOURCE,
                          MEDIA_PHOSPHORUS_SOURCE,
                          MEDIA_SULFUR_SOURCE,
                          MEDIA_ELECTRON_ACCEPTOR,
                          MEDIA_CALCIUM_SOURCE,
-                         MEDIA_ANTIBIOTIC]
+                         MEDIA_ANTIBIOTIC,
+                         MEDIA_SUPPLEMENT]
 
 
 def multiple_replace(text):
@@ -69,9 +71,11 @@ def extract_experiment_parameters(metadata_path):
     project = "N/A"
     creator = "N/A"
     experiment = "N/A"
+    files = []
 
     for f in os.listdir(metadata_path):
         if f.endswith(".csv") or f.endswith(".CSV"):
+            files.append(f)
             with open(os.path.join(metadata_path, f), 'rt') as csvfile:
                 csv_reader = csv.reader(csvfile)
 
@@ -107,7 +111,9 @@ def extract_experiment_parameters(metadata_path):
                 elif experiment != curr_experiment:
                     print("Experiment Mismatch: Please ensure all experiment specific parameters share the same values", f)
                     return False
-
+    if len(files) == 0:
+        print("No Metadata: Please ensure there are csv metadata files in the metadata folder")
+        return False
     return creator, experiment, project
 
 
@@ -115,6 +121,8 @@ def _get_media_supplement_description(metadata_dict):
     media_supplement_description = ''
 
     media_components_dict = json.loads(metadata_dict[MEDIA_COMPONENTS])
+    if MEDIA_SUPPLEMENT not in media_components_dict.keys():
+        media_components_dict[MEDIA_SUPPLEMENT] = ''
 
     for media_descriptor in media_components_dict.keys():
         if media_descriptor not in MEDIA_DESCRIPTOR_LIST and media_components_dict[media_descriptor] != '':
@@ -165,7 +173,6 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
 
             if MEDIA_CARBON_SOURCE in metadata_dict.keys():
                 carbon_source = metadata_dict[MEDIA_CARBON_SOURCE]
-
 
             if LIBRARY_PREP_KIT_CYCLES in metadata_dict.keys():
                 if library_prep != "":
