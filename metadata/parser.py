@@ -170,16 +170,6 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
 
             if MEDIA_CARBON_SOURCE in metadata_keys:
                 carbon_source = metadata_dict[MEDIA_CARBON_SOURCE]
-            if MEDIA_NITROGEN_SOURCE in metadata_keys:
-                nitrogen_source = metadata_dict[MEDIA_NITROGEN_SOURCE]
-            if MEDIA_PHOSPHORUS_SOURCE in metadata_keys:
-                phosphorus_source = metadata_dict[MEDIA_PHOSPHORUS_SOURCE]
-            if MEDIA_SULFUR_SOURCE in metadata_keys:
-                sulfur_source = metadata_dict[MEDIA_SULFUR_SOURCE]
-            if MEDIA_ELECTRON_ACCEPTOR in metadata_keys:
-                electron_acceptor = metadata_dict[MEDIA_ELECTRON_ACCEPTOR]
-            if MEDIA_CALCIUM_SOURCE in metadata_keys:
-                calcium_source = metadata_dict[MEDIA_CALCIUM_SOURCE]
 
             supplement_keys = list(set(metadata_keys) - set(MEDIA_DESCRIPTOR_LIST))
             supplement_values = []
@@ -202,7 +192,16 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
                 experiment_details = metadata_dict[EXPERIMENT_DETAILS]
 
             media_supplement_description, media_components_dict = _get_media_supplement_description(metadata_dict)
-
+            if MEDIA_NITROGEN_SOURCE in metadata_keys:
+                nitrogen_source = media_components_dict[MEDIA_NITROGEN_SOURCE]
+            if MEDIA_PHOSPHORUS_SOURCE in metadata_keys:
+                phosphorus_source = media_components_dict[MEDIA_PHOSPHORUS_SOURCE]
+            if MEDIA_SULFUR_SOURCE in metadata_keys:
+                sulfur_source = media_components_dict[MEDIA_SULFUR_SOURCE]
+            if MEDIA_ELECTRON_ACCEPTOR in metadata_keys:
+                electron_acceptor = media_components_dict[MEDIA_ELECTRON_ACCEPTOR]
+            if MEDIA_CALCIUM_SOURCE in metadata_keys:
+                calcium_source = media_components_dict[MEDIA_CALCIUM_SOURCE]
             ale_id = tech_rep.isolate.flask.ale_id
             ale_id.description = ale_id_description
             ale_id.strain = strain
