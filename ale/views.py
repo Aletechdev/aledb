@@ -16,7 +16,10 @@ def projects(request):
         project_experiments = project.aleexperiment_set.all()
         dois = []
         for project_experiment in project_experiments:
-            experiment_dois = project_experiment.doi.split()
+            if project_experiment.doi is not None:
+                experiment_dois = project_experiment.doi.split()
+            else:
+                experiment_dois = []
             dois = dois + experiment_dois
         project_dic[project] = list(set(dois))
 
