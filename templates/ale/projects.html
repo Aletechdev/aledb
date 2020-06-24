@@ -20,20 +20,23 @@
         <thead class="alert-success">
             <tr>
                 <th>Name</th>
-                <th>Description</th>
+                <th>Publications</th>
                 <th>Date</th>
-{#                <th>Is Public?</th>#}
             </tr>
         </thead>
         <tbody>
-            {% for project in projects %}
+            {% for project, publications in project_dic %}
             <tr>
                 <td>
                     <a href="/ale/project/{{ project.id }}">{{ project.name }}</a>
-                    </td>
-                <td>{{ project.description }}</td>
+                </td>
+                <td>
+                    {% for doi in publications %}
+                        <a href="https://doi.org/{{ doi }}">{{ doi }}</a>
+                    {% endfor %}
+
+                </td>
                 <td>{{ project.date_str }}</td>
-{#                <td>{{ project.is_public }}</td>#}
             </tr>
             {% endfor %}
         </tbody>
