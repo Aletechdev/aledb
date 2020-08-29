@@ -203,7 +203,7 @@ def _check_and_extract_parameters_from_metadata(metadata_path):
         logger.info("invalid metadata path")
         print("invalid path:", metadata_path)
         return False
-    if not is_valid(metadata_path,"metadata/xpmdvalidator/Json_schema.json"):
+    if not is_valid(metadata_path, "metadata/xpmdvalidator/Json_schema.json"):
         return False
     return metadata.parser.extract_experiment_parameters(metadata_path)
 
@@ -282,6 +282,103 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
             root_abs_path = breseq_output_group_root_abs_path.replace("/breseq","")
         breseq_output_group_root_abs_path = root_abs_path + "/breseq/"
 
+        clear_dashboard_cache()  # TODO: remove, since no longer using cache.
+
+        breseq_output_group_root_abs_path = builder.util.sanitize_path(breseq_output_group_root_abs_path)
+        try:
+            project = ale.models.Project.objects.get(name=proj_name)
+        except Exception:
+            print("Project not found: ", proj_name)
+            try_creating_project(proj_name, ale_exp_user)
+            project = ale.models.Project.objects.get(name=proj_name)
+
+        instrument, created = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
+        experiment, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
+                                                                             instrument=instrument,
+                                                                             person=ale_exp_user,
+                                                                             project=project)
+
+        create_event(title="Experiment Created",
+                     message="Experiment %s was created" % experiment.name,
+                     icon='<i class="fa fa-flask" aria-hidden="true"></i>',
+                     color="success")
+
+        default_media, \
+        created = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
+                                                         substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
+                                                         temperature=metadata.parser.DEFAULT_TEMPERATURE,
+                                                         volume=metadata.parser.DEFAULT_VOLUME,
+                                                         stirring_speed=metadata.parser.DEFAULT_STIRRING_SPEED)
+
+        freezer_box, created = ale.models.FreezerBox.objects.get_or_create(
+            name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
+            number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
+
+        if breseq_starting_strain_output_abs_path is not None:
+            _insert_starting_strain_flask(breseq_starting_strain_output_abs_path,
+                                          ale_exp_user,
+                                          ale_exp_name,
+                                          experiment,
+                                          default_media,
+                                          freezer_box)
+
+        # Might need to explicitly sort this list in the future.
+        breseq_sample_report_list = _get_sample_report_list(breseq_output_group_root_abs_path)
+        for ale_isolate_name in breseq_sample_report_list:
+            ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
+            flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
+            isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
+            technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name,
+                                                                     builder.util.AleName.TechnicalReplicate)
+            print(ale_number, flask_number, isolate_number, technical_replicate_number)
+            output_path = breseq_output_group_root_abs_path + ale_isolate_name + "/" + BRESEQ_OUTPUT_REPORT_DIR
+            _create_and_commit_ale_entry(ale_exp_user,
+                                         output_path,
+                                         ale_number,
+                                         flask_number,
+                                         isolate_number,
+                                         technical_replicate_number,
+                                         experiment,
+                                         default_media,
+                                         freezer_box,
+                                         is_wild_type=False)
+
+        default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
+        AleExperimentFilter.objects.get_or_create(**default_filter_params)
+        rebuild_converge_mutations(experiment.ale_id)
+        rebuild_fixated_mutations(experiment.ale_id)
+        generate_static_data(experiment.ale_id)
+        rebuild_dashboard_data()
+
+        metadata.parser.parse_metadata_post_experiment_upload(root_abs_path+"/metadata", experiment.ale_id)
+        return True
+    except Exception as e:
+        logger.exception(e)
+
+
+# For wild_type, expecting directory with output.gd in it.
+def create_ale_experiment(breseq_output_group_root_abs_path,
+                          ale_exp_user,
+                          ale_exp_name,
+                          proj_name,
+                          breseq_starting_strain_output_abs_path=None):
+
+    logger.info("Creating Ale Experiment", extra=locals())
+
+    if not os.path.isdir(breseq_output_group_root_abs_path):
+        logger.info("invalid path")
+        print("invalid path:", breseq_output_group_root_abs_path)
+        return False
+
+    try:
+
+        """
+        Executed from Django ipython shell.
+        """
+        root_abs_path = breseq_output_group_root_abs_path
+        if "/breseq" in breseq_output_group_root_abs_path:
+            root_abs_path = breseq_output_group_root_abs_path.replace("/breseq","")
+        breseq_output_group_root_abs_path = root_abs_path + "/breseq/"
 
         clear_dashboard_cache()  # TODO: remove, since no longer using cache.
 
