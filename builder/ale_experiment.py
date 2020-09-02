@@ -431,26 +431,29 @@ def create_ensemble_ale_experiment(breseq_output_group_root_abs_path,
         # Might need to explicitly sort this list in the future.
         breseq_sample_report_list = _get_sample_report_list(breseq_output_group_root_abs_path)
         for ale_isolate_name in breseq_sample_report_list:
-            ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
-            flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
-            isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
-            technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name,
-                                                                     builder.util.AleName.TechnicalReplicate)
-            afir_parts = [ale_number, flask_number, isolate_number, technical_replicate_number]
-            ensemble_gd_filename = '-'.join(str(n) for n in afir_parts)+'.gd'
-            print(ensemble_gd_filename)
-            output_path = experiment_path
-            _create_and_commit_ale_entry(ale_exp_user,
-                                         output_path,
-                                         ale_number,
-                                         flask_number,
-                                         isolate_number,
-                                         technical_replicate_number,
-                                         experiment,
-                                         default_media,
-                                         freezer_box,
-                                         is_wild_type=False,
-                                         filename=ensemble_gd_filename)
+            try:
+                ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
+                flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
+                isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
+                technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name,
+                                                                         builder.util.AleName.TechnicalReplicate)
+                afir_parts = [ale_number, flask_number, isolate_number, technical_replicate_number]
+                ensemble_gd_filename = '-'.join(str(n) for n in afir_parts)+'.gd'
+                print(ensemble_gd_filename)
+                output_path = experiment_path
+                _create_and_commit_ale_entry(ale_exp_user,
+                                             output_path,
+                                             ale_number,
+                                             flask_number,
+                                             isolate_number,
+                                             technical_replicate_number,
+                                             experiment,
+                                             default_media,
+                                             freezer_box,
+                                             is_wild_type=False,
+                                             filename=ensemble_gd_filename)
+            except:
+                print("Sample Failed")
 
         default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
         AleExperimentFilter.objects.get_or_create(**default_filter_params)

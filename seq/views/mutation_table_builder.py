@@ -217,7 +217,9 @@ def _get_table_mutation_entry(observed_mutation, experiment_url_dict):
         if observed_mutation.sequencing_experiment_id in experiment_url_dict:
             url = experiment_url_dict[observed_mutation.sequencing_experiment_id]
             evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
-
+            gatk_frequency = observed_mutation.frequency_gatk
+            if gatk_frequency > -1:
+                gatk_frequency
             table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
                                                                   'TODO', float(observed_mutation.frequency_gatk))
         else:
