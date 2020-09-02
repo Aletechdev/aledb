@@ -83,7 +83,8 @@ def _delete_all_orphaned_mutations():
     """Find the orphaned muations that don't have associated observed mutations.
     Retrieving observed mutations for each mutation to check if it is orphan is very expensive
     """
-    orphans = seq.models.Mutation.objects.raw('select * from seq_mutation m where not exists (select * from seq_observedmutation ob where ob.mutation_id = m.id)')
+    orphans = seq.models.Mutation.objects.raw(
+        'select * from seq_mutation m where not exists (select * from seq_observedmutation ob where ob.mutation_id = m.id)')
     for mutation in orphans:
         mutation.delete()
 
@@ -91,7 +92,9 @@ def _delete_all_orphaned_mutations():
 def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate_number):
     isolate_to_delete = ale.models.Isolate.objects.filter(isolate_number=isolate_number)
     for isolate in isolate_to_delete:
-        if isolate.flask.ale_id.ale_experiment_id == ale_experiment_primary_key and isolate.flask.ale_id.ale_id == ale_number and isolate.flask.flask_number == flask_number:
+        if isolate.flask.ale_id.ale_experiment_id == ale_experiment_primary_key and \
+                isolate.flask.ale_id.ale_id == ale_number and \
+                isolate.flask.flask_number == flask_number:
             isolate.delete()
             print("Successfully removed: ", ale_number, flask_number, isolate_number)
     _delete_all_orphaned_mutations()
@@ -170,7 +173,7 @@ def upload_ale_experiment(experiment_path):
     k = _check_and_extract_parameters_from_metadata(experiment_path + "/metadata")
     if k:
         print(experiment_path, k[0], k[1], k[2])
-        create_ale_experiment(experiment_path, k[0], k[1], k[2])
+        create_ensemble_ale_experiment(experiment_path, k[0], k[1], k[2], experiment_path)
     else:
         return k
 
@@ -357,17 +360,22 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
 
 
 # For wild_type, expecting directory with output.gd in it.
-def create_ale_experiment(breseq_output_group_root_abs_path,
-                          ale_exp_user,
-                          ale_exp_name,
-                          proj_name,
-                          breseq_starting_strain_output_abs_path=None):
+def create_ensemble_ale_experiment(breseq_output_group_root_abs_path,
+                                   ale_exp_user,
+                                   ale_exp_name,
+                                   proj_name,
+                                   experiment_path,
+                                   breseq_starting_strain_output_abs_path=None):
 
-    logger.info("Creating Ale Experiment", extra=locals())
+    logger.info("Creating Ensemble Ale Experiment", extra=locals())
 
     if not os.path.isdir(breseq_output_group_root_abs_path):
         logger.info("invalid path")
         print("invalid path:", breseq_output_group_root_abs_path)
+        return False
+    if not os.path.isdir(breseq_output_group_root_abs_path):
+        logger.info("invalid path")
+        print("invalid path:", experiment_path)
         return False
 
     try:
@@ -428,8 +436,10 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
             isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
             technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name,
                                                                      builder.util.AleName.TechnicalReplicate)
-            print(ale_number, flask_number, isolate_number, technical_replicate_number)
-            output_path = breseq_output_group_root_abs_path + ale_isolate_name + "/" + BRESEQ_OUTPUT_REPORT_DIR
+            afir_parts = [ale_number, flask_number, isolate_number, technical_replicate_number]
+            ensemble_gd_filename = '-'.join(str(n) for n in afir_parts)+'.gd'
+            print(ensemble_gd_filename)
+            output_path = experiment_path
             _create_and_commit_ale_entry(ale_exp_user,
                                          output_path,
                                          ale_number,
@@ -439,7 +449,8 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
                                          experiment,
                                          default_media,
                                          freezer_box,
-                                         is_wild_type=False)
+                                         is_wild_type=False,
+                                         filename=ensemble_gd_filename)
 
         default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
         AleExperimentFilter.objects.get_or_create(**default_filter_params)
@@ -515,7 +526,7 @@ def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
 
 
 def _create_and_commit_ale_entry(person,
-                                 breseq_output_dir_path,
+                                 output_dir_path,
                                  ale_number,
                                  flask_number,
                                  isolate_number,
@@ -523,7 +534,8 @@ def _create_and_commit_ale_entry(person,
                                  experiment,
                                  media,
                                  freezer_box,
-                                 is_wild_type):
+                                 is_wild_type,
+                                 filename=ANNOTATION_GENOMIC_DIFF_FILE_NAME):
     """
     is_wild_type was implemented because initially, we wanted to ignore
     mutations that were already thought to be in the wild type strain,
@@ -539,10 +551,12 @@ def _create_and_commit_ale_entry(person,
     have changed.
     """
 
+    #TODO:going to add a check to allow for additional filenames
+
     ale_id, created = ale.models.AleId.objects.get_or_create(ale_experiment=experiment, ale_id=ale_number)
     flask, created = ale.models.Flask.objects.get_or_create(flask_number=flask_number, ale_id=ale_id, media=media)
 
-    with open(os.path.join(breseq_output_dir_path, ANNOTATION_GENOMIC_DIFF_FILE_NAME),
+    with open(os.path.join(output_dir_path, filename),
               'rb') as annotation_genomic_diff_file:
         mutation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
@@ -561,7 +575,7 @@ def _create_and_commit_ale_entry(person,
     if gdparse.RESEQ_TYPE_KEY in mutation_gd_parser.meta_data.keys():
         sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
     else:  # Breseq version 0.26.0 doesn't have the #=COMMAND meta-data.
-        sample_reseq_type = _get_reseq_type(breseq_output_dir_path)
+        sample_reseq_type = _get_reseq_type(output_dir_path)
         mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY] = sample_reseq_type
 
     is_population = False
@@ -583,7 +597,7 @@ def _create_and_commit_ale_entry(person,
 
     builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
                                       person=person,
-                                      breseq_ouput_dir_path=breseq_output_dir_path,
+                                      breseq_ouput_dir_path=output_dir_path,
                                       mutation_gd_parser=mutation_gd_parser,
                                       reseq_ref_name=reseq_ref_name,
                                       experiment=experiment,

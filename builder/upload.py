@@ -25,10 +25,12 @@ GD_MUT_GENE_NAME_ATTR_KEY = 'gene_name'
 GD_MUT_GENE_PRODUCT_ATTR_KEY = 'gene_product'  # Will contain list of genes for mutations affecting many.
 GD_MUT_TYPE_ATTR_KEY = 'type'
 GD_MUT_FREQ_ATTR_KEY = 'frequency'
+GATK_MUT_FREQ_ATTR_KEY = ''
 GD_MUT_HTML = 'html_mutation'
 GD_MUT_ANNOTATION_HTML = "html_mutation_annotation"
 GD_MUT_SEQ_ID_ATTR_KEY = 'seq_id'
 DEFAULT_CLONAL_FREQ = 1
+DEFAULT_GATK_FREQ = 0
 BRESEQ_REPORT_COLUMN_KEY_EVIDENCE = "evidence"
 
 ale_data_root_dir = settings.ALE_DATA_ROOT_DIR
@@ -219,11 +221,14 @@ def _database_mutations(sample_type,
             html_row = html_mut_resultset[html_mut_idx]
             html_mut_attrs = html_row.findChildren("td")
             evidence = html_mut_attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents()
+        frequencies = _get_mutation_freq(mutation_dict[mut_num])
+
         observed_mutation = ObservedMutation(sequencing_experiment=seq_experiment,
                                              mutation=mut,
                                              breseq_present=True,
                                              evidence=evidence,
-                                             frequency=_get_mutation_freq(mutation_dict[mut_num]))
+                                             frequency=frequencies[0],
+                                             frequency_gatk=frequencies[1])
         observed_mutation_list.append(observed_mutation)
 
     ObservedMutation.objects.bulk_create(observed_mutation_list)
@@ -238,12 +243,21 @@ def _database_mutations(sample_type,
 
 def _get_mutation_freq(mutation_dict):
     frequency = DEFAULT_CLONAL_FREQ
-    # This will only execute if the sample is a population.
+    frequency_gatk = DEFAULT_GATK_FREQ
+
     if GD_MUT_FREQ_ATTR_KEY in mutation_dict:
         freq = mutation_dict[GD_MUT_FREQ_ATTR_KEY]
         if isinstance(freq, numbers.Number):
             frequency = freq
-    return frequency
+    for key in mutation_dict.keys():
+        if key.startswith('frequency_'):
+            if key.endswith('BRESEQ'):
+                frequency = mutation_dict[key]
+            elif key.endswith('GATK'):
+                frequency_gatk = mutation_dict[key]
+
+
+    return [frequency, frequency_gatk]
 
 
 def _get_mutation_header_dict(mutations_html):

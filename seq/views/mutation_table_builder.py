@@ -17,7 +17,7 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/img/close-icon.gif" width="12" height="11"></a>"""
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
-HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
+HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>/<a class="true" href="%s">%.2f</a>"""
 
 EXPANDABLE_COLUMN_PLUS_SIGN = """<i onclick="expand_collapse_gene_entry(this)" class="fa fa-plus pull-left" aria-hidden="true" data-toggle="collapse" data-target="#%s"></i>"""
 EXPANDABLE_GENE_ENTRY = """<div class="collapse pull-left" id="%s">%s</div>"""
@@ -213,12 +213,15 @@ def _get_experiment_id_idx_mapping_dict(seq_experiment_dict):
 def _get_table_mutation_entry(observed_mutation, experiment_url_dict):
     table_entry = ""
     if observed_mutation.breseq_present:
+        #there's a chance for null values in frequency
         if observed_mutation.sequencing_experiment_id in experiment_url_dict:
             url = experiment_url_dict[observed_mutation.sequencing_experiment_id]
             evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
-            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency))
+
+            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
+                                                                  'TODO', float(observed_mutation.frequency_gatk))
         else:
-            table_entry = """<span class="true">%.2f</span>""" % observed_mutation.frequency
+            table_entry = """<span class="true">%.2f/%.2f</span>""" % (observed_mutation.frequency, observed_mutation.frequency_gatk)
 
     # TODO: Figure out what this is supposed to do.
     elif observed_mutation.present is False:
