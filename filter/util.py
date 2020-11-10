@@ -6,7 +6,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from genes.util import get_gene_list
 from common.util import is_int
 
-__author__ = 'Patrick Phaneuf'
+__author__ = 'Patrick Phaneuf, Muyao :)'
 
 NO_BREAK_STRING_CODE = u'\xa0'
 
@@ -38,11 +38,12 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_id=None):
 
         q_exp = Q()
         if exp_filter.min_cutoff and exp_filter.min_cutoff > 0:
-            q_exp.add(Q(frequency__lt=exp_filter.min_cutoff / 100), Q.AND)
-        if exp_filter.min_gatk_cutoff and exp_filter.min_gatk_cutoff > 0:
-            q_exp.add(Q(frequency_gatk__lt=exp_filter.min_cutoff / 100), Q.OR)
+            q_exp.add(Q(frequency__lt=exp_filter.min_cutoff / 100), Q.OR)
         if exp_filter.max_cutoff and exp_filter.max_cutoff < 100:
             q_exp.add(Q(frequency__gt=exp_filter.max_cutoff / 100), Q.AND)
+        if exp_filter.min_gatk_cutoff and exp_filter.min_gatk_cutoff > 0:
+            q_exp.add(Q(frequency_gatk__lt=exp_filter.min_cutoff / 100), Q.OR)
+
         if exp_filter.max_gatk_cutoff and exp_filter.max_gatk_cutoff < 100:
             q_exp.add(Q(frequency_gatk__gt=exp_filter.max_cutoff / 100), Q.OR)
         if len(exp_filter_muts) > 0:
