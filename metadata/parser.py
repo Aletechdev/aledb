@@ -187,6 +187,9 @@ def parse_metadata_post_experiment_upload(metadata_path, ale_experiment_primary_
                 experiment_details = metadata_dict[EXPERIMENT_DETAILS]
 
             media_supplement_description, media_components_dict = _get_media_supplement_description(metadata_dict)
+
+            nitrogen_source = phosphorus_source = sulfur_source = calcium_source = ""
+
             if MEDIA_NITROGEN_SOURCE in media_components_dict:
                 nitrogen_source = media_components_dict[MEDIA_NITROGEN_SOURCE]
             if MEDIA_PHOSPHORUS_SOURCE in media_components_dict:
