@@ -1,5 +1,7 @@
 from os.path import join
 import re
+import sys
+import traceback
 from bs4 import BeautifulSoup
 from builder.gdparse.gdparse import gdparse
 import collections
@@ -216,13 +218,19 @@ def _database_mutations(sample_type,
         if is_wild_type is True:
             wild_type_mutation_list.append(mut.id)
         evidence = ""
-        if html_mut_resultset:
-            # mutations are in the same order in the html and output.gd
-            # files so we can index the ids with row_num
-            html_mut_idx = mut_num - 1
-            html_row = html_mut_resultset[html_mut_idx]
-            html_mut_attrs = html_row.findChildren("td")
-            evidence = html_mut_attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents()
+        try:
+            if html_mut_resultset:
+                # mutations are in the same order in the html and output.gd
+                # files so we can index the ids with row_num
+                html_mut_idx = mut_num - 1
+                html_row = html_mut_resultset[html_mut_idx]
+                html_mut_attrs = html_row.findChildren("td")
+                evidence = html_mut_attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents()
+        except:
+            print("html_mut_resultset failed")
+            e = sys.exc_info()[0]
+            print("Error: %s" % e)
+            traceback.print_exc()
         frequencies = _get_mutation_freq(mutation_dict[mut_num])
 
         observed_mutation = ObservedMutation(sequencing_experiment=seq_experiment,
