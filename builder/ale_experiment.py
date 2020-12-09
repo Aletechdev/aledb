@@ -1,5 +1,6 @@
 import os
 import sys
+import traceback
 import ale.models
 import builder.upload
 import builder.util
@@ -456,7 +457,9 @@ def create_ensemble_ale_experiment(breseq_output_group_root_abs_path,
             except:
                 print("Sample Failed")
                 e = sys.exc_info()[0]
-                print("<p>Error: %s</p>" % e)
+                print("Error: %s" % e)
+                traceback.print_exc()
+
 
         default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
         AleExperimentFilter.objects.get_or_create(**default_filter_params)
