@@ -39,9 +39,10 @@ ale_data_root_dir = settings.ALE_DATA_ROOT_DIR
 
 def add_breseq_results(technical_replicate_id,
                        person,
-                       breseq_output_dir_path,
+                       experiment_path,
                        mutation_gd_parser,
                        reseq_ref_name,
+                       sample_name,
                        experiment=None,
                        is_wild_type=False):
     """
@@ -50,7 +51,7 @@ def add_breseq_results(technical_replicate_id,
     Read the output/log.txt file for " -p " option, which indicates that
     sample was processed as a population.
     """
-
+    breseq_output_dir_path = '%s/breseq/%s/output/' % {experiment_path, sample_name}
     reseq = _get_reseq_experiment_with_stats(breseq_output_dir_path,
                                              technical_replicate_id,
                                              person)

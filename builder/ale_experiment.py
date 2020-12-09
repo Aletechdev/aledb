@@ -597,12 +597,13 @@ def _create_and_commit_ale_entry(person,
     technical_replicate, \
     created = ale.models.TechnicalReplicate.objects.get_or_create(tech_rep_number=technical_replicate_number,
                                                                   isolate=isolate)
-
+    afir = str(ale_number)+'-'+str(flask_number)+'-'+str(isolate_number)+'-'+str(technical_replicate_number)
     builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
                                       person=person,
-                                      breseq_ouput_dir_path=output_dir_path,
+                                      breseq_output_dir_path=output_dir_path,
                                       mutation_gd_parser=mutation_gd_parser,
                                       reseq_ref_name=reseq_ref_name,
+                                      sample_name=afir,
                                       experiment=experiment,
                                       is_wild_type=is_wild_type, )
 
