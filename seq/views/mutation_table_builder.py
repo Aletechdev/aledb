@@ -180,7 +180,7 @@ def get_table_body(user: User,
 
 
 def get_gene_table_entry(mutation):
-    table_entry = """<div style="width:150px">"""
+    table_entry = """<div style="width: 150px; white-space: nowrap; overflow-x: scroll;">"""
     cleaned_gene_list = get_ecocyc_gene_list(get_gene_list(mutation.gene), mutation.is_ecocyc_gene())
 
     if len(cleaned_gene_list) > 10:
