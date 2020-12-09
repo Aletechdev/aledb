@@ -32,13 +32,14 @@ GD_MUT_SEQ_ID_ATTR_KEY = 'seq_id'
 DEFAULT_CLONAL_FREQ = 1
 DEFAULT_GATK_FREQ = 0
 BRESEQ_REPORT_COLUMN_KEY_EVIDENCE = "evidence"
+BRESEQ_RESULT_RELATIVE_PATH = ""
 
 ale_data_root_dir = settings.ALE_DATA_ROOT_DIR
 
 
 def add_breseq_results(technical_replicate_id,
                        person,
-                       breseq_ouput_dir_path,
+                       breseq_output_dir_path,
                        mutation_gd_parser,
                        reseq_ref_name,
                        experiment=None,
@@ -50,7 +51,7 @@ def add_breseq_results(technical_replicate_id,
     sample was processed as a population.
     """
 
-    reseq = _get_reseq_experiment_with_stats(breseq_ouput_dir_path,
+    reseq = _get_reseq_experiment_with_stats(breseq_output_dir_path,
                                              technical_replicate_id,
                                              person)
 
@@ -60,7 +61,7 @@ def add_breseq_results(technical_replicate_id,
     sample_mutation_dict = mutation_gd_parser.data[gdparse.MUTATION_KEY]
 
     _database_mutations(sample_reseq_type,
-                        breseq_ouput_dir_path,
+                        breseq_output_dir_path,
                         reseq,
                         sample_mutation_dict,
                         experiment,
@@ -70,7 +71,7 @@ def add_breseq_results(technical_replicate_id,
 
     _database_unassigned_missing_coverage(reseq,
                                           sample_evidence_dict,
-                                          breseq_ouput_dir_path)
+                                          breseq_output_dir_path)
 
 
 def _get_beautifulsoup_html(output_folder, html_file_name):
