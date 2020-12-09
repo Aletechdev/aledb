@@ -440,7 +440,8 @@ def create_ensemble_ale_experiment(breseq_output_group_root_abs_path,
                 technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name,
                                                                          builder.util.AleName.TechnicalReplicate)
                 afir_parts = [ale_number, flask_number, isolate_number, technical_replicate_number]
-                ensemble_gd_filename = '-'.join(str(n) for n in afir_parts)+'.gd'
+                afir = '-'.join(str(n) for n in afir_parts)
+                ensemble_gd_filename = afir+'.gd'
                 print(ensemble_gd_filename)
                 output_path = experiment_path
                 _create_and_commit_ale_entry(ale_exp_user,
@@ -606,7 +607,7 @@ def _create_and_commit_ale_entry(person,
     afir = str(ale_number)+'-'+str(flask_number)+'-'+str(isolate_number)+'-'+str(technical_replicate_number)
     builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
                                       person=person,
-                                      breseq_output_dir_path=output_dir_path,
+                                      experiment_path=output_dir_path,
                                       mutation_gd_parser=mutation_gd_parser,
                                       reseq_ref_name=reseq_ref_name,
                                       sample_name=afir,
