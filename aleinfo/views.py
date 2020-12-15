@@ -20,12 +20,13 @@ user_allowed_data_dirs = dict()
 
 def protected_file_serve(request, page_name: str):
     """
-    User can only view files in output folder. Make sure to handle files with binary data, e.g. images
+    User can only view files in aledata folder. Make sure to handle files with binary data, e.g. images
     :param request:
     :param page_name:
     :return: the requested file or error if no permission or file link not available
     """
     user = request.user
+    logger.info("file serve " + str(page_name), extra=user_extra(request))
     if page_name and 'output/' in page_name:
         if page_name.endswith('output/'):
             reseq_location = page_name

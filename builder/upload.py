@@ -54,7 +54,8 @@ def add_breseq_results(technical_replicate_id,
     sample was processed as a population.
     """
     breseq_output_dir_path = '%s/breseq/%s/output/' % (experiment_path, sample_name)
-    reseq = _get_reseq_experiment_with_stats(breseq_output_dir_path,
+    reseq = _get_reseq_experiment_with_stats(experiment_path,
+                                             sample_name,
                                              technical_replicate_id,
                                              person)
 
@@ -148,12 +149,10 @@ def _parse_read_count(read_row_input):
     return int(read_row_input.replace(",", ""))
 
 
-def _get_reseq_experiment_with_stats(breseq_folder, technical_replicate_id, person):
-    breseq_path = ""
-    index_file_path = breseq_folder + HTML_INDEX_FILE_NAME
-    if os.path.isfile(index_file_path):
-        breseq_path = breseq_folder[breseq_folder.find(ale_data_root_dir) + len(ale_data_root_dir):]
-    reseq, created = ResequencingExperiment.objects.get_or_create(location=breseq_path,
+def _get_reseq_experiment_with_stats(experiment_path, sample_name, technical_replicate_id, person):
+    breseq_folder = '%s/breseq/%s/output/' % (experiment_path, sample_name)
+    #index_file_path = breseq_folder + HTML_INDEX_FILE_NAME
+    reseq, created = ResequencingExperiment.objects.get_or_create(location=experiment_path,
                                                                   tech_rep_id=technical_replicate_id,
                                                                   person=person)
     statistics_html = _get_beautifulsoup_html(breseq_folder, HTML_SUMMARY_FILE_NAME)
