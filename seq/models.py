@@ -21,6 +21,9 @@ class ResequencingExperiment(models.Model):
     location = models.CharField(max_length=200,
                                 blank=True,
                                 null=True)
+    sample_name = models.CharField(max_length=200,
+                                blank=True,
+                                null=True)
     mean_coverage = models.FloatField(blank=True,
                                       default=0)
     percentage_mapped = models.FloatField(blank=True,

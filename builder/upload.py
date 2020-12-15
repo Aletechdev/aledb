@@ -151,8 +151,12 @@ def _parse_read_count(read_row_input):
 
 def _get_reseq_experiment_with_stats(experiment_path, sample_name, technical_replicate_id, person):
     breseq_folder = '%s/breseq/%s/output/' % (experiment_path, sample_name)
-    #index_file_path = breseq_folder + HTML_INDEX_FILE_NAME
-    reseq, created = ResequencingExperiment.objects.get_or_create(location=experiment_path.replace(ale_data_root_dir,""),
+    breseq_path = ""
+    index_file_path = breseq_folder + HTML_INDEX_FILE_NAME
+    if os.path.isfile(index_file_path):
+        breseq_path = breseq_folder[breseq_folder.find(ale_data_root_dir) + len(ale_data_root_dir):]
+    reseq, created = ResequencingExperiment.objects.get_or_create(location=experiment_path.replace(ale_data_root_dir, ""),
+                                                                  sample_name=sample_name,
                                                                   tech_rep_id=technical_replicate_id,
                                                                   person=person)
     statistics_html = _get_beautifulsoup_html(breseq_folder, HTML_SUMMARY_FILE_NAME)
