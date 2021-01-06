@@ -375,10 +375,6 @@ def create_ensemble_ale_experiment(breseq_output_group_root_abs_path,
         logger.info("invalid path")
         print("invalid path:", breseq_output_group_root_abs_path)
         return False
-    if not os.path.isdir(breseq_output_group_root_abs_path):
-        logger.info("invalid path")
-        print("invalid path:", experiment_path)
-        return False
 
     try:
 

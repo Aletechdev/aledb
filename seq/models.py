@@ -21,6 +21,12 @@ class ResequencingExperiment(models.Model):
     location = models.CharField(max_length=200,
                                 blank=True,
                                 null=True)
+    experiment_location = models.CharField(max_length=200,
+                                blank=True,
+                                null=True)
+    gatk_location = models.CharField(max_length=200,
+                                blank=True,
+                                null=True)
     sample_name = models.CharField(max_length=200,
                                 blank=True,
                                 null=True)
