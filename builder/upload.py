@@ -15,6 +15,9 @@ from genes.util import get_annotated_gene_list
 from filter.models import AleExperimentFilter
 import filter.models
 from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 HTML_SUMMARY_FILE_NAME = "summary.html"
 HTML_INDEX_FILE_NAME = "index.html"
@@ -234,10 +237,7 @@ def _database_mutations(sample_type,
                 html_mut_attrs = html_row.findChildren("td")
                 evidence = html_mut_attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents()
         except:
-            print("html_mut_resultset failed")
-            e = sys.exc_info()[0]
-            print("Error: %s" % e)
-            traceback.print_exc()
+            logger.exception("html_mut_resultset failed")
         frequencies = _get_mutation_freq(mutation_dict[mut_num])
 
         observed_mutation = ObservedMutation(sequencing_experiment=seq_experiment,
