@@ -20,15 +20,12 @@ user_allowed_data_dirs = dict()
 
 def protected_file_serve(request, page_name: str):
     """
-    User can only view files in aledata folder. Make sure to handle files with binary data, e.g. images
+    User can only view files in output folder. Make sure to handle files with binary data, e.g. images
     :param request:
     :param page_name:
     :return: the requested file or error if no permission or file link not available
     """
     user = request.user
-    logger.info("file serve " + str(page_name), extra=user_extra(request))
-
-    #for breseq:
     if page_name and 'output/' in page_name:
         if page_name.endswith('output/'):
             reseq_location = page_name
@@ -44,16 +41,7 @@ def protected_file_serve(request, page_name: str):
         logger.info("display file " + page_name, extra=user_extra(request))
         file_path = DOC_ROOT + page_name
         return _get_file_response(file_path)
-
-    #check if it's one of the ensemble output files
-    last_obj = os.path.basename(os.path.normpath(page_name))
-    if '.' in last_obj and last_obj.count('-')==3:
-        reseq_location = page_name
-
-    if can_view_experiment(user, reseq_location):
-
-
-    if _is_valid_pagename(page_name, user):
+    elif _is_valid_pagename(page_name, user):
         return _get_file_response(DOC_ROOT + page_name)
     else:
         logger.error("file path error: " + "page not available - " + page_name)
