@@ -82,7 +82,8 @@ else:
 
 def get_table_header(user, reseq_dict, experiment: AleExperiment = None):
     base_table_header = HTML_MUTATION_TABLE_HEADER
-    experiment_urls = get_experiment_urls(reseq_dict)
+    experiment_urls = get_experiment_root_urls(reseq_dict)
+    gatk_urls = get_gatk_urls(reseq_dict)
     table_header_list = []
 
     for reseq_id in reseq_dict:
@@ -157,11 +158,12 @@ def get_mutation_table_data(reseq_dict, observed_mutations):
     mutation_index_dict = dict((mutation_id, i) for i, mutation_id in enumerate(mutation_map.keys()))
     # resequencing_experiment urls
     experiment_url_dict = get_experiment_urls(reseq_dict)
+    gatk_url_dict = get_gatk_urls(reseq_dict)
     experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
     # Initialize all sample mutation table cells as empty.
     table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mutation_index_dict)
     for observed_mutation in observed_mutations:
-        new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
+        new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict, gatk_url_dict)
         if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
             table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
                 experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
@@ -205,23 +207,48 @@ def get_experiment_urls(reseq_dict):
     return experiment_urls
 
 
+def get_experiment_root_urls(reseq_dict):
+    # experiment_urls = dict((i.id, resequencing_report_url + i.location) for i in reseq_dict.values())
+    experiment_urls = {}
+    for reseq in reseq_dict.values():
+        if reseq.experiment_location != "":
+            experiment_urls[reseq.id] = resequencing_report_url + reseq.experiment_location + '/' + reseq.sample_name + '.html'
+    return experiment_urls
+
+
+def get_gatk_urls(reseq_dict):
+    # experiment_urls = dict((i.id, resequencing_report_url + i.location) for i in reseq_dict.values())
+    gatk_urls = {}
+    for reseq in reseq_dict.values():
+        if reseq.location != "":
+            gatk_urls[reseq.id] = resequencing_report_url + reseq.gatk_location
+    return gatk_urls
+
+
 def _get_experiment_id_idx_mapping_dict(seq_experiment_dict):
     experiment_id_idx_mapping = dict((reseq_exp_id, idx) for idx, reseq_exp_id in enumerate(seq_experiment_dict.keys()))
     return experiment_id_idx_mapping
 
 
-def _get_table_mutation_entry(observed_mutation, experiment_url_dict):
+def _get_table_mutation_entry(observed_mutation, experiment_url_dict, gatk_url_dict):
     table_entry = ""
-    if observed_mutation.breseq_present:
+    if observed_mutation.breseq_present or observed_mutation.gatk_present:
         #there's a chance for null values in frequency
         if observed_mutation.sequencing_experiment_id in experiment_url_dict:
             url = experiment_url_dict[observed_mutation.sequencing_experiment_id]
             evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
-            gatk_frequency = observed_mutation.frequency_gatk
-            if gatk_frequency > -1:
-                gatk_frequency
-            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
-                                                                  'TODO', float(observed_mutation.frequency_gatk))
+            gatk_url = gatk_url_dict[observed_mutation.sequencing_experiment_id]
+            gatk_evidence = gatk_url + 'evidence/' + str(observed_mutation.mutation.position) + '.html'
+
+            if observed_mutation.mutation.mutation_type == "AMP":
+                gatk_cnv_evidence = gatk_url + 'coverage_evidence/' + str(observed_mutation.mutation.position) + '.png'
+                table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
+                                                                      gatk_cnv_evidence,
+                                                                      float(observed_mutation.frequency_gatk))
+            else:
+                table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
+                                                                  gatk_evidence, float(observed_mutation.frequency_gatk))
+
         else:
             table_entry = """<span class="true">%.2f/%.2f</span>""" % (observed_mutation.frequency, observed_mutation.frequency_gatk)
 

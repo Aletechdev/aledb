@@ -34,7 +34,7 @@ GATK_MUT_FREQ_ATTR_KEY = ''
 GD_MUT_HTML = 'html_mutation'
 GD_MUT_ANNOTATION_HTML = "html_mutation_annotation"
 GD_MUT_SEQ_ID_ATTR_KEY = 'seq_id'
-DEFAULT_CLONAL_FREQ = 1
+DEFAULT_CLONAL_FREQ = 0
 DEFAULT_GATK_FREQ = 0
 BRESEQ_REPORT_COLUMN_KEY_EVIDENCE = "evidence"
 BRESEQ_RESULT_RELATIVE_PATH = ""
@@ -69,6 +69,8 @@ def add_breseq_results(technical_replicate_id,
 
     _database_mutations(sample_reseq_type,
                         breseq_output_dir_path,
+                        experiment_path,
+                        sample_name,
                         reseq,
                         sample_mutation_dict,
                         experiment,
@@ -190,18 +192,23 @@ def _get_reseq_experiment_with_stats(experiment_path, sample_name, technical_rep
 
 def _database_mutations(sample_type,
                         breseq_folder,
+                        experiment_path,
+                        sample_name,
                         seq_experiment,
                         mutation_dict,
                         experiment,
                         is_wild_type):
-    mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_INDEX_FILE_NAME)
-    column_type_index_dict = _get_mutation_header_dict(mutations_html)
-    html_mut_resultset = _get_html_mutations_resultset(mutations_html, sample_type)
+
+    breseq_mutations_html = _get_beautifulsoup_html(breseq_folder, HTML_INDEX_FILE_NAME)
+    breseq_column_type_index_dict = _get_mutation_header_dict(breseq_mutations_html)
+    breseq_html_mut_resultset = _get_html_mutations_resultset(breseq_mutations_html, sample_type)
+
     observed_mutation_list = []
 
     # Only used if is_wild_type is True. Doesn't affect functionality otherwise
     # TODO: if this is the case, needs a conditional so not always executed.
     wild_type_mutation_list = []
+    breseq_mut_num = 0
     for mut_num in mutation_dict.keys():
         breseq_gene_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
         breseq_gene_product_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
@@ -228,22 +235,34 @@ def _database_mutations(sample_type,
         if is_wild_type is True:
             wild_type_mutation_list.append(mut.id)
         evidence = ""
-        try:
-            if html_mut_resultset:
-                # mutations are in the same order in the html and output.gd
-                # files so we can index the ids with row_num
-                html_mut_idx = mut_num - 1
-                html_row = html_mut_resultset[html_mut_idx]
-                html_mut_attrs = html_row.findChildren("td")
-                evidence = html_mut_attrs[column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents()
-        except:
-            logger.exception("html_mut_resultset failed")
+
         frequencies = _get_mutation_freq(mutation_dict[mut_num])
+
+        breseq_frequency = frequencies[0]
+        if breseq_frequency > 0:
+            breseq_mut_num = breseq_mut_num + 1
+            try:
+                if breseq_html_mut_resultset:
+                    # mutations are in the same order in the html and output.gd
+                    # files so we can index the ids with row_num
+                    html_mut_idx = breseq_mut_num - 1
+                    html_row = breseq_html_mut_resultset[html_mut_idx]
+                    html_mut_attrs = html_row.findChildren("td")
+                    evidence = html_mut_attrs[
+                        breseq_column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents()
+            except:
+                logger.exception("html_mut_resultset failed")
+        if mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY) == "AMP":
+            gatk_evidence = str(mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY)) + '.html'
+        else:
+            gatk_evidence = str(mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY)) + '.png'
 
         observed_mutation = ObservedMutation(sequencing_experiment=seq_experiment,
                                              mutation=mut,
                                              breseq_present=True,
+                                             gatk_present=True,
                                              evidence=evidence,
+                                             gatk_evidence=gatk_evidence,
                                              frequency=frequencies[0],
                                              frequency_gatk=frequencies[1])
         observed_mutation_list.append(observed_mutation)
@@ -262,17 +281,18 @@ def _get_mutation_freq(mutation_dict):
     frequency = DEFAULT_CLONAL_FREQ
     frequency_gatk = DEFAULT_GATK_FREQ
 
-    if GD_MUT_FREQ_ATTR_KEY in mutation_dict:
-        freq = mutation_dict[GD_MUT_FREQ_ATTR_KEY]
-        if isinstance(freq, numbers.Number):
-            frequency = freq
     for key in mutation_dict.keys():
         if key.startswith('frequency_'):
-            if key.endswith('BRESEQ'):
-                frequency = mutation_dict[key]
+            if key.endswith('output'):
+                if isinstance(mutation_dict[key], float) or isinstance(mutation_dict[key], int):
+                    frequency = mutation_dict[key]
+                else:
+                    frequency = 0
             elif key.endswith('GATK'):
-                frequency_gatk = mutation_dict[key]
-
+                if isinstance(mutation_dict[key], float) or isinstance(mutation_dict[key], int):
+                    frequency_gatk = mutation_dict[key]
+                else:
+                    frequency_gatk = 0
 
     return [frequency, frequency_gatk]
 
