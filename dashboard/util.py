@@ -106,10 +106,10 @@ def rebuild_mutation_counts():
         elif functional_change_type == 'pseudogene':
             obs_mut_count_qryset.update(pseudogene=observed_mutation_type_count)
             mut_count_qryset.update(pseudogene=unique_mutation_type_count)
-        elif functional_change_type == 'snp_type_synonymous':
+        elif functional_change_type == 'synonymous':
             obs_mut_count_qryset.update(synonymous=observed_mutation_type_count)
             mut_count_qryset.update(synonymous=unique_mutation_type_count)
-        elif functional_change_type == 'snp_type_nonsynonymous':
+        elif functional_change_type == 'nonsynonymous':
             obs_mut_count_qryset.update(nonsynonymous=observed_mutation_type_count)
             mut_count_qryset.update(nonsynonymous=unique_mutation_type_count)
         elif functional_change_type == UNANNOTATED:
