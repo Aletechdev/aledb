@@ -198,8 +198,14 @@ def _database_mutations(sample_type,
             sequence_change_str = bs_html.text.replace(u'\xa0', u' ').strip()
         if GD_MUT_ANNOTATION_HTML in mutation_dict[mut_num].keys():
             # What is in the mutation HTML under the "annotation" column.
-            bs_html = BeautifulSoup(mutation_dict[mut_num].get(GD_MUT_ANNOTATION_HTML), "lxml")
-            protein_change_str = bs_html.text.replace(u'\xa0', u' ').strip()
+            annotation_html = mutation_dict[mut_num].get(GD_MUT_ANNOTATION_HTML)
+            annotation_type = ""
+            if "snp_type_" in annotation_html:
+                start = 'snp_type_'
+                end = '"'
+                annotation_type = (annotation_html.split(start))[1].split(end)[0] + ": "
+            bs_html = BeautifulSoup(annotation_html, "lxml")
+            protein_change_str = annotation_type + (bs_html.text.replace(u'\xa0', u' ').strip())
         mut, \
         created = Mutation.objects.get_or_create(position=mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY),
                                                  gene=gene_list_str,
