@@ -54,7 +54,7 @@ def protected_file_serve(request, page_name: str):
         logger.info("display file " + page_name, extra=user_extra(request))
         file_path = DOC_ROOT + page_name
         return _get_file_response(file_path)
-    if '.html' in page_name:
+    if '.html' in page_name or '.ba' in page_name:
         file_path = DOC_ROOT + page_name
         return _get_file_response(file_path)
     elif _is_valid_pagename(page_name, user):
