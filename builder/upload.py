@@ -251,7 +251,7 @@ def _database_mutations(sample_type,
                     evidence = html_mut_attrs[
                         breseq_column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents()
             except:
-                logger.exception("html_mut_resultset failed")
+                logger.exception("html_mut_resultset failed", extra=mutation_dict[mut_num].update(breseq_html_mut_resultset))
         if mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY) == "AMP":
             gatk_evidence = str(mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY)) + '.html'
         else:
