@@ -209,7 +209,10 @@ def _database_mutations(sample_type,
     # TODO: if this is the case, needs a conditional so not always executed.
     wild_type_mutation_list = []
     breseq_mut_num = 0
-    for mut_num in mutation_dict.keys():
+
+    sorted_mutation_keys = sorted(mutation_dict, key=lambda k: mutation_dict[k].get(GD_MUT_POS_ATTR_KEY))
+
+    for mut_num in sorted_mutation_keys:
         breseq_gene_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
         breseq_gene_product_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
         gene_list = get_annotated_gene_list(breseq_gene_annotation, breseq_gene_product_annotation)
@@ -250,8 +253,9 @@ def _database_mutations(sample_type,
                     html_mut_attrs = html_row.findChildren("td")
                     evidence = html_mut_attrs[
                         breseq_column_type_index_dict[BRESEQ_REPORT_COLUMN_KEY_EVIDENCE]].renderContents()
-            except:
-                logger.exception("html_mut_resultset failed", extra=mutation_dict[mut_num].update(breseq_html_mut_resultset))
+            except Exception as e:
+                logger.error(e, "html_mut_resultset failed during handling of " + str(html_mut_idx), extra=breseq_html_mut_resultset)
+                return
         if mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY) == "AMP":
             gatk_evidence = str(mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY)) + '.html'
         else:
