@@ -166,52 +166,6 @@
                 </table>
             </div>
         </div>
-        <div class="col-sm-6 col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">ALE experiment functional change counts</h3>
-                </div>
-
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Functional Change Type</th>
-                        <th>Unique</th>
-                        <th>Observed</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td>Intergenic</td>
-                        <td>{{ protein_change_type_count_dict.intergenic }}</td>
-                        <td>{{ observed_protein_change_type_count_dict.intergenic }}</td>
-                    </tr>
-                    <tr>
-                        <td>Noncoding</td>
-                        <td>{{ protein_change_type_count_dict.noncoding }}</td>
-                        <td>{{ observed_protein_change_type_count_dict.noncoding }}</td>
-                    </tr>
-                    <tr>
-                        <td>Pseudogene</td>
-                        <td>{{ protein_change_type_count_dict.pseudogene }}</td>
-                        <td>{{ observed_protein_change_type_count_dict.pseudogene }}</td>
-                    </tr>
-                    <tr>
-                        <td>Synonymous</td>
-                        <td>{{ protein_change_type_count_dict.snp_type_synonymous }}</td>
-                        <td>{{ observed_protein_change_type_count_dict.snp_type_synonymous }}</td>
-                    </tr>
-                    <tr>
-                        <td><b>Total</b></td>
-                        <td><b>{{ protein_change_sum }}</b></td>
-                        <td><b>{{ observed_protein_change_sum }}</b></td>
-                    </tr>
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
     {% if perms.filter.add_globalfilter %}
     <h2>Sample Resequencing Stats</h2>
     <div><i>Note: The mutation counts shown below represent unfiltered mutation sets.</i></div>
