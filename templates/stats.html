@@ -202,11 +202,6 @@
                         <td>{{ observed_protein_change_type_count_dict.snp_type_synonymous }}</td>
                     </tr>
                     <tr>
-                        <td>Nonsynonymous</td>
-                        <td>{{ protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
-                        <td>{{ observed_protein_change_type_count_dict.snp_type_nonsynonymous }}</td>
-                    </tr>
-                    <tr>
                         <td><b>Total</b></td>
                         <td><b>{{ protein_change_sum }}</b></td>
                         <td><b>{{ observed_protein_change_sum }}</b></td>
@@ -292,7 +287,6 @@
                         function _get_label(datum) {
                             return datum.mutation__gene;
                         }
-                        {% include 'bar_chart.js' %}
                     </script>
                 </td>
             </tr>
