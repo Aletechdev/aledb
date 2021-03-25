@@ -26,6 +26,8 @@ POPULATION_HTML_CLASSES_TO_PARSE_FOR_MUTATIONS = ["normal_table_row", "polymorph
 AVERAGE_READ_LENGTH_INDEX = 5
 READ_COUNT_INDEX = 2
 GD_MUT_POS_ATTR_KEY = 'position'
+GD_SIZE_TYPES = ['SUB', 'DEL', 'INV', 'INT', 'AMP', 'CON']
+GD_CNV_LENGTH_ATTR_KEY = 'size'
 GD_MUT_GENE_NAME_ATTR_KEY = 'gene_name'
 GD_MUT_GENE_PRODUCT_ATTR_KEY = 'gene_product'  # Will contain list of genes for mutations affecting many.
 GD_MUT_TYPE_ATTR_KEY = 'type'
@@ -222,15 +224,20 @@ def _database_mutations(sample_type,
             # What is in the mutation HTML under the "mutation" column.
             bs_html = BeautifulSoup(mutation_dict[mut_num].get(GD_MUT_HTML), "lxml")
             sequence_change_str = bs_html.text.replace(u'\xa0', u' ').strip()
+        size = None
+        if mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY) in GD_SIZE_TYPES:
+            size = mutation_dict[mut_num].get(GD_CNV_LENGTH_ATTR_KEY)
         if GD_MUT_ANNOTATION_HTML in mutation_dict[mut_num].keys():
             # What is in the mutation HTML under the "annotation" column.
             bs_html = BeautifulSoup(mutation_dict[mut_num].get(GD_MUT_ANNOTATION_HTML), "lxml")
             protein_change_str = bs_html.text.replace(u'\xa0', u' ').strip()
+
         mut, \
         created = Mutation.objects.get_or_create(position=mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY),
                                                  gene=gene_list_str,
                                                  reseq_reference=mutation_dict[mut_num].get(GD_MUT_SEQ_ID_ATTR_KEY),
                                                  product=breseq_gene_product_annotation,
+                                                 feature_length=size,
                                                  sequence_change=sequence_change_str,
                                                  mutation_type=mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY),
                                                  protein_change=protein_change_str)
@@ -256,9 +263,12 @@ def _database_mutations(sample_type,
             except Exception as e:
                 logger.exception("html_mut_resultset failed during handling of " + str(html_mut_idx), extra=breseq_html_mut_resultset)
         if mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY) == "AMP":
-            gatk_evidence = str(mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY)) + '.html'
-        else:
             gatk_evidence = str(mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY)) + '.png'
+
+        elif mutation_dict[mut_num].get(GD_MUT_TYPE_ATTR_KEY) == "DEL" and int(mutation_dict[mut_num].get(GD_CNV_LENGTH_ATTR_KEY)) > 190:
+            gatk_evidence = str(mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY)) + '.png'
+        else:
+            gatk_evidence = str(mutation_dict[mut_num].get(GD_MUT_POS_ATTR_KEY)) + '.html'
 
         observed_mutation = ObservedMutation(sequencing_experiment=seq_experiment,
                                              mutation=mut,
