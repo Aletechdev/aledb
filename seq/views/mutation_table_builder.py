@@ -131,7 +131,7 @@ def get_mutation_table_body(user: User, observed_mutations: [], reseq_dict, expe
             if is_gene_table:
                 if evidence.search(mutation.protein_change):
                     try:
-                        table_row.append("<a id=\"%s\" onclick=\"highlight_mutation(%d,%d)\">%s</a>" %
+                        table_row.append("<a id=\"%s\" onclick=\"highlight_mutation(%d,%d)\" target=\"_blank\">%s</a>" %
                                          ("mutation_" + str(mutation.id),
                                           int(non_decimal.sub('', mutation.protein_change)),
                                           int(mutation.id), mutation.protein_change))
