@@ -93,7 +93,7 @@ def get_table_header(user, reseq_dict, experiment: AleExperiment = None):
 
         sample_header_html = sample_name
         if reseq_id in experiment_urls.keys():
-            sample_header_html = """<a href="%s">%s</a>"""
+            sample_header_html = """<a href="%s" target="_blank">%s</a>"""
             sample_header_html = sample_header_html % (experiment_urls[reseq_id], sample_name)
         if can_add_global_filter(user) or can_add_experiment_filter(user, experiment):
             dropdown_html = _get_replicate_tag_dropdown_entries(reseq.tech_rep)
