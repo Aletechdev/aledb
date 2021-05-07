@@ -296,7 +296,7 @@ def _get_mutation_freq(mutation_dict):
 
     for key in mutation_dict.keys():
         if key.startswith('frequency_'):
-            if key.endswith('output'):
+            if key.endswith('breseq'):
                 if isinstance(mutation_dict[key], float) or isinstance(mutation_dict[key], int):
                     frequency = mutation_dict[key]
                 else:
