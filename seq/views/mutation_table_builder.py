@@ -54,7 +54,7 @@ def _build_table_cell_for_dropdown(mutation, ale_experiment):
 
     menuitems = ''
     # all tables have a 'Save to Global Filter' menuitem
-    menuitems = _menu_item_save_to_global_filter % (mutation.id)
+    # menuitems = _menu_item_save_to_global_filter % (mutation.id)
 
     # some other tables have a 'Save to Experiment Filter' menuitem
     if ale_experiment:
