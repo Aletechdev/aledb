@@ -64,6 +64,11 @@ def amplification_data(request):
                     extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception as e:
+        logger.exception("amplifications broke", extra=user_extra(request))
+        template = loader.get_template("500.html")
+        context['err_message'] = str(e)
+        return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def mutation_table(request):
@@ -105,7 +110,7 @@ def mutation_table(request):
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
-        logger.exception("stats broke", extra=user_extra(request))
+        logger.exception("mutations broke", extra=user_extra(request))
         template = loader.get_template("500.html")
         context['err_message'] = str(e)
         return HttpResponse(template.render(context, request), content_type="text/html")
