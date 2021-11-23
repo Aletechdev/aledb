@@ -177,7 +177,16 @@ def get_table_body(user: User,
                    observed_mutations_queryset,
                    ale_experiment=None,
                    is_gene_table=False):
-    observed_mutations = filter_observed_mutations(observed_mutations_queryset)
+    observed_mutations = filter_observed_mutations(observed_mutations_queryset, filter_type='AMP')
+    return get_mutation_table_body(user, observed_mutations, reseq_dict, ale_experiment, is_gene_table)
+
+
+def get_amp_table_body(user: User,
+                   reseq_dict,
+                   observed_mutations_queryset,
+                   ale_experiment=None,
+                   is_gene_table=False):
+    observed_mutations = filter_observed_mutations(observed_mutations_queryset, filter_type='NOT_AMP')
     return get_mutation_table_body(user, observed_mutations, reseq_dict, ale_experiment, is_gene_table)
 
 
