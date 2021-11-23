@@ -70,6 +70,7 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, fi
     if len(global_filter_genes) > 0 or len(exp_filter_genes_map) > 0:
         for obs_mut in queryset:
             if filter_amp:
+                print(obs_mut.mutation.mutation_type)
                 if obs_mut.mutation.mutation_type == 'AMP':
                     continue
 
