@@ -343,14 +343,7 @@ function save_to_experiment_filter(ale_experiment_id, mutation_id) {
                 experiment_id: ale_experiment_id,
                 save_method: "experiment"
             },
-            success: function (result) {
-                var message = result['content'];
-                if (message == 'ok') {
-                    swal("", "Added mutation to experiment filter", "success");
-                }
-                else {
-                    swal("", message, "info")
-                }
+            success: print('Successfully added ' + mutation_id + ' to experiment filter')
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 swal("", "Save-tag failed", "error");
