@@ -11,7 +11,7 @@ __author__ = 'Patrick Phaneuf, Muyao :)'
 NO_BREAK_STRING_CODE = u'\xa0'
 
 
-def filter_observed_mutations(observed_mutation_queryset, experiment_id=None):
+def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, filter_amp = True):
     """
     R. Cai - 1/19/2019
     :param observed_mutation_queryset:
@@ -69,6 +69,10 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_id=None):
     deleted_global_mutations = set()
     if len(global_filter_genes) > 0 or len(exp_filter_genes_map) > 0:
         for obs_mut in queryset:
+            if filter_amp:
+                if obs_mut.mutation.mutation_type == 'AMP':
+                    continue
+
             deleted = obs_mut.mutation.id in deleted_global_mutations
             if not deleted and len(global_filter_genes) > 0 or obs_mut.get_experiment_id() in exp_filter_genes_map:
                 genes = set(get_gene_list(obs_mut.mutation.gene))
