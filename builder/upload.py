@@ -301,7 +301,7 @@ def _get_mutation_freq(mutation_dict):
                     frequency = mutation_dict[key]
                 else:
                     frequency = 0
-            elif key.endswith('GATK'):
+            elif key.endswith('GATK_CNVnator'):
                 if isinstance(mutation_dict[key], float) or isinstance(mutation_dict[key], int):
                     frequency_gatk = mutation_dict[key]
                 else:
