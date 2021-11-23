@@ -41,7 +41,7 @@ def amplification_data(request):
 
         table_header = mutation_table_builder.get_table_header(request.user, ordered_reseq_dict, experiment)
 
-        table_body = get_amp_table_body(experiment, ordered_reseq_dict, request.user)
+        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user, filter_type="NOT_AMP")
 
         hidden_columns = request.GET.get('hidden_columns', "")
 
@@ -82,7 +82,7 @@ def mutation_table(request):
 
         table_header = mutation_table_builder.get_table_header(request.user, ordered_reseq_dict, experiment)
 
-        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user)
+        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user, filter_type="AMP")
 
         hidden_columns = request.GET.get('hidden_columns', "")
 
@@ -111,8 +111,8 @@ def mutation_table(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-def _get_table_body(experiment, ordered_reseq_dict, user):
-    obs_mutations = get_all_observed_muations_filtered(experiment.ale_id)
+def _get_table_body(experiment, ordered_reseq_dict, user, filter_type = None):
+    obs_mutations = get_all_observed_muations_filtered(experiment.ale_id, filter_type)
     return mutation_table_builder.get_mutation_table_body(user, obs_mutations, ordered_reseq_dict, experiment)
 
 
