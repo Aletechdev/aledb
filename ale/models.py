@@ -161,6 +161,9 @@ class Media(models.Model):
                 self.volume,
                 self.stirring_speed)
 
+    def experiments(self):
+        return Flask.objects.filter(project=self).values("ale_id").values("ale_experiment").distinct()
+
     class Meta:
         verbose_name_plural = "Media"
 
