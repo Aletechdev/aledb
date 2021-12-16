@@ -27,6 +27,6 @@ class ProjectAdmin(GuardedModelAdmin):
 
 @admin.register(Media)
 class MediaAdmin(GuardedModelAdmin):
-    list_display = ('id', 'description')
+    list_display = ('id', 'description', 'experiments')
     search_fields = ('name', 'user')
     # inlines = [ExperimentInline]
