@@ -224,7 +224,7 @@ def get_experiment_root_urls(reseq_dict):
     experiment_urls = {}
     for reseq in reseq_dict.values():
         if reseq.experiment_location != "":
-            experiment_urls[reseq.id] = resequencing_report_url + reseq.experiment_location + '/' + reseq.sample_name + '.html'
+            experiment_urls[reseq.id] = str(resequencing_report_url) + str(reseq.experiment_location) + '/' + str(reseq.sample_name) + '.html'
     return experiment_urls
 
 
