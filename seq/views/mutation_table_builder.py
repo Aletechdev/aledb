@@ -32,7 +32,7 @@ REP_DROPDOWN = '<div class="dropdown tag_dropdown"><button class="btn btn-defaul
 REP_TAG = '</div><div class="tag_dropdown">%s</div>'
 
 # the dropdown cell in the mutation table
-_menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
+# _menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
 _menu_item_save_to_experiment_filter = """<li><a onclick="save_to_experiment_filter(%d, %d)" style="cursor:pointer">Save to Experiment Filter</a></li>"""
 _table_cell_dropdown_template = """<div class="dropdown">
   <button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -54,7 +54,7 @@ def _build_table_cell_for_dropdown(mutation, ale_experiment):
 
     menuitems = ''
     # all tables have a 'Save to Global Filter' menuitem
-    menuitems = _menu_item_save_to_global_filter % (mutation.id)
+    #menuitems = _menu_item_save_to_global_filter % (mutation.id)
 
     # some other tables have a 'Save to Experiment Filter' menuitem
     if ale_experiment:
@@ -177,7 +177,16 @@ def get_table_body(user: User,
                    observed_mutations_queryset,
                    ale_experiment=None,
                    is_gene_table=False):
-    observed_mutations = filter_observed_mutations(observed_mutations_queryset)
+    observed_mutations = filter_observed_mutations(observed_mutations_queryset, filter_type='AMP')
+    return get_mutation_table_body(user, observed_mutations, reseq_dict, ale_experiment, is_gene_table)
+
+
+def get_amp_table_body(user: User,
+                   reseq_dict,
+                   observed_mutations_queryset,
+                   ale_experiment=None,
+                   is_gene_table=False):
+    observed_mutations = filter_observed_mutations(observed_mutations_queryset, filter_type='NOT_AMP')
     return get_mutation_table_body(user, observed_mutations, reseq_dict, ale_experiment, is_gene_table)
 
 
