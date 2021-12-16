@@ -63,7 +63,7 @@ def _build_table_cell_for_dropdown(mutation, ale_experiment):
         filter_button = _button_save_to_experiment_filter % (ale_experiment.ale_id, mutation.id)
         menuitems += _menu_item_save_to_experiment_filter % (ale_experiment.ale_id, mutation.id)
 
-    return filter_button+_table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation.id))
+    return filter_button+str(_table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation.id)))
 
 
 class TableType(Enum):
