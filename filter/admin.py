@@ -5,6 +5,6 @@ from guardian.admin import GuardedModelAdmin
 
 
 @admin.register(AleExperimentFilter)
-class ProjectAdmin(GuardedModelAdmin):
+class FilterAdmin(GuardedModelAdmin):
     list_display = ('id', 'ale_experiment', 'min_cutoff', 'max_cutoff')
     search_fields = ('id', 'ale_experiment')
