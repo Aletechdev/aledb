@@ -17,7 +17,7 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/img/close-icon.gif" width="12" height="11"></a>"""
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
-HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
+HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>/<a class="true" href="%s" target="_blank">%.2f</a>"""
 
 EXPANDABLE_COLUMN_PLUS_SIGN = """<i onclick="expand_collapse_gene_entry(this)" class="fa fa-plus pull-left" aria-hidden="true" data-toggle="collapse" data-target="#%s"></i>"""
 EXPANDABLE_GENE_ENTRY = """<div class="collapse pull-left" id="%s">%s</div>"""
@@ -32,11 +32,12 @@ REP_DROPDOWN = '<div class="dropdown tag_dropdown"><button class="btn btn-defaul
 REP_TAG = '</div><div class="tag_dropdown">%s</div>'
 
 # the dropdown cell in the mutation table
-_menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
+# _menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
+_button_save_to_experiment_filter = """<button class="btn btn-default btn-xs type="button" id="experiment_filter_button" onclick="save_to_experiment_filter(%d, %d); return false;"><i class="fa fa-filter" aria-hidden="true"></i></button>"""
 _menu_item_save_to_experiment_filter = """<li><a onclick="save_to_experiment_filter(%d, %d)" style="cursor:pointer">Save to Experiment Filter</a></li>"""
 _table_cell_dropdown_template = """<div class="dropdown">
   <button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-    <i class="fa fa-filter" aria-hidden="true"></i>
+    <i class="fa fa-bars" aria-hidden="true"></i>
   </button>
   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
     %s
@@ -53,14 +54,16 @@ def _build_table_cell_for_dropdown(mutation, ale_experiment):
     """
 
     menuitems = ''
+    filter_button = ''
     # all tables have a 'Save to Global Filter' menuitem
-    # menuitems = _menu_item_save_to_global_filter % (mutation.id)
+    #menuitems = _menu_item_save_to_global_filter % (mutation.id)
 
     # some other tables have a 'Save to Experiment Filter' menuitem
     if ale_experiment:
+        filter_button += _button_save_to_experiment_filter % (ale_experiment.ale_id, mutation.id)
         menuitems += _menu_item_save_to_experiment_filter % (ale_experiment.ale_id, mutation.id)
 
-    return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation.id))
+    return filter_button+_table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation.id))
 
 
 class TableType(Enum):
