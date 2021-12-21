@@ -17,7 +17,7 @@ EXPERIMENT_MAPPING_FILTERING_REMOVE_FLAG = "remove"
 HTML_MUTATION_TABLE_ROW = """<a href="javascript:void(0)" style="float:right" onclick="deleteRow.call(this)"><img src="/static/img/close-icon.gif" width="12" height="11"></a>"""
 HTML_EMPTY_MUTATION_CELL = """<span class="empty"></span>"""
 HTML_MUTATION_PRESENT_FALSE_CELL_HTML = """<span class="false">%d/%d</span>"""
-HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>/<a class="true" href="%s" target="_blank">%.2f</a>"""
+HTML_MUTATION_PRESENT_TRUE_CELL_HTML = """<a class="true" href="%s">%.2f</a>"""
 
 EXPANDABLE_COLUMN_PLUS_SIGN = """<i onclick="expand_collapse_gene_entry(this)" class="fa fa-plus pull-left" aria-hidden="true" data-toggle="collapse" data-target="#%s"></i>"""
 EXPANDABLE_GENE_ENTRY = """<div class="collapse pull-left" id="%s">%s</div>"""
@@ -32,12 +32,11 @@ REP_DROPDOWN = '<div class="dropdown tag_dropdown"><button class="btn btn-defaul
 REP_TAG = '</div><div class="tag_dropdown">%s</div>'
 
 # the dropdown cell in the mutation table
-# _menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
-_button_save_to_experiment_filter = """<button class="btn btn-default btn-xs type="button" id="experiment_filter_button" onclick="save_to_experiment_filter(%d, %d); return false;"><i class="fa fa-filter" aria-hidden="true"></i></button>"""
+_menu_item_save_to_global_filter = """<li><a onclick="save_to_global_filter(%d)" style="cursor:pointer">Save to Global Filter</a></li>"""
 _menu_item_save_to_experiment_filter = """<li><a onclick="save_to_experiment_filter(%d, %d)" style="cursor:pointer">Save to Experiment Filter</a></li>"""
 _table_cell_dropdown_template = """<div class="dropdown">
   <button class="btn btn-default btn-xs dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-    <i class="fa fa-bars" aria-hidden="true"></i>
+    <i class="fa fa-filter" aria-hidden="true"></i>
   </button>
   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
     %s
@@ -54,16 +53,14 @@ def _build_table_cell_for_dropdown(mutation, ale_experiment):
     """
 
     menuitems = ''
-    filter_button = ''
     # all tables have a 'Save to Global Filter' menuitem
-    #menuitems = _menu_item_save_to_global_filter % (mutation.id)
+    # menuitems = _menu_item_save_to_global_filter % (mutation.id)
 
     # some other tables have a 'Save to Experiment Filter' menuitem
     if ale_experiment:
-        filter_button += _button_save_to_experiment_filter % (ale_experiment.ale_id, mutation.id)
         menuitems += _menu_item_save_to_experiment_filter % (ale_experiment.ale_id, mutation.id)
 
-    return filter_button+_table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation.id))
+    return _table_cell_dropdown_template % (menuitems + _get_tag_filter_dropdown_entries(mutation.id))
 
 
 class TableType(Enum):
@@ -85,8 +82,7 @@ else:
 
 def get_table_header(user, reseq_dict, experiment: AleExperiment = None):
     base_table_header = HTML_MUTATION_TABLE_HEADER
-    experiment_urls = get_experiment_root_urls(reseq_dict)
-    gatk_urls = get_gatk_urls(reseq_dict)
+    experiment_urls = get_experiment_urls(reseq_dict)
     table_header_list = []
 
     for reseq_id in reseq_dict:
@@ -161,12 +157,11 @@ def get_mutation_table_data(reseq_dict, observed_mutations):
     mutation_index_dict = dict((mutation_id, i) for i, mutation_id in enumerate(mutation_map.keys()))
     # resequencing_experiment urls
     experiment_url_dict = get_experiment_urls(reseq_dict)
-    gatk_url_dict = get_gatk_urls(reseq_dict)
     experiment_id_idx_mapping_dict = _get_experiment_id_idx_mapping_dict(reseq_dict)
     # Initialize all sample mutation table cells as empty.
     table_entry_list = _initialize_table(experiment_id_idx_mapping_dict, mutation_index_dict)
     for observed_mutation in observed_mutations:
-        new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict, gatk_url_dict)
+        new_entry = _get_table_mutation_entry(observed_mutation, experiment_url_dict)
         if new_entry is not None and observed_mutation.sequencing_experiment_id in reseq_dict.keys():
             table_entry_list[mutation_index_dict[observed_mutation.mutation_id]][
                 experiment_id_idx_mapping_dict[observed_mutation.sequencing_experiment_id]] = new_entry
@@ -180,21 +175,12 @@ def get_table_body(user: User,
                    observed_mutations_queryset,
                    ale_experiment=None,
                    is_gene_table=False):
-    observed_mutations = filter_observed_mutations(observed_mutations_queryset, filter_type='AMP')
-    return get_mutation_table_body(user, observed_mutations, reseq_dict, ale_experiment, is_gene_table)
-
-
-def get_amp_table_body(user: User,
-                   reseq_dict,
-                   observed_mutations_queryset,
-                   ale_experiment=None,
-                   is_gene_table=False):
-    observed_mutations = filter_observed_mutations(observed_mutations_queryset, filter_type='NOT_AMP')
+    observed_mutations = filter_observed_mutations(observed_mutations_queryset)
     return get_mutation_table_body(user, observed_mutations, reseq_dict, ale_experiment, is_gene_table)
 
 
 def get_gene_table_entry(mutation):
-    table_entry = """<div style="width: 150px; white-space: nowrap; overflow-x: scroll;">"""
+    table_entry = """<div style="width:150px">"""
     cleaned_gene_list = get_ecocyc_gene_list(get_gene_list(mutation.gene), mutation.is_ecocyc_gene())
 
     if len(cleaned_gene_list) > 10:
@@ -219,50 +205,20 @@ def get_experiment_urls(reseq_dict):
     return experiment_urls
 
 
-def get_experiment_root_urls(reseq_dict):
-    # experiment_urls = dict((i.id, resequencing_report_url + i.location) for i in reseq_dict.values())
-    experiment_urls = {}
-    for reseq in reseq_dict.values():
-        if reseq.experiment_location != "":
-            experiment_urls[reseq.id] = str(resequencing_report_url) + str(reseq.experiment_location) + '/' + str(reseq.sample_name) + '.html'
-    return experiment_urls
-
-
-def get_gatk_urls(reseq_dict):
-    # experiment_urls = dict((i.id, resequencing_report_url + i.location) for i in reseq_dict.values())
-    gatk_urls = {}
-    for reseq in reseq_dict.values():
-        if reseq.location != "":
-            gatk_urls[reseq.id] = resequencing_report_url + reseq.gatk_location
-    return gatk_urls
-
-
 def _get_experiment_id_idx_mapping_dict(seq_experiment_dict):
     experiment_id_idx_mapping = dict((reseq_exp_id, idx) for idx, reseq_exp_id in enumerate(seq_experiment_dict.keys()))
     return experiment_id_idx_mapping
 
 
-def _get_table_mutation_entry(observed_mutation, experiment_url_dict, gatk_url_dict):
+def _get_table_mutation_entry(observed_mutation, experiment_url_dict):
     table_entry = ""
-    if observed_mutation.breseq_present or observed_mutation.gatk_present:
-        #there's a chance for null values in frequency
+    if observed_mutation.breseq_present:
         if observed_mutation.sequencing_experiment_id in experiment_url_dict:
             url = experiment_url_dict[observed_mutation.sequencing_experiment_id]
             evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
-            gatk_url = gatk_url_dict[observed_mutation.sequencing_experiment_id]
-            gatk_evidence = gatk_url + 'evidence/' + str(observed_mutation.mutation.position) + '.html'
-
-            if observed_mutation.mutation.mutation_type == "AMP" or (observed_mutation.mutation.mutation_type == "DEL" and int(observed_mutation.mutation.feature_length) > 190):
-                gatk_cnv_evidence = gatk_url + 'coverage_evidence/' + str(observed_mutation.mutation.position) + '.png'
-                table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
-                                                                      gatk_cnv_evidence,
-                                                                      float(observed_mutation.frequency_gatk))
-            else:
-                table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
-                                                                  gatk_evidence, float(observed_mutation.frequency_gatk))
-
+            table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency))
         else:
-            table_entry = """<span class="true">%.2f/%.2f</span>""" % (observed_mutation.frequency, observed_mutation.frequency_gatk)
+            table_entry = """<span class="true">%.2f</span>""" % observed_mutation.frequency
 
     # TODO: Figure out what this is supposed to do.
     elif observed_mutation.present is False:
