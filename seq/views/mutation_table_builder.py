@@ -253,7 +253,7 @@ def _get_table_mutation_entry(observed_mutation, experiment_url_dict, gatk_url_d
             gatk_evidence = gatk_url + 'evidence/' + str(observed_mutation.mutation.position) + '.html'
 
             if observed_mutation.mutation.mutation_type == "AMP" or (observed_mutation.mutation.mutation_type == "DEL" and int(observed_mutation.mutation.feature_length) > 190):
-                gatk_cnv_evidence = gatk_url + 'coverage_evidence/' + str(observed_mutation.mutation.position) + '.png'
+                gatk_cnv_evidence = gatk_url + 'coverage_evidence/' + str(observed_mutation.mutation.reseq_reference) + '/' + str(observed_mutation.mutation.position) + '.png'
                 table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
                                                                       gatk_cnv_evidence,
                                                                       float(observed_mutation.frequency_gatk))
