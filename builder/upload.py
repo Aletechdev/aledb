@@ -215,7 +215,7 @@ def _database_mutations(sample_type,
     #TODO:sorting by position doesn't work when there are multiple reference files!
     sorted_mutation_keys = sorted(mutation_dict, key=lambda k: mutation_dict[k].get(GD_MUT_POS_ATTR_KEY))
 
-    for mut_num in mutation_dict.keys():
+    for mut_num in sorted(mutation_dict.keys()):
         breseq_gene_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_NAME_ATTR_KEY)
         breseq_gene_product_annotation = mutation_dict[mut_num].get(GD_MUT_GENE_PRODUCT_ATTR_KEY)
         gene_list = get_annotated_gene_list(breseq_gene_annotation, breseq_gene_product_annotation)
