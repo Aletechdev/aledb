@@ -42,7 +42,7 @@ def export(request):
                     writer = csv.writer(csv_data)
                     writer.writerows(get_csv_str(experiment.ale_id, mut_type_str))
                     csv_data.seek(0)
-                    zip_file.writestr(experiment.name + '_' + mut_type_str + '.csv', csv_data.read())
+                    zip_file.writestr(experiment.project.name + '_' + experiment.name + '_' + mut_type_str + '.csv', csv_data.read())
                 zip_file.close()
                 response = HttpResponse(zip_data.getvalue(), content_type='application/x-zip-compressed')
                 response['Content-Disposition'] = 'attachment; filename="download.zip"'
