@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def experiments(request):
+def evidence(request):
     file_to_serve = get_all_user_exps(request.path)
     path_of_file = "/data/aledata/" + file_to_serve
 
