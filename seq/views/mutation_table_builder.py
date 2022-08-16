@@ -233,7 +233,8 @@ def get_gatk_urls(reseq_dict):
     gatk_urls = {}
     for reseq in reseq_dict.values():
         if reseq.location != "":
-            gatk_urls[reseq.id] = resequencing_report_url + reseq.gatk_location
+            location_to_return = reseq.gatk_location or "default"
+            gatk_urls[reseq.id] = resequencing_report_url + location_to_return
     return gatk_urls
 
 
