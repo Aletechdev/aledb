@@ -1,7 +1,7 @@
-from django.urls import path
+from django.conf.urls import url
 
 from . import views
 
 urlpatterns = [
-    path('^$', views.evidence, name='evidence'),
+    url(r'^$', views.evidence, name='evidence'),
 ]
