@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'metadata',
     'about',
     'enrichment',
+    'evidence',
     'converge',
     'accounts',
     'export',
