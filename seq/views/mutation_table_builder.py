@@ -253,7 +253,11 @@ def _get_table_mutation_entry(observed_mutation, experiment_url_dict, gatk_url_d
             gatk_url = gatk_url_dict[observed_mutation.sequencing_experiment_id]
             gatk_evidence = gatk_url + 'evidence/' + str(observed_mutation.mutation.position) + '.html'
 
-            if observed_mutation.mutation.mutation_type == "AMP" or (observed_mutation.mutation.mutation_type == "DEL" and int(observed_mutation.mutation.feature_length) > 190):
+            if observed_mutation.mutation.feature_length is None:
+                feature_length = 0
+            else:
+                feature_length = int(observed_mutation.mutation.feature_length)
+            if observed_mutation.mutation.mutation_type == "AMP" or (observed_mutation.mutation.mutation_type == "DEL" and feature_length > 190):
                 gatk_cnv_evidence = gatk_url + 'coverage_evidence/' + str(observed_mutation.mutation.reseq_reference) + '/' + str(observed_mutation.mutation.position) + '.png'
                 table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
                                                                       gatk_cnv_evidence,
