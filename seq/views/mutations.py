@@ -121,6 +121,11 @@ def _get_table_body(experiment, ordered_reseq_dict, user, filter_type = None):
     return mutation_table_builder.get_mutation_table_body(user, obs_mutations, ordered_reseq_dict, experiment)
 
 
+def mutation_table(request):
+    template = loader.get_template("evidence/evidence.html")
+    return HttpResponse(template.render(request), content_type="text/html")
+
+
 @ajax
 def add_to_global_filter(request):
     if permissions.can_add_global_filter(request.user):
