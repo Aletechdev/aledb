@@ -123,7 +123,8 @@ def _get_table_body(experiment, ordered_reseq_dict, user, filter_type = None):
 
 def mutation_table(request):
     template = loader.get_template("evidence/evidence.html")
-    return HttpResponse(template.render(request), content_type="text/html")
+    context = get_user_context(request.user)
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 @ajax
