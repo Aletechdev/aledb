@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def evidence(request):
+    logger.log("evidence page")
     file_to_serve = get_all_user_exps(request.path)
     path_of_file = "/data/aledata/" + file_to_serve
 
