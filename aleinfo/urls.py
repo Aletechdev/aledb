@@ -18,6 +18,7 @@ urlpatterns = [
     url(r'^bibliome/', include('bibliome.urls')),
     url(r'^converge/', include('converge.urls')),
     url(r'^enrichment/', include('enrichment.urls')),
+    url(r'^evidence/', include('evidence.urls')),
     url(r'^export', include('export.urls')),
     url(r'^md_export', include('md_export.urls')),
     url(r'^filter/', include('filter.urls')),
