@@ -31,7 +31,6 @@ INSTALLED_APPS = (
     "bootstrap3",
     "bootstrap4",
     'defender',
-
     'ale',
     'seq',
     'filter',
