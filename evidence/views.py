@@ -5,4 +5,5 @@ from django.http import HttpResponse
 
 
 def evidence(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+
+    return HttpResponse("Here's some evidence")
