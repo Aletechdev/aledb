@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^add_to_exp_filter', seq.views.mutations.add_to_exp_filter, name='mutation_to_exp_filter'),
     url(r'^toggle-mut-tag/', seq.views.mutations.save_mut_tag, name='toggle_mut_tag'),
     url(r'^toggle-rep-tag', seq.views.mutations.save_rep_tag, name='toggle_rep_tag'),
+    url(r'^evidence', seq.views.mutations.save_rep_tag, name='toggle_rep_tag'),
 ]

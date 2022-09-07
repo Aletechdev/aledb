@@ -1,4 +1,6 @@
 import os
+import sys
+import traceback
 import ale.models
 import builder.upload
 import builder.util
@@ -83,7 +85,8 @@ def _delete_all_orphaned_mutations():
     """Find the orphaned muations that don't have associated observed mutations.
     Retrieving observed mutations for each mutation to check if it is orphan is very expensive
     """
-    orphans = seq.models.Mutation.objects.raw('select * from seq_mutation m where not exists (select * from seq_observedmutation ob where ob.mutation_id = m.id)')
+    orphans = seq.models.Mutation.objects.raw(
+        'select * from seq_mutation m where not exists (select * from seq_observedmutation ob where ob.mutation_id = m.id)')
     for mutation in orphans:
         mutation.delete()
 
@@ -91,7 +94,9 @@ def _delete_all_orphaned_mutations():
 def delete_isolate(ale_experiment_primary_key, ale_number, flask_number, isolate_number):
     isolate_to_delete = ale.models.Isolate.objects.filter(isolate_number=isolate_number)
     for isolate in isolate_to_delete:
-        if isolate.flask.ale_id.ale_experiment_id == ale_experiment_primary_key and isolate.flask.ale_id.ale_id == ale_number and isolate.flask.flask_number == flask_number:
+        if isolate.flask.ale_id.ale_experiment_id == ale_experiment_primary_key and \
+                isolate.flask.ale_id.ale_id == ale_number and \
+                isolate.flask.flask_number == flask_number:
             isolate.delete()
             print("Successfully removed: ", ale_number, flask_number, isolate_number)
     _delete_all_orphaned_mutations()
@@ -170,7 +175,7 @@ def upload_ale_experiment(experiment_path):
     k = _check_and_extract_parameters_from_metadata(experiment_path + "/metadata")
     if k:
         print(experiment_path, k[0], k[1], k[2])
-        create_ale_experiment(experiment_path, k[0], k[1], k[2])
+        create_ensemble_ale_experiment(experiment_path, k[0], k[1], k[2], experiment_path)
     else:
         return k
 
@@ -203,7 +208,7 @@ def _check_and_extract_parameters_from_metadata(metadata_path):
         logger.info("invalid metadata path")
         print("invalid path:", metadata_path)
         return False
-    if not is_valid(metadata_path,"metadata/xpmdvalidator/Json_schema.json"):
+    if not is_valid(metadata_path, "metadata/xpmdvalidator/Json_schema.json"):
         return False
     return metadata.parser.extract_experiment_parameters(metadata_path)
 
@@ -282,7 +287,6 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
             root_abs_path = breseq_output_group_root_abs_path.replace("/breseq","")
         breseq_output_group_root_abs_path = root_abs_path + "/breseq/"
 
-
         clear_dashboard_cache()  # TODO: remove, since no longer using cache.
 
         breseq_output_group_root_abs_path = builder.util.sanitize_path(breseq_output_group_root_abs_path)
@@ -343,6 +347,116 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
                                          default_media,
                                          freezer_box,
                                          is_wild_type=False)
+
+        default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
+        AleExperimentFilter.objects.get_or_create(**default_filter_params)
+        rebuild_converge_mutations(experiment.ale_id)
+        rebuild_fixated_mutations(experiment.ale_id)
+        generate_static_data(experiment.ale_id)
+        rebuild_dashboard_data()
+
+        metadata.parser.parse_metadata_post_experiment_upload(root_abs_path+"/metadata", experiment.ale_id)
+        return True
+    except Exception as e:
+        logger.exception(e)
+
+
+# For wild_type, expecting directory with output.gd in it.
+def create_ensemble_ale_experiment(breseq_output_group_root_abs_path,
+                                   ale_exp_user,
+                                   ale_exp_name,
+                                   proj_name,
+                                   experiment_path,
+                                   breseq_starting_strain_output_abs_path=None):
+
+    logger.info("Creating Ensemble Ale Experiment", extra=locals())
+
+    if not os.path.isdir(breseq_output_group_root_abs_path):
+        logger.info("invalid path")
+        print("invalid path:", breseq_output_group_root_abs_path)
+        return False
+
+    try:
+
+        """
+        Executed from Django ipython shell.
+        """
+        root_abs_path = breseq_output_group_root_abs_path
+        if "/breseq" in breseq_output_group_root_abs_path:
+            root_abs_path = breseq_output_group_root_abs_path.replace("/breseq","")
+        breseq_output_group_root_abs_path = root_abs_path + "/breseq/"
+
+        clear_dashboard_cache()  # TODO: remove, since no longer using cache.
+
+        breseq_output_group_root_abs_path = builder.util.sanitize_path(breseq_output_group_root_abs_path)
+        try:
+            project = ale.models.Project.objects.get(name=proj_name)
+        except Exception:
+            print("Project not found: ", proj_name)
+            try_creating_project(proj_name, ale_exp_user)
+            project = ale.models.Project.objects.get(name=proj_name)
+
+        instrument, created = ale.models.Instrument.objects.get_or_create(name=metadata.parser.DEFAULT_INSTRUMENT_NAME)
+        experiment, created = ale.models.AleExperiment.objects.get_or_create(name=ale_exp_name,
+                                                                             instrument=instrument,
+                                                                             person=ale_exp_user,
+                                                                             project=project)
+
+        create_event(title="Experiment Created",
+                     message="Experiment %s was created" % experiment.name,
+                     icon='<i class="fa fa-flask" aria-hidden="true"></i>',
+                     color="success")
+
+        default_media, \
+        created = ale.models.Media.objects.get_or_create(description=metadata.parser.DEFAULT_MEDIA_DESCRIPTION,
+                                                         substrate=metadata.parser.DEFAULT_MEDIA_SUBSTRATE,
+                                                         temperature=metadata.parser.DEFAULT_TEMPERATURE,
+                                                         volume=metadata.parser.DEFAULT_VOLUME,
+                                                         stirring_speed=metadata.parser.DEFAULT_STIRRING_SPEED)
+
+        freezer_box, created = ale.models.FreezerBox.objects.get_or_create(
+            name=metadata.parser.DEFAULT_FREEZER_BOX_NAME,
+            number=metadata.parser.DEFAULT_FREEZER_BOX_NUMBER)
+
+        if breseq_starting_strain_output_abs_path is not None:
+            _insert_starting_strain_flask(breseq_starting_strain_output_abs_path,
+                                          ale_exp_user,
+                                          ale_exp_name,
+                                          experiment,
+                                          default_media,
+                                          freezer_box)
+
+        # Might need to explicitly sort this list in the future.
+        breseq_sample_report_list = _get_sample_report_list(breseq_output_group_root_abs_path)
+        for ale_isolate_name in breseq_sample_report_list:
+            try:
+                ale_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Ale)
+                flask_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Flask)
+                isolate_number = builder.util.parse_ale_name(ale_isolate_name, builder.util.AleName.Isolate)
+                technical_replicate_number = builder.util.parse_ale_name(ale_isolate_name,
+                                                                         builder.util.AleName.TechnicalReplicate)
+                afir_parts = [ale_number, flask_number, isolate_number, technical_replicate_number]
+                afir = '-'.join(str(n) for n in afir_parts)
+                ensemble_gd_filename = afir+'.gd'
+                print(ensemble_gd_filename)
+                output_path = experiment_path
+                _create_and_commit_ale_entry(ale_exp_user,
+                                             output_path,
+                                             ale_number,
+                                             flask_number,
+                                             isolate_number,
+                                             technical_replicate_number,
+                                             experiment,
+                                             default_media,
+                                             freezer_box,
+                                             is_wild_type=False,
+                                             filename=ensemble_gd_filename)
+            except:
+                print("Sample Failed")
+                e = sys.exc_info()[0]
+                print("Error: %s" % e)
+                traceback.print_exc()
+
 
         default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
         AleExperimentFilter.objects.get_or_create(**default_filter_params)
@@ -418,7 +532,7 @@ def _create_and_commit_wild_type_ale_entry(breseq_wild_type_abs_path,
 
 
 def _create_and_commit_ale_entry(person,
-                                 breseq_output_dir_path,
+                                 output_dir_path,
                                  ale_number,
                                  flask_number,
                                  isolate_number,
@@ -426,7 +540,8 @@ def _create_and_commit_ale_entry(person,
                                  experiment,
                                  media,
                                  freezer_box,
-                                 is_wild_type):
+                                 is_wild_type,
+                                 filename=ANNOTATION_GENOMIC_DIFF_FILE_NAME):
     """
     is_wild_type was implemented because initially, we wanted to ignore
     mutations that were already thought to be in the wild type strain,
@@ -442,10 +557,12 @@ def _create_and_commit_ale_entry(person,
     have changed.
     """
 
+    #TODO:going to add a check to allow for additional filenames
+
     ale_id, created = ale.models.AleId.objects.get_or_create(ale_experiment=experiment, ale_id=ale_number)
     flask, created = ale.models.Flask.objects.get_or_create(flask_number=flask_number, ale_id=ale_id, media=media)
 
-    with open(os.path.join(breseq_output_dir_path, ANNOTATION_GENOMIC_DIFF_FILE_NAME),
+    with open(os.path.join(output_dir_path, filename),
               'rb') as annotation_genomic_diff_file:
         mutation_gd_parser = gdparse.GDParser(file_handle=annotation_genomic_diff_file)
 
@@ -464,7 +581,7 @@ def _create_and_commit_ale_entry(person,
     if gdparse.RESEQ_TYPE_KEY in mutation_gd_parser.meta_data.keys():
         sample_reseq_type = mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY]
     else:  # Breseq version 0.26.0 doesn't have the #=COMMAND meta-data.
-        sample_reseq_type = _get_reseq_type(breseq_output_dir_path)
+        sample_reseq_type = _get_reseq_type(output_dir_path)
         mutation_gd_parser.meta_data[gdparse.RESEQ_TYPE_KEY] = sample_reseq_type
 
     is_population = False
@@ -483,12 +600,13 @@ def _create_and_commit_ale_entry(person,
     technical_replicate, \
     created = ale.models.TechnicalReplicate.objects.get_or_create(tech_rep_number=technical_replicate_number,
                                                                   isolate=isolate)
-
+    afir = str(ale_number)+'-'+str(flask_number)+'-'+str(isolate_number)+'-'+str(technical_replicate_number)
     builder.upload.add_breseq_results(technical_replicate_id=technical_replicate.id,
                                       person=person,
-                                      breseq_ouput_dir_path=breseq_output_dir_path,
+                                      experiment_path=output_dir_path,
                                       mutation_gd_parser=mutation_gd_parser,
                                       reseq_ref_name=reseq_ref_name,
+                                      sample_name=afir,
                                       experiment=experiment,
                                       is_wild_type=is_wild_type, )
 

@@ -41,6 +41,22 @@ def protected_file_serve(request, page_name: str):
         logger.info("display file " + page_name, extra=user_extra(request))
         file_path = DOC_ROOT + page_name
         return _get_file_response(file_path)
+    if page_name and 'evidence' in page_name:
+        if page_name.endswith('evidence/'):
+            reseq_location = page_name
+        else:
+            output_loc = page_name.find('evidence/')
+            reseq_location = page_name[0:output_loc + len('evidence/')]
+        ok = can_view_experiment(user, reseq_location)
+        if not ok:
+            logger.error("file path error: " + "Cannot view the link " + page_name)
+            raise HttpResponseForbidden
+        logger.info("display file " + page_name, extra=user_extra(request))
+        file_path = DOC_ROOT + page_name
+        return _get_file_response(file_path)
+    if '.html' in page_name or '.ba' in page_name:
+        file_path = DOC_ROOT + page_name
+        return _get_file_response(file_path)
     elif _is_valid_pagename(page_name, user):
         return _get_file_response(DOC_ROOT + page_name)
     else:

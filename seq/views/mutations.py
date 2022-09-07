@@ -26,7 +26,49 @@ logger = logging.getLogger(__name__)
 
 
 def amplification_data(request):
-    return show_amplifiction_data(request)
+    logger.info("amplification mutation usage", user_extra(request))
+    try:
+        start_time = time.clock()
+        context = get_user_context(request.user)
+        experiment = seq.views.common.get_ale_experiment(request)
+
+        exp_name = experiment.project.name + ": " + experiment.name
+        ale_no = seq.views.common.get_ale_id(request)
+        sample_type = seq.views.common.get_sample_type(request)
+        aleid_ale_id_list = seq.views.common.get_aleid_ale_id_list(experiment.ale_id, True)
+
+        ordered_reseq_dict = get_reseq_ordered_dict(experiment.ale_id, ale_no, sample_type, request)
+
+        table_header = mutation_table_builder.get_table_header(request.user, ordered_reseq_dict, experiment)
+
+        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user, filter_type="NOT_AMP")
+
+        hidden_columns = request.GET.get('hidden_columns', "")
+
+        template = loader.get_template("base_table_template.html")
+
+        context.update({"ales": aleid_ale_id_list,
+                        "ale_experiment_name": exp_name,
+                        "ale_no": ale_no,
+                        "sample_type": sample_type,
+                        "ale_experiment_id": experiment.ale_id,
+                        "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
+                        "title": exp_name + " Mutations",
+                        "table_header": table_header,
+                        "template_header": "Mutations",
+                        "hidden_columns": hidden_columns,
+                        "refseq_column": REFSEQ_COLUMN_IN_MUT_TABLE,
+                        "tag_dropdown": common.constants.TAGS
+                        })
+        logger.info("mutation performance",
+                    extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+
+        return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception as e:
+        logger.exception("amplifications broke", extra=user_extra(request))
+        template = loader.get_template("500.html")
+        context['err_message'] = str(e)
+        return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 def mutation_table(request):
@@ -45,7 +87,7 @@ def mutation_table(request):
 
         table_header = mutation_table_builder.get_table_header(request.user, ordered_reseq_dict, experiment)
 
-        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user)
+        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user, filter_type="AMP")
 
         hidden_columns = request.GET.get('hidden_columns', "")
 
@@ -68,15 +110,21 @@ def mutation_table(request):
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
-        logger.exception("stats broke", extra=user_extra(request))
+        logger.exception("mutations broke", extra=user_extra(request))
         template = loader.get_template("500.html")
         context['err_message'] = str(e)
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-def _get_table_body(experiment, ordered_reseq_dict, user):
-    obs_mutations = get_all_observed_muations_filtered(experiment.ale_id)
+def _get_table_body(experiment, ordered_reseq_dict, user, filter_type = None):
+    obs_mutations = get_all_observed_muations_filtered(experiment.ale_id, filter_type)
     return mutation_table_builder.get_mutation_table_body(user, obs_mutations, ordered_reseq_dict, experiment)
+
+
+def evidence(request):
+    template = loader.get_template("evidence/evidence.html")
+    context = get_user_context(request.user)
+    return HttpResponse(template.render(context, request), content_type="text/html")
 
 
 @ajax

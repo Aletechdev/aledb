@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 def is_valid(csv_directory_path, schema_file_path):
 
     Valdation = True
+    # comment out following line to disable validation
+    return Valdation
 
     with open(schema_file_path, "r") as j:
         schema = json.load(j)
