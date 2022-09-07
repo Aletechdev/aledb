@@ -6,12 +6,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from genes.util import get_gene_list
 from common.util import is_int
 
-__author__ = 'Patrick Phaneuf'
+__author__ = 'Patrick Phaneuf, Muyao :)'
 
 NO_BREAK_STRING_CODE = u'\xa0'
 
 
-def filter_observed_mutations(observed_mutation_queryset, experiment_id=None):
+def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, filter_type = None):
     """
     R. Cai - 1/19/2019
     :param observed_mutation_queryset:
@@ -38,9 +38,15 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_id=None):
 
         q_exp = Q()
         if exp_filter.min_cutoff and exp_filter.min_cutoff > 0:
-            q_exp.add(Q(frequency__lt=exp_filter.min_cutoff / 100), Q.OR)
+            q_exp.add(Q(frequency__lt=exp_filter.min_cutoff / 100), Q.AND)
+        if exp_filter.min_gatk_cutoff and exp_filter.min_gatk_cutoff > 0:
+            q_exp.add(Q(frequency__lt=exp_filter.min_cutoff / 100), Q.AND)
         if exp_filter.max_cutoff and exp_filter.max_cutoff < 100:
-            q_exp.add(Q(frequency__gt=exp_filter.max_cutoff / 100), Q.OR)
+            q_exp.add(Q(frequency__gt=exp_filter.max_cutoff / 100), Q.AND)
+        if exp_filter.min_gatk_cutoff and exp_filter.min_gatk_cutoff > 0:
+            q_exp.add(Q(frequency_gatk__lt=exp_filter.min_cutoff / 100), Q.AND)
+        if exp_filter.max_gatk_cutoff and exp_filter.max_gatk_cutoff < 100:
+            q_exp.add(Q(frequency_gatk__gt=exp_filter.max_cutoff / 100), Q.AND)
         if len(exp_filter_muts) > 0:
             q_exp.add(Q(mutation__id__in=exp_filter_muts), Q.OR)
         exp_q_query = Q(
@@ -61,8 +67,15 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_id=None):
     )
     observed_mutations = []
     deleted_global_mutations = set()
-    if len(global_filter_genes) > 0 or len(exp_filter_genes_map) > 0:
+    if filter_type or len(global_filter_genes) > 0 or len(exp_filter_genes_map) > 0:
         for obs_mut in queryset:
+            if filter_type == 'AMP':
+                if obs_mut.mutation.mutation_type == 'AMP':
+                    continue
+            if filter_type == 'NOT_AMP':
+                if obs_mut.mutation.mutation_type != 'AMP':
+                    continue
+
             deleted = obs_mut.mutation.id in deleted_global_mutations
             if not deleted and len(global_filter_genes) > 0 or obs_mut.get_experiment_id() in exp_filter_genes_map:
                 genes = set(get_gene_list(obs_mut.mutation.gene))

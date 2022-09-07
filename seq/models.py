@@ -21,6 +21,15 @@ class ResequencingExperiment(models.Model):
     location = models.CharField(max_length=200,
                                 blank=True,
                                 null=True)
+    experiment_location = models.CharField(max_length=200,
+                                blank=True,
+                                null=True)
+    gatk_location = models.CharField(max_length=200,
+                                blank=True,
+                                null=True)
+    sample_name = models.CharField(max_length=200,
+                                blank=True,
+                                null=True)
     mean_coverage = models.FloatField(blank=True,
                                       default=0)
     percentage_mapped = models.FloatField(blank=True,
@@ -121,6 +130,7 @@ class ObservedMutation(models.Model):
     mutation = models.ForeignKey(Mutation, on_delete=models.DO_NOTHING)
     present = models.NullBooleanField()
     breseq_present = models.NullBooleanField()
+    gatk_present = models.NullBooleanField()
     wt_reads = models.IntegerField(null=True)
     mutated_reads = models.IntegerField(null=True)
     other_reads = models.IntegerField(null=True)
@@ -128,9 +138,15 @@ class ObservedMutation(models.Model):
     evidence = models.CharField(max_length=400,
                                 blank=True,
                                 null=True)
+    gatk_evidence = models.CharField(max_length=400,
+                                     blank=True,
+                                     null=True)
     frequency = models.DecimalField(null=True,
                                     max_digits=5,
                                     decimal_places=4)
+    frequency_gatk = models.DecimalField(null=True,
+                                         max_digits=5,
+                                         decimal_places=4)
 
     def get_experiment_id(self):
         return self.sequencing_experiment.tech_rep.isolate.flask.ale_id.ale_experiment_id

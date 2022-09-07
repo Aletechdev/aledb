@@ -10,11 +10,11 @@ class Migration(migrations.Migration):
     dependencies = [
         ('ale', '0025_auto_20191112_1631'),
     ]
-
+'''
     operations = [
         migrations.AddField(
             model_name='media',
             name='calcium_source',
             field=models.CharField(blank=True, default=None, max_length=200, null=True),
         ),
-    ]
+    ]'''

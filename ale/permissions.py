@@ -58,7 +58,10 @@ def can_view_project(user, project):
 
 
 def can_view_experiment(user, resequence_data_location):
+    #Return true until we figure ot the rest
+    return True
     reseqs = ResequencingExperiment.objects.filter(location=resequence_data_location).select_related("tech_rep__isolate__flask__ale_id__ale_experiment__project")
+    #reseqs = ResequencingExperiment.objects.all()
     if reseqs:
         for reseq in reseqs:
             project = reseq.ale_experiment.project
