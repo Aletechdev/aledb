@@ -93,8 +93,8 @@ AUTHENTICATION_BACKENDS = (
 
 LOGIN_URL = '/accounts/login/'
 ROOT_URLCONF = 'aleinfo.urls'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'experiments_view'
+LOGOUT_REDIRECT_URL = 'experiments_view'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'aleinfo.wsgi.application'
 
