@@ -1,5 +1,4 @@
-from django.conf.urls import url
-
+from django.conf.urls import include, url
 import seq.views.mutations
 
 
@@ -12,4 +11,5 @@ urlpatterns = [
     url(r'^toggle-mut-tag/', seq.views.mutations.save_mut_tag, name='toggle_mut_tag'),
     url(r'^toggle-rep-tag', seq.views.mutations.save_rep_tag, name='toggle_rep_tag'),
     url(r'^evidence', seq.views.mutations.save_rep_tag, name='toggle_rep_tag'),
+    url(r'^details', include('evidence.urls')),
 ]
