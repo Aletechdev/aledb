@@ -250,8 +250,11 @@ def _get_table_mutation_entry(observed_mutation, experiment_url_dict, gatk_url_d
         if observed_mutation.sequencing_experiment_id in experiment_url_dict:
             url = experiment_url_dict[observed_mutation.sequencing_experiment_id]
             evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
+            breseq_details_url = 'details?observed_mut_id=' + str(observed_mutation.id) + '&mut_caller=breseq'
             gatk_url = gatk_url_dict[observed_mutation.sequencing_experiment_id]
-            gatk_evidence = gatk_url + 'evidence/' + str(observed_mutation.mutation.position) + '.html'
+            #gatk_raw_file_loc = 'details?location=' + gatk_url +'evidence/'+ str(observed_mutation.mutation.position) + '.html'
+            gatk_details_url = 'details?observed_mut_id=' + str(observed_mutation.id) + '&mut_caller=gatkcnvnator'
+            #gatk_evidence = gatk_detail_url
 
             if observed_mutation.mutation.feature_length is None:
                 feature_length = 0
@@ -259,12 +262,12 @@ def _get_table_mutation_entry(observed_mutation, experiment_url_dict, gatk_url_d
                 feature_length = int(observed_mutation.mutation.feature_length)
             if observed_mutation.mutation.mutation_type == "AMP" or (observed_mutation.mutation.mutation_type == "DEL" and feature_length > 190):
                 gatk_cnv_evidence = gatk_url + 'coverage_evidence/' + str(observed_mutation.mutation.reseq_reference) + '/' + str(observed_mutation.mutation.position) + '.png'
-                table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
+                table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (breseq_details_url, float(observed_mutation.frequency),
                                                                       gatk_cnv_evidence,
                                                                       float(observed_mutation.frequency_gatk))
             else:
-                table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (evidence_url, float(observed_mutation.frequency),
-                                                                  gatk_evidence, float(observed_mutation.frequency_gatk))
+                table_entry = HTML_MUTATION_PRESENT_TRUE_CELL_HTML % (breseq_details_url, float(observed_mutation.frequency),
+                                                                  gatk_details_url, float(observed_mutation.frequency_gatk))
 
         else:
             table_entry = """<span class="true">%.2f/%.2f</span>""" % (observed_mutation.frequency, observed_mutation.frequency_gatk)
