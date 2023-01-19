@@ -251,7 +251,8 @@ def _get_table_mutation_entry(observed_mutation, experiment_url_dict, gatk_url_d
             url = experiment_url_dict[observed_mutation.sequencing_experiment_id]
             evidence_url = url + _find_between(observed_mutation.evidence, "\"", "\"")
             gatk_url = gatk_url_dict[observed_mutation.sequencing_experiment_id]
-            gatk_evidence = gatk_url + 'evidence/' + str(observed_mutation.mutation.position) + '.html'
+            gatk_raw_file_loc = gatk_url + '?location=' + gatk_url +'evidence/'+ str(observed_mutation.mutation.position) + '.html'
+            gatk_evidence = gatk_raw_file_loc
 
             if observed_mutation.mutation.feature_length is None:
                 feature_length = 0
