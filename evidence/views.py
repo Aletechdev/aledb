@@ -34,12 +34,21 @@ def evidence(request, *args, **kwargs):
     experiment_name = experiment.name
     project = experiment.project
     project_name = project.name
-    if mut_caller == 'gatkcnvnator':
-        evidence_html = open(DATA_MOUNT_LOCATION + resequencing_experiment.gatk_location + gatk_evidence_location, 'r')
-    else:
-        evidence_html = open(DATA_MOUNT_LOCATION + resequencing_experiment.location + breseq_evidence_location, 'r')
+    #if mut_caller == 'gatkcnvnator':
+    try:
+        evidence_html_breseq = open(DATA_MOUNT_LOCATION + resequencing_experiment.location + breseq_evidence_location, 'r').read
+    except:
+        evidence_html_breseq = ""
+    
+    try:
+        evidence_html_gatkcnvnator = open(DATA_MOUNT_LOCATION + resequencing_experiment.gatk_location + gatk_evidence_location, 'r').read()
+    except:
+        evidence_html_gatkcnvnator = ""
+    
+    evidence_html = evidence_html_breseq + evidence_html_gatkcnvnator
+    
     template = loader.get_template("evidence/evidence.html")
     context = get_user_context(request.user)
-    context.update({'evidence_html': evidence_html.read()})
+    context.update({'evidence_html': evidence_html)})
 
     return HttpResponse(template.render(context, request))
