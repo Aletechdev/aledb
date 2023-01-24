@@ -144,7 +144,10 @@
                 </div>
             </div>
             {% block content %}{% endblock %}
-            {{ evidence_html|safe }}
+            <h4>Breseq alignment</h4>
+            {{ evidence_html_breseq|safe }}
+            <h4>GATK/CNVnator alignment</h4>
+            {{ evidence_html_gatkcnvnator|safe }}
         </div>
     </nav>
 </div>
