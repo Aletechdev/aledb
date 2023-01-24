@@ -38,17 +38,15 @@ def evidence(request, *args, **kwargs):
     try:
         evidence_html_breseq = open(DATA_MOUNT_LOCATION + resequencing_experiment.location + breseq_evidence_location, 'r').read
     except:
-        evidence_html_breseq = ""
+        evidence_html_breseq = "N/A"
     
     try:
         evidence_html_gatkcnvnator = open(DATA_MOUNT_LOCATION + resequencing_experiment.gatk_location + gatk_evidence_location, 'r').read()
     except:
-        evidence_html_gatkcnvnator = ""
-    
-    evidence_html = evidence_html_breseq + evidence_html_gatkcnvnator
+        evidence_html_gatkcnvnator = "N/A"
     
     template = loader.get_template("evidence/evidence.html")
     context = get_user_context(request.user)
-    context.update({'evidence_html': evidence_html)})
+    context.update({'evidence_html_breseq': evidence_html_breseq), 'evidence_html_gatkcnvnator':evidence_html_gatkcnvnator})
 
     return HttpResponse(template.render(context, request))
