@@ -47,6 +47,6 @@ def evidence(request, *args, **kwargs):
     
     template = loader.get_template("evidence/evidence.html")
     context = get_user_context(request.user)
-    context.update({'evidence_html_breseq': evidence_html_breseq), 'evidence_html_gatkcnvnator':evidence_html_gatkcnvnator})
+    context.update({'evidence_html_breseq': evidence_html_breseq, 'evidence_html_gatkcnvnator':evidence_html_gatkcnvnator})
 
     return HttpResponse(template.render(context, request))
