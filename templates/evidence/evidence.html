@@ -143,11 +143,14 @@
                     </div>
                 </div>
             </div>
-            {% block content %}{% endblock %}
-            <h4>Breseq alignment</h4>
-            {{ evidence_html_breseq|safe }}
-            <h4>GATK/CNVnator alignment</h4>
-            {{ evidence_html_gatkcnvnator|safe }}
+            {% block content %}
+                <h2>{{ project_name|safe }} {{ experiment_name|safe }} {{ sample|safe }}</h2>
+                <h4>Breseq alignment</h4>
+                {{ evidence_html_breseq|safe }}
+                <h4>GATK/CNVnator alignment</h4>
+                {{ evidence_html_gatkcnvnator|safe }}
+            {% endblock %}
+
         </div>
     </nav>
 </div>
