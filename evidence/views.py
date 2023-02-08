@@ -13,21 +13,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 DATA_MOUNT_LOCATION = '/data/aledata/'
-LINK_START_SUBSTRING = 'href="'
-IMAGE_START_SUBSTRING = 'img src="'
-
-
-def raw_file_serve(request):
-    sample = 'sample_location'
-    observed_mutation_id = request.GET.get('observed_mut_id')
-
-    observed_mutation = ObservedMutation.objects.get(id=observed_mutation_id)
-
-
-
-def update_breseq_html_locations(html_content, base_url):
-    #it's only a breseq issue for now
-    return html_content.replace(LINK_START_SUBSTRING, LINK_START_SUBSTRING + str(base_url)).replace(IMAGE_START_SUBSTRING, str(base_url))
 
 
 def evidence(request, *args, **kwargs):
@@ -51,9 +36,7 @@ def evidence(request, *args, **kwargs):
     project_name = project.name
     #if mut_caller == 'gatkcnvnator':
     try:
-        orig_breseq_html = open(DATA_MOUNT_LOCATION + resequencing_experiment.location + breseq_evidence_location, 'r').read
-        evidence_html_breseq = update_breseq_html_locations(orig_breseq_html, '/' + str(resequencing_experiment.location))
-
+        evidence_html_breseq = open(DATA_MOUNT_LOCATION + resequencing_experiment.location + breseq_evidence_location, 'r').read
     except:
         evidence_html_breseq = "N/A"
     
