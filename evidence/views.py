@@ -36,6 +36,7 @@ def evidence(request, *args, **kwargs):
     logger.info("evidence request " + request_details, extra=user_extra(request))
 
     #evidence_location = '/data' + request.GET.get('location') #kwargs['evidence_location']
+    mut_caller = request.GET.get('mut_caller')
     observed_mutation_id = request.GET.get('observed_mut_id')
     observed_mutation = ObservedMutation.objects.get(id=observed_mutation_id)
 
@@ -48,6 +49,7 @@ def evidence(request, *args, **kwargs):
     experiment_name = experiment.name
     project = experiment.project
     project_name = project.name
+    #if mut_caller == 'gatkcnvnator':
     try:
         orig_breseq_html = open(DATA_MOUNT_LOCATION + resequencing_experiment.location + breseq_evidence_location, 'r').read
         evidence_html_breseq = update_breseq_html_locations(orig_breseq_html, '/' + str(resequencing_experiment.location))
@@ -62,11 +64,6 @@ def evidence(request, *args, **kwargs):
     
     template = loader.get_template("evidence/evidence.html")
     context = get_user_context(request.user)
-    context.update({
-        'project_name': project_name,
-        'experiment_name': experiment_name,
-        'sample': sample,
-        'evidence_html_breseq': evidence_html_breseq,
-        'evidence_html_gatkcnvnator':evidence_html_gatkcnvnator})
+    context.update({'evidence_html_breseq': evidence_html_breseq, 'evidence_html_gatkcnvnator':evidence_html_gatkcnvnator})
 
     return HttpResponse(template.render(context, request))
