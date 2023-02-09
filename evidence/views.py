@@ -34,7 +34,9 @@ def evidence(request, *args, **kwargs):
     project = experiment.project
     project_name = project.name
     try:
-        evidence_html_breseq = open(DATA_MOUNT_LOCATION + resequencing_experiment.location + breseq_evidence_location, 'r').read
+
+        orig_breseq_html = open(DATA_MOUNT_LOCATION + resequencing_experiment.location + breseq_evidence_location, 'r').read()
+        evidence_html_breseq = update_breseq_html_locations(orig_breseq_html, '/' + str(resequencing_experiment.location))
     except:
         evidence_html_breseq = "N/A"
     
