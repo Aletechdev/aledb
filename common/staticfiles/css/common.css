@@ -1,6 +1,3 @@
-
-
-
 .git-hash{
     display: block;
     font-size:.7em;
@@ -9,4 +6,24 @@
 
 .d3-tip{
     z-index: 1001;
+}
+
+.reject {
+  background-color: #f1f1f1;
+  color: black;
+}
+
+.next {
+  background-color: #04AA6D;
+  color: white;
+}
+
+#footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+#center {
+    width: 500px;
+    margin: 0 auto;
 }
