@@ -144,23 +144,22 @@
                 </div>
             </div>
             {% block content %}
+                <h2>{{ project_name|safe }} {{ experiment_name|safe }} {{ sample|safe }}</h2>
+                <h4>Breseq alignment</h4>
+                {{ evidence_html_breseq|safe }}
+                <h4>GATK/CNVnator alignment</h4>
+                {{ evidence_html_gatkcnvnator|safe }}
 
+                <div id="footer">
+                    <div id="center">
+                        <a href="#" class="reject">&laquo; Filter Mutation</a>
+                        <a href="#" class="next">Next Mutation &raquo;</a>
+                    </div>
+                </div>
             {% endblock %}
-
         </div>
     </nav>
-    <h2>{{ project_name|safe }} {{ experiment_name|safe }} {{ sample|safe }}</h2>
-    <h4>Breseq alignment</h4>
-    {{ evidence_html_breseq|safe }}
-    <h4>GATK/CNVnator alignment</h4>
-    {{ evidence_html_gatkcnvnator|safe }}
 
-    <div id="footer">
-        <div id="center">
-            <a href="#" class="reject">&laquo; Filter Mutation</a>
-            <a href="#" class="next">Next Mutation &raquo;</a>
-        </div>
-    </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/metisMenu/2.5.2/metisMenu.min.js"></script>
