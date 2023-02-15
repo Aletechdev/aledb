@@ -172,7 +172,7 @@
                     {% if user.is_superuser %}
                     <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/mutations/details?observed_mut_id={{ next_mutation_id }}')">&laquo; Filter Mutation</a>
                     {% endif %}
-                    if {{ next_mutation_id }}
+                    {% if next_mutation_id %}
                     <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
                     {% endif %}
                     {% if right_mutation_id %}
