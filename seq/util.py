@@ -122,4 +122,4 @@ def get_matching_observed_mutation_ids(mutation_id, experiment_id):
         'sequencing_experiment__tech_rep__isolate__flask__flask_number',
         'sequencing_experiment__tech_rep__isolate__isolate_number',
         'sequencing_experiment__tech_rep__tech_rep_number')
-    return local_observed_mutations
+    return list(local_observed_mutations)
