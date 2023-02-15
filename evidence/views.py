@@ -24,7 +24,6 @@ def raw_file_serve(request):
     observed_mutation = ObservedMutation.objects.get(id=observed_mutation_id)
 
 
-
 def update_breseq_html_locations(html_content, base_url):
     #it's only a breseq issue for now
     return html_content.replace(IMAGE_START_SUBSTRING, IMAGE_START_SUBSTRING + '/aledata' +  str(base_url) + 'evidence/').replace(LINK_START_SUBSTRING, LINK_START_SUBSTRING + '/aledata' + base_url + 'evidence/')
@@ -67,6 +66,8 @@ def evidence(request, *args, **kwargs):
         'experiment_name': experiment_name,
         'sample': sample,
         'evidence_html_breseq': evidence_html_breseq,
-        'evidence_html_gatkcnvnator':evidence_html_gatkcnvnator})
+        'evidence_html_gatkcnvnator': evidence_html_gatkcnvnator,
+        'mutation_id': observed_mutation.mutation.id
+    })
 
     return HttpResponse(template.render(context, request))

@@ -68,6 +68,26 @@
         }
     </script>
 
+    <script type="text/javascript">
+        function save_to_experiment_filter(ale_experiment_id, mutation_id) {
+            var token = '{{csrf_token}}';
+            $.ajax(
+                {
+                    type: 'POST',
+                    headers: { "X-CSRFToken": token },
+                    url: "/mutations/add_to_exp_filter",
+                    data: {
+                        mut_id: mutation_id,
+                        experiment_id: ale_experiment_id,
+                        save_method: "experiment"
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        swal("", "Save-tag failed", "error");
+                    }
+            })
+        }
+    </script>
+
     <!-- Select 2 -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
@@ -152,7 +172,7 @@
 
                 <div id="footer">
                     <div id="center">
-                        <a href="#" class="reject">&laquo; Filter Mutation</a>
+                        <a href="#" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); return false;">&laquo; Filter Mutation</a>
                         <a href="#" class="next">Next Mutation &raquo;</a>
                     </div>
                 </div>
