@@ -6,7 +6,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django_ajax.decorators import ajax
 import seq.views.common
 from seq.views import mutation_table_builder
-from seq.util import get_all_observed_muations_filtered, get_reseq_ordered_dict
+from seq.util import get_all_observed_mutations_filtered, get_reseq_ordered_dict
 from seq.models import ResequencingExperiment
 from common.util import get_user_context
 from common.constants import REFSEQ_COLUMN_IN_MUT_TABLE
@@ -117,7 +117,7 @@ def mutation_table(request):
 
 
 def _get_table_body(experiment, ordered_reseq_dict, user, filter_type = None):
-    obs_mutations = get_all_observed_muations_filtered(experiment.ale_id, filter_type)
+    obs_mutations = get_all_observed_mutations_filtered(experiment.ale_id, filter_type)
     return mutation_table_builder.get_mutation_table_body(user, obs_mutations, ordered_reseq_dict, experiment)
 
 
