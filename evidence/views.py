@@ -5,7 +5,8 @@ import re
 from django.http import HttpResponse
 from ale.permissions import can_view_experiment
 from seq.models import ObservedMutation
-from seq.util import get_matching_observed_mutation_ids
+from seq.util import get_matching_observed_mutation_ids, get_all_observed_mutations_filtered, \
+    get_mutations_from_observed_muations
 from common.util import get_user_context
 from django.template import loader
 from logs.aledb_logger import user_extra
@@ -43,16 +44,19 @@ def get_neighbor_ids(current_mutation, experiment_id):
         right_mutation_id = list_observed_muts[ind + 1]
     else:
         right_mutation_id = None
-    neighbors = {'next': next_mutation_id,
+    neighbors = {'next': get_next_mutation(current_mutation.mutation, experiment_id),
                  'prev': previous_mutation_id,
                  'left': left_mutation_id,
                  'right': right_mutation_id}
     return neighbors
 
 
-def get_next_mutation(mutation):
-    #sort by position
-    return
+def get_next_mutation(current_mutation, experiment_id):
+    mutations = get_mutations_from_observed_muations(get_all_observed_mutations_filtered(experiment_id))
+    list_muts = sorted(mutations, key=lambda x: x.position)
+    ind = list_muts.index(current_mutation)
+
+    return list_muts[ind+1].id
 
 
 def evidence(request, *args, **kwargs):
