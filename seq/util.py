@@ -116,7 +116,12 @@ def get_ref_sequences():
 
 
 def get_matching_observed_mutation_ids(mutation_id, experiment_id):
-    local_observed_mutations = get_observed_mutation_queryset(experiment_id)
+    local_observed_mutations = get_observed_mutation_queryset(experiment_id).order_by(
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__name',
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_id',
+        'sequencing_experiment__tech_rep__isolate__flask__flask_number',
+        'sequencing_experiment__tech_rep__isolate__isolate_number',
+        'sequencing_experiment__tech_rep__tech_rep_number')
     matching_observed_mutation_ids = []
     for local_observed_mutation in local_observed_mutations:
         if local_observed_mutation.mutation.id == mutation_id:
