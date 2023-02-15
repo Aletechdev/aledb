@@ -96,6 +96,23 @@
     {% block scripts_and_style %}{% endblock %}
 </head>
 <body style="background-color: white">
+<div id="footer">
+    <div id="center">
+        {% if left_mutation_id %}
+        <a href="/mutations/details?observed_mut_id={{ left_mutation_id }}" class="neighbor">Left</a>
+        {% endif %}
+        {% if user.is_superuser %}
+        <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/mutations/details?observed_mut_id={{ next_mutation_id }}')">&laquo; Filter Mutation</a>
+        {% endif %}
+        {% if next_mutation_id %}
+        <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
+        {% endif %}
+        {% if right_mutation_id %}
+        <a href="/mutations/details?observed_mut_id={{ right_mutation_id }}" class="neighbor">Right</a>
+        {% endif %}
+
+    </div>
+</div>
 <div id="wrapper">
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px">
         <div class="navbar-header">
@@ -164,23 +181,7 @@
                     </div>
                 </div>
             </div>
-            <div id="footer">
-                <div id="center">
-                    {% if left_mutation_id %}
-                    <a href="/mutations/details?observed_mut_id={{ left_mutation_id }}" class="neighbor">Left</a>
-                    {% endif %}
-                    {% if user.is_superuser %}
-                    <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/mutations/details?observed_mut_id={{ next_mutation_id }}')">&laquo; Filter Mutation</a>
-                    {% endif %}
-                    {% if next_mutation_id %}
-                    <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
-                    {% endif %}
-                    {% if right_mutation_id %}
-                    <a href="/mutations/details?observed_mut_id={{ right_mutation_id }}" class="neighbor">Right</a>
-                    {% endif %}
 
-                </div>
-            </div>
             {% block content %}
                 <h2>{{ project_name|safe }} {{ ale_experiment_name|safe }} {{ sample|safe }}</h2>
                 <h4>Breseq alignment</h4>
