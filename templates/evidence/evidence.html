@@ -164,7 +164,7 @@
                 </div>
             </div>
             {% block content %}
-                <h2>{{ project_name|safe }} {{ experiment_name|safe }} {{ sample|safe }}</h2>
+                <h2>{{ project_name|safe }} {{ ale_experiment_name|safe }} {{ sample|safe }}</h2>
                 <h4>Breseq alignment</h4>
                 {{ evidence_html_breseq|safe }}
                 <h4>GATK/CNVnator alignment</h4>
@@ -172,8 +172,8 @@
 
                 <div id="footer">
                     <div id="center">
-                        <a href="#" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); return false;">&laquo; Filter Mutation</a>
-                        <a href="#" class="next">Next Mutation &raquo;</a>
+                        <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); return false;">&laquo; Filter Mutation</a>
+                        <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
                     </div>
                 </div>
             {% endblock %}
