@@ -1,6 +1,3 @@
-th{
-    padding-left: 3em;
-}
 
 .git-hash{
     display: block;
@@ -39,5 +36,7 @@ th{
     font-size: 22px;
 }
 #center {
+    width: 500px;
     margin: 0 auto;
+    text-align: center;
 }
