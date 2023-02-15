@@ -34,6 +34,7 @@
     padding: .5%;
     width: 100%;
     font-size: 22px;
+    z-index: 1;
 }
 #center {
     margin: 0 auto;
