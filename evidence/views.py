@@ -35,8 +35,14 @@ def get_neighbor_ids(current_mutation, experiment_id):
     previous_mutation_id = ObservedMutation.objects.filter(id__lt=current_mutation.id).order_by('id').last().id
     list_observed_muts = get_matching_observed_mutation_ids(current_mutation.mutation.id, experiment_id)
     ind = list_observed_muts.index(current_mutation.id)
-    left_mutation_id = list_observed_muts[ind - 1]
-    right_mutation_id = list_observed_muts[ind + 1]
+    if ind > 1:
+        left_mutation_id = list_observed_muts[ind - 1]
+    else:
+        left_mutation_id = current_mutation.id
+    if ind < len(list_observed_muts):
+        right_mutation_id = list_observed_muts[ind + 1]
+    else:
+        right_mutation_id = current_mutation.id
     neighbors = {'next': next_mutation_id,
                  'prev': previous_mutation_id,
                  'left': left_mutation_id,
