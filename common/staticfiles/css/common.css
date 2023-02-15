@@ -1,5 +1,5 @@
-th {
-    padding: 1.5em;
+th{
+    padding-left: 3em;
 }
 
 .git-hash{
@@ -27,7 +27,7 @@ th {
     bottom: 0;
     margin: 1%;
     width: 100%;
-    font-size: 30px;
+    font-size: 22px;
 }
 #center {
     width: 500px;
