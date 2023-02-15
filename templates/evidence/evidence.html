@@ -145,6 +145,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="page-header">
+
                         <h2>{% block header %}<b>{{ ale_experiment_name }}</b>{% endblock %}
                             <img src="{% static "img/aledb_header.png" %}"
                                  style="max-width: 10%; max-height: 10%; float: right">
@@ -163,6 +164,12 @@
                     </div>
                 </div>
             </div>
+            <div id="footer">
+                <div id="center">
+                    <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/mutations/details?observed_mut_id={{ next_mutation_id }}')">&laquo; Filter Mutation</a>
+                    <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
+                </div>
+            </div>
             {% block content %}
                 <h2>{{ project_name|safe }} {{ ale_experiment_name|safe }} {{ sample|safe }}</h2>
                 <h4>Breseq alignment</h4>
@@ -170,12 +177,6 @@
                 <h4>GATK/CNVnator alignment</h4>
                 {{ evidence_html_gatkcnvnator|safe }}
 
-                <div id="footer">
-                    <div id="center">
-                        <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/mutations/details?observed_mut_id={{ next_mutation_id }}')">&laquo; Filter Mutation</a>
-                        <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
-                    </div>
-                </div>
             {% endblock %}
         </div>
     </nav>
