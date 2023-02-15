@@ -114,3 +114,11 @@ def get_ref_sequences():
     ref_seq_list = [ref_seq for ref_seq in ref_seq_set if ref_seq]
     return sorted(ref_seq_list)
 
+
+def get_matching_observed_mutation_ids(mutation_id, experiment_id):
+    local_observed_mutations = get_observed_mutation_queryset(experiment_id)
+    matching_observed_mutation_ids = []
+    for local_observed_mutation in local_observed_mutations:
+        if local_observed_mutation.mutation.id == mutation_id:
+            matching_observed_mutation_ids.append(local_observed_mutation.id)
+    return matching_observed_mutation_ids
