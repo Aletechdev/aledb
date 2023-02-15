@@ -67,7 +67,7 @@ def evidence(request, *args, **kwargs):
     
     template = loader.get_template("evidence/evidence.html")
 
-    neighbor_mutation_ids = get_neighbor_ids(observed_mutation_id)
+    neighbor_mutation_ids = get_neighbor_ids(observed_mutation)
 
     context = get_user_context(request.user)
     context.update({
