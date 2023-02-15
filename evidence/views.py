@@ -58,8 +58,10 @@ def get_next_mutation(current_mutation, experiment_id):
     mutations = get_mutations_from_observed_muations(get_all_observed_mutations_filtered(experiment_id))
     list_muts = sorted(mutations, key=lambda x: x.position)
     ind = list_muts.index(current_mutation)
-
-    return list_muts[ind+1].id
+    if ind == len(list_muts):
+        return list_muts[ind+1].id
+    else:
+        return None
 
 
 def evidence(request, *args, **kwargs):
