@@ -166,8 +166,11 @@
             </div>
             <div id="footer">
                 <div id="center">
+                    <a href="/mutations/details?observed_mut_id={{ left_mutation_id }}" class="neighbor">Left</a>
                     <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/mutations/details?observed_mut_id={{ next_mutation_id }}')">&laquo; Filter Mutation</a>
                     <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
+                    <a href="/mutations/details?observed_mut_id={{ right_mutation_id }}" class="neighbor">Right</a>
+
                 </div>
             </div>
             {% block content %}

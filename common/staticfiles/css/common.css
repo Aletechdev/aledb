@@ -24,6 +24,12 @@ th{
     padding: .5%;
 }
 
+.neighbor {
+    background-color: #f1f1f1;
+    color: black;
+    padding: .5%;
+}
+
 #footer {
     position: fixed;
     bottom: 0;

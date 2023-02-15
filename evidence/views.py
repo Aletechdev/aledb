@@ -5,6 +5,7 @@ import re
 from django.http import HttpResponse
 from ale.permissions import can_view_experiment
 from seq.models import ObservedMutation
+from seq.util import get_matching_observed_mutation_ids
 from common.util import get_user_context
 from django.template import loader
 from logs.aledb_logger import user_extra
@@ -29,10 +30,23 @@ def update_breseq_html_locations(html_content, base_url):
     return html_content.replace(IMAGE_START_SUBSTRING, IMAGE_START_SUBSTRING + '/aledata' +  str(base_url) + 'evidence/').replace(LINK_START_SUBSTRING, LINK_START_SUBSTRING + '/aledata' + base_url + 'evidence/')
 
 
-def get_neighbor_ids(current_mutation):
+def get_neighbor_ids(current_mutation, experiment_id):
     next_mutation_id = ObservedMutation.objects.filter(id__gt=current_mutation.id).order_by('id').first().id
-    neighbors = {'next': next_mutation_id}
+    previous_mutation_id = ObservedMutation.objects.filter(id__lt=current_mutation.id).order_by('id').last().id
+    list_observed_muts = get_matching_observed_mutation_ids(current_mutation.mutation.id, experiment_id)
+    ind = list_observed_muts.index(current_mutation.id)
+    left_mutation_id = list_observed_muts[ind - 1]
+    right_mutation_id = list_observed_muts[ind + 1]
+    neighbors = {'next': next_mutation_id,
+                 'prev': previous_mutation_id,
+                 'left': left_mutation_id,
+                 'right': right_mutation_id}
     return neighbors
+
+
+def get_next_mutation(mutation):
+    #sort by position
+    return
 
 
 def evidence(request, *args, **kwargs):
@@ -67,7 +81,7 @@ def evidence(request, *args, **kwargs):
     
     template = loader.get_template("evidence/evidence.html")
 
-    neighbor_mutation_ids = get_neighbor_ids(observed_mutation)
+    neighbor_mutation_ids = get_neighbor_ids(observed_mutation, experiment.ale_id)
 
     context = get_user_context(request.user)
     context.update({
@@ -78,7 +92,10 @@ def evidence(request, *args, **kwargs):
         'evidence_html_breseq': evidence_html_breseq,
         'evidence_html_gatkcnvnator': evidence_html_gatkcnvnator,
         'mutation_id': observed_mutation.mutation.id,
-        'next_mutation_id': neighbor_mutation_ids["next"]
+        'next_mutation_id': neighbor_mutation_ids["next"],
+        'prev_mutation_id': neighbor_mutation_ids["prev"],
+        'left_mutation_id': neighbor_mutation_ids["left"],
+        'right_mutation_id': neighbor_mutation_ids["right"],
     })
 
     return HttpResponse(template.render(context, request))
