@@ -64,6 +64,7 @@ def evidence(request, *args, **kwargs):
     context.update({
         'project_name': project_name,
         'experiment_name': experiment_name,
+        'ale_experiment_id': experiment.id,
         'sample': sample,
         'evidence_html_breseq': evidence_html_breseq,
         'evidence_html_gatkcnvnator': evidence_html_gatkcnvnator,
