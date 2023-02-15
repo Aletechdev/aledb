@@ -30,7 +30,7 @@ def update_breseq_html_locations(html_content, base_url):
 
 
 def get_neighbor_ids(current_mutation):
-    next_mutation_id = ObservedMutation.objects.filter(id__gt=current_mutation.id).order_by('id').first()
+    next_mutation_id = ObservedMutation.objects.filter(id__gt=current_mutation.id).order_by('id').first().id
     neighbors = {'next': next_mutation_id}
     return neighbors
 
