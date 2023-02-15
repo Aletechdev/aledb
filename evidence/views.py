@@ -39,7 +39,7 @@ def get_neighbor_ids(current_mutation, experiment_id):
         left_mutation_id = list_observed_muts[ind - 1]
     else:
         left_mutation_id = current_mutation.id
-    if ind < len(list_observed_muts):
+    if ind < len(list_observed_muts)-1:
         right_mutation_id = list_observed_muts[ind + 1]
     else:
         right_mutation_id = current_mutation.id
