@@ -77,7 +77,7 @@ def evidence(request, *args, **kwargs):
         'sample': sample,
         'evidence_html_breseq': evidence_html_breseq,
         'evidence_html_gatkcnvnator': evidence_html_gatkcnvnator,
-        'mutation_id': observed_mutation_id,
+        'mutation_id': observed_mutation.mutation.id,
         'next_mutation_id': neighbor_mutation_ids["next"]
     })
 
