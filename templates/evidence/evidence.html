@@ -96,7 +96,10 @@
     {% block scripts_and_style %}{% endblock %}
 </head>
 <body style="background-color: white">
-<div id="footer">
+
+<div id="wrapper">
+    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px">
+    <div id="footer">
     <div id="center">
         {% if left_mutation_id %}
             <a href="/mutations/details?observed_mut_id={{ left_mutation_id }}" class="neighbor">Left</a>
@@ -121,8 +124,6 @@
 
     </div>
 </div>
-<div id="wrapper">
-    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px">
         <div class="navbar-header">
             <a class="navbar-brand" href="/">ALEdb 1.1.0</a>
         </div>
