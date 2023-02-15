@@ -29,6 +29,12 @@ def update_breseq_html_locations(html_content, base_url):
     return html_content.replace(IMAGE_START_SUBSTRING, IMAGE_START_SUBSTRING + '/aledata' +  str(base_url) + 'evidence/').replace(LINK_START_SUBSTRING, LINK_START_SUBSTRING + '/aledata' + base_url + 'evidence/')
 
 
+def get_neighbor_ids(current_mutation):
+    next_mutation_id = ObservedMutation.objects.filter(id__gt=current_mutation.id).order_by('id').first()
+    neighbors = {'next': next_mutation_id}
+    return neighbors
+
+
 def evidence(request, *args, **kwargs):
     request_details = str(request)
 
@@ -60,15 +66,19 @@ def evidence(request, *args, **kwargs):
         evidence_html_gatkcnvnator = "N/A"
     
     template = loader.get_template("evidence/evidence.html")
+
+    neighbor_mutation_ids = get_neighbor_ids(observed_mutation_id)
+
     context = get_user_context(request.user)
     context.update({
         'project_name': project_name,
-        'experiment_name': experiment_name,
+        'ale_experiment_name': experiment_name,
         'ale_experiment_id': experiment.ale_id,
         'sample': sample,
         'evidence_html_breseq': evidence_html_breseq,
         'evidence_html_gatkcnvnator': evidence_html_gatkcnvnator,
-        'mutation_id': observed_mutation.mutation.id
+        'mutation_id': observed_mutation_id,
+        'next_mutation_id': neighbor_mutation_ids["next"]
     })
 
     return HttpResponse(template.render(context, request))
