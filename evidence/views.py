@@ -38,11 +38,11 @@ def get_neighbor_ids(current_mutation, experiment_id):
     if ind > 0:
         left_mutation_id = list_observed_muts[ind - 1]
     else:
-        left_mutation_id = current_mutation.id
+        left_mutation_id = None
     if ind < len(list_observed_muts)-1:
         right_mutation_id = list_observed_muts[ind + 1]
     else:
-        right_mutation_id = current_mutation.id
+        right_mutation_id = None
     neighbors = {'next': next_mutation_id,
                  'prev': previous_mutation_id,
                  'left': left_mutation_id,
