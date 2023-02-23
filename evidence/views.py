@@ -111,6 +111,7 @@ def evidence(request, *args, **kwargs):
         'ale_experiment_name': experiment_name,
         'ale_experiment_id': experiment.ale_id,
         'sample': sample,
+        'experiments_info_list': experiments_info_list,
         'evidence_html_breseq': evidence_html_breseq,
         'evidence_html_gatkcnvnator': evidence_html_gatkcnvnator,
         'mutation_id': observed_mutation.mutation.id,
