@@ -52,88 +52,88 @@
 {% endblock %}
 {% block header %}<b>{{ ale_experiment_name }}</b> - Experiment Stats{% endblock %}
 {% block content %}
-    <div id="page-wrapper">
-        <div id="footer">
 
-            <div style="text-align:center">
-                {% for sibling_mutation_id in sibling_mutation_ids %}
-                    {% if forloop.counter0 == index %}
-                        <a href="/mutations/details?observed_mut_id={{ sibling_mutation_id }}" class="dot active" ></a>
-                    {% else %}
-                        <a href="/mutations/details?observed_mut_id={{ sibling_mutation_id }}" class="dot"></a>
-                    {% endif %}
+    <div id="footer">
+
+        <div style="text-align:center">
+            {% for sibling_mutation_id in sibling_mutation_ids %}
+                {% if forloop.counter0 == index %}
+                    <a href="/mutations/details?observed_mut_id={{ sibling_mutation_id }}" class="dot active" ></a>
+                {% else %}
+                    <a href="/mutations/details?observed_mut_id={{ sibling_mutation_id }}" class="dot"></a>
+                {% endif %}
+
+            {% endfor %}
+        </div>
+        <div id="center">
+            {% if left_mutation_id %}
+                <a href="/mutations/details?observed_mut_id={{ left_mutation_id }}" class="neighbor">Left</a>
+            {% else %}
+                <a href="#" class="neighbor">Left</a>
+            {% endif %}
+            {% if user.is_superuser %}
+                <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/mutations/details?observed_mut_id={{ next_mutation_id }}')">&laquo; Filter Mutation</a>
+            {% else %}
+                <a href="#" class="reject">&laquo; Filter Mutation</a>
+            {% endif %}
+            {% if next_mutation_id %}
+                <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
+            {% else %}
+                <a href="#" class="next">Next Mutation &raquo;</a>
+            {% endif %}
+            {% if right_mutation_id %}
+                <a href="/mutations/details?observed_mut_id={{ right_mutation_id }}" class="neighbor">Right</a>
+            {% else %}
+                <a href="#" class="neighbor">Right</a>
+            {% endif %}
+
+        </div>
+        <h2>{{ project_name|safe }} {{ ale_experiment_name|safe }} {{ sample|safe }}</h2>
+        <h2>Sample Resequencing Stats</h2>
+        <div><i>Note: The mutation counts shown below represent unfiltered mutation sets.</i></div>
+        <div class="row">
+            <table id="runs" class="table">
+                <thead>
+                <tr>
+                    <th>ALE, Flask, Isolate</th>
+                    <th>Predicted Mutations</th>
+                    <th>Unassigned Missing Coverage Evidence</th>
+                    <th>Mean Coverage</th>
+                    <th>Total Reads</th>
+                    <th>Percent Mapped</th>
+                    <th>Mapped Reads</th>
+                    <th>Average Read Length</th>
+
+                </tr>
+                </thead>
+                <tbody>
+                {% for experiment_info_tuple in experiments_info_list %}
+                    <tr class="experiment_stats">
+                        <td class="sample_name">
+                            {% if experiment_info_tuple.0.location != "" %}
+                                <a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}index.html">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
+                            {% else %}
+                                {{ experiment_info_tuple.0.ale_flask_isolate_str }}
+                            {% endif %}
+                        </td>
+                        <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
+                        <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
+                        <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
+                        <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
+                        <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
+                        <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
+                        <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
+                    </tr>
 
                 {% endfor %}
-            </div>
-            <div id="center">
-                {% if left_mutation_id %}
-                    <a href="/mutations/details?observed_mut_id={{ left_mutation_id }}" class="neighbor">Left</a>
-                {% else %}
-                    <a href="#" class="neighbor">Left</a>
-                {% endif %}
-                {% if user.is_superuser %}
-                    <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/mutations/details?observed_mut_id={{ next_mutation_id }}')">&laquo; Filter Mutation</a>
-                {% else %}
-                    <a href="#" class="reject">&laquo; Filter Mutation</a>
-                {% endif %}
-                {% if next_mutation_id %}
-                    <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
-                {% else %}
-                    <a href="#" class="next">Next Mutation &raquo;</a>
-                {% endif %}
-                {% if right_mutation_id %}
-                    <a href="/mutations/details?observed_mut_id={{ right_mutation_id }}" class="neighbor">Right</a>
-                {% else %}
-                    <a href="#" class="neighbor">Right</a>
-                {% endif %}
-
-            </div>
-            <h2>{{ project_name|safe }} {{ ale_experiment_name|safe }} {{ sample|safe }}</h2>
-            <h2>Sample Resequencing Stats</h2>
-            <div><i>Note: The mutation counts shown below represent unfiltered mutation sets.</i></div>
-            <div class="row">
-                <table id="runs" class="table">
-                    <thead>
-                    <tr>
-                        <th>ALE, Flask, Isolate</th>
-                        <th>Predicted Mutations</th>
-                        <th>Unassigned Missing Coverage Evidence</th>
-                        <th>Mean Coverage</th>
-                        <th>Total Reads</th>
-                        <th>Percent Mapped</th>
-                        <th>Mapped Reads</th>
-                        <th>Average Read Length</th>
-
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for experiment_info_tuple in experiments_info_list %}
-                        <tr class="experiment_stats">
-                            <td class="sample_name">
-                                {% if experiment_info_tuple.0.location != "" %}
-                                    <a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}index.html">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
-                                {% else %}
-                                    {{ experiment_info_tuple.0.ale_flask_isolate_str }}
-                                {% endif %}
-                            </td>
-                            <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
-                            <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
-                            <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
-                            <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
-                            <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
-                            <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
-                            <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
-                        </tr>
-
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <h4>Breseq alignment</h4>
-            {{ evidence_html_breseq|safe }}
-            <h4>GATK/CNVnator alignment</h4>
-            {{ evidence_html_gatkcnvnator|safe }}
+                </tbody>
+            </table>
         </div>
+
+        <h4>Breseq alignment</h4>
+        {{ evidence_html_breseq|safe }}
+        <h4>GATK/CNVnator alignment</h4>
+        {{ evidence_html_gatkcnvnator|safe }}
     </div>
+
 {% endblock %}
