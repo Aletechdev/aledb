@@ -117,7 +117,7 @@ def evidence(request, *args, **kwargs):
         'left_mutation_id': neighbor_mutation_ids["left"],
         'right_mutation_id': neighbor_mutation_ids["right"],
         'sibling_mutation_ids': neighbor_mutation_ids["sibling_mutation_ids"],
-        'index': ["index"]
+        'index': neighbor_mutation_ids["index"]
 
     })
 
