@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+       <!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -20,7 +20,7 @@
 
     {% load static %}
 
-    <!-- Bootstrap CSS -->
+        <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -84,7 +84,7 @@
                     error: function (xhr, ajaxOptions, thrownError) {
                         swal("", "Save-tag failed", "error");
                     }
-                })
+            })
         }
     </script>
 
@@ -99,42 +99,42 @@
 
 <div id="wrapper">
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px">
-        <div id="footer">
+    <div id="footer">
 
-            <div style="text-align:center">
-                {% for sibling_mutation_id in sibling_mutation_ids %}
-                    {% if forloop.counter0 == index %}
-                        <a href="/mutations/details?observed_mut_id={{ sibling_mutation_id }}" class="dot active" ></a>
-                    {% else %}
-                        <a href="/mutations/details?observed_mut_id={{ sibling_mutation_id }}" class="dot"></a>
-                    {% endif %}
+    <div style="text-align:center">
+        {% for sibling_mutation_id in sibling_mutation_ids %}
+            {% if forloop.counter0 == index %}
+                <a href="/mutations/details?observed_mut_id={{ sibling_mutation_id }}" class="dot active" ></a>
+            {% else %}
+                <a href="/mutations/details?observed_mut_id={{ sibling_mutation_id }}" class="dot"></a>
+            {% endif %}
 
-                {% endfor %}
-            </div>
-            <div id="center">
-                {% if left_mutation_id %}
-                    <a href="/mutations/details?observed_mut_id={{ left_mutation_id }}" class="neighbor">Left</a>
-                {% else %}
-                    <a href="#" class="neighbor">Left</a>
-                {% endif %}
-                {% if user.is_superuser %}
-                    <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/mutations/details?observed_mut_id={{ next_mutation_id }}')">&laquo; Filter Mutation</a>
-                {% else %}
-                    <a href="#" class="reject">&laquo; Filter Mutation</a>
-                {% endif %}
-                {% if next_mutation_id %}
-                    <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
-                {% else %}
-                    <a href="#" class="next">Next Mutation &raquo;</a>
-                {% endif %}
-                {% if right_mutation_id %}
-                    <a href="/mutations/details?observed_mut_id={{ right_mutation_id }}" class="neighbor">Right</a>
-                {% else %}
-                    <a href="#" class="neighbor">Right</a>
-                {% endif %}
+        {% endfor %}
+    </div>
+    <div id="center">
+        {% if left_mutation_id %}
+            <a href="/mutations/details?observed_mut_id={{ left_mutation_id }}" class="neighbor">Left</a>
+        {% else %}
+            <a href="#" class="neighbor">Left</a>
+        {% endif %}
+        {% if user.is_superuser %}
+            <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/mutations/details?observed_mut_id={{ next_mutation_id }}')">&laquo; Filter Mutation</a>
+        {% else %}
+            <a href="#" class="reject">&laquo; Filter Mutation</a>
+        {% endif %}
+        {% if next_mutation_id %}
+            <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
+        {% else %}
+            <a href="#" class="next">Next Mutation &raquo;</a>
+        {% endif %}
+        {% if right_mutation_id %}
+            <a href="/mutations/details?observed_mut_id={{ right_mutation_id }}" class="neighbor">Right</a>
+        {% else %}
+            <a href="#" class="neighbor">Right</a>
+        {% endif %}
 
-            </div>
-        </div>
+    </div>
+</div>
         <div class="navbar-header">
             <a class="navbar-brand" href="/">ALEdb 1.1.0</a>
         </div>
@@ -143,12 +143,12 @@
                 <ul class="nav in" id="side-menu">
                     {% if user.is_authenticated %}
                         <li ><a href="#"><b>{{ user.username}}</b></a>
-                        <li>
-                            <a href="{% url 'accounts:logout' %}" class="small">&nbsp;&nbsp;&nbsp;Logout</a>
-                        </li>
-                        <li>
-                            <a href="/admin/password_change/" class="small">&nbsp;&nbsp;&nbsp;Change Password</a>
-                        </li>
+                            <li>
+                                <a href="{% url 'accounts:logout' %}" class="small">&nbsp;&nbsp;&nbsp;Logout</a>
+                            </li>
+                            <li>
+                                <a href="/admin/password_change/" class="small">&nbsp;&nbsp;&nbsp;Change Password</a>
+                            </li>
                         </li>
                     {% else %}
                         <li><a href="{% url 'accounts:login' %}">Login</a></li>
@@ -178,7 +178,80 @@
                 <span id="sidebar_arrows" style="display: block; margin-top: 470px">«</span>
             </div>
         </div>
+        <div id="page-wrapper">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="page-header">
 
+                        <h2>{% block header %}<b>{{ ale_experiment_name }}</b>{% endblock %}
+                            <img src="{% static "img/aledb_header.png" %}"
+                                 style="max-width: 10%; max-height: 10%; float: right">
+                        </h2>
+                    {% if ale_experiment_id %}
+                        <a href="/stats?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Stats</a> |
+                        <a href="/metadata?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Metadata</a> |
+                        <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Mutations</a> |
+                        <a href="/converge?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Converged Mutations</a> |
+                        <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Fixed Mutations</a> |
+                        <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Filter</a>
+                    {% endif %}
+                    {% if ale_experiment_id and user.is_authenticated %}
+                        | <a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Amplifications</a>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% block content %}
+                <h2>{{ project_name|safe }} {{ ale_experiment_name|safe }} {{ sample|safe }}</h2>
+                    <h2>Sample Resequencing Stats</h2>
+                <div><i>Note: The mutation counts shown below represent unfiltered mutation sets.</i></div>
+                <div class="row">
+                    <table id="runs" class="table">
+                        <thead>
+                        <tr>
+                            <th>ALE, Flask, Isolate</th>
+                            <th>Predicted Mutations</th>
+                            <th>Unassigned Missing Coverage Evidence</th>
+                            <th>Mean Coverage</th>
+                            <th>Total Reads</th>
+                            <th>Percent Mapped</th>
+                            <th>Mapped Reads</th>
+                            <th>Average Read Length</th>
+
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for experiment_info_tuple in experiments_info_list %}
+                            <tr class="experiment_stats">
+                                <td class="sample_name">
+                                    {% if experiment_info_tuple.0.location != "" %}
+                                        <a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}index.html">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
+                                    {% else %}
+                                        {{ experiment_info_tuple.0.ale_flask_isolate_str }}
+                                    {% endif %}
+                                </td>
+                                <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
+                                <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
+                                <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
+                                <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
+                                <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
+                                <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
+                                <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
+                            </tr>
+
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <h4>Breseq alignment</h4>
+                {{ evidence_html_breseq|safe }}
+                <h4>GATK/CNVnator alignment</h4>
+                {{ evidence_html_gatkcnvnator|safe }}
+
+            {% endblock %}
+        </div>
     </nav>
 
 </div>
@@ -198,13 +271,12 @@
 <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 
-<link rel="stylesheet" type="text/css"
-      href="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.css"/>
-<script type="text/javascript"
-        src="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.css"/>
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.js"></script>
 <header>{{ file_to_serve }}</header>
 
 
 </body>
 </html>
-
