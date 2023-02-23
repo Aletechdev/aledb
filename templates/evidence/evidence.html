@@ -1,104 +1,58 @@
-       <!DOCTYPE html>
-<html lang="en">
-<head>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_TAG }}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-
-        function gtag() {
-            dataLayer.push(arguments);
+{% extends 'base.html' %}
+{% block title %}{{ ale_experiment_name }} experiment stats{% endblock %}
+{% block scripts_and_style %}
+    <style type="text/css">
+        table.dataTable tr.odd {
+            background-color: lightgrey;
         }
 
-        gtag('js', new Date());
+        table.dataTable tr.even {
+            background-color: white;
+        }
+    </style>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.css"/>
 
-        gtag('config', '{{ GOOGLE_ANALYTICS_TAG }}');
-    </script>
-
-    <meta charset="utf-8">
-    <title>{% block title %}{% endblock %}</title>
-
-    {% load static %}
-
-        <!-- Bootstrap CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-    <!-- metisMenu CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/metisMenu/2.5.2/metisMenu.min.css" rel="stylesheet">
-
-    <!-- SBAdmin 2 Theme CSS -->
-    <link href="{% static "css/sb-admin-2.css" %}" rel="stylesheet">
-
-    <!-- Font Awesome CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet"
-          integrity="sha384-T8Gy5hrqNKT+hzMclPo118YTQO6cYprQmhrYwIiQ/3axmI1hQomh7Ud2hPOy8SP1" crossorigin="anonymous">
-
-    <!-- Favicon -->
-    <link rel="shortcut icon" type="image/png" href="{% static "img/fav.png" %}">
-
-    <!-- Common CSS -->
-    <link href="{% static "css/common.css" %}" rel="stylesheet">
-
-    <!-- Jquery JS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
-
-    <!-- Jquery DataTables JS -->
-    <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
-
+    <script type="text/javascript"
+            src="https://cdn.datatables.net/v/bs-3.3.6/jszip-2.5.0/pdfmake-0.1.18/dt-1.10.12/b-1.2.2/b-colvis-1.2.2/b-flash-1.2.2/b-html5-1.2.2/b-print-1.2.2/cr-1.3.2/fh-3.1.2/datatables.min.js"></script>
     <script type="text/javascript">
-        var sidebar_hidden = false;
-        function toggle_sidebar() {
-            var x = document.getElementsByClassName('row');
-            if (sidebar_hidden) {
-                sidebar_hidden = false;
-                $('nav').css('left', '0');
-                document.getElementById('sidebar_arrows').innerText = '«';
-                for (var i = 0; i < x.length; i++) {
-                    $(x[i]).width($(x[i]).width() - 240)
-                }
-            } else {
-                sidebar_hidden = true;
-                $('nav').css('left', '-240px');
-                document.getElementById('sidebar_arrows').innerText = '»';
-                for (var j = 0; j < x.length; j++) {
-                    $(x[j]).width($(x[j]).width() + 240)
-                }
-            }
-        }
+        $(document).ready(function () {
+            $('#runs').DataTable({
+                paging: false,
+                dom: 'tir',
+                deferRender: true
+            });
+        })
     </script>
-
-    <script type="text/javascript">
-        function save_to_experiment_filter(ale_experiment_id, mutation_id) {
-            var token = '{{csrf_token}}';
-            $.ajax(
-                {
-                    type: 'POST',
-                    headers: { "X-CSRFToken": token },
-                    url: "/mutations/add_to_exp_filter",
-                    data: {
-                        mut_id: mutation_id,
-                        experiment_id: ale_experiment_id,
-                        save_method: "experiment"
-                    },
-                    error: function (xhr, ajaxOptions, thrownError) {
-                        swal("", "Save-tag failed", "error");
-                    }
-            })
+    <style>
+        .huge {
+            font-size: 28px;
         }
-    </script>
 
-    <!-- Select 2 -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css" rel="stylesheet"/>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+        .panel-magenta {
+            background-color: #b7337a;
+            color: white;
+        }
 
+        .panel-purple {
+            background-color: #7033b7;
+            color: white;
+        }
 
-    {% block scripts_and_style %}{% endblock %}
-</head>
-<body style="background-color: white">
+        .panel-orange {
+            background-color: #b77033;
+            color: white;
+        }
 
-<div id="wrapper">
-    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px">
+        .app {
+            height: 100px;
+        }
+    </style>
+
+{% endblock %}
+{% block header %}<b>{{ ale_experiment_name }}</b> - Experiment Stats{% endblock %}
+{% block content %}
+    <div id="page-wrapper">
     <div id="footer">
 
     <div style="text-align:center">
@@ -134,150 +88,55 @@
         {% endif %}
 
     </div>
-</div>
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/">ALEdb 1.1.0</a>
-        </div>
-        <div class="navbar-default sidebar" role="navigation" style="height: 100%">
-            <div class="sidebar-nav navbar-collapse pull-left" style="width: 240px">
-                <ul class="nav in" id="side-menu">
-                    {% if user.is_authenticated %}
-                        <li ><a href="#"><b>{{ user.username}}</b></a>
-                            <li>
-                                <a href="{% url 'accounts:logout' %}" class="small">&nbsp;&nbsp;&nbsp;Logout</a>
-                            </li>
-                            <li>
-                                <a href="/admin/password_change/" class="small">&nbsp;&nbsp;&nbsp;Change Password</a>
-                            </li>
-                        </li>
-                    {% else %}
-                        <li><a href="{% url 'accounts:login' %}">Login</a></li>
-                    {% endif %}
-                    <li {% block dash %}{% endblock %}><a href="/">Dashboard</a></li>
-                    <li {% block search %}{% endblock %}><a href="/search/">Search</a></li>
-                    <li><a href="/ale/projects/">Projects</a></li>
-                    <li><a href="/ale/experiments/">Experiments</a></li>
-                    <!-- <li {% block filter %}{% endblock %}><a href="/filter/global_filter/">Global Filter</a></li> -->
-                    <li><a href="/about">About</a></li>
-                    {# <li><a href="/bibliome">Bibliome</a></li> #}
-                    {% if ale_experiment_id %}
-                        <li><a href="/stats?ale_experiment_id={{ ale_experiment_id }}"><b>{{ ale_experiment_name }}</b></a></li>
-                        <li><a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Metadata</a></li>
-                        <li><a href="/mutations?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Mutations</a></li>
-                        <li><a href="/converge?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Converged Mutations</a></li>
-                        <li><a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Fixed Mutations</a></li>
-                        <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Filter</a></li>
-                    {% endif %}
-                    {% if ale_experiment_id and user.is_authenticated %}
-                        <li><a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Amplifications</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-            <div id="sidebarbutton" title="Collapse sidebar" onclick="toggle_sidebar()"
-                 style="border-radius: 0 5px 5px 0; color: rgb(68, 68, 68); font-size: 1.2em; cursor: pointer; height: 100%; padding-top: 1px; padding-left: 1px; margin-left: 240px; background-color: rgb(204, 204, 204);">
-                <span id="sidebar_arrows" style="display: block; margin-top: 470px">«</span>
-            </div>
-        </div>
-        <div id="page-wrapper">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="page-header">
+    <h2>{{ project_name|safe }} {{ ale_experiment_name|safe }} {{ sample|safe }}</h2>
+    <h2>Sample Resequencing Stats</h2>
+    <div><i>Note: The mutation counts shown below represent unfiltered mutation sets.</i></div>
+    <div class="row">
+        <table id="runs" class="table">
+            <thead>
+            <tr>
+                <th>ALE, Flask, Isolate</th>
+                <th>Predicted Mutations</th>
+                <th>Unassigned Missing Coverage Evidence</th>
+                <th>Mean Coverage</th>
+                <th>Total Reads</th>
+                <th>Percent Mapped</th>
+                <th>Mapped Reads</th>
+                <th>Average Read Length</th>
 
-                        <h2>{% block header %}<b>{{ ale_experiment_name }}</b>{% endblock %}
-                            <img src="{% static "img/aledb_header.png" %}"
-                                 style="max-width: 10%; max-height: 10%; float: right">
-                        </h2>
-                    {% if ale_experiment_id %}
-                        <a href="/stats?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Stats</a> |
-                        <a href="/metadata?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Metadata</a> |
-                        <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Mutations</a> |
-                        <a href="/converge?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Converged Mutations</a> |
-                        <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Fixed Mutations</a> |
-                        <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Filter</a>
-                    {% endif %}
-                    {% if ale_experiment_id and user.is_authenticated %}
-                        | <a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Amplifications</a>
-                    {% endif %}
-                    </div>
-                </div>
-            </div>
+            </tr>
+            </thead>
+            <tbody>
+            {% for experiment_info_tuple in experiments_info_list %}
+                <tr class="experiment_stats">
+                    <td class="sample_name">
+                        {% if experiment_info_tuple.0.location != "" %}
+                            <a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}index.html">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
+                        {% else %}
+                            {{ experiment_info_tuple.0.ale_flask_isolate_str }}
+                        {% endif %}
+                    </td>
+                    <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
+                    <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
+                    <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
+                    <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
+                    <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
+                    <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
+                    <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
+                </tr>
 
-            {% block content %}
-                <h2>{{ project_name|safe }} {{ ale_experiment_name|safe }} {{ sample|safe }}</h2>
-                    <h2>Sample Resequencing Stats</h2>
-                <div><i>Note: The mutation counts shown below represent unfiltered mutation sets.</i></div>
-                <div class="row">
-                    <table id="runs" class="table">
-                        <thead>
-                        <tr>
-                            <th>ALE, Flask, Isolate</th>
-                            <th>Predicted Mutations</th>
-                            <th>Unassigned Missing Coverage Evidence</th>
-                            <th>Mean Coverage</th>
-                            <th>Total Reads</th>
-                            <th>Percent Mapped</th>
-                            <th>Mapped Reads</th>
-                            <th>Average Read Length</th>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for experiment_info_tuple in experiments_info_list %}
-                            <tr class="experiment_stats">
-                                <td class="sample_name">
-                                    {% if experiment_info_tuple.0.location != "" %}
-                                        <a href="{{ resequencing_report_url }}{{ experiment_info_tuple.0.location }}index.html">{{ experiment_info_tuple.0.ale_flask_isolate_str }}</a>
-                                    {% else %}
-                                        {{ experiment_info_tuple.0.ale_flask_isolate_str }}
-                                    {% endif %}
-                                </td>
-                                <td class="mutation_count">{{ experiment_info_tuple.0.mutations.count }}</td>
-                                <td class="missing_coverage_count">{{ experiment_info_tuple.1 | length }}</td>
-                                <td class="mean_coverage">{{ experiment_info_tuple.0.mean_coverage }}</td>
-                                <td class="total_reads">{{ experiment_info_tuple.0.reads }}</td>
-                                <td class="percent_reads_mapped">{{ experiment_info_tuple.0.percentage_mapped }}%</td>
-                                <td class="mapped_read_count">{{ experiment_info_tuple.2 }}</td>
-                                <td class="average_read_length">{{ experiment_info_tuple.0.average_read_length }}</td>
-                            </tr>
+    <h4>Breseq alignment</h4>
+    {{ evidence_html_breseq|safe }}
+    <h4>GATK/CNVnator alignment</h4>
+    {{ evidence_html_gatkcnvnator|safe }}
 
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <h4>Breseq alignment</h4>
-                {{ evidence_html_breseq|safe }}
-                <h4>GATK/CNVnator alignment</h4>
-                {{ evidence_html_gatkcnvnator|safe }}
-
-            {% endblock %}
-        </div>
-    </nav>
-
+{% endblock %}
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/metisMenu/2.5.2/metisMenu.min.js"></script>
-<script src="{% static "js/sb-admin-2.min.js" %}"></script>
-
-<!-- DataTables Bootstrap JS -->
-<script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
-
-<!-- Bootstrap JS -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"
-        type="text/javascript"></script>
-
-<!-- Bootstrap Toggle -->
-<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-
-    <link rel="stylesheet" type="text/css"
-          href="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.css"/>
-    <script type="text/javascript"
-            src="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.js"></script>
-<header>{{ file_to_serve }}</header>
-
-
-</body>
-</html>
-
+{% endblock %}
+</div>
