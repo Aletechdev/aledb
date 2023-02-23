@@ -8,6 +8,7 @@ from seq.models import ObservedMutation
 from seq.util import get_matching_observed_mutation_ids, get_all_observed_mutations_filtered, \
     get_mutations_from_observed_muations
 from common.util import get_user_context
+from stats.util import get_reseq_experiment_info_list
 from django.template import loader
 from logs.aledb_logger import user_extra
 import logging
@@ -87,6 +88,7 @@ def evidence(request, *args, **kwargs):
     experiment_name = experiment.name
     project = experiment.project
     project_name = project.name
+    experiments_info_list = get_reseq_experiment_info_list([resequencing_experiment])
     try:
         orig_breseq_html = open(DATA_MOUNT_LOCATION + resequencing_experiment.location + breseq_evidence_location, 'r').read()
         evidence_html_breseq = update_breseq_html_locations(orig_breseq_html, '/' + str(resequencing_experiment.location))
