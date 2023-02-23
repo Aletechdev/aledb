@@ -103,7 +103,7 @@
 
     <div style="text-align:center">
         {% for sibling_mutation_id in sibling_mutation_ids %}
-            {% if forloop.counter == index %}
+            {% if forloop.counter0 == index %}
                 <a href="/mutations/details?observed_mut_id={{ sibling_mutation_id }}" class="dot active" ></a>
             {% else %}
                 <a href="/mutations/details?observed_mut_id={{ sibling_mutation_id }}" class="dot"></a>
