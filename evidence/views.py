@@ -53,7 +53,9 @@ def get_neighbor_ids(current_mutation, experiment_id):
     neighbors = {'next': next_observed_mutation,
                  'prev': previous_mutation_id,
                  'left': left_mutation_id,
-                 'right': right_mutation_id}
+                 'right': right_mutation_id,
+                 'sibling_mutation_ids': list_observed_muts,
+                 'index': ind}
     return neighbors
 
 
@@ -114,6 +116,9 @@ def evidence(request, *args, **kwargs):
         'prev_mutation_id': neighbor_mutation_ids["prev"],
         'left_mutation_id': neighbor_mutation_ids["left"],
         'right_mutation_id': neighbor_mutation_ids["right"],
+        'sibling_mutation_ids': neighbor_mutation_ids["sibling_mutation_ids"],
+        'index': ["index"]
+
     })
 
     return HttpResponse(template.render(context, request))

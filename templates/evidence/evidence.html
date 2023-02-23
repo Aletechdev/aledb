@@ -100,6 +100,12 @@
 <div id="wrapper">
     <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px">
     <div id="footer">
+
+    <div style="text-align:center">
+        {% for sibling_mutation_id in sibling_mutation_ids %}
+            <span class="dot" onclick="window.location.assign('/mutations/details?observed_mut_id={{ sibling_mutation_id }}"></span>
+        {% endfor %}
+    </div>
     <div id="center">
         {% if left_mutation_id %}
             <a href="/mutations/details?observed_mut_id={{ left_mutation_id }}" class="neighbor">Left</a>
