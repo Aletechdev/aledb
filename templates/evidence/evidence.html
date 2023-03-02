@@ -125,7 +125,7 @@
                 {% if next_mutation_id %}
                     <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
                 {% else %}
-                    <a href="#" class="next">Next Mutation &raquo;</a>
+                    <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}" class="next">Next Mutation &raquo;</a>
                 {% endif %}
                 {% if right_mutation_id %}
                     <a href="/mutations/details?observed_mut_id={{ right_mutation_id }}" class="neighbor">Right</a>
