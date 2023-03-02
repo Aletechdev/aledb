@@ -122,7 +122,7 @@
                 {% elif user.is_superuser %}
                     <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="reject" onclick="save_to_experiment_filter({{ ale_experiment_id }}, {{ mutation_id }}); window.location.assign('/filter?ale_experiment_id={{ ale_experiment_id }}">&laquo; Filter Mutation</a>
                 {% else %}
-                    <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="next">Next Mutation &raquo;</a>
+                    <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="reject">&laquo; Filter Mutation</a>
                 {% endif %}
                 {% if next_mutation_id %}
                     <a href="/mutations/details?observed_mut_id={{ next_mutation_id }}" class="next">Next Mutation &raquo;</a>
