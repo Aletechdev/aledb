@@ -170,7 +170,7 @@
 
         </div>
     </div>
-    {% if perms.filter.add_globalfilter %}
+
     <h2>Sample Resequencing Stats</h2>
     <div><i>Note: The mutation counts shown below represent unfiltered mutation sets.</i></div>
     <div class="row">
@@ -212,7 +212,7 @@
         </table>
     </div>
     <hr>
-    {% endif %}
+
     <h2>Mutation Needle Plot</h2>
     <div class="row">
         {% include 'muts_needle_plot.html' %} {# histograms use d3js import from this implementation #}
