@@ -108,8 +108,10 @@ def evidence(request, *args, **kwargs):
     context = get_user_context(request.user)
     context.update({
         'project_name': project_name,
-        'ale_experiment_name': project_name + ": " + experiment.name,
+        'ale_experiment_name': experiment.name,
         'ale_experiment_id': experiment.ale_id,
+        "ale_project_name": experiment.project.name,
+        "ale_project_id": experiment.project.id,
         'sample': sample,
         'experiments_info_list': experiments_info_list,
         'evidence_html_breseq': evidence_html_breseq,
