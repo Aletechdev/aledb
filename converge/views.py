@@ -26,7 +26,7 @@ def converge_mutations(request):
         context = get_user_context(request.user)
         experiment = seq.views.common.get_ale_experiment(request)
 
-        exp_name = experiment.project.name + ": " + experiment.name
+        exp_name = experiment.name
         ale_experiment_id = experiment.ale_id
         ale_number = seq.views.common.get_ale_id(request)
         ale_qrtset = seq.views.common.get_aleid_ale_id_list(ale_experiment_id, True)
@@ -45,6 +45,8 @@ def converge_mutations(request):
                         "ale_experiment_name": exp_name,
                         "ale_no": ale_number,
                         "ale_experiment_id": ale_experiment_id,
+                        "ale_project_name": experiment.project.name,
+                        "ale_project_id": experiment.project.id,
                         "table_body": mark_safe(table_body),
                         "table_header": mark_safe(table_header),
                         "template_header": "Converged Mutations",
