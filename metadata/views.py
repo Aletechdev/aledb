@@ -45,7 +45,9 @@ def metadata(request):
         context = get_user_context(request.user)
         context.update({"reseq_info_list": reseq_info_list,
                         "reseq_report_url": reseq_report_url,
-                        "ale_experiment_name": experiment.project.name + ": " + experiment.name,
+                        "ale_experiment_name": experiment.name,
+                        "ale_project_name": experiment.project.name,
+                        "ale_project_id": experiment.project.id,
                         "multiple": False,
                         "ale_experiment_id": ale_experiment_id
                         })
