@@ -36,7 +36,7 @@
     </script>
 
 {% endblock %}
-{% block header %}<b> {{ ale_experiment_name}} </b> - Mutation Filtering Options{% endblock %}
+{% block header %}<b><a href="/ale/project/{{ ale_project_id }}">{{ ale_project_name }}</a>: {{ ale_experiment_name}} </b> - Mutation Filtering Options{% endblock %}
 {% block content %}
 <div class="row">
     <form action="" method="POST">
