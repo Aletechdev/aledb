@@ -126,7 +126,7 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="page-header">
-                        <h2>{% block header %}<b>{{ ale_experiment_name }}</b>{% endblock %}
+                        <h2>{% block header %}<b><a href="/ale/project/{{ ale_project_id }}">{{ ale_project_name }}</a>: {{ ale_experiment_name }}</b>{% endblock %}
                             <img src="{% static "img/aledb_header.png" %}"
                                  style="max-width: 10%; max-height: 10%; float: right">
                         </h2>

@@ -32,7 +32,7 @@ def amplification_data(request):
         context = get_user_context(request.user)
         experiment = seq.views.common.get_ale_experiment(request)
 
-        exp_name = experiment.project.name + ": " + experiment.name
+        exp_name = experiment.name
         ale_no = seq.views.common.get_ale_id(request)
         sample_type = seq.views.common.get_sample_type(request)
         aleid_ale_id_list = seq.views.common.get_aleid_ale_id_list(experiment.ale_id, True)
@@ -50,6 +50,8 @@ def amplification_data(request):
         context.update({"ales": aleid_ale_id_list,
                         "ale_experiment_name": exp_name,
                         "ale_no": ale_no,
+                        "ale_project_name": experiment.project.name,
+                        "ale_project_id": experiment.project.id,
                         "sample_type": sample_type,
                         "ale_experiment_id": experiment.ale_id,
                         "table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
