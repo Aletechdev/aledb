@@ -4,6 +4,7 @@ from django.template import loader
 from django.utils.safestring import mark_safe
 from django.conf import settings
 from seq.util import get_ordered_reseq_queryset
+import seq.views.common
 from seq.views import common
 from stats.util import get_histogram_jsons,\
     get_needle_plot_data,\
@@ -46,6 +47,11 @@ def stats(request):
         except Publication.DoesNotExist:
             pub_qryset = None
 
+        experiment = seq.views.common.get_ale_experiment(request)
+        exp_name = experiment.name
+        ale_experiment_id = experiment.ale_id
+        ale_number = seq.views.common.get_ale_id(request)
+
         ale_id = common.get_ale_id(request)
         reseq_queryset = get_ordered_reseq_queryset(experiment.ale_id, ale_id)
         ale_flask_isolate_count_list = get_ale_flask_isolate_count_list(reseq_queryset)
@@ -70,7 +76,12 @@ def stats(request):
         genes_json = get_histogram_jsons(experiment.ale_id, barchart_item_count)
 
         needle_plot_data = get_needle_plot_data(experiment.ale_id)
-        context.update({"protein_change_type_count_dict": protein_change_type_count_dict,
+        context.update({"ale_experiment_name": exp_name,
+                        "ale_no": ale_number,
+                        "ale_experiment_id": ale_experiment_id,
+                        "ale_project_name": experiment.project.name,
+                        "ale_project_id": experiment.project.id,
+                        "protein_change_type_count_dict": protein_change_type_count_dict,
                         "protein_change_sum": sum(protein_change_type_count_dict.values()),
                         "observed_protein_change_type_count_dict": observed_protein_change_type_count_dict,
                         "observed_protein_change_sum": sum(observed_protein_change_type_count_dict.values()),

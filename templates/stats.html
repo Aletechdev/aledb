@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}<a href="/ale/project/{{ ale_project_id }}">{{ ale_project_name }}</a>: {{ ale_experiment_name }} experiment stats{% endblock %}
+{% block title %}{{ ale_project_name }}: {{ ale_experiment_name }} experiment stats{% endblock %}
 {% block scripts_and_style %}
     <style type="text/css">
         table.dataTable tr.odd {
