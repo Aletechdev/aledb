@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ ale_experiment_name }} experiment stats{% endblock %}
+{% block title %}<a href="/ale/project/{{ ale_project_id }}">{{ ale_project_name }}</a>: {{ ale_experiment_name }} experiment stats{% endblock %}
 {% block scripts_and_style %}
     <style type="text/css">
         table.dataTable tr.odd {
@@ -50,7 +50,7 @@
     </style>
 
 {% endblock %}
-{% block header %}<b>{{ ale_experiment_name }}</b> - Experiment Stats{% endblock %}
+{% block header %}<b><a href="/ale/project/{{ ale_project_id }}">{{ ale_project_name }}</a>: {{ ale_experiment_name }}</b> - Experiment Stats{% endblock %}
 {% block content %}
     <div class="panel panel-default">
         <div class="panel-heading">Notes</div>
@@ -170,7 +170,7 @@
 
         </div>
     </div>
-    {% if perms.filter.add_globalfilter %}
+
     <h2>Sample Resequencing Stats</h2>
     <div><i>Note: The mutation counts shown below represent unfiltered mutation sets.</i></div>
     <div class="row">
@@ -212,7 +212,7 @@
         </table>
     </div>
     <hr>
-    {% endif %}
+
     <h2>Mutation Needle Plot</h2>
     <div class="row">
         {% include 'muts_needle_plot.html' %} {# histograms use d3js import from this implementation #}

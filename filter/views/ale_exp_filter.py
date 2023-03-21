@@ -45,7 +45,9 @@ def mutation_filter(request):
             "form": filter_form,
             "experiment": experiment,
             "ale_experiment_id": experiment.ale_id,
-            "ale_experiment_name": experiment.project.name + ": " + experiment.name,
+            "ale_experiment_name": experiment.name,
+            "ale_project_name": experiment.project.name,
+            "ale_project_id": experiment.project.id,
             "ignored_mutations": ignored_mutations,
             "starting_strain_mutations": starting_strain_mutations})
         return HttpResponse(template.render(context, request), content_type="text/html")

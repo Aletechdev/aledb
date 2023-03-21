@@ -27,7 +27,7 @@ def fixating_mutations(request):
         start_time = time.clock()
         context = get_user_context(request.user)
         experiment = seq.views.common.get_ale_experiment(request)
-        exp_name = experiment.project.name + ": " + experiment.name
+        exp_name = experiment.name
         ale_experiment_id = experiment.ale_id
         ale_number = seq.views.common.get_ale_id(request)
         ale_qryset = seq.views.common.get_aleid_ale_id_list(ale_experiment_id, True)
@@ -51,6 +51,8 @@ def fixating_mutations(request):
                         "ale_experiment_name": exp_name,
                         "ale_no": ale_number,
                         "ale_experiment_id": ale_experiment_id,
+                        "ale_project_name": experiment.project.name,
+                        "ale_project_id": experiment.project.id,
                         "table_body": mark_safe(table_body),
                         "title": exp_name + " Fixating Mutations",
                         "table_header": mark_safe(table_header),
