@@ -158,6 +158,29 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/metisMenu/2.5.2/metisMenu.min.js"></script>
 <script src="{% static "js/sb-admin-2.min.js" %}"></script>
 
+
+<script type="text/javascript">
+
+function save_to_experiment_filter(ale_experiment_id, mutation_id) {
+    var token = '{{csrf_token}}';
+    $.ajax(
+        {
+            type: 'POST',
+            headers: { "X-CSRFToken": token },
+            url: "/mutations/add_to_exp_filter",
+            data: {
+                mut_id: mutation_id,
+                experiment_id: ale_experiment_id,
+                save_method: "experiment"
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                swal("", "Save-tag failed", "error");
+            }
+    })
+}
+
+</script>
+
 <!-- DataTables Bootstrap JS -->
 <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.bootstrap.min.js"></script>
 

@@ -24,6 +24,11 @@ def raw_file_serve(request):
     observed_mutation = ObservedMutation.objects.get(id=observed_mutation_id)
 
 
+def get_adjacent_mutations(request):
+    #returns mutation ids of mutation in the following positions: up, down, left and right
+    neighbors =  {}
+    return neighbors
+
 
 def update_breseq_html_locations(html_content, base_url):
     #it's only a breseq issue for now
