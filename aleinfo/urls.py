@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^enrichment/', include('enrichment.urls')),
     url(r'^evidence/', include('evidence.urls')),
     url(r'^export', include('export.urls')),
+    url(r'^home', include('home.urls')),
     url(r'^md_export', include('md_export.urls')),
     url(r'^filter/', include('filter.urls')),
     url(r'^fixation/', include('fixation.urls')),
