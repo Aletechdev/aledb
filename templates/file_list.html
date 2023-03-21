@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{{ title }}{% endblock %}
-{% block header %}<b>{{ ale_experiment_name }}</b> -{{ subtitle }}{% endblock %}
+{% block header %}<b><a href="/ale/project/{{ ale_project_id }}">{{ ale_project_name }}</a>: {{ ale_experiment_name }}</b> -{{ subtitle }}{% endblock %}
 {% block content %}
     <ul>
         {% for file, url in file_urls.items %}

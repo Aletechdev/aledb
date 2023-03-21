@@ -10,7 +10,7 @@ def get_observed_mutation_queryset(experiment_id):
     return seq.models.ObservedMutation.objects.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=experiment_id)
 
 
-def get_all_observed_muations_filtered(experiment_id, filter_type = None):
+def get_all_observed_mutations_filtered(experiment_id, filter_type = None):
     queryset = get_observed_mutation_queryset(experiment_id)
     return filter_observed_mutations(queryset, experiment_id, filter_type)
 
@@ -114,3 +114,15 @@ def get_ref_sequences():
     ref_seq_list = [ref_seq for ref_seq in ref_seq_set if ref_seq]
     return sorted(ref_seq_list)
 
+
+def get_matching_observed_mutation_ids(mutation_id, experiment_id):
+    local_observed_mutations = seq.models.ObservedMutation.objects.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=experiment_id, mutation__id=mutation_id).order_by(
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__name',
+        'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_id',
+        'sequencing_experiment__tech_rep__isolate__flask__flask_number',
+        'sequencing_experiment__tech_rep__isolate__isolate_number',
+        'sequencing_experiment__tech_rep__tech_rep_number')
+    matching_observed_mutation_ids = []
+    for local_observed_mutation in local_observed_mutations:
+        matching_observed_mutation_ids.append(local_observed_mutation.id)
+    return matching_observed_mutation_ids
