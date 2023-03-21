@@ -105,7 +105,7 @@
 
                     {# <li><a href="/bibliome">Bibliome</a></li> #}
                     {% if ale_experiment_id %}
-                        <li><a href="/stats?ale_experiment_id={{ ale_experiment_id }}"><b>{{ ale_experiment_name }}</b></a></li>
+                        <li><a href="/stats?ale_experiment_id={{ ale_experiment_id }}"><b>{{ ale_project_name }}: {{ ale_experiment_name }}</b></a></li>
                         <li><a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Metadata</a></li>
                         <li><a href="/mutations?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Mutations</a></li>
                         <li><a href="/converge?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Converged Mutations</a></li>
