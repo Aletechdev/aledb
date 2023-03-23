@@ -1,4 +1,4 @@
-       <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -20,7 +20,7 @@
 
     {% load static %}
 
-        <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -48,6 +48,7 @@
 
     <script type="text/javascript">
         var sidebar_hidden = false;
+
         function toggle_sidebar() {
             var x = document.getElementsByClassName('row');
             if (sidebar_hidden) {
@@ -85,13 +86,13 @@
             <div class="sidebar-nav navbar-collapse pull-left" style="width: 240px">
                 <ul class="nav in" id="side-menu">
                     {% if user.is_authenticated %}
-                        <li ><a href="#"><b>{{ user.username}}</b></a>
-                            <li>
-                                <a href="{% url 'accounts:logout' %}" class="small">&nbsp;&nbsp;&nbsp;Logout</a>
-                            </li>
-                            <li>
-                                <a href="/admin/password_change/" class="small">&nbsp;&nbsp;&nbsp;Change Password</a>
-                            </li>
+                        <li><a href="#"><b>{{ user.username }}</b></a>
+                        <li>
+                            <a href="{% url 'accounts:logout' %}" class="small">&nbsp;&nbsp;&nbsp;Logout</a>
+                        </li>
+                        <li>
+                            <a href="/admin/password_change/" class="small">&nbsp;&nbsp;&nbsp;Change Password</a>
+                        </li>
                         </li>
                     {% else %}
                         <li><a href="{% url 'accounts:login' %}">Login</a></li>
@@ -105,15 +106,24 @@
 
                     {# <li><a href="/bibliome">Bibliome</a></li> #}
                     {% if ale_experiment_id %}
-                        <li><a href="/stats?ale_experiment_id={{ ale_experiment_id }}"><b>{{ ale_project_name }}: {{ ale_experiment_name }}</b></a></li>
-                        <li><a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Metadata</a></li>
-                        <li><a href="/mutations?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Mutations</a></li>
-                        <li><a href="/converge?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Converged Mutations</a></li>
-                        <li><a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Fixed Mutations</a></li>
-                        <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Filter</a></li>
+                        <li>
+                            <a href="/stats?ale_experiment_id={{ ale_experiment_id }}"><b>{{ ale_project_name }}: {{ ale_experiment_name }}</b></a>
+                        </li>
+                        <li><a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Metadata</a>
+                        </li>
+                        <li>
+                            <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Mutations</a>
+                        </li>
+                        <li><a href="/converge?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Converged
+                            Mutations</a></li>
+                        <li><a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Fixed
+                            Mutations</a></li>
+                        <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Filter</a>
+                        </li>
                     {% endif %}
                     {% if ale_experiment_id and user.is_authenticated %}
-                        <li><a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Amplifications</a></li>
+                        <li><a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Amplifications</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
@@ -126,75 +136,128 @@
             <div class="row">
                 <div class="col-lg-12">
                     <div class="page-header">
-                        <h2><b>Home</b>
+                        <h2>
                             <a href="/home"><img src="{% static "img/aledb_header.png" %}"
                                                  style="max-width: 10%; max-height: 10%; float: left"></a>
                         </h2>
-                    {% if ale_experiment_id %}
-                        <a href="/stats?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Stats</a> |
-                        <a href="/metadata?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Metadata</a> |
-                        <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Mutations</a> |
-                        <a href="/converge?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Converged Mutations</a> |
-                        <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Fixed Mutations</a> |
-                        <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Filter</a>
-                    {% endif %}
-                    {% if ale_experiment_id and user.is_authenticated %}
-                        | <a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Amplifications</a>
-                    {% endif %}
+                        {% if ale_experiment_id %}
+                            <a href="/stats?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Stats</a> |
+                            <a href="/metadata?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Metadata</a> |
+                            <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Mutations</a> |
+                            <a href="/converge?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Converged Mutations</a> |
+                            <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Fixed Mutations</a> |
+                            <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Filter</a>
+                        {% endif %}
+                        {% if ale_experiment_id and user.is_authenticated %}
+                            |<a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}"
+                                class="btn-primary2" role="button">Amplifications</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            <p>ALEdb (i) is a web-based platform that comprehensively reports on ALE acquired mutations and their conditions, (ii) reports key mutations using previously established trends, (iii) enables a search-driven workflow to enhance user mutation functional analysis through mutation cross-reference, (iv) allows exporting of mutation query results for custom analysis, (v) includes a bibliome describing the databased experiment publications and (vi) contains experimental evolution mutations from multiple model organisms.</p>
-    <p>ALEdb is freely available for non-commercial use. It is hosted and maintained by the Systems Biology Research Group at the University of California, San Diego.  The PI and Group leader for the ALE activities at UCSD is Dr. Adam Feist. If you are interested in contributing to it or have general questions about its use, please email, afeist@ucsd.edu. </p>
-    <p></p>
-    <h4>Data Submission</h4>
-    <p>For data submission, please complete the the following submission <a href="https://sbrgsoftware.atlassian.net/jira/core/projects/ALE/form/1">form</a></p>
-    <h4>How do I cite ALEdb?</h4>
-    <p>When using ALEdb in your research, we kindly ask that you cite the latest publication. Your citation of ALEdb will help us to apply for ongoing funding to maintain this resource.</p>
-    <p>Phaneuf PV, Gosting D, Palsson BO, Feist AM. ALEdb 1.0: a database of mutations from adaptive laboratory evolution experimentation. Nucleic Acids Res. 2018; <a href="https://doi.org/10.1093/nar/gky983">doi:10.1093/nar/gky983</a></p>
-    <h4>Mutation data generation</h4>
-    <p>The mutation data presented on this platform was generated using an in-house pipeline that incorporates the <a
-            href=https://github.com/barricklab/breseq>BreSeq</a> resquencing pipeline, the <a href=https://gatk.broadinstitute.org/>GATK Best Practices</a> pipeline, and the <a href=https://github.com/abyzovlab/CNVnator>CNVnator</a> copy number variation detection tool.</p>
-    <p>Deatherage, D.E., Barrick, J.E. (2014) Identification of mutations in laboratory-evolved microbes from
-        next-generation sequencing data using BreSeq. Methods Mol. Biol.</p>
-    <p>Poplin R, Ruano-Rubio V, DePristo MA, Fennell TJ, Carneiro MO, Van der Auwera GA, Kling DE, Gauthier LD, Levy-Moonshine A, Roazen D, Shakir K, Thibault J, Chandran S, Whelan C, Lek M, Gabriel S, Daly MJ, Neale B, MacArthur DG, Banks E. (2017). Scaling accurate genetic variant discovery to tens of thousands of samples bioRxiv, 201178.</p>
-    <p>Abyzov A, Urban AE, Snyder M, Gerstein M. CNVnator: an approach to discover, genotype, and characterize typical and atypical CNVs from family and population genome sequencing. Genome Res. 2011 Jun;21(6):974-84. </p>
-    <h4>3rd party packages used</h4>
-    <p>mutation-needle-plot: http://dx.doi.org/10.5281/zenodo.14561</p>
-    <h4>License</h4>
-    <p>Copyright © 2023 The Regents of the University of California</p>
-    <p>Permission to use, copy, modify and distribute any part of ALEdb for educational, research and non-profit purposes, without fee, and without a written agreement is hereby granted, provided that the above copyright notice, this paragraph and the following three paragraphs appear in all copies.</p>
-    <p>Those desiring to incorporate ALEdb Models into commercial products or use for commercial purposes should contact Adam Feist at afeist@ucsd.edu and he can inform you about the appropriate tech transfer contacts.</p>
-    <p>In no event shall the University of California be liable to any party for direct, indirect, special, incidental, or consequential damages, including lost profits, arising out of the use of ALEdb, even if the University of California has been advised of the possibility of such damage.</p>
-    <p>ALEdb provided herein is on an "as is" basis, and the University of California has no obligation to provide maintenance, support, updates, enhancements, or modifications. The University of California makes no representations and extends no warranties of any kind, either implied or express, including, but not limited to, the implied warranties of merchantability or fitness for a particular purpose, or that the use of ALEdb will not infringe any patent, trademark or other rights.</p>
+            <div style="text-align: center;">
+                <h1>Intuitive and inclusive matrices for available mutations</h1>
+                <div class="two-button-field">
+                    <button>Search the Database</button>
+                    <button>See All Available Projects</button>
+                </div>
+                <div>Want to see your own private/unpublished data? <a href="/login">
+                    <div>Log in here</div>
+                </a></div>
 
-        <hr>
-        <div class="container">
-             <div class="row">
-                <div class="col-sm-12m text-muted" align="center">
-                    ALEdb is hosted and maintained by the Systems Biology Research Group at the University of California,
-                San Diego.
+                <p>ALEdb is a web-based platform that comprehensively reports on ALE acquired mutations and their
+                    conditions, (ii) reports key mutations using previously established trends, (iii) enables a
+                    search-driven workflow to enhance user mutation functional analysis through mutation
+                    cross-reference, (iv) allows exporting of mutation query results for custom analysis, (v) includes a
+                    bibliome describing the databased experiment publications and (vi) contains experimental evolution
+                    mutations from multiple model organisms.</p>
+            </div>
+            <p>ALEdb is freely available for non-commercial use. It is hosted and maintained by the Systems Biology
+                Research Group at the University of California, San Diego. The PI and Group leader for the ALE
+                activities at UCSD is Dr. Adam Feist. If you are interested in contributing to it or have general
+                questions about its use, please email, afeist@ucsd.edu. </p>
+            <p></p>
+            <h4>Data Submission</h4>
+            <p>For data submission, please complete the the following submission <a
+                    href="https://sbrgsoftware.atlassian.net/jira/core/projects/ALE/form/1">form</a></p>
+            <h4>How do I cite ALEdb?</h4>
+            <p>When using ALEdb in your research, we kindly ask that you cite the latest publication. Your citation of
+                ALEdb will help us to apply for ongoing funding to maintain this resource.</p>
+            <p>Phaneuf PV, Gosting D, Palsson BO, Feist AM. ALEdb 1.0: a database of mutations from adaptive laboratory
+                evolution experimentation. Nucleic Acids Res. 2018; <a href="https://doi.org/10.1093/nar/gky983">doi:10.1093/nar/gky983</a>
+            </p>
+            <h4>Mutation data generation</h4>
+            <p>The mutation data presented on this platform was generated using an in-house pipeline that incorporates
+                the <a
+                        href=https://github.com/barricklab/breseq>BreSeq</a> resquencing pipeline, the <a
+                        href=https://gatk.broadinstitute.org/>GATK Best Practices</a> pipeline, and the <a
+                        href=https://github.com/abyzovlab/CNVnator>CNVnator</a> copy number variation detection tool.
+            </p>
+            <p>Deatherage, D.E., Barrick, J.E. (2014) Identification of mutations in laboratory-evolved microbes from
+                next-generation sequencing data using BreSeq. Methods Mol. Biol.</p>
+            <p>Poplin R, Ruano-Rubio V, DePristo MA, Fennell TJ, Carneiro MO, Van der Auwera GA, Kling DE, Gauthier LD,
+                Levy-Moonshine A, Roazen D, Shakir K, Thibault J, Chandran S, Whelan C, Lek M, Gabriel S, Daly MJ, Neale
+                B, MacArthur DG, Banks E. (2017). Scaling accurate genetic variant discovery to tens of thousands of
+                samples bioRxiv, 201178.</p>
+            <p>Abyzov A, Urban AE, Snyder M, Gerstein M. CNVnator: an approach to discover, genotype, and characterize
+                typical and atypical CNVs from family and population genome sequencing. Genome Res. 2011
+                Jun;21(6):974-84. </p>
+            <h4>3rd party packages used</h4>
+            <p>mutation-needle-plot: http://dx.doi.org/10.5281/zenodo.14561</p>
+            <h4>License</h4>
+            <p>Copyright © 2023 The Regents of the University of California</p>
+            <p>Permission to use, copy, modify and distribute any part of ALEdb for educational, research and non-profit
+                purposes, without fee, and without a written agreement is hereby granted, provided that the above
+                copyright notice, this paragraph and the following three paragraphs appear in all copies.</p>
+            <p>Those desiring to incorporate ALEdb Models into commercial products or use for commercial purposes should
+                contact Adam Feist at afeist@ucsd.edu and he can inform you about the appropriate tech transfer
+                contacts.</p>
+            <p>In no event shall the University of California be liable to any party for direct, indirect, special,
+                incidental, or consequential damages, including lost profits, arising out of the use of ALEdb, even if
+                the University of California has been advised of the possibility of such damage.</p>
+            <p>ALEdb provided herein is on an "as is" basis, and the University of California has no obligation to
+                provide maintenance, support, updates, enhancements, or modifications. The University of California
+                makes no representations and extends no warranties of any kind, either implied or express, including,
+                but not limited to, the implied warranties of merchantability or fitness for a particular purpose, or
+                that the use of ALEdb will not infringe any patent, trademark or other rights.</p>
+
+            <hr>
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12m text-muted" align="center">
+                        ALEdb is hosted and maintained by the Systems Biology Research Group at the University of
+                        California,
+                        San Diego.
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-1"></div>
+                    <div class="col-sm-3">
+                        <a href="http://systemsbiology.ucsd.edu/">
+                            <img class="img-responsive footer-image" src="/static/img/sbrg-logo.png" height="60%"
+                                 width="60%">
+                        </a>
+                    </div>
+                    <div class="col-sm-2">
+                        <a href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
+                                                                     src="/static/img/cfb-logo.png" height="30%"
+                                                                     width="30%"></a>
+                    </div>
+                    <div class="col-sm-4">
+                        <a href="http://www.ucsd.edu/"><img class="img-responsive footer-image"
+                                                            src="/static/img/ucsd-logo.png" height="40%"
+                                                            width="40%"></a>
+                    </div>
+                    <div class="col-sm-2">
+                        <h6 class="git-hash">{{ git_hash }}</h6></div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-sm-1"></div>
-                <div class="col-sm-3">
-                    <a href="http://systemsbiology.ucsd.edu/">
-                        <img class="img-responsive footer-image" src="/static/img/sbrg-logo.png" height="60%" width="60%">
-                    </a>
-                </div>
-                <div class="col-sm-2">
-                    <a href="http://www.biosustain.dtu.dk/"><img class="img-responsive footer-image"
-                                                             src="/static/img/cfb-logo.png" height="30%" width="30%"></a>
-                </div>
-                <div class="col-sm-4">
-                    <a href="http://www.ucsd.edu/"><img class="img-responsive footer-image"
-                                                        src="/static/img/ucsd-logo.png" height="40%" width="40%"></a>
-                </div>
-                <div class="col-sm-2">
-                <h6 class="git-hash" >{{ git_hash }}</h6></div>
-            </div>
-        </div>
         </div>
     </nav>
 </div>
@@ -217,10 +280,10 @@
 <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 
-    <link rel="stylesheet" type="text/css"
-          href="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.css"/>
-    <script type="text/javascript"
-            src="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.js"></script>
+<link rel="stylesheet" type="text/css"
+      href="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.css"/>
+<script type="text/javascript"
+        src="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.js"></script>
 
 </body>
 </html>
