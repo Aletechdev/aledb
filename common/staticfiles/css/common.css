@@ -27,6 +27,7 @@ a:hover{
 .log-in-prompt{
     display: inline-block;
     position: relative;
+    padding: 12px 12px 12px 12px;
 }
 
 .log-in-prompt:hover{
