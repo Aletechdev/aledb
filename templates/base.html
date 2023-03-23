@@ -127,8 +127,8 @@
                 <div class="col-lg-12">
                     <div class="page-header">
                         <h2>{% block header %}<b><a href="/ale/project/{{ ale_project_id }}">{{ ale_project_name }}</a>: {{ ale_experiment_name }}</b>{% endblock %}
-                            <img src="{% static "img/aledb_header.png" %}"
-                                 style="max-width: 10%; max-height: 10%; float: right">
+                            <a href="/home"><img src="{% static "img/aledb_header.png" %}"
+                                                              style="max-width: 10%; max-height: 10%; float: right"></a>
                         </h2>
                     {% if ale_experiment_id %}
                         <a href="/stats?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Stats</a> |
