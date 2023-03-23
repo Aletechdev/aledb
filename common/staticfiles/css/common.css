@@ -4,6 +4,10 @@ h1{
     font-family: helvetica;
 }
 
+a:hover{
+    text-decoration:none;
+}
+
 .small-spacer-top{
     margin-top: 24px;
 }
