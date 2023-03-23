@@ -192,7 +192,8 @@ body {
 .btn-primary.btn-outline:hover,
 .btn-success.btn-outline:hover,
 .btn-warning.btn-outline:hover {
-    color: #fff
+    color: #fff;
+    text-decoration: none;
 }
 
 .chat {
