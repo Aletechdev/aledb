@@ -1,5 +1,5 @@
 h1{
-    margin-top: 80px;
+    margin-top: 60px;
     font-size: 60px;
     font-family: helvetica;
 }
@@ -29,6 +29,9 @@ a:hover{
     position: relative;
 }
 
+.log-in-prompt:hover{
+    background-color: rgba(26,115,232,.04);
+}
 .home-key-btn{
     padding: 12px 24px 12px 24px;
 }
