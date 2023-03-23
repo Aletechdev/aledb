@@ -82,6 +82,7 @@
         <div class="navbar-header">
             <a class="navbar-brand" href="/">ALEdb 1.1.0</a>
         </div>
+    <!--
         <div class="navbar-default sidebar" role="navigation" style="height: 100%">
             <div class="sidebar-nav navbar-collapse pull-left" style="width: 240px">
                 <ul class="nav in" id="side-menu">
@@ -102,7 +103,7 @@
                     <li {% block search %}{% endblock %}><a href="/search/">Search</a></li>
                     <li><a href="/ale/projects/">Projects</a></li>
                     <li><a href="/ale/experiments/">Experiments</a></li>
-                    <!-- <li {% block filter %}{% endblock %}><a href="/filter/global_filter/">Global Filter</a></li> -->
+
 
                     {# <li><a href="/bibliome">Bibliome</a></li> #}
                     {% if ale_experiment_id %}
@@ -132,6 +133,7 @@
                 <span id="sidebar_arrows" style="display: block; margin-top: 470px">«</span>
             </div>
         </div>
+         -->
         <div id="page-wrapper">
             <div class="row">
                 <div class="col-lg-12">
@@ -168,7 +170,7 @@
                     <button>See All Available Projects</button>
                 </div>
                 <div>Want to see your own private/unpublished data? <a href="/login">
-                    <div>Log in here</div>
+                    <div class="log-in-prompt">Log in here</div>
                 </a></div>
 
                 <p>ALEdb is a web-based platform that comprehensively reports on ALE acquired mutations and their
