@@ -8,6 +8,10 @@ a:hover{
     text-decoration:none;
 }
 
+.page-header{
+    margin: 0px;
+}
+
 .small-spacer-top{
     margin-top: 24px;
 }
