@@ -16,7 +16,7 @@
     </script>
 
     <meta charset="utf-8">
-    <title>ALEDB</title>
+    <title>aledb</title>
 
     {% load static %}
 
@@ -141,7 +141,7 @@
                     <div class="page-header">
                         <h2>
                             <a href="/home"><img src="{% static "img/aledb_header.png" %}"
-                                                 style="max-width: 10%; max-height: 10%; float: left"></a>
+                                                 style="max-width: 10%; max-height: 36px;"></a>
                         </h2>
                         {% if ale_experiment_id %}
                             <a href="/stats?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
@@ -165,15 +165,15 @@
                 </div>
             </div>
             <div style="text-align: center;">
-                <h1>Intuitive matrices for available mutations</h1>
+                <h1>Intuitive matrices for available mutation data</h1>
                 <div class="small-spacer-top">
-                    <p class="header-description">See mutations from related samples all in one well organized table</p>
+                    <p class="header-description">High quality curated mutations from related samples in organized, interactive and annotated tables</p>
                 </div>
                 <div class="two-button-field small-spacer-top">
-                    <button>Search the Database</button>
-                    <button>See All Available Projects</button>
+                    <a href="/search" class="btn-primary">Search the Database</a>
+                    <a href="/ale/projects" class="btn-info">See All Available Projects</a>
                 </div>
-                <div class="small-prompt">Want to see your own private/unpublished data? <a href="/login">
+                <div class="small-prompt small-spacer-top">Want to see your own private/unpublished data in aledb? <a href="/login">
                     <div class="log-in-prompt">Log in here</div>
                 </a></div>
 
