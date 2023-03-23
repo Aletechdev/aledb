@@ -21,6 +21,9 @@ h1{
     position: relative;
 }
 
+.home-key-btn{
+    padding: 12px 24px 12px 24px;
+}
 
 .git-hash{
     display: block;
