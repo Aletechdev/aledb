@@ -53,16 +53,17 @@ a:hover{
 }
 
 .pair-grid-container {
-  display: grid;
-  grid-template-columns: auto auto;
-  background-color: #FFF;
-  padding: 20px;
+    display: grid;
+    grid-template-columns: auto auto;
+    background-color: #FFF;
+    margin-top: 50px;
+    padding: 20px;
 }
 .grid-item {
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 20px;
-  font-size: 15px;
-  text-align: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    font-size: 15px;
+    text-align: center;
 }
 
 .grid-img {
