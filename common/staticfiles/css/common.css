@@ -45,6 +45,10 @@ a:hover{
     padding: 12px 24px 12px 24px;
 }
 
+.centered {
+    text-align: center;
+}
+
 .center-img {
     display: block;
     margin-left: auto;
