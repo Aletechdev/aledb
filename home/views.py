@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_unique_publication_count():
-    return AleExperiment.objects.order_by().values('doi').distinct().count
+    return AleExperiment.objects.order_by().values('doi').distinct().count()
 
 def home(request):
 
