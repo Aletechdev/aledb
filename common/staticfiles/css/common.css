@@ -4,7 +4,7 @@ html {
 
 h1{
     margin-top: 60px;
-    font-size: 60px;
+    font-size: 96px;
     font-family: helvetica;
 }
 
@@ -21,7 +21,7 @@ a:hover{
 }
 
 .header-description{
-    font-size: 20px;
+    font-size: 32px;
 }
 
 .description{
@@ -29,7 +29,7 @@ a:hover{
 }
 
 .small-prompt{
-    font-size: 16px;
+    font-size: 20px;
 }
 
 .prompt-button{
@@ -75,6 +75,11 @@ a:hover{
 
 .grid-img {
     max-width: 100%;
+}
+
+
+.example-link {
+    font-size: 16px;
 }
 
 .git-hash{
