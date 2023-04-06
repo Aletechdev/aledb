@@ -193,10 +193,64 @@
             <div id="features" class="small-spacer-top"></div>
 
         <div id="stats" class="pair-grid-container small-spacer-top">
-            <div class="grid-item"><img class="grid-img" src="/static/img/mut_stats.png"></div>
+
+            <div class="grid-item">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Mutation Type</th>
+                        <th>Observed Mutations</th>
+                        <th>Unique Mutations</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Single Base Substitutions</td>
+                        <td>{{ observed_mutation_counts.single_base_substitution }}</td>
+                        <td>{{ unique_mutation_counts.single_base_substitution }}</td>
+                    </tr>
+                    <tr>
+                        <td>Multiple Base Substitutions</td>
+                        <td>{{ observed_mutation_counts.multiple_base_substitution }}</td>
+                        <td>{{ unique_mutation_counts.multiple_base_substitution }}</td>
+                    </tr>
+                    <tr>
+                        <td>Deletions</td>
+                        <td>{{ observed_mutation_counts.deletion }}</td>
+                        <td>{{ unique_mutation_counts.deletion }}</td>
+                    </tr>
+                    <tr>
+                        <td>Insertions</td>
+                        <td>{{ observed_mutation_counts.insertion }}</td>
+                        <td>{{ unique_mutation_counts.insertion }}</td>
+                    </tr>
+                    <tr>
+                        <td>Mobile Element Insertions</td>
+                        <td>{{ observed_mutation_counts.mobile_element_insertion }}</td>
+                        <td>{{ unique_mutation_counts.mobile_element_insertion }}</td>
+                    </tr>
+                    <tr>
+                        <td>Amplifications</td>
+                        <td>{{ observed_mutation_counts.amplification }}</td>
+                        <td>{{ unique_mutation_counts.amplification }}</td>
+                    </tr>
+                    <tr>
+                        <td>Gene Conversions</td>
+                        <td>{{ observed_mutation_counts.gene_conversion }}</td>
+                        <td>{{ unique_mutation_counts.gene_conversion }}</td>
+                    </tr>
+                    <tr>
+                        <td>Inversions</td>
+                        <td>{{ observed_mutation_counts.inversion }}</td>
+                        <td>{{ unique_mutation_counts.inversion }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div class="grid-item">
               <h2 class="small-spacer-top">aledb is the largest collection of microbial evolution mutation data in the world</h2>
-                <p class="small-spacer-top">560433 instances of 192663 unique mutations from 11471 isolates across 203 unique projects</p>
+                <p class="small-spacer-top">{{ observed_mutation_counts.total }} instances of {{ unique_mutation_counts.total }} unique mutations from {{ count_dict.isolate }} isolates across {{ count_dict.project }} unique projects</p>
                 <p class="small-spacer-top">More projects added every month</p>
           </div>
 
