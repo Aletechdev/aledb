@@ -25,7 +25,7 @@ def dashboard(request):
 
     try:
         start_time = time.clock()
-        general_count_dict = _get_general_count_dict()
+        general_count_dict = get_general_count_dict()
         observed_mutation_counts = ObservedMutationCounts.objects.first()
         unique_mutation_counts = UniqueMutationCounts.objects.first()
 
@@ -46,7 +46,7 @@ def dashboard(request):
         logger.exception(e, extra = user_extra(request))
 
 
-def _get_general_count_dict():
+def get_general_count_dict():
     count_dict = dict()
     count_dict['ale_exp'] = AleExperiment.objects.count()  # No need to filter experiment count.
     count_dict['project'] = Project.objects.count()
