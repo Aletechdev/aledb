@@ -35,7 +35,6 @@ def home(request):
                     "unique_mutation_counts": unique_mutation_counts,
                     "observed_mutation_counts": observed_mutation_counts})
     logger.info("home", extra=user_extra(request))
-    context = get_user_context(request.user)
     context.update({"unique_publication_count": get_unique_publication_count})
     try:
         template = loader.get_template("home/index.html")
