@@ -60,9 +60,8 @@ a:hover{
     display: grid;
     grid-template-columns: auto auto;
     background-color: #FFF;
-    margin-top: 10%;
     padding: 20px;
-    margin-bottom: 10%;
+    margin: 10% 5%;
 }
 
 .grid-item {
