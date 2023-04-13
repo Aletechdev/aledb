@@ -263,6 +263,99 @@
           <div class="grid-item"><img class="grid-img" src="/static/img/search.png"></div>
         </div>
 
+        <div class="row">
+    <form action="/search/" method="get" >
+        <input class="form-control" type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
+        <div class="form-group row">
+            <label for="gene" class="col-sm-2 col-form-label text-right">Genetic Target:</label>
+            <div class="col-sm-3">
+              <input type="text" value="{{ last_search.gene }}" name="gene" class="form-control" id="gene"
+                     autofocus placeholder="e.g. rpoB, atp (case sensitive)" minlength="3">
+            </div>
+            <label class="col-sm-2 col-form-label text-right">Frequency Cut: </label>
+            <div class="col-sm-5">
+                <div class="row">
+                    <label for="min_freq" class="col-sm-2 col-form-label text-right">min</label>
+                    <div class="col-sm-4">
+                    <input type="number" min="0" max="1" step="0.1" value="{{ last_search.min_freq }}" name="min_freq" class="form-control" id="min_freq" placeholder="0.0 - 1.0">
+                    </div>
+                    <label for="max_freq" class="col-sm-2 col-form-label text-right">max</label>
+                    <div class="col-sm-4">
+                    <input type="number" min="0" max="1" step="0.1" value="{{ last_search.max_freq }}" name="max_freq" class="form-control" id="max_freq" placeholder="0.0 - 1.0">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="ref_seq" class="col-sm-2 col-form-label text-right">Ref Sequence:</label>
+            <div class="col-sm-3">
+                <select class="form-control" name="ref_seq" id="ref_seq">
+                        <option></option>
+                        {% for ref_seq in ref_seqs %}
+                            <option {% if ref_seq == last_search.ref_seq %}selected{% endif %}>{{ ref_seq}}</option>
+                        {% endfor %}
+                </select>
+            </div>
+
+            <label class="col-sm-2 col-form-label text-right">Position:</label>
+
+             <div class="col-sm-5">
+                <div class="row">
+                    <label for="min_pos" class="col-sm-2 text-right">Start</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control"  value="{{ last_search.min_pos }}" name="min_pos" id="min_pos" placeholder="1">
+                    </div>
+                    <label for="max_pos" class="col-sm-2 col-form-label text-right">End</label>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control"  value="{{ last_search.max_pos }}" name="max_pos" id="max_pos" placeholder="100000">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="form-group row">
+            <label for="mut_type" class="col-sm-2 col-form-label text-right">Mutation Type:</label>
+            <div class="col-sm-3">
+                <select class="form-control" name="mut_type" id="mut_type">
+                        <option></option>
+                        {% for mut_type in mut_types %}
+                            <option {% if mut_type == last_search.mut_type %}selected{% endif %}>{{ mut_type}}</option>
+                        {% endfor %}
+                </select>
+            </div>
+
+            <label for="project" class="col-sm-1 col-form-label text-right">Project:</label>
+            <div class="col-sm-3">
+                <select class="form-control" name="project" id="project">
+                        <option></option>
+                        {% for proj in projects %}
+                            <option value="{{ proj.id }}" {% if proj.id == last_search.project %}selected{% endif %}>{{ proj.name}}</option>
+                        {% endfor %}
+                </select>
+            </div>
+
+            <label for="strain" class="col-sm-1 col-form-label text-right">Strain Tax ID:</label>
+            <div class="col-sm-2">
+              <select class="form-control" id="strain" name="strain">
+                        <option></option>
+                        {% for item in strains %}
+                            <option {% if item == last_search.strain %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-4">
+                <input type="submit" class="btn btn-primary" value="Search">
+                <input class="btn btn-danger" type="button" value="Clear" onclick="clear_search()">
+                <div></div>
+            </div>
+        </div>
+        <div class="alert-danger">{{ message }}</div>
+    </form>
+</div>
+
         <div id="alignment" class="pair-grid-container small-spacer-top">
             <div class="grid-item"><img class="grid-img" width="400" height="500" src="/static/img/alignment.png"></div>
             <div class="grid-item">
