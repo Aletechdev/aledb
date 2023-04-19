@@ -255,16 +255,15 @@
           </div>
 
         </div>
-        <div id="search" class="pair-grid-container small-spacer-top">
-          <div class="grid-item">
+        <div id="search">
+          <div>
               <h2 class="small-spacer-top">Search through our database to compare results from multiple experiments at once</h2>
               <p class="small-spacer-top">When logged in, search will also include private projects you have access to as well</p>
           </div>
-          <div class="grid-item"><img class="grid-img" src="/static/img/search.png"></div>
         </div>
 
         <div class="row">
-    <form action="/search/" method="get" >
+        <form action="/search/" method="get" >
         <input class="form-control" type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
         <div class="form-group row">
             <label for="gene" class="col-sm-2 col-form-label text-right">Genetic Target:</label>
