@@ -266,19 +266,19 @@
         <form action="/search/" method="get" >
         <input class="form-control" style="width: 70%" type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
         <div class="form-group row">
-            <label for="gene" class="col-sm-2 col-form-label text-right">Genetic Target:</label>
+            <label for="gene" class="col-sm-2 col-form-label">Genetic Target:</label>
             <div class="col-sm-3">
               <input type="text" value="{{ last_search.gene }}" name="gene" class="form-control" id="gene"
                      autofocus placeholder="e.g. rpoB, atp (case sensitive)" minlength="3">
             </div>
-            <label class="col-sm-2 col-form-label text-right">Frequency Cut: </label>
+            <label class="col-sm-2 col-form-label">Frequency Cut: </label>
             <div class="col-sm-5">
                 <div class="row">
-                    <label for="min_freq" class="col-sm-2 col-form-label text-right">min</label>
+                    <label for="min_freq" class="col-sm-2 col-form-label">min</label>
                     <div class="col-sm-4">
                     <input type="number" min="0" max="1" step="0.1" value="{{ last_search.min_freq }}" name="min_freq" class="form-control" style="width: 70%" id="min_freq" placeholder="0.0 - 1.0">
                     </div>
-                    <label for="max_freq" class="col-sm-2 col-form-label text-right">max</label>
+                    <label for="max_freq" class="col-sm-2 col-form-label">max</label>
                     <div class="col-sm-4">
                     <input type="number" min="0" max="1" step="0.1" value="{{ last_search.max_freq }}" name="max_freq" class="form-control" style="width: 70%" id="max_freq" placeholder="0.0 - 1.0">
                     </div>
@@ -286,7 +286,7 @@
             </div>
         </div>
         <div class="form-group row">
-            <label for="ref_seq" class="col-sm-2 col-form-label text-right">Ref Sequence:</label>
+            <label for="ref_seq" class="col-sm-2 col-form-label">Ref Sequence:</label>
             <div class="col-sm-3">
                 <select class="form-control" name="ref_seq" id="ref_seq">
                         <option></option>
@@ -296,15 +296,15 @@
                 </select>
             </div>
 
-            <label class="col-sm-2 col-form-label text-right">Position:</label>
+            <label class="col-sm-2 col-form-label">Position:</label>
 
              <div class="col-sm-5">
                 <div class="row">
-                    <label for="min_pos" class="col-sm-2 text-right">Start</label>
+                    <label for="min_pos" class="col-sm-2">Start</label>
                     <div class="col-sm-4">
                         <input type="text" class="form-control" style="width: 70%"  value="{{ last_search.min_pos }}" name="min_pos" id="min_pos" placeholder="1">
                     </div>
-                    <label for="max_pos" class="col-sm-2 col-form-label text-right">End</label>
+                    <label for="max_pos" class="col-sm-2 col-form-label">End</label>
                     <div class="col-sm-4">
                         <input type="text" class="form-control" style="width: 70%"  value="{{ last_search.max_pos }}" name="max_pos" id="max_pos" placeholder="100000">
                     </div>
@@ -314,7 +314,7 @@
         </div>
 
         <div class="form-group row">
-            <label for="mut_type" class="col-sm-2 col-form-label text-right">Mutation Type:</label>
+            <label for="mut_type" class="col-sm-2 col-form-label">Mutation Type:</label>
             <div class="col-sm-3">
                 <select class="form-control" name="mut_type" id="mut_type">
                         <option></option>
@@ -324,7 +324,7 @@
                 </select>
             </div>
 
-            <label for="project" class="col-sm-1 col-form-label text-right">Project:</label>
+            <label for="project" class="col-sm-1 col-form-label">Project:</label>
             <div class="col-sm-3">
                 <select class="form-control" style="width: 70%" name="project" id="project">
                         <option></option>
@@ -334,7 +334,7 @@
                 </select>
             </div>
 
-            <label for="strain" class="col-sm-1 col-form-label text-right">Strain Tax ID:</label>
+            <label for="strain" class="col-sm-1 col-form-label">Strain Tax ID:</label>
             <div class="col-sm-2">
               <select class="form-control" style="width: 70%" id="strain" name="strain">
                         <option></option>
