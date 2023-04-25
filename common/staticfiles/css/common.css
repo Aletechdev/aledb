@@ -20,6 +20,10 @@ a:hover{
     margin-top: 24px;
 }
 
+.small-padding-top{
+    padding-top: 24px;
+}
+
 .header-description{
     font-size: 26px;
 }
