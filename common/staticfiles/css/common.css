@@ -56,6 +56,11 @@ a:hover{
     width: 80%;
 }
 
+.margin-sides {
+    margin-left: 12px;
+    margin-right: 12px;
+}
+
 .pair-grid-container {
     display: grid;
     grid-template-columns: auto auto;
