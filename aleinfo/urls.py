@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^fixation/', include('fixation.urls')),
     url(r'^metadata/', include('metadata.urls')),
     url(r'^mutations/', include('seq.urls')),
+    url(r'^pipeline', include('pipeline.urls')),
     url(r'^search/', include('search.urls')),
     url(r'^stats/', include('stats.urls')),
     url(r'^aledata/(?P<page_name>.*)$', protected_file_serve)
