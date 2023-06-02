@@ -17,7 +17,7 @@ def pipeline(request):
     logger.info("pipeline", extra=user_extra(request))
 
     try:
-        template = loader.get_template("pipeline/index.html")
+        template = loader.get_template("pipeline/pipeline.html")
 
         return HttpResponse(template.render(get_user_context(request.user), request), content_type="text/html")
     except Exception:
