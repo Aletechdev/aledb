@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from about import views
+from pipeline import views
 
 __author__ = 'Patrick Phaneuf'
 
