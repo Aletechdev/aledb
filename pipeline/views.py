@@ -34,6 +34,6 @@ def pipeline(request):
     try:
         template = loader.get_template("pipeline/pipeline.html")
 
-        return HttpResponse(template.render(get_user_context(request.user), request), content_type="text/html")
+        return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
         logger.exception("pipeline broke", extra=user_extra(request))
