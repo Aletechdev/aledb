@@ -10,6 +10,13 @@
     <div> {{ reponse_text }}
     </div>
 
+
+<ul>
+{% for drive in shared_drives %}
+    <li>{{ drive.Name }}</li>
+{% endfor %}
+</ul>
+
 <div class="row">
     <form action="/pipeline" method="post">
         {% csrf_token %}
