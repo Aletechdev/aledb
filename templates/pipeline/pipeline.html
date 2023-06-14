@@ -4,12 +4,6 @@
 
 {% block header %}<b><a href="#">Getting Started</a></b> - Running the pipeline{% endblock %}
 
-<form method="POST" class="post-form">
-    {% csrf_token %}
-<input type="text" name="Google Drive Folder Name">
-<button type="submit" class="save   btn btn-default">Search</button>
-</form>
-
 
 {% block scripts_and_style%}
 
@@ -85,7 +79,14 @@
 
     <div> Just using the search as a template for forms and stuff. Will replace with other things.
     </div>
+
 <div class="row">
+    <form method="POST" class="post-form">
+        {% csrf_token %}
+    <input type="text" name="Google Drive Folder Name">
+    <button type="submit" class="save   btn btn-default">Search</button>
+    </form>
+
     <form action="/pipeline/" method="get" >
         <input class="form-control" type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
         <div class="form-group row">
