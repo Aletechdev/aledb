@@ -13,6 +13,7 @@ services:
     volumes:
       - .:/app
       - /data/aledata:/data/aledata
+      - /home/muyao/.ssh:/root/.ssh
     command: bash -c "python manage.py collectstatic --no-input && gunicorn aleinfo.wsgi -b 0.0.0.0:80 --workers=4 --limit-request-line 8190 --reload --timeout 300"
   nginx:
     container_name: aledb-nginx
