@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
-<<<<<<< HEAD
+
 {% block title %}The Ensemble Mutation Calling Pipeline{% endblock %}
 
 {% block header %}<b><a href="#">Getting Started</a></b> - Running the pipeline{% endblock %}
-{% block title %}Pipeline{% endblock %}
+
 <form method="POST" class="post-form">
+    {% csrf_token %}
 <input type="text" name="Google Drive Folder Name">
 <button type="submit" class="save   btn btn-default">Search</button>
 </form>
@@ -80,7 +81,6 @@
         </script>
 {% endblock %}
 
-{% block header %}Search{% endblock %}
 {% block content %}
 
     <div> Just using the search as a template for forms and stuff. Will replace with other things.
@@ -199,4 +199,4 @@
 </div>
 {% endif %}
 {% endblock %}
->>>>>>> e4e6c91b492ca8287d70fcd0be689ff6318fe364
+
