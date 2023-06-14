@@ -14,12 +14,19 @@ try:
 except NameError:
     pass
 
-import azure.storage.blob as azureblob
-import azure.batch.batch_service_client as batch
-from azure.common.credentials import ServicePrincipalCredentials
+from azure.storage.blob import (
+    BlobServiceClient,
+    BlobSasPermissions,
+    generate_blob_sas
+)
+from azure.batch import BatchServiceClient
+from azure.batch.batch_auth import SharedKeyCredentials
 import azure.batch.models as batchmodels
+from azure.core.exceptions import ResourceExistsError
 
 from pipeline import node_control
+
+DEFAULT_ENCODING = "utf-8"
 
 sys.path.append('.')
 sys.path.append('..')
@@ -29,14 +36,13 @@ sys.path.append('..')
 # for the Batch and Storage client objects.
 
 
-def query_yes_no(question, default="yes"):
+def query_yes_no(question: str, default: str = "yes") -> str:
     """
     Prompts the user for yes/no input, displaying the specified question text.
 
     :param str question: The text of the prompt for input.
     :param str default: The default if the user hits <ENTER>. Acceptable values
     are 'yes', 'no', and None.
-    :rtype: stra
     :return: 'yes' or 'no'
     """
     valid = {'y': 'yes', 'n': 'no'}
@@ -44,23 +50,27 @@ def query_yes_no(question, default="yes"):
         prompt = ' [y/n] '
     elif default == 'yes':
         prompt = ' [Y/n] '
-
     elif default == 'no':
         prompt = ' [y/N] '
     else:
-        raise ValueError("Invalid default answer: '{}'".format(default))
+        raise ValueError(f"Invalid default answer: '{default}'")
+
+    choice = default
 
     while 1:
-        choice = input(question + prompt).lower()
-        if default and not choice:
-            return default
+        user_input = input(question + prompt).lower()
+        if not user_input:
+            break
         try:
-            return valid[choice[0]]
+            choice = valid[user_input[0]]
+            break
         except (KeyError, IndexError):
             print("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
+    return choice
 
-def print_batch_exception(batch_exception):
+
+def print_batch_exception(batch_exception: batchmodels.BatchErrorException):
     """
     Prints the contents of the specified Batch exception.
 
@@ -75,7 +85,7 @@ def print_batch_exception(batch_exception):
         if batch_exception.error.values:
             print()
             for mesg in batch_exception.error.values:
-                print('{}:\t{}'.format(mesg.key, mesg.value))
+                print(f'{mesg.key}:\t{mesg.value}')
     print('-------------------------------------------')
 
 
@@ -314,6 +324,7 @@ def add_tasks(batch_service_client, job_id, input_files_collection, output_conta
         )
 
     batch_service_client.task.add_collection(job_id, tasks)
+
 
 if __name__ == '__main__':
     try:
