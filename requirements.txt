@@ -23,3 +23,5 @@ six==1.11.0
 xlrd==1.1.0
 jsonschema==3.0.1
 coverage==4.5.3
+azure-batch==6.0.0
+azure-storage-blob==1.4.0
