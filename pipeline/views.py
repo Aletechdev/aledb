@@ -17,7 +17,16 @@ def pipeline(request):
     # TODO: use the template location described within settings.py
 
     logger.info("pipeline", extra=user_extra(request))
+    context = get_user_context(request.user)
 
+    if request.method == "POST":
+        context.update({"reponse_text":request.POST})
+        try:
+            template = loader.get_template("pipeline/pipeline.html")
+
+            return HttpResponse(template.render(context, request), content_type="text/html")
+        except Exception:
+            logger.exception("pipeline broke", extra=user_extra(request))
     try:
         template = loader.get_template("pipeline/pipeline.html")
 
