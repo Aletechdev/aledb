@@ -5,8 +5,7 @@ import subprocess
 def get_shared_directories():
     lsjson_cmd = ['ssh', '-i', '/root/.ssh/aledb', 'muyao@aledb.org', 'rclone', 'lsjson', '--dirs-only',
               '--drive-shared-with-me', 'ALE:']
-    lsjson_out = json.loads(subprocess.run(lsjson_cmd, capture_output=True, text=True).stdout)
-
+    lsjson_out = json.loads(subprocess.check_output(lsjson_cmd).decode("utf-8"))
     return lsjson_out
 
 
