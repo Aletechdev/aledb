@@ -49,6 +49,7 @@ INSTALLED_APPS = (
     'search',
     'genes',
     'bibliome',
+    'pipeline',
     'debug_toolbar',
     'guardian',
 )
