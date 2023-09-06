@@ -5,6 +5,7 @@
 *.pyc
 *~
 *.ini
+*.yml
 static/
 config.sh
 .ropeproject/
@@ -22,3 +23,4 @@ config.sh
 .idea
 .coverage
 coverage.xml
+requirements.txt
