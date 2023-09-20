@@ -1,7 +1,6 @@
 import os
 import sys
 
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -11,12 +10,13 @@ GOOGLE_ANALYTICS_TAG = os.environ.get('GOOGLE_ANALYTICS_TAG', 'no-google-analyti
 SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'http://sbrg.ucsd.edu/')
 ALE_DATA_ROOT_DIR = os.environ.get('ALE_DATA_ROOT_DIR', 'ale_data_root_dir')
 
-
-ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), '127.0.0.1', '35.236.92.37', 'ale.ucsd.edu']
+ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), 'localhost', '127.0.0.1', '35.236.92.37',
+                 'ale.ucsd.edu']
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 3600  # in seconds, 1hr
 SESSION_SAVE_EVERY_REQUEST = True
 
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", "http://localhost:8000"]
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     'genes',
     'bibliome',
     'pipeline',
+    'goggles',
     'debug_toolbar',
     'guardian',
 )
@@ -72,7 +73,7 @@ CACHES = {
     }
 }
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -91,7 +92,6 @@ AUTHENTICATION_BACKENDS = (
     'guardian.backends.ObjectPermissionBackend',
 )
 
-
 LOGIN_URL = '/accounts/login/'
 ROOT_URLCONF = 'aleinfo.urls'
 LOGIN_REDIRECT_URL = 'experiments_view'
@@ -99,17 +99,15 @@ LOGOUT_REDIRECT_URL = 'experiments_view'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'aleinfo.wsgi.application'
 
-
 # XXX(lyschoening) what does this refer to?
 OTHER_USERNAME = os.environ.get('OTHER_DATABASE_USERNAME', 'other_database_username')
 OTHER_PASSWORD = os.environ.get('OTHER_DATABASE_', 'other_database_password')
 
 USE_X_FORWARDED_PORT = os.environ.get('USE_X_FORWARDED_PORT', '0') == '1'
 
-
 # Likely has to be after initial DATABASES definition.
 # This is used for unit testing of django code.
-if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
+if 'test' in sys.argv or 'test_coverage' in sys.argv:  # Covers regular testing and django-coverage
     DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 
 # Local time zone for this installation. Choices can be found here:
@@ -260,7 +258,6 @@ LOGGING = {
     },
 }
 
-
 PUBLIC = os.environ.get('PUBLIC', '0') == '1'
 PUBLIC_USERNAME = os.environ.get('PUBLIC_USERNAME', 'public')
 PUBLIC_PASSWORD = os.environ.get('PUBLIC_PASSWORD', 'public_password')
@@ -302,9 +299,9 @@ DEFENDER_LOGIN_FAILURE_LIMIT_IP = int(os.environ.get('DEFENDER_LOGIN_FAILURE_LIM
 DEFENDER_COOLOFF_TIME = int(os.environ.get('DEFENDER_COOLOFF_TIME', 30))  # sec
 DEFENDER_REDIS_URL = os.environ.get('REDIS_URL', 'redis://:<REDIS_PW_REDACTED>@aledb-redis:6379/1')
 
-
 # For Bootstrap 3, change error alert to 'danger'
 from django.contrib import messages
+
 MESSAGE_TAGS = {
     messages.ERROR: 'danger'
 }

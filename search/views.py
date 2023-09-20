@@ -42,7 +42,7 @@ def search(request):
         if not request.GET:
             return render(request, 'search/search.html', context)
 
-        start_time = time.clock()
+        start_time = time.time()
         last_search = _get_last_search(request)
         context.update({"last_search": last_search})
 
@@ -73,7 +73,7 @@ def search(request):
                         })
         logger.info("search performance", extra=join_extras(
             {"parameters": last_search},
-            {"time taken": time.clock() - start_time}))
+            {"time taken": time.time() - start_time}))
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
         logger.exception("search broke", extra = user_extra(request))

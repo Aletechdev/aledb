@@ -1,6 +1,6 @@
 # noinspection PyUnresolvedReferences
 from .defaults import *
 
-MIDDLEWARE_CLASSES += (
+MIDDLEWARE += (
     'accounts.login_middleware.LoginRequiredMiddleware',
 )

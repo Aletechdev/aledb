@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ALEGoggles{% endblock %}
+
+{% block header %}<b><a href="#">ALEGoggles</a></b> - See our ALEBots live!{% endblock %}
+
+
+{% block content %}
+    <div class="container">
+    <h1 id="app">{{ text }}</h1>
+
+    </div>
+ <script src="{% static '/js/goggles.js' %}"></script>
+{% endblock %}
+

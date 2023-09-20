@@ -11,6 +11,6 @@ class FixatedMutation(models.Model):
                                        on_delete=models.CASCADE)
 
     mutation = models.ForeignKey(Mutation,
-                                 null=True)
+                                 null=True, on_delete=models.DO_NOTHING)
 
     fixed_observed_mutation_series = models.TextField(default='', null=True)

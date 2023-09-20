@@ -33,7 +33,7 @@ def gene(request):
     logger.info("gene usage", extra = user_extra(request))
 
     try:
-        start_time = time.clock()
+        start_time = time.time()
         gene_query = request.GET['g']
         reseq_dict, observed_mutations_with_gene_queryset = _get_seq_exp(request, gene_query)
         table_header = mutation_table_builder.get_table_header(request.user, reseq_dict)
@@ -60,7 +60,7 @@ def gene(request):
                    "homology_data": mark_safe(json.dumps(homology_data)),
                    "has_homology_data": has_homology_data,
                    "hidden_columns": hidden_columns})
-        logger.info("genes performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+        logger.info("genes performance", extra=join_extras(user_extra(request), {"time taken": time.time() - start_time}))
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
         logger.exception("genes broke", extra = user_extra(request))

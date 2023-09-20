@@ -1,9 +1,9 @@
-from django.conf.urls import url
+from django.urls import include, re_path
 
 from search import views
 
 __author__ = 'dgosting'
 
 urlpatterns = [
-    url('^$', views.search, name="search"),
+    re_path('^$', views.search, name="search"),
 ]
