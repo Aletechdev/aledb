@@ -23,4 +23,3 @@ config.sh
 .idea
 .coverage
 coverage.xml
-requirements.txt

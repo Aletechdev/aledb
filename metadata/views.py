@@ -32,7 +32,7 @@ def metadata(request):
     logger.info("fixation usage", extra=user_extra(request))
 
     try:
-        start_time = time.clock()
+        start_time = time.time()
         context = get_user_context(request.user)
         experiment = common.get_ale_experiment(request)
         ale_experiment_id = experiment.ale_id
@@ -53,7 +53,7 @@ def metadata(request):
                         })
 
         template = loader.get_template(META_DATA_TEMPLATE)
-        logger.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+        logger.info("metadata performance", extra=join_extras(user_extra(request), {"time taken": time.time() - start_time}))
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
         logger.exception("stats broke", extra=user_extra(request))

@@ -1,9 +1,9 @@
-from django.conf.urls import url
+from django.urls import include, re_path
 
 from genes import views
 
 __author__ = 'dgosting'
 
 urlpatterns = [
-    url('^$', views.gene, name="gene"),
+    re_path('^$', views.gene, name="gene"),
 ]

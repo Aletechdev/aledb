@@ -1,5 +1,5 @@
 from django.db import models
-from django_mysql.models import JSONField, Model
+from jsonfield import JSONField
 
 # Create your models here.
 class StaticData(models.Model):

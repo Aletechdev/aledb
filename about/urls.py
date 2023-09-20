@@ -1,9 +1,9 @@
-from django.conf.urls import url
+from django.urls import include, re_path
 
 from about import views
 
 __author__ = 'Patrick Phaneuf'
 
 urlpatterns = [
-    url('^$', views.about, name="about"),
+    re_path('^$', views.about, name="about"),
 ]
