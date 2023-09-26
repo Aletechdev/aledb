@@ -107,7 +107,7 @@ class AleId(models.Model):
     species = models.CharField(max_length=300, **blank_field)
     strain = models.CharField(max_length=300, **blank_field)
     ale_experiment = models.ForeignKey(AleExperiment, on_delete=models.CASCADE)
-    starting_strain = models.ForeignKey("Isolate", on_delete=models.CASCADE,
+    starting_strain = models.ForeignKey("Isolate", on_delete=models.DO_NOTHING,
                                         default=None,
                                         **blank_field)
 
@@ -198,7 +198,7 @@ class FreezerBox(models.Model):
 class Flask(models.Model):
     ale_id = models.ForeignKey(AleId, on_delete=models.CASCADE)
     flask_number = models.IntegerField(**blank_field)
-    media = models.ForeignKey(Media, on_delete=models.CASCADE)
+    media = models.ForeignKey(Media, on_delete=models.DO_NOTHING)
     comments = models.CharField(max_length=200, **blank_field)
 
     def __unicode__(self):
@@ -225,10 +225,10 @@ class Flask(models.Model):
 #TODO: Change 'library_prep' field to 'wgs_kit'
 class Isolate(models.Model):
     isolate_number = models.IntegerField()
-    parent_isolate = models.ForeignKey("Isolate", on_delete=models.CASCADE, **blank_field)
+    parent_isolate = models.ForeignKey("Isolate", on_delete=models.DO_NOTHING, **blank_field)
     flask = models.ForeignKey(Flask, on_delete=models.CASCADE)
     is_population = models.BooleanField()
-    freezer_box = models.ForeignKey(FreezerBox, on_delete=models.CASCADE)
+    freezer_box = models.ForeignKey(FreezerBox, on_delete=models.DO_NOTHING)
     description = models.CharField(max_length=300, **blank_field)
     person = models.CharField(max_length=200, **blank_field)
     reseq_reference = models.CharField(max_length=200, **blank_field)
