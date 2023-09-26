@@ -3,6 +3,7 @@
         var table = $('#exp_table').DataTable({
             scrollY: 600,
             scrollX: true,
+            autoWidth: true,
             paging: false,
             dom: 'l<<"pull-left"B><"pull-right"f>r>t<<"pull-left"i><"pull-right"p>>',
             deferRender: true,

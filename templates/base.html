@@ -1,4 +1,4 @@
-       <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -20,7 +20,7 @@
 
     {% load static %}
 
-        <!-- Bootstrap CSS -->
+    <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -47,23 +47,24 @@
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
 
     <script type="text/javascript">
-        var sidebar_hidden = false;
+        var sidebar_hidden = true;
+
         function toggle_sidebar() {
-            var x = document.getElementsByClassName('row');
+            var x = document.getElementById('aledb-content');
             if (sidebar_hidden) {
                 sidebar_hidden = false;
-                $('nav').css('left', '0');
+                document.getElementById('sidebar').style.display = 'block';
+                document.getElementById('sidebar').style.width = '240px';
+                //$('nav').css('left', '0');
                 document.getElementById('sidebar_arrows').innerText = '«';
-                for (var i = 0; i < x.length; i++) {
-                    $(x[i]).width($(x[i]).width() - 240)
-                }
+                x.style.paddingLeft = '240px';
             } else {
                 sidebar_hidden = true;
-                $('nav').css('left', '-240px');
+                document.getElementById('sidebar').style.display = 'none';
+                document.getElementById('sidebar').style.width = '0';
+                //$('nav').css('left', '-240px');
                 document.getElementById('sidebar_arrows').innerText = '»';
-                for (var j = 0; j < x.length; j++) {
-                    $(x[j]).width($(x[j]).width() + 240)
-                }
+                x.style.paddingLeft = '0';
             }
         }
     </script>
@@ -77,74 +78,97 @@
 </head>
 <body style="background-color: white">
 <div id="wrapper">
-    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0px">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="/">ALEdb 1.1.0</a>
-        </div>
-        <div class="navbar-default sidebar" role="navigation" style="height: 100%">
-            <div class="sidebar-nav navbar-collapse pull-left" style="width: 240px">
-                <ul class="nav in" id="side-menu">
-                    {% if user.is_authenticated %}
-                        <li ><a href="#"><b>{{ user.username}}</b></a>
-                            <li>
-                                <a href="{% url 'accounts:logout' %}" class="small">&nbsp;&nbsp;&nbsp;Logout</a>
-                            </li>
-                            <li>
-                                <a href="/admin/password_change/" class="small">&nbsp;&nbsp;&nbsp;Change Password</a>
-                            </li>
-                        </li>
-                    {% else %}
-                        <li><a href="{% url 'accounts:login' %}">Login</a></li>
-                    {% endif %}
-                    <li><a href="/about">About</a></li>
-                    <li {% block dash %}{% endblock %}><a href="/dashboard">Dashboard</a></li>
-                    <li {% block search %}{% endblock %}><a href="/search/">Search</a></li>
-                    <li><a href="/ale/projects/">Projects</a></li>
-                    <li><a href="/ale/experiments/">Experiments</a></li>
-                    <!-- <li {% block filter %}{% endblock %}><a href="/filter/global_filter/">Global Filter</a></li> -->
+    <div class="navbar-default" role="navigation" style=" z-index:999; float: left;position: absolute; top:0; left:0">
+        <div class="sidebar" style="display:none; width: 0; float: left" id="sidebar">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">ALEdb 1.1.0</a>
+            </div>
+            <ul class="nav in" id="side-menu" style="padding-top: 6em;">
+                {% if user.is_authenticated %}
+                    <li><a href="#"><b>{{ user.username }}</b></a>
+                    <li>
+                        <a href="{% url 'accounts:logout' %}" class="small">&nbsp;&nbsp;&nbsp;Logout</a>
+                    </li>
+                    <li>
+                        <a href="/admin/password_change/" class="small">&nbsp;&nbsp;&nbsp;Change Password</a>
+                    </li>
+                    </li>
+                {% else %}
+                    <li><a href="{% url 'accounts:login' %}">Login</a></li>
+                {% endif %}
+                <li><a href="/about">About</a></li>
+                <li {% block dash %}{% endblock %}><a href="/dashboard">Dashboard</a></li>
+                <li {% block search %}{% endblock %}><a href="/search/">Search</a></li>
+                <li><a href="/ale/projects/">Projects</a></li>
+                <li><a href="/ale/experiments/">Experiments</a></li>
+                <!-- <li {% block filter %}{% endblock %}><a href="/filter/global_filter/">Global Filter</a></li> -->
 
-                    {# <li><a href="/bibliome">Bibliome</a></li> #}
-                    {% if ale_experiment_id %}
-                        <li><a href="/stats?ale_experiment_id={{ ale_experiment_id }}"><b>{{ ale_project_name }}: {{ ale_experiment_name }}</b></a></li>
-                        <li><a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Metadata</a></li>
-                        <li><a href="/mutations?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Mutations</a></li>
-                        <li><a href="/converge?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Converged Mutations</a></li>
-                        <li><a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Fixed Mutations</a></li>
-                        <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Filter</a></li>
-                        <li><a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Amplifications</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-            <div id="sidebarbutton" title="Collapse sidebar" onclick="toggle_sidebar()"
-                 style="border-radius: 0 5px 5px 0; color: rgb(68, 68, 68); font-size: 1.2em; cursor: pointer; height: 100%; padding-top: 1px; padding-left: 1px; margin-left: 240px; background-color: rgb(204, 204, 204);">
-                <span id="sidebar_arrows" style="display: block; margin-top: 470px">«</span>
-            </div>
+                {# <li><a href="/bibliome">Bibliome</a></li> #}
+                {% if ale_experiment_id %}
+                    <li>
+                        <a href="/stats?ale_experiment_id={{ ale_experiment_id }}"><b>{{ ale_project_name }}: {{ ale_experiment_name }}</b></a>
+                    </li>
+                    <li><a href="/metadata?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Metadata</a>
+                    </li>
+                    <li>
+                        <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Mutations</a>
+                    </li>
+                    <li><a href="/converge?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Converged
+                        Mutations</a></li>
+                    <li><a href="/fixation?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Fixed
+                        Mutations</a></li>
+                    <li><a href="/filter?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Filter</a>
+                    </li>
+                    <li><a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}">&nbsp;&nbsp;&nbsp;Amplifications</a>
+                    </li>
+                {% endif %}
+            </ul>
         </div>
-        <div id="page-wrapper">
-            <div class="row">
+        <div id="sidebarbutton" title="Collapse sidebar" onclick="toggle_sidebar()"
+             style=" float:left; background-color: rgb(204, 204, 204); border-radius: 0 5px 5px 0; color: rgb(68, 68, 68); font-size: 1.2em; cursor: pointer; padding-top: 1px; padding-left: 1px; margin-top: 5em; margin-bottom: 5em">
+            <div id="sidebar_arrows" style="height: 100vh;line-height: 100vh; text-align: center;">«</div>
+        </div>
+
+    </div>
+
+    <div id="aledb-content" style="float: left; margin-left: 2em; position: absolute; top:0; padding-left:0px; width: 95vw">
+        <div class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0px">
+
+            <div class="body">
                 <div class="col-lg-12">
                     <div class="page-header">
-                        <h2>{% block header %}<b><a href="/ale/project/{{ ale_project_id }}">{{ ale_project_name }}</a>: {{ ale_experiment_name }}</b>{% endblock %}
+                        <h2>{% block header %}
+                            <b><a href="/ale/project/{{ ale_project_id }}">{{ ale_project_name }}</a>: {{ ale_experiment_name }}
+                            </b>{% endblock %}
                             <a href="/home"><img src="{% static "img/aledb_header.png" %}"
-                                                              style="max-width: 10%; max-height: 10%; float: right"></a>
+                                                 style="max-width: 10%; max-height: 10%; float: right"></a>
                         </h2>
-                    {% if ale_experiment_id %}
-                        <a href="/stats?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Stats</a> |
-                        <a href="/metadata?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Metadata</a> |
-                        <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Mutations</a> |
-                        <a href="/converge?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Converged Mutations</a> |
-                        <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Fixed Mutations</a> |
-                        <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Filter</a>
-                    {% endif %}
-                    {% if ale_experiment_id and user.is_authenticated %}
-                        | <a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2" role="button">Amplifications</a>
-                    {% endif %}
+                        {% if ale_experiment_id %}
+                            <a href="/stats?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Stats</a> |
+                            <a href="/metadata?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Metadata</a> |
+                            <a href="/mutations?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Mutations</a> |
+                            <a href="/converge?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Converged Mutations</a> |
+                            <a href="/fixation?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Fixed Mutations</a> |
+                            <a href="/filter?ale_experiment_id={{ ale_experiment_id }}" class="btn-primary2"
+                               role="button">Filter</a>
+                        {% endif %}
+                        {% if ale_experiment_id and user.is_authenticated %}
+                            |<a href="/mutations/amplifications?ale_experiment_id={{ ale_experiment_id }}"
+                                class="btn-primary2" role="button">Amplifications</a>
+                        {% endif %}
                     </div>
+
                 </div>
             </div>
-            {% block content %}{% endblock %}
+
         </div>
-    </nav>
+        {% block content %}{% endblock %}
+    </div>
 </div>
 
 
@@ -163,11 +187,12 @@
 <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 
-    <link rel="stylesheet" type="text/css"
-          href="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.css"/>
-    <script type="text/javascript"
-            src="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.js"></script>
+<link rel="stylesheet" type="text/css"
+      href="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.css"/>
+<script type="text/javascript"
+        src="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.js"></script>
 
+<script>toggle_sidebar()</script>
 </body>
 </html>
 
