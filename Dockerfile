@@ -1,5 +1,5 @@
 
-FROM python:3.5
+FROM python:3.11
 
 # Ensure that Python outputs everything that's printed inside
 # the application rather than buffering it.

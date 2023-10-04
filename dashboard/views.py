@@ -24,7 +24,7 @@ def dashboard(request):
     logger.info("populating dashboard", extra=user_extra(request))
 
     try:
-        start_time = time.clock()
+        start_time = time.time()
         general_count_dict = get_general_count_dict()
         observed_mutation_counts = ObservedMutationCounts.objects.first()
         unique_mutation_counts = UniqueMutationCounts.objects.first()
@@ -38,7 +38,7 @@ def dashboard(request):
                         "unique_mutation_counts": unique_mutation_counts,
                         "observed_mutation_counts": observed_mutation_counts,
                         "timeline": get_timeline()})
-        logger.info("dashboard performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+        logger.info("dashboard performance", extra=join_extras(user_extra(request), {"time taken": time.time() - start_time}))
 
         return render(request, DASHBOARD_TEMPLATE, context, content_type="text/html")
 

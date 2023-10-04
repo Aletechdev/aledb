@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import include, re_path
 
 from . import views
 
@@ -6,5 +6,5 @@ __author__ = 'dgosting'
 
 
 urlpatterns = [
-    url(r'^$', views.stats, name='stats'),
+    re_path(r'^$', views.stats, name='stats'),
 ]

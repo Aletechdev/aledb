@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import include, re_path
 
 import enrichment.views
 
 
 urlpatterns = [
-    url('^$', enrichment.views.enrichment_mutations, name="enrichment")
+    re_path('^$', enrichment.views.enrichment_mutations, name="enrichment")
 ]

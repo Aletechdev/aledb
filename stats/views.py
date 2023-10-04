@@ -35,8 +35,7 @@ if hasattr(settings, "SEQUENCING_URL"):
 def stats(request):
     logger.info("stats usage", extra=user_extra(request))
     try:
-        start_time = time.clock()
-
+        start_time = time.time()
         context = get_user_context(request.user)
         experiment = common.get_ale_experiment(request)
         if experiment:
@@ -108,13 +107,14 @@ def stats(request):
                         })
 
         logger.info("stats performance",
-                             extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+                             extra=join_extras(user_extra(request), {"time taken": time.time() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
 
     except Exception as e:
         logger.exception("stats broke", extra=user_extra(request))
         template = loader.get_template("500.html")
+        context = get_user_context(request.user)
         context['err_message'] = str(e)
         return HttpResponse(template.render(context, request), content_type="text/html")
 
