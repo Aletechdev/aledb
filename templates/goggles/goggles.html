@@ -92,28 +92,6 @@
 
     <script src="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.js"></script>
 
-    <table id="ale-machines" class="display" style="width:20%"></table>
-    <script>
-        const dataSet = [
-            ['ALE 1.0', 'UCSD'],
-            ['ALE 1.1', 'UCSD'],
-            ['ALE 2.0', 'UCSD'],
-            ['ALE 2.1', 'UCSD'],
-            ['ALE 3.0', 'UCSD'],
-            ['ALE 1.0', 'DTU'],
-            ['ALE 1.1', 'DTU'],
-            ['ALE 2.1', 'DTU'],
-            ['ALE 3.0', 'DTU'],
-        ];
-        new DataTable('#ale-machines', {
-            select: 'multi+shift',
-            columns: [
-                {title: 'Name'},
-                {title: 'Location'}
-            ],
-            data: dataSet
-        });
-    </script>
     <div class="container">
         <h1 id="app">{{ text }}</h1>
     </div>
