@@ -1,9 +1,9 @@
-from django.conf.urls import url
+from django.urls import include, re_path
 
 from export import views
 
 __author__ = 'dgosting'
 
 urlpatterns = [
-    url('^$', views.export, name="export"),
+    re_path('^$', views.export, name="export"),
 ]

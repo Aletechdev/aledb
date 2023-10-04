@@ -1,8 +1,8 @@
-from django.conf.urls import url
+from django.urls import include, re_path
 
 import converge.views
 
 
 urlpatterns = [
-    url('^$', converge.views.converge_mutations, name="converge")
+    re_path('^$', converge.views.converge_mutations, name="converge")
 ]

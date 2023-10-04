@@ -1,5 +1,6 @@
 from django.db import models
-from django_mysql.models import JSONField, Model
+from django_mysql.models import Model
+from jsonfield import JSONField
 
 
 class ObservedMutationCounts(models.Model):

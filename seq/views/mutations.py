@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 def amplification_data(request):
     logger.info("amplification mutation usage", user_extra(request))
     try:
-        start_time = time.clock()
+        start_time = time.time()
         context = get_user_context(request.user)
         experiment = seq.views.common.get_ale_experiment(request)
 
@@ -63,7 +63,7 @@ def amplification_data(request):
                         "tag_dropdown": common.constants.TAGS
                         })
         logger.info("mutation performance",
-                    extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+                    extra=join_extras(user_extra(request), {"time taken": time.time() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
@@ -76,7 +76,7 @@ def amplification_data(request):
 def mutation_table(request):
     logger.info("mutation usage", user_extra(request))
     try:
-        start_time = time.clock()
+        start_time = time.time()
         context = get_user_context(request.user)
         experiment = seq.views.common.get_ale_experiment(request)
 
@@ -110,7 +110,7 @@ def mutation_table(request):
                         "refseq_column": REFSEQ_COLUMN_IN_MUT_TABLE,
                         "tag_dropdown": common.constants.TAGS
                         })
-        logger.info("mutation performance", extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+        logger.info("mutation performance", extra=join_extras(user_extra(request), {"time taken": time.time() - start_time}))
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:

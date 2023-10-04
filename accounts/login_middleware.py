@@ -24,7 +24,7 @@ class LoginRequiredMiddleware:
         logger = logging.getLogger(__name__)
         assert hasattr(request, 'user'), "The Login Required middleware\
  requires authentication middleware to be installed. Edit your\
- MIDDLEWARE_CLASSES setting to insert\
+ MIDDLEWARE setting to insert\
  'django.contrib.auth.middleware.AuthenticationMiddleware'. If that doesn't\
  work, ensure your TEMPLATE_CONTEXT_PROCESSORS setting includes\
  'django.core.context_processors.auth'."

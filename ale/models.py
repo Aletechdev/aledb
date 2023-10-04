@@ -64,7 +64,7 @@ class AleExperiment(models.Model):
     name = models.CharField(max_length=200)
     person = models.CharField(max_length=200)
     date = models.DateTimeField(auto_now_add=True)
-    instrument = models.ForeignKey(Instrument)
+    instrument = models.ForeignKey(Instrument, on_delete=models.CASCADE)
     notes = models.TextField(**blank_field)
     project = models.ForeignKey(Project, default=None, **blank_field, on_delete=models.DO_NOTHING)
     doi = models.TextField(**blank_field)
@@ -106,8 +106,8 @@ class AleId(models.Model):
     description = models.CharField(max_length=300, **blank_field)
     species = models.CharField(max_length=300, **blank_field)
     strain = models.CharField(max_length=300, **blank_field)
-    ale_experiment = models.ForeignKey(AleExperiment)
-    starting_strain = models.ForeignKey("Isolate",
+    ale_experiment = models.ForeignKey(AleExperiment, on_delete=models.CASCADE)
+    starting_strain = models.ForeignKey("Isolate", on_delete=models.DO_NOTHING,
                                         default=None,
                                         **blank_field)
 
@@ -196,9 +196,9 @@ class FreezerBox(models.Model):
 
 
 class Flask(models.Model):
-    ale_id = models.ForeignKey(AleId)
+    ale_id = models.ForeignKey(AleId, on_delete=models.CASCADE)
     flask_number = models.IntegerField(**blank_field)
-    media = models.ForeignKey(Media)
+    media = models.ForeignKey(Media, on_delete=models.DO_NOTHING)
     comments = models.CharField(max_length=200, **blank_field)
 
     def __unicode__(self):
@@ -225,10 +225,10 @@ class Flask(models.Model):
 #TODO: Change 'library_prep' field to 'wgs_kit'
 class Isolate(models.Model):
     isolate_number = models.IntegerField()
-    parent_isolate = models.ForeignKey("Isolate", **blank_field)
-    flask = models.ForeignKey(Flask)
+    parent_isolate = models.ForeignKey("Isolate", on_delete=models.DO_NOTHING, **blank_field)
+    flask = models.ForeignKey(Flask, on_delete=models.CASCADE)
     is_population = models.BooleanField()
-    freezer_box = models.ForeignKey(FreezerBox)
+    freezer_box = models.ForeignKey(FreezerBox, on_delete=models.DO_NOTHING)
     description = models.CharField(max_length=300, **blank_field)
     person = models.CharField(max_length=200, **blank_field)
     reseq_reference = models.CharField(max_length=200, **blank_field)
@@ -259,7 +259,7 @@ class Isolate(models.Model):
 
 class TechnicalReplicate(models.Model):
     tech_rep_number = models.IntegerField(default=1)
-    isolate = models.ForeignKey(Isolate)
+    isolate = models.ForeignKey(Isolate, on_delete=models.CASCADE)
     tags = models.CharField(max_length=500, **blank_field)
     description = models.CharField(max_length=500, **blank_field)
 

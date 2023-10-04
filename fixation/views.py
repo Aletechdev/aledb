@@ -24,7 +24,7 @@ def fixating_mutations(request):
     logger.info("fixation usage", extra=user_extra(request))
 
     try:
-        start_time = time.clock()
+        start_time = time.time()
         context = get_user_context(request.user)
         experiment = seq.views.common.get_ale_experiment(request)
         exp_name = experiment.name
@@ -62,7 +62,7 @@ def fixating_mutations(request):
                         "tag_dropdown": common.constants.TAGS})
 
         logger.info("fixation performance",
-                             extra=join_extras(user_extra(request), {"time taken": time.clock() - start_time}))
+                             extra=join_extras(user_extra(request), {"time taken": time.time() - start_time}))
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
         logger.exception("stats broke", extra=user_extra(request))

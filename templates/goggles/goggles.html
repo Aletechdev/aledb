@@ -1,0 +1,553 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ALEGoggles{% endblock %}
+{% block scripts_and_style %}
+
+    <script src="{% static '/js/goggles.js' %}"></script>
+    <link href="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.css"
+          rel="stylesheet">
+
+    <script src="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.js"></script>
+
+    <style>
+        label {
+            padding-left: 1em;
+        }
+
+        .dataTables_wrapper .dataTables_filter {
+            float: none;
+            text-align: center;
+        }
+
+        .collapsible {
+            background-color: #469597;
+            color: white;
+            cursor: pointer;
+            padding: 3px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .machines {
+            background-color: #5BA199;
+            font-size: 20px;
+            padding: 8px;
+        }
+
+        .active, .collapsible:hover {
+            background-color: #BBC6C8;
+        }
+
+        .content {
+            padding: 0 5px;
+            display: none;
+            overflow: hidden;
+        }
+
+        .dataTables_scrollHead {
+            display: none;
+        }
+
+        .goggles-option {
+        }
+    </style>
+
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/accessibility.js"></script>
+{% endblock %}
+
+{% block header %}<b><a href="#">ALEGoggles</a></b> - See our ALEBots live!{% endblock %}
+
+
+{% block content %}
+
+    <script>
+        toggle_sidebar();
+    </script>
+    <div class="options_bar" style="position: fixed; bottom:.5em">
+        <div class="goggles-option">
+            <label class="form-check-label" for="inlineCheckbox1">X-Axis Format:</label>
+            <select id="x_scale" onchange="handleSelectChangeX(event)">
+                <option selected value="days">Days</option>
+                <option value="dates">Dates</option>
+            </select>
+            <label class="form-check-label" for="inlineCheckbox1">Y-Axis Scaling:</label>
+            <select id="y_scale" onchange="handleSelectChangeY(event)">
+                <option value="logarithmic">Log</option>
+                <option value="linear">Linear</option>
+            </select>
+            <label class="form-check-label" for="inlineCheckbox1">Growth Rate Type:</label>
+            <select id="experiment_GR_type" onchange="handleSelectGrowthRateType(event)">
+                <option selected value=""></option>
+            </select>
+        </div>
+    <script src="{% static '/js/goggles.js' %}"></script>
+    <link href="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.css"
+          rel="stylesheet">
+
+    <script src="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.js"></script>
+
+    <table id="ale-machines" class="display" style="width:20%"></table>
+    <script>
+        const dataSet = [
+            ['ALE 1.0', 'UCSD'],
+            ['ALE 1.1', 'UCSD'],
+            ['ALE 2.0', 'UCSD'],
+            ['ALE 2.1', 'UCSD'],
+            ['ALE 3.0', 'UCSD'],
+            ['ALE 1.0', 'DTU'],
+            ['ALE 1.1', 'DTU'],
+            ['ALE 2.1', 'DTU'],
+            ['ALE 3.0', 'DTU'],
+        ];
+        new DataTable('#ale-machines', {
+            select: 'multi+shift',
+            columns: [
+                {title: 'Name'},
+                {title: 'Location'}
+            ],
+            data: dataSet
+        });
+    </script>
+    <div class="container">
+        <h1 id="app">{{ text }}</h1>
+    </div>
+    <div id="machine-bar" style="width:25em; float: left; padding-right: 3em">
+        {% for machine in machines %}
+            <button type="button" class="collapsible machines"
+                    style="text-align: center"> {{ machine.0 }} {{ machine.1 }} </button>
+            <div class="content" style="overflow-y:auto; max-height: 20em;">
+                {% for project in projects %}
+                    <button type="button" class="collapsible" style="text-align: center"> {{ project }} </button>
+                    <div class="content">
+                        <table id="ale-machine_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
+                               class="display"></table>
+                        {{ ales|json_script:"ale_data" }}
+
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <div id="mainChart"></div>
+
+    <script>
+        function getData(n) {
+            const arr = [];
+            let a,
+                b,
+                c,
+                spike;
+            for (let i = 0; i < n; i = i + 1) {
+                if (i % 100 === 0) {
+                    a = 2 * Math.random();
+                }
+                if (i % 1000 === 0) {
+                    b = 2 * Math.random();
+                }
+                if (i % 10000 === 0) {
+                    c = 2 * Math.random();
+                }
+                if (i % 50000 === 0) {
+                    spike = 10;
+                } else {
+                    spike = 0;
+                }
+                arr.push([
+                    i,
+                    2 * Math.sin(i / 100) + a + b + c + spike + Math.random()
+                ]);
+            }
+            return arr;
+        }
+
+        const n = 3000;
+    </script>
+    <script>
+
+        console.time('line');
+        const mainChart = Highcharts.stockChart('mainChart', {
+            chart: {
+                zoomType: 'x',
+                panning: true,
+                panKey: 'shift'
+            },
+
+            plotOptions: {
+                area: {
+                    //allowPointSelect: true,
+                    fillOpacity: 0.25
+                },
+                series: {
+                    lineWidth: 0.5,
+                    marker: {
+                        radius: 3,
+                        symbol: "circle"
+                    },
+                    point: {
+                        events: {
+                            click: function () {
+                                if (this.selected) {
+                                    this.select(false, true)
+                                } else {
+                                    this.select(true, true)
+                                }
+
+                            }
+                        }
+                    },
+                },
+            }, /**
+             title: {
+             text: 'Dummy opticALE(s) with ' + n + ' measurements'
+             },
+             uncomment when we are struggling to support all the points
+             boost: {
+             useGPUTranslations: true
+             },*/
+
+            legend: {
+                enabled: true
+            },
+
+            tooltip: {
+                valueDecimals: 2,
+                shared: false,
+                split: false,
+                followPointer: false,
+                stickOnContact: true,
+                useHTML: true,
+            },
+
+            series: [{
+                name: "lion",
+                data: [[-2, -16], [-3, -15], [-4, -16], [-4, -14], [-5, -14], [-3, -12], [-2, -13], [-1, -10],
+                    [-2, -7], [-3, -7], [-5, -9], [-7, -10], [-8, -10], [-8, -9], [-9, -9], [-8, -8], [-9, -7],
+                    [-6, -7], [-5, -5], [-2, -4], [-3, -1], [-10, -3], [-11, -3], [-11, -2], [-12, -2],
+                    [-11, -1], [-12, 0], [-10, 0], [-9, -1], [-6, 1], [-9, 2], [-11, 5], [-12, 5], [-11, 6],
+                    [-12, 8], [-11, 8], [-11, 9], [-9, 8], [-9, 6], [-8, 4], [-4, 3], [-3, 6], [-5, 6], [-5, 7],
+                    [-3, 7], [-5, 8], [-5, 10], [-3, 10], [-2, 12], [2, 12], [4, 14], [4, 11], [6, 8], [4, 8],
+                    [5, 6], [3, 6], [4, 4], [3, 4], [4, 2], [3, 2], [3, -4], [4, -4], [7, -1], [7, 1], [8, 0],
+                    [9, 3], [8, 5], [9, 5], [9, 7], [10, 6], [11, 6], [9, 1], [10, 1], [8, -2], [9, -2], [7, -3],
+                    [5, -5], [3, -6], [2, -8], [3, -10], [3, -11], [-2, -16]]
+            },
+                {
+                    name: "horse",
+                    data: [[4, 8], [6, 7], [8, 7], [9, 6], [8, 5], [6, 5], [5, 4], [5, 3], [6, 3], [6, 4], [9, 4],
+                        [10, 5], [13, 4], [14, 2], [13, 1], [13, 0], [14, 0], [14, 1], [15, 2], [14, 5],
+                        [13, 5], [13, 7], [12, 9], [17, 8], [14, 9], [17, 9], [14, 10], [17, 11], [15, 11],
+                        [17, 12], [13, 11], [12, 9], [10, 9], [8, 11], [8, 12], [5, 15], [4, 15], [3, 16],
+                        [3, 15], [1, 13], [1, 12], [2, 12], [4, 13], [5, 11], [4, 10], [2, 11], [0, 9], [0, 8],
+                        [1, 8], [1, 9], [2, 10], [3, 9], [2, 7], [4, 5], [5, 5], [5, 6], [4, 6], [3, 7], [4, 8]]
+                }]
+
+        });
+        console.timeEnd('line');
+
+    </script>
+    {% for machine in machines %}
+        {% for project in projects %}
+            <script>
+
+                var ALES_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = JSON.parse(document.getElementById('ale_data').textContent);
+
+                // Formatting function for row details - modify as you need
+                //console.log(ALES_{{ forloop.parentloop.counter }}_{{ forloop.counter }})
+                let table_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = new DataTable('#ale-machine_{{ forloop.parentloop.counter }}_{{ forloop.counter }}', {
+                    select: 'multi+shift',
+                    autoHeight: true,
+                    autoWidth: true,
+                    paging: false,
+                    searching: false,
+                    ordering: false,
+                    info: false,
+                    scrollY: 500,
+                    dataType: JSON,
+
+
+                    data: ALES_{{ forloop.parentloop.counter }}_{{ forloop.counter }},
+                    columns: [
+                        {},
+                        {
+                            'render': function (data, type, full, meta) {
+                                return '<input type="color" id="ale_{{ forloop.parentloop.counter }}_{{ forloop.counter }}_' + meta.row + '" name="head" value=' + data[1] + '>';
+                            }
+                        },
+                        //{title: 'EXP_ID'},
+                        //{title: 'Mod'},
+                        //{title: 'Ctrlr'},
+                        //{title: 'Pos'},
+                    ],
+                    //data: '<input type="color">'
+                });
+
+                function changeColor(e) {
+                    console.log(e.target.value);
+                    console.log(mainChart.get(e.target.id));
+                    mainChart.get(e.target.id).update({color: e.target.value});
+                }
+
+                table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function () {
+                    let row_number = table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index();
+                    let row_id = "ale_{{ forloop.parentloop.counter }}_{{ forloop.counter }}_".concat(row_number)
+                    table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
+
+                    document.getElementById(row_id).addEventListener("input", changeColor)
+
+                    if (table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
+                        mainChart.get(row_id).remove();
+                    } else {
+                        mainChart.addSeries({
+                            id: row_id,
+                            name: row_id,
+                            data: getData(n),
+                            color: document.getElementById(row_id).value,
+                        });
+                    }
+                    //alert('You clicked on ' + data[0] + "'s row");
+                });
+            </script>
+
+        {% endfor %}
+    {% endfor %}
+
+    <script>
+        let coll = document.getElementsByClassName("collapsible");
+        let i;
+
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                let content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            });
+        }
+        coll[0].classList.toggle("active");
+        coll[0].nextElementSibling.style.display = "block";
+
+    </script>
+
+
+
+    <div class="container" style="width: 95vw">
+        <div class="chart-container" style="margin-left:2em; float:left; height:80em; width:60em; ">
+            <canvas id="mainChartJS"></canvas>
+            <canvas id="subChartJS"></canvas>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            const ctx = document.getElementById('mainChartJS');
+            const zoomOptions = {
+                limits: {
+                    x: {min: 'original', max: 'original', minRange: 60 * 1000},
+                },
+                navigator: {
+                    enabled: true
+                },
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                    modifierKey: 'ctrl',
+                },
+                zoom: {
+                    wheel: {
+                        enabled: true,
+                    },
+                    drag: {
+                        enabled: true,
+                    },
+                    pinch: {
+                        enabled: true
+                    },
+                    mode: 'x',
+                }
+            };
+
+            new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        data: [[4, 8], [6, 7], [8, 7], [9, 6], [8, 5], [6, 5], [5, 4], [5, 3], [6, 3], [6, 4], [9, 4],
+                            [10, 5], [13, 4], [14, 2], [13, 1], [13, 0], [14, 0], [14, 1], [15, 2], [14, 5],
+                            [13, 5], [13, 7], [12, 9], [17, 8], [14, 9], [17, 9], [14, 10], [17, 11], [15, 11],
+                            [17, 12], [13, 11], [12, 9], [10, 9], [8, 11], [8, 12], [5, 15], [4, 15], [3, 16],
+                            [3, 15], [1, 13], [1, 12], [2, 12], [4, 13], [5, 11], [4, 10], [2, 11], [0, 9], [0, 8],
+                            [1, 8], [1, 9], [2, 10], [3, 9], [2, 7], [4, 5], [5, 5], [5, 6], [4, 6], [3, 7], [4, 8]],
+                        showLine: true,
+                        borderWidth: 1
+                    }, {
+                        data: [[-2, -16], [-3, -15], [-4, -16], [-4, -14], [-5, -14], [-3, -12], [-2, -13], [-1, -10],
+                            [-2, -7], [-3, -7], [-5, -9], [-7, -10], [-8, -10], [-8, -9], [-9, -9], [-8, -8], [-9, -7],
+                            [-6, -7], [-5, -5], [-2, -4], [-3, -1], [-10, -3], [-11, -3], [-11, -2], [-12, -2],
+                            [-11, -1], [-12, 0], [-10, 0], [-9, -1], [-6, 1], [-9, 2], [-11, 5], [-12, 5], [-11, 6],
+                            [-12, 8], [-11, 8], [-11, 9], [-9, 8], [-9, 6], [-8, 4], [-4, 3], [-3, 6], [-5, 6], [-5, 7],
+                            [-3, 7], [-5, 8], [-5, 10], [-3, 10], [-2, 12], [2, 12], [4, 14], [4, 11], [6, 8], [4, 8],
+                            [5, 6], [3, 6], [4, 4], [3, 4], [4, 2], [3, 2], [3, -4], [4, -4], [7, -1], [7, 1], [8, 0],
+                            [9, 3], [8, 5], [9, 5], [9, 7], [10, 6], [11, 6], [9, 1], [10, 1], [8, -2], [9, -2], [7, -3],
+                            [5, -5], [3, -6], [2, -8], [3, -10], [3, -11], [-2, -16]],
+                        showLine: true,
+                        borderWidth: 1
+                    }]
+
+                },
+
+                options: {
+                    plugins: {
+                        tooltip: {
+                            animation: false
+                        },
+                        zoom: zoomOptions,
+                        legend: {
+                            position: "bottom",
+                            align: "middle",
+                            labels: {
+                                font: {
+                                    size: 8
+                                }
+                            }
+
+                        }
+                    },
+                    transitions: {
+                        zoom: {
+                            animation: {
+                                duration: 100
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        },
+                        x: {
+                            //    type: 'time',
+                            //    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                        }
+                    }
+
+                }
+            });
+        </script>
+    </div>
+
+
+    <script>
+        // -------------- Change Y scale (Log/Linear) routine ------------------------//
+        function handleSelectChangeY(event) {
+            var selectElement = event.target;
+            var value = selectElement.value;
+            if (value == 'linear') {
+                myChartA.options.scales.y.type = 'linear'
+                myChartB.options.scales.y.type = 'linear'
+            } else {
+                myChartA.options.scales.y.type = 'logarithmic'
+                myChartB.options.scales.y.type = 'logarithmic'
+            }
+            myChartA.update();
+            myChartB.update();
+        }
+
+        // -------------- Change X scale (Date/Tine [0, inf]) routine ----------------//
+        function handleSelectChangeX(event) {
+            myChartA.update();
+            myChartB.update();
+            //setTimeout(2000);
+            var selectElement = event.target;
+            var value = selectElement.value;
+            myChartA.data.datasets = []
+            myChartB.data.datasets = []
+            myChartC.data.datasets = []
+            myChartD.data.datasets = []
+            myChartE.data.datasets = []
+            myChartF.data.datasets = []
+            myChartG.data.datasets = []
+            myChartH.data.datasets = []
+            myChartI.data.datasets = []
+            myChartJ.data.datasets = []
+            myChartK.data.datasets = []
+
+            if (value == 'dates') {
+                myChartA.options.scales.x = {
+                    //beginAtZero: true,
+                    type: 'time', //Change to 0 to inf format in the event handler
+
+                    ticks: {
+                        //source: 'data',
+                        maxTicksLimit: 10,
+                        maxRotation: 110,
+                        minRotation: 90
+                    }
+                }
+                myChartB.options.scales.x = {
+                    type: 'time',
+                    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                }
+                myChartC.options.scales.x = {
+                    type: 'time',
+                    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                }
+                myChartD.options.scales.x = {
+                    type: 'time',
+                    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                }
+                myChartE.options.scales.x = {
+                    type: 'time',
+                    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                }
+                myChartF.options.scales.x = {
+                    type: 'time',
+                    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                }
+                myChartG.options.scales.x = {
+                    type: 'time',
+                    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                }
+                myChartH.options.scales.x = {
+                    type: 'time',
+                    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                }
+                myChartI.options.scales.x = {
+                    type: 'time',
+                    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                }
+                myChartJ.options.scales.x = {
+                    type: 'time',
+                    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                }
+                myChartK.options.scales.x = {
+                    type: 'time',
+                    ticks: {maxTicksLimit: 10, maxRotation: 110, minRotation: 90}
+                }
+            } else {
+                myChartA.options.scales.x = {
+                    beginAtZero: true,
+                    type: 'linear',
+                }
+                myChartB.options.scales.x = {beginAtZero: true, type: 'linear'}
+                myChartC.options.scales.x = {beginAtZero: true, type: 'linear'}
+                myChartD.options.scales.x = {beginAtZero: true, type: 'linear'}
+                myChartE.options.scales.x = {beginAtZero: true, type: 'linear'}
+                myChartF.options.scales.x = {beginAtZero: true, type: 'linear'}
+                myChartG.options.scales.x = {beginAtZero: true, type: 'linear'}
+                myChartH.options.scales.x = {beginAtZero: true, type: 'linear'}
+                myChartI.options.scales.x = {beginAtZero: true, type: 'linear'}
+                myChartJ.options.scales.x = {beginAtZero: true, type: 'linear'}
+                myChartK.options.scales.x = {beginAtZero: true, type: 'linear'}
+            }
+        }
+
+    </script>
+{% endblock %}
+

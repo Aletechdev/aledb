@@ -1,5 +1,5 @@
-from django.conf.urls import url
+from django.urls import include, re_path
 
 from bibliome import views
 
-urlpatterns = [url(r'^$', views.bibliome, name="bibliome")]
+urlpatterns = [re_path(r'^$', views.bibliome, name="bibliome")]

@@ -8,7 +8,7 @@ blank_field = {"blank": True, "null": True}
 
 # TODO: Refactor: figure out how to get a ResequencingExperiment to return its list of observed mutations and remove functionality from seq.views.common
 class ResequencingExperiment(models.Model):
-    tech_rep = models.ForeignKey("ale.TechnicalReplicate",
+    tech_rep = models.ForeignKey("ale.TechnicalReplicate", on_delete=models.CASCADE,
                                  null=True)
     person = models.CharField(max_length=200,
                               blank=True)
@@ -125,7 +125,7 @@ class Mutation(models.Model):
 
 
 class ObservedMutation(models.Model):
-    sequencing_experiment = models.ForeignKey(ResequencingExperiment, null=True)
+    sequencing_experiment = models.ForeignKey(ResequencingExperiment, on_delete=models.CASCADE, null=True)
     # make sure not delete mutation if there is associated observed mutations
     mutation = models.ForeignKey(Mutation, on_delete=models.DO_NOTHING)
     present = models.NullBooleanField()

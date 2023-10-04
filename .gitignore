@@ -5,6 +5,7 @@
 *.pyc
 *~
 *.ini
+*.yml
 static/
 config.sh
 .ropeproject/

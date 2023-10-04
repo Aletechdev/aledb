@@ -1,5 +1,5 @@
-from django.conf.urls import url
+from django.urls import include, re_path
 
 from dashboard import views
 
-urlpatterns = [url(r'^$', views.dashboard, name="dashboard")]
+urlpatterns = [re_path(r'^$', views.dashboard, name="dashboard")]
