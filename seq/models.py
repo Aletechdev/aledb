@@ -107,7 +107,7 @@ class Mutation(models.Model):
     # different from the original strain. This is why setting this value to
     # true ignores enables further analysis to ignore these mutations.
 
-    reference_error = models.NullBooleanField(default=False)
+    reference_error = models.BooleanField(default=False)
 
     def __unicode__(self):
         return u"%d %s" % (self.position,
@@ -128,9 +128,9 @@ class ObservedMutation(models.Model):
     sequencing_experiment = models.ForeignKey(ResequencingExperiment, on_delete=models.CASCADE, null=True)
     # make sure not delete mutation if there is associated observed mutations
     mutation = models.ForeignKey(Mutation, on_delete=models.DO_NOTHING)
-    present = models.NullBooleanField()
-    breseq_present = models.NullBooleanField()
-    gatk_present = models.NullBooleanField()
+    present = models.BooleanField(null=True)
+    breseq_present = models.BooleanField(null=True)
+    gatk_present = models.BooleanField(null=True)
     wt_reads = models.IntegerField(null=True)
     mutated_reads = models.IntegerField(null=True)
     other_reads = models.IntegerField(null=True)
