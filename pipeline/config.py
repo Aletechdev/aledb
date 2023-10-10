@@ -19,17 +19,21 @@
 # unique to your accounts. These are used when constructing connection strings
 # for the Batch and Storage client objects.
 
-_BATCH_ACCOUNT_NAME = 'ale'
-_BATCH_ACCOUNT_KEY = '<AZURE_BATCH_KEY_REDACTED>='
-_BATCH_ACCOUNT_URL = 'https://ale.northeurope.batch.azure.com'
-_STORAGE_ACCOUNT_NAME = 'aledata'
-_STORAGE_ACCOUNT_KEY = '<AZURE_STORAGE_KEY_REDACTED>='
-_POOL_ID = 'AMPool_'
-_DEDICATED_POOL_NODE_COUNT_LIMIT = 1000
-_JOB_ID = 'AMPJoB_'
-_VIRTUAL_MACHINE_ID = "/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.Compute/galleries/ensembleamp/images/eAMP/versions/2.5.6"
-_NODE_AGENT_SKU_ID = "batch.node.ubuntu 18.04"
-_AMP_IMAGE_FILE = "https://aledata.blob.core.windows.net/images/amp.tar"
+BATCH_ACCOUNT_NAME = 'ale'
+BATCH_ACCOUNT_KEY = '<AZURE_BATCH_KEY_REDACTED>='
+BATCH_ACCOUNT_URL = 'https://ale.northeurope.batch.azure.com'
+STORAGE_ACCOUNT_NAME = 'aledata'
+STORAGE_ACCOUNT_DOMAIN = 'blob.core.windows.net'
+STORAGE_ACCOUNT_KEY = '<AZURE_STORAGE_KEY_REDACTED>='
+POOL_ID = 'ALEDBAMPool_'
+DEDICATED_POOL_NODE_COUNT_LIMIT = 1000
+JOB_ID = 'ALEDBAMPJoB_'
+VIRTUAL_MACHINE_ID = "/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.Compute/galleries/ensembleamp/images/eAMP/versions/2.5.6"
+NODE_AGENT_SKU_ID = "batch.node.ubuntu 18.04"
+
+AMP_IMAGE_FILE = "https://aledata.blob.core.windows.net/images/amp.tar"
+INPUT_CONTAINER_NAME = "data"
+OUTPUT_CONTAINER_NAME = "output"
 
 TENANT_ID = "f251f123-c9ce-448e-9277-34bb285911d9"
 RESOURCE = "https://batch.core.windows.net/"
