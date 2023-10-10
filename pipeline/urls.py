@@ -6,4 +6,6 @@ __author__ = 'Patrick Phaneuf'
 
 urlpatterns = [
     re_path('^$', views.pipeline, name="pipeline"),
+    re_path('^$', views.pipeline, name="pipeline"),
+
 ]
