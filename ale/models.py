@@ -27,11 +27,6 @@ class Project(models.Model):
     status = models.CharField(max_length=25, default='new', blank=True, choices=PROJECT_STATUS)
     description = models.CharField(max_length=300)
 
-    class Meta:
-        permissions = (
-            (VIEW_PROJECT, 'View project'),
-        )
-
     def owner(self):
         return self.user.get_full_name()
 

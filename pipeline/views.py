@@ -6,6 +6,7 @@ from common.util import get_user_context
 from django.template import loader
 from logs.aledb_logger import user_extra
 from pipeline.util import get_shared_directories
+
 import logging
 
 
@@ -19,8 +20,8 @@ def pipeline(request):
     logger.info("pipeline", extra=user_extra(request))
     context = get_user_context(request.user)
 
-    shared_directories_list = get_shared_directories()
-    context.update({"shared_drives": shared_directories_list})
+    #shared_directories_list = get_shared_directories()
+    #context.update({"shared_drives": shared_directories_list})
 
     if request.method == "POST":
         context.update({"reponse_text":request.POST})
