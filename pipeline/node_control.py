@@ -1,3 +1,5 @@
+#just here for reference. This is the old batch pipeline
+
 '''
 
 
