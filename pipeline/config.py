@@ -32,8 +32,11 @@ VIRTUAL_MACHINE_ID = "/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resour
 NODE_AGENT_SKU_ID = "batch.node.ubuntu 18.04"
 
 AMP_IMAGE_FILE = "https://aledata.blob.core.windows.net/images/amp.tar"
+AMP_IMAGE_CONTAINER_NAME = 'images'
 INPUT_CONTAINER_NAME = "data"
 OUTPUT_CONTAINER_NAME = "output"
+REFERENCE_CONTAINER_NAME = "reference"
+
 
 TENANT_ID = "f251f123-c9ce-448e-9277-34bb285911d9"
 RESOURCE = "https://batch.core.windows.net/"
