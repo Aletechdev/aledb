@@ -1,3 +1,6 @@
+#just here for reference. This is the old batch pipeline script
+
+
 from __future__ import print_function
 import datetime
 import re
