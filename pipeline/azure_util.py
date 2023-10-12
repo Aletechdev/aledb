@@ -238,4 +238,4 @@ def run_pipeline(directory, run_name):
 
 
 if __name__ == '__main__':
-    run_pipeline('project_D_new_reference', 'testing_aledbamp_6')
+    run_pipeline('project_D_new_reference', 'testing_aledbamp_8')
