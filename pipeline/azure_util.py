@@ -79,7 +79,7 @@ def get_pipeline_inputs_from_directory(directory):
             for file in name_dict['reference_files']:
                 input_dict[blob_name].append(
                     batchmodels.ResourceFile(auto_storage_container_name=config.REFERENCE_CONTAINER_NAME,
-                                             blob_prefix=directory + '/' + file))
+                                             blob_prefix=file))
 
     return input_dict
 
@@ -189,9 +189,9 @@ def run_pipeline(directory, run_name):
         blob_service_client,
         container_name=config.OUTPUT_CONTAINER_NAME,
         sas_token=generate_container_sas(account_name=blob_service_client.account_name,
-                                         account_key=config.BATCH_ACCOUNT_KEY,
+                                         account_key=config.STORAGE_ACCOUNT_KEY,
                                          container_name=config.OUTPUT_CONTAINER_NAME,
-                                         permission=BlobSasPermissions.from_string('w'),
+                                         permission=BlobSasPermissions.from_string('rw'),
                                          expiry=datetime.datetime.utcnow() + datetime.timedelta(
                                              days=7)))
 
@@ -238,4 +238,4 @@ def run_pipeline(directory, run_name):
 
 
 if __name__ == '__main__':
-    run_pipeline('project_D_new_reference', 'testing_aledbamp_4')
+    run_pipeline('project_D_new_reference', 'testing_aledbamp_6')
