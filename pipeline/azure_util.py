@@ -78,8 +78,8 @@ def get_pipeline_inputs_from_directory(directory):
                                              blob_prefix=directory + '/' + file))
             for file in name_dict['reference_files']:
                 input_dict[blob_name].append(
-                    batchmodels.ResourceFile(auto_storage_container_name=config.REFERENCE_CONTAINER_NAME,
-                                             blob_prefix=file))
+                    batchmodels.ResourceFile(auto_storage_container_name=config.INPUT_CONTAINER_NAME,
+                                             blob_prefix=directory + '/' + file))
 
     return input_dict
 
