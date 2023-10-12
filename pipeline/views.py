@@ -6,6 +6,7 @@ from common.util import get_user_context
 from django.template import loader
 from logs.aledb_logger import user_extra
 from pipeline.util import get_shared_directories
+from pipeline.azure_util import run_pipeline
 
 import logging
 
@@ -27,6 +28,7 @@ def pipeline(request):
         context.update({"reponse_text":request.POST})
         try:
             template = loader.get_template("pipeline/pipeline.html")
+            run_pipeline(request.POST['azure_data_folder'],request.POST['azure_output_folder'])
 
             return HttpResponse(template.render(context, request), content_type="text/html")
         except Exception:
