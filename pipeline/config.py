@@ -37,7 +37,6 @@ INPUT_CONTAINER_NAME = "data"
 OUTPUT_CONTAINER_NAME = "output"
 REFERENCE_CONTAINER_NAME = "reference"
 
-
 TENANT_ID = "f251f123-c9ce-448e-9277-34bb285911d9"
 RESOURCE = "https://batch.core.windows.net/"
 CLIENT_ID = "e4fccc0f-8557-4534-82cd-bffe18ff2de9"
@@ -53,8 +52,13 @@ EDSV4_SERIES_PROGRESSION = [('Edsv4', 2), ('Edsv4', 4)]
 # storage gb progression: 50, 75, 100, 150, 200, 300
 FINE_PROGRESSION = [('Dv2', 1), ('Edsv4', 2), ('Dv2', 2), ('Edsv4', 4), ('Dv2', 3), ('Edsv4', 8)]
 ESTIMATE_FINAL_COST_ADJUSTMENT = 1.3  # depends on the VM but a decent estimate
-SERIES_INFO = {'Dv2':   {'minimum_cores': 1, 'cost_per_core': 0.0658, 'naming_schema': 'Standard_D{}_v2', 'naming_progression': 'linear'},
-               'Dv3':   {'minimum_cores': 2, 'cost_per_core': 0.0535, 'naming_schema': 'Standard_D{}_v3', 'naming_progression': 'cores'},
-               'Dv4':   {'minimum_cores': 2, 'cost_per_core': 0.063, 'naming_schema': 'Standard_D{}_v4', 'naming_progression': 'cores'},
-               'Edsv4': {'minimum_cores': 2, 'cost_per_core': 0.08, 'naming_schema': 'Standard_E{}ds_v4', 'naming_progression': 'cores'},
-               'H':     {'minimum_cores': 8, 'cost_per_core': 0.121375, 'naming_schema': 'Standard_H{}', 'naming_progression': 'cores'}}
+SERIES_INFO = {'Dv2': {'minimum_cores': 1, 'cost_per_core': 0.0658, 'naming_schema': 'Standard_D{}_v2',
+                       'naming_progression': 'linear'},
+               'Dv3': {'minimum_cores': 2, 'cost_per_core': 0.0535, 'naming_schema': 'Standard_D{}_v3',
+                       'naming_progression': 'cores'},
+               'Dv4': {'minimum_cores': 2, 'cost_per_core': 0.063, 'naming_schema': 'Standard_D{}_v4',
+                       'naming_progression': 'cores'},
+               'Edsv4': {'minimum_cores': 2, 'cost_per_core': 0.08, 'naming_schema': 'Standard_E{}ds_v4',
+                         'naming_progression': 'cores'},
+               'H': {'minimum_cores': 8, 'cost_per_core': 0.121375, 'naming_schema': 'Standard_H{}',
+                     'naming_progression': 'cores'}}

@@ -11,12 +11,10 @@ from pipeline.azure_upload_util import run_upload_script, get_output_directory_n
 
 import logging
 
-
 logger = logging.getLogger(__name__)
 
 
 def upload(request):
-
     # TODO: use the template location described within settings.py
 
     logger.info("upload", extra=user_extra(request))
@@ -26,7 +24,7 @@ def upload(request):
     context.update({"output_folders": output_folders})
 
     if request.method == "POST":
-        context.update({"reponse_text":request.POST})
+        context.update({"reponse_text": request.POST})
         try:
             template = loader.get_template("pipeline/upload.html")
             download_blobs_from_folder(request.POST['azure_output_folder'])
@@ -43,20 +41,24 @@ def upload(request):
 
 
 def pipeline(request):
-
     # TODO: use the template location described within settings.py
 
     logger.info("pipeline", extra=user_extra(request))
     context = get_user_context(request.user)
 
-    #shared_directories_list = get_shared_directories()
-    #context.update({"shared_drives": shared_directories_list})
+    # shared_directories_list = get_shared_directories()
+    # context.update({"shared_drives": shared_directories_list})
 
     if request.method == "POST":
-        context.update({"reponse_text":request.POST})
+        context.update({"reponse_text": request.POST})
         try:
             template = loader.get_template("pipeline/pipeline.html")
-            run_pipeline(request.POST['azure_data_folder'],request.POST['azure_output_folder'])
+            input_dir = request.POST['azure_data_folder']
+            output_dir = request.POST['azure_output_folder']
+            if len(input_dir) + len(output_dir) > 3:
+                run_pipeline(request.POST['azure_data_folder'], output_dir)
+            else:
+                context.update({"response_text": "please input a longer directory name"})
 
             return HttpResponse(template.render(context, request), content_type="text/html")
         except Exception:

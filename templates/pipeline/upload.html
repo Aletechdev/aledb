@@ -8,29 +8,29 @@
 {% block content %}
 
 
-<h2>This does not work yet</h2>
+    <h2>This does not work yet</h2>
 
     <h3>available datasets to upload</h3>
 
-<ul>
-{% for output_folder in output_folders %}
-    <li>{{ output_folder }}</li>
-{% endfor %}
-</ul>
+    <ul>
+        {% for output_folder in output_folders %}
+            <li>{{ output_folder }}</li>
+        {% endfor %}
+    </ul>
 
-        <div> uploading {{ reponse_text.azure_output_folder }}
+    <div> uploading {{ reponse_text.azure_output_folder }}
     </div>
 
-<div class="row">
-    <form action="/pipeline/upload/" method="post">
-        {% csrf_token %}
-        <!--<label for="google_drive_folder">Google Drive folder name: </label>-->
-        <!--<input id="google_drive_folder" type="text" name="google_drive_folder" value="">-->
-        <label for="azure_output_folder">Azure output folder name: </label>
-        <input id="azure_output_folder" type="text" name="azure_output_folder" value="">
-        <input type="submit" value="OK">
-    </form>
-</div>
+    <div class="row">
+        <form action="/pipeline/upload/" method="post">
+            {% csrf_token %}
+            <!--<label for="google_drive_folder">Google Drive folder name: </label>-->
+            <!--<input id="google_drive_folder" type="text" name="google_drive_folder" value="">-->
+            <label for="azure_output_folder">Azure output folder name: </label>
+            <input id="azure_output_folder" type="text" name="azure_output_folder" value="">
+            <input type="submit" value="OK">
+        </form>
+    </div>
 
 {% endblock %}
 
