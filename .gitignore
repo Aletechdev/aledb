@@ -16,6 +16,8 @@ config.sh
 .docker/data
 .docker/*.env
 
+/pipeline/transfer/**
+
 /logs/debug.log*
 /logs/info.log*
 
