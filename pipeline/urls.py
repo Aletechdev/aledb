@@ -1,11 +1,11 @@
-from django.urls import include, re_path
+from django.urls import include, re_path, path
 
 from pipeline import views
 
-__author__ = 'Patrick Phaneuf'
+__author__ = 'Muyao'
 
 urlpatterns = [
-    re_path('^$', views.pipeline, name="pipeline"),
-    re_path('^$', views.pipeline, name="pipeline"),
+    path('', views.pipeline, name="pipeline"),
+    path('upload/', views.upload, name='upload'),
 
 ]
