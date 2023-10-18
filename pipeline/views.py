@@ -24,7 +24,7 @@ def upload(request):
     context.update({"output_folders": output_folders})
 
     if request.method == "POST":
-        context.update({"reponse_text": request.POST})
+        context.update({"response_text": request.POST})
         try:
             template = loader.get_template("pipeline/upload.html")
             download_blobs_from_folder(request.POST['azure_output_folder'])
@@ -50,15 +50,15 @@ def pipeline(request):
     # context.update({"shared_drives": shared_directories_list})
 
     if request.method == "POST":
-        context.update({"reponse_text": request.POST})
         try:
             template = loader.get_template("pipeline/pipeline.html")
             input_dir = request.POST['azure_data_folder']
             output_dir = request.POST['azure_output_folder']
-            if len(input_dir) + len(output_dir) > 3:
-                run_pipeline(request.POST['azure_data_folder'], output_dir)
+            if len(str(output_dir)) > 5 and len(str(input_dir)) > 5:
+                context.update({"response_text": request.POST})
+                run_pipeline(input_dir, output_dir)
             else:
-                context.update({"response_text": "please input a longer directory name"})
+                context.update({"error": "please input a longer directory name"})
 
             return HttpResponse(template.render(context, request), content_type="text/html")
         except Exception:

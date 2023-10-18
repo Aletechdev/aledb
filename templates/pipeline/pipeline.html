@@ -7,9 +7,6 @@
 
 {% block content %}
 
-    <div> running pipeline for {{ reponse_text.azure_data_folder }}
-    </div>
-
 
     <ul>
         {% for drive in shared_drives %}
@@ -18,7 +15,7 @@
     </ul>
 
     <div class="row">
-        <form action="/pipeline" method="post">
+        <form action="/pipeline/" method="post">
             {% csrf_token %}
             <!--<label for="google_drive_folder">Google Drive folder name: </label>-->
             <!--<input id="google_drive_folder" type="text" name="google_drive_folder" value="">-->
