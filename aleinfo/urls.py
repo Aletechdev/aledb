@@ -1,5 +1,5 @@
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import include, re_path
+from django.urls import include, re_path, path
 from django.conf import settings
 from django.contrib import admin
 from aleinfo.views import protected_file_serve
@@ -26,7 +26,7 @@ urlpatterns = [
     re_path(r'^fixation/', include('fixation.urls')),
     re_path(r'^metadata/', include('metadata.urls')),
     re_path(r'^mutations/', include('seq.urls')),
-    re_path(r'^pipeline', include('pipeline.urls')),
+    path("pipeline/", include('pipeline.urls')),
     re_path(r'^goggles', include('goggles.urls')),
     re_path(r'^search/', include('search.urls')),
     re_path(r'^stats/', include('stats.urls')),
