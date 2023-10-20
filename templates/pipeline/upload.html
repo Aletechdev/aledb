@@ -1,34 +1,35 @@
 {% extends 'base.html' %}
 
-{% block title %}The Ensemble Mutation Calling Pipeline{% endblock %}
+{% block title %}Uploading your data{% endblock %}
 
-{% block header %}<b><a href="#">Getting Started</a></b> - Running the pipeline{% endblock %}
+{% block header %}<b><a href="#">Getting Started</a></b> - Upload{% endblock %}
 
 
 {% block content %}
 
 
+    <h2>This does not work yet</h2>
+
+    <h3>available datasets to upload</h3>
+
     <ul>
-        {% for drive in shared_drives %}
-            <li>{{ drive.Name }}</li>
+        {% for output_folder in output_folders %}
+            <li>{{ output_folder }}</li>
         {% endfor %}
     </ul>
 
+    <div> uploading {{ response_text.azure_output_folder }}
+    </div>
+
     <div class="row">
-        <form action="/pipeline/" method="post">
+        <form action="/pipeline/upload/" method="post">
             {% csrf_token %}
             <!--<label for="google_drive_folder">Google Drive folder name: </label>-->
             <!--<input id="google_drive_folder" type="text" name="google_drive_folder" value="">-->
-            <label for="azure_data_folder">Azure data folder name: </label>
-            <input id="azure_data_folder" type="text" name="azure_data_folder" value="">
             <label for="azure_output_folder">Azure output folder name: </label>
             <input id="azure_output_folder" type="text" name="azure_output_folder" value="">
             <input type="submit" value="OK">
         </form>
-    </div>
-
-    <div>
-        <a href="/pipeline/upload">Once your project is done running, click here to see the uploading options</a>
     </div>
 
 {% endblock %}

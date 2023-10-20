@@ -24,20 +24,12 @@ import pipeline.config as config
 DEFAULT_ENCODING = "utf-8"
 
 
-def get_directory_contents(directory, blob_service_client):
+def get_input_directory_contents(directory, blob_service_client):
     return blob_service_client.get_container_client(container=config.INPUT_CONTAINER_NAME).list_blobs(
         name_starts_with=directory)
 
 
 def get_input_directories():
-    blob_service_client = BlobServiceClient(
-        account_url=f"https://{config.STORAGE_ACCOUNT_NAME}.{config.STORAGE_ACCOUNT_DOMAIN}/",
-        credential=config.STORAGE_ACCOUNT_KEY
-    )
-    return blob_service_client.get_container_client(container=config.INPUT_CONTAINER_NAME).walk_blobs(delimiter='/')
-
-
-def get_output_directories():
     blob_service_client = BlobServiceClient(
         account_url=f"https://{config.STORAGE_ACCOUNT_NAME}.{config.STORAGE_ACCOUNT_DOMAIN}/",
         credential=config.STORAGE_ACCOUNT_KEY
@@ -66,7 +58,7 @@ def get_pipeline_inputs_from_directory(directory):
     )
     input_dict = {}
 
-    for blob in get_directory_contents(directory, blob_service_client):
+    for blob in get_input_directory_contents(directory, blob_service_client):
         blob_name = str(blob.name)
         if blob_name.endswith('.csv'):
             input_dict[blob_name] = [batchmodels.ResourceFile(auto_storage_container_name=config.INPUT_CONTAINER_NAME,
