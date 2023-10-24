@@ -42,7 +42,10 @@ def get_pipeline_input_filenames_from_blob(csv_blob: BlobProperties, blob_servic
     container = blob_service_client.get_container_client(container=csv_blob.container)
     reader = csv.reader(StringIO(container.download_blob(blob=csv_blob).readall().decode()))
     run_details = {rows[0]: rows[1] for rows in reader}
-    read_file_list = run_details['additional read files'].split(",")
+    if run_details['additional read files'] == "" or run_details['additional read files'] == 'N/A' or run_details['additional read files'] == 'n/a':
+        read_file_list = []
+    else:
+        read_file_list = run_details['additional read files'].split(",")
     read_file_list.append(run_details['filename'])
     read_file_list.append(run_details['filename2'])
     reference_file_list = run_details['reference file name(s)'].split(",")
