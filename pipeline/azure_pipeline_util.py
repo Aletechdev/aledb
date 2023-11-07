@@ -171,7 +171,7 @@ def run_pipeline(directory, run_name, vm_size):
     samples = get_pipeline_inputs_from_directory(directory=directory).items()
     # get the number of samples to run
 
-    create_pool(batch_client=batch_client, pool_id=run_name, vm_count=len(samples), vm_size=vm_size)
+    create_pool(batch_client=batch_client, pool_id=run_name, vm_count=len(samples), vm_size=str(vm_size))
 
     create_job(batch_client=batch_client, job_id=run_name,
                pool_id=run_name)
