@@ -148,7 +148,7 @@ def build_sas_url(
     return f"{base_url}{container_name}?{sas_token}"
 
 
-def run_pipeline(directory, run_name):
+def run_pipeline(directory, run_name, vm_size):
     batch_account_key = config.BATCH_ACCOUNT_KEY
     batch_account_name = config.BATCH_ACCOUNT_NAME
     batch_service_url = config.BATCH_ACCOUNT_URL
@@ -171,7 +171,7 @@ def run_pipeline(directory, run_name):
     samples = get_pipeline_inputs_from_directory(directory=directory).items()
     # get the number of samples to run
 
-    create_pool(batch_client=batch_client, pool_id=run_name, vm_count=len(samples), vm_size="STANDARD_E2ds_V4")
+    create_pool(batch_client=batch_client, pool_id=run_name, vm_count=len(samples), vm_size=vm_size)
 
     create_job(batch_client=batch_client, job_id=run_name,
                pool_id=run_name)
