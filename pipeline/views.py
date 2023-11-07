@@ -84,9 +84,10 @@ def pipeline(request):
             template = loader.get_template("pipeline/pipeline.html")
             input_dir = request.POST['azure_data_folder']
             output_dir = request.POST['azure_output_folder']
+            vm_size = request.POST['vm_size']
             if len(str(output_dir)) > 5 and len(str(input_dir)) > 5:
                 context.update({"response_text": request.POST})
-                run_pipeline(input_dir, output_dir)
+                run_pipeline(input_dir, output_dir, vm_size)
             else:
                 context.update({"error": "please input a longer directory name"})
 
