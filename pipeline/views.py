@@ -24,7 +24,7 @@ def drive(request):
     if request.method == "POST":
         try:
             template = loader.get_template("pipeline/drive.html")
-            input_dir = request.POST['drive']
+            input_dir = request.POST['google_drive_folder']
             if len(str(input_dir)) > 5 and len(str(input_dir)) > 5:
                 context.update({"response_text": request.POST})
                 transfer_to_azure(input_dir)
