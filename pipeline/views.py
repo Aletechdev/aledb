@@ -5,7 +5,7 @@ from common.util import get_user_context
 
 from django.template import loader
 from logs.aledb_logger import user_extra
-from pipeline.util import get_shared_directories
+from pipeline.util import get_shared_directories, transfer_to_azure
 from pipeline.azure_pipeline_util import run_pipeline
 from pipeline.azure_upload_util import run_upload_script, get_output_directory_names, download_blobs_from_folder
 
@@ -14,22 +14,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def status(request):
+def drive(request):
     logger.info("status", extra=user_extra(request))
     context = get_user_context(request.user)
 
-    # shared_directories_list = get_shared_directories()
-    # context.update({"shared_drives": shared_directories_list})
+    shared_directories_list = get_shared_directories()
+    context.update({"shared_drives": shared_directories_list})
 
     if request.method == "POST":
         try:
-            template = loader.get_template("pipeline/pipeline.html")
-            input_dir = request.POST['azure_data_folder']
-            output_dir = request.POST['azure_output_folder']
-            vm_size = request.POST['vm_size']
-            if len(str(output_dir)) > 5 and len(str(input_dir)) > 5:
+            template = loader.get_template("pipeline/drive.html")
+            input_dir = request.POST['drive']
+            if len(str(input_dir)) > 5 and len(str(input_dir)) > 5:
                 context.update({"response_text": request.POST})
-                run_pipeline(input_dir, output_dir, vm_size)
+                transfer_to_azure(input_dir)
             else:
                 context.update({"error": "please input a longer directory name"})
 
@@ -37,11 +35,11 @@ def status(request):
         except Exception:
             logger.exception("pipeline broke", extra=user_extra(request))
     try:
-        template = loader.get_template("pipeline/pipeline.html")
+        template = loader.get_template("pipeline/drive.html")
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
-        logger.exception("pipeline broke", extra=user_extra(request))
+        logger.exception("pipeline drive broke", extra=user_extra(request))
 
 
 def upload(request):

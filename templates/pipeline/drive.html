@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}The Ensemble Mutation Calling Pipeline{% endblock %}
+
+{% block header %}<b><a href="#">Getting Started</a></b> - Running the pipeline{% endblock %}
+
+
+{% block content %}
+
+    <table id="drive" class="display" style="width:100%">
+        {% for drive in shared_drives %}
+            <tr>{{ drive.Name }}</tr>
+        {% endfor %}
+    </table>
+
+    <div class="row">
+        <form action="/pipeline/" method="post">
+            {% csrf_token %}
+            <label for="google_drive_folder">Google Drive folder name: </label>
+            <input id="google_drive_folder" type="text" name="google_drive_folder" value="">
+            <input type="submit" value="OK">
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        new DataTable('#drive');
+    </script>
+
+
+{% endblock %}
