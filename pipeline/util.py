@@ -40,7 +40,7 @@ def get_files_from_directory(dir):
 
 
 def transfer_to_azure(shared_drive_name):
-    root_cmd = ['ssh', '-i', '/root/.ssh/aledb', 'muyao@aledb.org']
+    root_cmd = ['ssh', '-i', '/root/.ssh/aledb', 'muyao@aledb.org', 'sudo']
 
     create_folder_cmd = ['mkdir', f'/pipeline_inputs/{shared_drive_name}']
     subprocess.run(root_cmd + create_folder_cmd)
