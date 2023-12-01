@@ -7,5 +7,6 @@ __author__ = 'Muyao'
 urlpatterns = [
     path('', views.pipeline, name="pipeline"),
     path('upload/', views.upload, name='upload'),
+    path('drive/', views.drive, name='drive')
 
 ]
