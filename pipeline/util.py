@@ -44,7 +44,7 @@ def transfer_to_azure(shared_drive_name):
 
     create_folder_cmd = ['sudo', 'mkdir', f'/pipeline_inputs/{shared_drive_name}']
     subprocess.run(root_cmd + create_folder_cmd)
-    copy_files_cmd = ['rclone', 'copy', '--drive-shared-with-me', f"ALE:{shared_drive_name}", f"/pipeline_inputs/{shared_drive_name}"]
+    copy_files_cmd = ['rclone', 'copy', '--drive-shared-with-me', "ALE:" + "\"{shared_drive_name}\"/", "/pipeline_inputs/" + "\"{shared_drive_name}\"/"]
     subprocess.run(root_cmd + copy_files_cmd)
 
 
