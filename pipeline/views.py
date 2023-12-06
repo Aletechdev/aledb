@@ -8,10 +8,16 @@ from logs.aledb_logger import user_extra
 from pipeline.util import get_shared_directories, transfer_to_azure
 from pipeline.azure_pipeline_util import run_pipeline
 from pipeline.azure_upload_util import run_upload_script, get_output_directory_names, download_blobs_from_folder
+from pipeline.models import get_runs
 
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def manager(request):
+    get_runs(request.user)
+    logger.info("pipeline_manager", extra=user_extra(request))
 
 
 def drive(request):
