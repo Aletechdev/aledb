@@ -66,10 +66,10 @@
 {% block header %}Search{% endblock %}
 {% block content %}
 
-<div class="row">
+<div class="form-row">
     <form action="/search" method="get" >
         <input class="form-control" type="hidden" id="hidden_columns" name="hidden_columns" value="{{ hidden_columns }}"/>
-        <div class="form-group row">
+        <div class="form-group form-row">
             <label for="p" class="col-sm-2 col-form-label text-right">Gene:</label>
             <div class="col-sm-3">
               <input type="text" value="{{ last_search.q }}" name="q" class="form-control" id="q" autofocus>
@@ -84,7 +84,7 @@
                 </select>
             </div>
         </div>
-        <div class="form-group row">
+        <div class="form-group form-row">
             <label for="min" class="col-sm-2 col-form-label text-right">Start Position:</label>
             <div class="col-sm-3">
               <input type="number" value="{{ last_search.min }}" name="min" class="form-control" id="min">
@@ -94,7 +94,7 @@
               <input type="number" value="{{ last_search.max }}" name="max" class="form-control" id="max">
             </div>
         </div>
-        <div class="form-group row">
+        <div class="form-group form-row">
             <label for="seq" class="col-sm-2 col-form-label text-right">Sequence Change:</label>
             <div class="col-sm-3">
               <input type="text" value="{{ last_search.seq }}" name="seq" class="form-control" id="seq">
@@ -105,7 +105,7 @@
             </div>
         </div>
 
-        <div class="form-group row">
+        <div class="form-group form-row">
             <label for="project" class="col-sm-2 col-form-label text-right">Project:</label>
             <div class="col-sm-8">
                 <select class="form-control" name="project" id="project">
@@ -116,7 +116,7 @@
                 </select>
             </div>
         </div>
-        <div class="form-group row">
+        <div class="form-group form-row">
             <div class="col-sm-4">
               <input type="submit" class="btn btn-primary" value="Search">
                 <input class="btn btn-danger" type="button" value="Clear" onclick="clear_search()">
