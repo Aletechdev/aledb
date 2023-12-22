@@ -47,27 +47,23 @@
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
 
     <script type="text/javascript">
-        var sidebar_hidden = true;
+        var sidebar_hidden = false;
 
         function toggle_sidebar() {
-            var x = document.getElementById('aledb-content');
+            x = document.getElementById("aledb-content")
             if (sidebar_hidden) {
                 sidebar_hidden = false;
-                document.getElementById('sidebar').style.display = 'block';
-                document.getElementById('sidebar').style.width = '240px';
+                document.getElementById("sidebar").style.width = "17vw";
+                x.style.width = "77vw"
                 //$('nav').css('left', '0');
                 document.getElementById('sidebar_arrows').innerText = '«';
-                document.getElementById('sidebarbutton').marginLeft = '240px';
-                x.style.paddingLeft = '240px';
             } else {
                 sidebar_hidden = true;
-                document.getElementById('sidebar').style.display = 'none';
-                document.getElementById('sidebar').style.width = '0';
-                //$('nav').css('left', '-240px');
+                document.getElementById("sidebar").style.width = "";
+                x.style.width = "95vw"
                 document.getElementById('sidebar_arrows').innerText = '»';
-                document.getElementById('sidebarbutton').marginLeft = '0px';
-                x.style.paddingLeft = '0';
             }
+            window.dispatchEvent(new Event('resize'));
         }
     </script>
 
@@ -80,8 +76,8 @@
 </head>
 <body style="background-color: white">
 <div id="wrapper">
-    <div class="navbar-default" role="navigation" style=" z-index:999; float: left;position: absolute; top:0; left:0">
-        <div class="sidebar" style="display:none; width: 0; float: left" id="sidebar">
+    <div class="navbar-default" role="navigation" style=" z-index:999; float: left; top:0; left:0">
+        <div class="sidebar" style="width: 17vw" id="sidebar">
             <div class="navbar-header">
                 <a class="navbar-brand" href="/">ALEdb 1.1.0</a>
             </div>
@@ -126,15 +122,14 @@
                 {% endif %}
             </ul>
         </div>
-        <div id="sidebarbutton" title="Collapse sidebar" onclick="toggle_sidebar()"
-             style=" float:left; background-color: rgb(204, 204, 204); border-radius: 0 5px 5px 0; color: rgb(68, 68, 68); font-size: 1.2em; cursor: pointer; padding-top: 1px; padding-left: 1px; margin-top: 5em; margin-bottom: 5em;">
-            <div id="sidebar_arrows" style="height: 100vh;line-height: 100vh; text-align: center;">«</div>
-        </div>
-
+    </div>
+    <div id="sidebarbutton" title="Collapse sidebar" onclick="toggle_sidebar()"
+         style=" float:left; background-color: #f8f8f8; border-radius: 0 5px 5px 0; color: rgb(68, 68, 68); font-size: 1.2em; cursor: pointer; padding-top: 1px; margin-top: 5em; margin-bottom: 5em;">
+        <div id="sidebar_arrows" class="sidebar_arrows" style="line-height: 100vh; text-align: center;">«</div>
     </div>
 
     <div id="aledb-content"
-         style="float: left; margin-left: 2em; position: absolute; top:0; padding-left:0px; width: 95vw">
+         style="float: left; top:0; width: 77vw">
         <div class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0px">
 
             <div class="body">
@@ -196,7 +191,6 @@
 <script type="text/javascript"
         src="https://cdn.datatables.net/v/bs-3.3.7/dt-1.10.15/b-1.3.1/b-colvis-1.3.1/b-html5-1.3.1/se-1.2.2/datatables.min.js"></script>
 
-<script>toggle_sidebar()</script>
 </body>
 </html>
 

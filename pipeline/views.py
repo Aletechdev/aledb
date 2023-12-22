@@ -16,8 +16,31 @@ logger = logging.getLogger(__name__)
 
 
 def manager(request):
-    get_runs(request.user)
+    context = get_user_context(request.user)
+    pipeline_runs = get_runs(request.user)
+    context.update({"pipeline_runs": pipeline_runs})
+
     logger.info("pipeline_manager", extra=user_extra(request))
+
+    if request.method == "POST":
+        try:
+            template = loader.get_template("pipeline/pipeline_manager.html")
+            input_dir = request.POST['google_drive_folder']
+            if len(str(input_dir)) > 5 and len(str(input_dir)) > 5:
+                context.update({"response_text": request.POST})
+                transfer_to_azure(input_dir)
+            else:
+                context.update({"error": "please input a longer directory name"})
+
+            return HttpResponse(template.render(context, request), content_type="text/html")
+        except Exception:
+            logger.exception("pipeline manager broke", extra=user_extra(request))
+    try:
+        template = loader.get_template("pipeline/pipeline_manager.html")
+
+        return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception:
+        logger.exception("pipeline manager broke", extra=user_extra(request))
 
 
 def drive(request):
