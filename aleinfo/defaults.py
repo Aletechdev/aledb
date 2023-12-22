@@ -148,9 +148,9 @@ MEDIA_URL = ''
 # Example: '/home/media/media.lawrence.com/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (
+STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'common/staticfiles'),
-)
+]
 
 # List of finder classes that know how to find static files in
 # various locations.
