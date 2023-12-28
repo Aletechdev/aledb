@@ -9,41 +9,11 @@ from logs.aledb_logger import user_extra
 from pipeline.util import get_shared_directories, transfer_to_azure
 from pipeline.azure_pipeline_util import run_pipeline
 from pipeline.azure_upload_util import run_upload_script, get_output_directory_names, download_blobs_from_folder
-from pipeline.models import get_runs
+from pipeline.models import Run, Attempt, get_runs
 
 import logging
 
 logger = logging.getLogger(__name__)
-
-
-@login_required(login_url='/accounts/login/')
-def manager(request):
-
-    context = get_user_context(request.user)
-    pipeline_runs = get_runs(request.user)
-    context.update({"pipeline_runs": pipeline_runs})
-
-    logger.info("pipeline_manager", extra=user_extra(request))
-
-    if request.method == "POST":
-        try:
-            template = loader.get_template("pipeline/pipeline_manager.html")
-            input_dir = request.POST['google_drive_folder']
-            if len(str(input_dir)) > 5 and len(str(input_dir)) > 5:
-                context.update({"response_text": request.POST})
-                transfer_to_azure(input_dir)
-            else:
-                context.update({"error": "please input a longer directory name"})
-
-            return HttpResponse(template.render(context, request), content_type="text/html")
-        except Exception:
-            logger.exception("pipeline manager broke", extra=user_extra(request))
-    try:
-        template = loader.get_template("pipeline/pipeline_manager.html")
-
-        return HttpResponse(template.render(context, request), content_type="text/html")
-    except Exception:
-        logger.exception("pipeline manager broke", extra=user_extra(request))
 
 
 @login_required(login_url='/accounts/login/')
@@ -104,32 +74,42 @@ def upload(request):
 
 @login_required(login_url='/accounts/login/')
 def pipeline(request):
-    # TODO: use the template location described within settings.py
-
-    logger.info("pipeline", extra=user_extra(request))
     context = get_user_context(request.user)
+    pipeline_runs = get_runs(request.user)
+    context.update({"pipeline_runs": pipeline_runs})
 
-    # shared_directories_list = get_shared_directories()
-    # context.update({"shared_drives": shared_directories_list})
+    logger.info("pipeline_manager", extra=user_extra(request))
 
     if request.method == "POST":
         try:
-            template = loader.get_template("pipeline/pipeline.html")
-            input_dir = request.POST['azure_data_folder']
-            output_dir = request.POST['azure_output_folder']
+            template = loader.get_template("pipeline/pipeline_manager.html")
+            data_location = request.POST['data_location']
+            input_dir = request.POST['folder_name']
+            run_name = request.POST['run_name']
             vm_size = request.POST['vm_size']
-            if len(str(output_dir)) > 5 and len(str(input_dir)) > 5:
-                context.update({"response_text": request.POST})
-                run_pipeline(input_dir, output_dir, vm_size)
+            xpmd = request.POST['xpmd']
+            if len(str(input_dir)) > 5 and len(str(run_name)) > 5:
+                run = Run(name=run_name, user=request.user, xpmd=xpmd)
+                if data_location == 'drive':
+                    context.update({"response_text": request.POST})
+                    run.status = "transferring"
+                    run.save()
+                    transfer_to_azure(input_dir)
+                elif data_location == 'azure':
+                    run.status = "running"
+                    run.save()
+                    attempt = Attempt(run=run, vm=vm_size, input=input_dir, output=run_name)
+                    attempt.save()
+                    run_pipeline(input_dir, run_name, vm_size=vm_size)
             else:
                 context.update({"error": "please input a longer directory name"})
 
             return HttpResponse(template.render(context, request), content_type="text/html")
         except Exception:
-            logger.exception("pipeline broke", extra=user_extra(request))
+            logger.exception("pipeline manager broke", extra=user_extra(request))
     try:
-        template = loader.get_template("pipeline/pipeline.html")
+        template = loader.get_template("pipeline/pipeline_manager.html")
 
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
-        logger.exception("pipeline broke", extra=user_extra(request))
+        logger.exception("pipeline manager broke", extra=user_extra(request))
