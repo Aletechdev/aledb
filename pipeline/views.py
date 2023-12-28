@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from common.util import get_user_context
 
 from django.template import loader
+from django.contrib.auth.decorators import login_required
 from logs.aledb_logger import user_extra
 from pipeline.util import get_shared_directories, transfer_to_azure
 from pipeline.azure_pipeline_util import run_pipeline
@@ -15,7 +16,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@login_required(login_url='/accounts/login/')
 def manager(request):
+
     context = get_user_context(request.user)
     pipeline_runs = get_runs(request.user)
     context.update({"pipeline_runs": pipeline_runs})
@@ -43,6 +46,7 @@ def manager(request):
         logger.exception("pipeline manager broke", extra=user_extra(request))
 
 
+@login_required(login_url='/accounts/login/')
 def drive(request):
     logger.info("status", extra=user_extra(request))
     context = get_user_context(request.user)
@@ -71,6 +75,7 @@ def drive(request):
         logger.exception("pipeline drive broke", extra=user_extra(request))
 
 
+@login_required(login_url='/accounts/login/')
 def upload(request):
     # TODO: use the template location described within settings.py
 
@@ -97,6 +102,7 @@ def upload(request):
         logger.exception("webapp upload broke", extra=user_extra(request))
 
 
+@login_required(login_url='/accounts/login/')
 def pipeline(request):
     # TODO: use the template location described within settings.py
 
