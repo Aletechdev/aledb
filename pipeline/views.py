@@ -89,7 +89,7 @@ def pipeline(request):
             vm_size = request.POST['vm_size']
             xpmd = request.POST['xpmd']
             if len(str(input_dir)) > 5 and len(str(run_name)) > 5:
-                run = Run(name=run_name, user=request.user, xpmd=xpmd)
+                run, created = Run.objects.get_or_create(name=run_name, user=request.user, xpmd=xpmd)
                 if data_location == 'drive':
                     context.update({"response_text": request.POST})
                     run.status = "transferring"
