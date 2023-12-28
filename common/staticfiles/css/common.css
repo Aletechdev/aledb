@@ -1,5 +1,10 @@
 #aledb-content {
     padding: 25px;
+    background-color: white;
+}
+
+#padding_top {
+    padding-top: 1em;
 }
 
 .navbar-default {
@@ -37,6 +42,7 @@
 
 html {
     scroll-behavior: smooth;
+    background-color: #f8f8f8;
 }
 
 h1 {

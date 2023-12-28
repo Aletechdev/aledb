@@ -8,10 +8,47 @@
     <link rel="stylesheet" type="text/css" href="/static/css/pipeline.css"/>
 {% endblock %}
 {% block content %}
+    <button type="button" class="big collapsible">Click Here to Create A New Pipeline Run</button>
+    <div class="content" style="padding: 3em">
+        <div class="form-row">
+            <form action="/pipeline/manager/" method="post">
+                {% csrf_token %}
+                <label for="run_name">Name for the Run</label>
+                <input id="run_name" type="text" name="run_name" value="">
+                <label for="xpmd">Metadata URL</label>
+                <input id="xpmd" type="text" name="xpmd" value="">
+                <label for="data_location">Current Data Location</label>
+                <select name="data_location" id="data_location">
+                    <optgroup label="Data is already in our internal Azure System">
+                        <option value="azure">Azure</option>
+                    </optgroup>
+                    <optgroup label="Data is in a Private Google Drive folder and needs to be transferred to Azure">
+                        <option value="drive">Drive</option>
+                    </optgroup>
+                </select>
+
+                <label for="folder_name">Folder name: </label>
+                <input id="folder_name" type="text" name="folder_name" value="">
+
+                <label for="vm_size">VM Options:</label>
+                <select name="vm_size" id="vm_size">
+                    <optgroup label="Smaller Genomes/Prokaryotes">
+                        <option value="STANDARD_E2ds_V4">16GB</option>
+                    </optgroup>
+                    <optgroup label="Larger Genomes/Eukaryotes">
+                        <option value="STANDARD_E4ds_V4">32GB</option>
+                        <option value="STANDARD_E8ds_V4">64GB</option>
+                    </optgroup>
+                </select>
+                <input type="submit" value="OK">
+            </form>
+        </div>
+    </div>
     {% if pipeline_runs|length == 0 %}
-        <div><h2>You don't have any pipeline runs</h2></div>
+        <div class="section_header"><h3>You don't have any pipeline runs</h3></div>
     {% else %}
-        <table id="pipeline_runs" class="display">
+        <div class="section_header"><h3>Your Pipeline Runs</h3></div>
+        <table id="pipeline_runs" class="display table">
             <thead>
             <tr>
                 <th>Date</th>
@@ -32,7 +69,7 @@
                     {% if request.user.is_superuser %}
                         <td>{{ run.user }}</td>
                     {% endif %}
-                    <td>{{ run.xpmd }}</td>
+                    <td><a href="{{ run.xpmd }}">XPMD</a></td>
                     <td>{{ run.status }}</td>
                 </tr>
             {% endfor %}
@@ -42,38 +79,20 @@
             $(document)
                 .ready(function () {
                     $('#pipeline_runs')
-                        .DataTable();
+                        .DataTable({
+                            "columns": [
+                                {"width": "7%"},
+                                {"width": "7%"},
+                                {% if request.user.is_superuser %}
+                                    {"width": "3%"},
+                                {% endif %}
+                                {"width": "3%"},
+                                {"width": "4%"},
+                            ]
+                        });
                 });
         </script>
     {% endif %}
-
-    <button type="button" class="collapsible">Click Here to Start A New Pipeline Run</button>
-    <div class="content">
-        <div class="form-row">
-            <form action="/pipeline/manager/" method="post">
-                {% csrf_token %}
-                <label for="azure_output_folder">Name for the Run</label>
-                <input id="azure_output_folder" type="text" name="azure_output_folder" value="">
-
-                <label for="data_location">Current Data Location</label>
-
-                <label for="azure_data_folder">Folder name: </label>
-                <input id="azure_data_folder" type="text" name="azure_data_folder" value="">
-
-                <label for="vm_size">VM Options:</label>
-                <select name="vm_size" id="vm_size">
-                    <optgroup label="Smaller Genomes/Prokaryotes">
-                        <option value="STANDARD_E2ds_V4">16GB</option>
-                    </optgroup>
-                    <optgroup label="Larger Genomes/Eukaryotes">
-                        <option value="STANDARD_E4ds_V4">32GB</option>
-                        <option value="STANDARD_E8ds_V4">64GB</option>
-                    </optgroup>
-                </select>
-                <input type="submit" value="OK">
-            </form>
-        </div>
-    </div>
 
     <div>
         <a href="/pipeline/upload">Once your project is done running, click here to see the uploading options</a>
