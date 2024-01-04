@@ -1,14 +1,19 @@
 # Create your views here.
+import subprocess
+from datetime import datetime, timezone
 from django.http import HttpResponse
+from django.shortcuts import redirect
 
 from common.util import get_user_context
 
 from django.template import loader
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from logs.aledb_logger import user_extra
-from pipeline.util import get_shared_directories, transfer_to_azure
+from pipeline.util import get_shared_directories, transfer_to_azure, upload_to_aledb
 from pipeline.azure_pipeline_util import run_pipeline
 from pipeline.azure_upload_util import run_upload_script, get_output_directory_names, download_blobs_from_folder
+from pipeline.azure_batch_status_util import get_task_list, get_log_file
 from pipeline.models import Run, Attempt, get_runs
 
 import logging
@@ -46,28 +51,18 @@ def drive(request):
 
 
 @login_required(login_url='/accounts/login/')
-def upload(request):
-    # TODO: use the template location described within settings.py
-
-    logger.info("upload", extra=user_extra(request))
-    context = get_user_context(request.user)
-
-    output_folders = get_output_directory_names()
-    context.update({"output_folders": output_folders})
-
-    if request.method == "POST":
-        context.update({"response_text": request.POST})
-        try:
-            template = loader.get_template("pipeline/upload.html")
-            download_blobs_from_folder(request.POST['azure_output_folder'])
-
-            return HttpResponse(template.render(context, request), content_type="text/html")
-        except Exception:
-            logger.exception("webapp upload broke", extra=user_extra(request))
+def upload(request, name):
+    logger.info("uploading {} via webapp".format(name), extra=user_extra(request))
     try:
-        template = loader.get_template("pipeline/upload.html")
-
-        return HttpResponse(template.render(context, request), content_type="text/html")
+        run = Run.objects.get(name=name)
+        run.status = "uploading"
+        run.save()
+        upload_cmd = ['ssh', '-i', '/root/.ssh/aledb', 'muyao@aledb.org', '/upload/upload.sh {}'.format(name), 'lsjson', '--dirs-only',
+                      '--drive-shared-with-me', 'ALE:']
+        subprocess.run(upload_cmd)
+        run.status = "done"
+        run.save()
+        return redirect(pipeline)
     except Exception:
         logger.exception("webapp upload broke", extra=user_extra(request))
 
@@ -113,3 +108,47 @@ def pipeline(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception:
         logger.exception("pipeline manager broke", extra=user_extra(request))
+
+
+@staff_member_required(login_url='/accounts/login/')
+def log(request, job, task):
+    return HttpResponse(get_log_file(job, task), content_type='text/plain')
+
+
+@login_required(login_url='/accounts/login/')
+def run(request, id):
+    context = get_user_context(request.user)
+    current_run = Run.objects.get(id=id)
+    task_list = get_task_list(current_run.name)
+    run_details = []
+    complete_count = 0
+    for task in task_list:
+        if task.state.value == "running":
+            current_time = datetime.now(timezone.utc)
+            duration = current_time - task.execution_info.start_time
+        elif task.execution_info.end_time:
+            duration = task.execution_info.end_time - task.execution_info.start_time
+            complete_count = complete_count+1
+        else:
+            duration = "N/A"
+        task_detail = (task, duration)
+        run_details.append(task_detail)
+    context.update({"run_details": run_details, "current_run": current_run, "complete_count": complete_count})
+    logger.info("run_details", extra=user_extra(request))
+
+    if request.method == "POST":
+        context.update({"response_text": request.POST})
+        try:
+            template = loader.get_template("pipeline/run.html")
+            download_blobs_from_folder(request.POST['azure_output_folder'])
+
+            return HttpResponse(template.render(context, request), content_type="text/html")
+        except Exception:
+            logger.exception("webapp upload broke", extra=user_extra(request))
+    try:
+        template = loader.get_template("pipeline/run.html")
+
+        return HttpResponse(template.render(context, request), content_type="text/html")
+    except Exception:
+        logger.exception("webapp upload broke", extra=user_extra(request))
+    return None
