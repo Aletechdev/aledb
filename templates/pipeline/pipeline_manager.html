@@ -2,7 +2,7 @@
 
 {% block title %}The Ensemble Mutation Calling Pipeline{% endblock %}
 
-{% block header %}<b><a href="#">The Ensemble Mutation Calling Pipeline</a></b> - Getting Started{% endblock %}
+{% block header %}<b><a href="#">The Ensemble Mutation Calling Pipeline</a></b> - Pipeline Manager{% endblock %}
 {% block scripts_and_style %}
     <link rel="stylesheet" type="text/css" href="/static/css/webapp.css"/>
     <link rel="stylesheet" type="text/css" href="/static/css/pipeline.css"/>
@@ -46,54 +46,55 @@
             </form>
         </div>
     </div>
+
+    <table id="pipeline_runs" class="display table">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Name</th>
+            {% if request.user.is_superuser %}
+                <th>User</th>
+            {% endif %}
+            <th>XPMD</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        {% for run in pipeline_runs %}
+            <tr>
+                <td>{{ run.date }}</td>
+                <td><b><a href="/pipeline/run/{{ run.id }}">{{ run.name }}</a></b></td>
+                {% if request.user.is_superuser %}
+                    <td>{{ run.user }}</td>
+                {% endif %}
+                <td><a href="{{ run.xpmd }}" target="_blank">XPMD</a></td>
+                <td>{{ run.status }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        $(document)
+            .ready(function () {
+                $('#pipeline_runs')
+                    .DataTable({
+                        "columns": [
+                            {"width": "7%"},
+                            {"width": "7%"},
+                            {% if request.user.is_superuser %}
+                                {"width": "3%"},
+                            {% endif %}
+                            {"width": "3%"},
+                            {"width": "4%"},
+                        ]
+                    });
+            });
+    </script>
+
     {% if pipeline_runs|length == 0 %}
         <div class="section_header"><h3>You don't have any pipeline runs</h3></div>
     {% else %}
-        <div class="section_header"><h3>Your pipeline runs. Click on the run name to manage the run.</h3></div>
-        <table id="pipeline_runs" class="display table">
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Name</th>
-                {% if request.user.is_superuser %}
-                    <th>User</th>
-                {% endif %}
-                <th>XPMD</th>
-                <th>Status</th>
-            </tr>
-            </thead>
-            <tbody>
-
-            {% for run in pipeline_runs %}
-                <tr>
-                    <td>{{ run.date }}</td>
-                    <td><b><a href="/pipeline/run/{{ run.id }}">{{ run.name }}</a></b></td>
-                    {% if request.user.is_superuser %}
-                        <td>{{ run.user }}</td>
-                    {% endif %}
-                    <td><a href="{{ run.xpmd }}" target="_blank">XPMD</a></td>
-                    <td>{{ run.status }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        <script>
-            $(document)
-                .ready(function () {
-                    $('#pipeline_runs')
-                        .DataTable({
-                            "columns": [
-                                {"width": "7%"},
-                                {"width": "7%"},
-                                {% if request.user.is_superuser %}
-                                    {"width": "3%"},
-                                {% endif %}
-                                {"width": "3%"},
-                                {"width": "4%"},
-                            ]
-                        });
-                });
-        </script>
         <div>
             <p>Once completed, your runs could be uploaded through their respective panels.
                 Access them by clicking the run name in the table above</p>
