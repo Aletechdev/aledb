@@ -33,7 +33,11 @@
                 <td>{{ task.id }}</td>
                 <td>{{ task.execution_info.start_time }}</td>
                 <td>{{ task.execution_info.end_time }}</td>
-                <td>{{ task.state.value }}</td>
+                {% if task.execution_info.failure_info %}
+                    <td>{{ task.execution_info.failure_info }}</td>
+                {% else %}
+                    <td>{{ task.state.value }}</td>
+                {% endif %}
                 <td><a href="log/{{ current_run.name }}/{{ task.id }}">log</a></td>
             </tr>
         {% endfor %}
