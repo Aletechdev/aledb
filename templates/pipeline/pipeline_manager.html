@@ -16,20 +16,22 @@
                 <label for="run_name">Name for the Run</label>
                 <input id="run_name" type="text" name="run_name" value="">
                 <label for="xpmd">Metadata URL <a
-                        href="https://docs.google.com/spreadsheets/d/1WhKCgSKn5G5ypx8ZUB2a6xeuKvi06DqhTAlUJRoRems/copy">Click
+                        href="https://docs.google.com/spreadsheets/d/1WhKCgSKn5G5ypx8ZUB2a6xeuKvi06DqhTAlUJRoRems/copy"
+                        target="_blank">Click
                     here to generate a new spreadsheet for your pipeline run</a></label>
                 <input id="xpmd" type="text" name="xpmd" value="">
-                <label for="data_location">Current Data Location</label>
+                <label for="data_location">Current Input Data Location</label>
                 <select name="data_location" id="data_location">
-                    <optgroup label="Data is already in our internal Azure System">
+                    <optgroup label="Input data is already in our internal Azure System">
                         <option value="azure">Azure</option>
                     </optgroup>
-                    <optgroup label="Data is in a Private Google Drive folder and needs to be transferred to Azure">
+                    <optgroup
+                            label="Input data is in a Google Drive folder has been shared with aledb and needs to be transferred to Azure">
                         <option value="drive">Drive</option>
                     </optgroup>
                 </select>
 
-                <label for="folder_name">Folder name: </label>
+                <label for="folder_name">Input folder name: </label>
                 <input id="folder_name" type="text" name="folder_name" value="">
 
                 <label for="vm_size">VM Options:</label>
