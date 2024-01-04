@@ -10,7 +10,7 @@ from django.template import loader
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from logs.aledb_logger import user_extra
-from pipeline.util import get_shared_directories, transfer_to_azure, upload_to_aledb
+from pipeline.util import get_shared_directories, transfer_to_azure
 from pipeline.azure_pipeline_util import run_pipeline
 from pipeline.azure_upload_util import run_upload_script, get_output_directory_names, download_blobs_from_folder
 from pipeline.azure_batch_status_util import get_task_list, get_log_file
