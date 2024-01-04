@@ -44,13 +44,14 @@ def transfer_to_azure(shared_drive_name):
 
     create_folder_cmd = ['sudo', 'mkdir', f'/pipeline_inputs/{shared_drive_name}']
     subprocess.run(root_cmd + create_folder_cmd)
-    copy_files_cmd = ['sudo', 'rclone', 'copy', '--drive-shared-with-me', "ALE:" + f"\"{shared_drive_name}\"/", "/pipeline_inputs/" + f"\"{shared_drive_name}\"/"]
+    copy_files_cmd = ['sudo', 'rclone', 'copy', '--drive-shared-with-me', "ALE:" + f"\"{shared_drive_name}\"/",
+                      "/pipeline_inputs/" + f"\"{shared_drive_name}\"/"]
     subprocess.run(root_cmd + copy_files_cmd)
 
 
-#will use the external rclone command to do so
+# will use the external rclone command to do so
 def transfer_to_azure_mounted(dir):
-    #code for the files in a mounted system
+    # code for the files in a mounted system
     blob_service_client = BlobServiceClient(
         account_url=f"https://{config.STORAGE_ACCOUNT_NAME}.{config.STORAGE_ACCOUNT_DOMAIN}/",
         credential=config.STORAGE_ACCOUNT_KEY
@@ -66,3 +67,31 @@ def transfer_to_azure_mounted(dir):
 
             print("\nUploading to Azure Storage as blob:\n\t" + fileName)
             blob_service_client.get_container_client(container="data").upload_blob(fileName, open(fullPath, "rb"))
+
+
+def update_run_status(run):
+    match run.status:
+        case "new":
+            return
+        case "transferring":
+            check_transfer()
+            return
+        case "running":
+            check_run()
+            return
+        case "awaiting":
+            return
+        case "uploading":
+            return
+        case "done":
+            return
+        case "error":
+            return
+
+
+def check_transfer():
+    return
+
+
+def check_run():
+    return

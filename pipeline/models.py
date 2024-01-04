@@ -8,8 +8,9 @@ class Run(models.Model):
     user = models.ForeignKey(User, default=None, on_delete=models.DO_NOTHING, help_text="project owner")
     date = models.DateTimeField(auto_now_add=True, help_text="pipeline run created date")
     PIPELINE_RUN_STATUS = (
-    ('new', 'New'), ('transferring', 'Transferring'), ('running', 'Running'), ('awaiting upload', 'Awaiting Upload'),
-    ('uploading', 'Uploading'), ('done', 'Done'), ('error', 'Error'))
+        ('new', 'New'), ('transferring', 'Transferring'), ('running', 'Running'),
+        ('awaiting upload', 'Awaiting Upload'),
+        ('uploading', 'Uploading'), ('done', 'Done'), ('error', 'Error'))
     status = models.CharField(max_length=25, default='new', blank=True, choices=PIPELINE_RUN_STATUS)
     xpmd = models.CharField(max_length=150)
 

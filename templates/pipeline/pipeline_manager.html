@@ -11,11 +11,13 @@
     <button type="button" class="big collapsible">Click Here to Create A New Pipeline Run</button>
     <div class="content" style="padding: 3em">
         <div class="form-row">
-            <form action="/pipeline/manager/" method="post">
+            <form action="/pipeline/" method="post">
                 {% csrf_token %}
                 <label for="run_name">Name for the Run</label>
                 <input id="run_name" type="text" name="run_name" value="">
-                <label for="xpmd">Metadata URL <a href="https://docs.google.com/spreadsheets/d/1WhKCgSKn5G5ypx8ZUB2a6xeuKvi06DqhTAlUJRoRems/copy>">Click here to generate a new spreadsheet for your pipeline run</a></label>
+                <label for="xpmd">Metadata URL <a
+                        href="https://docs.google.com/spreadsheets/d/1WhKCgSKn5G5ypx8ZUB2a6xeuKvi06DqhTAlUJRoRems/copy>">Click
+                    here to generate a new spreadsheet for your pipeline run</a></label>
                 <input id="xpmd" type="text" name="xpmd" value="">
                 <label for="data_location">Current Data Location</label>
                 <select name="data_location" id="data_location">
@@ -65,11 +67,11 @@
             {% for run in pipeline_runs %}
                 <tr>
                     <td>{{ run.date }}</td>
-                    <td>{{ run.name }}</td>
+                    <td><b><a href="/pipeline/run/{{ run.id }}">{{ run.name }}</a></b></td>
                     {% if request.user.is_superuser %}
                         <td>{{ run.user }}</td>
                     {% endif %}
-                    <td><a href="{{ run.xpmd }}">XPMD</a></td>
+                    <td><a href="{{ run.xpmd }}" target="_blank">XPMD</a></td>
                     <td>{{ run.status }}</td>
                 </tr>
             {% endfor %}
@@ -92,11 +94,13 @@
                         });
                 });
         </script>
+        <div>
+            <p>Once completed, your runs could be uploaded through their respective panels.
+                Access them by clicking the run name in the table above</p>
+        </div>
     {% endif %}
 
-    <div>
-        <a href="/pipeline/upload">Once your project is done running, click here to see the uploading options</a>
-    </div>
+
     <script>
         var coll = document.getElementsByClassName("collapsible");
         var i;

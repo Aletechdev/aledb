@@ -6,7 +6,8 @@ __author__ = 'Muyao'
 
 urlpatterns = [
     path('', views.pipeline, name="pipeline"),
-    path('upload/', views.upload, name='upload'),
+    path('upload/<str:name>', views.upload, name='upload'),
     path('drive/', views.drive, name='drive'),
-
+    path('run/<int:id>', views.run, name='run'),
+    path('run/log/<str:job>/<str:task>', views.log, name='log'),
 ]
