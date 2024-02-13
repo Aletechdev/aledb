@@ -63,6 +63,14 @@ DATABASES = {
         'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'password'),
         'HOST': os.environ.get('MYSQL_HOST', 'db'),
         'PORT': int(os.environ.get('MYSQL_PORT', 3306)),
+    },
+    'ale_machine': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('ALE_MACHINE_DATABASE', 'database'),
+        'USER': os.environ.get('ALE_MACHINE_USER', 'user'),
+        'PASSWORD': os.environ.get('ALE_MACHINE_PASSWORD', 'password'),
+        'HOST': os.environ.get('ALE_MACHINE_HOST', 'db'),
+        'PORT': int(os.environ.get('ALE_MACHINE_MYSQL_PORT', 13306)),
     }
 }
 
