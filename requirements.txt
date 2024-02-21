@@ -64,3 +64,4 @@ lxml==4.9.3
 mysqlclient==2.2.0
 numpy==1.25.2
 pandas==2.1.0
+daphne==4.1.0

@@ -92,6 +92,28 @@
         {% endfor %}
     </div>
 
+    <script>
+        const gogglesSocket = new WebSocket('ws://' + window.location.host + '/ws/goggles/');
+
+        gogglesSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            const message = data['message'];
+            // Handle incoming message
+            console.log(message)
+        };
+
+        gogglesSocket.onclose = function (e) {
+            console.error('Goggles socket closed unexpectedly');
+        };
+
+        // Send message to server
+        function sendMessage(message) {
+            gogglesSocket.send(JSON.stringify({
+                'message': message
+            }));
+        }
+    </script>
+
     <div id="mainChart" style="overflow: visible; width: 65% !important;"></div>
 
     <script>
@@ -238,6 +260,7 @@
                     if (table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
                         mainChart.get(row_id).remove();
                     } else {
+                        sendMessage(row_id)
                         mainChart.addSeries({
                             id: row_id,
                             name: row_id,

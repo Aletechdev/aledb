@@ -6,6 +6,7 @@
 *~
 *.ini
 *.yml
+*.conf
 */migrations
 static/
 config.sh
