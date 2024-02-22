@@ -10,33 +10,15 @@ from common.util import get_user_context
 from django.template import loader
 from logs.aledb_logger import user_extra
 
-from .models import Projects, Experiments
+from .util import generate_ales, generate_projects
 
 import logging
-
-import random
 
 logger = logging.getLogger(__name__)
 
 ALE_MACHINES = [
-    ['ALE 3.0', 'UCSD'],
-    ['ALE 3.0', 'Future']]
-
-
-def generate_projects():
-    from string import ascii_lowercase as alc
-    projects = []
-    for p in Projects.objects.using('ale_machine').all():
-        projects.append(p.title)
-    return projects
-
-
-def generate_ales():
-    ales = []
-    for experiment in Experiments.objects.using('ale_machine').all():
-        ale = [experiment.description, [experiment.description, '#' + ''.join(random.sample('0123456789ABCDEF', 6))]]
-        ales.append(ale)
-    return ales
+    ['ALE 3.0', 'UCSD', 'ucsd'],
+    ['ALE 3.0', 'Future', 'future']]
 
 
 def goggles(request):
