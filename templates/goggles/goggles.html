@@ -106,12 +106,19 @@
             // Handle incoming message
             console.log(message)
             if (selected_ales.includes(message[0])) {
-                mainChart.get('ALES_' + message[0]).setData(message[1]);
+                mainChart.get('ALES_' + message[0]).setData(message[1][0]);
+                growthChart.get('ALES_' + message[0]).setData(message[1][1]);
             } else {
                 mainChart.addSeries({
                     id: 'ALES_' + message[0],
                     name: message[2],
-                    data: message[1],
+                    data: message[1][0],
+                    color: document.getElementById('ale_' + message[0]).value,
+                });
+                growthChart.addSeries({
+                    id: 'ALES_' + message[0],
+                    name: message[2],
+                    data: message[1][1],
                     color: document.getElementById('ale_' + message[0]).value,
                 });
                 selected_ales.push(message[0])
@@ -235,6 +242,7 @@
                     console.log(e.target.value);
                     console.log(mainChart.get(e.target.id));
                     mainChart.get(e.target.id).update({color: e.target.value});
+                    growthChart.get(e.target.id).update({color: e.target.value});
                 }
 
                 table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function () {
@@ -246,7 +254,8 @@
 
                     if (table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
                         mainChart.get(row_id).remove();
-                        selected_ales.pop(ALE_id)
+                        growthChart.get(row_id).remove();
+                        selected_ales.pop(ALE_id);
                     } else {
 
                         //send ale_ids of the requests
