@@ -1,0 +1,20 @@
+button {
+    width: 100%;
+}
+
+input[type=text], select {
+    width: 10%;
+    padding: 3px 5px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#machine-bar {
+    width: 25em;
+    float: left;
+    padding-right: 3em;
+    height: 150vh
+}

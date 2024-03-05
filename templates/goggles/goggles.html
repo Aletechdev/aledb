@@ -4,7 +4,8 @@
 {% block title %}ALEGoggles{% endblock %}
 {% block scripts_and_style %}
 
-    <script src="{% static '/js/goggles.js' %}"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/webapp.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/goggles.css' %}">
     <link href="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.css"
           rel="stylesheet">
 
@@ -47,7 +48,22 @@
     <script>
         toggle_sidebar();
     </script>
-    <div class="options_bar" style="position: fixed; bottom:.5em; z-index: 100">
+    <script>
+        function handleSelectChangeX(event) {
+            format = document.getElementById("x_scale").value;
+            if (format === "dates") {
+                mainChart.xAxis.type = "datetime"
+                mainChart.xAxis.step = 24
+            } else if (format === "days") {
+                mainChart.xAxis.type = "datetime"
+                mainChart.xAxis.step = 9999999999999
+            }
+            mainChart.redraw()
+
+        }
+
+    </script>
+    <div class="options_bar" style="position: fixed; bottom:.5em; z-index: 100;">
         <div class="goggles-option">
             <label class="form-check-label" for="inlineCheckbox1">X-Axis Format:</label>
             <select id="x_scale" onchange="handleSelectChangeX(event)">
@@ -65,20 +81,15 @@
             </select>
             <label for="live_data">Live Updates:</label>
             <input type="checkbox" id="live_data" onclick="myFunction()">
-
-
         </div>
     </div>
 
-
-    <script src="{% static '/js/goggles.js' %}"></script>
     <link href="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.css"
           rel="stylesheet">
 
     <script src="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.js"></script>
 
     <div class="container">
-    <h1 id="app">{{ text }}</h1>
     <div id="machine-bar" style="width:25em; float: left; padding-right: 3em">
         {% for machine in machines %}
             <button type="button" class="collapsible machines"
@@ -96,7 +107,6 @@
     </div>
 
     <script>
-
         const gogglesSocket = new WebSocket('ws://' + window.location.host + '/ws/goggles/');
 
         gogglesSocket.onmessage = function (e) {
@@ -106,19 +116,26 @@
             // Handle incoming message
             console.log(message)
             if (selected_ales.includes(message[0])) {
-                mainChart.get('ALES_' + message[0]).setData(message[1][0]);
-                growthChart.get('ALES_' + message[0]).setData(message[1][1]);
+                mainChart.get('ALE_' + message[0]).setData(message[1][0]);
+                growthChart.get('ALE_' + message[0]).setData(message[1][1]);
+                temperatureChart.get('ALE_' + message[0]).setData(message[1][2]);
             } else {
                 mainChart.addSeries({
-                    id: 'ALES_' + message[0],
-                    name: message[2],
+                    id: 'ALE_' + message[0],
+                    name: 'OD:'+message[2],
                     data: message[1][0],
                     color: document.getElementById('ale_' + message[0]).value,
                 });
                 growthChart.addSeries({
-                    id: 'ALES_' + message[0],
-                    name: message[2],
+                    id: 'ALE_' + message[0],
+                    name: 'GR:' + message[2],
                     data: message[1][1],
+                    color: document.getElementById('ale_' + message[0]).value,
+                });
+                temperatureChart.addSeries({
+                    id: 'ALE_' + message[0],
+                    name: 'Temp:' + message[2],
+                    data: message[1][2],
                     color: document.getElementById('ale_' + message[0]).value,
                 });
                 selected_ales.push(message[0])
@@ -137,16 +154,19 @@
             }));
         }
     </script>
-
-    <div id="mainChart" style="overflow: visible; width: 65% !important;"></div>
+    <div id="mainChart" style="overflow: visible; width: 65%; !important;"></div>
+    <div id="growthChart" style="overflow: visible; width: 65%; !important;"></div>
+    <div id="temperatureChart" style="overflow: visible; width: 65% !important;"></div>
     <script>
-
         console.time('line');
         const mainChart = Highcharts.stockChart('mainChart', {
             chart: {
                 zoomType: 'x',
                 panning: true,
                 panKey: 'shift'
+            },
+            xAxis: {
+                type: 'datetime',
             },
 
             plotOptions: {
@@ -193,6 +213,9 @@
                 followPointer: false,
                 stickOnContact: true,
                 useHTML: true,
+                style: {
+                    pointerEvents: 'auto'
+                }
             },
 
         });
@@ -206,9 +229,9 @@
     {% for machine in machines %}
         {% for project in projects %}
             <script>
-                var ALES_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = JSON.parse(document.getElementById('ale_data').textContent);
+                var ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = JSON.parse(document.getElementById('ale_data').textContent);
                 // Formatting function for row details - modify as you need
-                //console.log(ALES_{{ forloop.parentloop.counter }}_{{ forloop.counter }})
+                //console.log(ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }})
                 let table_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = new DataTable('#ale-machine_{{ forloop.parentloop.counter }}_{{ forloop.counter }}', {
                     select: 'multi+shift',
                     autoHeight: true,
@@ -221,7 +244,7 @@
                     dataType: JSON,
 
 
-                    data: ALES_{{ forloop.parentloop.counter }}_{{ forloop.counter }},
+                    data: ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }},
                     columns: [
                         {},
                         {},
@@ -243,11 +266,12 @@
                     console.log(mainChart.get(e.target.id));
                     mainChart.get(e.target.id).update({color: e.target.value});
                     growthChart.get(e.target.id).update({color: e.target.value});
+                    temperatureChart.get(e.target.id).update({color: e.target.value});
                 }
 
                 table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function () {
-                    let ALE_id = ALES_{{ forloop.parentloop.counter }}_{{ forloop.counter }}[table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index()][0];
-                    let row_id = "ALES_".concat(ALE_id)
+                    let ALE_id = ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }}[table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index()][0];
+                    let row_id = "ALE_".concat(ALE_id)
                     table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
 
                     //document.getElementById(row_id).addEventListener("input", changeColor)
@@ -255,6 +279,7 @@
                     if (table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
                         mainChart.get(row_id).remove();
                         growthChart.get(row_id).remove();
+                        temperatureChart.get(row_id).remove();
                         selected_ales.pop(ALE_id);
                     } else {
 
@@ -275,7 +300,7 @@
             console.log("rerunning", selected_ales)
             if (selected_ales.length > 0) {
                 for (let i = 0; i < selected_ales.length; i++) {
-                    sendMessage([selected_ales[i], "ALES_".concat(selected_ales[i])]);
+                    sendMessage([selected_ales[i], "ALE_".concat(selected_ales[i])]);
                 }
                 if (checkBox.checked == true) {
                     setTimeout(live_data_loop, 5000);
@@ -310,9 +335,73 @@
         coll[0].nextElementSibling.style.display = "block";
 
     </script>
+    <script>
+        console.time('line');
+        const temperatureChart = Highcharts.stockChart('temperatureChart', {
+            chart: {
+                zoomType: 'x',
+                panning: true,
+                panKey: 'shift'
+            },
+            xAxis: {
+                type: 'datetime',
+            },
+
+            plotOptions: {
+                area: {
+                    //allowPointSelect: true,
+                    fillOpacity: 0.25
+                },
+                series: {
+                    lineWidth: 0.5,
+                    marker: {
+                        radius: 3,
+                        symbol: "circle"
+                    },
+                    point: {
+                        events: {
+                            click: function () {
+                                if (this.selected) {
+                                    this.select(false, true)
+                                } else {
+                                    this.select(true, true)
+                                }
+
+                            }
+                        }
+                    },
+                },
+            }, /**
+             title: {
+             text: 'Dummy opticALE(s) with ' + n + ' measurements'
+             },
+             uncomment when we are struggling to support all the points
+             boost: {
+             useGPUTranslations: true
+             },*/
+
+            legend: {
+                enabled: true
+            },
+
+            tooltip: {
+                valueDecimals: 2,
+                shared: false,
+                split: false,
+                followPointer: false,
+                stickOnContact: true,
+                useHTML: true,
+                style: {
+                    pointerEvents: 'auto'
+                }
+            },
+
+        });
+        console.timeEnd('line');
+
+    </script>
 
 
-    <div id="growthChart" style="overflow: visible; width: 65% !important;"></div>
 
     <script>
 
