@@ -64,3 +64,8 @@ input[type=submit]:hover {
     z-index: 100;
     width: 100%
 }
+
+.container{
+    margin-left: 1vw;
+    margin-right: 1vw;
+}

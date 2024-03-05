@@ -3,14 +3,11 @@
 
 {% block title %}ALEGoggles{% endblock %}
 {% block scripts_and_style %}
-
-    <link rel="stylesheet" type="text/css" href="{% static 'css/webapp.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/goggles.css' %}">
     <link href="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.css"
           rel="stylesheet">
-
     <script src="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.js"></script>
-
+    <link rel="stylesheet" type="text/css" href="{% static 'css/webapp.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/goggles.css' %}">
     <style>
         label {
             padding-left: 1em;
@@ -84,10 +81,7 @@
         </div>
     </div>
 
-    <link href="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.css"
-          rel="stylesheet">
 
-    <script src="https://cdn.datatables.net/v/dt/dt-1.13.6/date-1.5.1/r-2.5.0/sc-2.2.0/sp-2.2.0/sl-1.7.0/datatables.min.js"></script>
 
     <div class="container">
     <div id="machine-bar" style="width:25em; float: left; padding-right: 3em">
@@ -122,7 +116,7 @@
             } else {
                 mainChart.addSeries({
                     id: 'ALE_' + message[0],
-                    name: 'OD:'+message[2],
+                    name: 'OD:' + message[2],
                     data: message[1][0],
                     color: document.getElementById('ale_' + message[0]).value,
                 });
@@ -246,6 +240,13 @@
 
                     data: ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }},
                     columns: [
+                        {},
+                        {},
+                        {
+                            'render': function (data, type, full, meta) {
+                                return data[0];
+                            }
+                        },
                         {},
                         {},
                         {

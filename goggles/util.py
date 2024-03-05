@@ -3,7 +3,7 @@
 import random
 import math
 from .models import Projects, Experiments, Batches, MeasurementTypes, Measurements, GrowthAnalyses, \
-    TemperatureMeasurements
+    TemperatureMeasurements, Protocol
 
 from django.core import serializers
 import numpy as np
@@ -24,10 +24,16 @@ def generate_projects():
 
 def generate_ales():
     ales = []
-    for experiment in Experiments.objects.using('ale_machine').all():
-        ale = [experiment.db_id, experiment.description,
-               [experiment.description, '#' + ''.join(random.sample('0123456789ABCDEF', 6)), experiment.db_id]]
-        ales.append(ale)
+    all_protocols = Protocol.objects.using('ale_machine').all()
+
+    for protocol in all_protocols:
+        experiment = protocol.experiment
+        if protocol.media:
+            ale = [experiment.db_id, experiment.description,
+                   protocol.type, protocol.filter_toggle, protocol.media.description,
+                   [experiment.description, '#' + ''.join(random.sample('0123456789ABCDEF', 6)), experiment.db_id,
+                    ]]
+            ales.append(ale)
     return ales
 
 
