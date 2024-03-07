@@ -8,6 +8,9 @@ from .models import Projects, Experiments, Batches, MeasurementTypes, Measuremen
 from django.core import serializers
 import numpy as np
 
+# i don't know about you but i'm feeling
+TEMPERATURE_MINIMUM = 22
+
 
 def json_serialize(qs):
     qs_json = serializers.serialize('json', qs)
@@ -57,6 +60,7 @@ def get_measurement_data(measurement_type_db_ids):
     measurement_list = []
     temperature_measurements_list = []
     growth_rate_list = []
+    prev_batch = -1
     for temp_measurement in temperature_measurements:
         current_batch = temp_measurement.measurement.measurement_type_db.batch.batch_id
         current_time = temp_measurement.time.timestamp() * 1000
@@ -85,12 +89,16 @@ def get_measurement_data(measurement_type_db_ids):
         measurement_list.append(
             [current_time, adc_OD_values,
              current_batch])
-        temperature_measurements_list.append(
-            [current_time, temp_measurement.temperature,
-             current_batch])
-        growth_rate_list.append([current_time,
+        current_temp = temp_measurement.temperature
+        if current_temp > TEMPERATURE_MINIMUM:
+            temperature_measurements_list.append(
+                [current_time, temp_measurement.temperature,
+                 current_batch])
+        if current_batch != prev_batch:
+            growth_rate_list.append([current_time,
                                  growth_dict[current_batch],
                                  current_batch])
+            prev_batch = current_batch
     return [measurement_list, growth_rate_list, temperature_measurements_list]
 
 
