@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 
 from common.util import get_user_context
+from django.contrib.admin.views.decorators import staff_member_required
 
 from django.template import loader
 from logs.aledb_logger import user_extra
@@ -21,6 +22,7 @@ ALE_MACHINES = [
     ['ALE 3.0', 'Future', 'future']]
 
 
+@staff_member_required(login_url='/accounts/login/')
 def goggles(request):
     logger.info("goggles usage", extra=user_extra(request))
 
