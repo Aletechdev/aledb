@@ -13,7 +13,6 @@ services:
       - .docker/one.env
     volumes:
       - .:/app
-      - /Users/muyao/projects/aledata:/data/aledata
       - /data/aledata:/data/aledata
       - /home/muyao/.ssh:/root/.ssh
 
