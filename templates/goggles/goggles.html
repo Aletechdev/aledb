@@ -101,7 +101,7 @@
     </div>
 
     <script>
-        const gogglesSocket = new WebSocket('ws://' + window.location.host + '/ws/goggles/');
+        const gogglesSocket = new WebSocket('wss://' + window.location.host + '/wss/goggles/');
 
         gogglesSocket.onmessage = function (e) {
             const data = JSON.parse(e.data);
