@@ -1,14 +1,19 @@
 import json
-from random import random
-from time import sleep
-
 from channels.generic.websocket import WebsocketConsumer
+from .util import get_experiment_data
 
 
-class GraphConsumer(WebsocketConsumer):
+class GogglesConsumer(WebsocketConsumer):
     def connect(self):
         self.accept()
 
-        for i in range(1000):
-            self.send(json.dumps({'value': random()}))
-            sleep(1)
+    def disconnect(self, close_code):
+        pass
+
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        ale_id = text_data_json['db_id']
+        name = text_data_json['name']
+        self.send(text_data=json.dumps({
+            'message': [ale_id, get_experiment_data(ale_id), name]
+        }, indent=4, sort_keys=True, default=str))
