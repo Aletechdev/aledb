@@ -57,8 +57,7 @@ def upload(request, name):
         run = Run.objects.get(name=name)
         run.status = "uploading"
         run.save()
-        upload_cmd = ['ssh', '-i', '/root/.ssh/aledb', 'muyao@aledb.org', '/upload/upload.sh {}'.format(name), 'lsjson', '--dirs-only',
-                      '--drive-shared-with-me', 'ALE:']
+        upload_cmd = ['ssh', '-i', '/root/.ssh/aledb', 'root@aledb.org', '/upload/webapp-upload.sh {}'.format(name)]
         subprocess.run(upload_cmd)
         run.status = "done"
         run.save()
