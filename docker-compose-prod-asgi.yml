@@ -15,6 +15,8 @@ services:
       - .:/app
       - /data/aledata:/data/aledata
       - /home/muyao/.ssh:/root/.ssh
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
     command: bash -c "python manage.py collectstatic --no-input && daphne -b 0.0.0.0 -p 80 aleinfo.asgi:application"
   nginx:
@@ -28,7 +30,7 @@ services:
       - static:/usr/share/nginx/static:ro
       - ./nginx-ws.conf:/etc/nginx/conf.d/default.conf:ro
       - /data/aledata:/data/aledata:ro
-    command: [nginx-debug, '-g', 'daemon off;']
+    command: [ nginx-debug, '-g', 'daemon off;' ]
     ports:
       - 8000:80
 volumes:
