@@ -10,7 +10,7 @@ GOOGLE_ANALYTICS_TAG = os.environ.get('GOOGLE_ANALYTICS_TAG', 'no-google-analyti
 SEQUENCING_URL = os.environ.get('SEQUENCING_URL', 'http://sbrg.ucsd.edu/')
 ALE_DATA_ROOT_DIR = os.environ.get('ALE_DATA_ROOT_DIR', 'ale_data_root_dir')
 
-ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), 'localhost', '127.0.0.1', '35.236.92.37',
+ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), 'localhost', '127.0.0.1', '35.236.92.37', '0.0.0.0',
                  'ale.ucsd.edu', 'aledb.org']
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 3600  # in seconds, 1hr
@@ -19,6 +19,8 @@ SESSION_SAVE_EVERY_REQUEST = True
 CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", "http://localhost:8000", "https://aledb.org", "https://www.aledb.org"]
 
 INSTALLED_APPS = (
+
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -30,6 +32,7 @@ INSTALLED_APPS = (
     "django_filters",
     "bootstrap3",
     "bootstrap4",
+    'channels',
     'defender',
     'ale',
     'seq',
@@ -63,6 +66,22 @@ DATABASES = {
         'PASSWORD': os.environ.get('MYSQL_PASSWORD', 'password'),
         'HOST': os.environ.get('MYSQL_HOST', 'db'),
         'PORT': int(os.environ.get('MYSQL_PORT', 3306)),
+    },
+    'ale_machine_local': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('ALE_MACHINE_DATABASE', 'database'),
+        'USER': os.environ.get('ALE_MACHINE_USER', 'user'),
+        'PASSWORD': os.environ.get('ALE_MACHINE_PASSWORD', 'password'),
+        'HOST': os.environ.get('ALE_MACHINE_HOST', 'db'),
+        'PORT': int(os.environ.get('ALE_MACHINE_MYSQL_PORT', 13306)),
+    },
+    'ale_machine': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('ALPHA_MACHINE_DATABASE', 'database'),
+        'USER': os.environ.get('ALPHA_MACHINE_USER', 'user'),
+        'PASSWORD': os.environ.get('ALPHA_MACHINE_PASSWORD', 'password'),
+        'HOST': os.environ.get('ALPHA_MACHINE_HOST', 'db'),
+        'PORT': int(os.environ.get('ALPHA_MACHINE_MYSQL_PORT', 5432)),
     }
 }
 
@@ -71,6 +90,12 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
         'LOCATION': 'cache_table',
     }
+}
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
 }
 
 MIDDLEWARE = (
@@ -98,6 +123,8 @@ LOGIN_REDIRECT_URL = 'experiments_view'
 LOGOUT_REDIRECT_URL = 'experiments_view'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'aleinfo.wsgi.application'
+
+ASGI_APPLICATION = "aleinfo.asgi.application"
 
 # XXX(lyschoening) what does this refer to?
 OTHER_USERNAME = os.environ.get('OTHER_DATABASE_USERNAME', 'other_database_username')

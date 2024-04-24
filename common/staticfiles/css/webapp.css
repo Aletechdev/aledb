@@ -6,7 +6,7 @@
 }
 
 
-.section_header{
+.section_header {
 
 
 }
@@ -56,4 +56,16 @@ input[type=submit] {
 
 input[type=submit]:hover {
     background-color: #45a049;
+}
+
+.options_bar {
+    position: fixed;
+    bottom: .5em;
+    z-index: 100;
+    width: 100%
+}
+
+.container{
+    margin-left: 1vw;
+    margin-right: 1vw;
 }
