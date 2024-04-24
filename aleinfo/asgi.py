@@ -18,7 +18,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mysite.settings")
 
 
 application = ProtocolTypeRouter({
-    "http": django_asgi_app,
+    'https': get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter([
             path('ws/goggles/', GogglesConsumer.as_asgi()),
