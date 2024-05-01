@@ -58,7 +58,7 @@ def upload(request, name):
         run.status = "uploading"
         run.save()
         upload_cmd = ['ssh', '-i', '/root/.ssh/aledb', 'root@aledb.org', '/upload/webapp-upload.sh {}'.format(name)]
-        subprocess.run(upload_cmd)
+        subprocess.Popen(upload_cmd)
         run.status = "done"
         run.save()
         return redirect(pipeline)
