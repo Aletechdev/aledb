@@ -11,23 +11,40 @@ import numpy as np
 # i don't know about you but i'm feeling
 TEMPERATURE_MINIMUM = 22
 
+ALE_MACHINES = [
+    ['UCSD 3.0', 'UCSD ONE', 'ucsd_machine_one'],
+    ['UCSD 3.0a', 'UCSD TWO', 'ucsd_machine_two'],
+    ['DTU 3.1', 'DTU ONE', 'dtu_machine_one']]
+
 
 def json_serialize(qs):
     qs_json = serializers.serialize('json', qs)
     return qs_json
 
 
-def generate_projects():
+def get_ale_machines():
+    return ALE_MACHINES
+
+
+def generate_projects(machine):
     from string import ascii_lowercase as alc
+
     projects = []
-    for p in Projects.objects.using('ale_machine').all():
+    for p in Projects.objects.using(machine).all():
         projects.append(p.title)
     return projects
 
 
-def generate_ales():
+def generate_all_projects():
+    project_set = []
+    for machine in ALE_MACHINES:
+        project_set.append(generate_projects(machine[2]))
+    return project_set
+
+
+def generate_ales(machine):
     ales = []
-    all_protocols = Protocol.objects.using('ale_machine').all()
+    all_protocols = Protocol.objects.using(machine).all()
 
     for protocol in all_protocols:
         experiment = protocol.experiment
@@ -40,8 +57,15 @@ def generate_ales():
     return ales
 
 
-def get_growth_data(measurement_type_db_ids):
-    experiment_growth_rates = GrowthAnalyses.objects.using('ale_machine').filter(
+def generate_all_ales():
+    ale_set = []
+    for machine in ALE_MACHINES:
+        ale_set.append(generate_ales(machine[2]))
+    return ale_set
+
+
+def get_growth_data(ale_machine, measurement_type_db_ids):
+    experiment_growth_rates = GrowthAnalyses.objects.using(ale_machine).filter(
         measurement_type_db_id__in=measurement_type_db_ids)
     growth_rate_dict = {}
     for rate in experiment_growth_rates:
@@ -49,12 +73,12 @@ def get_growth_data(measurement_type_db_ids):
     return growth_rate_dict
 
 
-def get_measurement_data(measurement_type_db_ids):
-    growth_dict = get_growth_data(measurement_type_db_ids)
+def get_measurement_data(ale_machine, measurement_type_db_ids):
+    growth_dict = get_growth_data(ale_machine, measurement_type_db_ids)
     # let's just do each experiment separately
-    measurements = Measurements.objects.using('ale_machine').filter(
+    measurements = Measurements.objects.using(ale_machine).filter(
         measurement_type_db_id__in=measurement_type_db_ids)
-    temperature_measurements = TemperatureMeasurements.objects.using('ale_machine').filter(measurement__in=measurements)
+    temperature_measurements = TemperatureMeasurements.objects.using(ale_machine).filter(measurement__in=measurements)
     # temperature measurements include measurements and batch, we can use it to pull all we need at once
 
     measurement_list = []
@@ -102,8 +126,10 @@ def get_measurement_data(measurement_type_db_ids):
     return [measurement_list, growth_rate_list, temperature_measurements_list]
 
 
-def get_experiment_data(experiment_id):
-    batches = Batches.objects.using('ale_machine').filter(experiment=experiment_id).values("db_id")
-    measurement_type_db_ids = MeasurementTypes.objects.using('ale_machine').filter(batch_id__in=batches).values("db_id")
+def get_experiment_data(ale_machine, experiment_id):
+    batches = Batches.objects.using(ale_machine).filter(experiment=experiment_id).values("db_id")
+    measurement_type_db_ids = MeasurementTypes.objects.using(ale_machine).filter(batch_id__in=batches).values("db_id")
     measurement_data = get_measurement_data(measurement_type_db_ids)
     return [measurement_data[0], measurement_data[1], measurement_data[2]]
+
+

@@ -11,15 +11,12 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.template import loader
 from logs.aledb_logger import user_extra
 
-from .util import generate_ales, generate_projects
+from .util import generate_all_ales, generate_all_projects, ALE_MACHINES
 
 import logging
 
 logger = logging.getLogger(__name__)
 
-ALE_MACHINES = [
-    ['ALE 3.0', 'UCSD', 'ucsd'],
-    ['ALE 3.0', 'Future', 'future']]
 
 
 @staff_member_required(login_url='/accounts/login/')
@@ -29,7 +26,7 @@ def goggles(request):
     try:
         context = get_user_context(request.user)
         context.update(
-            {'text': 'hello', 'machines': ALE_MACHINES, 'projects': generate_projects(), 'ales': generate_ales()})
+            {'text': 'hello', 'machines': ALE_MACHINES, 'projects': generate_all_projects(), 'ales': generate_all_ales()})
         template = loader.get_template("goggles/goggles.html")
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:

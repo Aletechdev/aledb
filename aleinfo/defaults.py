@@ -75,14 +75,30 @@ DATABASES = {
         'HOST': os.environ.get('ALE_MACHINE_HOST', 'db'),
         'PORT': int(os.environ.get('ALE_MACHINE_MYSQL_PORT', 13306)),
     },
-    'ale_machine': {
+    'ucsd_machine_one': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('ALPHA_MACHINE_DATABASE', 'database'),
-        'USER': os.environ.get('ALPHA_MACHINE_USER', 'user'),
-        'PASSWORD': os.environ.get('ALPHA_MACHINE_PASSWORD', 'password'),
-        'HOST': os.environ.get('ALPHA_MACHINE_HOST', 'db'),
-        'PORT': int(os.environ.get('ALPHA_MACHINE_MYSQL_PORT', 5432)),
-    }
+        'NAME': os.environ.get('UCSD_MACHINE_ONE_DATABASE', 'database'),
+        'USER': os.environ.get('UCSD_MACHINE_ONE_USER', 'user'),
+        'PASSWORD': os.environ.get('UCSD_MACHINE_ONE_PASSWORD', 'password'),
+        'HOST': os.environ.get('UCSD_MACHINE_ONE_HOST', 'db'),
+        'PORT': int(os.environ.get('UCSD_MACHINE_ONE_MYSQL_PORT', 5432)),
+    },
+    'ucsd_machine_two': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('UCSD_MACHINE_TWO_DATABASE', 'database'),
+        'USER': os.environ.get('UCSD_MACHINE_TWO_USER', 'user'),
+        'PASSWORD': os.environ.get('UCSD_MACHINE_TWO_PASSWORD', 'password'),
+        'HOST': os.environ.get('UCSD_MACHINE_TWO_HOST', 'db'),
+        'PORT': int(os.environ.get('UCSD_MACHINE_TWO_MYSQL_PORT', 3308)),
+    },
+    'dtu_machine_one': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DTU_MACHINE_ONE_DATABASE', 'database'),
+        'USER': os.environ.get('DTU_MACHINE_ONE_USER', 'user'),
+        'PASSWORD': os.environ.get('DTU_MACHINE_ONE_PASSWORD', 'password'),
+        'HOST': os.environ.get('DTU_MACHINE_ONE_HOST', 'db'),
+        'PORT': int(os.environ.get('DTU_MACHINE_ONE_MYSQL_PORT', 4306)),
+    },
 }
 
 CACHES = {
