@@ -144,7 +144,8 @@
         function sendMessage(message) {
             gogglesSocket.send(JSON.stringify({
                 'db_id': message[0],
-                'name': message[1]
+                'name': message[1],
+                'machine': message[2]
             }));
         }
     </script>
@@ -285,7 +286,7 @@
                     } else {
 
                         //send ale_ids of the requests
-                        sendMessage([ALE_id, row_id]);
+                        sendMessage([ALE_id, row_id, machine]);
                     }
                     //alert('You clicked on ' + data[0] + "'s row");
                 });
