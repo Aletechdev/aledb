@@ -67,14 +67,6 @@ DATABASES = {
         'HOST': os.environ.get('MYSQL_HOST', 'db'),
         'PORT': int(os.environ.get('MYSQL_PORT', 3306)),
     },
-    'ale_machine_local': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('ALE_MACHINE_DATABASE', 'database'),
-        'USER': os.environ.get('ALE_MACHINE_USER', 'user'),
-        'PASSWORD': os.environ.get('ALE_MACHINE_PASSWORD', 'password'),
-        'HOST': os.environ.get('ALE_MACHINE_HOST', 'db'),
-        'PORT': int(os.environ.get('ALE_MACHINE_MYSQL_PORT', 13306)),
-    },
     'ucsd_machine_one': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('UCSD_MACHINE_ONE_DATABASE', 'database'),
@@ -89,7 +81,7 @@ DATABASES = {
         'USER': os.environ.get('UCSD_MACHINE_TWO_USER', 'user'),
         'PASSWORD': os.environ.get('UCSD_MACHINE_TWO_PASSWORD', 'password'),
         'HOST': os.environ.get('UCSD_MACHINE_TWO_HOST', 'db'),
-        'PORT': int(os.environ.get('UCSD_MACHINE_TWO_MYSQL_PORT', 3308)),
+        'PORT': int(os.environ.get('UCSD_MACHINE_TWO_MYSQL_PORT', 3307)),
     },
     'dtu_machine_one': {
         'ENGINE': 'django.db.backends.mysql',
