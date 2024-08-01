@@ -11,7 +11,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.template import loader
 from logs.aledb_logger import user_extra
 
-from .util import get_initial_data, generate_all_ales, generate_all_projects, ALE_MACHINES
+from .util import get_initial_data, ALE_MACHINES
 
 import logging
 
@@ -26,7 +26,7 @@ def goggles(request):
     try:
         context = get_user_context(request.user)
         context.update(
-            {'text': 'hello', 'initial': get_initial_data, 'machines': ALE_MACHINES, 'projects': generate_all_projects(), 'ales': generate_all_ales()})
+            {'text': 'hello', 'initial': get_initial_data, 'machines': ALE_MACHINES})
         template = loader.get_template("goggles/goggles.html")
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:

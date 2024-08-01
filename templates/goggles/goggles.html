@@ -87,35 +87,95 @@
     <div id="machine-bar" style="width:25em; float: left; padding-right: 3em">
         {% for key, value in initial.items %}
             <button type="button" class="collapsible machines"
-                    style="text-align: center"> {{ machine.name }} {{ machine.id }} </button>
+                    style="text-align: center"> {{ value.name }} </button>
             <div class="content" style="overflow-y:auto; max-height: 20em;">
-                {% for project in machine.projects %}
-                    <button type="button" class="collapsible" style="text-align: center"> {{ project }} </button>
+                {% for project_key, project_value in value.projects.items %}
+                    <button type="button" class="collapsible"
+                            style="text-align: center"> {{ project_value.name }} </button>
                     <div class="content">
-                        <table id="ale-machine_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
-                               class="display"></table>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endfor %}
-    </div>
-    <! –- <div id="machine-bar" style="width:25em; float: left; padding-right: 3em">
-        {% for machine in machines %}
-            <button type="button" class="collapsible machines"
-                    style="text-align: center"> {{ machine.0 }} {{ machine.1 }} </button>
-            <div class="content" style="overflow-y:auto; max-height: 20em;">
-                {% for project in projects %}
-                    <button type="button" class="collapsible" style="text-align: center"> {{ project }} </button>
-                    <div class="content">
-                        <table id="ale-machine_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
-                               class="display"></table>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endfor %}
-    </div>
-    -->
+                        <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
+                               class="display">
+                            {% for experiment in project_value.experiments %}
+                                <tr>
+                                    {% for entry in experiment %}
+                                        <td>{{ entry }}</td>
+                                    {% endfor %}
+                                </tr>
 
+                            {% endfor %}
+                        </table>
+                        <script>
+                            let table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = new DataTable('#ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}', {
+                                select: 'multi+shift',
+                                autoHeight: true,
+                                autoWidth: true,
+                                paging: false,
+                                searching: false,
+                                ordering: false,
+                                info: false,
+                                scrollY: 500,
+                                dataType: JSON,
+
+
+                                //data: ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }},
+                                columns: [
+                                    {},
+                                    {},
+                                    {
+                                        'render': function (data) {
+                                            return data[0];
+                                        }
+                                    },
+                                    {},
+                                    {},
+                                    {
+                                        'render': function (data) {
+                                            var current_color = data.split(',')
+                                            return '<input type="color" id="experiment_{{ value.name }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}_' + current_color[2] + '" value=' + current_color[1] + '>';
+                                        }
+                                    },
+                                    //{title: 'EXP_ID'},
+                                    //{title: 'Mod'},
+                                    //{title: 'Ctrlr'},
+                                    //{title: 'Pos'},
+                                ],
+                                //data: '<input type="color">'
+                            });
+
+                            function changeColor(e) {
+                                console.log(e.target.value);
+                                console.log(mainChart.get(e.target.id));
+                                mainChart.get(e.target.id).update({color: e.target.value});
+                                growthChart.get(e.target.id).update({color: e.target.value});
+                                temperatureChart.get(e.target.id).update({color: e.target.value});
+                            }
+
+                            table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function () {
+                                let ALE_id = ALE_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}[table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index()][0];
+                                let row_id = "ALE_".concat(ALE_id)
+                                table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
+
+                                //document.getElementById(row_id).addEventListener("input", changeColor)
+
+                                if (table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
+                                    mainChart.get(row_id).remove();
+                                    growthChart.get(row_id).remove();
+                                    temperatureChart.get(row_id).remove();
+                                    selected_ales.pop(ALE_id);
+                                } else {
+
+                                    //send ale_ids of the requests
+                                    sendMessage([ALE_id, row_id, "{{ machine.2 }}"]);
+                                }
+                                //alert('You clicked on ' + data[0] + "'s row");
+                            });
+                        </script>
+                    </div>
+
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
     <script>
         const gogglesSocket = new WebSocket('wss://' + window.location.host + '/ws/goggles/');
 
@@ -237,79 +297,7 @@
     <script>
         const selected_ales = []
     </script>
-    {% for machine in machines %}
-        {% for project in projects %}
-            <script>
-                var ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = JSON.parse(document.getElementById('ale_data').textContent);
-                // Formatting function for row details - modify as you need
-                //console.log(ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }})
-                let table_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = new DataTable('#ale-machine_{{ forloop.parentloop.counter }}_{{ forloop.counter }}', {
-                    select: 'multi+shift',
-                    autoHeight: true,
-                    autoWidth: true,
-                    paging: false,
-                    searching: false,
-                    ordering: false,
-                    info: false,
-                    scrollY: 500,
-                    dataType: JSON,
 
-
-                    data: ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }},
-                    columns: [
-                        {},
-                        {},
-                        {
-                            'render': function (data, type, full, meta) {
-                                return data[0];
-                            }
-                        },
-                        {},
-                        {},
-                        {
-                            'render': function (data, type, full, meta) {
-                                return '<input type="color" id="ale_' + data[2] + '" name="head" value=' + data[1] + '>';
-                            }
-                        },
-                        //{title: 'EXP_ID'},
-                        //{title: 'Mod'},
-                        //{title: 'Ctrlr'},
-                        //{title: 'Pos'},
-                    ],
-                    //data: '<input type="color">'
-                });
-
-                function changeColor(e) {
-                    console.log(e.target.value);
-                    console.log(mainChart.get(e.target.id));
-                    mainChart.get(e.target.id).update({color: e.target.value});
-                    growthChart.get(e.target.id).update({color: e.target.value});
-                    temperatureChart.get(e.target.id).update({color: e.target.value});
-                }
-
-                table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function () {
-                    let ALE_id = ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }}[table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index()][0];
-                    let row_id = "ALE_".concat(ALE_id)
-                    table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
-
-                    //document.getElementById(row_id).addEventListener("input", changeColor)
-
-                    if (table_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
-                        mainChart.get(row_id).remove();
-                        growthChart.get(row_id).remove();
-                        temperatureChart.get(row_id).remove();
-                        selected_ales.pop(ALE_id);
-                    } else {
-
-                        //send ale_ids of the requests
-                        sendMessage([ALE_id, row_id, "{{ machine.2 }}"]);
-                    }
-                    //alert('You clicked on ' + data[0] + "'s row");
-                });
-            </script>
-
-        {% endfor %}
-    {% endfor %}
     <script>
         var checkBox = document.getElementById("live_data");
         var text = document.getElementById("text");
