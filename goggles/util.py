@@ -11,10 +11,9 @@ import numpy as np
 # i don't know about you but i'm feeling
 TEMPERATURE_MINIMUM = 22
 
-ALE_MACHINES = [
-    ['UCSD 3.0', 'UCSD ONE', 'ucsd_machine_one'],
-    ['UCSD 3.0a', 'UCSD TWO', 'ucsd_machine_two'],
-    ['DTU 3.1', 'DTU ONE', 'dtu_machine_one']]
+ALE_MACHINES = [['UCSD 3.0', 'UCSD ONE', 'ucsd_machine_one'],
+                ['UCSD 3.0a', 'UCSD TWO', 'ucsd_machine_two'],
+                ['DTU 3.1', 'DTU ONE', 'dtu_machine_one']]
 
 
 def json_serialize(qs):
