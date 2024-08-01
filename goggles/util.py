@@ -29,7 +29,7 @@ def get_initial_data():
     data = {}
     for machine in ALE_MACHINES:
         id = machine[2]
-        data[machine] = {
+        data[id] = {
             'name': machine[0],
             'codename': machine[1],
             'id': id,
