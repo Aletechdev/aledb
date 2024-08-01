@@ -35,6 +35,7 @@ def get_initial_data():
             'id': id,
             'projects': generate_projects(id)
         }
+    return data
 
 
 def generate_projects(machine):
