@@ -25,6 +25,18 @@ def get_ale_machines():
     return ALE_MACHINES
 
 
+def get_initial_data():
+    data = {}
+    for machine in ALE_MACHINES:
+        id = machine[2]
+        data[machine] = {
+            'name': machine[0],
+            'codename': machine[1],
+            'id': id,
+            'projects': generate_projects(id)
+        }
+
+
 def generate_projects(machine):
     from string import ascii_lowercase as alc
 
