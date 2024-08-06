@@ -7,6 +7,7 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
+import numpy as np
 
 class Adps(models.Model):
     db_id = models.AutoField(primary_key=True)
@@ -255,8 +256,10 @@ class HeatBlockPositions(models.Model):
     experiment_id = models.IntegerField(blank=True, null=True)
     batch_id = models.IntegerField(blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
-    current_opticale_temperature = models.FloatField(db_column='current_opticALE_temperature')  # Field name made lowercase.
-    current_opticale_stirring_rpm = models.FloatField(db_column='current_opticALE_stirring_rpm')  # Field name made lowercase.
+    current_opticale_temperature = models.FloatField(
+        db_column='current_opticALE_temperature')  # Field name made lowercase.
+    current_opticale_stirring_rpm = models.FloatField(
+        db_column='current_opticALE_stirring_rpm')  # Field name made lowercase.
     d0_580_blank = models.IntegerField(db_column='D0_580_blank')  # Field name made lowercase.
     d0_640_blank = models.IntegerField(db_column='D0_640_blank')  # Field name made lowercase.
     d0_480_blank = models.IntegerField(db_column='D0_480_blank')  # Field name made lowercase.
@@ -331,14 +334,42 @@ class Measurements(models.Model):
     sampling_volume = models.IntegerField()
     measurement_type_id = models.CharField(max_length=50)
     raw_transmittance_value = models.FloatField()
-    raw_incident_value = models.FloatField()
     empty_scattering_value = models.FloatField()
     stirring_rate = models.FloatField()
     measurement_type_db = models.ForeignKey(MeasurementTypes, models.DO_NOTHING, blank=True, null=True)
-
     class Meta:
         managed = False
         db_table = 'measurements'
+    @property
+    def OD(self):
+        return self.value
+    @property
+    def optical_density(self):
+        return self.value
+    @property
+    def raw_incident_value(self):
+        if self.measurement_type_db is None:
+            return 5000
+        return self.measurement_type_db.blank_value
+    @property
+    def value(self):
+        if self.calculated_orreader_value and self.calculated_orreader_value > 0:
+            return self.calculated_orreader_value
+
+        else:
+            if self.measurement_type_db and self.raw_incident_value != 0 and self.raw_transmittance_value != 0 and \
+                    self.measurement_type_db.description[-1].lower() == 'a':
+                adc_OD_values = float(np.log10(self.raw_incident_value / self.raw_transmittance_value))
+            elif self.measurement_type_db and self.raw_incident_value != 0 and self.raw_transmittance_value != 0 and \
+                    self.measurement_type_db.description[-1].lower() == 'r':
+                adc_OD_values = (self.raw_transmittance_value / self.empty_scattering_value) - self.raw_incident_value
+            else:
+                adc_OD_values = 0.01  # To prevent division by zero
+
+            # Ensure adc_OD_values is a valid number
+            adc_OD_values = np.nan_to_num(adc_OD_values, nan=0.01)  # Convert nan to 0.01
+            adc_OD_values = max(round(adc_OD_values, 3), 0.01)
+            return float(adc_OD_values)
 
 
 class MediaComponents(models.Model):
@@ -413,7 +444,8 @@ class PaleAle(models.Model):
     default_sampling_delay = models.IntegerField()
     min_accurate_od = models.FloatField()
     starting_media = models.ForeignKey(Medias, models.DO_NOTHING, blank=True, null=True)
-    ending_media = models.ForeignKey(Medias, models.DO_NOTHING, related_name='paleale_ending_media_set', blank=True, null=True)
+    ending_media = models.ForeignKey(Medias, models.DO_NOTHING, related_name='paleale_ending_media_set', blank=True,
+                                     null=True)
     media = models.ForeignKey(Medias, models.DO_NOTHING, related_name='paleale_media_set', blank=True, null=True)
 
     class Meta:
@@ -431,7 +463,8 @@ class PaleAleTest(models.Model):
     growth_time_extension = models.IntegerField()
     pass_volume = models.FloatField()
     min_number_of_batches = models.IntegerField()
-    field_propagate_boolean = models.IntegerField(db_column='_propagate_boolean')  # Field renamed because it started with '_'.
+    field_propagate_boolean = models.IntegerField(
+        db_column='_propagate_boolean')  # Field renamed because it started with '_'.
 
     class Meta:
         managed = False
@@ -607,10 +640,12 @@ class Tale(models.Model):
     sampling_delay = models.IntegerField()
     min_rest = models.IntegerField()
     max_rest = models.IntegerField()
-    field_next_step = models.FloatField(db_column='_next_step', blank=True, null=True)  # Field renamed because it started with '_'.
+    field_next_step = models.FloatField(db_column='_next_step', blank=True,
+                                        null=True)  # Field renamed because it started with '_'.
     max_samples = models.IntegerField()
     initial_media = models.ForeignKey(Medias, models.DO_NOTHING, blank=True, null=True)
-    one_step_away_media = models.ForeignKey(Medias, models.DO_NOTHING, related_name='tale_one_step_away_media_set', blank=True, null=True)
+    one_step_away_media = models.ForeignKey(Medias, models.DO_NOTHING, related_name='tale_one_step_away_media_set',
+                                            blank=True, null=True)
 
     class Meta:
         managed = False

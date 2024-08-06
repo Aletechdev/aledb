@@ -10,13 +10,14 @@ services:
     container_name: aledb-web
     build: .
     #image: aledb_web
+    extra_hosts:
+      - host.docker.internal:host-gateway
     env_file:
       - .docker/one.env
     volumes:
       - .:/app
       - /data/aledata:/data/aledata
       - /home/muyao/.ssh:/root/.ssh
-      - /var/run/mysqld/mysqld.sock:/run/mysqld/mysqld.sock
 
     command: bash -c "python manage.py collectstatic --no-input && daphne -b 0.0.0.0 -p 8000 aleinfo.asgi:application"
     ports:

@@ -73,7 +73,7 @@ DATABASES = {
         'USER': os.environ.get('UCSD_MACHINE_ONE_USER', 'user'),
         'PASSWORD': os.environ.get('UCSD_MACHINE_ONE_PASSWORD', 'password'),
         'HOST': os.environ.get('UCSD_MACHINE_ONE_HOST', 'db'),
-        'PORT': int(os.environ.get('UCSD_MACHINE_ONE_MYSQL_PORT', 5432)),
+        'PORT': int(os.environ.get('UCSD_MACHINE_ONE_MYSQL_PORT', 3306)),
     },
     'ucsd_machine_two': {
         'ENGINE': 'django.db.backends.mysql',

@@ -26,7 +26,7 @@ def goggles(request):
     try:
         context = get_user_context(request.user)
         context.update(
-            {'text': 'hello', 'initial': get_initial_data, 'machines': ALE_MACHINES})
+            {'text': 'hello', 'initial': get_initial_data(), 'machines': ALE_MACHINES})
         template = loader.get_template("goggles/goggles.html")
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
