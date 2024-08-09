@@ -77,7 +77,7 @@
                 <option selected value=""></option>
             </select>
             <label for="live_data">Live Updates:</label>
-            <input type="checkbox" id="live_data" onclick="myFunction()">
+            <input type="checkbox" id="live_data">
         </div>
     </div>
 
@@ -94,7 +94,7 @@
             </script>
             <button type="button" class="collapsible machines"
                     style="text-align: center"> {{ value.name }} </button>
-            <div class="content" style="overflow-y:auto; max-height: 20em;">
+            <div class="content" style="overflow-y:auto; max-height: 40em;">
                 {% for project_key, project_value in value.projects.items %}
                     <button type="button" class="collapsible"
                             style="text-align: center"> {{ project_value.name }} </button>
@@ -102,7 +102,7 @@
                         <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
                                class="display">
                             {% for experiment in project_value.experiments %}
-                                <tr>
+                                <tr id="row_id_{{ value.id }}_{{ experiment.0 }}">
                                     {% for entry in experiment %}
                                         <td>{{ entry }}</td>
                                     {% endfor %}
@@ -137,7 +137,7 @@
                                     {
                                         'render': function (data) {
                                             var current_color = data.split(',')
-                                            return '<input type="color" id="experiment_{{ value.name }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}_' + current_color[2] + '" value=' + current_color[1] + '>';
+                                            return '<input type="color" id="experiment_{{ value.id }}_' + current_color[2] + '" value=' + current_color[1] + '>';
                                         }
                                     },
                                     //{title: 'EXP_ID'},
@@ -159,24 +159,26 @@
                             table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function () {
                                 //let ALE_id = ALE_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}[table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index()][0];
                                 let ALE_id = table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).data();
-                                let row_id = "ALE_" + "{{ value.id }}_" + ALE_id[0] + ALE_id[1]
+                                let data_id = "{{ value.id }}_" + ALE_id[0]
+                                let row_id = 'row_id_{{ value.id }}_' + ALE_id[0]
                                 table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
 
-                                //document.getElementById(row_id).addEventListener("input", changeColor)
+                                document.getElementById(row_id).addEventListener("input", changeColor)
+                                let message = [ALE_id[0], row_id, "{{ value.id }}", data_id]
 
                                 if (table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
-                                    let current_id = row_id
+                                    let current_id = data_id
                                     console.log("removing: " + current_id)
                                     mainChart.get(current_id).remove();
                                     growthChart.get(current_id).remove();
                                     temperatureChart.get(current_id).remove();
-                                    selected_ales.pop(ALE_id);
+                                    selected_ales.pop(message);
+                                    selected_ale_ids.pop(data_id)
                                 } else {
-                                    let message = [ALE_id[0], row_id, "{{ value.id }}"]
+
                                     //send ale_ids of the requests
                                     sendMessage(message);
                                     console.log(message);
-                                    console.log("{{ value.id }}");
                                 }
 
                             });
@@ -197,30 +199,31 @@
 
             // Handle incoming message
 
-            if (selected_ales.includes(message[0])) {
-                mainChart.get('ALE_' + message[0]).setData(message[1][0]);
-                growthChart.get('ALE_' + message[0]).setData(message[1][1]);
-                temperatureChart.get('ALE_' + message[0]).setData(message[1][2]);
+            if (selected_ale_ids.includes(message[3])) {
+                mainChart.get(message[3]).setData(message[1][0]);
+                growthChart.get(message[3]).setData(message[1][1]);
+                temperatureChart.get(message[3]).setData(message[1][2]);
             } else {
                 mainChart.addSeries({
-                    id: 'ALE_' + message[2],
-                    name: 'OD:' + message[2],
+                    id: message[3],
+                    name: message[2],
                     data: message[1][0],
-                    //color: document.getElementById('ale_' + message[0]).value,
+                    color: document.getElementById('experiment_' + message[3]).value,
                 });
                 growthChart.addSeries({
-                    id: 'ALE_' + message[2],
-                    name: 'GR:' + message[2],
+                    id: message[3],
+                    name: message[2],
                     data: message[1][1],
-                    //color: document.getElementById('ale_' + message[0]).value,
+                    color: document.getElementById('experiment_' + message[3]).value,
                 });
                 temperatureChart.addSeries({
-                    id: 'ALE_' + message[2],
-                    name: 'Temp:' + message[2],
+                    id: message[3],
+                    name: message[2],
                     data: message[1][2],
-                    //color: document.getElementById('ale_' + message[0]).value,
+                    color: document.getElementById('experiment_' + message[3]).value,
                 });
-                selected_ales.push(message[0])
+                selected_ales.push(message[4])
+                selected_ale_ids.push(message[3])
             }
         };
 
@@ -233,7 +236,8 @@
             gogglesSocket.send(JSON.stringify({
                 'db_id': message[0],
                 'name': message[1],
-                'machine': message[2]
+                'machine': message[2],
+                'data_id': message[3]
             }));
         }
     </script>
@@ -308,9 +312,11 @@
     {{ ales|json_script:"ale_data" }}
     <script>
         const selected_ales = []
+        const selected_ale_ids = []
     </script>
 
     <script>
+
         var checkBox = document.getElementById("live_data");
         var text = document.getElementById("text");
 
@@ -318,20 +324,17 @@
             console.log("rerunning", selected_ales)
             if (selected_ales.length > 0) {
                 for (let i = 0; i < selected_ales.length; i++) {
-                    sendMessage([selected_ales[i], "ALE_".concat(selected_ales[i])]);
-                }
-                if (checkBox.checked == true) {
-                    setTimeout(live_data_loop, 5000);
+                    sendMessage(selected_ales[i]);
                 }
             }
         }
 
-        function myFunction() {
-
+        setInterval(function () {
             if (checkBox.checked == true) {
                 live_data_loop();
             }
-        }
+        }, 30000);
+
     </script>
 
     <script>
