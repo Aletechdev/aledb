@@ -91,6 +91,14 @@ DATABASES = {
         'HOST': os.environ.get('DTU_MACHINE_ONE_HOST', 'db'),
         'PORT': int(os.environ.get('DTU_MACHINE_ONE_MYSQL_PORT', 4306)),
     },
+    'dtu_machine_two': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DTU_MACHINE_ONE_DATABASE', 'database'),
+        'USER': os.environ.get('DTU_MACHINE_ONE_USER', 'user'),
+        'PASSWORD': os.environ.get('DTU_MACHINE_ONE_PASSWORD', 'password'),
+        'HOST': os.environ.get('DTU_MACHINE_ONE_HOST', 'db'),
+        'PORT': int(os.environ.get('DTU_MACHINE_ONE_MYSQL_PORT', 4307)),
+    },
 }
 
 CACHES = {
