@@ -95,7 +95,7 @@
             <button type="button" class="collapsible machines"
                     style="text-align: center"> {{ value.name }} </button>
             <div class="content" style="overflow-y:auto; max-height: 40em;">
-                {% for project_key, project_value in value.projects.items %}
+                {% for project_key, project_value in value.projects.items.reverse %}
                     <button type="button" class="collapsible"
                             style="text-align: center"> {{ project_value.name }} </button>
                     <div class="content">
