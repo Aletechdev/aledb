@@ -52,7 +52,8 @@ def generate_projects_with_experiments(machine):
     from string import ascii_lowercase as alc
     projects = {}
     experiments = generate_experiments(machine)
-    for p in Projects.objects.using(machine).all().reverse():
+    all_projects = Projects.objects.using(machine).all().reverse()
+    for p in all_projects:
         projects[p.db_id] = {
             'name': p.title,
             'experiments': tuple(experiments[p.db_id])
