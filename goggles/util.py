@@ -15,7 +15,7 @@ TEMPERATURE_MAXIMUM = 500
 ALE_MACHINES = [['UCSD 3.0', 'UCSD ONE', 'ucsd_machine_one'],
                 ['UCSD 3.0a', 'UCSD TWO', 'ucsd_machine_two'],
                 ['DTU 3.1', 'DTU ONE', 'dtu_machine_one'],
-                'DTU 1.0', 'DTU TWO', 'dtu_machine_two']
+                ['DTU 1.0', 'DTU TWO', 'dtu_machine_two']]
 
 
 def json_serialize(qs):
