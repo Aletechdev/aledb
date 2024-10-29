@@ -96,7 +96,7 @@
                     style="text-align: center"> {{ value.name }} </button>
             <div class="content" style="overflow-y:auto; max-height: 40em;">
                 {% for project_key, project_value in value.projects.items reversed %}
-                    <button type="button" class="collapsible"
+                    <button type="button" class="collapsible_experiment"
                             style="text-align: center"> {{ project_value.name }} </button>
                     <div class="content">
                         <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
@@ -487,7 +487,7 @@
     </script>
 
     <script>
-        let coll = document.getElementsByClassName("collapsible");
+        let coll = document.getElementsByClassName("collapsible_experiment");
         let i;
 
         for (i = 0; i < coll.length; i++) {
