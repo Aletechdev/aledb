@@ -351,21 +351,9 @@
                     content.style.display = "block";
                 }
             });
-            if (coll[i].classList.contains("machines")) {
-                coll[i].classList.toggle("active");
-                let content = coll[i].nextElementSibling;
-                if (content.style.display === "block") {
-                    content.style.display = "none";
-                } else {
-                    content.style.display = "block";
-                }
-            }
         }
-        let coll = document.getElementsByClassName("collapsible machines");
-        for (i = 0; i < coll.length; i++) {
-            coll[i].click()
-        }
-
+        coll[0].classList.toggle("active");
+        coll[0].nextElementSibling.style.display = "block";
 
     </script>
     <script>
@@ -512,12 +500,8 @@
                 }
             });
         }
-        let coll = document.getElementsByClassName("collapsible machines");
-        for (i = 0; i < coll.length; i++) {
-            coll[i].click();
-            //coll[i].classList.toggle("active");
-            //coll[i].nextElementSibling.style.display = "block";
-        }
+        coll[0].click();
+
 
     </script>
 
