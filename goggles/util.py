@@ -52,7 +52,7 @@ def generate_projects_with_experiments(machine):
     from string import ascii_lowercase as alc
     projects = {}
     experiments = generate_experiments(machine)
-    for p in Projects.objects.using(machine).all():
+    for p in Projects.objects.using(machine).all().reverse():
         projects[p.db_id] = {
             'name': p.title,
             'experiments': tuple(experiments[p.db_id])
@@ -66,27 +66,19 @@ def generate_experiments(machine):
     for protocol in all_protocols:
         current_experiment = protocol.experiment
         if protocol.media:
-            experiment = (current_experiment.db_id, current_experiment.description,
-                          protocol.type, protocol.filter_toggle, protocol.media.description,
-                          current_experiment.description + ',' + '#' + ''.join(
-                              random.sample('0123456789ABCDEF', 6)) + ',' +
-                          str(current_experiment.db_id)
-                          )
-            if current_experiment.project_id in experiments.keys():
-                experiments[current_experiment.project_id].append(experiment)
-            else:
-                experiments[current_experiment.project_id] = [experiment]
+            media = protocol.media.description
         else:
-            experiment = (current_experiment.db_id, current_experiment.description,
-                          protocol.type, protocol.filter_toggle, "No Media",
-                          current_experiment.description + ',' + '#' + ''.join(
-                              random.sample('0123456789ABCDEF', 6)) + ',' +
-                          str(current_experiment.db_id)
-                          )
-            if current_experiment.project_id in experiments.keys():
-                experiments[current_experiment.project_id].append(experiment)
-            else:
-                experiments[current_experiment.project_id] = [experiment]
+            media = "N/A"
+        experiment = (current_experiment.db_id, current_experiment.description,
+                      protocol.type, protocol.filter_toggle, media,
+                      current_experiment.description + ',' + '#' + ''.join(
+                          random.sample('0123456789ABCDEF', 6)) + ',' +
+                      str(current_experiment.db_id)
+                      )
+        if current_experiment.project_id in experiments.keys():
+            experiments[current_experiment.project_id].append(experiment)
+        else:
+            experiments[current_experiment.project_id] = [experiment]
     return experiments
 
 
@@ -158,9 +150,10 @@ def get_experiment_data(ale_machine, experiment_id):
     batches = Batches.objects.using(ale_machine).filter(experiment=experiment_id).values("db_id")
     measurement_type_db_ids = MeasurementTypes.objects.using(ale_machine).filter(batch_id__in=batches).values("db_id")
     growth_dict = get_growth_data(ale_machine, measurement_type_db_ids)
-    temperature_measurement_ids = Experiments.objects.using(ale_machine).get(db_id=experiment_id).temperature_meas_ids.split(',')
+    temperature_measurement_ids = Experiments.objects.using(ale_machine).get(
+        db_id=experiment_id).temperature_meas_ids.split(',')
     if len(temperature_measurement_ids) < 2:
-        return [[],[],[]]
+        return [[], [], []]
     # measurement_ids = Experiments.objects.using(ale_machine).get(db_id=experiment_id).meas_ids
 
     measurement_list = []
