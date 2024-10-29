@@ -352,7 +352,13 @@
                 }
             });
             if(coll[i].classList.contains("machines")) {
-                coll[i].click()
+                coll[i].classList.toggle("active");
+                let content = coll[i].nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
             }
         }
         let coll = document.getElementsByClassName("collapsible machines");
