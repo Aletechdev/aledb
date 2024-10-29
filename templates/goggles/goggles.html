@@ -338,24 +338,6 @@
     </script>
 
     <script>
-        let coll = document.getElementsByClassName("collapsible");
-        let i;
-
-        for (i = 0; i < coll.length; i++) {
-            coll[i].addEventListener("click", function () {
-                this.classList.toggle("active");
-                let content = this.nextElementSibling;
-                if (content.style.display === "block") {
-                    content.style.display = "none";
-                } else {
-                    content.style.display = "block";
-                }
-            });
-        }
-        coll[0].click();
-
-    </script>
-    <script>
         console.time('line');
         const temperatureChart = Highcharts.stockChart('temperatureChart', {
             chart: {
@@ -498,8 +480,13 @@
                     content.style.display = "block";
                 }
             });
+            if(coll[i].classList.contains("machines")){
+                coll[i].click();
+            }
         }
-        coll[0].click();
+
+
+
 
 
     </script>
