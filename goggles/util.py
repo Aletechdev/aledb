@@ -70,7 +70,7 @@ def generate_experiments(machine):
             media = protocol.media.description
         else:
             media = "N/A"
-        experiment = (current_experiment.db_id, current_experiment.description,
+        experiment = (current_experiment.ale_id, current_experiment.description,
                       protocol.type, protocol.filter_toggle, media,
                       current_experiment.description + ',' + '#' + ''.join(
                           random.sample('0123456789ABCDEF', 6)) + ',' +
