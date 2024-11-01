@@ -70,11 +70,11 @@ def generate_experiments(machine):
             media = protocol.media.description
         else:
             media = "N/A"
-        experiment = (current_experiment.db_id, current_experiment.description,
+        experiment = (current_experiment.ale_id, current_experiment.description,
                       protocol.type, protocol.filter_toggle, media,
                       current_experiment.description + ',' + '#' + ''.join(
                           random.sample('0123456789ABCDEF', 6)) + ',' +
-                      str(current_experiment.db_id), current_experiment.ale_id
+                      str(current_experiment.db_id), current_experiment.db_id
                       )
         if current_experiment.project_id in experiments.keys():
             experiments[current_experiment.project_id].append(experiment)
