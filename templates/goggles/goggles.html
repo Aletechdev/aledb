@@ -165,7 +165,7 @@
                                 table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
 
                                 document.getElementById(row_id).addEventListener("input", changeColor)
-                                let message = [ALE_id[0], row_id, "{{ value.id }}", data_id]
+                                let message = [ALE_id[6], row_id, "{{ value.id }}", data_id]
 
                                 if (table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
                                     let current_id = data_id
