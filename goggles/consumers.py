@@ -10,7 +10,6 @@ class GogglesConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         pass
 
-
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
         db_id = text_data_json['db_id']
