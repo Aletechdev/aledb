@@ -103,7 +103,7 @@
                         <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
                                class="display">
                             {% for experiment in project_value.experiments %}
-                                <tr id="{{ project_value.id }} + _row_id_{{ value.id }}_{{ experiment.0 }}">
+                                <tr id="{{ project_value.id }}_row_id_{{ value.id }}_{{ experiment.0 }}">
                                     {% for entry in experiment %}
                                         <td>{{ entry }}</td>
                                     {% endfor %}
