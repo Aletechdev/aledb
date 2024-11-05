@@ -103,7 +103,7 @@
                         <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
                                class="display">
                             {% for experiment in project_value.experiments %}
-                                <tr id="{{ project_value.id }}_row_id_{{ value.id }}_{{ experiment.0 }}">
+                                <tr id="{{ project_key }}_row_id_{{ value.id }}_{{ experiment.0 }}">
                                     {% for entry in experiment %}
                                         <td>{{ entry }}</td>
                                     {% endfor %}
@@ -162,7 +162,7 @@
                                 //let ALE_id = ALE_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}[table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index()][0];
                                 let ALE_id = table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).data();
                                 let data_id = "{{ value.id }}_" + ALE_id[0]
-                                let row_id = {{ project_value.id }} + '_row_id_{{ value.id }}_' + ALE_id[0]
+                                let row_id = {{ project_key }} + '_row_id_{{ value.id }}_' + ALE_id[0]
                                 table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
 
                                 document.getElementById(row_id).addEventListener("input", changeColor)
