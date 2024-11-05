@@ -12,10 +12,10 @@ class GogglesConsumer(WebsocketConsumer):
 
     def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        ale_id = text_data_json['db_id']
+        db_id = text_data_json['db_id']
         name = text_data_json['name']
         machine = text_data_json['machine']
         data_id = text_data_json['data_id']
         self.send(text_data=json.dumps({
-            'message': [machine+ale_id, get_experiment_data(machine, ale_id), name, data_id, [ale_id, name, machine, data_id]]
+            'message': [machine+db_id, get_experiment_data(machine, db_id), name, data_id, [db_id, name, machine, data_id]]
         }, indent=4, sort_keys=True, default=str))
