@@ -207,25 +207,25 @@
                 temperatureChart.get(message[3]).setData(message[1][2]);
             } else {
                 mainChart.addSeries({
-                    id: message[3],
-                    name: message[2],
+                    id: message[2],
+                    name: message[3],
                     data: message[1][0],
                     color: document.getElementById('experiment_' + message[3]).value,
                 });
                 growthChart.addSeries({
-                    id: message[3],
-                    name: message[2],
+                    id: message[2],
+                    name: message[3],
                     data: message[1][1],
                     color: document.getElementById('experiment_' + message[3]).value,
                 });
                 temperatureChart.addSeries({
-                    id: message[3],
-                    name: message[2],
+                    id: message[2],
+                    name: message[3],
                     data: message[1][2],
                     color: document.getElementById('experiment_' + message[3]).value,
                 });
                 selected_ales.push(message[4])
-                selected_ale_ids.push(message[3])
+                selected_ale_ids.push(message[2])
             }
         };
 
