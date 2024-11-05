@@ -209,19 +209,19 @@
             } else {
                 mainChart.addSeries({
                     id: message[3],
-                    name: message[3],
+                    name: message[3].replace("_", " "),
                     data: message[1][0],
                     color: document.getElementById('experiment_' + message[3]).value,
                 });
                 growthChart.addSeries({
                     id: message[3],
-                    name: message[3],
+                    name: message[3].replace("_", " "),
                     data: message[1][1],
                     color: document.getElementById('experiment_' + message[3]).value,
                 });
                 temperatureChart.addSeries({
                     id: message[3],
-                    name: message[3],
+                    name: message[3].replace("_", " "),
                     data: message[1][2],
                     color: document.getElementById('experiment_' + message[3]).value,
                 });
