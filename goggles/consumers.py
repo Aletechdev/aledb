@@ -17,5 +17,5 @@ class GogglesConsumer(WebsocketConsumer):
         machine = text_data_json['machine']
         data_id = text_data_json['data_id']
         self.send(text_data=json.dumps({
-            'message': [machine+ale_id, get_experiment_data(machine, ale_id), name, data_id, [ale_id, name, machine, data_id]]
+            'message': [machine+ale_id, get_experiment_data(machine, ale_id), data_id, name, [ale_id, name, machine, data_id]]
         }, indent=4, sort_keys=True, default=str))
