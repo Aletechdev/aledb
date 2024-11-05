@@ -138,7 +138,7 @@
                                     {
                                         'render': function (data) {
                                             var current_color = data.split(',')
-                                            return '<input type="color" id="experiment_{{ value.id }}_' + current_color[2] + '" value=' + current_color[1] + '>';
+                                            return '<input type="color" id="experiment_{{ project_key }}_{{ value.id }}_' + current_color[2] + '" value=' + current_color[1] + '>';
                                         }
                                     },
                                     { visible: false }
