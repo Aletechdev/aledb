@@ -167,7 +167,7 @@
 
                                 document.getElementById(row_id).addEventListener("input", changeColor)
                                 let sample_name = "{{ value.name }}: {{ project_value.name }}= {{ project_key }}" + ALE_id[0]
-                                let message = [ALE_id[6], row_id, "{{ value.id }}", data_id]
+                                let message = [ALE_id[6], row_id, "{{ value.id }}", data_id, sample_name]
 
                                 if (table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
                                     let current_id = data_id
@@ -209,19 +209,19 @@
             } else {
                 mainChart.addSeries({
                     id: message[3],
-                    name: message[3].replace("_", " "),
+                    name: message[2],
                     data: message[1][0],
                     color: document.getElementById('experiment_' + message[3]).value,
                 });
                 growthChart.addSeries({
                     id: message[3],
-                    name: message[3].replace("_", " "),
+                    name: message[2],
                     data: message[1][1],
                     color: document.getElementById('experiment_' + message[3]).value,
                 });
                 temperatureChart.addSeries({
                     id: message[3],
-                    name: message[3].replace("_", " "),
+                    name: message[2],
                     data: message[1][2],
                     color: document.getElementById('experiment_' + message[3]).value,
                 });
@@ -242,7 +242,8 @@
                 'db_id': message[0],
                 'name': message[1],
                 'machine': message[2],
-                'data_id': message[3]
+                'data_id': message[3],
+                'sample_name': message[4]
             }));
         }
     </script>
