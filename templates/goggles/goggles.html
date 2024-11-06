@@ -322,8 +322,9 @@
                 },
                 formatter: function () {
                     console.log(this);
-                    return '<b> OD: ' + Highcharts.numberFormat(this.y, 0) + '</b><br/>' +
-                        'Time: ' + this.point.name;
+                    return '<b>' + this.series.name +'</b><b> OD: ' + this.y + '</b><br/>' +
+                        'Time: ' + Highcharts.dateFormat('%e - %b - %Y',
+                                          new Date(this.x));
                 }
 
             },
