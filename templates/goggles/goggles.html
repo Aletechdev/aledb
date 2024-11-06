@@ -87,12 +87,6 @@
     <div class="container" style="width:100%; display: flex;">
     <div id="machine-bar" style="width:25em; float: left; padding-right: 1em">
         {% for key, value in initial.items %}
-            <script>
-                console.log("{{ value.name }}");
-                {% for media in value.medias %}
-                    console.log("{{ media.description }}");
-                {%  endfor %}
-            </script>
             <button type="button" class="collapsible machines"
                     style="text-align: center"> {{ value.name }} </button>
             <div class="content" style="overflow-y:auto; max-height: 20em;">
@@ -130,6 +124,9 @@
                                     {},
                                     {
                                         'render': function (data) {
+                                            if (data.includes("test")){
+                                                return data[0]+"t";
+                                            }
                                             return data[0];
                                         }
                                     },
