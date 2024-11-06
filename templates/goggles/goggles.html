@@ -141,7 +141,7 @@
                                             return '<input type="color" id="experiment_{{ project_key }}_{{ value.id }}_' + current_color[2] + '" value=' + current_color[1] + '>';
                                         }
                                     },
-                                    { visible: false }
+                                    {visible: false}
                                     //{title: 'EXP_ID'},
                                     //{title: 'Mod'},
                                     //{title: 'Ctrlr'},
@@ -162,7 +162,7 @@
                                 //let ALE_id = ALE_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}[table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index()][0];
                                 let ALE_id = table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).data();
                                 let data_id = "{{ project_key }}_{{ value.id }}_" + ALE_id[0]
-                                let row_id = {{ project_key }} + '_row_id_{{ value.id }}_' + ALE_id[0]
+                                let row_id = {{ project_key }} +'_row_id_{{ value.id }}_' + ALE_id[0]
                                 table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
 
                                 document.getElementById(row_id).addEventListener("input", changeColor)
@@ -256,7 +256,7 @@
     </div>
 
     <div id="right-sidebar" style="width:15em; float: right">
-    hello world
+        hello world
     </div>
 
     <script>
@@ -319,7 +319,13 @@
                 shape: "circle",
                 style: {
                     pointerEvents: 'auto'
+                },
+                formatter: function () {
+                    console.log(this);
+                    return '<b> OD: ' + Highcharts.numberFormat(this.y, 0) + '</b><br/>' +
+                        'Time: ' + this.point.name;
                 }
+
             },
 
         });
@@ -497,13 +503,10 @@
                     content.style.display = "block";
                 }
             });
-            if(coll[i].classList.contains("machines")){
+            if (coll[i].classList.contains("machines")) {
                 coll[i].click();
             }
         }
-
-
-
 
 
     </script>
