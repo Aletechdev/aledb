@@ -112,24 +112,7 @@ def get_measurement_data(ale_machine: object, measurement_type_db_ids: object) -
             adc_OD_values = calculated_orreader_value
         else:
             adc_OD_values = temp_measurement.measurement.OD
-            '''raw_incident_value = temp_measurement.measurement.raw_incident_value
-            raw_transmittance_value = temp_measurement.measurement.raw_transmittance_value
 
-            measurement_type_short = temp_measurement.measurement.measurement_type_db.description[-1].lower()
-            if temp_measurement.measurement.measurement_type_id and raw_incident_value != 0 and raw_transmittance_value != 0 and \
-                    measurement_type_short == 'a':
-                t = (1.0 * raw_incident_value) / (
-                        1.0 * raw_transmittance_value)
-                if t >= 1:
-                    adc_OD_values = float(np.log10(t))
-                else:
-                    adc_OD_values = 0.01
-            elif temp_measurement.measurement.measurement_type_id and raw_incident_value != 0 and raw_transmittance_value != 0 and \
-                    measurement_type_short == 'r':
-                adc_OD_values = (
-                                        raw_transmittance_value / temp_measurement.measurement.empty_scattering_value) - raw_incident_value
-            else:
-                adc_OD_values = 0.01  # To prevent division by zero'''
         adc_OD_values = max(round(adc_OD_values, 3), 0.01)
         measurement_list.append(
             [current_time, adc_OD_values,
@@ -162,33 +145,64 @@ def get_experiment_data(ale_machine, experiment_id):
     growth_rate_list = []
     prev_batch_id = -1
 
-    for temp_measurement_id in temperature_measurement_ids:
-        if temp_measurement_id.isdigit():
-            temp_measurement = TemperatureMeasurements.objects.using(ale_machine).get(db_id=temp_measurement_id)
-            current_batch = temp_measurement.measurement.measurement_type_db.batch
-            current_media_description = current_batch.media.description
-            current_batch_id = current_batch.batch_id
-            current_time = temp_measurement.time.timestamp() * 1000
-            calculated_orreader_value = temp_measurement.measurement.calculated_orreader_value
-            if calculated_orreader_value and calculated_orreader_value > 0:
-                adc_OD_values = calculated_orreader_value
-            else:
-                adc_OD_values = temp_measurement.measurement.OD
-            adc_OD_values = max(round(adc_OD_values, 3), 0.01)
-            measurement_list.append(
-                [current_time, adc_OD_values,
-                 current_batch_id, current_media_description])
-            current_temp = temp_measurement.temperature
-            if current_temp > TEMPERATURE_MINIMUM and current_temp < TEMPERATURE_MAXIMUM:
-                temperature_measurements_list.append(
-                    [current_time, current_temp,
-                     current_batch_id])
-            if current_batch_id != prev_batch_id:
-                growth_rate_list.append([current_time,
-                                         growth_dict[current_batch_id],
-                                         current_batch_id])
-                prev_batch_id = current_batch_id
+    temp_measurement_queryset = TemperatureMeasurements.objects.using(ale_machine).filter(
+        db_id__in=temperature_measurement_ids)
+    for temp_measurement in temp_measurement_queryset:
+        current_batch = temp_measurement.measurement.measurement_type_db.batch
+        current_media_description = current_batch.media.description
+        current_batch_id = current_batch.batch_id
+        current_time = temp_measurement.time.timestamp() * 1000
+        calculated_orreader_value = temp_measurement.measurement.calculated_orreader_value
+        if calculated_orreader_value and calculated_orreader_value > 0:
+            adc_OD_values = calculated_orreader_value
+        else:
+            adc_OD_values = temp_measurement.measurement.OD
+        adc_OD_values = max(round(adc_OD_values, 3), 0.01)
+        measurement_list.append(
+            [current_time, adc_OD_values,
+             current_batch_id, current_media_description])
+        current_temp = temp_measurement.temperature
+        if current_temp > TEMPERATURE_MINIMUM and current_temp < TEMPERATURE_MAXIMUM:
+            temperature_measurements_list.append(
+                [current_time, current_temp,
+                 current_batch_id])
+        if current_batch_id != prev_batch_id:
+            growth_rate_list.append([current_time,
+                                     growth_dict[current_batch_id],
+                                     current_batch_id])
+            prev_batch_id = current_batch_id
     return [measurement_list, growth_rate_list, temperature_measurements_list]
+
+
+'''
+for temp_measurement_id in temperature_measurement_ids:
+    if temp_measurement_id.isdigit():
+        temp_measurement = TemperatureMeasurements.objects.using(ale_machine).get(db_id=temp_measurement_id)
+        current_batch = temp_measurement.measurement.measurement_type_db.batch
+        current_media_description = current_batch.media.description
+        current_batch_id = current_batch.batch_id
+        current_time = temp_measurement.time.timestamp() * 1000
+        calculated_orreader_value = temp_measurement.measurement.calculated_orreader_value
+        if calculated_orreader_value and calculated_orreader_value > 0:
+            adc_OD_values = calculated_orreader_value
+        else:
+            adc_OD_values = temp_measurement.measurement.OD
+        adc_OD_values = max(round(adc_OD_values, 3), 0.01)
+        measurement_list.append(
+            [current_time, adc_OD_values,
+             current_batch_id, current_media_description])
+        current_temp = temp_measurement.temperature
+        if current_temp > TEMPERATURE_MINIMUM and current_temp < TEMPERATURE_MAXIMUM:
+            temperature_measurements_list.append(
+                [current_time, current_temp,
+                 current_batch_id])
+        if current_batch_id != prev_batch_id:
+            growth_rate_list.append([current_time,
+                                     growth_dict[current_batch_id],
+                                     current_batch_id])
+            prev_batch_id = current_batch_id
+return [measurement_list, growth_rate_list, temperature_measurements_list]
+'''
 
 
 def get_experiment_data_old(ale_machine, experiment_id):
