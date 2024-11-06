@@ -323,8 +323,10 @@
                 formatter: function () {
                     console.log(this);
                     return '<b>' + this.series.name +'</b><br/><b> OD: ' + this.y + '</b><br/>' +
-                        'Time: ' + Highcharts.dateFormat('%e - %b - %Y - %H - %M - %s',
-                                          new Date(this.x));
+                        'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
+                                          new Date(this.x)) +
+                        'Batch: ' + this.series.userOptions.data[this.point.index]
+                        ;
                 }
 
             },
