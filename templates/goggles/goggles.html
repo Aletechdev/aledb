@@ -85,7 +85,7 @@
 
 
     <div class="container">
-    <div id="machine-bar" style="width:25em; float: left; padding-right: 3em">
+    <div id="machine-bar" style="width:25em; float: left; padding-right: 1em">
         {% for key, value in initial.items %}
             <script>
                 console.log("{{ value.name }}");
@@ -193,9 +193,7 @@
         {% endfor %}
     </div>
 
-    <div id="right-sidebar" style="margin-right:20%">
-    hello world
-    </div>
+
     <script>
         const gogglesSocket = new WebSocket('wss://' + window.location.host + '/ws/goggles/');
 
@@ -251,9 +249,16 @@
             }));
         }
     </script>
-    <div id="mainChart" style="overflow: visible; width: 65%; !important;"></div>
-    <div id="growthChart" style="overflow: visible; width: 65%; !important;"></div>
-    <div id="temperatureChart" style="overflow: visible; width: 65% !important;"></div>
+    <div id="charts" style="width: 55em  !important;">
+        <div id="mainChart" style="overflow: visible; !important;"></div>
+        <div id="growthChart" style="overflow: visible; !important;"></div>
+        <div id="temperatureChart" style="overflow: visible; !important;"></div>
+    </div>
+
+    <div id="right-sidebar" style="width:15em; float: right">
+    hello world
+    </div>
+
     <script>
         console.time('line');
         const mainChart = Highcharts.stockChart('mainChart', {
