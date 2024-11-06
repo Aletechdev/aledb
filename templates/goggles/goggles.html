@@ -325,7 +325,8 @@
                     return '<b>' + this.series.name +'</b><br/><b> OD: ' + this.y + '</b><br/>' +
                         'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
                                           new Date(this.x)) +
-                        '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2]
+                        '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2] +
+                        '<br/>Media: ' + this.series.userOptions.data[this.point.index][3]
                         ;
                 }
 
