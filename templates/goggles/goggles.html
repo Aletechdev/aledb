@@ -285,6 +285,7 @@
                     point: {
                         events: {
                             click: function () {
+                                console.log(this);
                                 if (this.selected) {
                                     this.select(false, true)
                                 } else {
@@ -321,7 +322,6 @@
                     pointerEvents: 'auto'
                 },
                 formatter: function () {
-                    console.log(this);
                     return '<b>' + this.series.name +'</b><br/><b> OD: ' + this.y + '</b><br/>' +
                         'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
                                           new Date(this.x)) +
