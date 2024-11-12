@@ -270,20 +270,21 @@
             chart: {
                 zoomType: 'x',
                 panning: true,
-                panKey: 'shift'
-            },
-            xAxis: {
-                type: 'datetime',
-                ordinal: 'false',
-                tickPixelInterval: 100,
-                minPadding: 0,
-                maxPadding: 0,
-                labels: {
-                    formatter: function () {
-                        return Highcharts.dateFormat('%b %e (%y)', this.value);
+                panKey: 'shift',
+                xAxis: {
+                    type: 'datetime',
+                    ordinal: 'false',
+                    tickPixelInterval: 100,
+                    minPadding: 0,
+                    maxPadding: 0,
+                    labels: {
+                        formatter: function () {
+                            return Highcharts.dateFormat('%b %e (%y)', this.value);
+                        }
                     }
-                }
+                },
             },
+
 
             plotOptions: {
                 area: {
