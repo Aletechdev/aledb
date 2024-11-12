@@ -267,25 +267,14 @@
     <script>
         console.time('line');
         const mainChart = Highcharts.stockChart('mainChart', {
+            xAxis: {
+                ordinal: 'false',
+            },
             chart: {
                 zoomType: 'x',
                 panning: true,
-                panKey: 'shift',
-                xAxis: {
-                    type: 'datetime',
-                    ordinal: 'false',
-                    tickPixelInterval: 100,
-                    minPadding: 0,
-                    maxPadding: 0,
-                    labels: {
-                        formatter: function () {
-                            return Highcharts.dateFormat('%b %e (%y)', this.value);
-                        }
-                    }
-                },
+                panKey: 'shift'
             },
-
-
             plotOptions: {
                 area: {
                     //allowPointSelect: true,
