@@ -227,15 +227,6 @@
                 selected_ales.push(message[4])
                 selected_ale_ids.push(message[3])
             }
-
-            update = () => {
-                mainChart.xAxis[0].update({
-                    breaks: [],
-                })
-                mainChart.xAxis[0].update({
-                    ordinal: false,
-                })
-            }
         };
 
         gogglesSocket.onclose = function (e) {
@@ -267,9 +258,9 @@
     <script>
         console.time('line');
         const mainChart = Highcharts.stockChart('mainChart', {
-            xAxis: {
+            xAxis: [{
                 ordinal: 'false',
-            },
+            }],
             chart: {
                 zoomType: 'x',
                 panning: true,
@@ -381,9 +372,9 @@
                 panning: true,
                 panKey: 'shift'
             },
-            xAxis: {
+            xAxis: [{
                 ordinal: 'false',
-            },
+            }],
 
             plotOptions: {
                 area: {
@@ -465,9 +456,9 @@
                 panning: true,
                 panKey: 'shift'
             },
-            xAxis: {
+            xAxis: [{
                 ordinal: 'false',
-            },
+            }],
             plotOptions: {
                 area: {
                     //allowPointSelect: true,
