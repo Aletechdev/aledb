@@ -227,6 +227,15 @@
                 selected_ales.push(message[4])
                 selected_ale_ids.push(message[3])
             }
+
+            update = () => {
+                mainChart.xAxis[0].update({
+                    breaks: [],
+                })
+                mainChart.xAxis[0].update({
+                    ordinal: true,
+                })
+            }
         };
 
         gogglesSocket.onclose = function (e) {
@@ -281,7 +290,7 @@
                         radius: 3,
                         symbol: "circle"
                     },
-                     dataGrouping: {
+                    dataGrouping: {
                         enabled: false
                     },
                     point: {
@@ -472,7 +481,7 @@
                         radius: 3,
                         symbol: "circle"
                     },
-                     dataGrouping: {
+                    dataGrouping: {
                         enabled: false
                     },
                     point: {
