@@ -124,8 +124,8 @@
                                     {},
                                     {
                                         'render': function (data) {
-                                            if (data.includes("test")){
-                                                return data[0]+"t";
+                                            if (data.includes("test")) {
+                                                return data[0] + "t";
                                             }
                                             return data[0];
                                         }
@@ -318,10 +318,13 @@
                 style: {
                     pointerEvents: 'auto'
                 },
+                positioner: function () {
+                    return {x: 80, y: 50};
+                },
                 formatter: function () {
-                    return '<b>' + this.series.name +'</b><br/><b> OD: ' + this.y + '</b><br/>' +
+                    return '<b>' + this.series.name + '</b><br/><b> OD: ' + this.y + '</b><br/>' +
                         'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
-                                          new Date(this.x)) +
+                            new Date(this.x)) +
                         '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2] +
                         '<br/>Media: ' + this.series.userOptions.data[this.point.index][3]
                         ;
