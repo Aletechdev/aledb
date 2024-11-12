@@ -280,6 +280,9 @@
                         radius: 3,
                         symbol: "circle"
                     },
+                     dataGrouping: {
+                        enabled: false
+                    },
                     point: {
                         events: {
                             click: function () {
@@ -319,7 +322,7 @@
                     pointerEvents: 'auto'
                 },
                 positioner: function () {
-                    return {x: this.chart.xAxis[0].width, y: 0 };
+                    return {x: this.chart.xAxis[0].width, y: 0};
                 },
                 formatter: function () {
                     return '<b>' + this.series.name + '</b><br/><b> OD: ' + this.y + '</b><br/>' +
@@ -386,6 +389,8 @@
                     marker: {
                         radius: 3,
                         symbol: "circle"
+                    }, dataGrouping: {
+                        enabled: false
                     },
                     point: {
                         events: {
@@ -425,7 +430,7 @@
                     pointerEvents: 'auto'
                 },
                 positioner: function () {
-                    return {x: this.chart.xAxis[0].width, y: 0 };
+                    return {x: this.chart.xAxis[0].width, y: 0};
                 },
                 formatter: function () {
                     return '<b>' + this.series.name + '</b><br/><b> OD: ' + this.y + '</b><br/>' +
@@ -466,6 +471,9 @@
                         radius: 3,
                         symbol: "circle"
                     },
+                     dataGrouping: {
+                        enabled: false
+                    },
                     point: {
                         events: {
                             click: function () {
@@ -504,7 +512,7 @@
                     pointerEvents: 'auto'
                 },
                 positioner: function () {
-                    return {x: this.chart.xAxis[0].width, y: 0 };
+                    return {x: this.chart.xAxis[0].width, y: 0};
                 },
                 formatter: function () {
                     return '<b>' + this.series.name + '</b><br/><b> OD: ' + this.y + '</b><br/>' +
