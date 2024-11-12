@@ -278,6 +278,11 @@
                 tickPixelInterval: 100,
                 minPadding: 0,
                 maxPadding: 0,
+                labels: {
+                    formatter: function () {
+                        return Highcharts.dateFormat('%b %e (%y)', this.value);
+                    }
+                }
             },
 
             plotOptions: {
@@ -445,7 +450,7 @@
                     return {x: this.chart.xAxis[0].width, y: 0};
                 },
                 formatter: function () {
-                    return '<b>' + this.series.name + '</b><br/><b> OD: ' + this.y + '</b><br/>' +
+                    return '<b>' + this.series.name + '</b><br/><b> Growth Rate: ' + this.y + '</b><br/>' +
                         'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
                             new Date(this.x)) +
                         '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2] +
@@ -530,7 +535,7 @@
                     return {x: this.chart.xAxis[0].width, y: 0};
                 },
                 formatter: function () {
-                    return '<b>' + this.series.name + '</b><br/><b> OD: ' + this.y + '</b><br/>' +
+                    return '<b>' + this.series.name + '</b><br/><b> Temperature: ' + this.y + '</b><br/>' +
                         'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
                             new Date(this.x)) +
                         '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2] +
