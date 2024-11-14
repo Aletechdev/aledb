@@ -29,11 +29,11 @@ class AleExperimentFilter(models.Model):
         default=DEFAULT_MUTATION_FREQ_MAX)  # TODO: this should like rather be a decimal to it's conterpart of seq.models.ObservedMutation.frequency
 
     ignored_genes = models.TextField(default='', blank=True)
-    ignored_mutations = models.CharField(max_length=5000, default='', blank=True)
-    starting_strain_mutations = models.CharField(max_length=5000, default='', blank=True)
+    ignored_mutations = models.CharField(max_length=15000, default='', blank=True)
+    starting_strain_mutations = models.CharField(max_length=15000, default='', blank=True)
 
 
 class GlobalFilter(models.Model):
 
-    ignored_genes = models.CharField(max_length=5000, default='', blank=True)
-    ignored_mutations = models.CharField(max_length=5000, default='', blank=True)
+    ignored_genes = models.CharField(max_length=15000, default='', blank=True)
+    ignored_mutations = models.CharField(max_length=15000, default='', blank=True)
