@@ -69,11 +69,11 @@
             </select>
             <label class="form-check-label" for="inlineCheckbox1">Y-Axis Scaling:</label>
             <select id="y_scale" onchange="handleSelectChangeY(event)">
-                <option value="logarithmic">Log</option>
                 <option value="linear">Linear</option>
+                <option value="logarithmic">Log</option>
             </select>
             <label class="form-check-label" for="inlineCheckbox1">Growth Rate Type:</label>
-            <select id="experiment_GR_type" onchange="handleSelectGrowthRateType(event)">
+            <select id="experiment_GR_type" onchange="handleSelectGrowthRateType()">
                 <option selected value=""></option>
             </select>
             <label for="live_data">Live Updates:</label>
@@ -81,6 +81,16 @@
 
         </div>
     </div>
+
+    <script>
+
+        function handleSelectChangeY() {
+            var y = document.getElementById("y_scale");
+            yAxisMode = y.value
+
+            refresh_data()
+        }
+    </script>
 
 
 
@@ -193,23 +203,30 @@
 
     <script>
         const gogglesSocket = new WebSocket('wss://' + window.location.host + '/ws/goggles/');
-
+        var yAxisMode = "linear"
         gogglesSocket.onmessage = function (e) {
             const data = JSON.parse(e.data);
             console.log(data)
             const message = data['message'];
-
+            var OD_data = message[1][0]
             // Handle incoming message
+            if (yAxisMode == "logarithmic") {
+                let i = 0;
+                while (i < OD_data.length) {
+                    OD_data[i] = Math.log10(OD_data[i])
+                    i++;
+                }
+            }
 
             if (selected_ale_ids.includes(message[3])) {
-                mainChart.get(message[3]).setData(message[1][0]);
+                mainChart.get(message[3]).setData(OD_data);
                 growthChart.get(message[3]).setData(message[1][1]);
                 temperatureChart.get(message[3]).setData(message[1][2]);
             } else {
                 mainChart.addSeries({
                     id: message[3],
                     name: message[2],
-                    data: message[1][0],
+                    data: OD_data,
                     color: document.getElementById('experiment_' + message[3]).value,
                 });
                 growthChart.addSeries({
@@ -347,7 +364,7 @@
         var checkBox = document.getElementById("live_data");
         var text = document.getElementById("text");
 
-        function live_data_loop() {
+        function refresh_data() {
             console.log("rerunning", selected_ales)
             if (selected_ales.length > 0) {
                 for (let i = 0; i < selected_ales.length; i++) {
@@ -358,7 +375,7 @@
 
         setInterval(function () {
             if (checkBox.checked == true) {
-                live_data_loop();
+                refresh_data();
             }
         }, 30000);
 

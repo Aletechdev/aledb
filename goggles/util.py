@@ -124,10 +124,10 @@ def get_experiment_data(ale_machine, experiment_id):
         if current_temp > TEMPERATURE_MINIMUM and current_temp < TEMPERATURE_MAXIMUM:
             temperature_measurements_list.append(
                 [current_time, current_temp,
-                 current_batch_id])
+                 current_batch_id, current_media_description])
         if current_batch_id != prev_batch_id:
             growth_rate_list.append([current_time,
                                      growth_dict[current_batch_id],
-                                     current_batch_id])
+                                     current_batch_id, current_media_description])
             prev_batch_id = current_batch_id
     return [measurement_list, growth_rate_list, temperature_measurements_list]
