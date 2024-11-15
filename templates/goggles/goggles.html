@@ -212,7 +212,7 @@
             if (yAxisMode == "logarithmic") {
                 let i = 0;
                 while (i < OD_data.length) {
-                    OD_data[i] = Math.log10(OD_data[i])
+                    OD_data[i][1] = Math.log10(OD_data[i][1])
                     i++;
                 }
             }
