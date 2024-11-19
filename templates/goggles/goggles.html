@@ -370,7 +370,7 @@
                     pointerEvents: 'auto'
                 },
                 positioner: function () {
-                    return {x: this.chart.xAxis[0].width};
+                    return {x: this.chart.xAxis[0].width, y: this.y};
                 },
                 formatter: function () {
                     return '<b>' + this.series.name + '</b><br/>' +
