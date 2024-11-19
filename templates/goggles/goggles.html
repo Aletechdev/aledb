@@ -160,8 +160,6 @@
                                 console.log(e.target.value);
                                 console.log(mainChart.get(e.target.id));
                                 mainChart.get(e.target.id).update({color: e.target.value});
-                                growthChart.get(e.target.id).update({color: e.target.value});
-                                temperatureChart.get(e.target.id).update({color: e.target.value});
                             }
 
                             table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function () {
@@ -181,8 +179,6 @@
                                     mainChart.get(current_id).remove();
                                     mainChart.get(current_id).remove();
                                     mainChart.get(current_id).remove();
-                                    growthChart.get(current_id).remove();
-                                    temperatureChart.get(current_id).remove();
                                     selected_ales.pop(message);
                                     selected_ale_ids.pop(data_id)
                                 } else {
@@ -221,8 +217,6 @@
 
             if (selected_ale_ids.includes(message[3])) {
                 mainChart.get(message[3]).setData(OD_data);
-                growthChart.get(message[3]).setData(message[1][1]);
-                temperatureChart.get(message[3]).setData(message[1][2]);
             } else {
                 mainChart.addSeries({
                     id: message[3],
@@ -244,18 +238,6 @@
                     data: message[1][2],
                     color: document.getElementById('experiment_' + message[3]).value,
                     yAxis: 2
-                });
-                growthChart.addSeries({
-                    id: message[3],
-                    name: message[2],
-                    data: message[1][1],
-                    color: document.getElementById('experiment_' + message[3]).value,
-                });
-                temperatureChart.addSeries({
-                    id: message[3],
-                    name: message[2],
-                    data: message[1][2],
-                    color: document.getElementById('experiment_' + message[3]).value,
                 });
                 selected_ales.push(message[4])
                 selected_ale_ids.push(message[3])
@@ -281,8 +263,6 @@
     </script>
     <div id="charts" style="width: 55em  !important;">
         <div id="mainChart" style="overflow: visible; height: 60em; !important;"></div>
-        <div id="growthChart" style="overflow: visible; !important;"></div>
-        <div id="temperatureChart" style="overflow: visible; !important;"></div>
     </div>
 
     <div id="right-sidebar" style="width:15em; height:94em; float: right; background-color: #5BA199; color: white">
@@ -406,171 +386,6 @@
                 refresh_data();
             }
         }, 30000);
-
-    </script>
-
-    <script>
-        console.time('line');
-        const temperatureChart = Highcharts.stockChart('temperatureChart', {
-            chart: {
-                zoomType: 'x',
-                panning: true,
-                panKey: 'shift'
-            },
-            xAxis: [{
-                ordinal: false,
-            }],
-
-            plotOptions: {
-                area: {
-                    //allowPointSelect: true,
-                    fillOpacity: 0.25
-                },
-                series: {
-                    lineWidth: 2,
-                    marker: {
-                        radius: 3,
-                        symbol: "circle"
-                    }, dataGrouping: {
-                        enabled: false
-                    },
-                    point: {
-                        events: {
-                            click: function () {
-                                if (this.selected) {
-                                    this.select(false, true)
-                                } else {
-                                    this.select(true, true)
-                                }
-
-                            }
-                        }
-                    },
-                },
-            }, /**
-             title: {
-             text: 'Dummy opticALE(s) with ' + n + ' measurements'
-             },
-             uncomment when we are struggling to support all the points
-             boost: {
-             useGPUTranslations: true
-             },*/
-
-            legend: {
-                enabled: true
-            },
-
-            tooltip: {
-                valueDecimals: 2,
-                shared: false,
-                split: false,
-                followPointer: false,
-                stickOnContact: true,
-                useHTML: true,
-                outside: true,
-                style: {
-                    pointerEvents: 'auto'
-                },
-                positioner: function () {
-                    return {x: this.chart.xAxis[0].width, y: 0};
-                },
-                formatter: function () {
-                    return '<b>' + this.series.name + '</b><br/><b> Growth Rate: ' + this.y + '</b><br/>' +
-                        'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
-                            new Date(this.x)) +
-                        '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2] +
-                        '<br/>Media: ' + this.series.userOptions.data[this.point.index][3]
-                        ;
-                }
-
-            },
-
-        });
-        console.timeEnd('line');
-
-    </script>
-
-
-
-    <script>
-
-        console.time('line');
-        const growthChart = Highcharts.stockChart('growthChart', {
-            chart: {
-                zoomType: 'x',
-                panning: true,
-                panKey: 'shift'
-            },
-            xAxis: [{
-                ordinal: false,
-            }],
-            plotOptions: {
-                area: {
-                    //allowPointSelect: true,
-                    fillOpacity: 0.25
-                },
-                series: {
-                    lineWidth: 1.5,
-                    marker: {
-                        radius: 3,
-                        symbol: "circle"
-                    },
-                    dataGrouping: {
-                        enabled: false
-                    },
-                    point: {
-                        events: {
-                            click: function () {
-                                if (this.selected) {
-                                    this.select(false, true)
-                                } else {
-                                    this.select(true, true)
-                                }
-
-                            }
-                        }
-                    },
-                },
-            }, /**
-             title: {
-             text: 'Dummy opticALE(s) with ' + n + ' measurements'
-             },
-             uncomment when we are struggling to support all the points
-             boost: {
-             useGPUTranslations: true
-             },*/
-
-            legend: {
-                enabled: true
-            },
-
-            tooltip: {
-                valueDecimals: 2,
-                shared: false,
-                split: false,
-                followPointer: false,
-                stickOnContact: true,
-                useHTML: true,
-                outside: true,
-                style: {
-                    pointerEvents: 'auto'
-                },
-                positioner: function () {
-                    return {x: this.chart.xAxis[0].width, y: 0};
-                },
-                formatter: function () {
-                    return '<b>' + this.series.name + '</b><br/><b> Temperature: ' + this.y + '</b><br/>' +
-                        'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
-                            new Date(this.x)) +
-                        '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2] +
-                        '<br/>Media: ' + this.series.userOptions.data[this.point.index][3]
-                        ;
-                }
-
-            },
-
-        });
-        console.timeEnd('line');
 
     </script>
 
