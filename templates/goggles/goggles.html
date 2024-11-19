@@ -227,6 +227,21 @@
                     name: message[2],
                     data: OD_data,
                     color: document.getElementById('experiment_' + message[3]).value,
+                    yAxis: 0
+                });
+                mainChart.addSeries({
+                    id: message[3],
+                    name: message[2],
+                    data: message[1][1],
+                    color: document.getElementById('experiment_' + message[3]).value,
+                    yAxis: 1
+                });
+                mainChart.addSeries({
+                    id: message[3],
+                    name: message[2],
+                    data: message[1][2],
+                    color: document.getElementById('experiment_' + message[3]).value,
+                    yAxis: 2
                 });
                 growthChart.addSeries({
                     id: message[3],
@@ -276,6 +291,18 @@
         const mainChart = Highcharts.stockChart('mainChart', {
             xAxis: [{
                 ordinal: false,
+            }],
+            yAxis: [{
+                height: '40%'
+            }, {
+                opposite: true,
+                top: '50%',
+                height: '20%',
+            }, {
+                opposite: true,
+                top: '80%',
+                height: '20%',
+                min: 30,
             }],
             chart: {
                 zoomType: 'x',
