@@ -370,7 +370,7 @@
                 },
                 formatter: function () {
                     return '<b>' + this.series.name + '</b><br/>' +
-                        this.series.yAxis.name +'<br/>' +
+                        this.series.yAxis.title.text +'<br/>' +
                         '<b> Value: ' + this.y + '</b><br/>' +
                         'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
                             new Date(this.x)) +
