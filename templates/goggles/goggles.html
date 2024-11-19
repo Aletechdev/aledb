@@ -223,21 +223,24 @@
                     name: message[2],
                     data: OD_data,
                     color: document.getElementById('experiment_' + message[3]).value,
-                    yAxis: 0
+                    yAxis: 0,
+                    showInNavigator: true,
                 });
                 mainChart.addSeries({
                     id: message[3] + "-GR",
                     name: message[2],
                     data: message[1][1],
                     color: document.getElementById('experiment_' + message[3]).value,
-                    yAxis: 1
+                    yAxis: 1,
+                    showInNavigator: true,
                 });
                 mainChart.addSeries({
                     id: message[3] + "-Temp",
                     name: message[2],
                     data: message[1][2],
                     color: document.getElementById('experiment_' + message[3]).value,
-                    yAxis: 2
+                    yAxis: 2,
+                    showInNavigator: true,
                 });
                 selected_ales.push(message[4])
                 selected_ale_ids.push(message[3])
