@@ -177,8 +177,8 @@
                                     let current_id = data_id
                                     console.log("removing: " + current_id)
                                     mainChart.get(current_id).remove();
-                                    mainChart.get(current_id+"-GR").remove();
-                                    mainChart.get(current_id+"-Temp").remove();
+                                    mainChart.get(current_id + "-GR").remove();
+                                    mainChart.get(current_id + "-Temp").remove();
                                     selected_ales.pop(message);
                                     selected_ale_ids.pop(data_id)
                                 } else {
@@ -278,11 +278,11 @@
                 height: '50%',
                 title: {
                     text: 'OD',
-                },labels: {
-                      	style: {
-                        	fontSize: '14 px'
-                        }
-                      }
+                }, labels: {
+                    style: {
+                        fontSize: '14 px'
+                    }
+                }
 
             }, {
                 opposite: true,
@@ -290,27 +290,32 @@
                 height: '30%',
                 title: {
                     text: 'Growth Rate',
-                },labels: {
-                      	style: {
-                        	fontSize: '14 px'
-                        }
-                      }
+                }, labels: {
+                    style: {
+                        fontSize: '14 px'
+                    }
+                }
             }, {
                 opposite: true,
                 top: '80%',
                 height: '20%',
                 title: {
                     text: 'Temperature °C',
-                },labels: {
-                      	style: {
-                        	fontSize: '14 px'
-                        }
-                      }
+                }, labels: {
+                    style: {
+                        fontSize: '14 px'
+                    }
+                }
             }],
             chart: {
                 zoomType: 'x',
                 panning: true,
-                panKey: 'shift'
+                panKey: 'shift',
+                marginTop: 40
+            },
+            navigator: {
+                top: 40,
+
             },
             plotOptions: {
                 area: {
@@ -369,7 +374,7 @@
                 },
                 formatter: function () {
                     return '<b>' + this.series.name + '</b><br/>' +
-                        '<b>'+this.series.yAxis.options.title.text + ': </b>'+ this.y +'<br/>' +
+                        '<b>' + this.series.yAxis.options.title.text + ': </b>' + this.y + '<br/>' +
                         'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
                             new Date(this.x)) +
                         '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2] +
