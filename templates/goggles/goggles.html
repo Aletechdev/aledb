@@ -179,6 +179,8 @@
                                     let current_id = data_id
                                     console.log("removing: " + current_id)
                                     mainChart.get(current_id).remove();
+                                    mainChart.get(current_id).remove();
+                                    mainChart.get(current_id).remove();
                                     growthChart.get(current_id).remove();
                                     temperatureChart.get(current_id).remove();
                                     selected_ales.pop(message);
@@ -293,16 +295,13 @@
                 ordinal: false,
             }],
             yAxis: [{
-                height: '40%'
+                height: '50%'
             }, {
                 opposite: true,
-                top: '50%',
-                height: '20%',
+                height: '30%',
             }, {
                 opposite: true,
-                top: '80%',
                 height: '20%',
-                min: 35,
             }],
             chart: {
                 zoomType: 'x',
