@@ -278,14 +278,23 @@
                 height: '50%',
                 title: {
                     text: 'OD',
-                }
+                },labels: {
+                      	style: {
+                        	fontSize: '14 px'
+                        }
+                      }
+
             }, {
                 opposite: true,
                 top: '50%',
                 height: '30%',
                 title: {
                     text: 'Growth Rate',
-                }
+                },labels: {
+                      	style: {
+                        	fontSize: '14 px'
+                        }
+                      }
             }, {
                 opposite: true,
                 top: '80%',
@@ -293,7 +302,11 @@
                 min: 35,
                 title: {
                     text: 'Temperature °C',
-                }
+                },labels: {
+                      	style: {
+                        	fontSize: '14 px'
+                        }
+                      }
             }],
             chart: {
                 zoomType: 'x',
@@ -328,11 +341,7 @@
                         }
                     },
                 },
-                labels: {
-                      	style: {
-                        	fontSize: '14 px'
-                        }
-                      }
+
             }, /**
              title: {
              text: 'Dummy opticALE(s) with ' + n + ' measurements'
