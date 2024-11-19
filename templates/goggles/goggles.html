@@ -177,8 +177,8 @@
                                     let current_id = data_id
                                     console.log("removing: " + current_id)
                                     mainChart.get(current_id).remove();
-                                    mainChart.get(current_id).remove();
-                                    mainChart.get(current_id).remove();
+                                    mainChart.get(current_id+"-GR").remove();
+                                    mainChart.get(current_id+"-Temp").remove();
                                     selected_ales.pop(message);
                                     selected_ale_ids.pop(data_id)
                                 } else {
@@ -226,15 +226,15 @@
                     yAxis: 0
                 });
                 mainChart.addSeries({
-                    id: message[3],
-                    name: message[2],
+                    id: message[3] + "-GR",
+                    name: message[2] + "-GR",
                     data: message[1][1],
                     color: document.getElementById('experiment_' + message[3]).value,
                     yAxis: 1
                 });
                 mainChart.addSeries({
-                    id: message[3],
-                    name: message[2],
+                    id: message[3] + "-Temp",
+                    name: message[2] + "-Temp",
                     data: message[1][2],
                     color: document.getElementById('experiment_' + message[3]).value,
                     yAxis: 2
