@@ -227,14 +227,14 @@
                 });
                 mainChart.addSeries({
                     id: message[3] + "-GR",
-                    name: message[2] + "-GR",
+                    name: message[2],
                     data: message[1][1],
                     color: document.getElementById('experiment_' + message[3]).value,
                     yAxis: 1
                 });
                 mainChart.addSeries({
                     id: message[3] + "-Temp",
-                    name: message[2] + "-Temp",
+                    name: message[2],
                     data: message[1][2],
                     color: document.getElementById('experiment_' + message[3]).value,
                     yAxis: 2
@@ -369,7 +369,9 @@
                     return {x: this.chart.xAxis[0].width, y: 0};
                 },
                 formatter: function () {
-                    return '<b>' + this.series.name + '</b><br/><b> Value: ' + this.y + '</b><br/>' +
+                    return '<b>' + this.series.name + '</b><br/>' +
+                        this.series.yAxis.name +'<br/>' +
+                        '<b> Value: ' + this.y + '</b><br/>' +
                         'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
                             new Date(this.x)) +
                         '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2] +
