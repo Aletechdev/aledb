@@ -7,7 +7,6 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
-import numpy as np
 
 class Adps(models.Model):
     db_id = models.AutoField(primary_key=True)
@@ -57,6 +56,48 @@ class AleMediaAssoc(models.Model):
     class Meta:
         managed = False
         db_table = 'ale_media_assoc'
+
+
+class AmigaResults(models.Model):
+    db_id = models.AutoField(primary_key=True)
+    growth_analysis_id = models.IntegerField(blank=True, null=True)
+    auc_lin = models.FloatField(blank=True, null=True)
+    auc_log = models.FloatField(blank=True, null=True)
+    k_lin = models.FloatField(blank=True, null=True)
+    k_log = models.FloatField(blank=True, null=True)
+    t_k = models.FloatField(blank=True, null=True)
+    gr = models.FloatField()
+    dr = models.FloatField(blank=True, null=True)
+    t_gr = models.FloatField(blank=True, null=True)
+    t_kr = models.FloatField(blank=True, null=True)
+    death_lin = models.FloatField(blank=True, null=True)
+    death_log = models.FloatField(blank=True, null=True)
+    lagc = models.FloatField(db_column='lagC', blank=True, null=True)  # Field name made lowercase.
+    lagp = models.FloatField(db_column='lagP', blank=True, null=True)  # Field name made lowercase.
+    t0 = models.FloatField(blank=True, null=True)
+    tf = models.FloatField(blank=True, null=True)
+    diaxie_df_dx = models.FloatField(blank=True, null=True)
+    dx_td = models.FloatField(blank=True, null=True)
+    dx_death_lin = models.FloatField(blank=True, null=True)
+    dx_dt_gr = models.FloatField(blank=True, null=True)
+    dx_lagc = models.FloatField(db_column='dx_lagC', blank=True, null=True)  # Field name made lowercase.
+    dx_lagp = models.FloatField(db_column='dx_lagP', blank=True, null=True)  # Field name made lowercase.
+    dx_t0 = models.FloatField(blank=True, null=True)
+    dx_tf = models.FloatField(blank=True, null=True)
+    td = models.FloatField(blank=True, null=True)
+    dxdt_gr = models.FloatField(blank=True, null=True)
+    dxdt_dt_gr = models.FloatField(blank=True, null=True)
+    dxdt_kr = models.FloatField(blank=True, null=True)
+    dxdt_td = models.FloatField(blank=True, null=True)
+    dxdt_t0 = models.FloatField(blank=True, null=True)
+    dxdt_tf = models.FloatField(blank=True, null=True)
+    t_d = models.FloatField(blank=True, null=True)
+    growth_analysis_db_id = models.IntegerField(blank=True, null=True)
+    runtime = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'amiga_results'
 
 
 class Batches(models.Model):
@@ -152,6 +193,26 @@ class Controllers(models.Model):
         db_table = 'controllers'
 
 
+class CroissanceResults(models.Model):
+    db_id = models.AutoField(primary_key=True)
+    growth_analysis_id = models.IntegerField(blank=True, null=True)
+    phase_start = models.FloatField(blank=True, null=True)
+    phase_end = models.FloatField(blank=True, null=True)
+    growth_rate = models.FloatField(blank=True, null=True)
+    intercept = models.FloatField(blank=True, null=True)
+    n0 = models.FloatField(blank=True, null=True)
+    snr = models.FloatField(blank=True, null=True)
+    aic = models.FloatField(blank=True, null=True)
+    bic = models.FloatField(blank=True, null=True)
+    rank = models.IntegerField(blank=True, null=True)
+    growth_analysis_db_id = models.IntegerField(blank=True, null=True)
+    runtime = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'croissance_results'
+
+
 class CurrentBatches(models.Model):
     test_tale = models.ForeignKey('TestTale', models.DO_NOTHING, blank=True, null=True)
     batch = models.ForeignKey(Batches, models.DO_NOTHING, blank=True, null=True)
@@ -159,6 +220,29 @@ class CurrentBatches(models.Model):
     class Meta:
         managed = False
         db_table = 'current_batches'
+
+
+class CurveballResults(models.Model):
+    db_id = models.AutoField(primary_key=True)
+    growth_analysis_id = models.IntegerField(unique=True, blank=True, null=True)
+    model = models.CharField(max_length=45, blank=True, null=True)
+    r = models.FloatField(blank=True, null=True)
+    k = models.FloatField(blank=True, null=True)
+    bic = models.FloatField(blank=True, null=True)
+    snr = models.FloatField(blank=True, null=True)
+    min_k_bound = models.FloatField(blank=True, null=True)
+    max_k_bound = models.FloatField(blank=True, null=True)
+    expected_k = models.FloatField(blank=True, null=True)
+    min_r_bound = models.FloatField(blank=True, null=True)
+    max_r_bound = models.FloatField(blank=True, null=True)
+    expected_r = models.FloatField(blank=True, null=True)
+    runtime = models.FloatField(blank=True, null=True)
+    growth_analysis_db_id = models.IntegerField(blank=True, null=True)
+    models_json = models.JSONField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'curveball_results'
 
 
 class Experiments(models.Model):
@@ -181,6 +265,9 @@ class Experiments(models.Model):
     stir_power = models.IntegerField(blank=True, null=True)
     meas_ids = models.TextField()
     temperature_meas_ids = models.TextField()
+    min_k_bound = models.JSONField(blank=True, null=True)
+    max_k_bound = models.JSONField(blank=True, null=True)
+    expected_k = models.JSONField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -238,11 +325,20 @@ class GrowthAnalyses(models.Model):
     stationary_phase_length = models.FloatField(blank=True, null=True)
     lag_phase_od = models.FloatField(blank=True, null=True)
     lag_phase_end = models.FloatField(blank=True, null=True)
-    model_type = models.CharField(max_length=50, blank=True, null=True)
+    model_name = models.CharField(max_length=50, blank=True, null=True)
     min_stationary_od = models.FloatField()
     min_stationary_growth_rate = models.FloatField()
     measurement_type_db = models.ForeignKey('MeasurementTypes', models.DO_NOTHING, blank=True, null=True)
     batch = models.ForeignKey(Batches, models.DO_NOTHING, blank=True, null=True)
+    min_k_bound = models.FloatField(blank=True, null=True)
+    max_k_bound = models.FloatField(blank=True, null=True)
+    expected_k = models.FloatField(blank=True, null=True)
+    min_r_bound = models.FloatField(blank=True, null=True)
+    max_r_bound = models.FloatField(blank=True, null=True)
+    expected_r = models.FloatField(blank=True, null=True)
+    curveball_list = models.JSONField(blank=True, null=True)
+    selected_growth_rate = models.FloatField(blank=True, null=True)
+    growth_models = models.CharField(max_length=150, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -256,10 +352,8 @@ class HeatBlockPositions(models.Model):
     experiment_id = models.IntegerField(blank=True, null=True)
     batch_id = models.IntegerField(blank=True, null=True)
     time = models.DateTimeField(blank=True, null=True)
-    current_opticale_temperature = models.FloatField(
-        db_column='current_opticALE_temperature')  # Field name made lowercase.
-    current_opticale_stirring_rpm = models.FloatField(
-        db_column='current_opticALE_stirring_rpm')  # Field name made lowercase.
+    current_opticale_temperature = models.FloatField(db_column='current_opticALE_temperature')  # Field name made lowercase.
+    current_opticale_stirring_rpm = models.FloatField(db_column='current_opticALE_stirring_rpm')  # Field name made lowercase.
     d0_580_blank = models.IntegerField(db_column='D0_580_blank')  # Field name made lowercase.
     d0_640_blank = models.IntegerField(db_column='D0_640_blank')  # Field name made lowercase.
     d0_480_blank = models.IntegerField(db_column='D0_480_blank')  # Field name made lowercase.
@@ -314,6 +408,9 @@ class MeasurementTypes(models.Model):
     previous_growth = models.FloatField()
     blank_value = models.FloatField()
     batch = models.ForeignKey(Batches, models.DO_NOTHING, blank=True, null=True)
+    min_k_bound = models.FloatField(blank=True, null=True)
+    max_k_bound = models.FloatField(blank=True, null=True)
+    expected_k = models.FloatField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -334,42 +431,14 @@ class Measurements(models.Model):
     sampling_volume = models.IntegerField()
     measurement_type_id = models.CharField(max_length=50)
     raw_transmittance_value = models.FloatField()
+    raw_incident_value = models.FloatField()
     empty_scattering_value = models.FloatField()
     stirring_rate = models.FloatField()
     measurement_type_db = models.ForeignKey(MeasurementTypes, models.DO_NOTHING, blank=True, null=True)
+
     class Meta:
         managed = False
         db_table = 'measurements'
-    @property
-    def OD(self):
-        return self.value
-    @property
-    def optical_density(self):
-        return self.value
-    @property
-    def raw_incident_value(self):
-        if self.measurement_type_db is None:
-            return 5000
-        return self.measurement_type_db.blank_value
-    @property
-    def value(self):
-        if self.calculated_orreader_value and self.calculated_orreader_value > 0:
-            return self.calculated_orreader_value
-
-        else:
-            if self.measurement_type_db and self.raw_incident_value != 0 and self.raw_transmittance_value != 0 and \
-                    self.measurement_type_db.description[-1].lower() == 'a':
-                adc_OD_values = float(np.log10(self.raw_incident_value / self.raw_transmittance_value))
-            elif self.measurement_type_db and self.raw_incident_value != 0 and self.raw_transmittance_value != 0 and \
-                    self.measurement_type_db.description[-1].lower() == 'r':
-                adc_OD_values = (self.raw_transmittance_value / self.empty_scattering_value) - self.raw_incident_value
-            else:
-                adc_OD_values = 0.01  # To prevent division by zero
-
-            # Ensure adc_OD_values is a valid number
-            adc_OD_values = np.nan_to_num(adc_OD_values, nan=0.01)  # Convert nan to 0.01
-            adc_OD_values = max(round(adc_OD_values, 3), 0.01)
-            return float(adc_OD_values)
 
 
 class MediaComponents(models.Model):
@@ -424,6 +493,7 @@ class Opticales(models.Model):
     coupling_stir_speed = models.IntegerField(blank=True, null=True)
     stir_power = models.IntegerField(blank=True, null=True)
     machine = models.ForeignKey(Machines, models.DO_NOTHING, blank=True, null=True)
+    column_prefix = models.IntegerField()
 
     class Meta:
         managed = False
@@ -444,8 +514,7 @@ class PaleAle(models.Model):
     default_sampling_delay = models.IntegerField()
     min_accurate_od = models.FloatField()
     starting_media = models.ForeignKey(Medias, models.DO_NOTHING, blank=True, null=True)
-    ending_media = models.ForeignKey(Medias, models.DO_NOTHING, related_name='paleale_ending_media_set', blank=True,
-                                     null=True)
+    ending_media = models.ForeignKey(Medias, models.DO_NOTHING, related_name='paleale_ending_media_set', blank=True, null=True)
     media = models.ForeignKey(Medias, models.DO_NOTHING, related_name='paleale_media_set', blank=True, null=True)
 
     class Meta:
@@ -463,8 +532,7 @@ class PaleAleTest(models.Model):
     growth_time_extension = models.IntegerField()
     pass_volume = models.FloatField()
     min_number_of_batches = models.IntegerField()
-    field_propagate_boolean = models.IntegerField(
-        db_column='_propagate_boolean')  # Field renamed because it started with '_'.
+    field_propagate_boolean = models.IntegerField(db_column='_propagate_boolean')  # Field renamed because it started with '_'.
 
     class Meta:
         managed = False
@@ -617,17 +685,6 @@ class StorageRacks(models.Model):
         db_table = 'storage_racks'
 
 
-class SysConfig(models.Model):
-    variable = models.CharField(primary_key=True, max_length=128)
-    value = models.CharField(max_length=128, blank=True, null=True)
-    set_time = models.DateTimeField()
-    set_by = models.CharField(max_length=128, blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'sys_config'
-
-
 class Tale(models.Model):
     db = models.OneToOneField(Protocol, models.DO_NOTHING, primary_key=True)
     drop_factor = models.FloatField()
@@ -640,12 +697,10 @@ class Tale(models.Model):
     sampling_delay = models.IntegerField()
     min_rest = models.IntegerField()
     max_rest = models.IntegerField()
-    field_next_step = models.FloatField(db_column='_next_step', blank=True,
-                                        null=True)  # Field renamed because it started with '_'.
+    field_next_step = models.FloatField(db_column='_next_step', blank=True, null=True)  # Field renamed because it started with '_'.
     max_samples = models.IntegerField()
     initial_media = models.ForeignKey(Medias, models.DO_NOTHING, blank=True, null=True)
-    one_step_away_media = models.ForeignKey(Medias, models.DO_NOTHING, related_name='tale_one_step_away_media_set',
-                                            blank=True, null=True)
+    one_step_away_media = models.ForeignKey(Medias, models.DO_NOTHING, related_name='tale_one_step_away_media_set', blank=True, null=True)
 
     class Meta:
         managed = False
