@@ -238,11 +238,18 @@ class GrowthAnalyses(models.Model):
     stationary_phase_length = models.FloatField(blank=True, null=True)
     lag_phase_od = models.FloatField(blank=True, null=True)
     lag_phase_end = models.FloatField(blank=True, null=True)
-    model_type = models.CharField(max_length=50, blank=True, null=True)
     min_stationary_od = models.FloatField()
     min_stationary_growth_rate = models.FloatField()
     measurement_type_db = models.ForeignKey('MeasurementTypes', models.DO_NOTHING, blank=True, null=True)
     batch = models.ForeignKey(Batches, models.DO_NOTHING, blank=True, null=True)
+
+    def __init__(self, *args, **kwargs):
+        # Remove unknown fields from kwargs before calling parent __init__
+        field_names = [f.name for f in self._meta.fields]
+        for key in list(kwargs.keys()):
+            if key not in field_names:
+                kwargs.pop(key)
+        super().__init__(*args, **kwargs)
 
     class Meta:
         managed = False
