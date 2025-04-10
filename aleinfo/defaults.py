@@ -158,8 +158,14 @@ USE_X_FORWARDED_PORT = os.environ.get('USE_X_FORWARDED_PORT', '0') == '1'
 
 # Likely has to be after initial DATABASES definition.
 # This is used for unit testing of django code.
-if 'test' in sys.argv or 'test_coverage' in sys.argv:  # Covers regular testing and django-coverage
-    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
+if ('test' in sys.argv  # Covers regular testing and django-coverage
+    or 'test_coverage' in sys.argv
+    or os.environ.get('FORCE_SQLITE') == '1' #FORCE_SQLITE=1 in .docker/one.env
+    ): 
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'dev.sqlite3'),
+    }
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
