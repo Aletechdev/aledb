@@ -76,7 +76,7 @@ Either the quick start:
 ```
 docker-compose up -d
 ```
- 
+
 Or in a tmux session:
 
 ```
@@ -192,4 +192,18 @@ docker exec -it aledb-web coverage run manage.py test
 
 docker exec -it aledb-web coverage report
 
+```
+
+
+
+### For local Dev without connecting to SQL
+
+```bash
+#add FORCE_SQLITE=1 to e.g., .docker/one.env
+# bring up services
+docker-compose -f docker-compose-prod-asgi-host-nginx.yml up --build -d
+# generate local sqlite3 file
+docker-compose -f docker-compose-prod-asgi-host-nginx.yml exec web bash -c "python manage.py makemigrations && python manage.py migrate"
+# test django
+docker-compose -f docker-compose-prod-asgi-host-nginx.yml exec web bash -c "python manage.py test"
 ```
