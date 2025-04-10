@@ -7,7 +7,7 @@ from django.shortcuts import render
 from seq.models import ObservedMutation
 from django.db.models import Q
 import operator, collections, common
-from functools import reduce, lru_cache
+from functools import reduce
 from seq.views import mutation_table_builder
 from ale.utils import get_user_projects, get_strains
 from seq.util import get_ref_sequences
