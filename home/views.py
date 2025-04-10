@@ -6,7 +6,8 @@ from django.template import loader
 from logs.aledb_logger import user_extra
 from dashboard.models import ObservedMutationCounts, UniqueMutationCounts, SampleCounts
 from dashboard.views import get_general_count_dict
-from search.views import MUT_TYPES, MUT_TYPES_DISPLAY, STRAINS, REF_SEQS
+# from search.views import MUT_TYPES, MUT_TYPES_DISPLAY, STRAINS, REF_SEQS
+from search.views import MUT_TYPES, MUT_TYPES_DISPLAY, load_strains, load_ref_sequences
 from ale.utils import get_user_projects
 
 
@@ -39,8 +40,8 @@ def home(request):
                     "observed_mutation_counts": observed_mutation_counts})
     user_projects = get_user_projects(request.user)
     context.update({"mut_types": MUT_TYPES,
-                    "strains": STRAINS,
-                    "ref_seqs": REF_SEQS,
+                    "strains": load_strains,
+                    "ref_seqs": load_ref_sequences,
                     "projects": user_projects})
     logger.info("home", extra=user_extra(request))
     context.update({"unique_publication_count": get_unique_publication_count})
