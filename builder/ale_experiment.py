@@ -25,6 +25,7 @@ from django.contrib.auth.models import User
 from datetime import datetime
 from stats.models import StaticData
 from ale.permissions import grant_access_to_project
+from seq.models import Mutation
 
 WILD_TYPE_ALE_NUMBER = 0
 WILD_TYPE_FLASK_NUMBER = 0
@@ -350,8 +351,16 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
 
         default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
         AleExperimentFilter.objects.get_or_create(**default_filter_params)
+        print("Debut create ale_exp:===")
+        print(experiment.ale_id)
+        print("debug rebuild_converge_mutations")
         rebuild_converge_mutations(experiment.ale_id)
+        print("debug rebuild_fixated_mutations")
         rebuild_fixated_mutations(experiment.ale_id)
+        print("debug generate_static_data (ale_experiment.py)")
+        print(experiment.ale_id)
+        print(Mutation.objects.all().count())
+        print("======")
         generate_static_data(experiment.ale_id)
         rebuild_dashboard_data()
 

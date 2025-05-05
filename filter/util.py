@@ -24,13 +24,20 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, fi
         exp_filters = AleExperimentFilter.objects.filter(ale_experiment_id__in=observed_mutation_queryset.values(
             "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment_id"))
     global_filter_genes, global_filter_muts = _get_global_filter_genes_muts()
+    print("Debug filter_observed_mutations")
+    print(f"Global Filter Genes: {global_filter_genes}")
+    print(f"Global Filter Mutations: {global_filter_muts}")
     exp_filter_genes_map = dict()
 
     # filter muts by global filter
     q_queries = Q()
+    print(f"Q Queries: {q_queries}")
     if len(global_filter_muts) > 0:
         q_queries.add(Q(mutation__id__in=global_filter_muts), Q.OR)
     # filter muts by experiment filters
+    print(f"Experiment Filters: {exp_filters}")
+    for exp_filter in exp_filters:
+        print(f"Filter Details: {exp_filter.__dict__}")
     for exp_filter in exp_filters:
         exp_filter_genes, exp_filter_muts = _get_exp_filter_genes_muts(exp_filter)
         if len(exp_filter_genes) > 0:
@@ -65,10 +72,19 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, fi
         'sequencing_experiment__tech_rep__isolate__isolate_number',
         'sequencing_experiment__tech_rep__tech_rep_number'
     )
+    for obs_mut in queryset:
+        print(f"Observed Mutation ID: {obs_mut.id}")
+        print(f"Mutation Type: {obs_mut.mutation.mutation_type}")
+        print(f"Gene: {obs_mut.mutation.gene}")
+        print(f"Frequency: {obs_mut.frequency}")
+        print("---")
     observed_mutations = []
     deleted_global_mutations = set()
     if filter_type or len(global_filter_genes) > 0 or len(exp_filter_genes_map) > 0:
         for obs_mut in queryset:
+            print("DEBUG: filter_observed_mutations")
+            print(f"Observed Mutation ID: {obs_mut.id}")
+            print(f"Mutation Type: {obs_mut.mutation.mutation_type}")
             if filter_type == 'AMP':
                 if obs_mut.mutation.mutation_type == 'AMP':
                     continue
@@ -90,6 +106,7 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, fi
                 observed_mutations.append(obs_mut)
     else:
         observed_mutations = [obs_mut for obs_mut in queryset]
+    print(f"DEBUG: Observed Mutation Count: {len(observed_mutations)}")
     return observed_mutations
 
 

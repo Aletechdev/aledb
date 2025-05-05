@@ -23,8 +23,23 @@ def get_observed_mutation_list(ale_experiment_id):
     :return: list of observed mutations for given experiment, filtered and data loaded
     """
     ordered_reseq_dict = get_reseq_ordered_dict(ale_experiment_id)
+    print("Debug get_observed_mutation_list")
+    print("ordered_reseq_dict", ordered_reseq_dict)
+    print("TODO: figure out frequency and frequency_gatk were generated")
+    for key, value in ordered_reseq_dict.items():
+        print(f"Key: {key}")
+        print(f"Attributes: {value.__dict__}")
+        print("---")
     observed_mutation_query_set = get_all_observed_mutations(list(ordered_reseq_dict.keys()))
+    print("observed_mutation_query_set", observed_mutation_query_set)
+    
+    for observed_mutation in observed_mutation_query_set:
+        print(observed_mutation.__dict__)
+        print("---")
+    print(f"Observed Mutation QuerySet Count: {observed_mutation_query_set.count()}")
     observed_mutation_list = filter_observed_mutations(observed_mutation_query_set, ale_experiment_id)
+    print(ale_experiment_id)
+    print("observed_mutation_list", observed_mutation_list)
     return observed_mutation_list
 
 
@@ -62,7 +77,10 @@ def get_needle_plot_data(experiment_id):
 
 
 def generate_static_data(ale_id):
+    print("debug generate static data====*")
+    print("ale_id", ale_id)
     observed_mutation_list = get_observed_mutation_list(ale_id)
+    print("observed_mutation_list", observed_mutation_list)
     mutation_needle_data = generate_needle_plot_data(observed_mutation_list)
     static_data_orm, created = stats.models.StaticData.objects.get_or_create(id=ale_id)
     static_data_orm.mut_needle_data = mutation_needle_data

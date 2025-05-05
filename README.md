@@ -206,4 +206,5 @@ docker-compose -f docker-compose-prod-asgi-host-nginx.yml up --build -d
 docker-compose -f docker-compose-prod-asgi-host-nginx.yml exec web bash -c "python manage.py makemigrations && python manage.py migrate"
 # test django
 docker-compose -f docker-compose-prod-asgi-host-nginx.yml exec web bash -c "python manage.py test"
+docker-compose -f docker-compose-prod-asgi-host-nginx.yml exec web coverage report
 ```

@@ -21,11 +21,13 @@ def rebuild_sample_counts():
     SampleCounts.objects.all().update(flask_count=flask_count)
     isolate_count = Isolate.objects.filter(~Q(flask__ale_id__ale_id=0)).count()
     SampleCounts.objects.all().update(isolate_count=isolate_count)
+    print("debug: 1 1 1 stands for ale, flask, isolate, dashboard.util.rebuild_sample_counts")
     print(ale_count, flask_count, isolate_count)
 
 
 def rebuild_mutation_counts():
     raw_obs_mut_qryset = ObservedMutation.objects.all()
+    print("debug: filter under rebuild_mutation_counts")
     obs_muts = filter_observed_mutations(raw_obs_mut_qryset)
     muts = get_mutations_from_observed_muations(obs_muts)
 

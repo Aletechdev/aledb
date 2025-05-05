@@ -33,14 +33,20 @@ class TestEnrichment(TestCase):
         status = "In progress", is_public = False)
 
     def test_create_ALE_experiment(self):
-        test_report_path = os.path.dirname(os.path.realpath(__file__)) + "/breseq/"
+        # test_report_path = os.path.dirname(os.path.realpath(__file__)) + "/breseq/"
+        test_report_path = os.path.dirname(os.path.realpath(__file__)) + "/zl_test/breseq/"
         self.assertFalse(create_ale_experiment(test_report_path+"/invalid_part", "Patrick", "test", "test_project"))
         create_ale_experiment(test_report_path, "Patrick", "test", "test_project")
-        expected_mutation_count = 27
+        expected_mutation_count = 11#27
         self.assertEqual(expected_mutation_count, Mutation.objects.all().count())
+        print(Mutation.objects.all())
         expected_experiment_count = 1
         self.assertEqual(expected_experiment_count, AleExperiment.objects.all().count())
         expected_histogram_length = 68
+        print("debug StaticData=====")
+        print(StaticData.objects.get(id=1))
+        print(StaticData.objects.get(id=1).histogram_data)
+        print(StaticData.objects.get(id=1).mut_needle_data)
         self.assertEquals(expected_histogram_length, len(StaticData.objects.get(id=1).histogram_data))
 
     def test_create_ALE_experiment_with_wildtype(self):
