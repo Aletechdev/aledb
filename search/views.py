@@ -24,8 +24,14 @@ logger = logging.getLogger(__name__)
 
 MUT_TYPES = ['AMP', 'CON', 'DEL', 'INS', 'INV', 'MOB', 'SNP', 'SUB']
 MUT_TYPES_DISPLAY = ["Amplification", "Conversion", "Deletion", "Insersion", "Inversion", "Mobil", "SNP", "Substitution"]
-STRAINS = get_strains()
-REF_SEQS = get_ref_sequences()
+
+# These functions lazily load strains and reference sequences,
+# ensuring that module-level imports do not trigger premature DB access 
+# e.g., during test setup or before migrations.
+def load_strains():
+    return get_strains()
+def load_ref_sequences():
+    return get_ref_sequences()
 
 
 def search(request):
@@ -34,8 +40,8 @@ def search(request):
         context = get_user_context(request.user)
         user_projects = get_user_projects(request.user)
         context.update({"mut_types": MUT_TYPES,
-                        "strains": STRAINS,
-                        "ref_seqs": REF_SEQS,
+                        "strains": load_strains,
+                        "ref_seqs": load_ref_sequences,
                         "projects": user_projects})
         template = loader.get_template("search/search.html")
 
