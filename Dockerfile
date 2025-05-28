@@ -13,6 +13,7 @@ RUN pip install -r requirements.txt
 
 COPY . /app
 
+RUN git config --global --add safe.directory /app
 #VOLUME /app/static
 #VOLUME /app/aleinfo
 
