@@ -28,8 +28,8 @@ STORAGE_ACCOUNT_KEY = '<AZURE_STORAGE_KEY_REDACTED>='
 POOL_ID = 'ALEDBAMPool_'
 DEDICATED_POOL_NODE_COUNT_LIMIT = 1000
 JOB_ID = 'ALEDBAMPJoB_'
-VIRTUAL_MACHINE_ID = "/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.Compute/galleries/ensembleamp/images/eAMP/versions/2.5.6"
-NODE_AGENT_SKU_ID = "batch.node.ubuntu 18.04"
+VIRTUAL_MACHINE_ID = "/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.Compute/galleries/ensembleamp/images/eAMP_Ubuntu24.04_open/versions/2.6.2"
+NODE_AGENT_SKU_ID = "batch.node.ubuntu 24.04"
 
 AMP_IMAGE_FILE = "https://aledata.blob.core.windows.net/images/amp.tar"
 AMP_IMAGE_CONTAINER_NAME = 'images'
