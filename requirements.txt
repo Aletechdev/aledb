@@ -30,7 +30,8 @@ django-mysql==4.11.0
 django-tables2==2.6.0
 djangoajax==3.3
 gunicorn==21.2.0
-idna==2.6
+uvicorn[standard]==0.34.2
+idna==3.6
 isodate==0.6.1
 jsonfield==3.1.0
 jsonschema==4.19.1
@@ -65,3 +66,4 @@ mysqlclient==2.2.0
 numpy==1.25.2
 pandas==2.1.0
 daphne==4.1.0
+zipstream-ng==1.8.0
