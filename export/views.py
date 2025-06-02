@@ -47,7 +47,7 @@ def export(request):
                             csv_buffer = io.StringIO()
                             writer = csv.writer(csv_buffer)
                             writer.writerows(get_csv_str(experiment.ale_id, mut_type_str))
-                            filename = f"{safe_filename(experiment.project.name)}_{safe_filename(experiment.name)}_{mut_type_str}.csv"
+                            filename = f"Proj_{safe_filename(experiment.project.name)}_Exp_{safe_filename(experiment.name)}_{mut_type_str}.csv"
                             zf.writestr(filename, csv_buffer.getvalue())
                             logger.info(f"Added {filename} to zip", extra=user_extra(request))
 
