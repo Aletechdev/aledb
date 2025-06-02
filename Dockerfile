@@ -3,7 +3,7 @@ FROM python:3.11
 
 # Ensure that Python outputs everything that's printed inside
 # the application rather than buffering it.
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1
 
 RUN mkdir /app
 WORKDIR /app
