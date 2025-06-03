@@ -65,7 +65,9 @@
 
         {% for run in pipeline_runs %}
             <tr>
-                <td>{{ run.date }}</td>
+                <td data-order="{{ run.date|date:'Y-m-d H:i:s' }}">
+                    {{ run.date|date:"Y-m-d, g:i a T" }}
+                </td>
                 <td><b><a href="/pipeline/run/{{ run.id }}">{{ run.name }}</a></b></td>
                 {% if request.user.is_superuser %}
                     <td>{{ run.user }}</td>
@@ -81,6 +83,7 @@
             .ready(function () {
                 $('#pipeline_runs')
                     .DataTable({
+                        "order": [[0, "desc"]],  // Sort by first column (Date), descending
                         "columns": [
                             {"width": "7%"},
                             {"width": "7%"},
@@ -98,8 +101,7 @@
         <div class="section_header"><h3>You don't have any pipeline runs</h3></div>
     {% else %}
         <div>
-            <p>Once completed, your runs could be uploaded through their respective panels.
-                Access them by clicking the run name in the table above</p>
+            <p>Run detail pages are under active development. Some functionality may be limited or unstable.</p>
         </div>
     {% endif %}
 
@@ -122,4 +124,3 @@
     </script>
 
 {% endblock %}
-
