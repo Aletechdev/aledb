@@ -95,7 +95,23 @@ def create_pool(
             vm_count, vm_count),
         auto_scale_evaluation_interval=datetime.timedelta(minutes=5),
         start_task=batchmodels.StartTask(
-            command_line="/bin/bash -c \"time /root/startup.sh\"",
+            # This startup script relocates Docker's storage directory from the default
+            # /var/lib/docker (which uses the limited OS disk) to /mnt/docker (on the larger
+            # ephemeral disk). This helps prevent overlay2 buildup from filling up /dev/root.
+            # It then restarts Docker and loads the amp.tar image using /root/startup.sh.
+            command_line=(
+                "/bin/bash -c '\n"
+                "sudo systemctl stop docker &&\n"
+                "sudo mkdir -p /mnt/docker &&\n"
+                "sudo rsync -aP /var/lib/docker/ /mnt/docker &&\n"
+                "sudo sed -i \"s|^ExecStart=.*|ExecStart=/usr/bin/dockerd --data-root=/mnt/docker|\" /lib/systemd/system/docker.service &&\n"
+                "sudo systemctl daemon-reexec &&\n"
+                "sudo systemctl daemon-reload &&\n"
+                "sudo systemctl start docker && sleep 5 &&\n"
+                "sudo docker info | grep \"Docker Root Dir\" &&\n"
+                "time /root/startup.sh\n"
+                "'"
+            ),
             resource_files=[batchmodels.ResourceFile(auto_storage_container_name=config.AMP_IMAGE_CONTAINER_NAME,
                                                      blob_prefix='amp.tar')],
             wait_for_success=True,
