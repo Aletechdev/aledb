@@ -104,7 +104,7 @@ server {
 ```bash
 #Add IP address to ALLOWED_HOSTS in aleinfo/defaults.py
 ```
-### Environment Configuration (`.docker/app.env`)
+### Environment Configuration (`.docker/one.env`)
 This file contains sensitive settings (credentials and runtime configuration) and is excluded from version control on GitHub
 
 Key values to modify:
@@ -121,6 +121,7 @@ MYSQL_USER=ale
 MYSQL_PASSWORD= #Ask ALEdb admin
 MYSQL_HOST=ale.mysql.database.azure.com
 MYSQL_PORT=3306
+REDIS_URL=redis://aledb-redis
 ALE_DATA_ROOT_DIR=/data/aledata/ #local mount/datafor Azure storage account:aledata -> container:aledata
 SEQUENCING_URL=/aledata/ # Used to generate public-facing URLs for results.
 ```
@@ -151,6 +152,7 @@ tmux attach -t aledb
 >   MYSQL_PASSWORD= #Ask ALEdb team for credentials#
 >   MYSQL_HOST=ale.mysql.database.azure.com
 >   MYSQL_PORT=3306
+>   REDIS_URL=redis://aledb-redis
 >   ```
 
 Check if containers are running:
