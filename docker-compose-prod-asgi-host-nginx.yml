@@ -17,7 +17,6 @@ services:
     volumes:
       - .:/app
       - /data/aledata:/data/aledata
-      - /home/muyao/.ssh:/root/.ssh
 
     command: bash -c "python manage.py collectstatic --no-input && daphne -b 0.0.0.0 -p 8000 aleinfo.asgi:application"
     ports:
