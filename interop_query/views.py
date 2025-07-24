@@ -15,8 +15,6 @@ from ale.models import AleExperiment
 from filter.util import filter_observed_mutations
 from logs.aledb_logger import user_extra
 from seq.models import ObservedMutation
-from seq.views import mutation_table_builder
-from seq.views import common
 from metadata.views import get_ordered_reseq_queryset, get_reseq_info_list
 logger = logging.getLogger(__name__)
 
@@ -55,7 +53,7 @@ def query_by_pair(request):
             "message": "Invalid JSON"
         }, status=400)
     except Exception as e:
-        logger.exception("search broke", extra=user_extra(request))
+        logger.exception("search error", extra=user_extra(request))
         return JsonResponse({
             "mutations": [],
             "count": 0,
@@ -176,7 +174,7 @@ def _serialize_mutations(mutations):
 
 def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
     """
-    Generic executor for both endpoints.
+    Generic executor for the endpoints.
     `q_builder(item:str) -> Q` builds a Q object for a single id.
     """
     if not ids:
@@ -199,12 +197,18 @@ def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
     reseq_dict = collections.OrderedDict({obs_mut.sequencing_experiment.id: obs_mut.sequencing_experiment
                                             for obs_mut in observed_mutations})
     
+    ale_experiment_ids = set()
+
     for observed_mutation in observed_mutations:
+        ale_experiment_id = observed_mutation.sequencing_experiment.ale_experiment.ale_id
+        logging.info("Processing mutation with ID: %s", ale_experiment_id, extra=user_extra(request))
+        ale_experiment_ids.add(ale_experiment_id)
         if observed_mutation.sequencing_experiment_id in reseq_dict.keys():
             sample_name = reseq_dict[observed_mutation.sequencing_experiment_id].exp_ale_flask_isolate_str
             if observed_mutation.breseq_present or observed_mutation.gatk_present:
                 sample_type = "%2f/%2f" % (float(observed_mutation.frequency), float(observed_mutation.frequency_gatk))
             observed_mutation.experiment = {
+                'ale_experiment_id': observed_mutation.sequencing_experiment.ale_experiment.ale_id,
                 'sequencing_experiment_id': observed_mutation.sequencing_experiment.id,
                 'name': sample_name,
                 'type': sample_type
@@ -212,12 +216,13 @@ def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
 
     metadata = []
 
-    for id in reseq_dict.keys():
-        experiment = AleExperiment.objects.get(ale_id=1693)
+    for ale_experiment_id in ale_experiment_ids:
+        logging.info("Processing reseq experiment with ID: %s", ale_experiment_id, extra=user_extra(request))
+        experiment = AleExperiment.objects.get(ale_id=ale_experiment_id)
         if experiment:
             if not can_view_project(request.user, experiment.project):
                 pass
-            reseq_queryset = get_ordered_reseq_queryset(id, None)
+            reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, None)
             reseq_info_list = get_reseq_info_list(reseq_queryset)
             experiment_info = {
                 "reseq_info_list": reseq_info_list,
@@ -225,11 +230,9 @@ def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
                 "ale_project_name": experiment.project.name,
                 "ale_project_id": experiment.project.id,
                 "multiple": False,
-                "ale_experiment_id": id
+                "ale_experiment_id": ale_experiment_id
             }
             metadata.append(experiment_info)
-
-    logging.info("Metadata for reseq experiments: %s", metadata)
     
     mutations_data = _serialize_mutations(observed_mutations)
     experiment_metadata = _serialize_metadata(metadata)
