@@ -29,6 +29,7 @@ urlpatterns = [
     path("pipeline/", include('pipeline.urls')),
     re_path(r'^goggles', include('goggles.urls')),
     re_path(r'^search/', include('search.urls')),
+    re_path(r'^interop-query/', include('interop_query.urls')),
     re_path(r'^stats/', include('stats.urls')),
     re_path(r'^aledata/(?P<page_name>.*)$', protected_file_serve)
 ]
