@@ -148,10 +148,13 @@ def _serialize_mutations(mutations):
     out = []
     for m in mutations:
         item = {
-            'mutation_id': m.id,
+            'observed_mutation_id': m.id,
+            'mutation_id': m.mutation_id,
             'gene': m.mutation.gene,
             'position': m.mutation.position,
             'mutation_type': m.mutation.mutation_type,
+            'sequence_change': m.mutation.sequence_change,
+            'details': m.mutation.protein_change,
             'frequency': m.frequency,
             'ref_seq': m.mutation.reseq_reference,
             'strain': m.sequencing_experiment.tech_rep.isolate.flask.ale_id.strain,
@@ -161,9 +164,10 @@ def _serialize_mutations(mutations):
         exp = getattr(m, 'experiment', None)
         if isinstance(exp, dict):
             item['experiment'] = {
+                'ale_experiment_id': exp.get('ale_experiment_id', m.sequencing_experiment.ale_experiment.ale_id),
                 'sequencing_experiment_id': exp.get('sequencing_experiment_id', m.sequencing_experiment.id),
-                'name': exp.get('name'),
-                'type': exp.get('type'),
+                'sample_name': exp.get('name'),
+                'genotype': exp.get('type'),
             }
         else:
             pass
