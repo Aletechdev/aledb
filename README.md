@@ -87,13 +87,21 @@ server {
 > Format og azure config file`cat /cfg/azure_pipeline_out.cfg`: 
 >
 > ```ini
+> # azure_aledata.cfg:
 > accountName aledata
 > accountKey XXX-from-Azure-portal-Key1
 > containerName aledata
+> # azure_pipeline_out.cfg:
+> accountName aledata
+> accountKey XXX
+> containerName output
 > ```
 >
 > ```bash
+> # Pipeline Output
 > sudo blobfuse /output --tmp-path=/mnt/resource/outdirtmp  --config-file=/cfg/azure_pipeline_out.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
+> # Evidence Files and Upload
+> sudo blobfuse /data --tmp-path=/mnt/resource/blobfusetmp -o allow_other --config-file=/cfg/azure_aledata.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
 > ```
 >
 
