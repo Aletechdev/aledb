@@ -1,22 +1,22 @@
 # talk to model, get data in JSON form
 
-import random
-import math
 from .models import Projects, Experiments, Batches, MeasurementTypes, Measurements, GrowthAnalyses, \
     TemperatureMeasurements, Protocol, Medias
 
 from django.core import serializers
-import numpy as np
 
-# i don't know about you but i'm feeling
-TEMPERATURE_MINIMUM = 22
-TEMPERATURE_MAXIMUM = 500
 
-ALE_MACHINES = [['UCSD 3.0', 'UCSD ONE', 'ucsd_machine_one'],
-                ['UCSD 3.0a', 'UCSD TWO', 'ucsd_machine_two'],
-                ['DTU 3.1', 'DTU ONE', 'dtu_machine_one'],
-                ['DTU 1.0', 'DTU TWO', 'dtu_machine_two'],
-                ['DTU 3.0a', 'DTU THREE', 'dtu_machine_three']]
+import json
+from pathlib import Path
+from django.conf import settings
+from typing import Dict, List, Tuple, Optional, Any
+from datetime import datetime, timezone
+
+# Limits for temperature plotting
+TEMPERATURE_MIN = 10
+TEMPERATURE_MAX = 100
+
+CONFIG_FILE = Path(settings.GOGGLES_MACHINE_CONFIG)
 
 
 def json_serialize(qs):
@@ -25,110 +25,166 @@ def json_serialize(qs):
 
 
 def get_ale_machines():
-    return ALE_MACHINES
+    """Load machine metadata from config file"""
+    with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)  # list of dicts
 
 
 def get_initial_data():
+
+    """
+    Build overview for all machines by reading controller metadata JSON files.
+    """
     data = {}
-    for machine in ALE_MACHINES:
-        id = machine[2]
+    for machine in get_ale_machines():
+        machine_id = machine["id"]
+        machine_name = machine["display_name"]
+        codename = machine["codename"]
+        data_dir = Path(machine["data_dir"])
+
+
         try:
-            data[id] = {
-                'name': machine[0],
-                'codename': machine[1],
-                'id': id,
-                'projects': generate_projects_with_experiments(id),
+            projects = compile_projects_with_experiments(data_dir)
+            data[machine_id] = {
+                "name": machine_name,
+                "codename": codename,
+                "id": machine_id,
+                "projects": projects,
             }
-        except:
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
             continue
     return data
 
-
-def generate_medias(machine):
-    return Medias.objects.using(machine).all()
-
-
-def generate_projects_with_experiments(machine):
-    from string import ascii_lowercase as alc
+def compile_projects_with_experiments(machine_dir: Path):
+    """
+    Parse controller metadata + experiment files from each controller db_id directory.
+    For now, project_id == controller db_id.
+    """
     projects = {}
-    experiments = generate_experiments(machine)
-    all_projects = Projects.objects.using(machine).all().reverse()
-    for p in all_projects:
-        projects[p.db_id] = {
-            'name': p.title,
-            'experiments': tuple(experiments[p.db_id])
+
+    # Loop over every subdirectory in the machine folder
+    for controller_dir in sorted(machine_dir.iterdir()):
+        if not controller_dir.is_dir():
+            continue
+
+        project_id = controller_dir.name  # Use directory name (db_id) as project_id
+        meta_file = controller_dir / f"controller_{project_id}_metadata.json"
+        if not meta_file.exists():
+            # Skip directories without a metadata file
+            continue
+
+        with open(meta_file, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+
+        num_exps = len(meta["experiment_db_ids"])
+        experiments_list = []
+
+        for idx in range(num_exps):
+            exp_dbid = meta["experiment_db_ids"][idx]
+            exp_file = controller_dir / f"experiment_{exp_dbid}.json"
+
+            # Basic experiment dict with metadata
+            exp_data = {
+                "ale_id": meta["experiment_ale_ids"][idx],
+                "description": meta["experiment_descriptions"][idx],
+                "protocol": meta["experiment_active_protocols"][idx],
+                "filter_toggle": None,  # placeholder
+                "media": None,  # placeholder
+                "unique_str": f"{meta['experiment_descriptions'][idx]},#{exp_dbid}",
+                "db_id": exp_dbid,
+                "status": meta["experiment_statuses"][idx],
+                "num_batches": meta["experiment_number_batches"][idx],
+                "measurement_wavelengths": meta["experiment_measurement_wavelengths"][idx],
+                "timeseries_file": str(exp_file) if exp_file.exists() else None,
+            }
+
+            experiments_list.append(exp_data)
+
+        projects[project_id] = {
+            "name": f"Project {project_id}",
+            "experiments": experiments_list,
         }
+
     return projects
 
-
-def generate_experiments(machine):
-    experiments = {}
-    all_protocols = Protocol.objects.using(machine).all()
-    for protocol in all_protocols:
-        current_experiment = protocol.experiment
-        if protocol.media:
-            media = protocol.media.description
-        else:
-            media = "N/A"
-        experiment = (current_experiment.ale_id, current_experiment.description,
-                      protocol.type, protocol.filter_toggle, media,
-                      current_experiment.description + ',' + '#' + ''.join(
-                          random.sample('0123456789ABCDEF', 6)) + ',' +
-                      str(current_experiment.ale_id), current_experiment.db_id
-                      )
-        if current_experiment.project_id in experiments.keys():
-            experiments[current_experiment.project_id].append(experiment)
-        else:
-            experiments[current_experiment.project_id] = [experiment]
-    return experiments
-
-
-def get_growth_data(ale_machine, measurement_type_db_ids):
-    experiment_growth_rates = GrowthAnalyses.objects.using(ale_machine).filter(
-        measurement_type_db_id__in=measurement_type_db_ids)
-    growth_rate_dict = {}
-    for rate in experiment_growth_rates:
-        growth_rate_dict[rate.measurement_type_db.batch.batch_id] = rate.growth_rate
-    return growth_rate_dict
-
-def get_experiment_data(ale_machine, experiment_id):
-    batches = Batches.objects.using(ale_machine).filter(experiment=experiment_id).values("db_id")
-    measurement_type_db_ids = MeasurementTypes.objects.using(ale_machine).filter(batch_id__in=batches).values("db_id")
-    growth_dict = get_growth_data(ale_machine, measurement_type_db_ids)
-    temperature_measurement_ids = Experiments.objects.using(ale_machine).get(
-        db_id=experiment_id).temperature_meas_ids.split(',')
-    if len(temperature_measurement_ids) < 2:
+def _iso_to_epoch_ms(ts_iso: str) -> int:
+    # Convert ISO datetime string to milliseconds since epoch (UTC)
+    dt = datetime.fromisoformat(ts_iso)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return int(dt.timestamp() * 1000)
+def get_experiment_data(ale_machine: str, experiment_id: int):
+    """
+    Drop-in JSON replacement for MySQL-based get_experiment_data().
+    Matches the original output format:
+      - measurement_list: [timestamp_ms, od_value, batch_id, media]
+      - growth_rate_list: [timestamp_ms, growth_rate, batch_id, media]
+      - temperature_list: [timestamp_ms, temperature, batch_id, media]
+    """
+    machines = get_ale_machines()
+    machine_entry = next((m for m in machines if str(m["id"]) == str(ale_machine)), None)
+    if not machine_entry:
         return [[], [], []]
 
-    measurement_list = []
-    temperature_measurements_list = []
-    growth_rate_list = []
-    prev_batch_id = -1
+    machine_dir = Path(machine_entry["data_dir"])
 
-    temp_measurement_queryset = TemperatureMeasurements.objects.using(ale_machine).filter(
-        db_id__in=temperature_measurement_ids)
-    for temp_measurement in temp_measurement_queryset:
-        current_batch = temp_measurement.measurement.measurement_type_db.batch
-        current_media_description = current_batch.media.description
-        current_batch_id = current_batch.batch_id
-        current_time = temp_measurement.time.timestamp() * 1000
-        calculated_orreader_value = temp_measurement.measurement.calculated_orreader_value
-        if calculated_orreader_value and calculated_orreader_value > 0:
-            adc_OD_values = calculated_orreader_value
-        else:
-            adc_OD_values = temp_measurement.measurement.OD
-        adc_OD_values = max(round(adc_OD_values, 3), 0.01)
-        measurement_list.append(
-            [current_time, adc_OD_values,
-             current_batch_id, current_media_description])
-        current_temp = temp_measurement.temperature
-        if current_temp > TEMPERATURE_MINIMUM and current_temp < TEMPERATURE_MAXIMUM:
-            temperature_measurements_list.append(
-                [current_time, current_temp,
-                 current_batch_id, current_media_description])
-        if current_batch_id != prev_batch_id:
-            growth_rate_list.append([current_time,
-                                     growth_dict[current_batch_id],
-                                     current_batch_id, current_media_description])
-            prev_batch_id = current_batch_id
+    # Locate experiment file
+    exp_file = None
+    for controller_dir in machine_dir.iterdir():
+        if not controller_dir.is_dir():
+            continue
+        candidate = controller_dir / f"experiment_{experiment_id}.json"
+        if candidate.exists():
+            exp_file = candidate
+            break
+    if not exp_file:
+        return [[], [], []]
+
+    with open(exp_file, "r", encoding="utf-8") as f:
+        exp = json.load(f)
+
+    wl = exp.get("primary_measurement_type") or (exp.get("measurement_types") or [None])[0]
+
+    if not wl:
+        return ([], [], [])
+
+    measurement_list: List[List[Any]] = []
+    growth_rate_list: List[List[Any]] = []
+    temperature_measurements_list: List[List[Any]] = []
+
+    for batch in exp.get("batches", []):
+        batch_id = batch.get("batch_id")
+        media_desc = (batch.get("media") or {}).get("description", "N/A")
+
+        measurements = (batch.get("measurements") or {}).get(wl)
+        if not measurements:
+            continue
+
+        times  = measurements.get("times", [])
+        ods    = measurements.get("OD", [])
+        temps  = measurements.get("temp", [])
+        rel_s  = measurements.get("time_since_start", [])
+
+        for t_iso, od, temp_c, _ in zip(times, ods, temps, rel_s):
+            ts_ms = _iso_to_epoch_ms(t_iso)
+            # OD values
+            od_val = max(round(float(od), 3), 0.01)
+            measurement_list.append([ts_ms, od_val, batch_id, media_desc])
+            # Temperature values (filtered like old version)
+            if temp_c is not None and TEMPERATURE_MIN < float(temp_c) < TEMPERATURE_MAX:
+                temperature_measurements_list.append([ts_ms, float(temp_c), batch_id, media_desc])
+
+        # Growth rate from 'best_fit' or fallback
+        gf = (batch.get("growth_fits") or {}).get(wl, {})
+        gr_val = (
+            gf.get("gr_bestfit") if gf.get("gr_bestfit") not in (None, -1)
+            else gf.get("gr_original") if gf.get("gr_original") not in (None, -1)
+            else gf.get("gr_awf") if gf.get("gr_awf") not in (None, -1)
+            else gf.get("gr_croissance")
+        )
+        if gr_val not in (None, -1) and times:
+            growth_rate_list.append([_iso_to_epoch_ms(times[-1]), float(gr_val), batch_id, media_desc])
+
     return [measurement_list, growth_rate_list, temperature_measurements_list]
