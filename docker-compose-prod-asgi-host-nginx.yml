@@ -17,7 +17,8 @@ services:
     volumes:
       - .:/app
       - /data/aledata:/data/aledata
-
+      - /srv/alelog/config/goggles_machine_config.json:/srv/alelog/config/goggles_machine_config.json:ro
+      - /srv/alelog/uploads:/srv/alelog/uploads
     command: bash -c "python manage.py collectstatic --no-input && daphne -b 0.0.0.0 -p 8000 aleinfo.asgi:application"
     ports:
       - 8000:8000
