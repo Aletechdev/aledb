@@ -121,11 +121,12 @@ Key values to modify:
 ```bash
 # ${GitRepo}/.docker/one.env
 DEBUG=0 # set 1 for viewing error on browser
-PUBLIC=0 # Obsoleted, keep at 1
+PUBLIC=0 # Obsoleted, keep at 0
 FORCE_SQLITE=0 # set 1 to launch service with 'empty' SQLite service hosted by Django
 DJANGO_SETTINGS_MODULE=aleinfo.settings_public
 DJANGO_SERVER_HOST=127.0.0.1
-
+# add your IP to whitelist on:
+# https://portal.azure.com/#@dtudk.onmicrosoft.com/resource/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.DBforMySQL/flexibleServers/ale/networking
 MYSQL_DATABASE=aledb_private #there are two other db aledb_public, ealedb, not called in this code base
 MYSQL_USER=ale
 MYSQL_PASSWORD= #Ask ALEdb admin
@@ -156,10 +157,9 @@ tmux attach -t aledb
 > - Edit MYSQL setting under `.docker/one.env`
 >
 >   ```bash
->   # related setting in .docker/one.env
 >   # ${GitRepo}/.docker/one.env
 >   DEBUG=0 # set 1 for viewing error on browser
->   PUBLIC=0 # Obsoleted, keep at 1
+>   PUBLIC=0 # Obsoleted, keep at 0
 >   FORCE_SQLITE=0 # set 1 to launch service with 'empty' SQLite service hosted by Django
 >   DJANGO_SETTINGS_MODULE=aleinfo.settings_public
 >   DJANGO_SERVER_HOST=127.0.0.1
@@ -171,6 +171,8 @@ tmux attach -t aledb
 >   MYSQL_HOST=ale.mysql.database.azure.com
 >   MYSQL_PORT=3306
 >   REDIS_URL=redis://aledb-redis
+>   ALE_DATA_ROOT_DIR=/data/aledata/ #local mount/datafor Azure storage account:aledata -> container:aledata
+>   SEQUENCING_URL=/aledata/ # Used to generate public-facing URLs for results.
 >   ```
 
 Check if containers are running:
@@ -233,11 +235,20 @@ docker-compose -f docker-compose-prod-asgi-host-nginx.yml down
 > #### Change the MYSQL config under .docker/one.env:
 >
 > ```bash
-> MYSQL_DATABASE=aledb_private
-> MYSQL_USER=ale
-> MYSQL_PASSWORD=XX
-> MYSQL_PORT=3306
-> MYSQL_HOST=host.docker.internal
+>   # ${GitRepo}/.docker/one.env
+>   DEBUG=0 # set 1 for viewing error on browser
+>   PUBLIC=0 # Obsoleted, keep at 0
+>   FORCE_SQLITE=0 # set 1 to launch service with 'empty' SQLite service hosted by Django
+>   DJANGO_SETTINGS_MODULE=aleinfo.settings_public
+>   DJANGO_SERVER_HOST=127.0.0.1
+>   # different MYSQL setting:
+>   MYSQL_DATABASE=aledb_private
+>   MYSQL_USER=ale
+>   MYSQL_PASSWORD=XX
+>   MYSQL_PORT=3306
+>   MYSQL_HOST=host.docker.internal
+>   REDIS_URL=redis://aledb-redis
+>   SEQUENCING_URL=/aledata/ # Used to generate public-facing URLs for results.
 > ```
 
 #### Run docker-compose
