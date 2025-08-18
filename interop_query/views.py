@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 
 from ale.permissions import can_view_project
 from ale.models import AleExperiment
+from ale.utils import get_user_projects
 from filter.util import filter_observed_mutations
 from logs.aledb_logger import user_extra
 from seq.models import ObservedMutation
@@ -191,7 +192,12 @@ def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
         q = q_builder(item)
         if q is None:
             continue
-        mutations = _get_observed_mutations([q], [])
+
+        include_argument_list = []
+        _add_projects_to_query(request, include_argument_list)
+        include_argument_list.append(q)
+
+        mutations = _get_observed_mutations(include_argument_list, [])
         logger.info("Found %d mutations for %s", len(mutations), item, extra=user_extra(request))
         observed_mutations.extend(mutations)
 
@@ -243,6 +249,12 @@ def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
 
     return JsonResponse({'mutations': mutations_data, 'experiment_metadata': experiment_metadata, 'count': len(mutations_data), 'message': 'Success'})
 
+
+def _add_projects_to_query(request, include_argument_list):
+    project_ids = [proj.id for proj in get_user_projects(request.user)]
+    include_argument_list.append(
+        Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=project_ids))
+    
 
 def _get_observed_mutations(search_include_param_list, search_exclude_param_list):
     """
