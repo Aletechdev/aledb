@@ -5,26 +5,28 @@
 
 ## Table of Contents
 
-- [Configuration](#configuration)  
-  - [Clone Git repository](#clone-git-repository)  
-  - [Install Docker](#install-docker)  
-  - [Set up host NGINX for VM server for networking](#set-up-host-nginx-for-vm-server-for-networking)  
-  - [For production: connect azure-storage-container as a local folder](#for-production-connect-azure-storage-container-as-a-local-folder)  
-  - [Make necessary configuration changes](#make-necessary-configuration-changes)  
-    - [aleinfo/defaults.py](#aleinfodefaultspy)  
-    - [Environment Configuration (.docker/app.env)](#environment-configuration-dockerappenv)  
-
-- [Running services](#running-services)  
-  - [Start / attach tmux's persistent sessions](#start--attach-tmuxs-persistent-sessions)  
-  - [Production / Local dev connected to Azure MySQL](#production--local-dev-connected-to-azure-mysql)  
-  - [Alternative: Local with MySQL](#alternative-local-with-mysql)  
-  - [Alternative: Local with SQLite](#alternative-local-with-sqlite)  
-
-- [Maintenance](#maintenance)  
-  - [Static files](#static-files)  
-  - [Bring all containers down](#bring-all-containers-down)  
-  - [See log files](#see-log-files)  
-  - [To run scripts within containers](#to-run-scripts-within-containers)  
+- [ALEdb](#aledb)
+  - [Table of Contents](#table-of-contents)
+  - [Configuration:](#configuration)
+    - [Clone Git repository](#clone-git-repository)
+    - [Install Docker](#install-docker)
+    - [Set up host NGINX for VM server for networking](#set-up-host-nginx-for-vm-server-for-networking)
+    - [For production: connect azure-storage-container as a local folder:](#for-production-connect-azure-storage-container-as-a-local-folder)
+    - [Make necessary configuration changes:](#make-necessary-configuration-changes)
+      - [aleinfo/defaults.py](#aleinfodefaultspy)
+    - [Environment Configuration (`.docker/one.env`)](#environment-configuration-dockeroneenv)
+  - [Running services:](#running-services)
+    - [Start / attach tmux's persistent sessions](#start--attach-tmuxs-persistent-sessions)
+    - [Production / Local dev connected to Azure MySQL](#production--local-dev-connected-to-azure-mysql)
+      - [Start the webapp with:](#start-the-webapp-with)
+    - [Alternative: Local with MySQL](#alternative-local-with-mysql)
+      - [Run docker-compose](#run-docker-compose)
+    - [Alternative: Local with SQLite](#alternative-local-with-sqlite)
+  - [Maintenance:](#maintenance)
+    - [Static files should be collected automatically but in case they weren't, collect existing static files:](#static-files-should-be-collected-automatically-but-in-case-they-werent-collect-existing-static-files)
+    - [Bring all containers down](#bring-all-containers-down)
+    - [See log files](#see-log-files)
+    - [To run scripts within containers](#to-run-scripts-within-containers)
 
 ## Configuration:
 
@@ -119,11 +121,12 @@ Key values to modify:
 ```bash
 # ${GitRepo}/.docker/one.env
 DEBUG=0 # set 1 for viewing error on browser
-PUBLIC=0 # Obsoleted, keep at 1
+PUBLIC=0 # Obsoleted, keep at 0
 FORCE_SQLITE=0 # set 1 to launch service with 'empty' SQLite service hosted by Django
 DJANGO_SETTINGS_MODULE=aleinfo.settings_public
 DJANGO_SERVER_HOST=127.0.0.1
-
+# add your IP to whitelist on:
+# https://portal.azure.com/#@dtudk.onmicrosoft.com/resource/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.DBforMySQL/flexibleServers/ale/networking
 MYSQL_DATABASE=aledb_private #there are two other db aledb_public, ealedb, not called in this code base
 MYSQL_USER=ale
 MYSQL_PASSWORD= #Ask ALEdb admin
@@ -154,13 +157,22 @@ tmux attach -t aledb
 > - Edit MYSQL setting under `.docker/one.env`
 >
 >   ```bash
->   # related setting in .docker/one.env
+>   # ${GitRepo}/.docker/one.env
+>   DEBUG=0 # set 1 for viewing error on browser
+>   PUBLIC=0 # Obsoleted, keep at 0
+>   FORCE_SQLITE=0 # set 1 to launch service with 'empty' SQLite service hosted by Django
+>   DJANGO_SETTINGS_MODULE=aleinfo.settings_public
+>   DJANGO_SERVER_HOST=127.0.0.1
+>   # add your IP to whitelist on:
+>   # https://portal.azure.com/#@dtudk.onmicrosoft.com/resource/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.DBforMySQL/flexibleServers/ale/networking
 >   MYSQL_DATABASE=aledb_private
 >   MYSQL_USER=ale
 >   MYSQL_PASSWORD= #Ask ALEdb team for credentials#
 >   MYSQL_HOST=ale.mysql.database.azure.com
 >   MYSQL_PORT=3306
 >   REDIS_URL=redis://aledb-redis
+>   ALE_DATA_ROOT_DIR=/data/aledata/ #local mount/datafor Azure storage account:aledata -> container:aledata
+>   SEQUENCING_URL=/aledata/ # Used to generate public-facing URLs for results.
 >   ```
 
 Check if containers are running:
@@ -223,11 +235,20 @@ docker-compose -f docker-compose-prod-asgi-host-nginx.yml down
 > #### Change the MYSQL config under .docker/one.env:
 >
 > ```bash
-> MYSQL_DATABASE=aledb_private
-> MYSQL_USER=ale
-> MYSQL_PASSWORD=XX
-> MYSQL_PORT=3306
-> MYSQL_HOST=host.docker.internal
+>   # ${GitRepo}/.docker/one.env
+>   DEBUG=0 # set 1 for viewing error on browser
+>   PUBLIC=0 # Obsoleted, keep at 0
+>   FORCE_SQLITE=0 # set 1 to launch service with 'empty' SQLite service hosted by Django
+>   DJANGO_SETTINGS_MODULE=aleinfo.settings_public
+>   DJANGO_SERVER_HOST=127.0.0.1
+>   # different MYSQL setting:
+>   MYSQL_DATABASE=aledb_private
+>   MYSQL_USER=ale
+>   MYSQL_PASSWORD=XX
+>   MYSQL_PORT=3306
+>   MYSQL_HOST=host.docker.internal
+>   REDIS_URL=redis://aledb-redis
+>   SEQUENCING_URL=/aledata/ # Used to generate public-facing URLs for results.
 > ```
 
 #### Run docker-compose
