@@ -192,11 +192,17 @@
                                 if (table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
                                     let current_id = data_id
                                     console.log("removing: " + current_id)
-                                    mainChart.get(current_id).remove();
-                                    mainChart.get(current_id + "-GR").remove();
-                                    mainChart.get(current_id + "-Temp").remove();
-                                    selected_ales.pop(message);
-                                    selected_ale_ids.pop(data_id)
+                                    ['', '-GR', '-Temp'].forEach(suffix => {
+                                    const s = mainChart.get(current_id + suffix);
+                                      if (s) s.remove();
+                                    });
+                                    // remove the id
+                                    const idx = selected_ale_ids.indexOf(current_id);
+                                    if (idx !== -1) selected_ale_ids.splice(idx, 1);
+
+                                    // remove the matching message entry (if you need to track it)
+                                    const msgIdx = selected_ales.findIndex(m => m[3] === current_id);
+                                    if (msgIdx !== -1) selected_ales.splice(msgIdx, 1);
                                 } else {
 
                                     //send ale_ids of the requests
@@ -239,6 +245,16 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
     <script>
         const scheme = (window.location.protocol === 'https:') ? 'wss' : 'ws';
         const gogglesSocket = new WebSocket(`${scheme}://${window.location.host}/ws/goggles/`);
+
+        function sendMessage(message) {
+          gogglesSocket.send(JSON.stringify({
+            'db_id': message[0],
+            'name': message[1],
+            'machine': message[2],
+            'data_id': message[3],
+            'sample_name': message[4]
+          }));
+}
         
 
         // one place for color logic, usable by both onmessage and changeColor
@@ -328,7 +344,7 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
             // 4) Stash both forms on the series
               const sharedCustom = {
                 lastModifiedRaw: lmRawStr,    // exact string from the machine (for verbatim display)
-                lastModifiedMs: lmMsNum       // parsed ms for Highcharts.dateFormat
+                lastModifiedMs: lmMsNum,       // parsed ms for Highcharts.dateFormat
                 aleId: metaFromClick.aleId ?? null,
                 lineageLabel: metaFromClick.lineageLabel ?? message[2]
                 };
