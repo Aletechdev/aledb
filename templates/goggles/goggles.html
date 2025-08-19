@@ -197,6 +197,8 @@
                                 if (table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
                                     let current_id = data_id
                                     console.log("removing: " + current_id)
+                                    const ids = [current_id, current_id + '-GR', current_id + '-Temp'];
+                                    console.log('removing series', ids, ids.map(id => !!mainChart.get(id)));
                                     ['', '-GR', '-Temp'].forEach(suffix => {
                                     const s = mainChart.get(current_id + suffix);
                                       if (s) s.remove();
