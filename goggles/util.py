@@ -115,7 +115,7 @@ def compile_projects_with_experiments(machine_dir: Path):
             experiments_list.append(exp_legacy)
 
         projects[project_id] = {
-            "name": f"Project {project_id}",
+            "name": f"Controller {project_id}",
             "experiments": experiments_list,
         }
 
