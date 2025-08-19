@@ -571,7 +571,8 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
                 useHTML: true,
                 outside: true,
                 style: {
-                    pointerEvents: 'auto'
+                    pointerEvents: 'auto',
+                    whiteSpace: 'normal'
                 },
               
                 positioner: function (labelWidth, labelHeight) {
@@ -612,7 +613,7 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
 
                       return `
                         <div style="display:flex; gap:6px; align-items:flex-start;">
-                          <div style="flex:0 0 90px; max-width:90px; word-break:break-word; overflow-wrap:anywhere;">
+                          <div style="flex:0 0 90px; max-width:90px; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
                             <div style="font-size:1.1rem; font-weight:700; line-height:1.25;">
                               ${escapeHTML(lineageLabel)}
                             </div>
