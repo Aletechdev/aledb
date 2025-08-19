@@ -41,7 +41,7 @@ class GogglesConsumer(WebsocketConsumer):
             payload = {
               "message": [
               f"{machine}{db_id}",
-              [exp_data[0], exp_data[1], exp_data[2]],
+              [exp_data[0], exp_data[1], exp_data[2],exp_data[3]],
               f"{machine} - {sample_name}",
               data_id,
               sample_name,

@@ -292,6 +292,12 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
             const data = JSON.parse(e.data);
             console.log(data)
             const message = data['message'];
+            // pull lineage-level last_modified from message[1][3]
+
+            const lastModifiedRaw = message[1][3];
+            const sharedCustom = {
+            lastModified: lastModifiedRaw ? Date.parse(lastModifiedRaw) : undefined
+            };
             var OD_data = message[1][0]
             // Handle incoming message
             if (yAxisMode == "logarithmic") {
@@ -306,27 +312,36 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
             if (selected_ale_ids.includes(message[3])) {
                 mainChart.get(message[3]).setData(OD_data);
             } else {
+                // OD series [x,y,batch,media,hasCryo]
                 const seriesColor = getLineageColor(message[3]);
                 mainChart.addSeries({
                     id: message[3],
                     name: message[2],
                     data: OD_data,
+                    keys: ['x','y','batch','media','hasCryo'],
+                    custom: sharedCustom,
                     color: seriesColor,
                     yAxis: 0,
                     showInNavigator: true,
                 });
+                //GR series [x,y,batch,media,hasCryo]
                 mainChart.addSeries({
                     id: message[3] + "-GR",
                     name: message[2],
                     data: message[1][1],
+                    keys: ['x','y','batch','media','hasCryo'],
+                    custom: sharedCustom,
                     color: seriesColor,
                     yAxis: 1,
                     showInNavigator: true,
                 });
+                //Temp series [x,y,batch,media]
                 mainChart.addSeries({
                     id: message[3] + "-Temp",
                     name: message[2],
                     data: message[1][2],
+                    keys: ['x','y','batch','media'],
+                    custom: sharedCustom
                     color: seriesColor,
                     yAxis: 2,
                 });
@@ -360,6 +375,7 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
     </div>
 
     <script>
+        Highcharts.setOptions({ time: { useUTC: false }});
         console.time('line');
         const mainChart = Highcharts.stockChart('mainChart', {
             xAxis: [{
@@ -499,18 +515,46 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
                 style: {
                     pointerEvents: 'auto'
                 },
-                positioner: function () {
-                    return {x: this.chart.xAxis[0].width, y: 0};
-                },
-                formatter: function () {
-                    return '<b>' + this.series.name + '</b><br/>' +
-                        '<b>' + this.series.yAxis.options.title.text + ': </b>' + this.y + '<br/>' +
-                        'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
-                            new Date(this.x)) +
-                        '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2] +
-                        '<br/>Media: ' + this.series.userOptions.data[this.point.index][3]
-                        ;
+              positioner: function (labelWidth, labelHeight, point) {
+                const menu = document.getElementById('machine-bar');
+                if (menu) {
+                  const rect = menu.getBoundingClientRect();
+                  const chartRect = this.chart.container.getBoundingClientRect();
+                  // place tooltip just below the menu, aligned left
+                  return {
+                    x: rect.left - chartRect.left,
+                    y: rect.bottom - chartRect.top + 10  // 10px padding
+                  };
                 }
+                // fallback
+                return {x: 0, y: 0};
+              },
+
+                formatter: function () {
+                  // Prefer raw (machine-local) if you kept it; else format ms
+                  const lmRaw = this.series.options.custom?.lastModifiedRaw;
+                  const lmMs  = this.series.options.custom?.lastModifiedMs;
+                  const lmStr = lmRaw ?? (lmMs ? Highcharts.dateFormat('%Y-%m-%d %H:%M', lmMs) : 'n/a');
+
+                  // With keys set, these exist as point props; otherwise fall back to indices
+                  const batch = (this.point && this.point.batch) ??
+                                (this.series.userOptions.data?.[this.point.index]?.[2]);
+                  const media = (this.point && this.point.media) ??
+                                (this.series.userOptions.data?.[this.point.index]?.[3]);
+
+                  // hasCryo is present on OD/GR if your backend added it; Temp lacks it → undefined → "n/a"
+                  const hasCryo = (typeof this.point.hasCryo === 'boolean') ? this.point.hasCryo : undefined;
+
+                  return (
+                    '<b>' + this.series.name + '</b><br/>' +
+                    '<b>' + this.series.yAxis.options.title.text + ':</b> ' + this.y + '<br/>' +
+                    'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S', this.x) + '<br/>' +
+                    'Batch: ' + (batch ?? 'n/a') + '<br/>' +
+                    'Media: ' + (media ?? 'n/a') + '<br/>' +
+                    'Cryostock: ' + (hasCryo === undefined ? 'n/a' : (hasCryo ? 'Yes' : 'No')) + '<br/>' +
+                    'Last modified: ' + lmStr
+                  );
+}
 
             },
 

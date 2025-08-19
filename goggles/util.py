@@ -170,12 +170,16 @@ def get_experiment_data(ale_machine: str, experiment_id: int):
     growth_rate_list: List[List[Any]] = []
     temperature_measurements_list: List[List[Any]] = []
 
+    last_modified = exp.get("last_updated")
+
     batch_count = 0
     for batch in exp.get("batches", []):
         batch_count += 1
         batch_id = batch.get("batch_id")
         media_desc = (batch.get("media") or {}).get("description", "N/A")
         measurements = (batch.get("measurements") or {}).get(wl)
+        has_cryo = batch.get("cryostock")
+        has_cryo = bool(has_cryo) if has_cryo is not None else False
         if not measurements:
             logger.debug(f"Batch {batch_id}: No measurements found for wl={wl}")
             continue
@@ -191,7 +195,7 @@ def get_experiment_data(ale_machine: str, experiment_id: int):
             ts_ms = _iso_to_epoch_ms(t_iso)
             # OD values
             od_val = max(round(float(od), 3), 0.01)
-            measurement_list.append([ts_ms, od_val, batch_id, media_desc])
+            measurement_list.append([ts_ms, od_val, batch_id, media_desc,has_cryo])
             # Temperature values (filtered like old version)
             if temp_c is not None and TEMPERATURE_MIN < float(temp_c) < TEMPERATURE_MAX:
                 temperature_measurements_list.append([ts_ms, float(temp_c), batch_id, media_desc])
@@ -204,12 +208,14 @@ def get_experiment_data(ale_machine: str, experiment_id: int):
             else gf.get("gr_awf") if gf.get("gr_awf") not in (None, -1)
             else gf.get("gr_croissance")
         )
+
+
         if gr_val not in (None, -1) and times:
-            growth_rate_list.append([_iso_to_epoch_ms(times[-1]), float(gr_val), batch_id, media_desc])
+            growth_rate_list.append([_iso_to_epoch_ms(times[-1]), float(gr_val), batch_id, media_desc, has_cryo])
 
     logger.info(
         f"Processed {batch_count} batches for experiment_id={experiment_id} in {time.time() - start_time:.2f}s "
         f"(OD={len(measurement_list)}, GR={len(growth_rate_list)}, Temp={len(temperature_measurements_list)})"
     )
 
-    return [measurement_list, growth_rate_list, temperature_measurements_list]
+    return [measurement_list, growth_rate_list, temperature_measurements_list, {"last_modified":last_modified}]
