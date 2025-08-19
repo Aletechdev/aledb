@@ -611,8 +611,8 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
                       const aleId        = this.series.options.custom?.aleId ?? 'n/a';
 
                       return `
-                        <div style="display:flex; gap:8px; align-items:flex-start;">
-                          <div style="min-width:180px;">
+                        <div style="display:flex; gap:6px; align-items:flex-start;">
+                          <div style="flex:0 0 90px; max-width:90px; word-break:break-word; overflow-wrap:anywhere;">
                             <div style="font-size:1.1rem; font-weight:700; line-height:1.25;">
                               ${escapeHTML(lineageLabel)}
                             </div>
