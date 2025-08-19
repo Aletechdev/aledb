@@ -294,10 +294,37 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
             const message = data['message'];
             // pull lineage-level last_modified from message[1][3]
 
-            const lastModifiedRaw = message[1][3];
-            const sharedCustom = {
-            lastModified: lastModifiedRaw ? Date.parse(lastModifiedRaw) : undefined
-            };
+       	
+	    // message[1][3] (last time JSON modified) may be a string or an object { last_modified: '...' }
+            const metaOrString = message[1][3];
+
+            // 1) Extract a raw string
+           let lmRawStr = null;
+           if (metaOrString && typeof metaOrString === 'object') {
+             lmRawStr =
+               metaOrString.last_modified ??
+               metaOrString.lastUpdated ??
+               metaOrString.updated_at ??
+               metaOrString.value ?? null;
+            } else if (typeof metaOrString === 'string' || typeof metaOrString === 'number') {
+            lmRawStr = String(metaOrString);
+            }
+
+            // 2) Convert microseconds → milliseconds so Date.parse works
+            let lmIsoForParse = lmRawStr;
+            if (lmIsoForParse && /\.\d{4,}/.test(lmIsoForParse)) {
+            // keep only first 3 fractional digits
+            lmIsoForParse = lmIsoForParse.replace(/(\.\d{3})\d+/, '$1');
+            }
+
+            // 3) Parse to ms (or undefined if not parsable)
+            const lmMsNum = lmIsoForParse ? Date.parse(lmIsoForParse) : undefined;
+
+            // 4) Stash both forms on the series
+              const sharedCustom = {
+                lastModifiedRaw: lmRawStr,    // exact string from the machine (for verbatim display)
+                lastModifiedMs: lmMsNum       // parsed ms for Highcharts.dateFormat
+                };
             var OD_data = message[1][0]
             // Handle incoming message
             if (yAxisMode == "logarithmic") {
@@ -341,7 +368,7 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
                     name: message[2],
                     data: message[1][2],
                     keys: ['x','y','batch','media'],
-                    custom: sharedCustom
+                    custom: sharedCustom,
                     color: seriesColor,
                     yAxis: 2,
                 });
@@ -515,45 +542,50 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
                 style: {
                     pointerEvents: 'auto'
                 },
-              positioner: function (labelWidth, labelHeight, point) {
-                const menu = document.getElementById('machine-bar');
-                if (menu) {
-                  const rect = menu.getBoundingClientRect();
-                  const chartRect = this.chart.container.getBoundingClientRect();
-                  // place tooltip just below the menu, aligned left
-                  return {
-                    x: rect.left - chartRect.left,
-                    y: rect.bottom - chartRect.top + 10  // 10px padding
-                  };
-                }
-                // fallback
-                return {x: 0, y: 0};
-              },
+              
+                positioner: function (labelWidth, labelHeight) {
+                  const chartPos = this.chart.pointer.getChartPosition();
 
-                formatter: function () {
-                  // Prefer raw (machine-local) if you kept it; else format ms
-                  const lmRaw = this.series.options.custom?.lastModifiedRaw;
-                  const lmMs  = this.series.options.custom?.lastModifiedMs;
-                  const lmStr = lmRaw ?? (lmMs ? Highcharts.dateFormat('%Y-%m-%d %H:%M', lmMs) : 'n/a');
+                  // anchor to the first machine header, fall back to the bar itself
+                  const anchor =
+                  document.querySelector('#machine-bar .collapsible.machines') ||
+                  document.querySelector('#machine-bar .collapsible') ||
+                  document.getElementById('machine-bar');
 
-                  // With keys set, these exist as point props; otherwise fall back to indices
-                  const batch = (this.point && this.point.batch) ??
-                                (this.series.userOptions.data?.[this.point.index]?.[2]);
-                  const media = (this.point && this.point.media) ??
-                                (this.series.userOptions.data?.[this.point.index]?.[3]);
+                  if (anchor) {
+                    const r = anchor.getBoundingClientRect();
+                    const x = r.left - chartPos.left;           // align left with the menu
+                    const y = r.top  - chartPos.top  + 100;       // just below the header
+                    return { x, y };
+                    }
+                    return { x: 10, y: 10 };
+                   },
+              formatter: function () {
+  // Get raw + parsed values
+  const lmRaw = this.series.options.custom?.lastModifiedRaw;
+  const lmMs  = this.series.options.custom?.lastModifiedMs;
 
-                  // hasCryo is present on OD/GR if your backend added it; Temp lacks it → undefined → "n/a"
-                  const hasCryo = (typeof this.point.hasCryo === 'boolean') ? this.point.hasCryo : undefined;
+  // Format as YYYY-MM-DD HH:MM
+  const lmStr = lmMs
+    ? Highcharts.dateFormat('%Y-%m-%d %H:%M', lmMs)
+    : (lmRaw ? lmRaw.replace('T', ' ').slice(0,16) : 'n/a');
 
-                  return (
-                    '<b>' + this.series.name + '</b><br/>' +
-                    '<b>' + this.series.yAxis.options.title.text + ':</b> ' + this.y + '<br/>' +
-                    'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S', this.x) + '<br/>' +
-                    'Batch: ' + (batch ?? 'n/a') + '<br/>' +
-                    'Media: ' + (media ?? 'n/a') + '<br/>' +
-                    'Cryostock: ' + (hasCryo === undefined ? 'n/a' : (hasCryo ? 'Yes' : 'No')) + '<br/>' +
-                    'Last modified: ' + lmStr
-                  );
+  // With keys set, these exist as point props; otherwise fall back to indices
+  const batch = (this.point && this.point.batch) ??
+                (this.series.userOptions.data?.[this.point.index]?.[2]);
+  const media = (this.point && this.point.media) ??
+                (this.series.userOptions.data?.[this.point.index]?.[3]);
+  const hasCryo = (typeof this.point.hasCryo === 'boolean') ? this.point.hasCryo : undefined;
+
+  return (
+    '<b>' + this.series.name + '</b><br/>' +
+    '<b>' + this.series.yAxis.options.title.text + ':</b> ' + this.y + '<br/>' +
+    'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S', this.x) + '<br/>' +
+    'Batch: ' + (batch ?? 'n/a') + '<br/>' +
+    'Media: ' + (media ?? 'n/a') + '<br/>' +
+    'Cryostock: ' + (hasCryo === undefined ? 'n/a' : (hasCryo ? 'Yes' : 'No')) + '<br/>' +
+    'Last modified: ' + lmStr
+  );
 }
 
             },
