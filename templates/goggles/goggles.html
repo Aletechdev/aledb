@@ -60,6 +60,11 @@
         }
 
     </script>
+    <script>
+        const selected_ales = []
+        const selected_ale_ids = []
+        const lineageMeta = {};
+    </script>
     <div class="options_bar" style="position: fixed; bottom:.5em; z-index: 100;">
         <div class="goggles-option">
             <label class="form-check-label" for="inlineCheckbox1">X-Axis Format:</label>
@@ -406,16 +411,7 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
 
         };
 
-        // Send message to server
-        function sendMessage(message) {
-            gogglesSocket.send(JSON.stringify({
-                'db_id': message[0],
-                'name': message[1],
-                'machine': message[2],
-                'data_id': message[3],
-                'sample_name': message[4]
-            }));
-        }
+
     </script>
     <div id="charts" style="width: 55em  !important;">
         <div id="mainChart" style="overflow: visible; height: 60em; !important;"></div>
@@ -423,7 +419,15 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
 
     <div id="right-sidebar" style="width:15em; height:94em; float: right; background-color: #5BA199; color: white">
     </div>
-
+    <script>
+      // Minimal, fast, safe HTML escape
+      function escapeHTML(s) {
+        if (s == null) return '';
+        return String(s).replace(/[&<>"']/g, function (ch) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+        });
+      }
+    </script>
     <script>
         Highcharts.setOptions({ time: { useUTC: false }});
         console.time('line');
@@ -606,10 +610,10 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
                         <div style="display:flex; gap:14px; align-items:flex-start;">
                           <div style="min-width:220px;">
                             <div style="font-size:1.1rem; font-weight:700; line-height:1.25;">
-                              ${Highcharts.escapeHTML(lineageLabel)}
+                              ${escapeHTML(lineageLabel)}
                             </div>
                             <div style="font-size:1rem; opacity:0.7; margin-top:2px;">
-                              ALE&nbsp;ID: ${Highcharts.escapeHTML(String(aleId))}
+                              ALE&nbsp;ID: ${escapeHTML(String(aleId))}
                             </div>
                           </div>
                           <div>
@@ -632,11 +636,7 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
 
     </script>
     {{ ales|json_script:"ale_data" }}
-    <script>
-        const selected_ales = []
-        const selected_ale_ids = []
-        const lineageMeta = {};
-    </script>
+
 
     <script>
 
