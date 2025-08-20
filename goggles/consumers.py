@@ -30,7 +30,12 @@ class GogglesConsumer(WebsocketConsumer):
             sample_name = text_data_json['sample_name']
             gr_type = text_data_json.get('gr_type')
 
-            logger.info(f"Parsed WebSocket message - machine={machine}, db_id={db_id}, sample={sample_name}")
+
+            gr_type = text_data_json.get('gr_type')
+            logger.info(
+                f"Parsed WebSocket message - machine={machine}, db_id={db_id}, "
+                f"sample={sample_name}, gr_type={gr_type}"
+            )
 
             logger.info("Calling get_experiment_data()...")
             exp_start = time.time()
@@ -52,7 +57,12 @@ class GogglesConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps(payload, default=str))
             logger.info(f"Sent WebSocket response in {time.time() - start_time:.2f} seconds")
 
-        except Exception:
+
+        except Exception as e:
+
             logger.exception("Error processing WebSocket message")
-            raise
+            try:
+                self.send(text_data=json.dumps({"error": str(e)}))
+            except Exception:
+                pass
 

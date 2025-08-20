@@ -296,6 +296,10 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
         const gogglesSocket = new WebSocket(`${scheme}://${window.location.host}/ws/goggles/`);
 
         function sendMessage(message) {
+          if (!Array.isArray(message) || message.length < 5) {
+            console.warn("[sendMessage] malformed message", message);
+            return;
+          }
           gogglesSocket.send(JSON.stringify({
             'db_id': message[0],
             'name': message[1],
@@ -304,7 +308,8 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
             'sample_name': message[4],
             'gr_type': selectedGRType
           }));
-}
+        }
+
         
 
         // one place for color logic, usable by both onmessage and changeColor
@@ -447,7 +452,7 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
                     color: seriesColor,
                     yAxis: 2,
                 });
-                selected_ales.push(message[4])
+                selected_ales.push(message);
                 selected_ale_ids.push(message[3])
             }
         };
@@ -692,13 +697,21 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
         var text = document.getElementById("text");
 
         function refresh_data() {
-            console.log("rerunning", selected_ales)
-            if (selected_ales.length > 0) {
-                for (let i = 0; i < selected_ales.length; i++) {
-                    sendMessage(selected_ales[i]);
-                }
+          console.log("rerunning", selected_ales);
+          if (!selected_ales.length) return;
+
+          for (let i = 0; i < selected_ales.length; i++) {
+            const m = selected_ales[i];
+
+            // Expect a 5-element array: [db_id, name, machine, data_id, sample_name]
+            if (!Array.isArray(m) || m.length < 5) {
+              console.warn("[refresh_data] skipping malformed entry at index", i, m);
+              continue;
             }
+            sendMessage(m);
+          }
         }
+
 
         setInterval(function () {
             if (checkBox.checked == true) {
