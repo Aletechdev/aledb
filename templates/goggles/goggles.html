@@ -115,7 +115,7 @@
             <label class="form-check-label" for="inlineCheckbox1">Y-Axis Scaling:</label>
             <select id="y_scale" onchange="handleSelectChangeY(event)">
                 <option value="linear">Linear</option>
-                <option value="logarithmic">Log</option>
+                <option value="ln">Log</option>
             </select>
             <label class="form-check-label" for="inlineCheckbox1">Growth Rate Type:</label>
             <select id="experiment_GR_type" onchange="handleSelectGrowthRateType()">
@@ -133,15 +133,15 @@
           const mode = document.getElementById("y_scale").value;
           yAxisMode = mode;
 
-          // flip OD axis between linear/logarithmic
           mainChart.yAxis[0].update({
-            type: mode === 'logarithmic' ? 'logarithmic' : 'linear',
-            // pick a sensible OD floor for log view; adjust to your sensor’s noise floor
-            min: mode === 'logarithmic' ? 1e-4 : null,
-            title: { text: mode === 'logarithmic' ? 'OD (log)' : 'OD' }
+            type: 'linear',
+            min: null,
+            title: { text: mode === 'ln' ? 'ln(OD)' : 'OD' }
           }, false);
 
           mainChart.redraw();
+          // re-pull so we can re-transform OD values for ln mode
+          refresh_data();
         }
     </script>
 
@@ -417,13 +417,22 @@ const sharedCustom = {
   lineageLabel: metaFromClick.lineageLabel ?? message[2]
 };
 
-// ↓↓↓ ONE declaration for OD_data (so log-scaling applies to what we render)
+
 const baseId = message[3];         // e.g. "22_ucsd_3_0a_1"
 const name   = message[2];
 
-let OD_data = message[1][0].map(([x, y, batch, media, hasCryo]) =>
-  [x, (y > 0 ? y : null), batch, media, hasCryo]
-);
+const rawOD = message[1][0];  // [[x, y, batch, media, hasCryo], ...]
+let OD_data;
+
+if (yAxisMode === 'ln') {
+  // ln view: y -> ln(y); null-out nonpositive values
+  OD_data = rawOD.map(([x, y, batch, media, hasCryo]) =>
+    [x, (y > 0 ? Math.log(y) : null), batch, media, hasCryo]
+  );
+} else {
+  // linear view: raw OD (zeros are fine)
+  OD_data = rawOD;
+}
 
 const GR_data = message[1][1];
 const T_data  = message[1][2];
