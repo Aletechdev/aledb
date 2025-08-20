@@ -65,6 +65,46 @@
         const selected_ale_ids = []
         const lineageMeta = {};
     </script>
+    <script>
+      // ---- Growth-rate model dropdown: state + labels ----
+      let selectedGRType = 'gr_bestfit';
+
+      const GR_MODEL_OPTIONS = [
+        { value: 'gr_bestfit', label: 'Best Fit' },
+        { value: 'gr_croissance', label: 'Croissance' },
+        { value: 'gr_awf', label: 'Adaptive Window Fitting' },
+        { value: 'gr_original', label: 'Legacy Fitting' },
+        { value: 'gr_curveball_BaranyiRoberts', label: 'Curveball (Baranyi–Roberts)' },
+        { value: 'gr_curveball_Logistic', label: 'Curveball (Logistic)' },
+        { value: 'gr_curveball_LogisticLag1', label: 'Curveball (Logistic + Lag1)' },
+        { value: 'gr_curveball_LogisticLag2', label: 'Curveball (Logistic + Lag2)' },
+        { value: 'gr_curveball_Richards', label: 'Curveball (Richards)' },
+        { value: 'gr_curveball_RichardsLag1', label: 'Curveball (Richards + Lag1)' },
+      ];
+
+      function populateGrowthRateDropdown() {
+        const sel = document.getElementById('experiment_GR_type');
+        if (!sel) return;
+        sel.innerHTML = ''; // clear any placeholder
+        for (const opt of GR_MODEL_OPTIONS) {
+          const o = document.createElement('option');
+          o.value = opt.value;
+          o.textContent = opt.label;
+          if (opt.value === selectedGRType) o.selected = true;
+          sel.appendChild(o);
+        }
+      }
+
+      function handleSelectGrowthRateType() {
+        const sel = document.getElementById('experiment_GR_type');
+        selectedGRType = (sel && sel.value) ? sel.value : 'gr_bestfit';
+        // Re-request data for currently selected lineages using the new model
+        refresh_data();
+      }
+
+      // Initialize the dropdown once the DOM is ready
+      document.addEventListener('DOMContentLoaded', populateGrowthRateDropdown);
+    </script>
     <div class="options_bar" style="position: fixed; bottom:.5em; z-index: 100;">
         <div class="goggles-option">
             <label class="form-check-label" for="inlineCheckbox1">X-Axis Format:</label>
@@ -261,7 +301,8 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
             'name': message[1],
             'machine': message[2],
             'data_id': message[3],
-            'sample_name': message[4]
+            'sample_name': message[4],
+            'gr_type': selectedGRType
           }));
 }
         
@@ -370,6 +411,8 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
 	                
             if (selected_ale_ids.includes(message[3])) {
                 mainChart.get(message[3]).setData(OD_data);
+                const grSeries = mainChart.get(message[3] + "-GR");
+                if (grSeries) grSeries.setData(message[1][1]);
             } else {
                 // OD series [x,y,batch,media,hasCryo]
                 const seriesColor = getLineageColor(message[3]);

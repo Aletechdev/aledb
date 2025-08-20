@@ -17,6 +17,16 @@ import time
 TEMPERATURE_MIN = 10
 TEMPERATURE_MAX = 100
 
+# Map UI keys → curveball model strings found in JSON
+CURVEBALL_MAP = {
+    "gr_curveball_BaranyiRoberts": "Model(BaranyiRoberts)",
+    "gr_curveball_Logistic": "Model(Logistic)",
+    "gr_curveball_LogisticLag1": "Model(LogisticLag1)",
+    "gr_curveball_LogisticLag2": "Model(LogisticLag2)",
+    "gr_curveball_Richards": "Model(Richards)",
+    "gr_curveball_RichardsLag1": "Model(RichardsLag1)",
+}
+
 logger = logging.getLogger(__name__)
 
 CONFIG_FILE = Path(settings.GOGGLES_MACHINE_CONFIG)
@@ -32,7 +42,37 @@ def get_ale_machines():
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         return json.load(f)  # list of dicts
 
+def _select_gr_value(gf: dict, gr_type: Optional[str]) -> Optional[float]:
+    """Return the requested growth-rate value from a growth_fits dict.
+    Accept 0.0 as valid; only None/-1 are considered missing.
+    """
+    def valid(v) -> bool:
+        return v is not None and v != -1
 
+    # No explicit model requested → keep current fallback order
+    if not gr_type:
+        for key in ("gr_bestfit", "gr_original", "gr_awf", "gr_croissance"):
+            v = gf.get(key)
+            if valid(v):
+                return float(v)
+        return None  # (no curveball fallback in legacy behavior)
+
+    # Curveball variants
+    if gr_type.startswith("gr_curveball_"):
+        target = CURVEBALL_MAP.get(gr_type)
+        if not target:
+            return None
+        cb = gf.get("gr_curveball") or []
+        for item in cb:
+            if isinstance(item, dict) and item.get("model") == target:
+                v = item.get("growth_rate")
+                if valid(v):
+                    return float(v)
+        return None
+
+    # Plain keys
+    v = gf.get(gr_type)
+    return float(v) if valid(v) else None
 def get_initial_data():
 
     """
@@ -127,7 +167,7 @@ def _iso_to_epoch_ms(ts_iso: str) -> int:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return int(dt.timestamp() * 1000)
-def get_experiment_data(ale_machine: str, experiment_id: int):
+def get_experiment_data(ale_machine: str, experiment_id: int, gr_type: Optional[str] = None):
     start_time = time.time()
     logger.info(f"get_experiment_data() called for machine={ale_machine}, experiment_id={experiment_id}")
 
@@ -200,17 +240,11 @@ def get_experiment_data(ale_machine: str, experiment_id: int):
             if temp_c is not None and TEMPERATURE_MIN < float(temp_c) < TEMPERATURE_MAX:
                 temperature_measurements_list.append([ts_ms, float(temp_c), batch_id, media_desc])
 
-        # Growth rate from 'best_fit' or fallback
+        # Growth rate: explicit selection or fallback
         gf = (batch.get("growth_fits") or {}).get(wl, {})
-        gr_val = (
-            gf.get("gr_bestfit") if gf.get("gr_bestfit") not in (None, -1)
-            else gf.get("gr_original") if gf.get("gr_original") not in (None, -1)
-            else gf.get("gr_awf") if gf.get("gr_awf") not in (None, -1)
-            else gf.get("gr_croissance")
-        )
+        gr_val = _select_gr_value(gf, gr_type)
 
-
-        if gr_val not in (None, -1) and times:
+        if gr_val is not None and times:
             growth_rate_list.append([_iso_to_epoch_ms(times[-1]), float(gr_val), batch_id, media_desc, has_cryo])
 
     logger.info(
