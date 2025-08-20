@@ -400,80 +400,76 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
 
             // 3) Parse to ms (or undefined if not parsable)
             const lmMsNum = lmIsoForParse ? Date.parse(lmIsoForParse) : undefined;
-            const metaFromClick = lineageMeta[message[3]] || {};
-            // 4) Stash both forms on the series
-              const sharedCustom = {
-                lastModifiedRaw: lmRawStr,    // exact string from the machine (for verbatim display)
-                lastModifiedMs: lmMsNum,       // parsed ms for Highcharts.dateFormat
-                aleId: metaFromClick.aleId ?? null,
-                lineageLabel: metaFromClick.lineageLabel ?? message[2]
-                };
-            var OD_data = message[1][0]
-            // Handle incoming message
-            if (yAxisMode == "logarithmic") {
-                let i = 0;
-                while (i < OD_data.length) {
-                    OD_data[i][1] = Math.log10(OD_data[i][1])
-                    i++;
-                }
-            }
-		
-	        const baseId = message[3];         // e.g. "22_ucsd_3_0a_1"
-            const name   = message[2];
+ const metaFromClick = lineageMeta[message[3]] || {};
+const sharedCustom = {
+  lastModifiedRaw: lmRawStr,
+  lastModifiedMs: lmMsNum,
+  aleId: metaFromClick.aleId ?? null,
+  lineageLabel: metaFromClick.lineageLabel ?? message[2]
+};
 
-            const GR_data = message[1][1];
-            const T_data  = message[1][2];
+// ↓↓↓ ONE declaration for OD_data (so log-scaling applies to what we render)
+const baseId = message[3];         // e.g. "22_ucsd_3_0a_1"
+const name   = message[2];
 
-            const existingOD = mainChart.get(baseId);
+let OD_data = message[1][0];
+if (yAxisMode === "logarithmic") {
+  for (let i = 0; i < OD_data.length; i++) {
+    OD_data[i][1] = Math.log10(OD_data[i][1]);
+  }
+}
+const GR_data = message[1][1];
+const T_data  = message[1][2];
 
-            if (existingOD) {
-              // Update existing series
-              existingOD.setData(OD_data);
-              const grSeries = mainChart.get(baseId + "-GR");
-              if (grSeries) grSeries.setData(GR_data);
-              const tSeries = mainChart.get(baseId + "-Temp");
-              if (tSeries) tSeries.setData(T_data);
-            } else {
-              // Add all 3 series
-              const seriesColor = getLineageColor(baseId);
-              mainChart.addSeries({
-                id: baseId,
-                name,
-                data: OD_data,
-                keys: ['x','y','batch','media','hasCryo'],
-                custom: sharedCustom,
-                color: seriesColor,
-                yAxis: 0,
-                showInNavigator: true,
-              });
-              mainChart.addSeries({
-                id: baseId + "-GR",
-                name,
-                data: GR_data,
-                keys: ['x','y','batch','media','hasCryo'],
-                custom: sharedCustom,
-                color: seriesColor,
-                yAxis: 1,
-                showInNavigator: true,
-              });
-              mainChart.addSeries({
-                id: baseId + "-Temp",
-                name,
-                data: T_data,
-                keys: ['x','y','batch','media'],
-                custom: sharedCustom,
-                color: seriesColor,
-                yAxis: 2,
-              });
+const existingOD = mainChart.get(baseId);
 
-              // Only now, after the series exist, track the id
-              if (!selected_ale_ids.includes(baseId)) {
-                selected_ale_ids.push(baseId);
-              }
+if (existingOD) {
+  existingOD.setData(OD_data);
+  const grSeries = mainChart.get(baseId + "-GR");
+  if (grSeries) grSeries.setData(GR_data);
+  const tSeries = mainChart.get(baseId + "-Temp");
+  if (tSeries) tSeries.setData(T_data);
+} else {
+  const seriesColor = getLineageColor(baseId);
+  mainChart.addSeries({
+    id: baseId,
+    name,
+    data: OD_data,
+    keys: ['x','y','batch','media','hasCryo'],
+    custom: sharedCustom,
+    color: seriesColor,
+    yAxis: 0,
+    showInNavigator: true,
+  });
+  mainChart.addSeries({
+    id: baseId + "-GR",
+    name,
+    data: GR_data,
+    keys: ['x','y','batch','media','hasCryo'],
+    custom: sharedCustom,
+    color: seriesColor,
+    yAxis: 1,
+    showInNavigator: true,
+  });
+  mainChart.addSeries({
+    id: baseId + "-Temp",
+    name,
+    data: T_data,
+    keys: ['x','y','batch','media'],
+    custom: sharedCustom,
+    color: seriesColor,
+    yAxis: 2,
+  });
+
+  if (!selected_ale_ids.includes(baseId)) {
+    selected_ale_ids.push(baseId);
+  }
+}
+};
 
 
 
-            }
+
 
 
 
