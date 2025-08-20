@@ -130,9 +130,18 @@
     <script>
 
         function handleSelectChangeY() {
-            var y = document.getElementById("y_scale");
-            yAxisMode = y.value
-            refresh_data()
+          const mode = document.getElementById("y_scale").value;
+          yAxisMode = mode;
+
+          // flip OD axis between linear/logarithmic
+          mainChart.yAxis[0].update({
+            type: mode === 'logarithmic' ? 'logarithmic' : 'linear',
+            // pick a sensible OD floor for log view; adjust to your sensor’s noise floor
+            min: mode === 'logarithmic' ? 1e-4 : null,
+            title: { text: mode === 'logarithmic' ? 'OD (log)' : 'OD' }
+          }, false);
+
+          mainChart.redraw();
         }
     </script>
 
@@ -412,12 +421,10 @@ const sharedCustom = {
 const baseId = message[3];         // e.g. "22_ucsd_3_0a_1"
 const name   = message[2];
 
-let OD_data = message[1][0];
-if (yAxisMode === "logarithmic") {
-  for (let i = 0; i < OD_data.length; i++) {
-    OD_data[i][1] = Math.log10(OD_data[i][1]);
-  }
-}
+let OD_data = message[1][0].map(([x, y, batch, media, hasCryo]) =>
+  [x, (y > 0 ? y : null), batch, media, hasCryo]
+);
+
 const GR_data = message[1][1];
 const T_data  = message[1][2];
 
