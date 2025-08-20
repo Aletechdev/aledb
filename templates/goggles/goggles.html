@@ -261,9 +261,7 @@
 
                                     // Original request for first load
 
-                                    if (!selected_ale_ids.includes(message[3])) {
-                                      selected_ale_ids.push(message[3]);
-                                    }
+                                    selected_ales.push(message);
                                 }
 
                             });
@@ -420,49 +418,64 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
                 }
             }
 		
-	                
-            if (selected_ale_ids.includes(message[3])) {
-                mainChart.get(message[3]).setData(OD_data);
-                const grSeries = mainChart.get(message[3] + "-GR");
-                if (grSeries) grSeries.setData(message[1][1]);
+	        const baseId = message[3];         // e.g. "22_ucsd_3_0a_1"
+            const name   = message[2];
+
+            const GR_data = message[1][1];
+            const T_data  = message[1][2];
+
+            const existingOD = mainChart.get(baseId);
+
+            if (existingOD) {
+              // Update existing series
+              existingOD.setData(OD_data);
+              const grSeries = mainChart.get(baseId + "-GR");
+              if (grSeries) grSeries.setData(GR_data);
+              const tSeries = mainChart.get(baseId + "-Temp");
+              if (tSeries) tSeries.setData(T_data);
             } else {
-                // OD series [x,y,batch,media,hasCryo]
-                const seriesColor = getLineageColor(message[3]);
-                mainChart.addSeries({
-                    id: message[3],
-                    name: message[2],
-                    data: OD_data,
-                    keys: ['x','y','batch','media','hasCryo'],
-                    custom: sharedCustom,
-                    color: seriesColor,
-                    yAxis: 0,
-                    showInNavigator: true,
-                });
-                //GR series [x,y,batch,media,hasCryo]
-                mainChart.addSeries({
-                    id: message[3] + "-GR",
-                    name: message[2],
-                    data: message[1][1],
-                    keys: ['x','y','batch','media','hasCryo'],
-                    custom: sharedCustom,
-                    color: seriesColor,
-                    yAxis: 1,
-                    showInNavigator: true,
-                });
-                //Temp series [x,y,batch,media]
-                mainChart.addSeries({
-                    id: message[3] + "-Temp",
-                    name: message[2],
-                    data: message[1][2],
-                    keys: ['x','y','batch','media'],
-                    custom: sharedCustom,
-                    color: seriesColor,
-                    yAxis: 2,
-                });
-                selected_ales.push(message);
-                selected_ale_ids.push(message[3])
+              // Add all 3 series
+              const seriesColor = getLineageColor(baseId);
+              mainChart.addSeries({
+                id: baseId,
+                name,
+                data: OD_data,
+                keys: ['x','y','batch','media','hasCryo'],
+                custom: sharedCustom,
+                color: seriesColor,
+                yAxis: 0,
+                showInNavigator: true,
+              });
+              mainChart.addSeries({
+                id: baseId + "-GR",
+                name,
+                data: GR_data,
+                keys: ['x','y','batch','media','hasCryo'],
+                custom: sharedCustom,
+                color: seriesColor,
+                yAxis: 1,
+                showInNavigator: true,
+              });
+              mainChart.addSeries({
+                id: baseId + "-Temp",
+                name,
+                data: T_data,
+                keys: ['x','y','batch','media'],
+                custom: sharedCustom,
+                color: seriesColor,
+                yAxis: 2,
+              });
+
+              // Only now, after the series exist, track the id
+              if (!selected_ale_ids.includes(baseId)) {
+                selected_ale_ids.push(baseId);
+              }
+
+
+
             }
-        };
+
+
 
         gogglesSocket.onclose = function (e) {
             console.error('Goggles socket closed unexpectedly');
