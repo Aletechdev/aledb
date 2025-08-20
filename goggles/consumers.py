@@ -31,7 +31,7 @@ class GogglesConsumer(WebsocketConsumer):
             gr_type = text_data_json.get('gr_type')
 
 
-            gr_type = text_data_json.get('gr_type')
+
             logger.info(
                 f"Parsed WebSocket message - machine={machine}, db_id={db_id}, "
                 f"sample={sample_name}, gr_type={gr_type}"

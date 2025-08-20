@@ -254,9 +254,16 @@
                                     delete lineageMeta[current_id];
                                 } else {
 
-                                    //send ale_ids of the requests
+
+                                    // send the request immediately
                                     sendMessage(message);
                                     console.log(message);
+
+                                    // Original request for first load
+
+                                    if (!selected_ale_ids.includes(message[3])) {
+                                      selected_ale_ids.push(message[3]);
+                                    }
                                 }
 
                             });
