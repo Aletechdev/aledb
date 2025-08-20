@@ -175,7 +175,7 @@ def get_experiment_data(ale_machine: str, experiment_id: int, gr_type: Optional[
     machine_entry = next((m for m in machines if str(m["id"]) == str(ale_machine)), None)
     if not machine_entry:
         logger.warning(f"No machine found with id={ale_machine}")
-        return [[], [], []]
+        return [[], [], [], {"last_modified": None}]
 
     machine_dir = Path(machine_entry["data_dir"])
     logger.debug(f"Machine directory resolved to {machine_dir}")
@@ -191,7 +191,7 @@ def get_experiment_data(ale_machine: str, experiment_id: int, gr_type: Optional[
             break
     if not exp_file:
         logger.warning(f"Experiment file not found for experiment_id={experiment_id}")
-        return [[], [], []]
+        return [[], [], [], {"last_modified": None}]
 
     logger.info(f"Found experiment file: {exp_file}")
 
@@ -204,7 +204,7 @@ def get_experiment_data(ale_machine: str, experiment_id: int, gr_type: Optional[
 
     if not wl:
         logger.warning(f"No wavelength found for experiment_id={experiment_id}")
-        return ([], [], [])
+        return [[], [], [], {"last_modified": None}]
 
     measurement_list: List[List[Any]] = []
     growth_rate_list: List[List[Any]] = []
@@ -243,7 +243,7 @@ def get_experiment_data(ale_machine: str, experiment_id: int, gr_type: Optional[
         # Growth rate: explicit selection or fallback
         gf = (batch.get("growth_fits") or {}).get(wl, {})
         gr_val = _select_gr_value(gf, gr_type)
-
+        logger.debug(f"Batch {batch_id}: selected GR model={gr_type or 'fallback'} value={gr_val}")
         if gr_val is not None and times:
             growth_rate_list.append([_iso_to_epoch_ms(times[-1]), float(gr_val), batch_id, media_desc, has_cryo])
 
