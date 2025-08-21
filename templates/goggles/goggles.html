@@ -25,7 +25,7 @@
         }
 
         .dataTables_scrollHead {
-            display: none;
+            display: block;
         }
 
         .goggles-option {
@@ -157,17 +157,28 @@
                     <button type="button" class="collapsible"
                             style="text-align: center"> {{ project_value.name }} </button>
                     <div class="content">
-                        <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
-                               class="display">
-                            {% for experiment in project_value.experiments %}
+                          <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}" class="display">
+                            <thead>
+                              <tr>
+                                <th>ALE ID</th>
+                                <th>Lineage</th>
+                                <th>Protocol</th>
+                                <th>Project</th>
+                                <th>Notes</th>
+                                <th>Color</th>
+                                <th style="display:none;">DB ID</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {% for experiment in project_value.experiments %}
                                 <tr id="{{ project_key }}_row_id_{{ value.id }}_{{ experiment.0 }}">
-                                    {% for entry in experiment %}
-                                        <td>{{ entry }}</td>
-                                    {% endfor %}
+                                  {% for entry in experiment %}
+                                    <td>{{ entry }}</td>
+                                  {% endfor %}
                                 </tr>
-
-                            {% endfor %}
-                        </table>
+                              {% endfor %}
+                            </tbody>
+                          </table>
                         <script>
                             let table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = new DataTable('#ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}', {
                                 select: 'multi+shift',
@@ -186,15 +197,16 @@
   {},
   {},
   {
-    render: function (data) {
-      if (data.includes("test")) {
-        return data[0] + "t";
-      }
-      return data[0];
-    }
+          render: function (data, type) {
+            return data ?? '';
+          }
   },
-  {},
-  {},
+  {    render: function () {
+      return "{{ project_value.name|escapejs }}";
+    }},
+  {
+       visible: false
+  },
   {
     // color picker column
     render: function (data, type, row) {
