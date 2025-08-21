@@ -9,6 +9,18 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/webapp.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/goggles.css' %}">
     <style>
+                .status-pill {
+          display: inline-block;
+          margin-left: .5rem;
+          padding: .15rem .5rem;
+          border-radius: 999px;
+          font-weight: 600;
+          font-size: 0.95em;
+        }
+        .status-connected { background: #e6f7ec; color: #0f7b3b; }
+        .status-disconnected { background: #f6eaea; color: #8a1c1c; }
+        .status-reconnecting { background: #fff6e0; color: #8a5a00; }
+
         label {
             padding-left: 1em;
         }
@@ -66,7 +78,12 @@
     <script src="https://code.highcharts.com/stock/11.4.8/modules/accessibility.js"></script>
 {% endblock %}
 
-{% block header %}<b><a href="#">ALEGoggles</a></b> - See our ALEBots <b id="goggles_title">live!</b>{% endblock %}
+{% block header %}
+  <strong>ALEGoggles</strong> — Experiment Dashboard
+  <span id="goggles_status" class="status-pill status-disconnected" aria-live="polite">Disconnected</span>
+{% endblock %}
+
+
 
 
 {% block content %}
@@ -424,6 +441,23 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
     <script>
         const scheme = (window.location.protocol === 'https:') ? 'wss' : 'ws';
         const gogglesSocket = new WebSocket(`${scheme}://${window.location.host}/ws/goggles/`);
+        function setGogglesStatus(text, cls) {
+          const el = document.getElementById('goggles_status');
+          if (!el) return;
+          el.textContent = text;
+          el.classList.remove('status-connected','status-disconnected','status-reconnecting');
+          el.classList.add(cls);
+        }
+
+        gogglesSocket.onopen = function () {
+          setGogglesStatus('Connected', 'status-connected');
+        };
+
+        gogglesSocket.onclose = function (e) {
+          console.error('Goggles socket closed unexpectedly');
+          setGogglesStatus('Disconnected', 'status-disconnected');
+        };
+
 
         function sendMessage(message) {
           if (!Array.isArray(message) || message.length < 5) {
@@ -616,17 +650,9 @@ if (existingOD) {
 }
 };
 
-
-
-
-
-
-
-        gogglesSocket.onclose = function (e) {
-            console.error('Goggles socket closed unexpectedly');
-            document.getElementById("goggles_title").textContent = "Socket Disconnected :("
-
-        };
+gogglesSocket.onerror = function () {
+  setGogglesStatus('Disconnected', 'status-disconnected');
+};
 
 
     </script>
