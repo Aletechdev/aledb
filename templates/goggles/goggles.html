@@ -27,7 +27,36 @@
         .dataTables_scrollHead {
             display: block;
         }
+            #machine-bar table.display td:nth-child(2),
+            #machine-bar table.display th:nth-child(2),
+            #machine-bar table.display td:nth-child(3),
+            #machine-bar table.display th:nth-child(3) {
+              white-space: normal !important;
+              word-break: break-word;
+              overflow-wrap: anywhere;
+              max-width: 14rem;
+            }
 
+            /* Compact the Color column */
+            #machine-bar table.display td:nth-child(6),
+            #machine-bar table.display th:nth-child(6) {
+              width: 52px;
+              min-width: 52px;
+              text-align: center;
+            }
+
+            #machine-bar input[type="color"] {
+              width: 36px;
+              height: 24px;
+              padding: 0;
+              border: none;
+              background: transparent;
+            }
+
+            /* Optional: stabilize column widths */
+            #machine-bar table.display {
+              table-layout: fixed;
+            }
         .goggles-option {
         }
     </style>
@@ -152,7 +181,7 @@
         {% for key, value in initial.items %}
             <button type="button" class="collapsible machines"
                     style="text-align: center"> {{ value.name }} </button>
-            <div class="content" style="overflow-y:auto; overflow-x:auto; max-height: 20em;">
+            <div class="content" style="overflow-y:auto; max-height: 20em;">
                 {% for project_key, project_value in value.projects.items reversed %}
                     <button type="button" class="collapsible"
                             style="text-align: center"> {{ project_value.name }} </button>
@@ -189,8 +218,6 @@
                                 ordering: false,
                                 info: false,
                                 scrollY: 500,
-                                scrollX: true,
-                                scrollCollapse: true,
                                 dataType: JSON,
 
 
@@ -203,9 +230,9 @@
             return data ?? '';
           }
   },
-  {    render: function () {
-      return "{{ project_value.name|escapejs }}";
-    }},
+  {
+  visible: false
+  },
   {
        visible: false
   },
