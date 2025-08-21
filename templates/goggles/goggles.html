@@ -58,6 +58,7 @@
         .goggles-option {
         }
         .dataTables_scrollHead { display: block !important; }
+        .options_bar .goggles-option select { min-width: 12rem; }
     </style>
 
     <script src="https://code.highcharts.com/stock/11.4.8/highstock.js"></script>
@@ -551,12 +552,10 @@ if (existingOD) {
 
 
     </script>
-    <div id="charts" style="width: 55em  !important;">
-        <div id="mainChart" style="overflow: visible; height: 60em; !important;"></div>
+    <div id="charts" style="flex:1; min-width:0; margin-left:1em;">
+        <div id="mainChart" style="overflow:visible; height:60em !important;"></div>
     </div>
 
-    <div id="right-sidebar" style="width:15em; height:94em; float: right; background-color: #5BA199; color: white">
-    </div>
     <script>
       // Minimal, fast, safe HTML escape
       function escapeHTML(s) {
