@@ -24,9 +24,7 @@
             padding: 8px;
         }
 
-        .dataTables_scrollHead {
-            display: block;
-        }
+
             #machine-bar table.display td:nth-child(2),
             #machine-bar table.display th:nth-child(2),
             #machine-bar table.display td:nth-child(3),
@@ -195,17 +193,21 @@
                                 <th>Project</th>
                                 <th>Notes</th>
                                 <th>Color</th>
-                                <th style="display:none;">DB ID</th>
+                                <th>DB ID</th>
                               </tr>
                             </thead>
                             <tbody>
-                              {% for experiment in project_value.experiments %}
-                                <tr id="{{ project_key }}_row_id_{{ value.id }}_{{ experiment.0 }}">
-                                  {% for entry in experiment %}
-                                    <td>{{ entry }}</td>
-                                  {% endfor %}
-                                </tr>
-                              {% endfor %}
+                            {% for experiment in project_value.experiments %}
+                              <tr id="{{ project_key }}_row_id_{{ value.id }}_{{ experiment.0 }}">
+                                <td>{{ experiment.0 }}</td>  <!-- ALE ID -->
+                                <td>{{ experiment.1 }}</td>  <!-- Lineage -->
+                                <td>{{ experiment.2 }}</td>  <!-- Protocol -->
+                                <td>{{ experiment.3 }}</td>  <!-- Project (hidden via DT config) -->
+                                <td>{{ experiment.4 }}</td>  <!-- Notes   (hidden via DT config) -->
+                                <td></td>                    <!-- Color (empty cell; DT renderer will inject <input type="color"> ) -->
+                                <td>{{ experiment.6 }}</td>  <!-- DB ID (hidden via DT config) -->
+                              </tr>
+                            {% endfor %}
                             </tbody>
                           </table>
                         <script>
@@ -272,7 +274,7 @@
                                 //let ALE_id = ALE_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}[table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index()][0];
                                 let ALE_id = table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).data();
                                 let data_id = "{{ project_key }}_{{ value.id }}_" + ALE_id[0]
-                                let row_id = {{ project_key }} +'_row_id_{{ value.id }}_' + ALE_id[0]
+                                let row_id = '{{ project_key }}' +'_row_id_{{ value.id }}_' + ALE_id[0]
                                 table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
 
                                 
