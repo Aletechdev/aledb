@@ -80,7 +80,7 @@
 
 {% block header %}
   <strong>ALEGoggles</strong> — Experiment Dashboard
-  <span id="goggles_status" class="status-pill status-disconnected" aria-live="polite">Disconnected</span>
+    <span id="goggles_status" hidden class="status-pill status-disconnected">Disconnected</span>
 {% endblock %}
 
 
@@ -441,17 +441,23 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
     <script>
         const scheme = (window.location.protocol === 'https:') ? 'wss' : 'ws';
         const gogglesSocket = new WebSocket(`${scheme}://${window.location.host}/ws/goggles/`);
-        function setGogglesStatus(text, cls) {
-          const el = document.getElementById('goggles_status');
-          if (!el) return;
-          el.textContent = text;
-          el.classList.remove('status-connected','status-disconnected','status-reconnecting');
-          el.classList.add(cls);
-        }
 
-        gogglesSocket.onopen = function () {
-          setGogglesStatus('Connected', 'status-connected');
-        };
+          function showStatus(text, cls) {
+            const el = document.getElementById('goggles_status');
+            if (!el) return;
+            el.textContent = text;
+            el.classList.remove('status-connected','status-disconnected','status-reconnecting');
+            el.classList.add(cls);
+            el.hidden = false;
+          }
+
+          function hideStatus() {
+            const el = document.getElementById('goggles_status');
+            if (!el) return;
+            el.hidden = true;
+          }
+
+
 
         gogglesSocket.onclose = function (e) {
           console.error('Goggles socket closed unexpectedly');
