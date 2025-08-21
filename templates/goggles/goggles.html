@@ -80,7 +80,7 @@
 
 {% block header %}
   <strong>ALEGoggles</strong> — Experiment Dashboard
-    <span id="goggles_status" hidden class="status-pill status-disconnected">Disconnected</span>
+    <span id="goggles_status" hidden class="status-pill">Disconnected</span>
 {% endblock %}
 
 
@@ -457,7 +457,10 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
             el.hidden = true;
           }
 
-
+          // Hide when connected; show only on problems
+          gogglesSocket.onopen = function () {
+            hideStatus();
+          };
 
         gogglesSocket.onclose = function (e) {
           console.error('Goggles socket closed unexpectedly');
