@@ -75,25 +75,80 @@
         toggle_sidebar();
     </script>
     <script>
-        function handleSelectChangeX(event) {
-            format = document.getElementById("x_scale").value;
-            if (format === "dates") {
-                mainChart.xAxis.type = "datetime"
-                mainChart.xAxis.step = 24
-            } else if (format === "days") {
-                mainChart.xAxis.type = "datetime"
-                mainChart.xAxis.step = 9999999999999
-            }
-            mainChart.redraw()
-
-        }
-
+      function handleSelectChangeX() {
+        const format = document.getElementById('x_scale').value;
+        xAxisMode = (format === 'dates') ? 'dates' : 'days';
+        applyXAxisMode();
+      }
     </script>
     <script>
         const selected_ales = []
         const selected_ale_ids = []
         const lineageMeta = {};
     </script>
+
+    <script>
+      const DAY_MS = 24 * 60 * 60 * 1000;
+
+      // Track X-axis mode and store raw series
+      let xAxisMode = 'days';               // default matches your <select>
+      const lineageStore = {};              // { [baseId]: { t0, OD_raw, GR_raw, T_raw } }
+
+      // Build OD data with correct X (dates/days) and Y (linear/ln)
+      function buildODData(OD_raw, t0) {
+        const toY = (y) => (yAxisMode === 'ln' ? (y > 0 ? Math.log(y) : null) : y);
+        if (xAxisMode === 'days') {
+          return OD_raw.map(([x,y,batch,media,hasCryo]) =>
+            [ (x - t0) / DAY_MS, toY(y), batch, media, hasCryo ]
+          );
+        } else {
+          return OD_raw.map(([x,y,batch,media,hasCryo]) =>
+            [ x, toY(y), batch, media, hasCryo ]
+          );
+        }
+      }
+
+      // Build GR / Temp data with correct X (Y unchanged)
+      function buildOtherData(raw, t0) {
+        if (xAxisMode === 'days') {
+          return raw.map(([x,y,batch,media,hasCryo]) =>
+            [ (x - t0) / DAY_MS, y, batch, media, hasCryo ]
+          );
+        } else {
+          return raw.map(([x,y,batch,media,hasCryo]) =>
+            [ x, y, batch, media, hasCryo ]
+          );
+        }
+      }
+
+      // Re-apply X mode to all visible series
+      function applyXAxisMode() {
+        // Update axis type
+        if (xAxisMode === 'days') {
+          mainChart.xAxis[0].update({ type: 'linear' }, false);
+        } else {
+          mainChart.xAxis[0].update({ type: 'datetime' }, false);
+        }
+
+        // Rebuild data for every selected lineage
+        for (const baseId of selected_ale_ids) {
+          const store = lineageStore[baseId];
+          if (!store) continue;
+
+          const od = mainChart.get(baseId);
+          const gr = mainChart.get(baseId + '-GR');
+          const t  = mainChart.get(baseId + '-Temp');
+
+          if (od) od.setData(buildODData(store.OD_raw, store.t0), false);
+          if (gr) gr.setData(buildOtherData(store.GR_raw, store.t0), false);
+          if (t)  t.setData(buildOtherData(store.T_raw,  store.t0), false);
+        }
+        mainChart.redraw();
+      }
+    </script>
+
+
+
     <script>
       // ---- Growth-rate model dropdown: state + labels ----
       let selectedGRType = 'gr_bestfit';
@@ -156,21 +211,28 @@
     </div>
 
     <script>
+      function handleSelectChangeY() {
+        const mode = document.getElementById("y_scale").value;
+        yAxisMode = mode;
 
-        function handleSelectChangeY() {
-          const mode = document.getElementById("y_scale").value;
-          yAxisMode = mode;
+        mainChart.yAxis[0].update({
+          type: 'linear',
+          min: null,
+          title: { text: mode === 'ln' ? 'ln(OD)' : 'OD' }
+        }, false);
 
-          mainChart.yAxis[0].update({
-            type: 'linear',
-            min: null,
-            title: { text: mode === 'ln' ? 'ln(OD)' : 'OD' }
-          }, false);
-
-          mainChart.redraw();
-          // re-pull so we can re-transform OD values for ln mode
-          refresh_data();
+        // Rebuild OD with new Y transform while preserving current X mode
+        for (const baseId of selected_ale_ids) {
+          const store = lineageStore[baseId];
+          if (!store) continue;
+          const od = mainChart.get(baseId);
+          if (od) od.setData(buildODData(store.OD_raw, store.t0), false);
         }
+        mainChart.redraw();
+
+        // Optional: re-fetch if you want freshest GR fits for a different model
+        // refresh_data();
+      }
     </script>
 
 
@@ -491,20 +553,37 @@ if (yAxisMode === 'ln') {
 const GR_data = message[1][1];
 const T_data  = message[1][2];
 
+// Compute per-lineage start time (t0) from OD timestamps
+const firstX = rawOD.find(row => row && typeof row[0] === 'number')?.[0] ?? null;
+const t0 = firstX ?? 0;
+
+// Store raw arrays so we can rebuild X on toggle
+lineageStore[baseId] = {
+  t0,
+  OD_raw: rawOD,
+  GR_raw: GR_data,
+  T_raw:  T_data
+};
+
 const existingOD = mainChart.get(baseId);
 
+const rebuiltOD = buildODData(lineageStore[baseId].OD_raw, lineageStore[baseId].t0);
+const rebuiltGR = buildOtherData(lineageStore[baseId].GR_raw, lineageStore[baseId].t0);
+const rebuiltT  = buildOtherData(lineageStore[baseId].T_raw,  lineageStore[baseId].t0);
+
 if (existingOD) {
-  existingOD.setData(OD_data);
+  existingOD.setData(rebuiltOD, false);
   const grSeries = mainChart.get(baseId + "-GR");
-  if (grSeries) grSeries.setData(GR_data);
+  if (grSeries) grSeries.setData(rebuiltGR, false);
   const tSeries = mainChart.get(baseId + "-Temp");
-  if (tSeries) tSeries.setData(T_data);
+  if (tSeries) tSeries.setData(rebuiltT,  false);
+  mainChart.redraw();
 } else {
   const seriesColor = getLineageColor(baseId);
   mainChart.addSeries({
     id: baseId,
     name,
-    data: OD_data,
+    data: rebuiltOD,
     keys: ['x','y','batch','media','hasCryo'],
     custom: sharedCustom,
     color: seriesColor,
@@ -514,7 +593,7 @@ if (existingOD) {
   mainChart.addSeries({
     id: baseId + "-GR",
     name,
-    data: GR_data,
+    data: rebuiltGR,
     keys: ['x','y','batch','media','hasCryo'],
     custom: sharedCustom,
     color: seriesColor,
@@ -524,7 +603,7 @@ if (existingOD) {
   mainChart.addSeries({
     id: baseId + "-Temp",
     name,
-    data: T_data,
+    data: rebuiltT,
     keys: ['x','y','batch','media'],
     custom: sharedCustom,
     color: seriesColor,
@@ -737,11 +816,16 @@ if (existingOD) {
                                     (this.series.userOptions.data?.[this.point.index]?.[2]);
                       const media = (this.point && this.point.media) ??
                                     (this.series.userOptions.data?.[this.point.index]?.[3]);
-                      const hasCryo = (typeof this.point.hasCryo === 'boolean') ? this.point.hasCryo : undefined;
+                      const hasCryo = (typeof this.point?.hasCryo === 'boolean') ? this.point.hasCryo : undefined;
 
                       // headline data
                       const lineageLabel = this.series.options.custom?.lineageLabel || this.series.name;
                       const aleId        = this.series.options.custom?.aleId ?? 'n/a';
+
+                      // time text for both modes
+                      const timeText = (xAxisMode === 'days')
+                        ? (typeof this.x === 'number' ? `${this.x.toFixed(2)} days` : 'n/a')
+                        : Highcharts.dateFormat('%e %b %H:%M:%S', this.x);
 
                       return `
                         <div style="display:flex; gap:6px; align-items:flex-start; min-width:290px">
@@ -755,7 +839,7 @@ if (existingOD) {
                           </div>
                           <div>
                             <b>${this.series.yAxis.options.title.text}:</b> ${this.y}<br/>
-                            Time: ${Highcharts.dateFormat('%e %b %H:%M:%S', this.x)}<br/>
+                            Time: ${timeText}<br/>
                             Batch: ${batch ?? 'n/a'}<br/>
                             Media: ${media ?? 'n/a'}<br/>
                             Cryostock: ${hasCryo === undefined ? 'n/a' : (hasCryo ? 'Yes' : 'No')}<br/>
@@ -766,10 +850,15 @@ if (existingOD) {
                     }
 
 
+
             },
 
         });
         console.timeEnd('line');
+
+        // Ensure axis starts in the same mode as the dropdown
+        xAxisMode = document.getElementById('x_scale').value === 'dates' ? 'dates' : 'days';
+        mainChart.xAxis[0].update({ type: xAxisMode === 'dates' ? 'datetime' : 'linear' }, false);
 
     </script>
     {{ ales|json_script:"ale_data" }}
