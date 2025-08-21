@@ -57,6 +57,7 @@
             }
         .goggles-option {
         }
+        .dataTables_scrollHead { display: block !important; }
     </style>
 
     <script src="https://code.highcharts.com/stock/11.4.8/highstock.js"></script>
@@ -211,7 +212,9 @@
                             </tbody>
                           </table>
                         <script>
-                            let table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = new DataTable('#ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}', {
+                            let table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = new DataTable('#ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}',
+
+                             {
                                 select: 'multi+shift',
                                 autoHeight: true,
                                 autoWidth: true,
@@ -225,20 +228,24 @@
 
                                 //data: ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }},
                                 columns: [
-  {},
-  {},
+  {title: 'ALE ID'},
+  {title: 'Lineage'},
   {
+           title: 'Protocol',
           render: function (data, type) {
             return data ?? '';
           }
   },
   {
+  title: 'Project',
   visible: false
   },
   {
+       title: 'Notes',
        visible: false
   },
   {
+    title: 'Color',
     // color picker column
     render: function (data, type, row) {
       // tolerate a few formats
@@ -263,9 +270,13 @@
       return '<input type="color" id="' + inputId + '" value="' + raw + '">';
     }
   },
-  { visible: false }
+  { title: 'DB ID', invisible: false }
 ]
 });
+
+table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.columns.adjust();
+
+
                             table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function (e) {
 
 
@@ -808,6 +819,11 @@ if (existingOD) {
                     content.style.display = "none";
                 } else {
                     content.style.display = "block";
+                      setTimeout(function () {
+    if (window.DataTable && DataTable.tables) {
+      DataTable.tables({ api: true }).columns.adjust();
+    }
+  }, 0);
                 }
             });
             // Collapse all machines
