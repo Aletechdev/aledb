@@ -24,7 +24,7 @@ class GogglesConsumer(WebsocketConsumer):
             logger.debug(f"Raw WebSocket message received: {text_data}")
             text_data_json = json.loads(text_data)
             db_id = text_data_json['db_id']
-            name = text_data_json['name']
+
             machine = text_data_json['machine']
             data_id = text_data_json['data_id']
             sample_name = text_data_json['sample_name']
