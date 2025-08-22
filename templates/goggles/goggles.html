@@ -305,7 +305,7 @@
       }
 
       // Initialize the dropdown once the DOM is ready
-      ddocument.addEventListener('DOMContentLoaded', () => {
+      document.addEventListener('DOMContentLoaded', () => {
           if (mainChart?.yAxis?.[3]) {
             mainChart.yAxis[3].setTitle({ text: `Media Ratio (component #${selectedMediaComponent})` }, false);
             mainChart.redraw();
@@ -889,7 +889,7 @@ gogglesSocket.onerror = function () {
               title: { text: 'Media Ratio (component #1)' },
               labels: { style: { fontSize: '14 px' } },
               min: 0
-            }]
+            }],
             rangeSelector: {
                 enabled: true,
                 buttons: [{
