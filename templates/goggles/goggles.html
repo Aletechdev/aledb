@@ -1041,11 +1041,15 @@ gogglesSocket.onerror = function () {
             navigator: { baseSeries: 0 },
             xAxis: [{
                 ordinal: false,
+                lineWidth: 2,
+                   lineColor: '#000000'
             }],
              yAxis: [{
               height: '41%',
               title: { text: 'OD' },
-              labels: { style: { fontSize: '14 px' } }
+              labels: { style: { fontSize: '14 px' } },
+              lineWidth: 2,        
+              lineColor: '#000000'
             }, {
               opposite: true,
               top: '45%', height: '21%',
