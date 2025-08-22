@@ -1045,17 +1045,15 @@ gogglesSocket.onerror = function () {
             panning: true,
             panKey: 'shift',
             backgroundColor: '#ffffff',
-            marginLeft: 100,          // more room for larger left-side labels
-            spacingBottom: 100        // keep navigator clear of the fixed options bar
+            marginLeft: 80 // more room for big left-side labels
           },
 
-          credits: { enabled: false },
           navigator: { baseSeries: 0 },
 
           // X axis styling + (optional) x=0 line handled by updateZeroLineX()
           xAxis: [{
             ordinal: false,
-            type: 'linear',           // will switch to 'datetime' when needed
+            type: 'linear',                // will be switched to 'datetime' when needed
             lineColor: '#000000',
             lineWidth: 2,
             gridLineWidth: 0,
@@ -1063,66 +1061,48 @@ gogglesSocket.onerror = function () {
             tickColor: '#000000',
             tickWidth: 2,
             tickLength: 6,
-            tickPosition: 'inside',   // ticks inside so they’re never clipped
-            labels: { style: { fontSize: '16px', fontWeight: '600' } }
+            tickPosition: 'outside',
+            labels: {
+              style: { fontSize: '16px', fontWeight: '600' }
+            }
           }],
 
-          // Four stacked y-axes, LEFT side, with thin gaps between them
+          // Four stacked y-axes, all on the LEFT, uniform look, and y=0 reference line
           yAxis: [{
-            // OD
-            top: '0%',
-            height: '43%',            // leaves 2% gap after (43–45)
+            height: '45%',
             opposite: false,
-            startOnTick: true,
-            endOnTick: true,
             title: { text: 'OD', style: { fontSize: '18px', fontWeight: '700' } },
             labels: { style: { fontSize: '16px', fontWeight: '600' } },
             lineColor: '#000000', lineWidth: 2,
             gridLineWidth: 0, minorGridLineWidth: 0,
-            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
-            tickAmount: 6,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'outside',
             plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
           }, {
-            // Growth Rate
-            top: '45%',
-            height: '22%',            // ends at 67%
+            top: '45%', height: '25%',
             opposite: false,
-            startOnTick: true,
-            endOnTick: true,
             title: { text: 'Growth Rate', style: { fontSize: '18px', fontWeight: '700' } },
             labels: { style: { fontSize: '16px', fontWeight: '600' } },
             lineColor: '#000000', lineWidth: 2,
             gridLineWidth: 0, minorGridLineWidth: 0,
-            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
-            tickAmount: 5,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'outside',
             plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
           }, {
-            // Temperature
-            top: '69%',
-            height: '14%',            // ends at 83%
+            top: '70%', height: '15%',
             opposite: false,
-            startOnTick: true,
-            endOnTick: true,
             title: { text: 'Temperature °C', style: { fontSize: '18px', fontWeight: '700' } },
             labels: { style: { fontSize: '16px', fontWeight: '600' } },
             lineColor: '#000000', lineWidth: 2,
             gridLineWidth: 0, minorGridLineWidth: 0,
-            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
-            tickAmount: 5,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'outside',
             plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
           }, {
-            // Media Ratio
-            top: '85%',
-            height: '14%',            // ends at 99% (room above navigator)
+            top: '85%', height: '15%',
             opposite: false,
-            startOnTick: true,
-            endOnTick: true,
             title: { text: 'Media Ratio (component #1)', style: { fontSize: '18px', fontWeight: '700' } },
             labels: { style: { fontSize: '16px', fontWeight: '600' } },
             lineColor: '#000000', lineWidth: 2,
             gridLineWidth: 0, minorGridLineWidth: 0,
-            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
-            tickAmount: 5,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'outside',
             min: 0,
             plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
           }],
@@ -1130,16 +1110,23 @@ gogglesSocket.onerror = function () {
           rangeSelector: {
             enabled: true,
             selected: 7,
-            buttons: [
-              { type: 'hour',  count: 1, text: '1h',  title: 'View 1 hour' },
-              { type: 'hour',  count: 6, text: '6h',  title: 'View 6 hours' },
-              { type: 'day',   count: 1, text: '1d',  title: 'View 1 day' },
-              { type: 'week',  count: 1, text: '1w',  title: 'View 1 week' },
-              { type: 'week',  count: 2, text: '2w',  title: 'View 2 weeks' },
-              { type: 'month', count: 1, text: '1m',  title: 'View 1 month' },
-              { type: 'month', count: 3, text: '3m',  title: 'View 3 months' },
-              { type: 'all', text: 'All', title: 'View all' }
-            ]
+            buttons: [{
+              type: 'hour', count: 1, text: '1h', title: 'View 1 hour'
+            }, {
+              type: 'hour', count: 6, text: '6h', title: 'View 6 hours'
+            }, {
+              type: 'day', count: 1, text: '1d', title: 'View 1 day'
+            }, {
+              type: 'week', count: 1, text: '1w', title: 'View 1 week'
+            }, {
+              type: 'week', count: 2, text: '2w', title: 'View 2 weeks'
+            }, {
+              type: 'month', count: 1, text: '1m', title: 'View 1 month'
+            }, {
+              type: 'month', count: 3, text: '3m', title: 'View 3 months'
+            }, {
+              type: 'all', text: 'All', title: 'View all'
+            }]
           },
 
           plotOptions: {
@@ -1224,9 +1211,30 @@ gogglesSocket.onerror = function () {
                 </div>
               `;
             }
+
           }
         });
 
+        console.timeEnd('line');
+
+        // Helper: show a bold x=0 line only when x is in "days" (linear) mode.
+        function updateZeroLineX() {
+          const xa = mainChart.xAxis[0];
+          try { xa.removePlotLine('x-zero'); } catch (_) {}
+          if (xAxisMode === 'days') {
+            xa.addPlotLine({ id: 'x-zero', value: 0, color: '#000000', width: 2, zIndex: 5 });
+          }
+        }
+
+        // Ensure axis starts in the same mode as the dropdown
+        xAxisMode = document.getElementById('x_scale').value === 'dates' ? 'dates' : 'days';
+        mainChart.xAxis[0].update({ type: xAxisMode === 'dates' ? 'datetime' : 'linear' }, false);
+        updateRangeSelectorVisibility();
+        updateZeroLineX();
+
+
+        const daysSel = document.getElementById('days_window');
+        if (daysSel) daysSel.value = '0';
 
     </script>
     {{ ales|json_script:"ale_data" }}
