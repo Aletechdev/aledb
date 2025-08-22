@@ -300,20 +300,6 @@
             mainChart.xAxis[0].update({ type: 'datetime' }, false);
           }
 
-            // After you do mainChart.xAxis[0].update({ type: ... }, false);
-mainChart.update({
-  navigator: {
-    xAxis: {
-      type: (xAxisMode === 'dates' ? 'datetime' : 'linear'),
-      labels: { enabled: false },
-      tickLength: 0
-    },
-    yAxis: {
-      labels: { enabled: false }
-    }
-  }
-}, false);
-
           // Rebuild data for every selected lineage
           for (const baseId of selected_ale_ids) {
             const store = lineageStore[baseId];
@@ -353,10 +339,6 @@ mainChart.update({
               mainChart.rangeSelector.clickButton(allIdx, true);
     }
   }
-  xAxisMode = document.getElementById('x_scale').value === 'dates' ? 'dates' : 'days';
-mainChart.xAxis[0].update({ type: xAxisMode === 'dates' ? 'datetime' : 'linear' }, false);
-mainChart.update({ navigator: { xAxis: { type: xAxisMode === 'dates' ? 'datetime' : 'linear' } } }, false);
-updateRangeSelectorVisibility();
   updateZeroLineX();
         }
 
@@ -1058,232 +1040,192 @@ gogglesSocket.onerror = function () {
         console.time('line');
 
         const mainChart = Highcharts.stockChart('mainChart', {
-  chart: {
-    zoomType: 'x',
-    panning: true,
-    panKey: 'shift',
-    backgroundColor: '#ffffff',
-    marginLeft: 100,
-    spacingBottom: 100
-  },
+          chart: {
+            zoomType: 'x',
+            panning: true,
+            panKey: 'shift',
+            backgroundColor: '#ffffff',
+            marginLeft: 100,          // more room for larger left-side labels
+            spacingBottom: 100        // keep navigator clear of the fixed options bar
+          },
 
-  credits: { enabled: false },
+          credits: { enabled: false },
+          navigator: { baseSeries: 0 },
 
-  // Hide navigator’s own labels to prevent weird times/stray numbers
-  navigator: {
-    baseSeries: 0,
-    xAxis: {
-      type: 'linear',              // will be flipped to 'datetime' in dates mode
-      labels: { enabled: false },
-      tickLength: 0,
-      gridLineWidth: 0
-    },
-    yAxis: {
-      labels: { enabled: false },
-      gridLineWidth: 0
-    }
-  },
+          // X axis styling + (optional) x=0 line handled by updateZeroLineX()
+          xAxis: [{
+            ordinal: false,
+            type: 'linear',           // will switch to 'datetime' when needed
+            lineColor: '#000000',
+            lineWidth: 2,
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            tickColor: '#000000',
+            tickWidth: 2,
+            tickLength: 6,
+            tickPosition: 'inside',   // ticks inside so they’re never clipped
+            labels: { style: { fontSize: '16px', fontWeight: '600' } }
+          }],
 
-  // X axis
-  xAxis: [{
-    ordinal: false,
-    type: 'linear',                 // flipped to 'datetime' in dates mode
-    lineColor: '#000000',
-    lineWidth: 2,
-    gridLineWidth: 0,
-    minorGridLineWidth: 0,
-    tickColor: '#000000',
-    tickWidth: 2,
-    tickLength: 6,
-    tickPosition: 'inside',
-    labels: {
-      style: { fontSize: '16px', fontWeight: '600' },
-      formatter: function () {
-        // Nice, unambiguous labels in both modes
-        if (window.xAxisMode === 'dates') {
-          return Highcharts.dateFormat('%Y-%m-%d', this.value);
-        }
-        // days mode: show integers / halves as needed
-        const v = this.value;
-        return Math.abs(v - Math.round(v)) < 1e-6
-          ? String(Math.round(v))
-          : Highcharts.numberFormat(v, 1);
-      }
-    }
-  }],
+          // Four stacked y-axes, LEFT side, with thin gaps between them
+          yAxis: [{
+            // OD
+            top: '0%',
+            height: '43%',            // leaves 2% gap after (43–45)
+            opposite: false,
+            startOnTick: true,
+            endOnTick: true,
+            title: { text: 'OD', style: { fontSize: '18px', fontWeight: '700' } },
+            labels: { style: { fontSize: '16px', fontWeight: '600' } },
+            lineColor: '#000000', lineWidth: 2,
+            gridLineWidth: 0, minorGridLineWidth: 0,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
+            tickAmount: 6,
+            plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
+          }, {
+            // Growth Rate
+            top: '45%',
+            height: '22%',            // ends at 67%
+            opposite: false,
+            startOnTick: true,
+            endOnTick: true,
+            title: { text: 'Growth Rate', style: { fontSize: '18px', fontWeight: '700' } },
+            labels: { style: { fontSize: '16px', fontWeight: '600' } },
+            lineColor: '#000000', lineWidth: 2,
+            gridLineWidth: 0, minorGridLineWidth: 0,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
+            tickAmount: 5,
+            plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
+          }, {
+            // Temperature
+            top: '69%',
+            height: '14%',            // ends at 83%
+            opposite: false,
+            startOnTick: true,
+            endOnTick: true,
+            title: { text: 'Temperature °C', style: { fontSize: '18px', fontWeight: '700' } },
+            labels: { style: { fontSize: '16px', fontWeight: '600' } },
+            lineColor: '#000000', lineWidth: 2,
+            gridLineWidth: 0, minorGridLineWidth: 0,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
+            tickAmount: 5,
+            plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
+          }, {
+            // Media Ratio
+            top: '85%',
+            height: '14%',            // ends at 99% (room above navigator)
+            opposite: false,
+            startOnTick: true,
+            endOnTick: true,
+            title: { text: 'Media Ratio (component #1)', style: { fontSize: '18px', fontWeight: '700' } },
+            labels: { style: { fontSize: '16px', fontWeight: '600' } },
+            lineColor: '#000000', lineWidth: 2,
+            gridLineWidth: 0, minorGridLineWidth: 0,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
+            tickAmount: 5,
+            min: 0,
+            plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
+          }],
 
-  // Four stacked y-axes, with labels forced on & nudged inward
-  yAxis: [{
-    top: '0%',
-    height: '43%',
-    opposite: false,
-    startOnTick: true,
-    endOnTick: true,
-    title: { text: 'OD', style: { fontSize: '18px', fontWeight: '700' } },
-    labels: {
-      enabled: true,
-      align: 'right',
-      x: -6,
-      style: { fontSize: '16px', fontWeight: '600' }
-    },
-    lineColor: '#000000', lineWidth: 2,
-    gridLineWidth: 0, minorGridLineWidth: 0,
-    tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
-    tickAmount: 6,
-    plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
-  }, {
-    top: '45%',
-    height: '22%',
-    opposite: false,
-    startOnTick: true,
-    endOnTick: true,
-    title: { text: 'Growth Rate', style: { fontSize: '18px', fontWeight: '700' } },
-    labels: {
-      enabled: true,
-      align: 'right',
-      x: -6,
-      style: { fontSize: '16px', fontWeight: '600' }
-    },
-    lineColor: '#000000', lineWidth: 2,
-    gridLineWidth: 0, minorGridLineWidth: 0,
-    tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
-    tickAmount: 5,
-    plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
-  }, {
-    top: '69%',
-    height: '14%',
-    opposite: false,
-    startOnTick: true,
-    endOnTick: true,
-    title: { text: 'Temperature °C', style: { fontSize: '18px', fontWeight: '700' } },
-    labels: {
-      enabled: true,
-      align: 'right',
-      x: -6,
-      style: { fontSize: '16px', fontWeight: '600' }
-    },
-    lineColor: '#000000', lineWidth: 2,
-    gridLineWidth: 0, minorGridLineWidth: 0,
-    tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
-    tickAmount: 5,
-    plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
-  }, {
-    top: '85%',
-    height: '14%',
-    opposite: false,
-    startOnTick: true,
-    endOnTick: true,
-    title: { text: 'Media Ratio (component #1)', style: { fontSize: '18px', fontWeight: '700' } },
-    labels: {
-      enabled: true,
-      align: 'right',
-      x: -6,
-      style: { fontSize: '16px', fontWeight: '600' }
-    },
-    lineColor: '#000000', lineWidth: 2,
-    gridLineWidth: 0, minorGridLineWidth: 0,
-    tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'inside',
-    tickAmount: 5,
-    min: 0,
-    plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
-  }],
+          rangeSelector: {
+            enabled: true,
+            selected: 7,
+            buttons: [
+              { type: 'hour',  count: 1, text: '1h',  title: 'View 1 hour' },
+              { type: 'hour',  count: 6, text: '6h',  title: 'View 6 hours' },
+              { type: 'day',   count: 1, text: '1d',  title: 'View 1 day' },
+              { type: 'week',  count: 1, text: '1w',  title: 'View 1 week' },
+              { type: 'week',  count: 2, text: '2w',  title: 'View 2 weeks' },
+              { type: 'month', count: 1, text: '1m',  title: 'View 1 month' },
+              { type: 'month', count: 3, text: '3m',  title: 'View 3 months' },
+              { type: 'all', text: 'All', title: 'View all' }
+            ]
+          },
 
-  rangeSelector: {
-    enabled: true,
-    selected: 7,
-    buttons: [
-      { type: 'hour',  count: 1, text: '1h',  title: 'View 1 hour' },
-      { type: 'hour',  count: 6, text: '6h',  title: 'View 6 hours' },
-      { type: 'day',   count: 1, text: '1d',  title: 'View 1 day' },
-      { type: 'week',  count: 1, text: '1w',  title: 'View 1 week' },
-      { type: 'week',  count: 2, text: '2w',  title: 'View 2 weeks' },
-      { type: 'month', count: 1, text: '1m',  title: 'View 1 month' },
-      { type: 'month', count: 3, text: '3m',  title: 'View 3 months' },
-      { type: 'all', text: 'All', title: 'View all' }
-    ]
-  },
+          plotOptions: {
+            area: { fillOpacity: 0.25 },
+            series: {
+              lineWidth: 1.5,
+              marker: { radius: 3, symbol: 'circle' },
+              dataGrouping: { enabled: false },
+              point: {
+                events: {
+                  click: function () {
+                    if (this.selected) this.select(false, true);
+                    else this.select(true, true);
+                  }
+                }
+              }
+            }
+          },
 
-  plotOptions: {
-    area: { fillOpacity: 0.25 },
-    series: {
-      lineWidth: 1.5,
-      marker: { radius: 3, symbol: 'circle' },
-      dataGrouping: { enabled: false },
-      point: {
-        events: {
-          click: function () {
-            if (this.selected) this.select(false, true);
-            else this.select(true, true);
+          legend: { enabled: false },
+
+          tooltip: {
+            valueDecimals: 2,
+            split: false, shared: false,
+            followPointer: false, stickOnContact: true,
+            useHTML: true, outside: true,
+            style: { pointerEvents: 'auto', whiteSpace: 'normal' },
+            positioner: function (labelWidth, labelHeight) {
+              const chartPos = this.chart.pointer.getChartPosition();
+              const anchor =
+                document.querySelector('#machine-bar .collapsible.machines') ||
+                document.querySelector('#machine-bar .collapsible') ||
+                document.getElementById('machine-bar');
+              if (anchor) {
+                const r = anchor.getBoundingClientRect();
+                const x = r.left - chartPos.left;
+                const y = r.top  - chartPos.top + 100;
+                return { x, y };
+              }
+              return { x: 10, y: 10 };
+            },
+            formatter: function () {
+              // lineage / ALE info from series-level custom metadata
+              const custom = (this.series && this.series.options && this.series.options.custom) || {};
+              const lineageLabel = custom.lineageLabel || this.series.name || '';
+              const aleId = custom.aleId != null ? String(custom.aleId) : 'n/a';
+
+              // pull per-point fields (batch, media, hasCryo, compName for MR series)
+              const batch = (this.point && this.point.batch) ??
+                            (this.series.userOptions.data?.[this.point.index]?.[2]);
+              const media = (this.point && this.point.media) ??
+                            (this.series.userOptions.data?.[this.point.index]?.[3]);
+              const hasCryo = (typeof this.point?.hasCryo === 'boolean') ? this.point.hasCryo : undefined;
+              const compName = this.point && this.point.compName;
+
+              // time text (handles days vs. dates mode)
+              const timeText = (window.xAxisMode === 'dates')
+                ? Highcharts.dateFormat('%Y-%m-%d %H:%M', this.x)
+                : `${Highcharts.numberFormat(this.x, 2)} days`;
+
+              const yAxisLabel = this.series.yAxis?.options?.title?.text || 'Value';
+              const yVal = (this.y != null && isFinite(this.y)) ? Highcharts.numberFormat(this.y, 3) : 'n/a';
+
+              return `
+                <div style="display:flex; gap:6px; align-items:flex-start; min-width:290px">
+                  <div style="flex:0 0 90px; max-width:90px; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
+                    <div style="font-size:1.1rem; font-weight:700; line-height:1.25;">
+                      ${escapeHTML(lineageLabel)}
+                    </div>
+                    <div style="font-size:1rem; opacity:0.7; margin-top:2px;">
+                      ALE&nbsp;ID: ${escapeHTML(aleId)}
+                    </div>
+                  </div>
+                  <div>
+                    <b>${escapeHTML(yAxisLabel)}:</b> ${yVal}<br/>
+                    Time: ${timeText}<br/>
+                    Batch: ${batch ?? 'n/a'}<br/>
+                    Media: ${media ?? 'n/a'}<br/>
+                    ${compName ? `Component: ${escapeHTML(String(compName))}<br/>` : '' }
+                    ${hasCryo === undefined ? '' : `Cryostock: ${hasCryo ? 'Yes' : 'No'}<br/>`}
+                  </div>
+                </div>
+              `;
+            }
           }
-        }
-      }
-    }
-  },
-
-  legend: { enabled: false },
-
-  tooltip: {
-    valueDecimals: 2,
-    split: false, shared: false,
-    followPointer: false, stickOnContact: true,
-    useHTML: true, outside: true,
-    style: { pointerEvents: 'auto', whiteSpace: 'normal' },
-    positioner: function (labelWidth, labelHeight) {
-      const chartPos = this.chart.pointer.getChartPosition();
-      const anchor =
-        document.querySelector('#machine-bar .collapsible.machines') ||
-        document.querySelector('#machine-bar .collapsible') ||
-        document.getElementById('machine-bar');
-      if (anchor) {
-        const r = anchor.getBoundingClientRect();
-        const x = r.left - chartPos.left;
-        const y = r.top  - chartPos.top + 100;
-        return { x, y };
-      }
-      return { x: 10, y: 10 };
-    },
-    formatter: function () {
-      const custom = (this.series && this.series.options && this.series.options.custom) || {};
-      const lineageLabel = custom.lineageLabel || this.series.name || '';
-      const aleId = custom.aleId != null ? String(custom.aleId) : 'n/a';
-
-      const batch = (this.point && this.point.batch) ??
-                    (this.series.userOptions.data?.[this.point.index]?.[2]);
-      const media = (this.point && this.point.media) ??
-                    (this.series.userOptions.data?.[this.point.index]?.[3]);
-      const hasCryo = (typeof this.point?.hasCryo === 'boolean') ? this.point.hasCryo : undefined;
-      const compName = this.point && this.point.compName;
-
-      const timeText = (window.xAxisMode === 'dates')
-        ? Highcharts.dateFormat('%Y-%m-%d %H:%M', this.x)
-        : `${Highcharts.numberFormat(this.x, 2)} days`;
-
-      const yAxisLabel = this.series.yAxis?.options?.title?.text || 'Value';
-      const yVal = (this.y != null && isFinite(this.y)) ? Highcharts.numberFormat(this.y, 3) : 'n/a';
-
-      return `
-        <div style="display:flex; gap:6px; align-items:flex-start; min-width:290px">
-          <div style="flex:0 0 90px; max-width:90px; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
-            <div style="font-size:1.1rem; font-weight:700; line-height:1.25;">
-              ${escapeHTML(lineageLabel)}
-            </div>
-            <div style="font-size:1rem; opacity:0.7; margin-top:2px;">
-              ALE&nbsp;ID: ${escapeHTML(aleId)}
-            </div>
-          </div>
-          <div>
-            <b>${escapeHTML(yAxisLabel)}:</b> ${yVal}<br/>
-            Time: ${timeText}<br/>
-            Batch: ${batch ?? 'n/a'}<br/>
-            Media: ${media ?? 'n/a'}<br/>
-            ${compName ? `Component: ${escapeHTML(String(compName))}<br/>` : '' }
-            ${hasCryo === undefined ? '' : `Cryostock: ${hasCryo ? 'Yes' : 'No'}<br/>`}
-          </div>
-        </div>
-      `;
-    }
-  }
-});
+        });
 
 
     </script>
