@@ -101,6 +101,39 @@
           line-height: 1.1;
           cursor: pointer;
         }
+        /* Keep each control pack on one line */
+        .options_row .field {
+          display: inline-flex;
+          align-items: center;
+          gap: .35rem;
+          flex-wrap: nowrap;
+          flex: 0 0 auto;   /* don't stretch */
+        }
+
+        /* Make the buttons small and not full width */
+        .options_row .field .btn-small,
+        .options_row .btn-small {
+          display: inline-flex;
+          align-items: center;
+          width: auto !important;   /* override any global 100% width */
+          padding: .25rem .5rem;
+          font-size: 0.85rem;
+          line-height: 1.1;
+          flex: 0 0 auto;           /* don't flex-grow */
+          white-space: nowrap;
+        }
+
+        /* Ensure number inputs in these control packs are compact */
+        .options_row .field input[type="number"] {
+          width: 6.5rem;
+          padding: .2rem .4rem;
+          font-size: 0.9rem;
+          flex: 0 0 auto;
+        }
+
+        /* Optional: prevent any child from auto-stretching in the row */
+        .options_row > * { flex: 0 0 auto; }
+
 
     </style>
 
@@ -284,11 +317,11 @@
           }
 
           // Toggle the control & reset range for days mode
-          updateXControlsVisibility();
+
           if (xAxisMode === 'days') {
             const sel = document.getElementById('days_window');
             if (sel) sel.value = '0';  // All
-            setDaysWindow(0);
+
           }
 
           mainChart.redraw();
@@ -433,21 +466,27 @@
             </select>
           </div>
 
-          <!-- Row 2: compact Y-bounds -->
-          <div class="options_row">
-            <label>OD Y:</label>
-            <input id="od_min" type="number" step="any" placeholder="min">
-            <input id="od_max" type="number" step="any" placeholder="max">
-            <button type="button" class="btn-small" onclick="applyYBounds(0)">Apply</button>
-            <button type="button" class="btn-small" onclick="resetYBounds(0)">Auto</button>
 
-            <label>GR Y:</label>
-            <input id="gr_min" type="number" step="any" placeholder="min">
-            <input id="gr_max" type="number" step="any" placeholder="max">
-            <button type="button" class="btn-small" onclick="applyYBounds(1)">Apply</button>
-            <button type="button" class="btn-small" onclick="resetYBounds(1)">Auto</button>
-          </div>
-        </div>
+            <!-- Row 2: compact Y-bounds -->
+            <div class="options_row">
+              <span class="field">
+                <label>OD Y:</label>
+                <input id="od_min" type="number" step="any" placeholder="min">
+                <input id="od_max" type="number" step="any" placeholder="max">
+                <button type="button" class="btn-small" onclick="applyYBounds(0)">Apply</button>
+                <button type="button" class="btn-small" onclick="resetYBounds(0)">Auto</button>
+              </span>
+
+              <span class="field">
+                <label>GR Y:</label>
+                <input id="gr_min" type="number" step="any" placeholder="min">
+                <input id="gr_max" type="number" step="any" placeholder="max">
+                <button type="button" class="btn-small" onclick="applyYBounds(1)">Apply</button>
+                <button type="button" class="btn-small" onclick="resetYBounds(1)">Auto</button>
+              </span>
+            </div>
+
+
 
 
     <script>
@@ -1173,12 +1212,10 @@ gogglesSocket.onerror = function () {
         xAxisMode = document.getElementById('x_scale').value === 'dates' ? 'dates' : 'days';
         mainChart.xAxis[0].update({ type: xAxisMode === 'dates' ? 'datetime' : 'linear' }, false);
         updateRangeSelectorVisibility();
-        updateXControlsVisibility();
+
         const daysSel = document.getElementById('days_window');
         if (daysSel) daysSel.value = '0'; // default to All
-        if (xAxisMode === 'days') {
-          setDaysWindow(0); //
-        }
+
 
 
     </script>
