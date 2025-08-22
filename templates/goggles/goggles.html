@@ -318,10 +318,7 @@
         if (!wrap) return;
         wrap.style.display = (xAxisMode === 'days') ? '' : 'none';
       }
-      updateXControlsVisibility();
-        if (xAxisMode === 'days') {
-          setDaysWindow(0); // default to “All”
-        }
+
 
     </script>
 
@@ -1170,6 +1167,13 @@ gogglesSocket.onerror = function () {
         // Ensure axis starts in the same mode as the dropdown
         xAxisMode = document.getElementById('x_scale').value === 'dates' ? 'dates' : 'days';
         mainChart.xAxis[0].update({ type: xAxisMode === 'dates' ? 'datetime' : 'linear' }, false);
+        updateXControlsVisibility();
+        const daysSel = document.getElementById('days_window');
+        if (daysSel) daysSel.value = '0'; // default to All
+        if (xAxisMode === 'days') {
+          setDaysWindow(0); //
+        }
+
 
     </script>
     {{ ales|json_script:"ale_data" }}
