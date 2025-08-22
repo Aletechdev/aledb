@@ -306,6 +306,12 @@
 
       // Initialize the dropdown once the DOM is ready
       document.addEventListener('DOMContentLoaded', () => {
+          // populate GR model choices
+          populateGrowthRateDropdown();
+
+          // ensure the select reflects the current state
+          const grSel = document.getElementById('experiment_GR_type');
+          if (grSel && !grSel.value) grSel.value = selectedGRType;
           if (mainChart?.yAxis?.[3]) {
             mainChart.yAxis[3].setTitle({ text: `Media Ratio (component #${selectedMediaComponent})` }, false);
             mainChart.redraw();
@@ -834,7 +840,7 @@ if (existingOD) {
     yAxis: 3,
     showInNavigator: false,
     dashStyle: 'Solid',
-  }, false);
+  });
 
   if (!selected_ale_ids.includes(baseId)) {
     selected_ale_ids.push(baseId);
