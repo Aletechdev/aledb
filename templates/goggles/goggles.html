@@ -662,14 +662,18 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
 
         var yAxisMode = "linear"
         gogglesSocket.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-            console.log(data)
-            if (data && data.error) {
+          const data = JSON.parse(e.data);
+          console.log(data);
+
+          // Early guard for server-side errors
+          if (data && data.error) {
             console.error("[goggles] server error:", data.error);
-            showStatus('Data error', 'status-reconnecting');  // non-intrusive pill
+            showStatus('Data error', 'status-reconnecting');
             return;
-            const message = data['message'];
-              if (!message || !Array.isArray(message) || !Array.isArray(message[1])) {
+          }
+
+          const message = data['message'];
+          if (!message || !Array.isArray(message) || !Array.isArray(message[1])) {
             console.warn("[goggles] unexpected payload shape:", data);
             return;
           }
