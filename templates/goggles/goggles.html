@@ -102,6 +102,15 @@
         const selected_ales = []
         const selected_ale_ids = []
         const lineageMeta = {};
+        <script>
+
+          let selectedWavelength = '620A';  // default
+          function handleSelectWavelength() {
+            const el = document.getElementById('wl_select');
+            selectedWavelength = el ? el.value : '620A';
+            refresh_data();  // re-pull & replot using the chosen wavelength
+          }
+        </script>
     </script>
 
     <script>
@@ -221,6 +230,18 @@
             <label class="form-check-label" for="inlineCheckbox1">Growth Rate Type:</label>
             <select id="experiment_GR_type" onchange="handleSelectGrowthRateType()">
                 <option selected value=""></option>
+            </select>
+            <label class="form-check-label" for="wl_select">Wavelength:</label>
+            <select id="wl_select" onchange="handleSelectWavelength()">
+              <!-- Default 620A -->
+              <option selected value="620A">620A</option>
+              <option value="640A">640A</option>
+              <option value="480A">480A</option>
+              <option value="580A">580A</option>
+              <option value="620R">620R</option>
+              <option value="640R">640R</option>
+              <option value="480R">480R</option>
+              <option value="580R">580R</option>
             </select>
 
 
@@ -482,7 +503,8 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
             'machine': message[2],
             'data_id': message[3],
             'sample_name': message[4],
-            'gr_type': selectedGRType
+            'gr_type': selectedGRType,
+            'wavelength': selectedWavelength
           }));
         }
 

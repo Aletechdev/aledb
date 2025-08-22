@@ -29,17 +29,18 @@ class GogglesConsumer(WebsocketConsumer):
             data_id = text_data_json['data_id']
             sample_name = text_data_json['sample_name']
             gr_type = text_data_json.get('gr_type')
+            wavelength = text_data_json.get('wavelength')
 
 
 
             logger.info(
                 f"Parsed WebSocket message - machine={machine}, db_id={db_id}, "
-                f"sample={sample_name}, gr_type={gr_type}"
+                f"sample={sample_name}, gr_type={gr_type}, wavelength={wavelength}"
             )
 
             logger.info("Calling get_experiment_data()...")
             exp_start = time.time()
-            exp_data = get_experiment_data(machine, db_id, gr_type)
+            exp_data = get_experiment_data(machine, db_id, gr_type, wavelength)
 
             logger.info(f"get_experiment_data() completed in {time.time() - exp_start:.2f} seconds. "
                         f"OD count={len(exp_data[0])}, GR count={len(exp_data[1])}, Temp count={len(exp_data[2])}")

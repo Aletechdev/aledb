@@ -147,8 +147,8 @@ def compile_projects_with_experiments(machine_dir: Path):
                 meta["experiment_ale_ids"][idx],                  # 1: ALE ID
                 meta["experiment_descriptions"][idx],             # 2: Description
                 meta["experiment_active_protocols"][idx],         # 3: Protocol
-                None,                                              # 4: Filter toggle (placeholder)
-                None,                                              # 5: Media (placeholder)
+                None,                                              # 4: placeholder
+                None,                                              # 5: placeholder
                 f"{meta['experiment_descriptions'][idx]},#{exp_dbid}",  # 6: Unique string
                 exp_dbid                                           # 7: DB ID
             )
@@ -160,6 +160,28 @@ def compile_projects_with_experiments(machine_dir: Path):
         }
 
     return projects
+def _norm_wl(wl: Optional[str]) -> Optional[str]:
+    return wl.strip().lower() if isinstance(wl, str) else None
+
+def _resolve_wl_key(container: dict, wl: str) -> Optional[str]:
+    """Find the exact dict key for a wavelength, case-insensitive."""
+    if wl in container:
+        return wl
+    lw = wl.lower()
+    for k in container.keys():
+        if str(k).lower() == lw:
+            return k
+    return None
+
+def _default_wl(exp: dict) -> Optional[str]:
+    """Prefer 620A; else primary; else first measurement_types."""
+    mts = [str(x).lower() for x in (exp.get("measurement_types") or [])]
+    if "620a" in mts:
+        return "620a"
+    pm = _norm_wl(exp.get("primary_measurement_type"))
+    if pm:
+        return pm
+    return mts[0] if mts else None
 
 def _iso_to_epoch_ms(ts_iso: str) -> int:
     # Convert ISO datetime string to milliseconds since epoch (UTC)
@@ -167,7 +189,7 @@ def _iso_to_epoch_ms(ts_iso: str) -> int:
     if dt.tzinfo is None:
         dt = dt.replace(tzinfo=timezone.utc)
     return int(dt.timestamp() * 1000)
-def get_experiment_data(ale_machine: str, experiment_id: int, gr_type: Optional[str] = None):
+def get_experiment_data(ale_machine: str,experiment_id: int,gr_type: Optional[str] = None,wavelength: Optional[str] = None):
     start_time = time.time()
     logger.info(f"get_experiment_data() called for machine={ale_machine}, experiment_id={experiment_id}")
 
@@ -199,12 +221,17 @@ def get_experiment_data(ale_machine: str, experiment_id: int, gr_type: Optional[
         exp = json.load(f)
     logger.debug("Experiment JSON loaded successfully")
 
-    wl = exp.get("primary_measurement_type") or (exp.get("measurement_types") or [None])[0]
-    logger.debug(f"Selected wavelength (wl) = {wl}")
+    requested_wl = _norm_wl(wavelength)
+    wl = requested_wl or _default_wl(exp)
+    logger.debug(f"Selected wavelength (requested={requested_wl}) -> wl={wl}")
 
     if not wl:
         logger.warning(f"No wavelength found for experiment_id={experiment_id}")
-        return [[], [], [], {"last_modified": None}]
+        return [[], [], [], {
+            "last_modified": exp.get("last_updated"),
+            "selected_wavelength": None,
+            "available_wavelengths": exp.get("measurement_types") or []
+        }]
 
     measurement_list: List[List[Any]] = []
     growth_rate_list: List[List[Any]] = []
@@ -217,7 +244,9 @@ def get_experiment_data(ale_machine: str, experiment_id: int, gr_type: Optional[
         batch_count += 1
         batch_id = batch.get("batch_id")
         media_desc = (batch.get("media") or {}).get("description", "N/A")
-        measurements = (batch.get("measurements") or {}).get(wl)
+        meas_all = (batch.get("measurements") or {})
+        wl_key_meas = _resolve_wl_key(meas_all, wl)
+        measurements = meas_all.get(wl_key_meas) if wl_key_meas else None
         has_cryo = batch.get("cryostock")
         has_cryo = bool(has_cryo) if has_cryo is not None else False
         if not measurements:
@@ -236,13 +265,14 @@ def get_experiment_data(ale_machine: str, experiment_id: int, gr_type: Optional[
             # OD values
             od_val = max(round(float(od), 3), 0.01)
             measurement_list.append([ts_ms, od_val, batch_id, media_desc,has_cryo])
-            # Temperature values (filtered like old version)
+            # Temperature values
             if temp_c is not None and TEMPERATURE_MIN < float(temp_c) < TEMPERATURE_MAX:
                 temperature_measurements_list.append([ts_ms, float(temp_c), batch_id, media_desc])
 
         # Growth rate: explicit selection or fallback
-        gf = (batch.get("growth_fits") or {}).get(wl, {})
-        gr_val = _select_gr_value(gf, gr_type)
+        gf_all = (batch.get("growth_fits") or {})
+        gf_by_wl = gf_all.get(_resolve_wl_key(gf_all, wl), {})
+        gr_val = _select_gr_value(gf_by_wl, gr_type)
         logger.debug(f"Batch {batch_id}: selected GR model={gr_type or 'fallback'} value={gr_val}")
         if gr_val is not None and times:
             growth_rate_list.append([_iso_to_epoch_ms(times[-1]), float(gr_val), batch_id, media_desc, has_cryo])
@@ -252,4 +282,11 @@ def get_experiment_data(ale_machine: str, experiment_id: int, gr_type: Optional[
         f"(OD={len(measurement_list)}, GR={len(growth_rate_list)}, Temp={len(temperature_measurements_list)})"
     )
 
-    return [measurement_list, growth_rate_list, temperature_measurements_list, {"last_modified":last_modified}]
+    available = exp.get("measurement_types") or []
+    meta = {
+        "last_modified": last_modified,
+        "selected_wavelength": wl,
+        "available_wavelengths": available,
+        "primary_measurement_type": exp.get("primary_measurement_type"),
+    }
+    return [measurement_list, growth_rate_list, temperature_measurements_list, meta]
