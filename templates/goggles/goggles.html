@@ -71,6 +71,37 @@
         }
         .dataTables_scrollHead { display: block !important; }
         .options_bar .goggles-option select { min-width: 12rem; }
+        .options_bar {
+          position: fixed;
+          bottom: .5em;
+          z-index: 100;
+          display: flex;
+          flex-direction: column;
+          gap: .35rem;
+        }
+
+        .options_row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: .5rem 1rem;
+        }
+
+        .options_row label { padding-left: 0; }
+
+        .options_bar input[type="number"] {
+          width: 6.5rem;
+          padding: .2rem .4rem;
+          font-size: 0.9rem;
+        }
+
+        .btn-small {
+          padding: .2rem .5rem;
+          font-size: 0.85rem;
+          line-height: 1.1;
+          cursor: pointer;
+        }
+
     </style>
 
     <script src="https://code.highcharts.com/stock/11.4.8/highstock.js"></script>
@@ -96,6 +127,7 @@
         const format = document.getElementById('x_scale').value;
         xAxisMode = (format === 'dates') ? 'dates' : 'days';
         applyXAxisMode();
+        updateRangeSelectorVisibility();
       }
     </script>
     <script>
@@ -260,9 +292,18 @@
           }
 
           mainChart.redraw();
+          updateRangeSelectorVisibility();
         }
 
 
+    </script>
+    <script>
+      function updateRangeSelectorVisibility() {
+        if (!window.mainChart) return;
+        const enabled = (xAxisMode !== 'days');
+        mainChart.update({ rangeSelector: { enabled } }, false);
+        mainChart.redraw();
+      }
     </script>
 
     <script>
@@ -292,32 +333,7 @@
         mainChart.yAxis[axisIdx].setExtremes(null, null);
       }
 
-      // ---- “Days window” controls for when xAxisMode === 'days' ----
-      function setDaysWindow(days){
-        const xa = mainChart.xAxis[0];
-        const ex = xa.getExtremes();
-        if (!ex || ex.dataMin == null || ex.dataMax == null) return;
 
-        if (!days || days <= 0){ // “All”
-          xa.setExtremes(ex.dataMin, ex.dataMax);
-          return;
-        }
-        const max = ex.dataMax;
-        const min = Math.max(ex.dataMin, max - days);
-        xa.setExtremes(min, max);
-      }
-
-      function applyDaysWindow(){
-        const sel = document.getElementById('days_window');
-        const days = Number(sel?.value) || 0;
-        setDaysWindow(days);
-      }
-
-      function updateXControlsVisibility(){
-        const wrap = document.getElementById('days_window_wrap');
-        if (!wrap) return;
-        wrap.style.display = (xAxisMode === 'days') ? '' : 'none';
-      }
 
 
     </script>
@@ -375,25 +391,28 @@
           }
         });
     </script>
-    <div class="options_bar" style="position: fixed; bottom:.5em; z-index: 100;">
-        <div class="goggles-option">
-            <label class="form-check-label" for="inlineCheckbox1">X-Axis Format:</label>
+    <div class="options_bar">
+
+          <div class="options_row">
+            <label>X-Axis Format:</label>
             <select id="x_scale" onchange="handleSelectChangeX(event)">
-                <option selected value="days">Days</option>
-                <option value="dates">Dates</option>
+              <option selected value="days">Days</option>
+              <option value="dates">Dates</option>
             </select>
-            <label class="form-check-label" for="inlineCheckbox1">Y-Axis Scaling:</label>
+
+            <label>Y-Axis Scaling:</label>
             <select id="y_scale" onchange="handleSelectChangeY(event)">
-                <option value="linear">Linear</option>
-                <option value="ln">Log</option>
+              <option value="linear">Linear</option>
+              <option value="ln">Log</option>
             </select>
-            <label class="form-check-label" for="inlineCheckbox1">Growth Rate Type:</label>
+
+            <label>Growth Rate Type:</label>
             <select id="experiment_GR_type" onchange="handleSelectGrowthRateType()">
-                <option selected value=""></option>
+              <option selected value=""></option>
             </select>
-            <label class="form-check-label" for="wl_select">Wavelength:</label>
+
+            <label>Wavelength:</label>
             <select id="wl_select" onchange="handleSelectWavelength()">
-              <!-- Default 620A -->
               <option selected value="620A">620A</option>
               <option value="640A">640A</option>
               <option value="480A">480A</option>
@@ -403,8 +422,8 @@
               <option value="480R">480R</option>
               <option value="580R">580R</option>
             </select>
-            <!-- Media components -->
-            <label class="form-check-label" for="media_component_select">Media component #:</label>
+
+            <label>Media component #:</label>
             <select id="media_component_select" onchange="handleMediaComponentChange()">
               <option value="1" selected>1</option>
               <option value="2">2</option>
@@ -412,38 +431,24 @@
               <option value="4">4</option>
               <option value="5">5</option>
             </select>
-            <!-- Y-axis bounds -->
-            <label style="margin-left:1em;">OD Y:</label>
-            <input id="od_min" type="number" step="any" placeholder="min" style="width:6.5rem;">
-            <input id="od_max" type="number" step="any" placeholder="max" style="width:6.5rem;">
-            <button type="button" onclick="applyYBounds(0)">Apply</button>
-            <button type="button" onclick="resetYBounds(0)">Auto</button>
+          </div>
 
-            <label style="margin-left:1em;">GR Y:</label>
-            <input id="gr_min" type="number" step="any" placeholder="min" style="width:6.5rem;">
-            <input id="gr_max" type="number" step="any" placeholder="max" style="width:6.5rem;">
-            <button type="button" onclick="applyYBounds(1)">Apply</button>
-            <button type="button" onclick="resetYBounds(1)">Auto</button>
+          <!-- Row 2: compact Y-bounds -->
+          <div class="options_row">
+            <label>OD Y:</label>
+            <input id="od_min" type="number" step="any" placeholder="min">
+            <input id="od_max" type="number" step="any" placeholder="max">
+            <button type="button" class="btn-small" onclick="applyYBounds(0)">Apply</button>
+            <button type="button" class="btn-small" onclick="resetYBounds(0)">Auto</button>
 
-            <!-- Days window (used only when X = days) -->
-            <span id="days_window_wrap" style="margin-left:1em; display:none;">
-              <label>Days window:</label>
-              <select id="days_window" onchange="applyDaysWindow()">
-                <option value="0">All</option>
-                <option value="0.0416667">1h</option>
-                <option value="0.25">6h</option>
-                <option value="1">1d</option>
-                <option value="7">1w</option>
-                <option value="14">2w</option>
-                <option value="30">1m</option>
-                <option value="90">3m</option>
-              </select>
-            </span>
-
-
-
+            <label>GR Y:</label>
+            <input id="gr_min" type="number" step="any" placeholder="min">
+            <input id="gr_max" type="number" step="any" placeholder="max">
+            <button type="button" class="btn-small" onclick="applyYBounds(1)">Apply</button>
+            <button type="button" class="btn-small" onclick="resetYBounds(1)">Auto</button>
+          </div>
         </div>
-    </div>
+
 
     <script>
       function handleSelectChangeY() {
@@ -1167,6 +1172,7 @@ gogglesSocket.onerror = function () {
         // Ensure axis starts in the same mode as the dropdown
         xAxisMode = document.getElementById('x_scale').value === 'dates' ? 'dates' : 'days';
         mainChart.xAxis[0].update({ type: xAxisMode === 'dates' ? 'datetime' : 'linear' }, false);
+        updateRangeSelectorVisibility();
         updateXControlsVisibility();
         const daysSel = document.getElementById('days_window');
         if (daysSel) daysSel.value = '0'; // default to All
