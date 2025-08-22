@@ -45,19 +45,35 @@ def get_ale_machines():
 def _select_gr_value(gf: dict, gr_type: Optional[str]) -> Optional[float]:
     """Return the requested growth-rate value from a growth_fits dict.
     Accept 0.0 as valid; only None/-1 are considered missing.
+
     """
     def valid(v) -> bool:
         return v is not None and v != -1
 
-    # No explicit model requested → keep current fallback order
-    if not gr_type:
+
+    if isinstance(gr_type, (list, tuple)) and gr_type:
+        try:
+            family = str(gr_type[0]).lower()
+            model  = str(gr_type[1]) if len(gr_type) > 1 else ''
+            lag    = int(gr_type[2]) if len(gr_type) > 2 else 0
+            if family == 'curveball' and model:
+                # normalize 'Logistic' + lag → 'gr_curveball_Logistic' or '...LagN'
+                lag_suffix = f'Lag{lag}' if lag else ''
+                gr_type = f'gr_curveball_{model}{lag_suffix}'
+            else:
+                gr_type = None
+        except Exception:
+            gr_type = None
+
+    # No explicit model requested → legacy fallback
+    if not gr_type or not isinstance(gr_type, str):
         for key in ("gr_bestfit", "gr_original", "gr_awf", "gr_croissance"):
             v = gf.get(key)
             if valid(v):
                 return float(v)
-        return None  # (no curveball fallback in legacy behavior)
+        return None  # no curveball fallback in legacy behavior
 
-    # Curveball variants
+    # Curveball variants (string)
     if gr_type.startswith("gr_curveball_"):
         target = CURVEBALL_MAP.get(gr_type)
         if not target:
@@ -73,6 +89,7 @@ def _select_gr_value(gf: dict, gr_type: Optional[str]) -> Optional[float]:
     # Plain keys
     v = gf.get(gr_type)
     return float(v) if valid(v) else None
+
 def get_initial_data():
 
     """

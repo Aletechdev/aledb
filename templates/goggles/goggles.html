@@ -592,17 +592,10 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
           gogglesSocket.onerror = function () {
             showStatus('Disconnected', 'status-disconnected');
           };
-        function toServerGRType(val) {
-          if (!val) return 'gr_bestfit';
-          if (!val.startsWith('gr_curveball_')) return val; // leave legacy types as-is
+            function toServerGRType(val) {
+              return val || 'gr_bestfit'; // always a string
+            }
 
-          // "gr_curveball_LogisticLag1" → ['curveball','Logistic',1]
-          const tail = val.replace('gr_curveball_', '');
-          const lagMatch = tail.match(/Lag(\d+)$/);
-          const lag = lagMatch ? parseInt(lagMatch[1], 10) : 0;
-          const model = tail.replace(/Lag\d+$/, '');
-          return ['curveball', model, lag];
-        }
         function sendMessage(message) {
           if (!Array.isArray(message) || message.length < 5) {
             console.warn("[sendMessage] malformed message", message);
