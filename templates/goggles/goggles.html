@@ -592,22 +592,35 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
           gogglesSocket.onerror = function () {
             showStatus('Disconnected', 'status-disconnected');
           };
+        function toServerGRType(val) {
+          if (!val) return 'gr_bestfit';
+          if (!val.startsWith('gr_curveball_')) return val; // leave legacy types as-is
 
+          // "gr_curveball_LogisticLag1" → ['curveball','Logistic',1]
+          const tail = val.replace('gr_curveball_', '');
+          const lagMatch = tail.match(/Lag(\d+)$/);
+          const lag = lagMatch ? parseInt(lagMatch[1], 10) : 0;
+          const model = tail.replace(/Lag\d+$/, '');
+          return ['curveball', model, lag];
+        }
         function sendMessage(message) {
           if (!Array.isArray(message) || message.length < 5) {
             console.warn("[sendMessage] malformed message", message);
             return;
           }
-          gogglesSocket.send(JSON.stringify({
-            'db_id': message[0],
-            'name': message[1],
-            'machine': message[2],
-            'data_id': message[3],
-            'sample_name': message[4],
-            'gr_type': selectedGRType,
-            'wavelength': selectedWavelength
-          }));
+          const payload = {
+            db_id: message[0],
+            name: message[1],
+            machine: message[2],
+            data_id: message[3],
+            sample_name: message[4],
+            gr_type: toServerGRType(selectedGRType), // <-- here
+            wavelength: selectedWavelength
+          };
+          console.log('[sendMessage] payload:', payload);
+          gogglesSocket.send(JSON.stringify(payload));
         }
+
 
 
 
