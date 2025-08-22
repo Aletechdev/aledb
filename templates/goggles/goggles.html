@@ -339,6 +339,7 @@
               mainChart.rangeSelector.clickButton(allIdx, true);
     }
   }
+  updateZeroLineX();
         }
 
 
@@ -1037,217 +1038,203 @@ gogglesSocket.onerror = function () {
     <script>
         Highcharts.setOptions({ time: { useUTC: false }});
         console.time('line');
+
         const mainChart = Highcharts.stockChart('mainChart', {
-            navigator: { baseSeries: 0 },
-            xAxis: [{
-                ordinal: false,
-            }],
-             yAxis: [{
-              height: '45%',                    // 0–45%
-              title: { text: 'OD' },
-              labels: { style: { fontSize: '14 px' } }
+          chart: {
+            zoomType: 'x',
+            panning: true,
+            panKey: 'shift',
+            backgroundColor: '#ffffff',
+            marginLeft: 80 // more room for big left-side labels
+          },
+
+          navigator: { baseSeries: 0 },
+
+          // X axis styling + (optional) x=0 line handled by updateZeroLineX()
+          xAxis: [{
+            ordinal: false,
+            type: 'linear',                // will be switched to 'datetime' when needed
+            lineColor: '#000000',
+            lineWidth: 2,
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            tickColor: '#000000',
+            tickWidth: 2,
+            tickLength: 6,
+            tickPosition: 'outside',
+            labels: {
+              style: { fontSize: '16px', fontWeight: '600' }
+            }
+          }],
+
+          // Four stacked y-axes, all on the LEFT, uniform look, and y=0 reference line
+          yAxis: [{
+            height: '45%',
+            opposite: false,
+            title: { text: 'OD', style: { fontSize: '18px', fontWeight: '700' } },
+            labels: { style: { fontSize: '16px', fontWeight: '600' } },
+            lineColor: '#000000', lineWidth: 2,
+            gridLineWidth: 0, minorGridLineWidth: 0,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'outside',
+            plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
+          }, {
+            top: '45%', height: '25%',
+            opposite: false,
+            title: { text: 'Growth Rate', style: { fontSize: '18px', fontWeight: '700' } },
+            labels: { style: { fontSize: '16px', fontWeight: '600' } },
+            lineColor: '#000000', lineWidth: 2,
+            gridLineWidth: 0, minorGridLineWidth: 0,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'outside',
+            plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
+          }, {
+            top: '70%', height: '15%',
+            opposite: false,
+            title: { text: 'Temperature °C', style: { fontSize: '18px', fontWeight: '700' } },
+            labels: { style: { fontSize: '16px', fontWeight: '600' } },
+            lineColor: '#000000', lineWidth: 2,
+            gridLineWidth: 0, minorGridLineWidth: 0,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'outside',
+            plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
+          }, {
+            top: '85%', height: '15%',
+            opposite: false,
+            title: { text: 'Media Ratio (component #1)', style: { fontSize: '18px', fontWeight: '700' } },
+            labels: { style: { fontSize: '16px', fontWeight: '600' } },
+            lineColor: '#000000', lineWidth: 2,
+            gridLineWidth: 0, minorGridLineWidth: 0,
+            tickColor: '#000000', tickWidth: 2, tickLength: 6, tickPosition: 'outside',
+            min: 0,
+            plotLines: [{ value: 0, color: '#000000', width: 2, zIndex: 5 }]
+          }],
+
+          rangeSelector: {
+            enabled: true,
+            selected: 7,
+            buttons: [{
+              type: 'hour', count: 1, text: '1h', title: 'View 1 hour'
             }, {
-              opposite: true,
-              top: '45%', height: '25%',        // 45–70%
-              title: { text: 'Growth Rate' },
-              labels: { style: { fontSize: '14 px' } }
+              type: 'hour', count: 6, text: '6h', title: 'View 6 hours'
             }, {
-              opposite: true,
-              top: '70%', height: '15%',        // 70–85%
-              title: { text: 'Temperature °C' },
-              labels: { style: { fontSize: '14 px' } }
+              type: 'day', count: 1, text: '1d', title: 'View 1 day'
             }, {
-              opposite: true,
-              top: '85%', height: '15%',        // 85–100%  ✅ now visible
-              title: { text: 'Media Ratio (component #1)' },
-              labels: { style: { fontSize: '14 px' } },
-              min: 0
-            }],
-            rangeSelector: {
-                enabled: true,
-                selected: 7,
-                buttons: [{
-                    type: 'hour',
-                    count: 1,
-                    text: '1h',
-                    title: 'View 1 hour'
-                }, {
-                    type: 'hour',
-                    count: 6,
-                    text: '6h',
-                    title: 'View 6 hours'
-                }, {
-                    type: 'day',
-                    count: 1,
-                    text: '1d',
-                    title: 'View 1 day'
-                }, {
-                    type: 'week',
-                    count: 1,
-                    text: '1w',
-                    title: 'View 1 week'
-                }, {
-                    type: 'week',
-                    count: 2,
-                    text: '2w',
-                    title: 'View 2 weeks'
-                }, {
-                    type: 'month',
-                    count: 1,
-                    text: '1m',
-                    title: 'View 1 month'
-                }, {
-                    type: 'month',
-                    count: 3,
-                    text: '3m',
-                    title: 'View 3 months'
-                }, {
-                    type: 'all',
-                    text: 'All',
-                    title: 'View all'
-                }]
+              type: 'week', count: 1, text: '1w', title: 'View 1 week'
+            }, {
+              type: 'week', count: 2, text: '2w', title: 'View 2 weeks'
+            }, {
+              type: 'month', count: 1, text: '1m', title: 'View 1 month'
+            }, {
+              type: 'month', count: 3, text: '3m', title: 'View 3 months'
+            }, {
+              type: 'all', text: 'All', title: 'View all'
+            }]
+          },
+
+          plotOptions: {
+            area: { fillOpacity: 0.25 },
+            series: {
+              lineWidth: 1.5,
+              marker: { radius: 3, symbol: 'circle' },
+              dataGrouping: { enabled: false },
+              point: {
+                events: {
+                  click: function () {
+                    if (this.selected) this.select(false, true);
+                    else this.select(true, true);
+                  }
+                }
+              }
+            }
+          },
+
+          legend: { enabled: false },
+
+          tooltip: {
+            valueDecimals: 2,
+            split: false, shared: false,
+            followPointer: false, stickOnContact: true,
+            useHTML: true, outside: true,
+            style: { pointerEvents: 'auto', whiteSpace: 'normal' },
+            positioner: function (labelWidth, labelHeight) {
+              const chartPos = this.chart.pointer.getChartPosition();
+              const anchor =
+                document.querySelector('#machine-bar .collapsible.machines') ||
+                document.querySelector('#machine-bar .collapsible') ||
+                document.getElementById('machine-bar');
+              if (anchor) {
+                const r = anchor.getBoundingClientRect();
+                const x = r.left - chartPos.left;
+                const y = r.top  - chartPos.top + 100;
+                return { x, y };
+              }
+              return { x: 10, y: 10 };
             },
-            chart: {
-                zoomType: 'x',
-                panning: true,
-                panKey: 'shift',
-            },
-            plotOptions: {
-                area: {
-                    //allowPointSelect: true,
-                    fillOpacity: 0.25
-                },
-                series: {
-                    lineWidth: 1.5,
-                    marker: {
-                        radius: 3,
-                        symbol: "circle"
-                    },
-                    dataGrouping: {
-                        enabled: false
-                    },
-                    point: {
-                        events: {
-                            click: function () {
-                                console.log(this);
-                                if (this.selected) {
-                                    this.select(false, true)
-                                } else {
-                                    this.select(true, true)
-                                }
+            formatter: function () {
+              // lineage / ALE info from series-level custom metadata
+              const custom = (this.series && this.series.options && this.series.options.custom) || {};
+              const lineageLabel = custom.lineageLabel || this.series.name || '';
+              const aleId = custom.aleId != null ? String(custom.aleId) : 'n/a';
 
-                            }
-                        }
-                    },
-                },
+              // pull per-point fields (batch, media, hasCryo, compName for MR series)
+              const batch = (this.point && this.point.batch) ??
+                            (this.series.userOptions.data?.[this.point.index]?.[2]);
+              const media = (this.point && this.point.media) ??
+                            (this.series.userOptions.data?.[this.point.index]?.[3]);
+              const hasCryo = (typeof this.point?.hasCryo === 'boolean') ? this.point.hasCryo : undefined;
+              const compName = this.point && this.point.compName;
 
-            }, /**
-             title: {
-             text: 'Dummy opticALE(s) with ' + n + ' measurements'
-             },
-             uncomment when we are struggling to support all the points
-             boost: {
-             useGPUTranslations: true
-             },*/
+              // time text (handles days vs. dates mode)
+              const timeText = (window.xAxisMode === 'dates')
+                ? Highcharts.dateFormat('%Y-%m-%d %H:%M', this.x)
+                : `${Highcharts.numberFormat(this.x, 2)} days`;
 
-            legend: {
-                enabled: false
-            },
+              const yAxisLabel = this.series.yAxis?.options?.title?.text || 'Value';
+              const yVal = (this.y != null && isFinite(this.y)) ? Highcharts.numberFormat(this.y, 3) : 'n/a';
 
-            tooltip: {
-                valueDecimals: 2,
-                split: false,
-                shared: false,
-                followPointer: false,
-                stickOnContact: true,
-                useHTML: true,
-                outside: true,
-                style: {
-                    pointerEvents: 'auto',
-                    whiteSpace: 'normal'
-                },
+              return `
+                <div style="display:flex; gap:6px; align-items:flex-start; min-width:290px">
+                  <div style="flex:0 0 90px; max-width:90px; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
+                    <div style="font-size:1.1rem; font-weight:700; line-height:1.25;">
+                      ${escapeHTML(lineageLabel)}
+                    </div>
+                    <div style="font-size:1rem; opacity:0.7; margin-top:2px;">
+                      ALE&nbsp;ID: ${escapeHTML(aleId)}
+                    </div>
+                  </div>
+                  <div>
+                    <b>${escapeHTML(yAxisLabel)}:</b> ${yVal}<br/>
+                    Time: ${timeText}<br/>
+                    Batch: ${batch ?? 'n/a'}<br/>
+                    Media: ${media ?? 'n/a'}<br/>
+                    ${compName ? `Component: ${escapeHTML(String(compName))}<br/>` : '' }
+                    ${hasCryo === undefined ? '' : `Cryostock: ${hasCryo ? 'Yes' : 'No'}<br/>`}
+                  </div>
+                </div>
+              `;
+            }
 
-                positioner: function (labelWidth, labelHeight) {
-                  const chartPos = this.chart.pointer.getChartPosition();
-
-                  // anchor to the first machine header, fall back to the bar itself
-                  const anchor =
-                  document.querySelector('#machine-bar .collapsible.machines') ||
-                  document.querySelector('#machine-bar .collapsible') ||
-                  document.getElementById('machine-bar');
-
-                  if (anchor) {
-                    const r = anchor.getBoundingClientRect();
-                    const x = r.left - chartPos.left;           // align left with the menu
-                    const y = r.top  - chartPos.top  + 100;       // just below the header
-                    return { x, y };
-                    }
-                    return { x: 10, y: 10 };
-                   },
-                    formatter: function () {
-                      // dates
-                      const lmRaw = this.series.options.custom?.lastModifiedRaw;
-                      const lmMs  = this.series.options.custom?.lastModifiedMs;
-                      const lmStr = lmMs
-                        ? Highcharts.dateFormat('%Y-%m-%d %H:%M', lmMs)
-                        : (lmRaw ? lmRaw.replace('T', ' ').slice(0,16) : 'n/a');
-
-                      // point fields
-                      const batch = (this.point && this.point.batch) ??
-                                    (this.series.userOptions.data?.[this.point.index]?.[2]);
-                      const media = (this.point && this.point.media) ??
-                                    (this.series.userOptions.data?.[this.point.index]?.[3]);
-                      const hasCryo = (typeof this.point?.hasCryo === 'boolean') ? this.point.hasCryo : undefined;
-
-                      // headline data
-                      const lineageLabel = this.series.options.custom?.lineageLabel || this.series.name;
-                      const aleId        = this.series.options.custom?.aleId ?? 'n/a';
-                      const compName = this.point && this.point.compName;
-
-                      // time text for both modes
-                      const timeText = (xAxisMode === 'days')
-                        ? (typeof this.x === 'number' ? `${this.x.toFixed(2)} days` : 'n/a')
-                        : Highcharts.dateFormat('%e %b %H:%M:%S', this.x);
-
-                      return `
-                        <div style="display:flex; gap:6px; align-items:flex-start; min-width:290px">
-                          <div style="flex:0 0 90px; max-width:90px; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
-                            <div style="font-size:1.1rem; font-weight:700; line-height:1.25;">
-                              ${escapeHTML(lineageLabel)}
-                            </div>
-                            <div style="font-size:1rem; opacity:0.7; margin-top:2px;">
-                              ALE&nbsp;ID: ${escapeHTML(String(aleId))}
-                            </div>
-                          </div>
-                          <div>
-                            <b>${this.series.yAxis.options.title.text}:</b> ${this.y != null ? this.y.toFixed(3) : 'n/a'}<br/>
-                            Time: ${timeText}<br/>
-                            Batch: ${batch ?? 'n/a'}<br/>
-                            Media: ${media ?? 'n/a'}<br/>
-                            ${compName ? `Component: ${escapeHTML(String(compName))}<br/>` : '' }
-                            Cryostock: ${hasCryo === undefined ? 'n/a' : (hasCryo ? 'Yes' : 'No')}<br/>
-                            Last modified: ${lmStr}
-                          </div>
-                        </div>
-                      `;
-                    }
-
-
-
-            },
-
+          }
         });
+
         console.timeEnd('line');
+
+        // Helper: show a bold x=0 line only when x is in "days" (linear) mode.
+        function updateZeroLineX() {
+          const xa = mainChart.xAxis[0];
+          try { xa.removePlotLine('x-zero'); } catch (_) {}
+          if (xAxisMode === 'days') {
+            xa.addPlotLine({ id: 'x-zero', value: 0, color: '#000000', width: 2, zIndex: 5 });
+          }
+        }
 
         // Ensure axis starts in the same mode as the dropdown
         xAxisMode = document.getElementById('x_scale').value === 'dates' ? 'dates' : 'days';
         mainChart.xAxis[0].update({ type: xAxisMode === 'dates' ? 'datetime' : 'linear' }, false);
         updateRangeSelectorVisibility();
+        updateZeroLineX();
+
 
         const daysSel = document.getElementById('days_window');
-        if (daysSel) daysSel.value = '0'; // default to All
-
-
+        if (daysSel) daysSel.value = '0';
 
     </script>
     {{ ales|json_script:"ale_data" }}
