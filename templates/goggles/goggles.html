@@ -344,18 +344,28 @@
 
     </script>
     <script>
-      function updateRangeSelectorVisibility() {
-        if (!window.mainChart) return;
-        const enabled = (xAxisMode !== 'days');
-        mainChart.update({ rangeSelector: { enabled } }, false);
-        mainChart.redraw();
+    function updateRangeSelectorVisibility() {
+      if (!window.mainChart) return;
 
-          // If we just enabled it, auto-click "All"
-      if (enabling && mainChart.rangeSelector) {
-        const allIdx = mainChart.rangeSelector.buttonOptions.length - 1;
-        mainChart.rangeSelector.clickButton(allIdx, true);
+      // what it was before the update
+      const wasEnabled = !!(mainChart.rangeSelector && mainChart.rangeSelector.options &&
+                            mainChart.rangeSelector.options.enabled !== false);
+
+      const nowEnabled = (xAxisMode !== 'days');
+
+      // apply the new setting
+      mainChart.update({ rangeSelector: { enabled: nowEnabled } }, false);
+      mainChart.redraw();
+
+      // if we just enabled it, sync the UI to "All"
+      if (!wasEnabled && nowEnabled && mainChart.rangeSelector) {
+        try {
+          const allIdx = mainChart.rangeSelector.buttonOptions.length - 1;
+          mainChart.rangeSelector.clickButton(allIdx, true);
+        } catch (_) {}
       }
-      }
+    }
+
     </script>
 
     <script>
