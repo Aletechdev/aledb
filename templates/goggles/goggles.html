@@ -1037,36 +1037,84 @@ gogglesSocket.onerror = function () {
     <script>
         Highcharts.setOptions({ time: { useUTC: false }});
         console.time('line');
-        const mainChart = Highcharts.stockChart('mainChart', {
-            navigator: { baseSeries: 0 },
-            xAxis: [{
-                ordinal: false,
-                lineWidth: 2,
-                   lineColor: '#000000'
-            }],
-             yAxis: [{
-              height: '41%',
-              title: { text: 'OD' },
-              labels: { style: { fontSize: '14 px' } },
-              lineWidth: 2,        
-              lineColor: '#000000'
-            }, {
-              opposite: true,
-              top: '45%', height: '21%',
-              title: { text: 'Growth Rate' },
-              labels: { style: { fontSize: '14 px' } }
-            }, {
-              opposite: true,
-              top: '70%', height: '13%',
-              title: { text: 'Temperature °C' },
-              labels: { style: { fontSize: '14 px' } }
-            }, {
-              opposite: true,
-              top: '87%', height: '13%',
-              title: { text: 'Media Ratio (component #1)' },
-              labels: { style: { fontSize: '14 px' } },
-              min: 0
-            }],
+ const mainChart = Highcharts.stockChart('mainChart', {
+  navigator: { baseSeries: 0 },
+
+  // One xAxis per pane: OD, GR, Temp, MR
+  xAxis: [
+    // OD pane axis (with labels/ticks)
+    {
+      ordinal: false,
+      top: '0%',
+      height: '41%',
+      lineWidth: 2,
+      lineColor: '#000000'
+      // keep labels/ticks as-is here
+    },
+    // GR pane baseline only
+    {
+      linkedTo: 0,
+      top: '45%',
+      height: '21%',
+      lineWidth: 2,
+      lineColor: '#000000',
+      labels: { enabled: false },
+      tickLength: 0,
+      gridLineWidth: 0
+    },
+    // Temp pane baseline only
+    {
+      linkedTo: 0,
+      top: '70%',
+      height: '13%',
+      lineWidth: 2,
+      lineColor: '#000000',
+      labels: { enabled: false },
+      tickLength: 0,
+      gridLineWidth: 0
+    },
+    // Media Ratio pane baseline only
+    {
+      linkedTo: 0,
+      top: '87%',
+      height: '13%',
+      lineWidth: 2,
+      lineColor: '#000000',
+      labels: { enabled: false },
+      tickLength: 0,
+      gridLineWidth: 0
+    }
+  ],
+
+  yAxis: [{
+    height: '41%',
+    title: { text: 'OD' },
+    labels: { style: { fontSize: '14px' } },
+    lineWidth: 2,
+    lineColor: '#000000'
+  }, {
+    opposite: true,
+    top: '45%', height: '21%',
+    title: { text: 'Growth Rate' },
+    labels: { style: { fontSize: '14px' } },
+    lineWidth: 2,
+    lineColor: '#000000'
+  }, {
+    opposite: true,
+    top: '70%', height: '13%',
+    title: { text: 'Temperature °C' },
+    labels: { style: { fontSize: '14px' } },
+    lineWidth: 2,
+    lineColor: '#000000'
+  }, {
+    opposite: true,
+    top: '87%', height: '13%',
+    title: { text: 'Media Ratio (component #1)' },
+    labels: { style: { fontSize: '14px' } },
+    min: 0,
+    lineWidth: 2,
+    lineColor: '#000000'
+  }],
             rangeSelector: {
                 enabled: true,
                 selected: 7,
