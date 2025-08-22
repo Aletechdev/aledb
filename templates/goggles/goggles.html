@@ -102,13 +102,46 @@
         const selected_ales = []
         const selected_ale_ids = []
         const lineageMeta = {};
-        
+
 
           let selectedWavelength = '620A';  // default
           function handleSelectWavelength() {
             const el = document.getElementById('wl_select');
             selectedWavelength = el ? el.value : '620A';
             refresh_data();  // re-pull & replot using the chosen wavelength
+          }
+
+          let selectedMediaComponent = 1; // 1..5 (1-based)
+          function handleMediaComponentChange() {
+            const sel = document.getElementById('media_component_select');
+            selectedMediaComponent = Math.max(1, Math.min(5, parseInt(sel?.value || '1', 10)));
+            // Rebuild the Media Ratio series for every selected lineage from cached data
+            for (const baseId of selected_ale_ids) {
+              const store = lineageStore[baseId];
+              if (!store) continue;
+              const mr = mainChart.get(baseId + '-MR');
+              if (mr) {
+                const rebuiltMR = buildMediaRatioData(store, store.t0);
+                mr.setData(rebuiltMR, false);
+              } else {
+                // If series doesn't exist yet (e.g., first time after selecting), add it
+                const rebuiltMR = buildMediaRatioData(store, store.t0);
+                mainChart.addSeries({
+                  id: baseId + '-MR',
+                  name: store.mediaRatioSeriesName || (store.lineageLabel || baseId) + ' (Media Ratio)',
+                  data: rebuiltMR,
+                  keys: ['x','y','batch','media','compName'],
+                  color: getLineageColor(baseId),
+                  yAxis: 3, // will add yAxis below
+                  showInNavigator: false,
+                }, false);
+              }
+            }
+            // Update axis title to show the component #
+            if (mainChart?.yAxis?.[3]) {
+              mainChart.yAxis[3].setTitle({ text: `Media Ratio (component #${selectedMediaComponent})` }, false);
+            }
+            mainChart.redraw();
           }
 
     </script>
@@ -146,6 +179,63 @@
           );
         }
       }
+
+       function buildMediaRatioData(store, t0) {
+            // Build a per-batch media ratio series.
+            // Strategy: one point per batch at that batch's LAST timestamp, with y = vol_i / vol_init.
+            // We pick the first batch that has a non-null volume for the selected component as the baseline.
+          try {
+            const compIdx = Math.max(1, Math.min(5, selectedMediaComponent)) - 1; // 0-based
+            const byBatch = store.mediaComponentsByBatch || {}; // { batch_id: [ {name, volume}, ... ] }
+
+            // Compute last x per batch from OD raw (we already carry batch ids alongside timestamps)
+            const lastXByBatch = new Map();
+            for (const row of store.OD_raw || []) {
+              const [x, _y, batch] = row || [];
+              if (batch == null) continue;
+              // Keep the latest timestamp per batch
+              const prev = lastXByBatch.get(batch);
+              if (prev == null || x > prev) lastXByBatch.set(batch, x);
+            }
+
+            // Find baseline volume (first batch with defined volume for the component)
+            let baselineVol = null;
+            for (const [batchId, xLast] of lastXByBatch.entries()) {
+              const comps = byBatch[batchId] || [];
+              const entry = comps[compIdx];
+              const vol = entry?.volume;
+              if (vol != null) { baselineVol = vol; break; }
+            }
+            if (baselineVol == null || baselineVol === 0) {
+              // No baseline → return empty set
+              return [];
+            }
+
+            // Build points
+            const points = [];
+            for (const [batchId, xLast] of lastXByBatch.entries()) {
+              const comps = byBatch[batchId] || [];
+              const entry = comps[compIdx];
+              const vol = entry?.volume;
+              const name = entry?.name || `Component #${compIdx + 1}`;
+              if (vol == null) continue; // skip if missing
+              const ratio = vol / baselineVol;
+
+              // Respect x-axis mode: we store raw X; conversion happens in buildOtherData-like path
+              const xVal = (xAxisMode === 'days') ? ((xLast - t0) / DAY_MS) : xLast;
+              // We’ll reuse tooltip's batch/media display fields; include compName for convenience
+              // keys: ['x','y','batch','media','compName']
+              points.push([xVal, ratio, batchId, (store.batchMediaDesc?.[batchId] || 'N/A'), name]);
+            }
+            // Sort by time to avoid zig-zag lines if Map iteration order differs
+            points.sort((a,b)=>a[0]-b[0]);
+            return points;
+          } catch (err) {
+            console.warn('[buildMediaRatioData] failed:', err);
+            return [];
+          }
+        }
+
 
       // Re-apply X mode to all visible series
       function applyXAxisMode() {
@@ -242,6 +332,15 @@
               <option value="640R">640R</option>
               <option value="480R">480R</option>
               <option value="580R">580R</option>
+            </select>
+            <!-- Media components -->
+            <label class="form-check-label" for="media_component_select">Media component #:</label>
+            <select id="media_component_select" onchange="handleMediaComponentChange()">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
             </select>
 
 
@@ -594,6 +693,7 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
             // 3) Parse to ms (or undefined if not parsable)
             const lmMsNum = lmIsoForParse ? Date.parse(lmIsoForParse) : undefined;
  const metaFromClick = lineageMeta[message[3]] || {};
+ const meta = (typeof metaOrString === 'object' && metaOrString) || {};
 const sharedCustom = {
   lastModifiedRaw: lmRawStr,
   lastModifiedMs: lmMsNum,
@@ -621,6 +721,14 @@ if (yAxisMode === 'ln') {
 const GR_data = message[1][1];
 const T_data  = message[1][2];
 
+// Build batch → media description map for nicer tooltips on MR series
+const batchMediaDesc = {};
+for (const row of rawOD) {
+  const batch = row?.[2];
+  const media = row?.[3];
+  if (batch != null && batchMediaDesc[batch] == null) batchMediaDesc[batch] = media;
+}
+
 // Compute per-lineage start time (t0) from OD timestamps
 const firstX = rawOD.find(row => row && typeof row[0] === 'number')?.[0] ?? null;
 const t0 = firstX ?? 0;
@@ -630,7 +738,11 @@ lineageStore[baseId] = {
   t0,
   OD_raw: rawOD,
   GR_raw: GR_data,
-  T_raw:  T_data
+  T_raw:  T_data,
+  mediaComponentsByBatch: meta.media_components_by_batch || {},  // <-- NEW
+  batchMediaDesc,                                                 // <-- NEW
+  lineageLabel: sharedCustom.lineageLabel,
+  mediaRatioSeriesName: `${sharedCustom.lineageLabel || name} (Media Ratio)`,
 };
 
 const existingOD = mainChart.get(baseId);
@@ -638,6 +750,8 @@ const existingOD = mainChart.get(baseId);
 const rebuiltOD = buildODData(lineageStore[baseId].OD_raw, lineageStore[baseId].t0);
 const rebuiltGR = buildOtherData(lineageStore[baseId].GR_raw, lineageStore[baseId].t0);
 const rebuiltT  = buildOtherData(lineageStore[baseId].T_raw,  lineageStore[baseId].t0);
+const rebuiltMR = buildMediaRatioData(lineageStore[baseId], lineageStore[baseId].t0);
+
 
 if (existingOD) {
   existingOD.setData(rebuiltOD, false);
@@ -645,6 +759,21 @@ if (existingOD) {
   if (grSeries) grSeries.setData(rebuiltGR, false);
   const tSeries = mainChart.get(baseId + "-Temp");
   if (tSeries) tSeries.setData(rebuiltT,  false);
+  let mrSeries = mainChart.get(baseId + "-MR");
+  if (mrSeries) {
+    mrSeries.setData(rebuiltMR, false);
+  } else {
+    mainChart.addSeries({
+      id: baseId + "-MR",
+      name: lineageStore[baseId].mediaRatioSeriesName,
+      data: rebuiltMR,
+      keys: ['x','y','batch','media','compName'],
+      color: getLineageColor(baseId),
+      yAxis: 3,
+      showInNavigator: false,
+      dashStyle: 'ShortDash',
+    }, false);
+  }
   mainChart.redraw();
 } else {
   const seriesColor = getLineageColor(baseId);
@@ -677,6 +806,16 @@ if (existingOD) {
     color: seriesColor,
     yAxis: 2,
   });
+    mainChart.addSeries({
+    id: baseId + "-MR",
+    name: lineageStore[baseId].mediaRatioSeriesName,
+    data: rebuiltMR,
+    keys: ['x','y','batch','media','compName'],
+    color: seriesColor,
+    yAxis: 3,
+    showInNavigator: false,
+    dashStyle: 'ShortDash',
+  }, false);
 
   if (!selected_ale_ids.includes(baseId)) {
     selected_ale_ids.push(baseId);
@@ -742,6 +881,13 @@ gogglesSocket.onerror = function () {
                         fontSize: '14 px'
                     }
                 }
+            },{
+              opposite: true,
+              top: '100%',
+              height: '20%',
+              title: { text: 'Media Ratio (component #1)' }, // updated by handler
+              labels: { style: { fontSize: '14 px' } },
+              min: 0, // ratios are >= 0
             }],
             rangeSelector: {
                 enabled: true,
@@ -881,6 +1027,7 @@ gogglesSocket.onerror = function () {
                       // headline data
                       const lineageLabel = this.series.options.custom?.lineageLabel || this.series.name;
                       const aleId        = this.series.options.custom?.aleId ?? 'n/a';
+                      const compName = this.point && this.point.compName;
 
                       // time text for both modes
                       const timeText = (xAxisMode === 'days')
@@ -902,6 +1049,7 @@ gogglesSocket.onerror = function () {
                             Time: ${timeText}<br/>
                             Batch: ${batch ?? 'n/a'}<br/>
                             Media: ${media ?? 'n/a'}<br/>
+                            ${compName ? `Component: ${escapeHTML(String(compName))}<br/>` : '' }
                             Cryostock: ${hasCryo === undefined ? 'n/a' : (hasCryo ? 'Yes' : 'No')}<br/>
                             Last modified: ${lmStr}
                           </div>
