@@ -180,61 +180,50 @@
         }
       }
 
-       function buildMediaRatioData(store, t0) {
-            // Build a per-batch media ratio series.
-            // Strategy: one point per batch at that batch's LAST timestamp, with y = vol_i / vol_init.
-            // We pick the first batch that has a non-null volume for the selected component as the baseline.
+        function buildMediaRatioData(store, t0) {
           try {
             const compIdx = Math.max(1, Math.min(5, selectedMediaComponent)) - 1; // 0-based
             const byBatch = store.mediaComponentsByBatch || {}; // { batch_id: [ {name, volume}, ... ] }
 
-            // Compute last x per batch from OD raw (we already carry batch ids alongside timestamps)
-            const lastXByBatch = new Map();
+            // Track the last timestamp per batch along with media & hasCryo
+            const lastByBatch = new Map();
             for (const row of store.OD_raw || []) {
-              const [x, _y, batch] = row || [];
+              const [x, _y, batch, media, hasCryo] = row || [];
               if (batch == null) continue;
-              // Keep the latest timestamp per batch
-              const prev = lastXByBatch.get(batch);
-              if (prev == null || x > prev) lastXByBatch.set(batch, x);
+              const prev = lastByBatch.get(batch);
+              if (!prev || x > prev.x) lastByBatch.set(batch, { x, media, hasCryo });
             }
 
-            // Find baseline volume (first batch with defined volume for the component)
+            // Baseline volume from the first batch that has it
             let baselineVol = null;
-            for (const [batchId, xLast] of lastXByBatch.entries()) {
+            for (const [batchId, rec] of lastByBatch.entries()) {
               const comps = byBatch[batchId] || [];
               const entry = comps[compIdx];
               const vol = entry?.volume;
               if (vol != null) { baselineVol = vol; break; }
             }
-            if (baselineVol == null || baselineVol === 0) {
-              // No baseline → return empty set
-              return [];
-            }
+            if (baselineVol == null || baselineVol === 0) return [];
 
-            // Build points
-            const points = [];
-            for (const [batchId, xLast] of lastXByBatch.entries()) {
+            // Build points: [x, ratio, batch, media, hasCryo, compName]
+            const pts = [];
+            for (const [batchId, rec] of lastByBatch.entries()) {
               const comps = byBatch[batchId] || [];
               const entry = comps[compIdx];
               const vol = entry?.volume;
               const name = entry?.name || `Component #${compIdx + 1}`;
-              if (vol == null) continue; // skip if missing
+              if (vol == null) continue;
               const ratio = vol / baselineVol;
-
-              // Respect x-axis mode: we store raw X; conversion happens in buildOtherData-like path
-              const xVal = (xAxisMode === 'days') ? ((xLast - t0) / DAY_MS) : xLast;
-              // We’ll reuse tooltip's batch/media display fields; include compName for convenience
-              // keys: ['x','y','batch','media','compName']
-              points.push([xVal, ratio, batchId, (store.batchMediaDesc?.[batchId] || 'N/A'), name]);
+              const xVal = (xAxisMode === 'days') ? ((rec.x - t0) / DAY_MS) : rec.x;
+              pts.push([xVal, ratio, batchId, (rec.media ?? 'N/A'), rec.hasCryo, name]);
             }
-            // Sort by time to avoid zig-zag lines if Map iteration order differs
-            points.sort((a,b)=>a[0]-b[0]);
-            return points;
+            pts.sort((a,b)=>a[0]-b[0]);
+            return pts;
           } catch (err) {
             console.warn('[buildMediaRatioData] failed:', err);
             return [];
           }
         }
+
 
 
       // Re-apply X mode to all visible series
@@ -514,7 +503,7 @@ table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.colu
                                     console.log("removing: " + current_id);
 
 
-                                    ['', '-GR', '-Temp'].forEach(suffix => {
+                                    ['', '-GR', '-Temp','-MR'].forEach(suffix => {
                                     const s = mainChart.get(current_id + suffix);
                                       if (s) s.remove();
                                     });
@@ -661,7 +650,7 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
 
     // update all 3 series (OD, GR, Temp)
     let touched = 0;
-    ['','-GR','-Temp'].forEach(suffix => {
+    ['','-GR','-Temp','-MR'].forEach(suffix => {
       const s = mainChart.get(seriesBase + suffix);
       if (s) { s.update({ color }, false); touched++; }
     });
@@ -792,7 +781,8 @@ if (existingOD) {
       id: baseId + "-MR",
       name: lineageStore[baseId].mediaRatioSeriesName,
       data: rebuiltMR,
-      keys: ['x','y','batch','media','compName'],
+      keys: ['x','y','batch','media','hasCryo','compName'],
+      custom: sharedCustom,
       color: getLineageColor(baseId),
       yAxis: 3,
       showInNavigator: false,
@@ -835,7 +825,8 @@ if (existingOD) {
     id: baseId + "-MR",
     name: lineageStore[baseId].mediaRatioSeriesName,
     data: rebuiltMR,
-    keys: ['x','y','batch','media','compName'],
+    keys: ['x','y','batch','media','hasCryo','compName'],
+    custom: sharedCustom,
     color: seriesColor,
     yAxis: 3,
     showInNavigator: false,
@@ -983,7 +974,7 @@ gogglesSocket.onerror = function () {
              },*/
 
             legend: {
-                enabled: true
+                enabled: false
             },
 
             tooltip: {
