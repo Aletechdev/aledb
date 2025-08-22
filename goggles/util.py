@@ -42,53 +42,121 @@ def get_ale_machines():
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         return json.load(f)  # list of dicts
 
-def _select_gr_value(gf: dict, gr_type: Optional[str]) -> Optional[float]:
-    """Return the requested growth-rate value from a growth_fits dict.
-    Accept 0.0 as valid; only None/-1 are considered missing.
+import math
 
+def _finite_or_none(x):
+    try:
+        x = float(x)
+    except (TypeError, ValueError):
+        return None
+    return x if math.isfinite(x) else None
+
+def _normalize_curveball(value, *, batch_id=None):
     """
-    def valid(v) -> bool:
-        return v is not None and v != -1
+    Accept any of:
+      - list[dict]   (normal)
+      - dict         (wrap to list)
+      - number/str   (bad placeholder) -> []
+      - None         -> []
+    Return list[(model_str, rate_float)] with only valid rows.
+    """
+    rows = []
+    if value is None:
+        return rows
 
+    if isinstance(value, list):
+        raw = value
+    elif isinstance(value, dict):
+        raw = [value]
+    else:
+        # Seen things like 5 / "failed" from some exporters
+        logger.warning("curveball placeholder for batch %s: %r (ignored)", batch_id, value)
+        return rows
 
+    for obj in raw:
+        if not isinstance(obj, dict):
+            logger.warning("curveball non-dict item for batch %s: %r (ignored)", batch_id, obj)
+            continue
+        rate = _finite_or_none(obj.get("growth_rate"))
+        if rate is None:
+            continue
+        model = str(obj.get("model", "")).strip()
+        rows.append((model, rate))
+    return rows
+
+def _cb_model_matches(model_str: str, wanted: str) -> bool:
+    """
+    Tolerant match:
+      - handles 'Model(LogisticLag1)' vs 'Model(Logistic + Lag1)'
+      - case / spacing / underscore differences
+    """
+    m = model_str.lower()
+    w = wanted.lower()
+
+    # strip 'Model(' ... ')' wrapper if present
+    if m.startswith("model(") and m.endswith(")"):
+        m = m[6:-1]
+    if w.startswith("model(") and w.endswith(")"):
+        w = w[6:-1]
+
+    # normalize punctuation/spacing
+    def norm(s: str) -> str:
+        s = s.replace("_", " ").replace("+", " ").replace("-", " ").replace("–", " ")
+        s = " ".join(s.split())
+        return s
+
+    return norm(w) in norm(m)
+
+def _select_gr_value(gf: dict, gr_type: Optional[str], *, batch_id=None) -> Optional[float]:
+    """
+    Return a float growth rate or None. Never raises.
+    Accepts both “simple” keys and curveball variants.
+    """
+    gf = gf or {}
+
+    # (A) If frontend sent the old tuple/list form like ('curveball','Logistic',1)
     if isinstance(gr_type, (list, tuple)) and gr_type:
         try:
             family = str(gr_type[0]).lower()
             model  = str(gr_type[1]) if len(gr_type) > 1 else ''
             lag    = int(gr_type[2]) if len(gr_type) > 2 else 0
             if family == 'curveball' and model:
-                # normalize 'Logistic' + lag → 'gr_curveball_Logistic' or '...LagN'
-                lag_suffix = f'Lag{lag}' if lag else ''
-                gr_type = f'gr_curveball_{model}{lag_suffix}'
+                gr_type = f'gr_curveball_{model}{"Lag"+str(lag) if lag else ""}'
             else:
                 gr_type = None
         except Exception:
             gr_type = None
 
-    # No explicit model requested → legacy fallback
+    # (B) No explicit model → legacy fallback order (preserve your current behavior)
     if not gr_type or not isinstance(gr_type, str):
         for key in ("gr_bestfit", "gr_original", "gr_awf", "gr_croissance"):
-            v = gf.get(key)
-            if valid(v):
-                return float(v)
-        return None  # no curveball fallback in legacy behavior
-
-    # Curveball variants (string)
-    if gr_type.startswith("gr_curveball_"):
-        target = CURVEBALL_MAP.get(gr_type)
-        if not target:
-            return None
-        cb = gf.get("gr_curveball") or []
-        for item in cb:
-            if isinstance(item, dict) and item.get("model") == target:
-                v = item.get("growth_rate")
-                if valid(v):
-                    return float(v)
+            v = _finite_or_none(gf.get(key))
+            if v is not None:
+                return v
         return None
 
-    # Plain keys
-    v = gf.get(gr_type)
-    return float(v) if valid(v) else None
+    # (C) Specific curveball variant requested
+    if gr_type.startswith("gr_curveball_"):
+
+        cb_rows = _normalize_curveball(gf.get("gr_curveball"), batch_id=batch_id)
+        if not cb_rows:
+            # present-but-bad will be logged by _normalize_curveball
+            return None
+
+        wanted = CURVEBALL_MAP.get(gr_type)  # e.g., "Model(LogisticLag1)"
+        # Prefer exact/tolerant match to the requested subtype
+        if wanted:
+            for model, rate in cb_rows:
+                if _cb_model_matches(model, wanted):
+                    return rate
+
+        # Fallback: pick the max rate among available curveball fits
+        return max((rate for _m, rate in cb_rows), default=None)
+
+    # (D) Plain keys like gr_awf / gr_croissance / gr_original / gr_bestfit
+    v = _finite_or_none(gf.get(gr_type))
+    return v
+
 
 def get_initial_data():
 
@@ -290,7 +358,7 @@ def get_experiment_data(ale_machine: str,experiment_id: int,gr_type: Optional[st
         # Growth rate: explicit selection or fallback
         gf_all = (batch.get("growth_fits") or {})
         gf_by_wl = gf_all.get(_resolve_wl_key(gf_all, wl), {})
-        gr_val = _select_gr_value(gf_by_wl, gr_type)
+        gr_val = _select_gr_value(gf_by_wl, gr_type, batch_id=batch_id)
         logger.debug(f"Batch {batch_id}: selected GR model={gr_type or 'fallback'} value={gr_val}")
         if gr_val is not None and times:
             growth_rate_list.append([_iso_to_epoch_ms(times[-1]), float(gr_val), batch_id, media_desc, has_cryo])
