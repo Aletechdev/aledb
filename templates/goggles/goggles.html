@@ -247,20 +247,22 @@
         }
 
         // Rebuild data for every selected lineage
-        for (const baseId of selected_ale_ids) {
-          const store = lineageStore[baseId];
-          if (!store) continue;
+          for (const baseId of selected_ale_ids) {
+            const store = lineageStore[baseId];
+            if (!store) continue;
 
-          const od = mainChart.get(baseId);
-          const gr = mainChart.get(baseId + '-GR');
-          const t  = mainChart.get(baseId + '-Temp');
+            const od = mainChart.get(baseId);
+            const gr = mainChart.get(baseId + '-GR');
+            const t  = mainChart.get(baseId + '-Temp');
+            const mr = mainChart.get(baseId + '-MR');     // <-- NEW
 
-          if (od) od.setData(buildODData(store.OD_raw, store.t0), false);
-          if (gr) gr.setData(buildOtherData(store.GR_raw, store.t0), false);
-          if (t)  t.setData(buildOtherData(store.T_raw,  store.t0), false);
+            if (od) od.setData(buildODData(store.OD_raw, store.t0), false);
+            if (gr) gr.setData(buildOtherData(store.GR_raw, store.t0), false);
+            if (t)  t.setData(buildOtherData(store.T_raw,  store.t0), false);
+            if (mr) mr.setData(buildMediaRatioData(store, store.t0), false);  // <-- NEW
+          }
+          mainChart.redraw();
         }
-        mainChart.redraw();
-      }
     </script>
 
 
@@ -303,7 +305,12 @@
       }
 
       // Initialize the dropdown once the DOM is ready
-      document.addEventListener('DOMContentLoaded', populateGrowthRateDropdown);
+      ddocument.addEventListener('DOMContentLoaded', () => {
+          if (mainChart?.yAxis?.[3]) {
+            mainChart.yAxis[3].setTitle({ text: `Media Ratio (component #${selectedMediaComponent})` }, false);
+            mainChart.redraw();
+          }
+        });
     </script>
     <div class="options_bar" style="position: fixed; bottom:.5em; z-index: 100;">
         <div class="goggles-option">
@@ -858,49 +865,31 @@ gogglesSocket.onerror = function () {
         Highcharts.setOptions({ time: { useUTC: false }});
         console.time('line');
         const mainChart = Highcharts.stockChart('mainChart', {
+            navigator: { baseSeries: 0 },
             xAxis: [{
                 ordinal: false,
             }],
-            yAxis: [{
-                height: '50%',
-                title: {
-                    text: 'OD',
-                }, labels: {
-                    style: {
-                        fontSize: '14 px'
-                    }
-                }
-
+             yAxis: [{
+              height: '45%',                    // 0–45%
+              title: { text: 'OD' },
+              labels: { style: { fontSize: '14 px' } }
             }, {
-                opposite: true,
-                top: '50%',
-                height: '30%',
-                title: {
-                    text: 'Growth Rate',
-                }, labels: {
-                    style: {
-                        fontSize: '14 px'
-                    }
-                }
-            }, {
-                opposite: true,
-                top: '80%',
-                height: '20%',
-                title: {
-                    text: 'Temperature °C',
-                }, labels: {
-                    style: {
-                        fontSize: '14 px'
-                    }
-                }
-            },{
               opposite: true,
-              top: '100%',
-              height: '20%',
-              title: { text: 'Media Ratio (component #1)' }, // updated by handler
+              top: '45%', height: '25%',        // 45–70%
+              title: { text: 'Growth Rate' },
+              labels: { style: { fontSize: '14 px' } }
+            }, {
+              opposite: true,
+              top: '70%', height: '15%',        // 70–85%
+              title: { text: 'Temperature °C' },
+              labels: { style: { fontSize: '14 px' } }
+            }, {
+              opposite: true,
+              top: '85%', height: '15%',        // 85–100%  ✅ now visible
+              title: { text: 'Media Ratio (component #1)' },
               labels: { style: { fontSize: '14 px' } },
-              min: 0, // ratios are >= 0
-            }],
+              min: 0
+            }]
             rangeSelector: {
                 enabled: true,
                 buttons: [{
