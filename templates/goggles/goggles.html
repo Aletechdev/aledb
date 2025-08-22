@@ -664,7 +664,15 @@ document.getElementById('machine-bar').addEventListener('input', function (ev) {
         gogglesSocket.onmessage = function (e) {
             const data = JSON.parse(e.data);
             console.log(data)
+            if (data && data.error) {
+            console.error("[goggles] server error:", data.error);
+            showStatus('Data error', 'status-reconnecting');  // non-intrusive pill
+            return;
             const message = data['message'];
+              if (!message || !Array.isArray(message) || !Array.isArray(message[1])) {
+            console.warn("[goggles] unexpected payload shape:", data);
+            return;
+          }
             // pull lineage-level last_modified from message[1][3]
 
 
@@ -824,7 +832,7 @@ if (existingOD) {
 };
 
 gogglesSocket.onerror = function () {
-  setGogglesStatus('Disconnected', 'status-disconnected');
+  showStatus('Disconnected', 'status-disconnected');
 };
 
 

@@ -249,16 +249,7 @@ def get_experiment_data(ale_machine: str,experiment_id: int,gr_type: Optional[st
         measurements = meas_all.get(wl_key_meas) if wl_key_meas else None
         has_cryo = batch.get("cryostock")
         has_cryo = bool(has_cryo) if has_cryo is not None else False
-        components = []
-        #Collect the first up to 5 media component names and volumes, for media ratio plotting
-        for comp in (batch.get("media") or {}).get("components", [])[:5]:
-            name = comp.get("name") or comp.get("component") or "Unnamed"
-            vol = comp.get("volume")  # expected to be numeric; tolerate None
-            try:
-                vol = float(vol) if vol is not None else None
-            except Exception:
-                vol = None
-            components.append({"name": name, "volume": vol})
+
         if not measurements:
             logger.debug(f"Batch {batch_id}: No measurements found for wl={wl}")
             continue
@@ -292,20 +283,34 @@ def get_experiment_data(ale_machine: str,experiment_id: int,gr_type: Optional[st
         f"(OD={len(measurement_list)}, GR={len(growth_rate_list)}, Temp={len(temperature_measurements_list)})"
     )
 
-
     media_components_by_batch = {}
     for batch in exp.get("batches", []):
         bid = batch.get("batch_id")
-        comps = []
-        for comp in (batch.get("media") or {}).get("components", [])[:5]:
-            name = comp.get("name") or comp.get("component") or "Unnamed"
-            vol = comp.get("volume")
-            try:
-                vol = float(vol) if vol is not None else None
-            except Exception:
-                vol = None
-            comps.append({"name": name, "volume": vol})
-        media_components_by_batch[bid] = comps
+        comps_out = []
+
+        comps_raw = (batch.get("media") or {}).get("components")
+        # Accept both dict and list formats; cap at 5
+        if isinstance(comps_raw, dict):
+            items = list(comps_raw.items())[:5]  # [(name, volume), ...]
+            for name, vol in items:
+                try:
+                    vol = float(vol) if vol is not None else None
+                except Exception:
+                    vol = None
+                comps_out.append({"name": str(name) if name is not None else "Unnamed", "volume": vol})
+        elif isinstance(comps_raw, list):
+            for comp in comps_raw[:5]:
+                name = (comp.get("name") or comp.get("component") or "Unnamed") if isinstance(comp, dict) else "Unnamed"
+                vol = comp.get("volume") if isinstance(comp, dict) else None
+                try:
+                    vol = float(vol) if vol is not None else None
+                except Exception:
+                    vol = None
+                comps_out.append({"name": name, "volume": vol})
+        else:
+            comps_out = []
+
+        media_components_by_batch[bid] = comps_out
 
     available = exp.get("measurement_types") or []
     meta = {
