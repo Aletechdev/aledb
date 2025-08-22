@@ -227,15 +227,15 @@
 
 
       // Re-apply X mode to all visible series
-      function applyXAxisMode() {
-        // Update axis type
-        if (xAxisMode === 'days') {
-          mainChart.xAxis[0].update({ type: 'linear' }, false);
-        } else {
-          mainChart.xAxis[0].update({ type: 'datetime' }, false);
-        }
+        function applyXAxisMode() {
+          // Update axis type
+          if (xAxisMode === 'days') {
+            mainChart.xAxis[0].update({ type: 'linear' }, false);
+          } else {
+            mainChart.xAxis[0].update({ type: 'datetime' }, false);
+          }
 
-        // Rebuild data for every selected lineage
+          // Rebuild data for every selected lineage
           for (const baseId of selected_ale_ids) {
             const store = lineageStore[baseId];
             if (!store) continue;
@@ -243,15 +243,86 @@
             const od = mainChart.get(baseId);
             const gr = mainChart.get(baseId + '-GR');
             const t  = mainChart.get(baseId + '-Temp');
-            const mr = mainChart.get(baseId + '-MR');     // <-- NEW
+            const mr = mainChart.get(baseId + '-MR');
 
             if (od) od.setData(buildODData(store.OD_raw, store.t0), false);
             if (gr) gr.setData(buildOtherData(store.GR_raw, store.t0), false);
             if (t)  t.setData(buildOtherData(store.T_raw,  store.t0), false);
-            if (mr) mr.setData(buildMediaRatioData(store, store.t0), false);  // <-- NEW
+            if (mr) mr.setData(buildMediaRatioData(store, store.t0), false);
           }
+
+          // Toggle the control & reset range for days mode
+          updateXControlsVisibility();
+          if (xAxisMode === 'days') {
+            const sel = document.getElementById('days_window');
+            if (sel) sel.value = '0';  // All
+            setDaysWindow(0);
+          }
+
           mainChart.redraw();
         }
+
+
+    </script>
+
+    <script>
+      // ---- Manual Y-axis bounds helpers ----
+      function parseNum(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }
+
+      function applyYBounds(axisIdx){
+        const minBox = axisIdx === 0 ? document.getElementById('od_min') : document.getElementById('gr_min');
+        const maxBox = axisIdx === 0 ? document.getElementById('od_max') : document.getElementById('gr_max');
+        const min = parseNum(minBox?.value);
+        const max = parseNum(maxBox?.value);
+        // null → auto
+        mainChart.yAxis[axisIdx].setExtremes(
+          min !== null ? min : null,
+          max !== null ? max : null
+        );
+      }
+
+      function resetYBounds(axisIdx){
+        if (axisIdx === 0){
+          document.getElementById('od_min').value = '';
+          document.getElementById('od_max').value = '';
+        } else {
+          document.getElementById('gr_min').value = '';
+          document.getElementById('gr_max').value = '';
+        }
+        mainChart.yAxis[axisIdx].setExtremes(null, null);
+      }
+
+      // ---- “Days window” controls for when xAxisMode === 'days' ----
+      function setDaysWindow(days){
+        const xa = mainChart.xAxis[0];
+        const ex = xa.getExtremes();
+        if (!ex || ex.dataMin == null || ex.dataMax == null) return;
+
+        if (!days || days <= 0){ // “All”
+          xa.setExtremes(ex.dataMin, ex.dataMax);
+          return;
+        }
+        const max = ex.dataMax;
+        const min = Math.max(ex.dataMin, max - days);
+        xa.setExtremes(min, max);
+      }
+
+      function applyDaysWindow(){
+        const sel = document.getElementById('days_window');
+        const days = Number(sel?.value) || 0;
+        setDaysWindow(days);
+      }
+
+      function updateXControlsVisibility(){
+        const wrap = document.getElementById('days_window_wrap');
+        if (!wrap) return;
+        wrap.style.display = (xAxisMode === 'days') ? '' : 'none';
+      }
+      updateXControlsVisibility();
+        if (xAxisMode === 'days') {
+          setDaysWindow(0); // default to “All”
+        }
+
     </script>
 
 
@@ -344,6 +415,34 @@
               <option value="4">4</option>
               <option value="5">5</option>
             </select>
+            <!-- Y-axis bounds -->
+            <label style="margin-left:1em;">OD Y:</label>
+            <input id="od_min" type="number" step="any" placeholder="min" style="width:6.5rem;">
+            <input id="od_max" type="number" step="any" placeholder="max" style="width:6.5rem;">
+            <button type="button" onclick="applyYBounds(0)">Apply</button>
+            <button type="button" onclick="resetYBounds(0)">Auto</button>
+
+            <label style="margin-left:1em;">GR Y:</label>
+            <input id="gr_min" type="number" step="any" placeholder="min" style="width:6.5rem;">
+            <input id="gr_max" type="number" step="any" placeholder="max" style="width:6.5rem;">
+            <button type="button" onclick="applyYBounds(1)">Apply</button>
+            <button type="button" onclick="resetYBounds(1)">Auto</button>
+
+            <!-- Days window (used only when X = days) -->
+            <span id="days_window_wrap" style="margin-left:1em; display:none;">
+              <label>Days window:</label>
+              <select id="days_window" onchange="applyDaysWindow()">
+                <option value="0">All</option>
+                <option value="0.0416667">1h</option>
+                <option value="0.25">6h</option>
+                <option value="1">1d</option>
+                <option value="7">1w</option>
+                <option value="14">2w</option>
+                <option value="30">1m</option>
+                <option value="90">3m</option>
+              </select>
+            </span>
+
 
 
         </div>
