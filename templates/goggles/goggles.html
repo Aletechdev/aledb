@@ -326,6 +326,19 @@
 
           mainChart.redraw();
           updateRangeSelectorVisibility();
+            // ensure full range in Dates mode
+          if (xAxisMode === 'dates') {
+            const xa = mainChart.xAxis[0];
+            const ex = xa.getExtremes();
+            if (isFinite(ex.dataMin) && isFinite(ex.dataMax)) {
+              xa.setExtremes(ex.dataMin, ex.dataMax); // show everything
+            }
+            if (mainChart.rangeSelector && mainChart.rangeSelector.buttonOptions) {
+              // virtually "click" the All button to sync the UI state
+              const allIdx = mainChart.rangeSelector.buttonOptions.length - 1;
+              mainChart.rangeSelector.clickButton(allIdx, true);
+    }
+  }
         }
 
 
@@ -336,6 +349,12 @@
         const enabled = (xAxisMode !== 'days');
         mainChart.update({ rangeSelector: { enabled } }, false);
         mainChart.redraw();
+
+          // If we just enabled it, auto-click "All"
+      if (enabling && mainChart.rangeSelector) {
+        const allIdx = mainChart.rangeSelector.buttonOptions.length - 1;
+        mainChart.rangeSelector.clickButton(allIdx, true);
+      }
       }
     </script>
 
@@ -485,7 +504,7 @@
                 <button type="button" class="btn-small" onclick="resetYBounds(1)">Auto</button>
               </span>
             </div>
-        </div> 
+        </div>
 
 
 
@@ -1036,6 +1055,7 @@ gogglesSocket.onerror = function () {
             }],
             rangeSelector: {
                 enabled: true,
+                selected: 7,
                 buttons: [{
                     type: 'hour',
                     count: 1,
