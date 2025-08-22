@@ -134,7 +134,7 @@
                   color: getLineageColor(baseId),
                   yAxis: 3, // will add yAxis below
                   showInNavigator: false,
-                }, false);
+                });
               }
             }
             // Update axis title to show the component #
@@ -790,7 +790,7 @@ if (existingOD) {
       color: getLineageColor(baseId),
       yAxis: 3,
       showInNavigator: false,
-      dashStyle: 'ShortDash',
+      dashStyle: 'Solid',
     }, false);
   }
   mainChart.redraw();
@@ -833,7 +833,7 @@ if (existingOD) {
     color: seriesColor,
     yAxis: 3,
     showInNavigator: false,
-    dashStyle: 'ShortDash',
+    dashStyle: 'Solid',
   }, false);
 
   if (!selected_ale_ids.includes(baseId)) {
