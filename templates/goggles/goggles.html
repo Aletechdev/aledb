@@ -1049,7 +1049,7 @@ gogglesSocket.onerror = function () {
                             </div>
                           </div>
                           <div>
-                            <b>${this.series.yAxis.options.title.text}:</b> ${this.y}<br/>
+                            <b>${this.series.yAxis.options.title.text}:</b> ${this.y != null ? this.y.toFixed(3) : 'n/a'}<br/>
                             Time: ${timeText}<br/>
                             Batch: ${batch ?? 'n/a'}<br/>
                             Media: ${media ?? 'n/a'}<br/>
