@@ -1042,12 +1042,10 @@ const mainChart = Highcharts.stockChart('mainChart', {
     zoomType: 'x',
     panning: true,
     panKey: 'shift',
-    // one shared gutter for ALL left-side axes
-    marginLeft: 90
+    marginLeft: 90   // shared gutter
   },
 
   navigator: { baseSeries: 0 },
-
   xAxis: [{ ordinal: false }],
 
   yAxis: [{
@@ -1056,13 +1054,15 @@ const mainChart = Highcharts.stockChart('mainChart', {
     height: '43%',
     offset: 0,
     labels: { style: { fontSize: '14px' }, reserveSpace: true },
-    title: { text: 'OD', align: 'middle', rotation: 270, x: -40 }
+    // Small or zero x so it stays visible in the gutter
+    title: { text: 'OD', align: 'middle', rotation: 270, x: -10 }
   }, {
     // Axis 1
     opposite: false,
     top: '45%', height: '23%',
     offset: 0,
     labels: { style: { fontSize: '14px' }, reserveSpace: false },
+    // Larger negative x to pull from inside the plot into the gutter
     title: { text: 'Growth Rate', align: 'middle', rotation: 270, x: -40 }
   }, {
     // Axis 2
@@ -1079,8 +1079,9 @@ const mainChart = Highcharts.stockChart('mainChart', {
     min: 0,
     labels: { style: { fontSize: '14px' }, reserveSpace: false },
     title: { text: 'Media Ratio (component #1)', align: 'middle', rotation: 270, x: -40 }
- 
   }],
+});
+
 
 
 
