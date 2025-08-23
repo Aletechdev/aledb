@@ -1063,14 +1063,14 @@ const mainChart = Highcharts.stockChart('mainChart', {
     offset: 0,
     labels: { style: { fontSize: '14px' }, reserveSpace: false },
     // Larger negative x to pull from inside the plot into the gutter
-    title: { text: 'Growth Rate', align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '14px', fontWeight: 'bold' } }
+    title: { text: 'GR (hr<sup>-1</sup>)',useHTML: true, align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '14px', fontWeight: 'bold' } }
   }, {
     // Axis 2
     opposite: false,
     top: '70%', height: '13%',
     offset: 0,
     labels: { style: { fontSize: '14px' }, reserveSpace: false },
-    title: { text: 'Temperature °C', align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '14px', fontWeight: 'bold' } }
+    title: { text: 'Temp (°C)', align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '14px', fontWeight: 'bold' } }
   },
     {
   // Axis 3
@@ -1080,7 +1080,7 @@ const mainChart = Highcharts.stockChart('mainChart', {
   min: 0,
   labels: { style: { fontSize: '14px' }, reserveSpace: false },
   title: {
-    text: 'Media Ratio<br/>(component #1)',
+    text: 'MR<br/>(comp. #1)',
     useHTML: true,
     align: 'middle',
     rotation: 270,
