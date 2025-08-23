@@ -204,7 +204,14 @@
             }
             // Update axis title to show the component #
             if (mainChart?.yAxis?.[3]) {
-              mainChart.yAxis[3].setTitle({ text: `MR (comp. #${selectedMediaComponent})` }, false);
+              mainChart.yAxis[3].setTitle({
+  text: `MR<br/>(comp. #${selectedMediaComponent})`,
+  useHTML: true,
+  align: 'middle',
+  rotation: 270,
+  x: -40,
+  style: { fontSize: '14px', fontWeight: 'bold' }
+}, false);
             }
             mainChart.redraw();
           }
@@ -448,7 +455,14 @@
           const grSel = document.getElementById('experiment_GR_type');
           if (grSel && !grSel.value) grSel.value = selectedGRType;
           if (mainChart?.yAxis?.[3]) {
-            mainChart.yAxis[3].setTitle({ text: `MR (comp. #${selectedMediaComponent})` }, false);
+            mainChart.yAxis[3].setTitle({
+  text: `MR<br/>(comp. #${selectedMediaComponent})`,
+  useHTML: true,
+  align: 'middle',
+  rotation: 270,
+  x: -40,
+  style: { fontSize: '14px', fontWeight: 'bold' }
+}, false);
             mainChart.redraw();
           }
         });
