@@ -1053,32 +1053,40 @@ const mainChart = Highcharts.stockChart('mainChart', {
     opposite: false,
     height: '43%',
     offset: 0,
-    labels: { style: { fontSize: '14px' }, reserveSpace: true },
+    labels: { style: { fontSize: '18px' }, reserveSpace: true },
     // Small or zero x so it stays visible in the gutter
-    title: { text: 'OD', align: 'middle', rotation: 270, x: -10 }
+    title: { text: 'OD', align: 'middle', rotation: 270, x: -10 ,style: { fontSize: '20px', fontWeight: 'bold' } }
   }, {
     // Axis 1
     opposite: false,
     top: '45%', height: '23%',
     offset: 0,
-    labels: { style: { fontSize: '14px' }, reserveSpace: false },
+    labels: { style: { fontSize: '18px' }, reserveSpace: false },
     // Larger negative x to pull from inside the plot into the gutter
-    title: { text: 'Growth Rate', align: 'middle', rotation: 270, x: -40 }
+    title: { text: 'Growth Rate', align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '20px', fontWeight: 'bold' } }
   }, {
     // Axis 2
     opposite: false,
     top: '70%', height: '13%',
     offset: 0,
-    labels: { style: { fontSize: '14px' }, reserveSpace: false },
-    title: { text: 'Temperature °C', align: 'middle', rotation: 270, x: -40 }
+    labels: { style: { fontSize: '18px' }, reserveSpace: false },
+    title: { text: 'Temperature °C', align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '20px', fontWeight: 'bold' } }
   }, {
-    // Axis 3
-    opposite: false,
-    top: '85%', height: '13%',
-    offset: 0,
-    min: 0,
-    labels: { style: { fontSize: '14px' }, reserveSpace: false },
-    title: { text: 'Media Ratio (component #1)', align: 'middle', rotation: 270, x: -40 }
+    {
+  // Axis 3
+  opposite: false,
+  top: '85%', height: '13%',
+  offset: 0,
+  min: 0,
+  labels: { style: { fontSize: '20px' }, reserveSpace: false },
+  title: {
+    text: 'Media Ratio<br/>(component #1)',
+    useHTML: true,
+    align: 'middle',
+    rotation: 270,
+    x: -40,
+    style: { fontSize: '20px', fontWeight: 'bold' }
+  }
   }],
 
 
