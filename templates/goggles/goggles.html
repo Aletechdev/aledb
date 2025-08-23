@@ -1087,7 +1087,20 @@ const mainChart = Highcharts.stockChart('mainChart', {
   },
 
   navigator: { baseSeries: 0 },
-  xAxis: [{ ordinal: false }],
+  xAxis: [{
+  ordinal: false,
+  labels: {
+    style: {
+      fontSize: '14px',
+      color: '#000000',
+      fontWeight: 'bold'
+    }
+  },
+  title: {
+    text: 'Time',
+    style: {fontSize: '14px',color: '#000000',fontWeight: 'bold'}
+  }
+}],
 
   yAxis: [{
     // Axis 0 — the ONLY one that reserves gutter space
