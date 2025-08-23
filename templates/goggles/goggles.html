@@ -1043,37 +1043,38 @@ const mainChart = Highcharts.stockChart('mainChart', {
   xAxis: [{
     ordinal: false
   }],
+yAxis: [{
+  // Axis 0 — the ONLY one that reserves space
+  opposite: false,
+  height: '43%',                    // 0–45%
+  offset: 0,
+  labels: { style: { fontSize: '14px' }, reserveSpace: true },
+  title: { text: 'OD', align: 'middle', rotation: 270 }
+}, {
+  // Axis 1
+  opposite: false,
+  top: '45%', height: '23%',        // 45–70%
+  offset: 0,
+  labels: { style: { fontSize: '14px' }, reserveSpace: false },
+  title: { text: 'Growth Rate', align: 'middle', rotation: 270 }
+}, {
+  // Axis 2
+  opposite: false,
+  top: '70%', height: '13%',        // 70–85%
+  offset: 0,
+  labels: { style: { fontSize: '14px' }, reserveSpace: false },
+  title: { text: 'Temperature °C', align: 'middle', rotation: 270 }
+}, {
+  // Axis 3
+  opposite: false,
+  top: '85%', height: '13%',        // 85–100%
+  offset: 0,
+  min: 0,
+  labels: { style: { fontSize: '14px' }, reserveSpace: false },
+  title: { text: 'Media Ratio (component #1)', align: 'middle', rotation: 270 }
+}],
 
-  yAxis: [{
-    // Axis 0 — the ONLY one that reserves space
-    opposite: false,
-    height: '43%',                    // 0–45%
-    offset: 0,
-    labels: { style: { fontSize: '14px' }, reserveSpace: true },
-    title: { text: 'OD', align: 'high', rotation: 0, x: 6, y: -6 }
-  }, {
-    // Axis 1
-    opposite: false,
-    top: '45%', height: '23%',        // 45–70%
-    offset: 0,
-    labels: { style: { fontSize: '14px' }, reserveSpace: false },
-    title: { text: 'Growth Rate', align: 'high', rotation: 0, x: 6, y: -6 }
-  }, {
-    // Axis 2
-    opposite: false,
-    top: '70%', height: '13%',        // 70–85%
-    offset: 0,
-    labels: { style: { fontSize: '14px' }, reserveSpace: false },
-    title: { text: 'Temperature °C', align: 'high', rotation: 0, x: 6, y: -6 }
-  }, {
-    // Axis 3
-    opposite: false,
-    top: '85%', height: '13%',        // 85–100%
-    offset: 0,
-    min: 0,
-    labels: { style: { fontSize: '14px' }, reserveSpace: false },
-    title: { text: 'Media Ratio (component #1)', align: 'high', rotation: 0, x: 6, y: -6 }
-  }],
+
 
             rangeSelector: {
                 enabled: true,
