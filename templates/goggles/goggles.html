@@ -302,9 +302,36 @@
         function applyXAxisMode() {
           // Update axis type
           if (xAxisMode === 'days') {
-            mainChart.xAxis[0].update({ type: 'linear' }, false);
+           mainChart.xAxis[0].update({ type: 'linear' }, false);
+           // Label as plain numbers (days) on the main axis
+           mainChart.xAxis[0].update({
+             labels: {
+               formatter: function () { return Highcharts.numberFormat(this.value, 2) + ' d'; }
+             }
+           }, false);
+           // Navigator: also use linear axis and numeric labels (no 16:00:00)
+           mainChart.update({
+             navigator: {
+               xAxis: {
+                 type: 'linear',
+                 labels: {
+                   formatter: function () { return Highcharts.numberFormat(this.value, 2) + ' d'; }
+                 }
+               }
+             }
+           }, false);
           } else {
             mainChart.xAxis[0].update({ type: 'datetime' }, false);
+           // Restore default datetime labeling
+           mainChart.xAxis[0].update({ labels: { formatter: undefined } }, false);
+           mainChart.update({
+             navigator: {
+               xAxis: {
+                 type: 'datetime',
+                 labels: { formatter: undefined }
+               }
+             }
+           }, false);
           }
 
           // Rebuild data for every selected lineage
