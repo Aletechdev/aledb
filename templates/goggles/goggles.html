@@ -1038,14 +1038,6 @@ gogglesSocket.onerror = function () {
        Highcharts.setOptions({ time: { useUTC: false }});
 console.time('line');
 const mainChart = Highcharts.stockChart('mainChart', {
-  navigator: { baseSeries: 0 },
-
-  xAxis: [{
-    ordinal: false
-  }],
-Highcharts.setOptions({ time: { useUTC: false }});
-console.time('line');
-const mainChart = Highcharts.stockChart('mainChart', {
   chart: {
     zoomType: 'x',
     panning: true,
@@ -1087,8 +1079,8 @@ const mainChart = Highcharts.stockChart('mainChart', {
     min: 0,
     labels: { style: { fontSize: '14px' }, reserveSpace: false },
     title: { text: 'Media Ratio (component #1)', align: 'middle', rotation: 270, x: -40 }
+ 
   }],
-});
 
 
 
