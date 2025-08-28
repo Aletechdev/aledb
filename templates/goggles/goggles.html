@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load jsid %}
 
 {% block title %}ALEGoggles{% endblock %}
 {% block scripts_and_style %}
@@ -594,171 +595,123 @@
                     style="text-align: center"> {{ value.name }} </button>
             <div class="content" style="overflow-y:auto; max-height: 20em;">
                 {% for project_key, project_value in value.projects.items reversed %}
-                    <button type="button" class="collapsible"
-                            style="text-align: center"> {{ project_value.name }} </button>
-                    <div class="content">
-                          <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}" class="display">
-                            <thead>
-                              <tr>
-                                <th>ALE ID</th>
-                                <th>Lineage</th>
-                                <th>Protocol</th>
-                                <th>Project</th>
-                                <th>Notes</th>
-                                <th>Color</th>
-                                <th>DB ID</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                            {% for experiment in project_value.experiments %}
-                              <tr id="{{ project_key }}_row_id_{{ value.id }}_{{ experiment.0 }}">
-                                <td>{{ experiment.0 }}</td>  <!-- ALE ID -->
-                                <td>{{ experiment.1 }}</td>  <!-- Lineage -->
-                                <td>{{ experiment.2 }}</td>  <!-- Protocol -->
-                                <td>{{ experiment.3 }}</td>  <!-- Project (hidden via DT config) -->
-                                <td>{{ experiment.4 }}</td>  <!-- Notes   (hidden via DT config) -->
-                                <td></td>                    <!-- Color (empty cell; DT renderer will inject <input type="color"> ) -->
-                                <td>{{ experiment.6 }}</td>  <!-- DB ID (hidden via DT config) -->
-                              </tr>
-                            {% endfor %}
-                            </tbody>
-                          </table>
-                        <script>
-                            let table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = new DataTable('#ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}',
+  <button type="button" class="collapsible" style="text-align: center"> {{ project_value.name }} </button>
+  <div class="content">
 
-                             {
-                                select: 'multi+shift',
-                                autoHeight: true,
-                                autoWidth: true,
-                                paging: false,
-                                searching: false,
-                                ordering: false,
-                                info: false,
-                                scrollY: 500,
-                                dataType: JSON,
+    {% with value.id|jsident as safe_id %}
+      <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}" class="display">
+        <thead>
+          <tr>
+            <th>ALE ID</th>
+            <th>Lineage</th>
+            <th>Protocol</th>
+            <th>Project</th>
+            <th>Notes</th>
+            <th>Color</th>
+            <th>DB ID</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for experiment in project_value.experiments %}
+          <tr id="{{ project_key }}_row_id_{{ value.id }}_{{ experiment.0 }}">
+            <td>{{ experiment.0 }}</td>
+            <td>{{ experiment.1 }}</td>
+            <td>{{ experiment.2 }}</td>
+            <td>{{ experiment.3 }}</td>
+            <td>{{ experiment.4 }}</td>
+            <td></td>
+            <td>{{ experiment.6 }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
 
+      <script>
+        let table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} =
+          new DataTable('#ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}', {
+            select: 'multi+shift',
+            autoHeight: true,
+            autoWidth: true,
+            paging: false,
+            searching: false,
+            ordering: false,
+            info: false,
+            scrollY: 500,
+            dataType: JSON,
+            columns: [
+              {title: 'ALE ID'},
+              {title: 'Lineage'},
+              {
+                title: 'Protocol',
+                render: function (data, type) { return data ?? ''; }
+              },
+              { title: 'Project', visible: false },
+              { title: 'Notes',   visible: false },
+              {
+                title: 'Color',
+                render: function (data, type, row) {
+                  var parts = String(data || '').split(',');
+                  var raw = parts[0] || parts[1] || '#000000';
+                  if (!/^#[0-9A-Fa-f]{6}$/.test(raw)) {
+                    if (/^#[0-9A-Fa-f]{3}$/.test(raw)) {
+                      raw = '#' + raw[1] + raw[1] + raw[2] + raw[2] + raw[3] + raw[3];
+                    } else { raw = '#000000'; }
+                  }
+                  var expNum = (row && row[0] != null) ? row[0] : 'unknown';
+                  var inputId = 'experiment_{{ project_key }}_{{ value.id }}_' + expNum;
+                  return '<input type="color" id="' + inputId + '" value="' + raw + '">';
+                }
+              },
+              { title: 'db id', invisible: false }
+            ]
+          });
 
-                                //data: ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }},
-                                columns: [
-  {title: 'ALE ID'},
-  {title: 'Lineage'},
-  {
-           title: 'Protocol',
-          render: function (data, type) {
-            return data ?? '';
+        table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.columns.adjust();
+
+        table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function (e) {
+          if (e.target && e.target.matches('input[type="color"]')) return;
+
+          let ALE_id = table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).data();
+          let data_id = "{{ project_key }}_{{ value.id }}_" + ALE_id[0];
+          let row_id  = "{{ project_key }}_row_id_{{ value.id }}_" + ALE_id[0];
+          table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
+
+          let sample_name = "{{ value.name }} {{ project_value.name }}: {{ project_key }}-" + ALE_id[0];
+          let message = [ALE_id[6], row_id, "{{ value.id }}", data_id, sample_name];
+
+          lineageMeta[data_id] = { aleId: ALE_id[0], lineageLabel: sample_name };
+
+          if (table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
+            ['', '-GR', '-Temp', '-MR'].forEach(suffix => {
+              const s = mainChart.get(data_id + suffix);
+              if (s) s.remove();
+            });
+            const idx = selected_ale_ids.indexOf(data_id);
+            if (idx !== -1) selected_ale_ids.splice(idx, 1);
+            const msgIdx = selected_ales.findIndex(m => m[3] === data_id);
+            if (msgIdx !== -1) selected_ales.splice(msgIdx, 1);
+            delete lineageMeta[data_id];
+          } else {
+            sendMessage(message);
+            selected_ales.push(message);
           }
-  },
-  {
-  title: 'Project',
-  visible: false
-  },
-  {
-       title: 'Notes',
-       visible: false
-  },
-  {
-    title: 'Color',
-    // color picker column
-    render: function (data, type, row) {
-      // tolerate a few formats
-      var parts = String(data || '').split(',');
-      var raw = parts[0] || parts[1] || '#000000';
+        });
 
-      // normalize to #rrggbb
-      if (!/^#[0-9A-Fa-f]{6}$/.test(raw)) {
-        if (/^#[0-9A-Fa-f]{3}$/.test(raw)) {
-          raw = '#' + raw[1] + raw[1] + raw[2] + raw[2] + raw[3] + raw[3];
-        } else {
-          raw = '#000000';
-        }
-      }
+        const tableEl_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} =
+          document.getElementById('ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}');
 
-      // first cell is the experiment number
-      var expNum = (row && row[0] != null) ? row[0] : 'unknown';
+        ['mousedown', 'click'].forEach(evt =>
+          tableEl_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.addEventListener(
+            evt,
+            (ev) => { if (ev.target && ev.target.matches('input[type="color"]')) ev.stopPropagation(); },
+            true
+          )
+        );
+      </script>
+    {% endwith %}
+  </div>
+{% endfor %}
 
-      // MUST match your series base id: <project_key>_<machine_id>_<expNum>
-      var inputId = 'experiment_{{ project_key }}_{{ value.id }}_' + expNum;
-
-      return '<input type="color" id="' + inputId + '" value="' + raw + '">';
-    }
-  },
-  { title: 'db id', invisible: false }
-]
-});
-
-table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.columns.adjust();
-
-
-                            table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function (e) {
-
-
-                                // If the user clicked the color input, do NOT toggle selection/remove series
-                                if (e.target && e.target.matches('input[type="color"]')) return;
-                                //let ALE_id = ALE_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}[table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index()][0];
-                                let ALE_id = table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).data();
-                                let data_id = "{{ project_key }}_{{ value.id }}_" + ALE_id[0]
-                                let row_id = '{{ project_key }}' +'_row_id_{{ value.id }}_' + ALE_id[0]
-                                table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
-
-
-                                let sample_name = "{{ value.name }} {{ project_value.name }}: {{ project_key }}-" + ALE_id[0]
-                                let message = [ALE_id[6], row_id, "{{ value.id }}", data_id, sample_name]
-
-                                lineageMeta[data_id] = {
-                                aleId: ALE_id[0],
-                                lineageLabel: sample_name
-                                };
-
-                                if (table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
-                                    let current_id = data_id
-                                    console.log("removing: " + current_id);
-
-
-                                    ['', '-GR', '-Temp','-MR'].forEach(suffix => {
-                                    const s = mainChart.get(current_id + suffix);
-                                      if (s) s.remove();
-                                    });
-                                    // remove the id
-                                    const idx = selected_ale_ids.indexOf(current_id);
-                                    if (idx !== -1) selected_ale_ids.splice(idx, 1);
-
-
-                                    // remove the matching message entry (if you need to track it)
-                                    const msgIdx = selected_ales.findIndex(m => m[3] === current_id);
-                                    if (msgIdx !== -1) selected_ales.splice(msgIdx, 1);
-                                    delete lineageMeta[current_id];
-                                } else {
-
-
-                                    // send the request immediately
-                                    sendMessage(message);
-                                    console.log(message);
-
-                                    // Original request for first load
-
-                                    selected_ales.push(message);
-                                }
-
-                            });
-
-                           const tableEl_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} =
-  document.getElementById('ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}');
-
-['mousedown', 'click'].forEach(evt =>
-  tableEl_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.addEventListener(
-    evt,
-    (ev) => {
-      if (ev.target && ev.target.matches('input[type="color"]')) {
-        ev.stopPropagation();
-      }
-    },
-    true  // capture phase to intercept early
-  )
-);
-                        </script>
-                    </div>
-
-                {% endfor %}
             </div>
         {% endfor %}
     </div>
