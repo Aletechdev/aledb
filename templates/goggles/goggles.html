@@ -206,10 +206,10 @@
             // Update axis title to show the component #
             if (mainChart?.yAxis?.[3]) {
               mainChart.yAxis[3].setTitle({
-  text: 'MR (Comp. #' + selectedMediaComponent + ')',
+  text: 'MR<br/>(Comp. #' + selectedMediaComponent + ')',
   align: 'middle',
   rotation: 270,
-  x: -10,
+  x: -40,
   y: 20,     // was 8 → try ~20
   style: { fontSize: '14px', fontWeight: 'bold' }
 }, false);
@@ -485,10 +485,10 @@
           if (grSel && !grSel.value) grSel.value = selectedGRType;
           if (mainChart?.yAxis?.[3]) {
             mainChart.yAxis[3].setTitle({
-  text: 'MR (Comp. #' + selectedMediaComponent + ')',
+  text: 'MR<br/>(Comp. #' + selectedMediaComponent + ')',
   align: 'middle',
   rotation: 270,
-  x: -10,
+  x: -40,
   y: 20,     // was 8 → try ~20
   style: { fontSize: '14px', fontWeight: 'bold' }
 }, false);
@@ -1038,7 +1038,7 @@ const mainChart = Highcharts.stockChart('mainChart', {
     zoomType: 'x',
     panning: true,
     panKey: 'shift',
-    marginLeft: 120   // shared gutter
+    marginLeft: 90   // shared gutter
   },
 
 
@@ -1059,7 +1059,7 @@ const mainChart = Highcharts.stockChart('mainChart', {
 }],
 
   yAxis: [{
-    // Axis 0
+    // Axis 0 — the ONLY one that reserves gutter space
     opposite: false,
     height: '43%',
     offset: 0,
@@ -1070,23 +1070,23 @@ const mainChart = Highcharts.stockChart('mainChart', {
     // Axis 1
     opposite: false,
     top: '45%', height: '23%',
-    offset: 0,
+    offset: 55,
     labels: { style: { fontSize: '14px' , color: '#000000'}, reserveSpace: false },
     // Larger negative x to pull from inside the plot into the gutter
-    title: { text: 'GR (hr<sup>-1</sup>)',useHTML: true, align: 'middle', rotation: 270, x: -10 ,style: { fontSize: '14px', fontWeight: 'bold' , color: '#000000'} }
+    title: { text: 'GR (hr<sup>-1</sup>)',useHTML: true, align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '14px', fontWeight: 'bold' , color: '#000000'} }
   }, {
     // Axis 2
     opposite: false,
     top: '70%', height: '13%',
-    offset: 0,
+    offset: 55,
     labels: { style: { fontSize: '14px' , color: '#000000'}, reserveSpace: false },
-    title: { text: 'Temp (°C)', align: 'middle', rotation: 270, x: -10 ,style: { fontSize: '14px', fontWeight: 'bold' , color: '#000000'} }
+    title: { text: 'Temp (°C)', align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '14px', fontWeight: 'bold' , color: '#000000'} }
   },
     {
   // Axis 3
   opposite: false,
   top: '85%', height: '13%',
-  offset: 0,
+  offset: 55,
   min: 0,
   labels: { style: { fontSize: '14px' , color: '#000000'}, reserveSpace: false },
     title: {
