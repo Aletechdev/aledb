@@ -1038,7 +1038,7 @@ const mainChart = Highcharts.stockChart('mainChart', {
     zoomType: 'x',
     panning: true,
     panKey: 'shift',
-    marginLeft: 90   // shared gutter
+    marginLeft: 110   // shared gutter
   },
 
 
@@ -1070,7 +1070,7 @@ const mainChart = Highcharts.stockChart('mainChart', {
     // Axis 1
     opposite: false,
     top: '45%', height: '23%',
-    offset: 0,
+    offset: 55,
     labels: { style: { fontSize: '14px' , color: '#000000'}, reserveSpace: false },
     // Larger negative x to pull from inside the plot into the gutter
     title: { text: 'GR (hr<sup>-1</sup>)',useHTML: true, align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '14px', fontWeight: 'bold' , color: '#000000'} }
@@ -1078,7 +1078,7 @@ const mainChart = Highcharts.stockChart('mainChart', {
     // Axis 2
     opposite: false,
     top: '70%', height: '13%',
-    offset: 0,
+    offset: 55,
     labels: { style: { fontSize: '14px' , color: '#000000'}, reserveSpace: false },
     title: { text: 'Temp (°C)', align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '14px', fontWeight: 'bold' , color: '#000000'} }
   },
@@ -1086,7 +1086,7 @@ const mainChart = Highcharts.stockChart('mainChart', {
   // Axis 3
   opposite: false,
   top: '85%', height: '13%',
-  offset: 0,
+  offset: 55,
   min: 0,
   labels: { style: { fontSize: '14px' , color: '#000000'}, reserveSpace: false },
     title: {
@@ -1094,7 +1094,7 @@ const mainChart = Highcharts.stockChart('mainChart', {
       // no useHTML
       align: 'middle',
       rotation: 270,
-      x: -40,
+      x: -10,
       y: 20,                 // ← give it extra vertical room
       style: { fontSize: '14px', color: '#000000', fontWeight: 'bold' }
     }
