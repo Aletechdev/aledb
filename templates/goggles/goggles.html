@@ -206,7 +206,7 @@
             // Update axis title to show the component #
             if (mainChart?.yAxis?.[3]) {
               mainChart.yAxis[3].setTitle({
-  text: `<div style="text-align:center">MR<br/>(comp. #${selectedMediaComponent})</div>`,
+  text: `<div style="text-align:center">MR<br/>(Comp. #${selectedMediaComponent})</div>`,
   useHTML: true,
   align: 'middle',
   rotation: 270,
@@ -484,7 +484,7 @@
           if (grSel && !grSel.value) grSel.value = selectedGRType;
           if (mainChart?.yAxis?.[3]) {
             mainChart.yAxis[3].setTitle({
-  text: `<div style="text-align:center">MR<br/>(comp. #${selectedMediaComponent})</div>`,
+  text: `<div style="text-align:center">MR<br/>(Comp. #${selectedMediaComponent})</div>`,
   useHTML: true,
   align: 'middle',
   rotation: 270,
@@ -527,7 +527,7 @@
               <option value="580R">580R</option>
             </select>
 
-            <label>Media component #:</label>
+            <label>Media Component #:</label>
             <select id="media_component_select" onchange="handleMediaComponentChange()">
               <option value="1" selected>1</option>
               <option value="2">2</option>
