@@ -1099,8 +1099,7 @@ const mainChart = Highcharts.stockChart('mainChart', {
       style: { fontSize: '14px', color: '#000000', fontWeight: 'bold' }
     }
     }],
-  mainChart.yAxis[3].update({ title: { useHTML: false, y: 20 } }, false);
-mainChart.redraw();
+
 
 
 
@@ -1280,6 +1279,8 @@ mainChart.redraw();
             },
 
         });
+          mainChart.yAxis[3].update({ title: { useHTML: false, y: 20 } }, false);
+mainChart.redraw();
         console.timeEnd('line');
 
         // Ensure axis starts in the same mode as the dropdown
