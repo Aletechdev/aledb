@@ -207,11 +207,10 @@
             if (mainChart?.yAxis?.[3]) {
               mainChart.yAxis[3].setTitle({
   text: 'MR<br/>(Comp. #' + selectedMediaComponent + ')',
-
   align: 'middle',
   rotation: 270,
   x: -40,
-  y: 8,               // small nudge so it isn’t tight to the top
+  y: 20,     // was 8 → try ~20
   style: { fontSize: '14px', fontWeight: 'bold' }
 }, false);
 
@@ -487,11 +486,10 @@
           if (mainChart?.yAxis?.[3]) {
             mainChart.yAxis[3].setTitle({
   text: 'MR<br/>(Comp. #' + selectedMediaComponent + ')',
-
   align: 'middle',
   rotation: 270,
   x: -40,
-  y: 8,               // small nudge so it isn’t tight to the top
+  y: 20,     // was 8 → try ~20
   style: { fontSize: '14px', fontWeight: 'bold' }
 }, false);
 
@@ -1042,6 +1040,8 @@ const mainChart = Highcharts.stockChart('mainChart', {
     panKey: 'shift',
     marginLeft: 90   // shared gutter
   },
+  mainChart.yAxis[3].update({ title: { useHTML: false, y: 20 } }, false);
+mainChart.redraw();
 
   navigator: { baseSeries: 0 },
   xAxis: [{
@@ -1090,14 +1090,15 @@ const mainChart = Highcharts.stockChart('mainChart', {
   offset: 0,
   min: 0,
   labels: { style: { fontSize: '14px' , color: '#000000'}, reserveSpace: false },
-  title: {
-    text: 'MR',
-    useHTML: true,
-    align: 'middle',
-    rotation: 270,
-    x: -40,
-    style: { fontSize: '14px', color: '#000000',fontWeight: 'bold' }
-  }
+    title: {
+      text: 'MR',            // placeholder; you overwrite it later
+      // no useHTML
+      align: 'middle',
+      rotation: 270,
+      x: -40,
+      y: 20,                 // ← give it extra vertical room
+      style: { fontSize: '14px', color: '#000000', fontWeight: 'bold' }
+    }
     }],
 
 
