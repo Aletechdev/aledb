@@ -1040,8 +1040,7 @@ const mainChart = Highcharts.stockChart('mainChart', {
     panKey: 'shift',
     marginLeft: 90   // shared gutter
   },
-  mainChart.yAxis[3].update({ title: { useHTML: false, y: 20 } }, false);
-mainChart.redraw();
+
 
   navigator: { baseSeries: 0 },
   xAxis: [{
@@ -1100,7 +1099,8 @@ mainChart.redraw();
       style: { fontSize: '14px', color: '#000000', fontWeight: 'bold' }
     }
     }],
-
+  mainChart.yAxis[3].update({ title: { useHTML: false, y: 20 } }, false);
+mainChart.redraw();
 
 
 
