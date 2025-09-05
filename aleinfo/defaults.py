@@ -1,9 +1,11 @@
 import os
 import sys
+from pathlib import Path
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+GOGGLES_MACHINE_CONFIG = "/srv/alelog/config/goggles_machine_config.json"
 DEBUG = os.environ.get('DEBUG', '0') == '1'
 
 GOOGLE_ANALYTICS_TAG = os.environ.get('GOOGLE_ANALYTICS_TAG', 'no-google-analytics-tag')
@@ -58,6 +60,7 @@ INSTALLED_APPS = (
     'guardian',
 )
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -107,8 +110,7 @@ DATABASES = {
         'HOST': os.environ.get('DTU_MACHINE_THREE_HOST', 'db'),
         'PORT': int(os.environ.get('DTU_MACHINE_THREE_MYSQL_PORT', 4409)),
     },
-}
-
+}      
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
@@ -263,7 +265,7 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse'
         },
         'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue'
+        '()': 'django.utils.log.RequireDebugTrue'
         },
         'uuidfilter': {
             '()': 'logs.aledb_logger.UUIDFilter'
@@ -293,7 +295,7 @@ LOGGING = {
             'formatter': 'simple',
             'class': 'logging.StreamHandler',
             'level': 'DEBUG',
-            'filters': ['uuidfilter', 'require_debug_true'],
+            'filters': ['uuidfilter','require_debug_true'],
         },
         'mail_admins': {
             'level': 'CRITICAL',
@@ -311,7 +313,12 @@ LOGGING = {
             'level': 'ERROR',
             'handlers': ['console', 'file', 'mail_admins'],
             'propagate': False,
-        }
+        },
+	'goggles': {
+	    'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
 
