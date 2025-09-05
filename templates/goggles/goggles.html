@@ -206,13 +206,15 @@
             // Update axis title to show the component #
             if (mainChart?.yAxis?.[3]) {
               mainChart.yAxis[3].setTitle({
-  text: `<div style="text-align:center">MR<br/>(Comp. #${selectedMediaComponent})</div>`,
-  useHTML: true,
+  text: 'MR<br/>(Comp. #' + selectedMediaComponent + ')',
+
   align: 'middle',
   rotation: 270,
   x: -40,
+  y: 8,               // small nudge so it isn’t tight to the top
   style: { fontSize: '14px', fontWeight: 'bold' }
 }, false);
+
             }
             mainChart.redraw();
           }
@@ -484,13 +486,15 @@
           if (grSel && !grSel.value) grSel.value = selectedGRType;
           if (mainChart?.yAxis?.[3]) {
             mainChart.yAxis[3].setTitle({
-  text: `<div style="text-align:center">MR<br/>(Comp. #${selectedMediaComponent})</div>`,
-  useHTML: true,
+  text: 'MR<br/>(Comp. #' + selectedMediaComponent + ')',
+
   align: 'middle',
   rotation: 270,
   x: -40,
-  style: { fontSize: '14px', fontWeight: 'bold', color: '#000000' }
+  y: 8,               // small nudge so it isn’t tight to the top
+  style: { fontSize: '14px', fontWeight: 'bold' }
 }, false);
+
             mainChart.redraw();
           }
         });
