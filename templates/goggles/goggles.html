@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load jsid %}
 
 {% block title %}ALEGoggles{% endblock %}
 {% block scripts_and_style %}
@@ -9,6 +10,18 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/webapp.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static 'css/goggles.css' %}">
     <style>
+                .status-pill {
+          display: inline-block;
+          margin-left: .5rem;
+          padding: .15rem .5rem;
+          border-radius: 999px;
+          font-weight: 600;
+          font-size: 0.95em;
+        }
+        .status-connected { background: #e6f7ec; color: #0f7b3b; }
+        .status-disconnected { background: #f6eaea; color: #8a1c1c; }
+        .status-reconnecting { background: #fff6e0; color: #8a5a00; }
+        [hidden] { display: none !important; }
         label {
             padding-left: 1em;
         }
@@ -24,12 +37,105 @@
             padding: 8px;
         }
 
-        .dataTables_scrollHead {
-            display: none;
-        }
 
+            #machine-bar table.display td:nth-child(2),
+            #machine-bar table.display th:nth-child(2),
+            #machine-bar table.display td:nth-child(3),
+            #machine-bar table.display th:nth-child(3) {
+              white-space: normal !important;
+              word-break: break-word;
+              overflow-wrap: anywhere;
+              max-width: 14rem;
+            }
+
+            /* Compact the Color column */
+            #machine-bar table.display td:nth-child(6),
+            #machine-bar table.display th:nth-child(6) {
+              width: 52px;
+              min-width: 52px;
+              text-align: center;
+            }
+
+            #machine-bar input[type="color"] {
+              width: 36px;
+              height: 24px;
+              padding: 0;
+              border: none;
+              background: transparent;
+            }
+
+            /* Optional: stabilize column widths */
+            #machine-bar table.display {
+              table-layout: fixed;
+            }
         .goggles-option {
         }
+        .dataTables_scrollHead { display: block !important; }
+        .options_bar .goggles-option select { min-width: 12rem; }
+        .options_bar {
+          position: fixed;
+          bottom: .5em;
+          z-index: 100;
+          display: flex;
+          flex-direction: column;
+          gap: .35rem;
+        }
+
+        .options_row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: .5rem 1rem;
+        }
+
+        .options_row label { padding-left: 0; }
+
+        .options_bar input[type="number"] {
+          width: 6.5rem;
+          padding: .2rem .4rem;
+          font-size: 0.9rem;
+        }
+
+        .btn-small {
+          padding: .2rem .5rem;
+          font-size: 0.85rem;
+          line-height: 1.1;
+          cursor: pointer;
+        }
+        /* Keep each control pack on one line */
+        .options_row .field {
+          display: inline-flex;
+          align-items: center;
+          gap: .35rem;
+          flex-wrap: nowrap;
+          flex: 0 0 auto;   /* don't stretch */
+        }
+
+        /* Make the buttons small and not full width */
+        .options_row .field .btn-small,
+        .options_row .btn-small {
+          display: inline-flex;
+          align-items: center;
+          width: auto !important;   /* override any global 100% width */
+          padding: .25rem .5rem;
+          font-size: 0.85rem;
+          line-height: 1.1;
+          flex: 0 0 auto;           /* don't flex-grow */
+          white-space: nowrap;
+        }
+
+        /* Ensure number inputs in these control packs are compact */
+        .options_row .field input[type="number"] {
+          width: 6.5rem;
+          padding: .2rem .4rem;
+          font-size: 0.9rem;
+          flex: 0 0 auto;
+        }
+
+        /* Optional: prevent any child from auto-stretching in the row */
+        .options_row > * { flex: 0 0 auto; }
+
+
     </style>
 
     <script src="https://code.highcharts.com/stock/11.4.8/highstock.js"></script>
@@ -37,7 +143,12 @@
     <script src="https://code.highcharts.com/stock/11.4.8/modules/accessibility.js"></script>
 {% endblock %}
 
-{% block header %}<b><a href="#">ALEGoggles</a></b> - See our ALEBots <b id="goggles_title">live!</b>{% endblock %}
+{% block header %}
+  <strong>ALEGoggles</strong> — Experiment Dashboard
+    <span id="goggles_status" hidden class="status-pill"></span>
+{% endblock %}
+
+
 
 
 {% block content %}
@@ -46,271 +157,953 @@
         toggle_sidebar();
     </script>
     <script>
-        function handleSelectChangeX(event) {
-            format = document.getElementById("x_scale").value;
-            if (format === "dates") {
-                mainChart.xAxis.type = "datetime"
-                mainChart.xAxis.step = 24
-            } else if (format === "days") {
-                mainChart.xAxis.type = "datetime"
-                mainChart.xAxis.step = 9999999999999
-            }
-            mainChart.redraw()
+      function handleSelectChangeX() {
+        const format = document.getElementById('x_scale').value;
+        xAxisMode = (format === 'dates') ? 'dates' : 'days';
+        applyXAxisMode();
+        updateRangeSelectorVisibility();
+      }
+    </script>
+    <script>
+        const selected_ales = []
+        const selected_ale_ids = []
+        const lineageMeta = {};
 
-        }
+
+          let selectedWavelength = '620A';  // default
+          function handleSelectWavelength() {
+            const el = document.getElementById('wl_select');
+            selectedWavelength = el ? el.value : '620A';
+            refresh_data();  // re-pull & replot using the chosen wavelength
+          }
+
+          let selectedMediaComponent = 1; // 1..5 (1-based)
+          function handleMediaComponentChange() {
+            const sel = document.getElementById('media_component_select');
+            selectedMediaComponent = Math.max(1, Math.min(5, parseInt(sel?.value || '1', 10)));
+            // Rebuild the Media Ratio series for every selected lineage from cached data
+            for (const baseId of selected_ale_ids) {
+              const store = lineageStore[baseId];
+              if (!store) continue;
+              const mr = mainChart.get(baseId + '-MR');
+              if (mr) {
+                const rebuiltMR = buildMediaRatioData(store, store.t0);
+                mr.setData(rebuiltMR, false);
+              } else {
+                // If series doesn't exist yet (e.g., first time after selecting), add it
+                const rebuiltMR = buildMediaRatioData(store, store.t0);
+                mainChart.addSeries({
+                  id: baseId + '-MR',
+                  name: store.mediaRatioSeriesName || (store.lineageLabel || baseId) + ' (Media Ratio)',
+                  data: rebuiltMR,
+                  keys: ['x','y','batch','media','compName'],
+                  color: getLineageColor(baseId),
+                  yAxis: 3, // will add yAxis below
+                  showInNavigator: false,
+                });
+              }
+            }
+            // Update axis title to show the component #
+            if (mainChart?.yAxis?.[3]) {
+              mainChart.yAxis[3].setTitle({
+  text: `<div style="text-align:center">MR<br/>(comp. #${selectedMediaComponent})</div>`,
+  useHTML: true,
+  align: 'middle',
+  rotation: 270,
+  x: -40,
+  style: { fontSize: '14px', fontWeight: 'bold' }
+}, false);
+            }
+            mainChart.redraw();
+          }
 
     </script>
-    <div class="options_bar" style="position: fixed; bottom:.5em; z-index: 100;">
-        <div class="goggles-option">
-            <label class="form-check-label" for="inlineCheckbox1">X-Axis Format:</label>
-            <select id="x_scale" onchange="handleSelectChangeX(event)">
-                <option selected value="days">Days</option>
-                <option value="dates">Dates</option>
-            </select>
-            <label class="form-check-label" for="inlineCheckbox1">Y-Axis Scaling:</label>
-            <select id="y_scale" onchange="handleSelectChangeY(event)">
-                <option value="linear">Linear</option>
-                <option value="logarithmic">Log</option>
-            </select>
-            <label class="form-check-label" for="inlineCheckbox1">Growth Rate Type:</label>
-            <select id="experiment_GR_type" onchange="handleSelectGrowthRateType()">
-                <option selected value=""></option>
-            </select>
-            <label for="live_data">Live Updates:</label>
-            <input type="checkbox" id="live_data">
-
-        </div>
-    </div>
 
     <script>
+      const DAY_MS = 24 * 60 * 60 * 1000;
 
-        function handleSelectChangeY() {
-            var y = document.getElementById("y_scale");
-            yAxisMode = y.value
-            refresh_data()
+      // Track X-axis mode and store raw series
+      let xAxisMode = 'days';               // default matches your <select>
+      const lineageStore = {};              // { [baseId]: { t0, OD_raw, GR_raw, T_raw } }
+
+      // Build OD data with correct X (dates/days) and Y (linear/ln)
+      function buildODData(OD_raw, t0) {
+        const toY = (y) => (yAxisMode === 'ln' ? (y > 0 ? Math.log(y) : null) : y);
+        if (xAxisMode === 'days') {
+          return OD_raw.map(([x,y,batch,media,hasCryo]) =>
+            [ (x - t0) / DAY_MS, toY(y), batch, media, hasCryo ]
+          );
+        } else {
+          return OD_raw.map(([x,y,batch,media,hasCryo]) =>
+            [ x, toY(y), batch, media, hasCryo ]
+          );
         }
+      }
+
+      // Build GR / Temp data with correct X (Y unchanged)
+      function buildOtherData(raw, t0) {
+        if (xAxisMode === 'days') {
+          return raw.map(([x,y,batch,media,hasCryo]) =>
+            [ (x - t0) / DAY_MS, y, batch, media, hasCryo ]
+          );
+        } else {
+          return raw.map(([x,y,batch,media,hasCryo]) =>
+            [ x, y, batch, media, hasCryo ]
+          );
+        }
+      }
+
+        function buildMediaRatioData(store, t0) {
+          try {
+            const compIdx = Math.max(1, Math.min(5, selectedMediaComponent)) - 1; // 0-based
+            const byBatch = store.mediaComponentsByBatch || {}; // { batch_id: [ {name, volume}, ... ] }
+
+            // Track the last timestamp per batch along with media & hasCryo
+            const lastByBatch = new Map();
+            for (const row of store.OD_raw || []) {
+              const [x, _y, batch, media, hasCryo] = row || [];
+              if (batch == null) continue;
+              const prev = lastByBatch.get(batch);
+              if (!prev || x > prev.x) lastByBatch.set(batch, { x, media, hasCryo });
+            }
+
+            // Baseline volume from the first batch that has it
+            let baselineVol = null;
+            for (const [batchId, rec] of lastByBatch.entries()) {
+              const comps = byBatch[batchId] || [];
+              const entry = comps[compIdx];
+              const vol = entry?.volume;
+              if (vol != null) { baselineVol = vol; break; }
+            }
+            if (baselineVol == null || baselineVol === 0) return [];
+
+            // Build points: [x, ratio, batch, media, hasCryo, compName]
+            const pts = [];
+            for (const [batchId, rec] of lastByBatch.entries()) {
+              const comps = byBatch[batchId] || [];
+              const entry = comps[compIdx];
+              const vol = entry?.volume;
+              const name = entry?.name || `Component #${compIdx + 1}`;
+              if (vol == null) continue;
+              const ratio = vol / baselineVol;
+              const xVal = (xAxisMode === 'days') ? ((rec.x - t0) / DAY_MS) : rec.x;
+              pts.push([xVal, ratio, batchId, (rec.media ?? 'N/A'), rec.hasCryo, name]);
+            }
+            pts.sort((a,b)=>a[0]-b[0]);
+            return pts;
+          } catch (err) {
+            console.warn('[buildMediaRatioData] failed:', err);
+            return [];
+          }
+        }
+
+
+
+      // Re-apply X mode to all visible series
+        function applyXAxisMode() {
+          // Update axis type
+          if (xAxisMode === 'days') {
+           mainChart.xAxis[0].update({ type: 'linear' }, false);
+           // Label as plain numbers (days) on the main axis
+           mainChart.xAxis[0].update({
+             labels: {
+               formatter: function () { return Highcharts.numberFormat(this.value, 2) + ' d'; }
+             }
+           }, false);
+           // Navigator: also use linear axis and numeric labels (no 16:00:00)
+           mainChart.update({
+             navigator: {
+               xAxis: {
+                 type: 'linear',
+                 labels: {
+                   formatter: function () { return Highcharts.numberFormat(this.value, 2) + ' d'; }
+                 }
+               }
+             }
+           }, false);
+          } else {
+            mainChart.xAxis[0].update({ type: 'datetime' }, false);
+           // Restore default datetime labeling
+           mainChart.xAxis[0].update({ labels: { formatter: undefined } }, false);
+           mainChart.update({
+             navigator: {
+               xAxis: {
+                 type: 'datetime',
+                 labels: { formatter: undefined }
+               }
+             }
+           }, false);
+          }
+
+          // Rebuild data for every selected lineage
+          for (const baseId of selected_ale_ids) {
+            const store = lineageStore[baseId];
+            if (!store) continue;
+
+            const od = mainChart.get(baseId);
+            const gr = mainChart.get(baseId + '-GR');
+            const t  = mainChart.get(baseId + '-Temp');
+            const mr = mainChart.get(baseId + '-MR');
+
+            if (od) od.setData(buildODData(store.OD_raw, store.t0), false);
+            if (gr) gr.setData(buildOtherData(store.GR_raw, store.t0), false);
+            if (t)  t.setData(buildOtherData(store.T_raw,  store.t0), false);
+            if (mr) mr.setData(buildMediaRatioData(store, store.t0), false);
+          }
+
+          // Toggle the control & reset range for days mode
+
+          if (xAxisMode === 'days') {
+            const sel = document.getElementById('days_window');
+            if (sel) sel.value = '0';  // All
+
+          }
+
+          mainChart.redraw();
+          updateRangeSelectorVisibility();
+            // ensure full range in Dates mode
+          if (xAxisMode === 'dates') {
+            const xa = mainChart.xAxis[0];
+            const ex = xa.getExtremes();
+            if (isFinite(ex.dataMin) && isFinite(ex.dataMax)) {
+              xa.setExtremes(ex.dataMin, ex.dataMax); // show everything
+            }
+            if (mainChart.rangeSelector && mainChart.rangeSelector.buttonOptions) {
+              // virtually "click" the All button to sync the UI state
+              const allIdx = mainChart.rangeSelector.buttonOptions.length - 1;
+              mainChart.rangeSelector.clickButton(allIdx, true);
+    }
+  }
+        }
+
+
+    </script>
+    <script>
+    function updateRangeSelectorVisibility() {
+      if (!window.mainChart) return;
+
+      // what it was before the update
+      const wasEnabled = !!(mainChart.rangeSelector && mainChart.rangeSelector.options &&
+                            mainChart.rangeSelector.options.enabled !== false);
+
+      const nowEnabled = (xAxisMode !== 'days');
+
+      // apply the new setting
+      mainChart.update({ rangeSelector: { enabled: nowEnabled } }, false);
+      mainChart.redraw();
+
+      // if we just enabled it, sync the UI to "All"
+      if (!wasEnabled && nowEnabled && mainChart.rangeSelector) {
+        try {
+          const allIdx = mainChart.rangeSelector.buttonOptions.length - 1;
+          mainChart.rangeSelector.clickButton(allIdx, true);
+        } catch (_) {}
+      }
+    }
+
+    </script>
+
+    <script>
+      // ---- Manual Y-axis bounds helpers ----
+      function parseNum(v){ const n = Number(v); return Number.isFinite(n) ? n : null; }
+
+      function applyYBounds(axisIdx){
+        const minBox = axisIdx === 0 ? document.getElementById('od_min') : document.getElementById('gr_min');
+        const maxBox = axisIdx === 0 ? document.getElementById('od_max') : document.getElementById('gr_max');
+        const min = parseNum(minBox?.value);
+        const max = parseNum(maxBox?.value);
+        // null → auto
+        mainChart.yAxis[axisIdx].setExtremes(
+          min !== null ? min : null,
+          max !== null ? max : null
+        );
+      }
+
+      function resetYBounds(axisIdx){
+        if (axisIdx === 0){
+          document.getElementById('od_min').value = '';
+          document.getElementById('od_max').value = '';
+        } else {
+          document.getElementById('gr_min').value = '';
+          document.getElementById('gr_max').value = '';
+        }
+        mainChart.yAxis[axisIdx].setExtremes(null, null);
+      }
+
+
+
+
+    </script>
+
+
+
+    <script>
+      // ---- Growth-rate model dropdown: state + labels ----
+      let selectedGRType = 'gr_bestfit';
+
+      const GR_MODEL_OPTIONS = [
+        { value: 'gr_bestfit', label: 'Best Fit' },
+        { value: 'gr_croissance', label: 'Croissance' },
+        { value: 'gr_awf', label: 'Adaptive Window Fitting' },
+        { value: 'gr_original', label: 'Legacy Fitting' },
+        { value: 'gr_curveball_BaranyiRoberts', label: 'Curveball (Baranyi–Roberts)' },
+        { value: 'gr_curveball_Logistic', label: 'Curveball (Logistic)' },
+        { value: 'gr_curveball_LogisticLag1', label: 'Curveball (Logistic + Lag1)' },
+        { value: 'gr_curveball_LogisticLag2', label: 'Curveball (Logistic + Lag2)' },
+        { value: 'gr_curveball_Richards', label: 'Curveball (Richards)' },
+        { value: 'gr_curveball_RichardsLag1', label: 'Curveball (Richards + Lag1)' },
+      ];
+
+      function populateGrowthRateDropdown() {
+        const sel = document.getElementById('experiment_GR_type');
+        if (!sel) return;
+        sel.innerHTML = ''; // clear any placeholder
+        for (const opt of GR_MODEL_OPTIONS) {
+          const o = document.createElement('option');
+          o.value = opt.value;
+          o.textContent = opt.label;
+          if (opt.value === selectedGRType) o.selected = true;
+          sel.appendChild(o);
+        }
+      }
+
+      function handleSelectGrowthRateType() {
+        const sel = document.getElementById('experiment_GR_type');
+        selectedGRType = (sel && sel.value) ? sel.value : 'gr_bestfit';
+        // Re-request data for currently selected lineages using the new model
+        refresh_data();
+      }
+
+      // Initialize the dropdown once the DOM is ready
+      document.addEventListener('DOMContentLoaded', () => {
+          // populate GR model choices
+          populateGrowthRateDropdown();
+
+          // ensure the select reflects the current state
+          const grSel = document.getElementById('experiment_GR_type');
+          if (grSel && !grSel.value) grSel.value = selectedGRType;
+          if (mainChart?.yAxis?.[3]) {
+            mainChart.yAxis[3].setTitle({
+  text: `<div style="text-align:center">MR<br/>(comp. #${selectedMediaComponent})</div>`,
+  useHTML: true,
+  align: 'middle',
+  rotation: 270,
+  x: -40,
+  style: { fontSize: '14px', fontWeight: 'bold', color: '#000000' }
+}, false);
+            mainChart.redraw();
+          }
+        });
+    </script>
+    <div class="options_bar">
+
+          <div class="options_row">
+            <label>X-Axis Format:</label>
+            <select id="x_scale" onchange="handleSelectChangeX(event)">
+              <option selected value="days">Days</option>
+              <option value="dates">Dates</option>
+            </select>
+
+            <label>Y-Axis Scaling:</label>
+            <select id="y_scale" onchange="handleSelectChangeY(event)">
+              <option value="linear">Linear</option>
+              <option value="ln">Log</option>
+            </select>
+
+            <label>Growth Rate Type:</label>
+            <select id="experiment_GR_type" onchange="handleSelectGrowthRateType()">
+              <option selected value=""></option>
+            </select>
+
+            <label>Wavelength:</label>
+            <select id="wl_select" onchange="handleSelectWavelength()">
+              <option selected value="620A">620A</option>
+              <option value="640A">640A</option>
+              <option value="480A">480A</option>
+              <option value="580A">580A</option>
+              <option value="620R">620R</option>
+              <option value="640R">640R</option>
+              <option value="480R">480R</option>
+              <option value="580R">580R</option>
+            </select>
+
+            <label>Media component #:</label>
+            <select id="media_component_select" onchange="handleMediaComponentChange()">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+
+
+            <!-- Row 2: compact Y-bounds -->
+            <div class="options_row">
+              <span class="field">
+                <label>OD Y:</label>
+                <input id="od_min" type="number" step="any" placeholder="min">
+                <input id="od_max" type="number" step="any" placeholder="max">
+                <button type="button" class="btn-small" onclick="applyYBounds(0)">Apply</button>
+                <button type="button" class="btn-small" onclick="resetYBounds(0)">Auto</button>
+              </span>
+
+              <span class="field">
+                <label>GR Y:</label>
+                <input id="gr_min" type="number" step="any" placeholder="min">
+                <input id="gr_max" type="number" step="any" placeholder="max">
+                <button type="button" class="btn-small" onclick="applyYBounds(1)">Apply</button>
+                <button type="button" class="btn-small" onclick="resetYBounds(1)">Auto</button>
+              </span>
+            </div>
+        </div>
+
+
+
+
+    <script>
+      function handleSelectChangeY() {
+        const mode = document.getElementById("y_scale").value;
+        yAxisMode = mode;
+
+        mainChart.yAxis[0].update({
+          type: 'linear',
+          min: null,
+          title: { text: mode === 'ln' ? 'ln(OD)' : 'OD' }
+        }, false);
+
+        // Rebuild OD with new Y transform while preserving current X mode
+        for (const baseId of selected_ale_ids) {
+          const store = lineageStore[baseId];
+          if (!store) continue;
+          const od = mainChart.get(baseId);
+          if (od) od.setData(buildODData(store.OD_raw, store.t0), false);
+        }
+        mainChart.redraw();
+
+        // Optional: re-fetch if you want freshest GR fits for a different model
+        // refresh_data();
+      }
     </script>
 
 
 
     <div class="container" style="width:100%; display: flex;">
-    <div id="machine-bar" style="width:25em; float: left; padding-right: 1em">
+    <div id="machine-bar" style="width:34em; float: left; padding-right: 1em">
         {% for key, value in initial.items %}
             <button type="button" class="collapsible machines"
                     style="text-align: center"> {{ value.name }} </button>
             <div class="content" style="overflow-y:auto; max-height: 20em;">
                 {% for project_key, project_value in value.projects.items reversed %}
-                    <button type="button" class="collapsible"
-                            style="text-align: center"> {{ project_value.name }} </button>
-                    <div class="content">
-                        <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}"
-                               class="display">
-                            {% for experiment in project_value.experiments %}
-                                <tr id="{{ project_key }}_row_id_{{ value.id }}_{{ experiment.0 }}">
-                                    {% for entry in experiment %}
-                                        <td>{{ entry }}</td>
-                                    {% endfor %}
-                                </tr>
+  <button type="button" class="collapsible" style="text-align: center"> {{ project_value.name }} </button>
+  <div class="content">
 
-                            {% endfor %}
-                        </table>
-                        <script>
-                            let table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} = new DataTable('#ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}', {
-                                select: 'multi+shift',
-                                autoHeight: true,
-                                autoWidth: true,
-                                paging: false,
-                                searching: false,
-                                ordering: false,
-                                info: false,
-                                scrollY: 500,
-                                dataType: JSON,
+    {% with value.id|jsident as safe_id %}
+      <table id="ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}" class="display">
+        <thead>
+          <tr>
+            <th>ALE ID</th>
+            <th>Lineage</th>
+            <th>Protocol</th>
+            <th>Project</th>
+            <th>Notes</th>
+            <th>Color</th>
+            <th>DB ID</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for experiment in project_value.experiments %}
+          <tr id="{{ project_key }}_row_id_{{ value.id }}_{{ experiment.0 }}">
+            <td>{{ experiment.0 }}</td>
+            <td>{{ experiment.1 }}</td>
+            <td>{{ experiment.2 }}</td>
+            <td>{{ experiment.3 }}</td>
+            <td>{{ experiment.4 }}</td>
+            <td></td>
+            <td>{{ experiment.6 }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
 
+      <script>
+        let table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} =
+          new DataTable('#ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}', {
+            select: 'multi+shift',
+            autoHeight: true,
+            autoWidth: true,
+            paging: false,
+            searching: false,
+            ordering: false,
+            info: false,
+            scrollY: 500,
+            dataType: JSON,
+            columns: [
+              {title: 'ALE ID'},
+              {title: 'Lineage'},
+              {
+                title: 'Protocol',
+                render: function (data, type) { return data ?? ''; }
+              },
+              { title: 'Project', visible: false },
+              { title: 'Notes',   visible: false },
+              {
+                title: 'Color',
+                render: function (data, type, row) {
+                  var parts = String(data || '').split(',');
+                  var raw = parts[0] || parts[1] || '#000000';
+                  if (!/^#[0-9A-Fa-f]{6}$/.test(raw)) {
+                    if (/^#[0-9A-Fa-f]{3}$/.test(raw)) {
+                      raw = '#' + raw[1] + raw[1] + raw[2] + raw[2] + raw[3] + raw[3];
+                    } else { raw = '#000000'; }
+                  }
+                  var expNum = (row && row[0] != null) ? row[0] : 'unknown';
+                  var inputId = 'experiment_{{ project_key }}_{{ value.id }}_' + expNum;
+                  return '<input type="color" id="' + inputId + '" value="' + raw + '">';
+                }
+              },
+              { title: 'db id', invisible: false }
+            ]
+          });
 
-                                //data: ALE_{{ forloop.parentloop.counter }}_{{ forloop.counter }},
-                                columns: [
-                                    {},
-                                    {},
-                                    {
-                                        'render': function (data) {
-                                            if (data.includes("test")) {
-                                                return data[0] + "t";
-                                            }
-                                            return data[0];
-                                        }
-                                    },
-                                    {},
-                                    {},
-                                    {
-                                        'render': function (data) {
-                                            var current_color = data.split(',')
-                                            return '<input type="color" id="experiment_{{ project_key }}_{{ value.id }}_' + current_color[2] + '" value=' + current_color[1] + '>';
-                                        }
-                                    },
-                                    {visible: false}
-                                    //{title: 'EXP_ID'},
-                                    //{title: 'Mod'},
-                                    //{title: 'Ctrlr'},
-                                    //{title: 'Pos'},
-                                ],
-                                //data: '<input type="color">'
-                            });
+        table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.columns.adjust();
 
-                            function changeColor(e) {
-                                console.log(e.target.value);
-                                console.log(mainChart.get(e.target.id));
-                                mainChart.get(e.target.id).update({color: e.target.value});
-                            }
+        table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function (e) {
+          if (e.target && e.target.matches('input[type="color"]')) return;
 
-                            table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.on('click', 'tbody tr', function () {
-                                //let ALE_id = ALE_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}[table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).index()][0];
-                                let ALE_id = table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).data();
-                                let data_id = "{{ project_key }}_{{ value.id }}_" + ALE_id[0]
-                                let row_id = {{ project_key }} +'_row_id_{{ value.id }}_' + ALE_id[0]
-                                table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
+          let ALE_id = table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).data();
+          let data_id = "{{ project_key }}_{{ value.id }}_" + ALE_id[0];
+          let row_id  = "{{ project_key }}_row_id_{{ value.id }}_" + ALE_id[0];
+          table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).id = row_id;
 
-                                document.getElementById(row_id).addEventListener("input", changeColor)
-                                let sample_name = "{{ value.name }} {{ project_value.name }}: {{ project_key }}-" + ALE_id[0]
-                                let message = [ALE_id[6], row_id, "{{ value.id }}", data_id, sample_name]
+          let sample_name = "{{ value.name }} {{ project_value.name }}: {{ project_key }}-" + ALE_id[0];
+          let message = [ALE_id[6], row_id, "{{ value.id }}", data_id, sample_name];
 
-                                if (table_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
-                                    let current_id = data_id
-                                    console.log("removing: " + current_id)
-                                    mainChart.get(current_id).remove();
-                                    mainChart.get(current_id + "-GR").remove();
-                                    mainChart.get(current_id + "-Temp").remove();
-                                    selected_ales.pop(message);
-                                    selected_ale_ids.pop(data_id)
-                                } else {
+          lineageMeta[data_id] = { aleId: ALE_id[0], lineageLabel: sample_name };
 
-                                    //send ale_ids of the requests
-                                    sendMessage(message);
-                                    console.log(message);
-                                }
+          if (table_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.row(this).selected()) {
+            ['', '-GR', '-Temp', '-MR'].forEach(suffix => {
+              const s = mainChart.get(data_id + suffix);
+              if (s) s.remove();
+            });
+            const idx = selected_ale_ids.indexOf(data_id);
+            if (idx !== -1) selected_ale_ids.splice(idx, 1);
+            const msgIdx = selected_ales.findIndex(m => m[3] === data_id);
+            if (msgIdx !== -1) selected_ales.splice(msgIdx, 1);
+            delete lineageMeta[data_id];
+          } else {
+            sendMessage(message);
+            selected_ales.push(message);
+          }
+        });
 
-                            });
-                        </script>
-                    </div>
+        const tableEl_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }} =
+          document.getElementById('ale-machine_{{ value.id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}');
 
-                {% endfor %}
+        ['mousedown', 'click'].forEach(evt =>
+          tableEl_{{ safe_id }}_{{ forloop.parentloop.counter }}_{{ forloop.counter }}.addEventListener(
+            evt,
+            (ev) => { if (ev.target && ev.target.matches('input[type="color"]')) ev.stopPropagation(); },
+            true
+          )
+        );
+      </script>
+    {% endwith %}
+  </div>
+{% endfor %}
+
             </div>
         {% endfor %}
     </div>
-
+<script>
+// Listen for color changes anywhere in the machine bar
+document.getElementById('machine-bar').addEventListener('input', function (ev) {
+  if (ev.target && ev.target.matches('input[type="color"]')) {
+    changeColor(ev);
+  }
+});
+</script>
 
     <script>
-        const gogglesSocket = new WebSocket('wss://' + window.location.host + '/ws/goggles/');
+          const scheme = (window.location.protocol === 'https:') ? 'wss' : 'ws';
+          const gogglesSocket = new WebSocket(`${scheme}://${window.location.host}/ws/goggles/`);
+
+          function showStatus(text, cls) {
+            const el = document.getElementById('goggles_status');
+            if (!el) return;
+            el.textContent = text;
+            el.classList.remove('status-connected','status-disconnected','status-reconnecting');
+            el.classList.add(cls);
+            el.hidden = false; // reveal
+          }
+
+          function hideStatus() {
+            const el = document.getElementById('goggles_status');
+            if (!el) return;
+            el.hidden = true; // hide
+          }
+
+          // Hide when connected; only show on problems
+          gogglesSocket.onopen = function () {
+            hideStatus();
+          };
+
+          gogglesSocket.onclose = function () {
+            console.error('Goggles socket closed unexpectedly');
+            showStatus('Disconnected', 'status-disconnected');
+          };
+
+          gogglesSocket.onerror = function () {
+            showStatus('Disconnected', 'status-disconnected');
+          };
+            function toServerGRType(val) {
+              return val || 'gr_bestfit'; // always a string
+            }
+
+        function sendMessage(message) {
+          if (!Array.isArray(message) || message.length < 5) {
+            console.warn("[sendMessage] malformed message", message);
+            return;
+          }
+          const payload = {
+            db_id: message[0],
+            name: message[1],
+            machine: message[2],
+            data_id: message[3],
+            sample_name: message[4],
+            gr_type: toServerGRType(selectedGRType), // <-- here
+            wavelength: selectedWavelength
+          };
+          console.log('[sendMessage] payload:', payload);
+          gogglesSocket.send(JSON.stringify(payload));
+        }
+
+
+
+
+        // one place for color logic, usable by both onmessage and changeColor
+        const pickColor = (id) => {
+           const el = document.getElementById('experiment_' + id);
+           // accept only #rrggbb; otherwise let the chart auto-choose a color
+           return el && /^#[0-9A-Fa-f]{6}$/.test(el.value) ? el.value : undefined;
+        };
+
+        // cache a single color per lineage id (shared)
+        const lineageColors = {};
+        const getLineageColor = (id) => {
+          if (!lineageColors[id]) {
+            const chosen = pickColor(id);
+            if (chosen) {
+              lineageColors[id] = chosen;
+            } else {
+              // deterministic fallback from Highcharts palette
+              const palette = Highcharts.getOptions().colors || [];
+              const idx = selected_ale_ids.length % (palette.length || 1);
+              lineageColors[id] = palette[idx] || undefined;
+             }
+          }
+          return lineageColors[id];
+        };
+
+  // … pickColor + lineageColors + getLineageColor already here …
+
+  // GLOBAL color change handler
+  function changeColor(e) {
+    const input = e.target.closest('input[type="color"]');
+    if (!input) return;
+
+    const seriesBase = input.id.replace(/^experiment_/, '');
+    const color = input.value;
+
+    console.log("[color] picked", input.id, color);     // debug: should print on change
+    lineageColors[seriesBase] = color;                   // keep cache updated
+
+    // update all 3 series (OD, GR, Temp)
+    let touched = 0;
+    ['','-GR','-Temp','-MR'].forEach(suffix => {
+      const s = mainChart.get(seriesBase + suffix);
+      if (s) { s.update({ color }, false); touched++; }
+    });
+    if (touched) {
+      mainChart.redraw();
+      console.log("[color] updated series for", seriesBase, "count:", touched);
+    } else {
+      console.log("[color] no matching series found yet for", seriesBase);
+    }
+  }
+
         var yAxisMode = "linear"
         gogglesSocket.onmessage = function (e) {
-            const data = JSON.parse(e.data);
-            console.log(data)
-            const message = data['message'];
-            var OD_data = message[1][0]
-            // Handle incoming message
-            if (yAxisMode == "logarithmic") {
-                let i = 0;
-                while (i < OD_data.length) {
-                    OD_data[i][1] = Math.log10(OD_data[i][1])
-                    i++;
-                }
+          const data = JSON.parse(e.data);
+          console.log(data);
+
+          // Early guard for server-side errors
+          if (data && data.error) {
+            console.error("[goggles] server error:", data.error);
+            showStatus('Data error', 'status-reconnecting');
+            return;
+          }
+
+          const message = data['message'];
+          if (!message || !Array.isArray(message) || !Array.isArray(message[1])) {
+            console.warn("[goggles] unexpected payload shape:", data);
+            return;
+          }
+            // pull lineage-level last_modified from message[1][3]
+
+
+	    // message[1][3] (last time JSON modified) may be a string or an object { last_modified: '...' }
+            const metaOrString = message[1][3];
+
+            // 1) Extract a raw string
+           let lmRawStr = null;
+           if (metaOrString && typeof metaOrString === 'object') {
+             lmRawStr =
+               metaOrString.last_modified ??
+               metaOrString.lastUpdated ??
+               metaOrString.updated_at ??
+               metaOrString.value ?? null;
+            } else if (typeof metaOrString === 'string' || typeof metaOrString === 'number') {
+            lmRawStr = String(metaOrString);
             }
 
-            if (selected_ale_ids.includes(message[3])) {
-                mainChart.get(message[3]).setData(OD_data);
-            } else {
-                mainChart.addSeries({
-                    id: message[3],
-                    name: message[2],
-                    data: OD_data,
-                    color: document.getElementById('experiment_' + message[3]).value,
-                    yAxis: 0,
-                    showInNavigator: true,
-                });
-                mainChart.addSeries({
-                    id: message[3] + "-GR",
-                    name: message[2],
-                    data: message[1][1],
-                    color: document.getElementById('experiment_' + message[3]).value,
-                    yAxis: 1,
-                    showInNavigator: true,
-                });
-                mainChart.addSeries({
-                    id: message[3] + "-Temp",
-                    name: message[2],
-                    data: message[1][2],
-                    color: document.getElementById('experiment_' + message[3]).value,
-                    yAxis: 2,
-                });
-                selected_ales.push(message[4])
-                selected_ale_ids.push(message[3])
+            // 2) Convert microseconds → milliseconds so Date.parse works
+            let lmIsoForParse = lmRawStr;
+            if (lmIsoForParse && /\.\d{4,}/.test(lmIsoForParse)) {
+            // keep only first 3 fractional digits
+            lmIsoForParse = lmIsoForParse.replace(/(\.\d{3})\d+/, '$1');
             }
-        };
 
-        gogglesSocket.onclose = function (e) {
-            console.error('Goggles socket closed unexpectedly');
-            document.getElementById("goggles_title").textContent = "Socket Disconnected :("
+            // 3) Parse to ms (or undefined if not parsable)
+            const lmMsNum = lmIsoForParse ? Date.parse(lmIsoForParse) : undefined;
+ const metaFromClick = lineageMeta[message[3]] || {};
+ const meta = (typeof metaOrString === 'object' && metaOrString) || {};
+const sharedCustom = {
+  lastModifiedRaw: lmRawStr,
+  lastModifiedMs: lmMsNum,
+  aleId: metaFromClick.aleId ?? null,
+  lineageLabel: metaFromClick.lineageLabel ?? message[2]
+};
 
-        };
 
-        // Send message to server
-        function sendMessage(message) {
-            gogglesSocket.send(JSON.stringify({
-                'db_id': message[0],
-                'name': message[1],
-                'machine': message[2],
-                'data_id': message[3],
-                'sample_name': message[4]
-            }));
-        }
+const baseId = message[3];         // e.g. "22_ucsd_3_0a_1"
+const name   = message[2];
+
+const rawOD = message[1][0];  // [[x, y, batch, media, hasCryo], ...]
+let OD_data;
+
+if (yAxisMode === 'ln') {
+  // ln view: y -> ln(y); null-out nonpositive values
+  OD_data = rawOD.map(([x, y, batch, media, hasCryo]) =>
+    [x, (y > 0 ? Math.log(y) : null), batch, media, hasCryo]
+  );
+} else {
+  // linear view: raw OD (zeros are fine)
+  OD_data = rawOD;
+}
+
+const GR_data = message[1][1];
+const T_data  = message[1][2];
+
+// Build batch → media description map for nicer tooltips on MR series
+const batchMediaDesc = {};
+for (const row of rawOD) {
+  const batch = row?.[2];
+  const media = row?.[3];
+  if (batch != null && batchMediaDesc[batch] == null) batchMediaDesc[batch] = media;
+}
+
+// Compute per-lineage start time (t0) from OD timestamps
+const firstX = rawOD.find(row => row && typeof row[0] === 'number')?.[0] ?? null;
+const t0 = firstX ?? 0;
+
+// Store raw arrays so we can rebuild X on toggle
+lineageStore[baseId] = {
+  t0,
+  OD_raw: rawOD,
+  GR_raw: GR_data,
+  T_raw:  T_data,
+  mediaComponentsByBatch: meta.media_components_by_batch || {},  // <-- NEW
+  batchMediaDesc,                                                 // <-- NEW
+  lineageLabel: sharedCustom.lineageLabel,
+  mediaRatioSeriesName: `${sharedCustom.lineageLabel || name} (Media Ratio)`,
+};
+
+const existingOD = mainChart.get(baseId);
+
+const rebuiltOD = buildODData(lineageStore[baseId].OD_raw, lineageStore[baseId].t0);
+const rebuiltGR = buildOtherData(lineageStore[baseId].GR_raw, lineageStore[baseId].t0);
+const rebuiltT  = buildOtherData(lineageStore[baseId].T_raw,  lineageStore[baseId].t0);
+const rebuiltMR = buildMediaRatioData(lineageStore[baseId], lineageStore[baseId].t0);
+
+
+if (existingOD) {
+  existingOD.setData(rebuiltOD, false);
+  const grSeries = mainChart.get(baseId + "-GR");
+  if (grSeries) grSeries.setData(rebuiltGR, false);
+  const tSeries = mainChart.get(baseId + "-Temp");
+  if (tSeries) tSeries.setData(rebuiltT,  false);
+  let mrSeries = mainChart.get(baseId + "-MR");
+  if (mrSeries) {
+    mrSeries.setData(rebuiltMR, false);
+  } else {
+    mainChart.addSeries({
+      id: baseId + "-MR",
+      name: lineageStore[baseId].mediaRatioSeriesName,
+      data: rebuiltMR,
+      keys: ['x','y','batch','media','hasCryo','compName'],
+      custom: sharedCustom,
+      color: getLineageColor(baseId),
+      yAxis: 3,
+      showInNavigator: false,
+      dashStyle: 'Solid',
+    }, false);
+  }
+  mainChart.redraw();
+} else {
+  const seriesColor = getLineageColor(baseId);
+  mainChart.addSeries({
+    id: baseId,
+    name,
+    data: rebuiltOD,
+    keys: ['x','y','batch','media','hasCryo'],
+    custom: sharedCustom,
+    color: seriesColor,
+    yAxis: 0,
+    showInNavigator: true,
+  });
+  mainChart.addSeries({
+    id: baseId + "-GR",
+    name,
+    data: rebuiltGR,
+    keys: ['x','y','batch','media','hasCryo'],
+    custom: sharedCustom,
+    color: seriesColor,
+    yAxis: 1,
+    showInNavigator: true,
+  });
+  mainChart.addSeries({
+    id: baseId + "-Temp",
+    name,
+    data: rebuiltT,
+    keys: ['x','y','batch','media'],
+    custom: sharedCustom,
+    color: seriesColor,
+    yAxis: 2,
+  });
+    mainChart.addSeries({
+    id: baseId + "-MR",
+    name: lineageStore[baseId].mediaRatioSeriesName,
+    data: rebuiltMR,
+    keys: ['x','y','batch','media','hasCryo','compName'],
+    custom: sharedCustom,
+    color: seriesColor,
+    yAxis: 3,
+    showInNavigator: false,
+    dashStyle: 'Solid',
+  });
+
+  if (!selected_ale_ids.includes(baseId)) {
+    selected_ale_ids.push(baseId);
+  }
+}
+};
+
+gogglesSocket.onerror = function () {
+  showStatus('Disconnected', 'status-disconnected');
+};
+
+
     </script>
-    <div id="charts" style="width: 55em  !important;">
-        <div id="mainChart" style="overflow: visible; height: 60em; !important;"></div>
-    </div>
-
-    <div id="right-sidebar" style="width:15em; height:94em; float: right; background-color: #5BA199; color: white">
+    <div id="charts" style="flex:1; min-width:0; margin-left:1em;">
+        <div id="mainChart" style="overflow:visible; height:60em !important;"></div>
     </div>
 
     <script>
-        console.time('line');
-        const mainChart = Highcharts.stockChart('mainChart', {
-            xAxis: [{
-                ordinal: false,
-            }],
-            yAxis: [{
-                height: '50%',
-                title: {
-                    text: 'OD',
-                }, labels: {
-                    style: {
-                        fontSize: '14 px'
-                    }
-                }
+      // Minimal, fast, safe HTML escape
+      function escapeHTML(s) {
+        if (s == null) return '';
+        return String(s).replace(/[&<>"']/g, function (ch) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+        });
+      }
+    </script>
+    <script>
+       Highcharts.setOptions({ time: { useUTC: false }});
+console.time('line');
+const mainChart = Highcharts.stockChart('mainChart', {
+  chart: {
+    zoomType: 'x',
+    panning: true,
+    panKey: 'shift',
+    marginLeft: 90   // shared gutter
+  },
 
-            }, {
-                opposite: true,
-                top: '50%',
-                height: '30%',
-                title: {
-                    text: 'Growth Rate',
-                }, labels: {
-                    style: {
-                        fontSize: '14 px'
-                    }
-                }
-            }, {
-                opposite: true,
-                top: '80%',
-                height: '20%',
-                title: {
-                    text: 'Temperature °C',
-                }, labels: {
-                    style: {
-                        fontSize: '14 px'
-                    }
-                }
-            }],
+  navigator: { baseSeries: 0 },
+  xAxis: [{
+  ordinal: false,
+  labels: {
+    style: {
+      fontSize: '14px',
+      color: '#000000',
+      fontWeight: 'bold'
+    }
+  },
+  title: {
+    text: 'Time',
+    style: {fontSize: '14px',color: '#000000',fontWeight: 'bold'}
+  }
+}],
+
+  yAxis: [{
+    // Axis 0 — the ONLY one that reserves gutter space
+    opposite: false,
+    height: '43%',
+    offset: 0,
+    labels: { style: { fontSize: '14px', color: '#000000' }, reserveSpace: true },
+    // Small or zero x so it stays visible in the gutter
+    title: { text: 'OD', align: 'middle', rotation: 270, x: -10 ,style: { fontSize: '14px', color: '#000000', fontWeight: 'bold' } }
+  }, {
+    // Axis 1
+    opposite: false,
+    top: '45%', height: '23%',
+    offset: 0,
+    labels: { style: { fontSize: '14px' , color: '#000000'}, reserveSpace: false },
+    // Larger negative x to pull from inside the plot into the gutter
+    title: { text: 'GR (hr<sup>-1</sup>)',useHTML: true, align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '14px', fontWeight: 'bold' , color: '#000000'} }
+  }, {
+    // Axis 2
+    opposite: false,
+    top: '70%', height: '13%',
+    offset: 0,
+    labels: { style: { fontSize: '14px' , color: '#000000'}, reserveSpace: false },
+    title: { text: 'Temp (°C)', align: 'middle', rotation: 270, x: -40 ,style: { fontSize: '14px', fontWeight: 'bold' , color: '#000000'} }
+  },
+    {
+  // Axis 3
+  opposite: false,
+  top: '85%', height: '13%',
+  offset: 0,
+  min: 0,
+  labels: { style: { fontSize: '14px' , color: '#000000'}, reserveSpace: false },
+  title: {
+    text: 'MR',
+    useHTML: true,
+    align: 'middle',
+    rotation: 270,
+    x: -40,
+    style: { fontSize: '14px', color: '#000000',fontWeight: 'bold' }
+  }
+    }],
+
+
+
+
+
+
             rangeSelector: {
                 enabled: true,
+                selected: 7,
                 buttons: [{
                     type: 'hour',
                     count: 1,
@@ -396,7 +1189,7 @@
              },*/
 
             legend: {
-                enabled: true
+                enabled: false
             },
 
             tooltip: {
@@ -408,52 +1201,118 @@
                 useHTML: true,
                 outside: true,
                 style: {
-                    pointerEvents: 'auto'
+                    pointerEvents: 'auto',
+                    whiteSpace: 'normal'
                 },
-                positioner: function () {
-                    return {x: this.chart.xAxis[0].width, y: 0};
-                },
-                formatter: function () {
-                    return '<b>' + this.series.name + '</b><br/>' +
-                        '<b>' + this.series.yAxis.options.title.text + ': </b>' + this.y + '<br/>' +
-                        'Time: ' + Highcharts.dateFormat('%e %b %H:%M:%S',
-                            new Date(this.x)) +
-                        '<br/>Batch: ' + this.series.userOptions.data[this.point.index][2] +
-                        '<br/>Media: ' + this.series.userOptions.data[this.point.index][3]
-                        ;
-                }
+
+                positioner: function (labelWidth, labelHeight) {
+                  const chartPos = this.chart.pointer.getChartPosition();
+
+                  // anchor to the first machine header, fall back to the bar itself
+                  const anchor =
+                  document.querySelector('#machine-bar .collapsible.machines') ||
+                  document.querySelector('#machine-bar .collapsible') ||
+                  document.getElementById('machine-bar');
+
+                  if (anchor) {
+                    const r = anchor.getBoundingClientRect();
+                    const x = r.left - chartPos.left;           // align left with the menu
+                    const y = r.top  - chartPos.top  + 100;       // just below the header
+                    return { x, y };
+                    }
+                    return { x: 10, y: 10 };
+                   },
+                    formatter: function () {
+                      // dates
+                      const lmRaw = this.series.options.custom?.lastModifiedRaw;
+                      const lmMs  = this.series.options.custom?.lastModifiedMs;
+                      const lmStr = lmMs
+                        ? Highcharts.dateFormat('%Y-%m-%d %H:%M', lmMs)
+                        : (lmRaw ? lmRaw.replace('T', ' ').slice(0,16) : 'n/a');
+
+                      // point fields
+                      const batch = (this.point && this.point.batch) ??
+                                    (this.series.userOptions.data?.[this.point.index]?.[2]);
+                      const media = (this.point && this.point.media) ??
+                                    (this.series.userOptions.data?.[this.point.index]?.[3]);
+                      const hasCryo = (typeof this.point?.hasCryo === 'boolean') ? this.point.hasCryo : undefined;
+
+                      // headline data
+                      const lineageLabel = this.series.options.custom?.lineageLabel || this.series.name;
+                      const aleId        = this.series.options.custom?.aleId ?? 'n/a';
+                      const compName = this.point && this.point.compName;
+
+                      // time text for both modes
+                      const timeText = (xAxisMode === 'days')
+                        ? (typeof this.x === 'number' ? `${this.x.toFixed(2)} days` : 'n/a')
+                        : Highcharts.dateFormat('%e %b %H:%M:%S', this.x);
+
+                      return `
+                        <div style="display:flex; gap:6px; align-items:flex-start; min-width:290px">
+                          <div style="flex:0 0 90px; max-width:90px; white-space:normal; word-break:break-word; overflow-wrap:anywhere;">
+                            <div style="font-size:1.1rem; font-weight:700; line-height:1.25;">
+                              ${escapeHTML(lineageLabel)}
+                            </div>
+                            <div style="font-size:1rem; opacity:0.7; margin-top:2px;">
+                              ALE&nbsp;ID: ${escapeHTML(String(aleId))}
+                            </div>
+                          </div>
+                          <div>
+                            <b>${this.series.yAxis.options.title.text}:</b> ${this.y != null ? this.y.toFixed(3) : 'n/a'}<br/>
+                            Time: ${timeText}<br/>
+                            Batch: ${batch ?? 'n/a'}<br/>
+                            Media: ${media ?? 'n/a'}<br/>
+                            ${compName ? `Component: ${escapeHTML(String(compName))}<br/>` : '' }
+                            Cryostock: ${hasCryo === undefined ? 'n/a' : (hasCryo ? 'Yes' : 'No')}<br/>
+                            Last modified: ${lmStr}
+                          </div>
+                        </div>
+                      `;
+                    }
+
+
 
             },
 
         });
         console.timeEnd('line');
 
+        // Ensure axis starts in the same mode as the dropdown
+        xAxisMode = document.getElementById('x_scale').value === 'dates' ? 'dates' : 'days';
+        mainChart.xAxis[0].update({ type: xAxisMode === 'dates' ? 'datetime' : 'linear' }, false);
+        updateRangeSelectorVisibility();
+
+        const daysSel = document.getElementById('days_window');
+        if (daysSel) daysSel.value = '0'; // default to All
+
+
+
     </script>
     {{ ales|json_script:"ale_data" }}
-    <script>
-        const selected_ales = []
-        const selected_ale_ids = []
-    </script>
+
 
     <script>
 
-        var checkBox = document.getElementById("live_data");
-        var text = document.getElementById("text");
+
 
         function refresh_data() {
-            console.log("rerunning", selected_ales)
-            if (selected_ales.length > 0) {
-                for (let i = 0; i < selected_ales.length; i++) {
-                    sendMessage(selected_ales[i]);
-                }
+          console.log("rerunning", selected_ales);
+          if (!selected_ales.length) return;
+
+          for (let i = 0; i < selected_ales.length; i++) {
+            const m = selected_ales[i];
+
+            // Expect a 5-element array: [db_id, name, machine, data_id, sample_name]
+            if (!Array.isArray(m) || m.length < 5) {
+              console.warn("[refresh_data] skipping malformed entry at index", i, m);
+              continue;
             }
+            sendMessage(m);
+          }
         }
 
-        setInterval(function () {
-            if (checkBox.checked == true) {
-                refresh_data();
-            }
-        }, 30000);
+
+
 
     </script>
 
@@ -469,6 +1328,11 @@
                     content.style.display = "none";
                 } else {
                     content.style.display = "block";
+                      setTimeout(function () {
+    if (window.DataTable && DataTable.tables) {
+      DataTable.tables({ api: true }).columns.adjust();
+    }
+  }, 0);
                 }
             });
             // Collapse all machines

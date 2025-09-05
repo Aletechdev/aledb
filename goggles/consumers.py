@@ -1,34 +1,69 @@
 import json
+import time
+import logging
 from channels.generic.websocket import WebsocketConsumer
 from .util import get_experiment_data
 
+logger = logging.getLogger(__name__)
 
 class GogglesConsumer(WebsocketConsumer):
     def connect(self):
         try:
-            # Connection logic
+            logger.info("GogglesConsumer: WebSocket connection established.")
             self.accept()
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            logger.exception("Error during WebSocket connect")
             raise
 
     def disconnect(self, close_code):
-        pass
+        logger.info(f"GogglesConsumer: WebSocket disconnected with code {close_code}")
 
     def receive(self, text_data):
+        start_time = time.time()
         try:
+            logger.debug(f"Raw WebSocket message received: {text_data}")
             text_data_json = json.loads(text_data)
             db_id = text_data_json['db_id']
-            name = text_data_json['name']
+
             machine = text_data_json['machine']
             data_id = text_data_json['data_id']
             sample_name = text_data_json['sample_name']
-            self.send(text_data=json.dumps({
-                'message': [machine+db_id, get_experiment_data(machine, db_id), sample_name, data_id, [db_id, name, machine, data_id, sample_name]]
-            }, indent=4, sort_keys=True, default=str))
+            gr_type = text_data_json.get('gr_type')
+            wavelength = text_data_json.get('wavelength')
+
+
+
+            logger.info(
+                f"Parsed WebSocket message - machine={machine}, db_id={db_id}, "
+                f"sample={sample_name}, gr_type={gr_type}, wavelength={wavelength}"
+            )
+
+            logger.info("Calling get_experiment_data()...")
+            exp_start = time.time()
+            exp_data = get_experiment_data(machine, db_id, gr_type, wavelength)
+
+            logger.info(f"get_experiment_data() completed in {time.time() - exp_start:.2f} seconds. "
+                        f"OD count={len(exp_data[0])}, GR count={len(exp_data[1])}, Temp count={len(exp_data[2])}")
+
+
+            payload = {
+              "message": [
+              f"{machine}{db_id}",
+              [exp_data[0], exp_data[1], exp_data[2],exp_data[3]],
+              f"{machine} - {sample_name}",
+              data_id,
+              sample_name,
+             ]
+            }
+            self.send(text_data=json.dumps(payload, default=str))
+            logger.info(f"Sent WebSocket response in {time.time() - start_time:.2f} seconds")
+
+
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            raise
+
+            logger.exception("Error processing WebSocket message")
+            try:
+                self.send(text_data=json.dumps({"error": str(e)}))
+            except Exception:
+                pass
 
