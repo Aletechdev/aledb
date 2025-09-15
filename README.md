@@ -86,7 +86,7 @@ server {
 >
 > Some results files, e.g, breseq html output, are side loaded from Azure to the Server, blobfuse is used to synchronize account:aledata -> container:aledata to /data folder. For local dev, it is okay to skip this step.
 >
-> Format og azure config file`cat /cfg/azure_pipeline_out.cfg`: 
+> Format og azure config file `sudo cat /cfg/azure_pipeline_out.cfg`: 
 >
 > ```ini
 > # azure_aledata.cfg:
@@ -109,10 +109,19 @@ server {
 
 ### Make necessary configuration changes:
 
+Add the VM's IP to MySQL server whitelist: [link](https://portal.azure.com/#@dtudk.onmicrosoft.com/resource/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.DBforMySQL/flexibleServers/ale/networking)
+
 
 #### aleinfo/defaults.py
 ```bash
 #Add IP address to ALLOWED_HOSTS in aleinfo/defaults.py
+# for direct access like https://20.82.182.70 (VM's IP), the IP need to be added to ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS, e.g.,:
+-ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), 'localhost', '127.0.0.1', '35.236.92.37', '0.0.0.0',
++ALLOWED_HOSTS = [os.environ.get('DJANGO_SERVER_HOST', 'localhost'), 'localhost', '127.0.0.1', '35.236.92.37', '0.0.0.0', '4.231.249.59'
+...
+-CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", "http://localhost:8000", "https://aledb.org", "https://www.aledb.org"]
++CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", "http://localhost:8000", "https://aledb.org", "https://www.aledb.org", "https://20.82.182.70"]
+
 ```
 ### Environment Configuration (`.docker/one.env`)
 This file contains sensitive settings (credentials and runtime configuration) and is excluded from version control on GitHub
@@ -129,7 +138,7 @@ DJANGO_SERVER_HOST=127.0.0.1
 # https://portal.azure.com/#@dtudk.onmicrosoft.com/resource/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.DBforMySQL/flexibleServers/ale/networking
 MYSQL_DATABASE=aledb_private #there are two other db aledb_public, ealedb, not called in this code base
 MYSQL_USER=ale
-MYSQL_PASSWORD= #Ask ALEdb admin
+MYSQL_PASSWORD= #Ask ALEdb admin #TODO: discuss when to store safely
 MYSQL_HOST=ale.mysql.database.azure.com
 MYSQL_PORT=3306
 REDIS_URL=redis://aledb-redis
@@ -167,7 +176,7 @@ tmux attach -t aledb
 >   # https://portal.azure.com/#@dtudk.onmicrosoft.com/resource/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.DBforMySQL/flexibleServers/ale/networking
 >   MYSQL_DATABASE=aledb_private
 >   MYSQL_USER=ale
->   MYSQL_PASSWORD= #Ask ALEdb team for credentials#
+>   MYSQL_PASSWORD= #Ask ALEdb team for credentials#TODO: discuss when to store safely
 >   MYSQL_HOST=ale.mysql.database.azure.com
 >   MYSQL_PORT=3306
 >   REDIS_URL=redis://aledb-redis
@@ -178,29 +187,30 @@ tmux attach -t aledb
 Check if containers are running:
 
 ```bash
-docker ps
-docker-compose -f docker-compose-prod-asgi-host-nginx.yml logs web
+sudo docker ps
+# log of running/previous run
+sudo docker-compose -f docker-compose-prod-asgi-host-nginx.yml logs web
 ```
 
 #### Start the webapp with:
 
-Either the quick start, `-d will run the services in background`:
+Either the quick start, `add -d will run the services in background`:
 
 ```bash
-docker-compose -f docker-compose-prod-asgi-host-nginx.yml up --build -d
+docker-compose -f docker-compose-prod-asgi-host-nginx.yml up --build #-d
 ```
 
 Or in a tmux session:
 
 ```bash
 tmux -s new aledb
-docker-compose -f docker-compose-prod-asgi-host-nginx.yml up --build
+sudo docker-compose -f docker-compose-prod-asgi-host-nginx.yml up --build
 ```
 
 Stop the services:
 
 ```bash
-docker-compose -f docker-compose-prod-asgi-host-nginx.yml down 
+sudo docker-compose -f docker-compose-prod-asgi-host-nginx.yml down 
 ```
 
 ### Alternative: Local with MySQL
@@ -254,8 +264,8 @@ docker-compose -f docker-compose-prod-asgi-host-nginx.yml down
 #### Run docker-compose
 ```bash
 # Docker down if running:
-docker-compose -f docker-compose-prod-asgi-host-nginx.yml down
-docker-compose -f docker-compose-prod-asgi-host-nginx.yml up --build -d
+sudo docker-compose -f docker-compose-prod-asgi-host-nginx.yml down
+sudo docker-compose -f docker-compose-prod-asgi-host-nginx.yml up --build -d
 ```
 
 ### Alternative: Local with SQLite
