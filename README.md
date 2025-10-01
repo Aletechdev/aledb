@@ -61,23 +61,168 @@ sudo apt update
 sudo apt install nginx
 ```
 
-add the following to /etc/nginx/sites-enabled/default:
+#### Setup Steps for New VM
 
-```yaml
+**Step 1: Initial HTTP Configuration**
+
+Create `/etc/nginx/sites-available/default` with basic HTTP setup:
+
+```nginx
+# WebSocket connection upgrade map
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+upstream django {
+    server 127.0.0.1:8000;
+}
+
 server {
-        server_name aledb.org www.aledb.org 4.231.249.59;
+    listen 80;
+    server_name your-domain.com www.your-domain.com;
+
     location / {
         proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_request_buffering off;
+        proxy_buffering off;
+        proxy_read_timeout 3600;
+        proxy_send_timeout 3600;
     }
+
     location /aledata {
         alias /data/aledata;
         autoindex off;
         satisfy any;
     }
+
     location /static {
         alias /var/www/aledb/static;
     }
+
+    # WebSocket support
+    location /ws/ {
+        proxy_pass http://django;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect off;
+    }
 }
+```
+
+Enable the site and test configuration:
+```bash
+sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+**Step 2: Obtain SSL Certificates**
+
+Install Certbot and obtain certificates:
+```bash
+sudo apt install certbot python3-certbot-nginx
+sudo certbot --nginx -d your-domain.com -d www.your-domain.com
+```
+
+Certbot will automatically modify your nginx configuration to add SSL support.
+
+**Step 3: Verify Final Configuration**
+
+After Certbot runs, your configuration should look like the production setup below.
+
+#### Current Production Configuration
+
+The nginx configuration is located at `/etc/nginx/sites-enabled/default` (symlinked from `/etc/nginx/sites-available/default`).
+
+**Port Configuration:**
+- **Port 80 (HTTP)**: Redirects all traffic to HTTPS (port 443)
+- **Port 443 (HTTPS)**: Main server with SSL certificates from Let's Encrypt
+
+**Docker Port Mapping:**
+When using `ports: 8000:80` in docker-compose, the mapping is:
+```
+External → Host port 8000 → Container port 80 (nginx) → Redirects to port 443 (HTTPS) → Proxies to Django at 127.0.0.1:8000
+```
+
+**Note**: For production, consider using `ports: 80:80` and `443:443` to properly expose both HTTP and HTTPS ports.
+
+**Full Production Configuration:**
+
+```nginx
+# HTTP Server (Port 80) - Redirects to HTTPS
+server {
+    listen 80;
+    server_name aledb.org www.aledb.org;
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS Server (Port 443) - Main Application
+server {
+    listen 443 ssl;
+    server_name aledb.org www.aledb.org 4.231.249.59;
+
+    # SSL Configuration (managed by Certbot)
+    ssl_certificate /etc/letsencrypt/live/aledb.org/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/aledb.org/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # Main application proxy
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_request_buffering off;
+        proxy_buffering off;
+        proxy_read_timeout 3600;
+        proxy_send_timeout 3600;
+    }
+
+    # Data files
+    location /aledata {
+        alias /data/aledata;
+        autoindex off;
+        satisfy any;
+    }
+
+    # Static files
+    location /static {
+        alias /var/www/aledb/static;
+    }
+
+    # WebSocket support
+    location /ws/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Host $server_name;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_redirect off;
+    }
+}
+
+# WebSocket connection upgrade map (defined at top level)
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+```
+
+**SSL Certificates:**
+Certificates are managed by Certbot (Let's Encrypt) and renew automatically. To manually renew:
+```bash
+sudo certbot renew
 ```
 
 ### For production: connect azure-storage-container as a local folder:
