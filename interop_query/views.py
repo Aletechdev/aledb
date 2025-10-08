@@ -70,7 +70,7 @@ def strains(request):
     try:
         ale_ids = AleId.objects.all()
         strain_sets = {obj.strain for obj in ale_ids}
-        strains = [strain for strain in strain_sets if strain and strain != "N/A"]
+        strains = [strain for strain in strain_sets if strain and strain != " N/A"]
         return JsonResponse({"strains": list(strains)})
     except Exception as e:
         logger.exception("strains endpoint error", extra=user_extra(request))
