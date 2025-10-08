@@ -11,13 +11,71 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.http import require_POST
 
 from ale.permissions import can_view_project
-from ale.models import AleExperiment
+from ale.models import AleExperiment, AleId
 from ale.utils import get_user_projects
 from filter.util import filter_observed_mutations
 from logs.aledb_logger import user_extra
 from seq.models import ObservedMutation
 from metadata.views import get_ordered_reseq_queryset, get_reseq_info_list
 logger = logging.getLogger(__name__)
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def genes(request):
+    """
+    Returns a list of all unique genes from mutations in the user's projects.
+    """
+    try:
+        user_projects = get_user_projects(request.user)
+        project_ids = [proj.id for proj in user_projects]
+        
+        # Build the query for user's projects
+        include_argument_list = [
+            Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=project_ids)
+        ]
+        
+        # Get the filtered queryset
+        mut_qryset = ObservedMutation.objects.filter(
+            reduce(operator.and_, include_argument_list)
+        )
+        
+        # Extract unique genes
+        genes_list = mut_qryset.values_list(
+            'mutation__gene', flat=True
+        ).distinct().order_by('mutation__gene')
+        
+        # Split comma-separated genes and flatten into individual entries
+        individual_genes = set()
+        for gene_entry in genes_list:
+            if gene_entry:
+                # Split by comma and strip whitespace from each gene
+                genes = [g.strip() for g in gene_entry.split(',')]
+                individual_genes.update(genes)
+        
+        # Convert to sorted list
+        genes_list = sorted(list(individual_genes))
+
+        return JsonResponse(genes_list, safe=False)
+
+    except Exception as e:
+        logger.exception("genes endpoint error", extra=user_extra(request))
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def strains(request):
+    """return list of strains"""
+    logger.info("list strains", extra=user_extra(request))
+    try:
+        ale_ids = AleId.objects.all()
+        strain_sets = {obj.strain for obj in ale_ids}
+        strains = [strain for strain in strain_sets if strain and strain != "N/A"]
+        return JsonResponse(list(strains), safe=False)
+    except Exception as e:
+        logger.exception("strains endpoint error", extra=user_extra(request))
+        return JsonResponse({'error': str(e)}, status=500)
+
 
 @csrf_exempt
 @require_http_methods(["POST"])
