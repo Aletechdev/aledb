@@ -55,7 +55,7 @@ def genes(request):
         # Convert to sorted list
         genes_list = sorted(list(individual_genes))
 
-        return JsonResponse(genes_list, safe=False)
+        return JsonResponse({"genes": genes_list})
 
     except Exception as e:
         logger.exception("genes endpoint error", extra=user_extra(request))
@@ -71,7 +71,7 @@ def strains(request):
         ale_ids = AleId.objects.all()
         strain_sets = {obj.strain for obj in ale_ids}
         strains = [strain for strain in strain_sets if strain and strain != "N/A"]
-        return JsonResponse(list(strains), safe=False)
+        return JsonResponse({"strains": list(strains)})
     except Exception as e:
         logger.exception("strains endpoint error", extra=user_extra(request))
         return JsonResponse({'error': str(e)}, status=500)
