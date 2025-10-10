@@ -18,7 +18,7 @@ services:
       - .:/app
       - /data/aledata:/data/aledata
       - /home/muyao/.ssh:/root/.ssh # for /pipeline upload
-      - /srv/alelog/config/goggles_machine_config.json:/srv/alelog/config/goggles_machine_config.json:ro
+      - ./config:/srv/alelog/config:ro
       - /srv/alelog/uploads:/srv/alelog/uploads
 
     command: bash -c "python manage.py collectstatic --no-input && daphne -b 0.0.0.0 -p 8000 aleinfo.asgi:application"
