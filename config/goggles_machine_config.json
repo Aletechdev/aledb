@@ -1,0 +1,20 @@
+[
+    {
+        "display_name": "UCSD 3.0",
+        "codename": "UCSD_3.0",
+        "id": "ucsd_3_0",
+        "data_dir": "/srv/alelog/uploads/ucsd_3_0"
+    },
+    {
+        "display_name": "UCSD 3.0A",
+        "codename": "UCSD_3.0A",
+        "id": "ucsd_3_0a",
+        "data_dir": "/srv/alelog/uploads/ucsd_3_0a"
+    },
+    {
+        "display_name": "DTU 3.1",
+        "codename": "DTU_3.1",
+        "id": "dk_3_1",
+        "data_dir": "/srv/alelog/uploads/dk_3_1"
+    }
+]
