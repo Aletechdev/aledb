@@ -1,22 +1,35 @@
 # talk to model, get data in JSON form
 
-import random
-import math
 from .models import Projects, Experiments, Batches, MeasurementTypes, Measurements, GrowthAnalyses, \
     TemperatureMeasurements, Protocol, Medias
 
 from django.core import serializers
-import numpy as np
 
-# i don't know about you but i'm feeling
-TEMPERATURE_MINIMUM = 22
-TEMPERATURE_MAXIMUM = 500
 
-ALE_MACHINES = [['UCSD 3.0', 'UCSD ONE', 'ucsd_machine_one'],
-                ['UCSD 3.0a', 'UCSD TWO', 'ucsd_machine_two'],
-                ['DTU 3.1', 'DTU ONE', 'dtu_machine_one'],
-                ['DTU 1.0', 'DTU TWO', 'dtu_machine_two'],
-                ['DTU 3.0a', 'DTU THREE', 'dtu_machine_three']]
+import json
+from pathlib import Path
+from django.conf import settings
+from typing import Dict, List, Tuple, Optional, Any
+from datetime import datetime, timezone
+import logging
+import time
+# Limits for temperature plotting
+TEMPERATURE_MIN = 10
+TEMPERATURE_MAX = 100
+
+# Map UI keys → curveball model strings found in JSON
+CURVEBALL_MAP = {
+    "gr_curveball_BaranyiRoberts": "Model(BaranyiRoberts)",
+    "gr_curveball_Logistic": "Model(Logistic)",
+    "gr_curveball_LogisticLag1": "Model(LogisticLag1)",
+    "gr_curveball_LogisticLag2": "Model(LogisticLag2)",
+    "gr_curveball_Richards": "Model(Richards)",
+    "gr_curveball_RichardsLag1": "Model(RichardsLag1)",
+}
+
+logger = logging.getLogger(__name__)
+
+CONFIG_FILE = Path(settings.GOGGLES_MACHINE_CONFIG)
 
 
 def json_serialize(qs):
@@ -25,110 +38,373 @@ def json_serialize(qs):
 
 
 def get_ale_machines():
-    return ALE_MACHINES
+    """Load machine metadata from config file"""
+    with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)  # list of dicts
+
+import math
+
+def _finite_or_none(x):
+    try:
+        x = float(x)
+    except (TypeError, ValueError):
+        return None
+    return x if math.isfinite(x) else None
+
+def _normalize_curveball(value, *, batch_id=None):
+    """
+    Accept any of:
+      - list[dict]   (normal)
+      - dict         (wrap to list)
+      - number/str   (bad placeholder) -> []
+      - None         -> []
+    Return list[(model_str, rate_float)] with only valid rows.
+    """
+    rows = []
+    if value is None:
+        return rows
+
+    if isinstance(value, list):
+        raw = value
+    elif isinstance(value, dict):
+        raw = [value]
+    else:
+        # Seen things like 5 / "failed" from some exporters
+        logger.warning("curveball placeholder for batch %s: %r (ignored)", batch_id, value)
+        return rows
+
+    for obj in raw:
+        if not isinstance(obj, dict):
+            logger.warning("curveball non-dict item for batch %s: %r (ignored)", batch_id, obj)
+            continue
+        rate = _finite_or_none(obj.get("growth_rate"))
+        if rate is None:
+            continue
+        model = str(obj.get("model", "")).strip()
+        rows.append((model, rate))
+    return rows
+
+def _cb_model_matches(model_str: str, wanted: str) -> bool:
+    """
+    Tolerant match:
+      - handles 'Model(LogisticLag1)' vs 'Model(Logistic + Lag1)'
+      - case / spacing / underscore differences
+    """
+    m = model_str.lower()
+    w = wanted.lower()
+
+    # strip 'Model(' ... ')' wrapper if present
+    if m.startswith("model(") and m.endswith(")"):
+        m = m[6:-1]
+    if w.startswith("model(") and w.endswith(")"):
+        w = w[6:-1]
+
+    # normalize punctuation/spacing
+    def norm(s: str) -> str:
+        s = s.replace("_", " ").replace("+", " ").replace("-", " ").replace("–", " ")
+        s = " ".join(s.split())
+        return s
+
+    return norm(w) in norm(m)
+
+def _select_gr_value(gf: dict, gr_type: Optional[str], *, batch_id=None) -> Optional[float]:
+    """
+    Return a float growth rate or None. Never raises.
+    Accepts both “simple” keys and curveball variants.
+    """
+    gf = gf or {}
+
+    # (A) If frontend sent the old tuple/list form like ('curveball','Logistic',1)
+    if isinstance(gr_type, (list, tuple)) and gr_type:
+        try:
+            family = str(gr_type[0]).lower()
+            model  = str(gr_type[1]) if len(gr_type) > 1 else ''
+            lag    = int(gr_type[2]) if len(gr_type) > 2 else 0
+            if family == 'curveball' and model:
+                gr_type = f'gr_curveball_{model}{"Lag"+str(lag) if lag else ""}'
+            else:
+                gr_type = None
+        except Exception:
+            gr_type = None
+
+    # (B) No explicit model → legacy fallback order (preserve your current behavior)
+    if not gr_type or not isinstance(gr_type, str):
+        for key in ("gr_bestfit", "gr_original", "gr_awf", "gr_croissance"):
+            v = _finite_or_none(gf.get(key))
+            if v is not None:
+                return v
+        return None
+
+    # (C) Specific curveball variant requested
+    if gr_type.startswith("gr_curveball_"):
+
+        cb_rows = _normalize_curveball(gf.get("gr_curveball"), batch_id=batch_id)
+        if not cb_rows:
+            # present-but-bad will be logged by _normalize_curveball
+            return None
+
+        wanted = CURVEBALL_MAP.get(gr_type)  # e.g., "Model(LogisticLag1)"
+        # Prefer exact/tolerant match to the requested subtype
+        if wanted:
+            for model, rate in cb_rows:
+                if _cb_model_matches(model, wanted):
+                    return rate
+
+        # Fallback: pick the max rate among available curveball fits
+        return max((rate for _m, rate in cb_rows), default=None)
+
+    # (D) Plain keys like gr_awf / gr_croissance / gr_original / gr_bestfit
+    v = _finite_or_none(gf.get(gr_type))
+    return v
 
 
 def get_initial_data():
+
+    """
+    Build overview for all machines by reading controller metadata JSON files.
+    """
     data = {}
-    for machine in ALE_MACHINES:
-        id = machine[2]
+    for machine in get_ale_machines():
+        machine_id = machine["id"]
+        machine_name = machine["display_name"]
+        codename = machine["codename"]
+        data_dir = Path(machine["data_dir"])
+
+
         try:
-            data[id] = {
-                'name': machine[0],
-                'codename': machine[1],
-                'id': id,
-                'projects': generate_projects_with_experiments(id),
+            projects = compile_projects_with_experiments(data_dir)
+            data[machine_id] = {
+                "name": machine_name,
+                "codename": codename,
+                "id": machine_id,
+                "projects": projects,
             }
-        except:
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
             continue
     return data
 
-
-def generate_medias(machine):
-    return Medias.objects.using(machine).all()
-
-
-def generate_projects_with_experiments(machine):
-    from string import ascii_lowercase as alc
+def compile_projects_with_experiments(machine_dir: Path):
+    """
+    Parse controller metadata + experiment files from each controller db_id directory.
+    For now, project_id == controller db_id.
+    """
     projects = {}
-    experiments = generate_experiments(machine)
-    all_projects = Projects.objects.using(machine).all().reverse()
-    for p in all_projects:
-        projects[p.db_id] = {
-            'name': p.title,
-            'experiments': tuple(experiments[p.db_id])
+
+    # Loop over every subdirectory in the machine folder
+    for controller_dir in sorted(machine_dir.iterdir()):
+        if not controller_dir.is_dir():
+            continue
+
+        project_id = controller_dir.name  # Use directory name (db_id) as project_id
+        meta_file = controller_dir / f"controller_{project_id}_metadata.json"
+        if not meta_file.exists():
+            # Skip directories without a metadata file
+            continue
+
+        with open(meta_file, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+
+        num_exps = len(meta["experiment_db_ids"])
+        experiments_list = []
+
+        for idx in range(num_exps):
+            exp_dbid = meta["experiment_db_ids"][idx]
+            exp_file = controller_dir / f"experiment_{exp_dbid}.json"
+
+            # Basic experiment dict with metadata
+            exp_data_new = {
+                "ale_id": meta["experiment_ale_ids"][idx],
+                "description": meta["experiment_descriptions"][idx],
+                "protocol": meta["experiment_active_protocols"][idx],
+                "filter_toggle": None,  # placeholder
+                "media": None,  # placeholder
+                "unique_str": f"{meta['experiment_descriptions'][idx]},#{exp_dbid}",
+                "db_id": exp_dbid,
+                "status": meta["experiment_statuses"][idx],
+                "num_batches": meta["experiment_number_batches"][idx],
+                "measurement_wavelengths": meta["experiment_measurement_wavelengths"][idx],
+                "timeseries_file": str(exp_file) if exp_file.exists() else None,
+            }
+
+            exp_legacy = (
+                meta["experiment_ale_ids"][idx],                  # 1: ALE ID
+                meta["experiment_descriptions"][idx],             # 2: Description
+                meta["experiment_active_protocols"][idx],         # 3: Protocol
+                None,                                              # 4: placeholder
+                None,                                              # 5: placeholder
+                f"{meta['experiment_descriptions'][idx]},#{exp_dbid}",  # 6: Unique string
+                exp_dbid                                           # 7: DB ID
+            )
+            experiments_list.append(exp_legacy)
+
+        projects[project_id] = {
+            "name": f"Controller {project_id}",
+            "experiments": experiments_list,
         }
+
     return projects
+def _norm_wl(wl: Optional[str]) -> Optional[str]:
+    return wl.strip().lower() if isinstance(wl, str) else None
 
+def _resolve_wl_key(container: dict, wl: str) -> Optional[str]:
+    """Find the exact dict key for a wavelength, case-insensitive."""
+    if wl in container:
+        return wl
+    lw = wl.lower()
+    for k in container.keys():
+        if str(k).lower() == lw:
+            return k
+    return None
 
-def generate_experiments(machine):
-    experiments = {}
-    all_protocols = Protocol.objects.using(machine).all()
-    for protocol in all_protocols:
-        current_experiment = protocol.experiment
-        if protocol.media:
-            media = protocol.media.description
+def _default_wl(exp: dict) -> Optional[str]:
+    """Prefer 620A; else primary; else first measurement_types."""
+    mts = [str(x).lower() for x in (exp.get("measurement_types") or [])]
+    if "620a" in mts:
+        return "620a"
+    pm = _norm_wl(exp.get("primary_measurement_type"))
+    if pm:
+        return pm
+    return mts[0] if mts else None
+
+def _iso_to_epoch_ms(ts_iso: str) -> int:
+    # Convert ISO datetime string to milliseconds since epoch (UTC)
+    dt = datetime.fromisoformat(ts_iso)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return int(dt.timestamp() * 1000)
+def get_experiment_data(ale_machine: str,experiment_id: int,gr_type: Optional[str] = None,wavelength: Optional[str] = None):
+    start_time = time.time()
+    logger.info(f"get_experiment_data() called for machine={ale_machine}, experiment_id={experiment_id}")
+
+    machines = get_ale_machines()
+    machine_entry = next((m for m in machines if str(m["id"]) == str(ale_machine)), None)
+    if not machine_entry:
+        logger.warning(f"No machine found with id={ale_machine}")
+        return [[], [], [], {"last_modified": None}]
+
+    machine_dir = Path(machine_entry["data_dir"])
+    logger.debug(f"Machine directory resolved to {machine_dir}")
+
+    # Locate experiment file
+    exp_file = None
+    for controller_dir in machine_dir.iterdir():
+        if not controller_dir.is_dir():
+            continue
+        candidate = controller_dir / f"experiment_{experiment_id}.json"
+        if candidate.exists():
+            exp_file = candidate
+            break
+    if not exp_file:
+        logger.warning(f"Experiment file not found for experiment_id={experiment_id}")
+        return [[], [], [], {"last_modified": None}]
+
+    logger.info(f"Found experiment file: {exp_file}")
+
+    with open(exp_file, "r", encoding="utf-8") as f:
+        exp = json.load(f)
+    logger.debug("Experiment JSON loaded successfully")
+
+    requested_wl = _norm_wl(wavelength)
+    wl = requested_wl or _default_wl(exp)
+    logger.debug(f"Selected wavelength (requested={requested_wl}) -> wl={wl}")
+
+    if not wl:
+        logger.warning(f"No wavelength found for experiment_id={experiment_id}")
+        return [[], [], [], {
+            "last_modified": exp.get("last_updated"),
+            "selected_wavelength": None,
+            "available_wavelengths": exp.get("measurement_types") or []
+        }]
+
+    measurement_list: List[List[Any]] = []
+    growth_rate_list: List[List[Any]] = []
+    temperature_measurements_list: List[List[Any]] = []
+
+    last_modified = exp.get("last_updated")
+
+    batch_count = 0
+    for batch in exp.get("batches", []):
+        batch_count += 1
+        batch_id = batch.get("batch_id")
+        media_desc = (batch.get("media") or {}).get("description", "N/A")
+        meas_all = (batch.get("measurements") or {})
+        wl_key_meas = _resolve_wl_key(meas_all, wl)
+        measurements = meas_all.get(wl_key_meas) if wl_key_meas else None
+        has_cryo = batch.get("cryostock")
+        has_cryo = bool(has_cryo) if has_cryo is not None else False
+
+        if not measurements:
+            logger.debug(f"Batch {batch_id}: No measurements found for wl={wl}")
+            continue
+
+        times  = measurements.get("times", [])
+        ods    = measurements.get("OD", [])
+        temps  = measurements.get("temp", [])
+        rel_s  = measurements.get("time_since_start", [])
+
+        logger.debug(f"Batch {batch_id}: {len(times)} timepoints, {len(ods)} OD values, {len(temps)} temps")
+
+        for t_iso, od, temp_c, _ in zip(times, ods, temps, rel_s):
+            ts_ms = _iso_to_epoch_ms(t_iso)
+            # OD values
+            od_val = max(round(float(od), 3), 0.01)
+            measurement_list.append([ts_ms, od_val, batch_id, media_desc,has_cryo])
+            # Temperature values
+            if temp_c is not None and TEMPERATURE_MIN < float(temp_c) < TEMPERATURE_MAX:
+                temperature_measurements_list.append([ts_ms, float(temp_c), batch_id, media_desc])
+
+        # Growth rate: explicit selection or fallback
+        gf_all = (batch.get("growth_fits") or {})
+        gf_by_wl = gf_all.get(_resolve_wl_key(gf_all, wl), {})
+        gr_val = _select_gr_value(gf_by_wl, gr_type, batch_id=batch_id)
+        logger.debug(f"Batch {batch_id}: selected GR model={gr_type or 'fallback'} value={gr_val}")
+        if gr_val is not None and times:
+            growth_rate_list.append([_iso_to_epoch_ms(times[-1]), float(gr_val), batch_id, media_desc, has_cryo])
+
+    logger.info(
+        f"Processed {batch_count} batches for experiment_id={experiment_id} in {time.time() - start_time:.2f}s "
+        f"(OD={len(measurement_list)}, GR={len(growth_rate_list)}, Temp={len(temperature_measurements_list)})"
+    )
+
+    media_components_by_batch = {}
+    for batch in exp.get("batches", []):
+        bid = batch.get("batch_id")
+        comps_out = []
+
+        comps_raw = (batch.get("media") or {}).get("components")
+        # Accept both dict and list formats; cap at 5
+        if isinstance(comps_raw, dict):
+            items = list(comps_raw.items())[:5]  # [(name, volume), ...]
+            for name, vol in items:
+                try:
+                    vol = float(vol) if vol is not None else None
+                except Exception:
+                    vol = None
+                comps_out.append({"name": str(name) if name is not None else "Unnamed", "volume": vol})
+        elif isinstance(comps_raw, list):
+            for comp in comps_raw[:5]:
+                name = (comp.get("name") or comp.get("component") or "Unnamed") if isinstance(comp, dict) else "Unnamed"
+                vol = comp.get("volume") if isinstance(comp, dict) else None
+                try:
+                    vol = float(vol) if vol is not None else None
+                except Exception:
+                    vol = None
+                comps_out.append({"name": name, "volume": vol})
         else:
-            media = "N/A"
-        experiment = (current_experiment.ale_id, current_experiment.description,
-                      protocol.type, protocol.filter_toggle, media,
-                      current_experiment.description + ',' + '#' + ''.join(
-                          random.sample('0123456789ABCDEF', 6)) + ',' +
-                      str(current_experiment.ale_id), current_experiment.db_id
-                      )
-        if current_experiment.project_id in experiments.keys():
-            experiments[current_experiment.project_id].append(experiment)
-        else:
-            experiments[current_experiment.project_id] = [experiment]
-    return experiments
+            comps_out = []
 
+        media_components_by_batch[bid] = comps_out
 
-def get_growth_data(ale_machine, measurement_type_db_ids):
-    experiment_growth_rates = GrowthAnalyses.objects.using(ale_machine).filter(
-        measurement_type_db_id__in=measurement_type_db_ids)
-    growth_rate_dict = {}
-    for rate in experiment_growth_rates:
-        growth_rate_dict[rate.measurement_type_db.batch.batch_id] = rate.growth_rate
-    return growth_rate_dict
+    available = exp.get("measurement_types") or []
+    meta = {
+        "last_modified": last_modified,
+        "selected_wavelength": wl,
+        "available_wavelengths": available,
+        "primary_measurement_type": exp.get("primary_measurement_type"),
+        "media_components_by_batch": media_components_by_batch,  # <-- NEW
+    }
 
-def get_experiment_data(ale_machine, experiment_id):
-    batches = Batches.objects.using(ale_machine).filter(experiment=experiment_id).values("db_id")
-    measurement_type_db_ids = MeasurementTypes.objects.using(ale_machine).filter(batch_id__in=batches).values("db_id")
-    growth_dict = get_growth_data(ale_machine, measurement_type_db_ids)
-    temperature_measurement_ids = Experiments.objects.using(ale_machine).get(
-        db_id=experiment_id).temperature_meas_ids.split(',')
-    if len(temperature_measurement_ids) < 2:
-        return [[], [], []]
+    return [measurement_list, growth_rate_list, temperature_measurements_list, meta]
 
-    measurement_list = []
-    temperature_measurements_list = []
-    growth_rate_list = []
-    prev_batch_id = -1
-
-    temp_measurement_queryset = TemperatureMeasurements.objects.using(ale_machine).filter(
-        db_id__in=temperature_measurement_ids)
-    for temp_measurement in temp_measurement_queryset:
-        current_batch = temp_measurement.measurement.measurement_type_db.batch
-        current_media_description = current_batch.media.description
-        current_batch_id = current_batch.batch_id
-        current_time = temp_measurement.time.timestamp() * 1000
-        calculated_orreader_value = temp_measurement.measurement.calculated_orreader_value
-        if calculated_orreader_value and calculated_orreader_value > 0:
-            adc_OD_values = calculated_orreader_value
-        else:
-            adc_OD_values = temp_measurement.measurement.OD
-        adc_OD_values = max(round(adc_OD_values, 3), 0.01)
-        measurement_list.append(
-            [current_time, adc_OD_values,
-             current_batch_id, current_media_description])
-        current_temp = temp_measurement.temperature
-        if current_temp > TEMPERATURE_MINIMUM and current_temp < TEMPERATURE_MAXIMUM:
-            temperature_measurements_list.append(
-                [current_time, current_temp,
-                 current_batch_id, current_media_description])
-        if current_batch_id != prev_batch_id:
-            growth_rate_list.append([current_time,
-                                     growth_dict[current_batch_id],
-                                     current_batch_id, current_media_description])
-            prev_batch_id = current_batch_id
-    return [measurement_list, growth_rate_list, temperature_measurements_list]
