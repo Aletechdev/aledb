@@ -5,7 +5,7 @@
 *.pyc
 *~
 *.ini
-*.yml
+docker-compose-prod-asgi-host-ports-nginx.yml
 *.conf
 */migrations
 static/
@@ -28,3 +28,4 @@ config.sh
 .coverage
 .ssh
 coverage.xml
+core
