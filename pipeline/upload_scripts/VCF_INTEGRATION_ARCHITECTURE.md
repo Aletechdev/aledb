@@ -67,22 +67,51 @@ Keep GD as internal format, add VCF as interchange format for new tools:
 
 GD format supports mutation types not well-represented in VCF:
 
-the `gdtools GD2VCF` output a VCF with limited stats, e.g. all AF=1 (SEM10_P._putida_in_p  60830  .    GATGTAA G    .    PASS  AF=1.0000;AD=69;DP=70). ***TODO: use tutorial or Emil long read as example (/Users/zhlia/Library/CloudStorage/OneDrive-DanmarksTekniskeUniversitet/Documents/Dev/AMP_pipeline/long_read/EmilChristensen/output_Emil/output.vcf /.gd).***
+the `gdtools GD2VCF` output a VCF with limited stats, e.g. all AF=1 (SEM10_P._putida_in_p  60830  .    GATGTAA G    .    PASS  AF=1.0000;AD=69;DP=70).
 
-
-
-***TODO: double check, all type should be able to convert to vcf, with basic stats*..**
+Mutation type documented on https://gensoft.pasteur.fr/docs/breseq/0.39.0/output.html
 
 | Type | Description | GD Support | VCF Support |
 |------|-------------|------------|-------------|
-| SNP | Single nucleotide polymorphism | ✅ Native | ✅ Native |
-| SUB | Multiple base substitution | ✅ Native | ✅ MNP |
-| DEL | Deletion | ✅ Native | ✅ Native |
-| INS | Insertion | ✅ Native | ✅ Native |
-| **MOB** | Mobile element insertion | ✅ Native | ⚠️ Custom INFO |
-| **AMP** | Amplification (CNV) | ✅ Native | ⚠️ Custom INFO |
-| ~~**CON**~~ | ~~Gene conversion~~ | ~~✅ Native~~ | ~~❌ No standard~~ |
-| ~~**INV**~~ | ~~Inversion~~ | ~~✅ Native~~ | ~~⚠️ SV spec~~ |
+| SNP | Single nucleotide polymorphism | ✅ Native | ✅ |
+| SUB | Multiple base substitution | ✅ Native | ✅ no SUB in clonal sample data for validation |
+| DEL | Deletion | ✅ Native | ✅ |
+| INS | Insertion | ✅ Native | ✅ |
+| **MOB** | Mobile element insertion | ✅ Native | ✅ |
+| **AMP** | Amplification (CNV) | ✅ Native | ⚠️ test featue of breseq, not validate |
+
+
+**VCF captures:** Full inserted sequence, position, frequency, depth
+
+**VCF loses:** IS element name, strand orientation, target site duplication size
+
+#### Frequency Rounding
+
+The `frequency` field in both VCF (AF) and GD mutation entries is **rounded/thresholded**, not the raw observed frequency. The actual frequency is stored in `polymorphism_frequency` within the RA (read alignment) entries in the GD file.
+
+| Position | `frequency` (VCF/GD) | `polymorphism_frequency` (GD RA) |
+|----------|----------------------|----------------------------------|
+| 380188 | 1 | 0.9667 |
+| 430835 | 1 | 0.9545 |
+| 475292 | 1 | 0.9310 |
+| 1004251 | 1 | 0.9524 |
+| 3762741 | 1 | 0.9688 |
+| 4616396 | 1 | 0.9608 |
+
+Variants with `polymorphism_frequency` above ~90% are rounded to `frequency=1` for the consensus call.
+
+
+
+**Use VCF if you need:**
+- Standard variant format for downstream tools
+- Basic variant calls (position, ref, alt, frequency)
+
+**Use GD if you need:**
+- Mobile element annotations (IS name, strand, duplication)
+- Structural variant evidence (junction reads)
+- Quality metrics (strand bias, polymorphism scores)
+- Coverage gap information
+- **Precise allele frequencies** (from `polymorphism_frequency` in RA entries)
 
 ### 2. Evidence Record System
 
