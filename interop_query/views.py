@@ -21,6 +21,7 @@ from metadata.views import get_ordered_reseq_queryset, get_reseq_info_list
 logger = logging.getLogger(__name__)
 
 _HTML_TAG_RE = re.compile(r'<[^>]+>')
+_BASE_SEARCH_URL = "https://aledb.org/search/"
 
 
 def _strip_html(text):
@@ -68,10 +69,18 @@ def genes(request):
                     if g:
                         individual_genes.add(g)
         
-        # Convert to sorted list
-        genes_list = sorted(list(individual_genes))
+        # Convert to sorted list of dicts with URL
 
-        return JsonResponse({"genes": genes_list})
+        genes_list = sorted(list(individual_genes))
+        genes_with_urls = [
+            {
+                "gene": gene,
+                "url": f"{_BASE_SEARCH_URL}?hidden_columns=&gene={gene}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain="
+            }
+            for gene in genes_list
+        ]
+
+        return JsonResponse({"genes": genes_with_urls})
 
     except Exception as e:
         logger.exception("genes endpoint error", extra=user_extra(request))
@@ -86,8 +95,16 @@ def strains(request):
     try:
         ale_ids = AleId.objects.all()
         strain_sets = {obj.strain for obj in ale_ids}
-        strains = [strain for strain in strain_sets if strain and strain != " N/A"]
-        return JsonResponse({"strains": list(strains)})
+        strains = sorted([strain for strain in strain_sets if strain and strain != " N/A"])
+
+        strains_with_urls = [
+            {
+                "strain": strain,
+                "url": f"{_BASE_SEARCH_URL}?hidden_columns=&gene=&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={strain}"
+            }
+            for strain in strains
+        ]
+        return JsonResponse({"strains": strains_with_urls})
     except Exception as e:
         logger.exception("strains endpoint error", extra=user_extra(request))
         return JsonResponse({'error': str(e)}, status=500)
