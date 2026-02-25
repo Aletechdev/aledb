@@ -2,6 +2,7 @@ import collections
 import json
 import logging
 import operator
+import re
 from functools import reduce
 
 from django.db.models import Q
@@ -18,6 +19,19 @@ from logs.aledb_logger import user_extra
 from seq.models import ObservedMutation
 from metadata.views import get_ordered_reseq_queryset, get_reseq_info_list
 logger = logging.getLogger(__name__)
+
+_HTML_TAG_RE = re.compile(r'<[^>]+>')
+
+
+def _strip_html(text):
+    """Extract gene name from potentially HTML-wrapped text.
+
+    e.g. '<i><b>168 genes</b><BR>yjgN' -> 'yjgN'
+    """
+    if '<BR>' in text:
+        text = text.rsplit('<BR>', 1)[-1]
+    return _HTML_TAG_RE.sub('', text).strip()
+
 
 @csrf_exempt
 @require_http_methods(["GET"])
@@ -44,13 +58,15 @@ def genes(request):
             'mutation__gene', flat=True
         ).distinct().order_by('mutation__gene')
         
-        # Split comma-separated genes and flatten into individual entries
+        # Split comma-separated genes, strip HTML tags, and flatten
         individual_genes = set()
         for gene_entry in genes_list:
             if gene_entry:
-                # Split by comma and strip whitespace from each gene
-                genes = [g.strip() for g in gene_entry.split(',')]
-                individual_genes.update(genes)
+                clean = _strip_html(gene_entry)
+                for g in clean.split(','):
+                    g = g.strip()
+                    if g:
+                        individual_genes.add(g)
         
         # Convert to sorted list
         genes_list = sorted(list(individual_genes))
