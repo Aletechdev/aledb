@@ -111,6 +111,50 @@ def strains(request):
 
 
 @csrf_exempt
+@require_http_methods(["GET"])
+def gene_strain_pairs(request):
+    """Returns all unique gene/strain pairs with search URLs."""
+    logger.info("list gene-strain pairs", extra=user_extra(request))
+    try:
+        user_projects = get_user_projects(request.user)
+        project_ids = [proj.id for proj in user_projects]
+
+        pairs_qs = ObservedMutation.objects.filter(
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=project_ids
+        ).values_list(
+            'mutation__gene',
+            'sequencing_experiment__tech_rep__isolate__flask__ale_id__strain',
+        ).distinct()
+
+        # Expand comma-separated genes, strip HTML tags, into individual pairs
+        unique_pairs = set()
+        for gene_entry, strain in pairs_qs:
+            if not gene_entry or not strain:
+                continue
+            clean = _strip_html(gene_entry)
+            for gene in clean.split(','):
+                gene = gene.strip()
+                if gene:
+                    unique_pairs.add((gene, strain))
+
+
+        pairs_with_urls = [
+            {
+                "gene": gene,
+                "strain": strain,
+                "url": f"{_BASE_SEARCH_URL}?hidden_columns=&gene={gene}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={strain}"
+            }
+            for gene, strain in sorted(unique_pairs)
+        ]
+
+        return JsonResponse({"pairs": pairs_with_urls, "count": len(pairs_with_urls)})
+
+    except Exception as e:
+        logger.exception("gene-strain-pairs endpoint error", extra=user_extra(request))
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
 @require_http_methods(["POST"])
 def query_by_pair(request):
     logger.info("query by pair", extra=user_extra(request))
