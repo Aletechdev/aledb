@@ -249,6 +249,9 @@ sudo certbot renew
 > sudo blobfuse /output --tmp-path=/mnt/resource/outdirtmp  --config-file=/cfg/azure_pipeline_out.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
 > # Evidence Files and Upload
 > sudo blobfuse /data --tmp-path=/mnt/resource/blobfusetmp -o allow_other --config-file=/cfg/azure_aledata.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
+> # Input files:
+> sudo blobfuse /pipeline_inputs --tmp-path=/mnt/resource/indirtmp -o allow_other --config-file=/cfg/azure_pipeline_in.cfg -o attr_timeout=240 -o entry_tim
+eout=240 -o negative_timeout=120
 > ```
 >
 > **Note:** Always mount the Azure Blob storage BEFORE starting Docker containers. If Docker starts first, it will bind to an empty directory and require a restart after mounting: `sudo docker-compose -f docker-compose-prod-asgi-host-nginx.yml restart web`
