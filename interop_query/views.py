@@ -283,18 +283,21 @@ def _serialize_metadata(metadata_list):
 def _serialize_mutations(mutations):
     out = []
     for m in mutations:
+        gene = m.mutation.gene
+        strain = m.sequencing_experiment.tech_rep.isolate.flask.ale_id.strain
         item = {
             'observed_mutation_id': m.id,
             'mutation_id': m.mutation_id,
-            'gene': m.mutation.gene,
+            'gene': gene,
             'position': m.mutation.position,
             'mutation_type': m.mutation.mutation_type,
             'sequence_change': m.mutation.sequence_change,
             'details': m.mutation.protein_change,
             'frequency': m.frequency,
             'ref_seq': m.mutation.reseq_reference,
-            'strain': m.sequencing_experiment.tech_rep.isolate.flask.ale_id.strain,
+            'strain': strain,
             'project_id': m.sequencing_experiment.tech_rep.isolate.flask.ale_id.ale_experiment.project_id,
+            'url': f"{_BASE_SEARCH_URL}?hidden_columns=&gene={gene}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={strain}",
         }
 
         exp = getattr(m, 'experiment', None)
