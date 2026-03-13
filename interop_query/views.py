@@ -21,6 +21,7 @@ from metadata.views import get_ordered_reseq_queryset, get_reseq_info_list
 logger = logging.getLogger(__name__)
 
 _HTML_TAG_RE = re.compile(r'<[^>]+>')
+_GENE_SEP_RE = re.compile(r'[,|;]')
 _BASE_SEARCH_URL = "https://aledb.org/search/"
 
 
@@ -64,7 +65,7 @@ def genes(request):
         for gene_entry in genes_list:
             if gene_entry:
                 clean = _strip_html(gene_entry)
-                for g in clean.split(','):
+                for g in _GENE_SEP_RE.split(clean):
                     g = g.strip()
                     if g:
                         individual_genes.add(g)
@@ -132,7 +133,7 @@ def gene_strain_pairs(request):
             if not gene_entry or not strain:
                 continue
             clean = _strip_html(gene_entry)
-            for gene in clean.split(','):
+            for gene in _GENE_SEP_RE.split(clean):
                 gene = gene.strip()
                 if gene:
                     unique_pairs.add((gene, strain))
