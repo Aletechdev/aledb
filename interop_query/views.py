@@ -230,7 +230,8 @@ def query_by_pair(request):
                 Q(mutation__gene__icontains=p.get("gene", "").strip())
             ) if p.get("gene") and p.get("strain") else None,
             empty_msg="No gene/strain pairs provided",
-            invalid_msg="No valid gene/strain pairs provided"
+            invalid_msg="No valid gene/strain pairs provided",
+            search_gene=pairs[0].get("gene", "").strip() if pairs else None
         )
 
     except json.JSONDecodeError:
@@ -279,7 +280,8 @@ def query_by_gene(request):
             ids,
             q_builder=lambda gene: Q(mutation__gene__icontains=gene),
             empty_msg='No genes provided',
-            invalid_msg='No valid genes provided'
+            invalid_msg='No valid genes provided',
+            search_gene=ids[0] if ids else None
         )
     except json.JSONDecodeError:
         return JsonResponse({'mutations': [], 'count': 0, 'message': 'Invalid JSON'}, status=400)
@@ -331,11 +333,33 @@ def _serialize_metadata(metadata_list):
         out.append(item)
     return out
 
-def _serialize_mutations(mutations):
+def _extract_url_gene(raw_gene, search_gene=None):
+    """Pick the best gene name for the search URL.
+
+    From a raw gene field (e.g. 'ADH1, YOL085C'), extract individual gene names
+    and return the one matching the user's search term. Falls back to the first
+    cleaned gene name, or the raw value.
+    """
+    if not raw_gene:
+        return ''
+    clean = _strip_html(raw_gene)
+    parts = [g.strip() for g in _GENE_SEP_RE.split(clean) if g.strip()]
+    if not parts:
+        return clean
+    if search_gene:
+        search_lower = search_gene.lower()
+        for p in parts:
+            if search_lower in p.lower():
+                return p
+    return parts[0]
+
+
+def _serialize_mutations(mutations, search_gene=None):
     out = []
     for m in mutations:
         gene = m.mutation.gene
         strain = m.sequencing_experiment.tech_rep.isolate.flask.ale_id.strain
+        url_gene = _extract_url_gene(gene, search_gene) if search_gene else ''
         item = {
             'observed_mutation_id': m.id,
             'mutation_id': m.mutation_id,
@@ -348,7 +372,7 @@ def _serialize_mutations(mutations):
             'ref_seq': m.mutation.reseq_reference,
             'strain': strain,
             'project_id': m.sequencing_experiment.tech_rep.isolate.flask.ale_id.ale_experiment.project_id,
-            'url': f"{_BASE_SEARCH_URL}?hidden_columns=&gene={quote(gene or '')}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={quote(strain or '')}",
+            'url': f"{_BASE_SEARCH_URL}?hidden_columns=&gene={quote(url_gene)}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={quote(strain or '')}",
         }
 
         exp = getattr(m, 'experiment', None)
@@ -366,7 +390,7 @@ def _serialize_mutations(mutations):
     return out
 
 
-def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
+def _run_query(request, ids, q_builder, empty_msg, invalid_msg, search_gene=None):
     """
     Generic executor for the endpoints.
     `q_builder(item:str) -> Q` builds a Q object for a single id.
@@ -432,7 +456,7 @@ def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
             }
             metadata.append(experiment_info)
     
-    mutations_data = _serialize_mutations(observed_mutations)
+    mutations_data = _serialize_mutations(observed_mutations, search_gene=search_gene)
     experiment_metadata = _serialize_metadata(metadata)
 
     return JsonResponse({'mutations': mutations_data, 'experiment_metadata': experiment_metadata, 'count': len(mutations_data), 'message': 'Success'})
