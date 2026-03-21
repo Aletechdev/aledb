@@ -1,23 +1,18 @@
 import collections
 import json
 import logging
-import operator
 import re
-from functools import reduce
 
+from ale.models import AleExperiment, AleId, Project
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.http import require_POST
-
-from ale.permissions import can_view_project
-from ale.models import AleExperiment, AleId
-from ale.utils import get_user_projects
+from django.views.decorators.http import require_http_methods, require_POST
 from filter.util import filter_observed_mutations
 from logs.aledb_logger import user_extra
-from seq.models import ObservedMutation
 from metadata.views import get_ordered_reseq_queryset, get_reseq_info_list
+from seq.models import ObservedMutation
+
 logger = logging.getLogger(__name__)
 
 _HTML_TAG_RE = re.compile(r'<[^>]+>')
@@ -39,20 +34,11 @@ def _strip_html(text):
 @require_http_methods(["GET"])
 def genes(request):
     """
-    Returns a list of all unique genes from mutations in the user's projects.
+    Returns a list of all unique genes from mutations in public projects.
     """
     try:
-        user_projects = get_user_projects(request.user)
-        project_ids = [proj.id for proj in user_projects]
-        
-        # Build the query for user's projects
-        include_argument_list = [
-            Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=project_ids)
-        ]
-        
-        # Get the filtered queryset
         mut_qryset = ObservedMutation.objects.filter(
-            reduce(operator.and_, include_argument_list)
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project__is_public=True
         )
         
         # Extract unique genes
@@ -94,7 +80,7 @@ def strains(request):
     """return list of strains"""
     logger.info("list strains", extra=user_extra(request))
     try:
-        ale_ids = AleId.objects.all()
+        ale_ids = AleId.objects.filter(ale_experiment__project__is_public=True)
         strain_sets = {obj.strain for obj in ale_ids}
         strains = sorted([strain for strain in strain_sets if strain and strain != " N/A"])
 
@@ -117,11 +103,8 @@ def gene_strain_pairs(request):
     """Returns all unique gene/strain pairs with search URLs."""
     logger.info("list gene-strain pairs", extra=user_extra(request))
     try:
-        user_projects = get_user_projects(request.user)
-        project_ids = [proj.id for proj in user_projects]
-
         pairs_qs = ObservedMutation.objects.filter(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=project_ids
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project__is_public=True
         ).values_list(
             'mutation__gene',
             'sequencing_experiment__tech_rep__isolate__flask__ale_id__strain',
@@ -324,19 +307,20 @@ def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
     if not ids:
         return JsonResponse({'mutations': [], 'count': 0, 'message': empty_msg})
 
+    public_project_q = Q(
+        sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project__is_public=True
+    )
+
     observed_mutations = []
     for item in ids:
-        if not item or not item:
+        if not item:
             continue
         q = q_builder(item)
         if q is None:
             continue
 
-        include_argument_list = []
-        _add_projects_to_query(request, include_argument_list)
-        include_argument_list.append(q)
-
-        mutations = _get_observed_mutations(include_argument_list, [])
+        qs = ObservedMutation.objects.filter(public_project_q & q)
+        mutations = filter_observed_mutations(qs)
         logger.info("Found %d mutations for %s", len(mutations), item, extra=user_extra(request))
         observed_mutations.extend(mutations)
 
@@ -369,8 +353,6 @@ def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
         logging.info("Processing reseq experiment with ID: %s", ale_experiment_id, extra=user_extra(request))
         experiment = AleExperiment.objects.get(ale_id=ale_experiment_id)
         if experiment:
-            if not can_view_project(request.user, experiment.project):
-                pass
             reseq_queryset = get_ordered_reseq_queryset(ale_experiment_id, None)
             reseq_info_list = get_reseq_info_list(reseq_queryset)
             experiment_info = {
@@ -389,28 +371,4 @@ def _run_query(request, ids, q_builder, empty_msg, invalid_msg):
     return JsonResponse({'mutations': mutations_data, 'experiment_metadata': experiment_metadata, 'count': len(mutations_data), 'message': 'Success'})
 
 
-def _add_projects_to_query(request, include_argument_list):
-    project_ids = [proj.id for proj in get_user_projects(request.user)]
-    include_argument_list.append(
-        Q(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project_id__in=project_ids))
-    
-
-def _get_observed_mutations(search_include_param_list, search_exclude_param_list):
-    """
-    :param request:
-    :return: mutation_queryset and observed_mutation_queryset based on user request and user permission
-    """
-    obs_mut_qryset = _get_mut_qryset(search_include_param_list, search_exclude_param_list)
-    observed_mutations = filter_observed_mutations(obs_mut_qryset)
-    return observed_mutations
-
-def _get_mut_qryset(include_argument_list, exclude_argument_list):
-    include_argument_list = reduce(operator.and_, include_argument_list)
-    if len(exclude_argument_list) > 0:
-        exclude_argument_list = reduce(operator.or_, exclude_argument_list)
-        mut_qryset = ObservedMutation.objects.filter(include_argument_list).exclude(exclude_argument_list)
-    else:
-        mut_qryset = ObservedMutation.objects.filter(include_argument_list)
-
-    return mut_qryset
 
