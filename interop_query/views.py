@@ -4,12 +4,14 @@ import logging
 import re
 from urllib.parse import quote
 
-from ale.models import AleExperiment, AleId, Project
+from ale.models import AleExperiment, Project
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
-from filter.util import filter_observed_mutations
+from filter.models import AleExperimentFilter
+from filter.util import filter_observed_mutations, _get_global_filter_genes_muts, _get_exp_filter_genes_muts
+from genes.util import get_gene_list
 from logs.aledb_logger import user_extra
 from metadata.views import get_ordered_reseq_queryset, get_reseq_info_list
 from seq.models import ObservedMutation
@@ -32,6 +34,71 @@ def _strip_html(text):
     return _HTML_TAG_RE.sub('', text).strip()
 
 
+def _get_public_filtered_queryset():
+    """Return ObservedMutation queryset for public projects with global and
+    experiment filters applied at the SQL level (same rules as the website)."""
+    qs = ObservedMutation.objects.filter(
+        sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project__is_public=True
+    )
+
+    global_filter_genes, global_filter_muts = _get_global_filter_genes_muts()
+    exp_filters = AleExperimentFilter.objects.filter(
+        ale_experiment_id__in=qs.values(
+            "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment_id"
+        )
+    )
+
+    q_queries = Q()
+    if len(global_filter_muts) > 0:
+        q_queries.add(Q(mutation__id__in=global_filter_muts), Q.OR)
+
+    exp_filter_genes_map = {}
+    for exp_filter in exp_filters:
+        exp_filter_genes, exp_filter_muts = _get_exp_filter_genes_muts(exp_filter)
+        if len(exp_filter_genes) > 0:
+            exp_filter_genes_map[exp_filter.ale_experiment_id] = exp_filter_genes
+
+        q_exp = Q()
+        if exp_filter.min_cutoff and exp_filter.min_cutoff > 0:
+            q_exp.add(Q(frequency__lt=exp_filter.min_cutoff / 100), Q.AND)
+        if exp_filter.min_gatk_cutoff and exp_filter.min_gatk_cutoff > 0:
+            q_exp.add(Q(frequency__lt=exp_filter.min_cutoff / 100), Q.AND)
+        if exp_filter.max_cutoff and exp_filter.max_cutoff < 100:
+            q_exp.add(Q(frequency__gt=exp_filter.max_cutoff / 100), Q.AND)
+        if exp_filter.min_gatk_cutoff and exp_filter.min_gatk_cutoff > 0:
+            q_exp.add(Q(frequency_gatk__lt=exp_filter.min_cutoff / 100), Q.AND)
+        if exp_filter.max_gatk_cutoff and exp_filter.max_gatk_cutoff < 100:
+            q_exp.add(Q(frequency_gatk__gt=exp_filter.max_cutoff / 100), Q.AND)
+        if len(exp_filter_muts) > 0:
+            q_exp.add(Q(mutation__id__in=exp_filter_muts), Q.OR)
+
+        exp_q_query = Q(
+            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=exp_filter.ale_experiment_id)
+        exp_q_query.add(q_exp, Q.AND)
+        q_queries.add(exp_q_query, Q.OR)
+
+    qs = qs.exclude(q_queries)
+
+    # Gene-level filtering: exclude mutations whose genes are entirely in the ignore lists
+    if global_filter_genes or exp_filter_genes_map:
+        exclude_mutation_ids = set()
+        for om in qs.select_related('mutation').only(
+            'mutation__id', 'mutation__gene',
+            'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment_id'
+        ).iterator():
+            genes = set(get_gene_list(om.mutation.gene))
+            if global_filter_genes and len(global_filter_genes) >= len(genes) and genes.issubset(global_filter_genes):
+                exclude_mutation_ids.add(om.mutation.id)
+            elif om.get_experiment_id() in exp_filter_genes_map:
+                efg = exp_filter_genes_map[om.get_experiment_id()]
+                if len(efg) >= len(genes) and genes.issubset(efg):
+                    exclude_mutation_ids.add(om.mutation.id)
+        if exclude_mutation_ids:
+            qs = qs.exclude(mutation__id__in=exclude_mutation_ids)
+
+    return qs
+
+
 @csrf_exempt
 @require_http_methods(["GET"])
 def genes(request):
@@ -39,10 +106,8 @@ def genes(request):
     Returns a list of all unique genes from mutations in public projects.
     """
     try:
-        mut_qryset = ObservedMutation.objects.filter(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project__is_public=True
-        )
-        
+        mut_qryset = _get_public_filtered_queryset()
+
         # Extract unique genes
         genes_list = mut_qryset.values_list(
             'mutation__gene', flat=True
@@ -82,9 +147,11 @@ def strains(request):
     """return list of strains"""
     logger.info("list strains", extra=user_extra(request))
     try:
-        ale_ids = AleId.objects.filter(ale_experiment__project__is_public=True)
-        strain_sets = {obj.strain for obj in ale_ids}
-        strains = sorted([strain for strain in strain_sets if strain and strain != " N/A"])
+        mut_qryset = _get_public_filtered_queryset()
+        strain_values = mut_qryset.values_list(
+            'sequencing_experiment__tech_rep__isolate__flask__ale_id__strain', flat=True
+        ).distinct()
+        strains = sorted([s for s in strain_values if s and s != " N/A"])
 
         strains_with_urls = [
             {
@@ -105,9 +172,7 @@ def gene_strain_pairs(request):
     """Returns all unique gene/strain pairs with search URLs."""
     logger.info("list gene-strain pairs", extra=user_extra(request))
     try:
-        pairs_qs = ObservedMutation.objects.filter(
-            sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project__is_public=True
-        ).values_list(
+        pairs_qs = _get_public_filtered_queryset().values_list(
             'mutation__gene',
             'sequencing_experiment__tech_rep__isolate__flask__ale_id__strain',
         ).distinct()
