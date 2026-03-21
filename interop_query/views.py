@@ -2,6 +2,7 @@ import collections
 import json
 import logging
 import re
+from urllib.parse import quote
 
 from ale.models import AleExperiment, AleId, Project
 from django.db.models import Q
@@ -62,7 +63,7 @@ def genes(request):
         genes_with_urls = [
             {
                 "gene": gene,
-                "url": f"{_BASE_SEARCH_URL}?hidden_columns=&gene={gene}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain="
+                "url": f"{_BASE_SEARCH_URL}?hidden_columns=&gene={quote(gene)}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain="
             }
             for gene in genes_list
         ]
@@ -87,7 +88,7 @@ def strains(request):
         strains_with_urls = [
             {
                 "strain": strain,
-                "url": f"{_BASE_SEARCH_URL}?hidden_columns=&gene=&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={strain}"
+                "url": f"{_BASE_SEARCH_URL}?hidden_columns=&gene=&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={quote(strain)}"
             }
             for strain in strains
         ]
@@ -126,7 +127,7 @@ def gene_strain_pairs(request):
             {
                 "gene": gene,
                 "strain": strain,
-                "url": f"{_BASE_SEARCH_URL}?hidden_columns=&gene={gene}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={strain}"
+                "url": f"{_BASE_SEARCH_URL}?hidden_columns=&gene={quote(gene)}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={quote(strain)}"
             }
             for gene, strain in sorted(unique_pairs)
         ]
@@ -281,7 +282,7 @@ def _serialize_mutations(mutations):
             'ref_seq': m.mutation.reseq_reference,
             'strain': strain,
             'project_id': m.sequencing_experiment.tech_rep.isolate.flask.ale_id.ale_experiment.project_id,
-            'url': f"{_BASE_SEARCH_URL}?hidden_columns=&gene={gene}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={strain}",
+            'url': f"{_BASE_SEARCH_URL}?hidden_columns=&gene={quote(gene or '')}&min_freq=&max_freq=&ref_seq=&min_pos=&max_pos=&mut_type=&project=&strain={quote(strain or '')}",
         }
 
         exp = getattr(m, 'experiment', None)
