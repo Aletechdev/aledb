@@ -359,7 +359,7 @@ def _serialize_mutations(mutations, search_gene=None):
     for m in mutations:
         gene = m.mutation.gene
         strain = m.sequencing_experiment.tech_rep.isolate.flask.ale_id.strain
-        url_gene = _extract_url_gene(gene, search_gene) if search_gene else ''
+        url_gene = _extract_url_gene(gene, search_gene)
         item = {
             'observed_mutation_id': m.id,
             'mutation_id': m.mutation_id,
