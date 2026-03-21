@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 _HTML_TAG_RE = re.compile(r'<[^>]+>')
 _GENE_SEP_RE = re.compile(r'[,|;]')
+_VALID_GENE_RE = re.compile(r'[A-Za-z0-9]')
 _BASE_SEARCH_URL = "https://aledb.org/search/"
 
 
@@ -54,7 +55,7 @@ def genes(request):
                 clean = _strip_html(gene_entry)
                 for g in _GENE_SEP_RE.split(clean):
                     g = g.strip()
-                    if g:
+                    if g and _VALID_GENE_RE.search(g):
                         individual_genes.add(g)
         
         # Convert to sorted list of dicts with URL
@@ -119,7 +120,7 @@ def gene_strain_pairs(request):
             clean = _strip_html(gene_entry)
             for gene in _GENE_SEP_RE.split(clean):
                 gene = gene.strip()
-                if gene:
+                if gene and _VALID_GENE_RE.search(gene):
                     unique_pairs.add((gene, strain))
 
 
