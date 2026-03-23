@@ -40,7 +40,7 @@ Add "Show Global Filtered" and "Show Experiment Filtered" toggle checkboxes to t
 4. **`templates/base_table_template.html`** — Add two checkbox inputs in the existing form (alongside `ale_no`, `sample_type`, `tag_select`), submitted with the existing Apply button
 
 #### Testing
-Navigate to `/mutations/?ale_experiment_id=748`, toggle each checkbox, click Apply. Verify hidden mutations appear. With no toggles, behavior should be identical to current.
+Navigate to `/mutations/?ale_experiment_id=748 and https://aledb.org/filter/?ale_experiment_id=735`, toggle each checkbox, click Apply. Verify hidden mutations appear. With no toggles, behavior should be identical to current.
 
 ---
 

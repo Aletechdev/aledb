@@ -76,6 +76,14 @@
                         <option>Hide Tag: {{ key }}</option>
                     {% endfor %}
                 </select>
+                <label style="margin-left: 10px; font-weight: normal;">
+                    <input type="checkbox" name="show_global_filtered" value="1"
+                           {% if show_global_filtered %}checked{% endif %} /> Show Global Filtered
+                </label>
+                <label style="margin-left: 10px; font-weight: normal;">
+                    <input type="checkbox" name="show_exp_filtered" value="1"
+                           {% if show_exp_filtered %}checked{% endif %} /> Show Experiment Filtered
+                </label>
                 <input type="submit" class="btn btn-default btn-primary" value="Apply"/>
                 <button type="button" class="btn btn-default" onclick="column_sort_from_right()">
                     <i class="fa fa-sort-amount-desc fa-fw" aria-hidden="true"></i>Column Sort from Right

@@ -41,7 +41,11 @@ def amplification_data(request):
 
         table_header = mutation_table_builder.get_table_header(request.user, ordered_reseq_dict, experiment)
 
-        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user, filter_type="NOT_AMP")
+        show_global_filtered = request.GET.get('show_global_filtered', '') == '1'
+        show_exp_filtered = request.GET.get('show_exp_filtered', '') == '1'
+
+        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user, filter_type="NOT_AMP",
+                                     skip_global_filter=show_global_filtered, skip_experiment_filter=show_exp_filtered)
 
         hidden_columns = request.GET.get('hidden_columns', "")
 
@@ -60,7 +64,9 @@ def amplification_data(request):
                         "template_header": "Mutations",
                         "hidden_columns": hidden_columns,
                         "refseq_column": REFSEQ_COLUMN_IN_MUT_TABLE,
-                        "tag_dropdown": common.constants.TAGS
+                        "tag_dropdown": common.constants.TAGS,
+                        "show_global_filtered": show_global_filtered,
+                        "show_exp_filtered": show_exp_filtered,
                         })
         logger.info("mutation performance",
                     extra=join_extras(user_extra(request), {"time taken": time.time() - start_time}))
@@ -89,7 +95,11 @@ def mutation_table(request):
 
         table_header = mutation_table_builder.get_table_header(request.user, ordered_reseq_dict, experiment)
 
-        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user, filter_type="AMP")
+        show_global_filtered = request.GET.get('show_global_filtered', '') == '1'
+        show_exp_filtered = request.GET.get('show_exp_filtered', '') == '1'
+
+        table_body = _get_table_body(experiment, ordered_reseq_dict, request.user, filter_type="AMP",
+                                     skip_global_filter=show_global_filtered, skip_experiment_filter=show_exp_filtered)
 
         hidden_columns = request.GET.get('hidden_columns', "")
 
@@ -108,7 +118,9 @@ def mutation_table(request):
                         "template_header": "Mutations",
                         "hidden_columns": hidden_columns,
                         "refseq_column": REFSEQ_COLUMN_IN_MUT_TABLE,
-                        "tag_dropdown": common.constants.TAGS
+                        "tag_dropdown": common.constants.TAGS,
+                        "show_global_filtered": show_global_filtered,
+                        "show_exp_filtered": show_exp_filtered,
                         })
         logger.info("mutation performance", extra=join_extras(user_extra(request), {"time taken": time.time() - start_time}))
 
@@ -120,8 +132,11 @@ def mutation_table(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-def _get_table_body(experiment, ordered_reseq_dict, user, filter_type = None):
-    obs_mutations = get_all_observed_mutations_filtered(experiment.ale_id, filter_type)
+def _get_table_body(experiment, ordered_reseq_dict, user, filter_type=None,
+                    skip_global_filter=False, skip_experiment_filter=False):
+    obs_mutations = get_all_observed_mutations_filtered(experiment.ale_id, filter_type,
+                                                        skip_global_filter=skip_global_filter,
+                                                        skip_experiment_filter=skip_experiment_filter)
     return mutation_table_builder.get_mutation_table_body(user, obs_mutations, ordered_reseq_dict, experiment)
 
 
