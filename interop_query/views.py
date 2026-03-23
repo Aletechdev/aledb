@@ -11,7 +11,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods, require_POST
 from filter.models import AleExperimentFilter
 from filter.util import filter_observed_mutations, _get_global_filter_genes_muts, _get_exp_filter_genes_muts
-from genes.util import get_gene_list
 from logs.aledb_logger import user_extra
 from metadata.views import get_ordered_reseq_queryset, get_reseq_info_list
 from seq.models import ObservedMutation
@@ -36,7 +35,13 @@ def _strip_html(text):
 
 def _get_public_filtered_queryset():
     """Return ObservedMutation queryset for public projects with global and
-    experiment filters applied at the SQL level (same rules as the website)."""
+    experiment filters applied at the SQL level (same rules as the website).
+
+    Note: gene-level filtering (ignored_genes) is skipped here because it
+    requires iterating every row in Python and is too slow for the full dataset.
+    The POST query endpoints use filter_observed_mutations() which handles
+    gene-level filtering on the smaller search result sets.
+    """
     qs = ObservedMutation.objects.filter(
         sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__project__is_public=True
     )
@@ -52,11 +57,8 @@ def _get_public_filtered_queryset():
     if len(global_filter_muts) > 0:
         q_queries.add(Q(mutation__id__in=global_filter_muts), Q.OR)
 
-    exp_filter_genes_map = {}
     for exp_filter in exp_filters:
         exp_filter_genes, exp_filter_muts = _get_exp_filter_genes_muts(exp_filter)
-        if len(exp_filter_genes) > 0:
-            exp_filter_genes_map[exp_filter.ale_experiment_id] = exp_filter_genes
 
         q_exp = Q()
         if exp_filter.min_cutoff and exp_filter.min_cutoff > 0:
@@ -78,23 +80,6 @@ def _get_public_filtered_queryset():
         q_queries.add(exp_q_query, Q.OR)
 
     qs = qs.exclude(q_queries)
-
-    # Gene-level filtering: exclude mutations whose genes are entirely in the ignore lists
-    if global_filter_genes or exp_filter_genes_map:
-        exclude_mutation_ids = set()
-        for om in qs.select_related('mutation').only(
-            'mutation__id', 'mutation__gene',
-            'sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment_id'
-        ).iterator():
-            genes = set(get_gene_list(om.mutation.gene))
-            if global_filter_genes and len(global_filter_genes) >= len(genes) and genes.issubset(global_filter_genes):
-                exclude_mutation_ids.add(om.mutation.id)
-            elif om.get_experiment_id() in exp_filter_genes_map:
-                efg = exp_filter_genes_map[om.get_experiment_id()]
-                if len(efg) >= len(genes) and genes.issubset(efg):
-                    exclude_mutation_ids.add(om.mutation.id)
-        if exclude_mutation_ids:
-            qs = qs.exclude(mutation__id__in=exclude_mutation_ids)
 
     return qs
 
