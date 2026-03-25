@@ -10,4 +10,5 @@ urlpatterns = [
     re_path(r'^query-by-pair/?$', views.query_by_pair, name='query_by_pair'),
     re_path(r'^genes/?$', views.genes, name='genes'),
     re_path(r'^strains/?$', views.strains, name='strains'),
+    re_path(r'^gene-strain-pairs/?$', views.gene_strain_pairs, name='gene_strain_pairs'),
 ]
