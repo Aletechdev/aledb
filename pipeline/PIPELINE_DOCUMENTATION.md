@@ -616,7 +616,60 @@ docker logs aledb-web | grep "uploading.*via webapp"
 sudo /upload/webapp-upload.sh {run_name}
 ```
 
-### Tasks fail on Azure Batch
+### "Create Run" fails silently (no new run appears)
+
+**Most likely cause: Azure Batch pool quota reached (default limit: 100 pools).**
+
+Old pools are never automatically deleted, so over time the quota fills up. The error is silently caught by the view — the page re-renders without any error message.
+
+**Diagnose:**
+```bash
+# Check pool count and active VMs
+sudo docker exec aledb-web python3 -c "
+from pipeline.config import *
+from azure.batch import BatchServiceClient
+from msrestazure.azure_active_directory import ServicePrincipalCredentials
+credentials = ServicePrincipalCredentials(client_id=CLIENT_ID, secret=SECRET, tenant=TENANT_ID, resource=RESOURCE)
+batch_client = BatchServiceClient(credentials, batch_url=BATCH_ACCOUNT_URL)
+pools = list(batch_client.pool.list())
+print(f'Active pools: {len(pools)} (quota is typically 100)')
+active = [p for p in pools if p.current_dedicated_nodes > 0]
+print(f'Pools with VMs: {len(active)}')
+for p in active:
+    print(f'  {p.id}: {p.current_dedicated_nodes} VMs')
+"
+```
+
+**Fix — clean up idle pools and orphaned jobs:**
+```bash
+# Dry-run first (shows what would be deleted)
+sudo docker exec aledb-web python3 pipeline/scripts/cleanup_batch_pools.py --dry-run
+sudo docker exec aledb-web python3 pipeline/scripts/cleanup_batch_jobs.py --dry-run
+
+# Then run for real (interactive confirmation)
+sudo docker exec -it aledb-web python3 pipeline/scripts/cleanup_batch_pools.py
+sudo docker exec -it aledb-web python3 pipeline/scripts/cleanup_batch_jobs.py
+```
+
+**Stop a specific run:**
+```bash
+sudo docker exec -it aledb-web python3 pipeline/scripts/stop_batch_run.py <run_name>
+```
+
+### Tasks fail on Azure Batch — Docker container name conflict
+
+If a task fails and Azure Batch retries it on the same node, the retry fails with:
+```
+docker: Error response from daemon: Conflict. The container name "/amp{sample}" is already in use
+```
+
+The first failure is typically caused by resource limits (OOM, disk full) — check `stderr.txt` for the original error. The Docker name conflict prevents all subsequent retries from recovering.
+
+**Fix:** The `--rm` flag was added to `docker run` in [azure_pipeline_util.py:214](pipeline/azure_pipeline_util.py#L214) to auto-remove containers after exit. See `ISSUE_docker_container_name_conflict_on_batch_retry.md` for details.
+
+**Task retry count** is configured per-task in Azure Batch (default: 0). The pipeline currently does not set `max_task_retry_count` on tasks, so Azure Batch uses the default.
+
+### Tasks fail on Azure Batch — other causes
 
 **Check:**
 1. Input files exist in Azure Blob `data` container
@@ -628,6 +681,11 @@ sudo /upload/webapp-upload.sh {run_name}
 ```
 https://aledb.org/pipeline/run/log/{job_name}/{task_id}
 ```
+
+**Check Azure Batch error files:**
+- `stdout.txt` — pipeline output
+- `stderr.txt` — error messages (OOM, disk full, etc.)
+- `fileuploaderr.txt` — output upload failures (often a symptom, not root cause)
 
 ### Data doesn't appear in database
 
