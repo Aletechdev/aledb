@@ -211,7 +211,7 @@ def run_pipeline(directory, run_name, vm_size):
                              csv_key.split("/")[-1].replace(".csv", "").replace("+", "-"))
 
         output_file_path = '{}/alemutpipe-outputs/{}.tar.gz'.format(directory, sample_name)
-        command = "/bin/bash -c \"sudo docker run -v $AZ_BATCH_TASK_WORKING_DIR/{}:/var/data -t --name amp{} " \
+        command = "/bin/bash -c \"sudo docker run --rm -v $AZ_BATCH_TASK_WORKING_DIR/{}:/var/data -t --name amp{} " \
                   "aletechdev/amp bash -i -c \\\"source /root/.bashrc && time /amp.sh\\\" && mv " \
                   "$AZ_BATCH_TASK_WORKING_DIR/{}/alemutpipe-outputs/*.tar.gz " \
                   "$AZ_BATCH_TASK_WORKING_DIR/{}/alemutpipe-outputs/{}.tar.gz\"".format(directory, sample_name,

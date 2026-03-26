@@ -11,19 +11,31 @@ __author__ = 'Patrick Phaneuf, Muyao :)'
 NO_BREAK_STRING_CODE = u'\xa0'
 
 
-def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, filter_type = None):
+def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, filter_type=None,
+                              skip_global_filter=False, skip_experiment_filter=False):
     """
     R. Cai - 1/19/2019
     :param observed_mutation_queryset:
     :param experiment_id: experiment_id for the observed_mutation_queryset
+    :param filter_type: 'AMP' or 'NOT_AMP' to filter by mutation type
+    :param skip_global_filter: if True, do not apply global filter exclusions
+    :param skip_experiment_filter: if True, do not apply experiment filter exclusions
     :return: list of observed_mutations sorted and loaded with related objects
     """
-    if experiment_id:
-        exp_filters = AleExperimentFilter.objects.filter(ale_experiment_id=experiment_id)
+    if not skip_experiment_filter:
+        if experiment_id:
+            exp_filters = AleExperimentFilter.objects.filter(ale_experiment_id=experiment_id)
+        else:
+            exp_filters = AleExperimentFilter.objects.filter(ale_experiment_id__in=observed_mutation_queryset.values(
+                "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment_id"))
     else:
-        exp_filters = AleExperimentFilter.objects.filter(ale_experiment_id__in=observed_mutation_queryset.values(
-            "sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment_id"))
-    global_filter_genes, global_filter_muts = _get_global_filter_genes_muts()
+        exp_filters = AleExperimentFilter.objects.none()
+
+    if not skip_global_filter:
+        global_filter_genes, global_filter_muts = _get_global_filter_genes_muts()
+    else:
+        global_filter_genes, global_filter_muts = set(), []
+
     exp_filter_genes_map = dict()
 
     # filter muts by global filter
