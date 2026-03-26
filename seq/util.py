@@ -10,9 +10,12 @@ def get_observed_mutation_queryset(experiment_id):
     return seq.models.ObservedMutation.objects.filter(sequencing_experiment__tech_rep__isolate__flask__ale_id__ale_experiment__ale_id=experiment_id)
 
 
-def get_all_observed_mutations_filtered(experiment_id, filter_type = None):
+def get_all_observed_mutations_filtered(experiment_id, filter_type=None,
+                                        skip_global_filter=False, skip_experiment_filter=False):
     queryset = get_observed_mutation_queryset(experiment_id)
-    return filter_observed_mutations(queryset, experiment_id, filter_type)
+    return filter_observed_mutations(queryset, experiment_id, filter_type,
+                                     skip_global_filter=skip_global_filter,
+                                     skip_experiment_filter=skip_experiment_filter)
 
 
 def get_all_observed_mutations(reseq_id_list):
