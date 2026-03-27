@@ -16,5 +16,11 @@
         "codename": "DTU_3.1",
         "id": "dk_3_1",
         "data_dir": "/srv/alelog/uploads/dk_3_1"
-    }
+    },
+     {
+	"display_name": "DK 3.0A",
+        "codename": "DK_3.0A",
+        "id": "dk_3_0a",
+        "data_dir": "/srv/alelog/uploads/dk_3_0a"
+     }
 ]
