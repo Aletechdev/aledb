@@ -10,7 +10,7 @@ The home page (`/home`) loads slowly due to several bottlenecks.
 
 ## Significant — N+1 queries in permission checks
 
-3. **`get_user_projects()`** (`ale/utils.py`) — loops over every project and calls `user.has_perm()` individually, resulting in 2N+ permission queries with no batching.
+3. **`get_user_projects()`** (`ale/utils.py`) — loops over every project and calls `user.has_perm()` individually, resulting in 2N+ permission queries with no batching. See [optimize-get-user-projects.md](optimize-get-user-projects.md) for proposed fix.
 
 ## Moderate — No caching
 
