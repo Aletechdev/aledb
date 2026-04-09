@@ -44,7 +44,7 @@ def md_export(request):
                     writer = csv.writer(csv_data)
                     writer.writerows(get_md_csv_str(experiment))
                     csv_data.seek(0)
-                    filename = f"md_Proj_{safe_filename(experiment.project.name)}_Exp_{safe_filename(experiment.name)}.csv"
+                    filename = f"md_Proj_{safe_filename(experiment.project.name)}_Exp_{safe_filename(experiment.name)}_ExpID{experiment.ale_id}.csv"
                     zip_file.writestr(filename, csv_data.read())
                 zip_file.close()
                 response = HttpResponse(zip_data.getvalue(), content_type='application/x-zip-compressed')

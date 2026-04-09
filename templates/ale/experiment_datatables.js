@@ -1,7 +1,7 @@
 
     $(document).ready(function () {
         var table = $('#exp_table').DataTable({
-            scrollY: 600,
+            scrollY: '70vh',
             scrollX: true,
             autoWidth: true,
             paging: false,
@@ -57,6 +57,12 @@
                                 export_metadata(table)
                             }
                         },
+                        {
+                            text: 'Experiment List',
+                            action: function () {
+                                export_experiment_index(table)
+                            }
+                        },
                     ]
                 },
             ],
@@ -84,6 +90,26 @@
         var url = "/export";
         var params = {
                     'mut_type': mutation_type,
+                    'project_id': project_id,
+                    'experiment_ids': exp_ids
+                };
+        var form = $('<form method="GET" action="' + url + '">');
+        $.each(params, function(k, v) {
+            form.append($('<input type="hidden" name="' + k +
+                    '" value="' + v + '">'));
+        });
+        $('body').append(form);
+        form.submit();
+    }
+
+    function export_experiment_index(table){
+        var exp_ids = get_selected_experiment_ids(table);
+        if (exp_ids == ''){
+            swal("", "Please select experiments and try again.", "warning");
+            return;
+        }
+        var url = "/export/experiment_index";
+        var params = {
                     'project_id': project_id,
                     'experiment_ids': exp_ids
                 };
