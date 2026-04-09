@@ -112,10 +112,10 @@ def get_mutation_objects(mutations_id_str):
 
 
 def get_ref_sequences():
-    muts = seq.models.Mutation.objects.all()
-    ref_seq_set = {mut.reseq_reference for mut in muts}
-    ref_seq_list = [ref_seq for ref_seq in ref_seq_set if ref_seq]
-    return sorted(ref_seq_list)
+    return sorted(
+        seq.models.Mutation.objects.exclude(reseq_reference__isnull=True).exclude(reseq_reference='')
+        .values_list('reseq_reference', flat=True).distinct()
+    )
 
 
 def get_matching_observed_mutation_ids(mutation_id, experiment_id):
