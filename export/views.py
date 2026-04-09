@@ -47,7 +47,7 @@ def export(request):
                             csv_buffer = io.StringIO()
                             writer = csv.writer(csv_buffer)
                             writer.writerows(get_csv_str(experiment.ale_id, mut_type_str))
-                            filename = f"Proj_{safe_filename(experiment.project.name)}_Exp_{safe_filename(experiment.name)}_{mut_type_str}.csv"
+                            filename = f"Proj_{safe_filename(experiment.project.name)}_Exp_{safe_filename(experiment.name)}_ExpID{experiment.ale_id}_{mut_type_str}.csv"
                             zf.writestr(filename, csv_buffer.getvalue())
                             logger.info(f"Added {filename} to zip", extra=user_extra(request))
 
@@ -73,3 +73,35 @@ def export(request):
         return HttpResponse("Internal server error during export.", status=500)
     # Catch any path that doesn't return explicitly
     return HttpResponse("Invalid export request.", status=400)
+
+
+def export_experiment_index(request):
+    logger.info("export_experiment_index", extra=user_extra(request))
+    try:
+        exp_id_str = request.GET.get('experiment_ids', None)
+        project_id = request.GET.get('project_id', None)
+
+        if project_id != 'null':
+            project = get_object_or_404(Project, pk=int(project_id))
+            if project and can_view_project(request.user, project):
+                experiments = project.aleexperiment_set.all()
+            else:
+                return HttpResponse(status=403)
+        else:
+            experiments = get_all_user_exps(request.user)
+
+        if exp_id_str:
+            exp_id_set = set(exp_id_str.split(','))
+            exp_list = [exp for exp in experiments if str(exp.ale_id) in exp_id_set]
+            if len(exp_list) > 0:
+                response = HttpResponse(content_type='text/csv')
+                response['Content-Disposition'] = 'attachment; filename="experiment_index.csv"'
+                writer = csv.writer(response)
+                writer.writerow(['ale_id', 'experiment_name', 'project_id', 'project_name', 'person', 'is_public', 'date'])
+                for e in sorted(exp_list, key=lambda x: x.ale_id):
+                    writer.writerow([e.ale_id, e.name, e.project_id, e.project.name, e.person, e.project.is_public, e.date_str()])
+                return response
+        return HttpResponse("Invalid export request.", status=400)
+    except Exception:
+        logger.exception("export_experiment_index broke", extra=user_extra(request))
+        return HttpResponse("Internal server error during export.", status=500)

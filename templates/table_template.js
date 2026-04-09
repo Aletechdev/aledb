@@ -79,6 +79,7 @@ $(document).ready(function () {
             {
                 extend: 'csv',
                 text: 'CSV',
+                title: '{{ ale_experiment_name }}_ExpID{{ ale_experiment_id }}',
                 exportOptions: {
                     columns: function (idx, data, node) {
                         var isVisible = oTable.column(idx).visible();
