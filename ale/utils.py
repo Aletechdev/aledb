@@ -64,8 +64,8 @@ def _ale_exp_exists(ale_id, recent_experiments):
 
 def get_strains():
     """return list of sorted strains"""
-    ale_ids = AleId.objects.all()
-    strain_sets = {obj.strain for obj in ale_ids}
-    strains = [strain for strain in strain_sets if strain]
-    return sorted(strains)
+    return sorted(
+        AleId.objects.exclude(strain__isnull=True).exclude(strain='')
+        .values_list('strain', flat=True).distinct()
+    )
 
