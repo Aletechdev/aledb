@@ -6,4 +6,5 @@ __author__ = 'dgosting'
 
 urlpatterns = [
     re_path('^$', views.export, name="export"),
+    re_path('^/experiment_index$', views.export_experiment_index, name="export_experiment_index"),
 ]
