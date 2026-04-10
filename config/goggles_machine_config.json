@@ -22,5 +22,11 @@
         "codename": "DK_3.0A",
         "id": "dk_3_0a",
         "data_dir": "/srv/alelog/uploads/dk_3_0a"
+     },
+     {
+        "display_name": "UCSD 1.0",
+        "codename": "UCSD_1.0",
+        "id": "ucsd_1_0",
+        "data_dir": "/srv/alelog/uploads/ucsd_1_0"
      }
 ]
