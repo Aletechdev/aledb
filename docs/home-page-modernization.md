@@ -23,6 +23,15 @@ Notes on modernizing the landing page at `/` / `/home`.
 - Delete the dead sidebar HTML comment block and the `toggle_sidebar` JS
 - Wrap the license text in `<details>` collapsed by default
 
+## Dark mode
+
+- Define CSS custom properties (`--bg`, `--fg`, `--accent`, `--muted`, `--border`, `--card-bg`) on `:root` and override them under `:root[data-theme="dark"]`. Swap by toggling the attribute on `<html>`.
+- Respect the OS preference by default via `@media (prefers-color-scheme: dark)`, and let a small toggle button in the header override it. Persist the user's choice in `localStorage`.
+- Set the initial theme in a tiny inline `<script>` in `<head>` *before* any stylesheet loads, to avoid a flash of light content (FOUC) on reload.
+- Audit the raster assets: `img/aledb_header.png`, `img/sbrg-logo.png`, `img/cfb-logo.png`, `img/ucsd-logo.png`, and the hero `img/table_sample.jpeg` all assume a white background. Either provide `-dark` variants or wrap in a light-tinted container under the dark theme.
+- Bootstrap 3 has no native dark mode, so this work dovetails with the Bootstrap 5 upgrade (BS5.3+ ships `data-bs-theme="dark"` out of the box). If staying on BS3, expect to override a fair number of `.panel`, `.table`, `.form-control`, and `.btn-*` rules by hand.
+- Chart/image-heavy pages (alignment reports, coverage PNGs) will still render on white — flag this as a known limitation rather than trying to invert them.
+
 ## Medium effort — dependency modernization
 
 - Drop the dead `gitcdn.github.io` bootstrap-toggle link (line 452-453)
