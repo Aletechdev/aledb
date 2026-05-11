@@ -77,7 +77,7 @@ def pipeline(request):
             try:
                 template = loader.get_template("pipeline/pipeline_manager.html")
                 data_location = request.POST['data_location']
-                input_dir = request.POST['folder_name']
+                input_dir = request.POST['folder_name'].strip().strip('/')
                 run_name = request.POST['run_name']
                 vm_size = request.POST['vm_size']
                 xpmd = request.POST['xpmd']
