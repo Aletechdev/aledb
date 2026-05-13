@@ -17,13 +17,13 @@ The global filter UI was disabled on November 22, 2021 (commit `5b466de` by muya
 
 | Reference | Count | Organism |
 |---|---|---|
-| LCTV02000* | 98 | *P. putida* |
+| LCTV02000* | 98 | *Rhodotorula toruloides* NBRC 0880 (WGS project LCTV, assembly v02) |
 | NC_000913 | 3 | *E. coli* MG1655 |
 | AP009048 | 1 | *E. coli* W3110 |
 | CP006881 | 1 | Other |
 | Deleted | 1 | Unknown |
 
-The *P. putida* mutations may have been intentionally filtered as reference artifacts. The *E. coli* mutations appear to be collateral damage.
+The *R. toruloides* mutations may have been intentionally filtered as reference artifacts (LCTV is the NCBI WGS accession for the *R. toruloides* NBRC 0880 assembly — the same strain as IFO 0880 used in experiment 2664). The *E. coli* mutations appear to be collateral damage.
 
 ---
 
