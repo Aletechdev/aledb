@@ -39,13 +39,21 @@ docker exec aledb-web python manage.py upload /data/aledata/{run_name}
 ---
 
 ### `transfer.sh`
-**Purpose**: Alternative upload script using azcopy for downloading from Azure Blob
-**Status**: Contains azcopy download logic (may be outdated - uses hardcoded SAS token)
+**Purpose**: Manual fallback for ingesting a run when the blobfuse `/output` mount is unavailable or slow. Downloads the run from Azure Blob via `azcopy`, then performs the same extract → `/data/aledata` → `manage.py upload` sequence as `webapp-upload.sh`.
+
+**Status**: **Not used by the webapp.** The Django upload view calls `webapp-upload.sh`, which reads directly from the blobfuse-mounted `/output`. `transfer.sh` is invoked manually only. As of 2026-06-03, the last observed invocation in `/root/.bash_history` is from September 2024 (`./transfer.sh Amino_A_Round_3_rerun_ettm`); no cron, systemd unit, or code path references it. The script is retained as a fallback.
+
+**SAS token**: Previously hardcoded; now read from `AZURE_OUTPUT_CONTAINER_SAS`. Before running, source the env file on the host:
+```bash
+source /upload/.azure-env
+./transfer.sh <run_name>
+```
+The script will exit immediately with a clear error if `AZURE_OUTPUT_CONTAINER_SAS` is unset.
 
 **What it does**:
 ```bash
-# 1. Download from Azure Blob using azcopy
-azcopy copy "https://aledata.blob.core.windows.net/output/$1?<SAS_TOKEN>" . --recursive
+# 1. Download from Azure Blob using azcopy (SAS from env)
+azcopy copy "https://aledata.blob.core.windows.net/output/$1?${AZURE_OUTPUT_CONTAINER_SAS}" . --recursive
 
 # 2. Extract tar.gz files
 find $1 -name '*.tar.gz' -execdir tar -xzvf '{}' \;
@@ -53,15 +61,13 @@ find $1 -name '*.tar.gz' -execdir tar -xzvf '{}' \;
 # 3. Remove tar.gz files
 rm $1/*.tar.gz
 
-# 4. Filter data (optional - currently commented out)
+# 4. Filter data
 python3 ~/preuploader/filter.py $1/*/*
 
 # 5. Move to aledata and import
 mv $1 /data/aledata
 docker exec -it aledb-web python manage.py upload /data/aledata/$1
 ```
-
-**Note**: This script may be deprecated in favor of blobfuse mounts. The SAS token is hardcoded and may expire.
 
 ---
 

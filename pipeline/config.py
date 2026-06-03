@@ -12,35 +12,45 @@
 # --------------------------------------------------------------------------
 
 # Global constant variables (Azure Storage account/Batch details)
+#
+# Required environment variables (set in .docker/one.env for the web container):
+#   Credentials (must stay out of source control):
+#     AZURE_BATCH_ACCOUNT_KEY    — Azure Batch shared key
+#     AZURE_STORAGE_ACCOUNT_KEY  — Azure Storage account key
+#     AZURE_CLIENT_SECRET        — service-principal password
+#   Tenant-identifying resource references:
+#     AZURE_BATCH_ACCOUNT_NAME   — e.g. "ale"
+#     AZURE_BATCH_ACCOUNT_URL    — e.g. "https://ale.northeurope.batch.azure.com"
+#     AZURE_STORAGE_ACCOUNT_NAME — e.g. "aledata"
+#     AZURE_TENANT_ID            — Azure AD tenant GUID
+#     AZURE_CLIENT_ID            — service-principal app registration GUID
+#     AZURE_VIRTUAL_MACHINE_ID   — full resource path of the Batch node VM image
+# Missing any of these will raise KeyError at import — intentional, fail loud.
 
-# import "config.py" in "batch_amp.py"
+import os
 
-# Update the Batch and Storage account credential strings below with the values
-# unique to your accounts. These are used when constructing connection strings
-# for the Batch and Storage client objects.
-
-BATCH_ACCOUNT_NAME = 'ale'
-BATCH_ACCOUNT_KEY = '<AZURE_BATCH_KEY_REDACTED>='
-BATCH_ACCOUNT_URL = 'https://ale.northeurope.batch.azure.com'
-STORAGE_ACCOUNT_NAME = 'aledata'
+BATCH_ACCOUNT_NAME = os.environ["AZURE_BATCH_ACCOUNT_NAME"]
+BATCH_ACCOUNT_KEY = os.environ["AZURE_BATCH_ACCOUNT_KEY"]
+BATCH_ACCOUNT_URL = os.environ["AZURE_BATCH_ACCOUNT_URL"]
+STORAGE_ACCOUNT_NAME = os.environ["AZURE_STORAGE_ACCOUNT_NAME"]
 STORAGE_ACCOUNT_DOMAIN = 'blob.core.windows.net'
-STORAGE_ACCOUNT_KEY = '<AZURE_STORAGE_KEY_REDACTED>='
+STORAGE_ACCOUNT_KEY = os.environ["AZURE_STORAGE_ACCOUNT_KEY"]
 POOL_ID = 'ALEDBAMPool_'
 DEDICATED_POOL_NODE_COUNT_LIMIT = 1000
 JOB_ID = 'ALEDBAMPJoB_'
-VIRTUAL_MACHINE_ID = "/subscriptions/aee8556f-d2fd-4efd-a6bd-f341a90fa76e/resourceGroups/rg-ALEdb/providers/Microsoft.Compute/galleries/ensembleamp/images/eAMP_Ubuntu24.04_open/versions/2.6.2"
+VIRTUAL_MACHINE_ID = os.environ["AZURE_VIRTUAL_MACHINE_ID"]
 NODE_AGENT_SKU_ID = "batch.node.ubuntu 24.04"
 
-AMP_IMAGE_FILE = "https://aledata.blob.core.windows.net/images/amp.tar"
 AMP_IMAGE_CONTAINER_NAME = 'images'
+AMP_IMAGE_FILE = f"https://{STORAGE_ACCOUNT_NAME}.{STORAGE_ACCOUNT_DOMAIN}/{AMP_IMAGE_CONTAINER_NAME}/amp.tar"
 INPUT_CONTAINER_NAME = "data"
 OUTPUT_CONTAINER_NAME = "output"
 REFERENCE_CONTAINER_NAME = "reference"
 
-TENANT_ID = "f251f123-c9ce-448e-9277-34bb285911d9"
+TENANT_ID = os.environ["AZURE_TENANT_ID"]
 RESOURCE = "https://batch.core.windows.net/"
-CLIENT_ID = "e4fccc0f-8557-4534-82cd-bffe18ff2de9"
-SECRET = "<SP_SECRET_REDACTED>"
+CLIENT_ID = os.environ["AZURE_CLIENT_ID"]
+SECRET = os.environ["AZURE_CLIENT_SECRET"]
 
 # for actual use. edit as necessary
 VM_SIZE_PROGRESSION = [('Dv2', 1), ('Dv2', 2), ('Dv2', 3)]

@@ -1,5 +1,7 @@
+: "${AZURE_OUTPUT_CONTAINER_SAS:?Set AZURE_OUTPUT_CONTAINER_SAS (source /upload/.azure-env)}"
+
 echo "Downloading: $1"
-sudo azcopy copy "https://aledata.blob.core.windows.net/output/$1?sv=2021-10-04&spr=https%2Chttp&st=2024-09-25T02%3A30%3A40Z&se=2034-09-26T02%3A30%3A00Z&sip=4.231.249.59&sr=c&sp=racwdxltf&sig=3%2BPAEm9KFgghlDOos%2FGhD7PV21%2BhHLIu7srNZMXwVmM%3D" '.' --recursive=true
+sudo -E azcopy copy "https://aledata.blob.core.windows.net/output/$1?${AZURE_OUTPUT_CONTAINER_SAS}" '.' --recursive=true
 
 echo "extracting..."
 sudo find $1 -name '*.tar.gz' -execdir tar -xzvf '{}' \;
