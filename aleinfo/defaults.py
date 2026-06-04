@@ -222,7 +222,7 @@ STATICFILES_FINDERS = (
 GUARDIAN_RAISE_403 = True
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = os.environ.get('SECRET_KEY', '<DJANGO_KEY_REDACTED>')
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 TEMPLATES = [
     {
