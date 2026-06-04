@@ -29,3 +29,7 @@ config.sh
 .ssh
 coverage.xml
 core
+
+# pre-publish secret audit — kept as a local working note while live credentials
+# (MySQL, Gmail) remain unrotated. Re-add a sanitized version once those are done.
+docs/pre_publish_secret_audit.md
