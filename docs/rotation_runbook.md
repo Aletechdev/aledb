@@ -601,9 +601,11 @@ After all four rotations complete and logs are clean:
 - [ ] Tick off the items in [pre_publish_secret_audit.md](pre_publish_secret_audit.md).
 - [ ] (Optional) `git filter-repo` to scrub the old values from aledb's history.
       Not required for safety once rotation is done — the leaked strings are dead.
-- [ ] Consider re-running a fragment sweep (`grep -rl "<AZURE_BATCH_KEY_PREFIX_REDACTED>" ...`) after
-      rotation to confirm no live system still holds an old value in memory or
-      a cached config file.
+- [ ] Consider re-running a fragment sweep with a prefix of each leaked
+      credential (capture the prefixes from a private notebook before
+      rotating; do not paste them into this runbook) after rotation, to
+      confirm no live system still holds an old value in memory or a
+      cached config file.
 
 ## Failure recovery
 
