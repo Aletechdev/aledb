@@ -1,4 +1,72 @@
 # ALEdb
+
+[ALEdb](https://aledb.org) is a Django web application for cataloging
+Adaptive Laboratory Evolution (ALE) experiments — tracking experimental
+metadata, sequencing data, and genetic mutations across years of
+microbial evolution studies conducted by [The Feist Lab](https://feistlab.ucsd.edu)
+at UC San Diego.
+
+**Live instance:** https://aledb.org
+
+## Citation
+
+If you use ALEdb in your work, please cite:
+
+> Patrick V Phaneuf, Dennis Gosting, Bernhard O Palsson, Adam M Feist,
+> *ALEdb 1.0: a database of mutations from adaptive laboratory evolution
+> experimentation*, **Nucleic Acids Research**, Volume 47, Issue D1, 08
+> January 2019, Pages D1164–D1171,
+> <https://doi.org/10.1093/nar/gky983>
+
+## License
+
+ALEdb is licensed under the **UC Regents Educational / Research
+License** — free for educational, research, and non-profit use.
+Commercial use requires contacting the UCSD Technology Transfer Office
+(<invent@ucsd.edu>). See [LICENSE](LICENSE) for full terms.
+
+## Project history and provenance
+
+This repository preserves contribution history going back to 2015. On
+2026-06-08, in preparation for the public release, the following content
+was scrubbed from git history:
+
+- Historical database dumps containing `auth_user` password hashes and
+  session artifacts.
+- Dated application log files containing IP addresses and session
+  identifiers.
+- Rotated credential literals (all keys / passwords from prior commits
+  replaced with redaction markers). The corresponding live credentials
+  were rotated in late May / early June 2026 — none of the historical
+  values still authenticate.
+
+Researcher names, institutional email addresses, and git author /
+committer metadata are **deliberately retained** for academic provenance
+and citation purposes.
+
+If you cloned this repository before 2026-06-08, please re-clone or
+hard-reset to the new history (commit SHAs from 2015 onwards changed).
+The full scrub plan and verification is documented in
+[`docs/operations/`](docs/operations/).
+
+## Repository contents
+
+- **Django web application** — UI and REST API for the ALE database
+  (`aleinfo/`, `alewebsite/`, `seq/`, etc.).
+- **Sequencing pipeline** (`pipeline/`) — variant-calling and analysis
+  scripts driven from Azure Batch.
+- **Deployment configuration** — Docker Compose stacks for production
+  (NGINX + ASGI + MySQL + Redis) and local development.
+- **Operations documentation** (`docs/operations/`) — pre-publish secret
+  audit, rotation runbook, deferred infrastructure-hardening tasks.
+
+---
+
+# Deployment
+
+The remainder of this README is the operator / maintainer deployment
+guide.
+
 > [!WARNING]
 >
 > ⚠️ Do NOT commit `.env` files to version control. Use `.gitignore` to exclude them.
