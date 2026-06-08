@@ -20,10 +20,10 @@ If you use ALEdb in your work, please cite:
 
 ## License
 
-ALEdb is licensed under the **UC Regents Educational / Research
-License** — free for educational, research, and non-profit use.
-Commercial use requires contacting the UCSD Technology Transfer Office
-(<invent@ucsd.edu>). See [LICENSE](LICENSE) for full terms.
+ALEdb is released under the **MIT License** — free for any use,
+including educational, research, non-profit, and commercial, without
+separate permission. Copyright © 2015–2026 The Feist Lab. See
+[LICENSE](LICENSE) for full terms.
 
 ## Project history and provenance
 
