@@ -330,7 +330,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'aledbsoftware')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '<GMAIL_PASSPHRASE_REDACTED>')
+EMAIL_HOST_PASSWORD = os.environ['EMAIL_HOST_PASSWORD']  # no fallback — fail loud. SMTP setup currently dead (Gmail account unrecoverable; see docs/operations/email_subsystem_review.md)
 
 SERVER_EMAIL = os.environ.get('SERVER_EMAIL', 'aledbsoftware+admin@gmail.com')
 DEFAULT_FROM_EMAIL = 'aledbsoftware+default@gmail.com'
