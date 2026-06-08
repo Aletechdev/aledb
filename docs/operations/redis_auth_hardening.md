@@ -15,8 +15,8 @@ the publish." The investigation found:
 | Property | Finding |
 |---|---|
 | `requirepass` on running Redis | **empty** — no authentication enforced (`redis-cli CONFIG GET requirepass` returns blank) |
-| Leaked password (in source-tracked files; see audit doc for the value) | **not in use** — `defaults.py:364` falls back to it only if `REDIS_URL` env is missing; production sets `REDIS_URL=redis://aledb-redis` (no password) in `.docker/one.env`, so the fallback is dead code |
-| Tracked source locations of leaked literal | `aleinfo/defaults.py:364`, `redis.conf:509`, `.docker/app-private.env:22` |
+| Leaked password (was hardcoded as a fallback in source) | **not in use** — `defaults.py` falls back to it only if `REDIS_URL` env is missing; production sets `REDIS_URL=redis://aledb-redis` (no password) in `.docker/one.env`, so the fallback was dead code |
+| Tracked source locations of leaked literal (as of investigation) | `aleinfo/defaults.py:364`, `redis.conf:509`, `.docker/app-private.env:22` — all three since cleaned, see **Quick-fix 2026-06-08** below |
 | Host port binding | `0.0.0.0:6379` (all interfaces of the public-IP host) |
 | Host firewall (ufw) | inactive |
 | `iptables INPUT` default policy | ACCEPT |
@@ -25,6 +25,34 @@ the publish." The investigation found:
 So the current state is: Redis is reachable from anywhere on the host
 network with no authentication, but external network access is blocked by
 the cloud-level firewall.
+
+## Quick-fix 2026-06-08 — leaked literal removed from HEAD
+
+The full two-layer hardening (Layer 1 + Layer 2 below) remains deferred,
+but the leaked password literal has been scrubbed from all tracked source
+files in HEAD so the repo can be made public without exposing the
+dead-but-still-published value:
+
+- `aleinfo/defaults.py:363` — the `DEFENDER_REDIS_URL` line was refactored
+  from `os.environ.get('REDIS_URL', 'redis://:<leaked>@aledb-redis:6379/1')`
+  to `os.environ['REDIS_URL']` (no fallback; fail loud at import). Matches
+  the env-var pattern used for the Azure secrets and `DJANGO_SECRET_KEY`.
+- `redis.conf` (entire file) — **deleted**. It was a 1373-line copy of the
+  stock Redis sample config with only one custom edit (the `requirepass`
+  line) and was not loaded by any running container. Anyone who needs a
+  Redis config template in the future can grab the upstream sample from
+  redis.io.
+- `.docker/app-private.env` — untracked from HEAD as part of the broader
+  `.docker/*.env` cleanup (same commit that added
+  [`.docker/app.env.example`](../../.docker/app.env.example)). Historical
+  commits still contain the file; per the audit doc, history rewrite is
+  optional since the leaked value is functionally dead anyway.
+
+**Functional state after this quick fix:** unchanged. Redis still has no
+`requirepass`, the host port is still bound to `0.0.0.0`, the host
+firewall is still inactive, and the NSG is still the only barrier. The
+quick fix is purely a HEAD-cleanup operation; the actual hardening below
+is still pending.
 
 ## Why it's safe to defer
 

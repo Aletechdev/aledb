@@ -360,7 +360,7 @@ DEFENDER_LOGIN_FAILURE_LIMIT_USERNAME = int(os.environ.get('DEFENDER_LOGIN_FAILU
 DEFENDER_LOGIN_FAILURE_LIMIT_IP = int(os.environ.get('DEFENDER_LOGIN_FAILURE_LIMIT_IP', 3))
 
 DEFENDER_COOLOFF_TIME = int(os.environ.get('DEFENDER_COOLOFF_TIME', 30))  # sec
-DEFENDER_REDIS_URL = os.environ.get('REDIS_URL', 'redis://:<REDIS_PW_REDACTED>@aledb-redis:6379/1')
+DEFENDER_REDIS_URL = os.environ['REDIS_URL']  # no fallback — fail loud. See docs/operations/redis_auth_hardening.md for the full hardening plan (bind 127.0.0.1 + real password) still pending.
 
 # For Bootstrap 3, change error alert to 'danger'
 from django.contrib import messages
