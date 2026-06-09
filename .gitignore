@@ -30,6 +30,8 @@ config.sh
 coverage.xml
 core
 
-# pre-publish secret audit — kept as a local working note while live credentials
-# (MySQL, Gmail) remain unrotated. Re-add a sanitized version once those are done.
-docs/pre_publish_secret_audit.md
+# Operator-local audit working docs. Contain live credential values + detailed
+# operational notes from the pre-publish security audit. The publish-safe
+# versions of this content live as docs/operations/audit_summary.md (the
+# inventory + outcome) and docs/operations/git_history_scrub.md (the runbook).
+/audit_local/

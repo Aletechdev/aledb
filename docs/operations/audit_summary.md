@@ -85,9 +85,10 @@ declared non-actionable:
   [`.docker/app.env.example`](../../.docker/app.env.example).
 
 In addition, after all rotations completed, `git filter-repo` was used
-to remove the historical literal occurrences AND bulk PII (Django
-password hashes + dated session logs) from the git history. The
-rewritten history was force-pushed to origin. Post-scrub `gitleaks`
+to remove the historical credential literal occurrences AND historical
+user data (Django `auth_user` password hashes + dated application log
+files containing session IDs and IP addresses) from the git history.
+The rewritten history was force-pushed to origin. Post-scrub `gitleaks`
 scan dropped from **43,910 findings to 2** (both false positives in a
 genomic test fixture flagged by `gitleaks`' generic-API-key regex).
 
@@ -137,6 +138,10 @@ flipping the repository public.
 
 - [`../rotation_runbook.md`](../rotation_runbook.md) — step-by-step
   procedures for the four Azure rotations + SP role tightening.
+- [`git_history_scrub.md`](git_history_scrub.md) — runbook for the
+  `git filter-repo` + force-push operation that removed historical
+  user data and rotated credential literals from git history on
+  2026-06-08.
 - [`redis_auth_hardening.md`](redis_auth_hardening.md) — deferred
   hardening plan for the Buffered Redis credential.
 - [`data_disk_migration.md`](data_disk_migration.md) — structural
