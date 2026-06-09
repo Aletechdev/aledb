@@ -161,5 +161,5 @@ become irrelevant to Batch.
   re-sync workaround that this migration eliminates.
 - [data_disk_migration.md](data_disk_migration.md) — sibling "structural
   cleanup" task discovered during the same rotation.
-- [../pre_publish_secret_audit.md](../pre_publish_secret_audit.md) — the
-  parent audit; this is one of its "structural follow-ups."
+- [audit_summary.md](audit_summary.md) — the parent audit; this is
+  one of its "structural follow-ups."

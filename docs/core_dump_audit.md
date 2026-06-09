@@ -1,7 +1,7 @@
 # Core Dump Audit — `/var/www/aledb/core`
 
 A 987 MB Python core dump from September 2024 was found on disk during the
-[pre-publish secret audit](pre_publish_secret_audit.md). This document explains
+[pre-publish security audit](operations/audit_summary.md). This document explains
 what it is, why it contained secrets, why it landed where it did, and how to
 prevent future occurrences before deleting the existing file.
 
@@ -130,7 +130,7 @@ Once the items below are done, the existing core dump can be removed safely.
       `sudo docker-compose -f docker-compose-prod-asgi-host-nginx.yml up -d --force-recreate web`.
 - [ ] Verify: `sudo docker exec aledb-web bash -c 'ulimit -c'` prints `0`.
 - [ ] Confirm credential rotation is complete (see
-      [pre_publish_secret_audit.md](pre_publish_secret_audit.md)) — the dump's
+      [operations/audit_summary.md](operations/audit_summary.md)) — the dump's
       contents become dead strings only after rotation.
 - [ ] `sudo rm /var/www/aledb/core` — frees ~941 MiB.
 

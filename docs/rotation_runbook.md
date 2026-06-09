@@ -2,10 +2,10 @@
 
 Sequenced commands for rotating the three Azure secrets (Storage key, Batch
 key, service-principal secret) and the SAS token, then committing the new
-values into the (private) `batch-amp` repo. Verification follows
-[pre_publish_secret_audit.md](pre_publish_secret_audit.md) Answer B: the
-rotation itself is the verification — if we missed a consumer, rotating the
-old key surfaces the omission as 403s in logs.
+values into the (private) `batch-amp` repo. The rotation itself is the
+verification — if we missed a consumer, rotating the old key surfaces the
+omission as 403s in logs. The parent audit + inventory is in
+[operations/audit_summary.md](operations/audit_summary.md).
 
 ## Context
 
@@ -598,7 +598,7 @@ After all four rotations complete and logs are clean:
 - [ ] `sudo rm /var/www/aledb/core` — the secret strings in it are now dead.
       See [core_dump_audit.md](core_dump_audit.md) — also apply
       `ulimits: core: 0` from that doc before the cleanup to prevent recurrence.
-- [ ] Tick off the items in [pre_publish_secret_audit.md](pre_publish_secret_audit.md).
+- [ ] Tick off the items in [operations/audit_summary.md](operations/audit_summary.md).
 - [ ] (Optional) `git filter-repo` to scrub the old values from aledb's history.
       Not required for safety once rotation is done — the leaked strings are dead.
 - [ ] Consider re-running a fragment sweep with a prefix of each leaked

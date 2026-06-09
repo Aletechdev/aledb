@@ -101,5 +101,5 @@ The repo can go public without doing any of the above. The minimum-change refact
 
 ## Cross-references
 
-- [../pre_publish_secret_audit.md](../pre_publish_secret_audit.md) — the audit that surfaced this, including the 2026-06-04 SMTP test that confirmed the credential is dead.
+- [audit_summary.md](audit_summary.md) — the parent audit; this is the deferred follow-up for the "Buffered" Gmail credential.
 - [data_disk_migration.md](data_disk_migration.md), [batch_managed_identity_migration.md](batch_managed_identity_migration.md), [redis_auth_hardening.md](redis_auth_hardening.md) — sibling deferred-task docs.

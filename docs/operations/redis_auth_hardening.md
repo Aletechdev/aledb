@@ -8,9 +8,9 @@ having to re-discover everything.
 
 ## Investigation summary (2026-06-04)
 
-The audit at [../pre_publish_secret_audit.md](../pre_publish_secret_audit.md)
-classified the Redis password as "Buffered — rotate carefully, not gating
-the publish." The investigation found:
+The audit at [audit_summary.md](audit_summary.md) classified the Redis
+password as "Buffered — rotate carefully, not gating the publish." The
+investigation found:
 
 | Property | Finding |
 |---|---|
@@ -180,8 +180,8 @@ nmap -p 6379 4.231.249.59  # from outside the host: expect filtered/closed
 
 ## Cross-references
 
-- [../pre_publish_secret_audit.md](../pre_publish_secret_audit.md) — the
-  parent audit; "Buffered" tier item for Redis.
+- [audit_summary.md](audit_summary.md) — the parent audit; "Buffered"
+  tier item for Redis.
 - [../rotation_runbook.md](../rotation_runbook.md) — credential-rotation
   patterns; this doc's Layer 2 follows the same env-var refactor approach.
 - [data_disk_migration.md](data_disk_migration.md),
