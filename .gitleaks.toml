@@ -1,0 +1,22 @@
+# Gitleaks configuration for ALEdb.
+# https://github.com/zricethezav/gitleaks
+#
+# Extends gitleaks' default ruleset, then allowlists known
+# false positives specific to this project.
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "ALEdb-specific false positives"
+
+# Genome diff (.gd) files under builder/tests/ and builder/gdparse/
+# are test fixtures for the genome-diff parsing code. They contain
+# genomic coordinates and short DNA sequences (e.g.,
+# "NC_000913__2518115__-1__NC_000913__3427075__-1__-22__TAACATGTAGTTAAAACCTCTT__239__239__0__1"
+# — an E. coli K-12 reference, GenBank accession NC_000913) that
+# gitleaks' generic-api-key regex flags as high-entropy.
+# These are scientific reference data, not secrets.
+paths = [
+    '''^builder/(tests|gdparse)/.*\.gd$''',
+]
