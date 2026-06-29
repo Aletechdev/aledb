@@ -108,6 +108,7 @@ Select experiments on `/ale/experiments/`, click Export > Unfiltered Mutations. 
 - `filter/util.py:14-93` — `filter_observed_mutations()`, global filter at lines 30-32
 - `seq/util.py:13-15` — `get_all_observed_mutations_filtered()` wrapper
 - `seq/views/mutations.py:76-125` — `mutation_table()` and `_get_table_body()`
+- `search/views.py:91-98` — `_get_observed_mutations()` calls `filter_observed_mutations()` with no skip flags and `experiment_id=None`, so `/search/` results are filtered by the global filter **and** every result experiment's local filter. Third `filter_observed_mutations()` call site, with no bypass toggle — globally-filtered mutations are silently absent from search results too.
 - `seq/views/mutation_table_builder.py:36` — global filter button commented out
 - `templates/base.html:104` — global filter nav link commented out
 - `templates/base_table_template.html` — mutation table page template
