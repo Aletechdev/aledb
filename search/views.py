@@ -59,7 +59,19 @@ def search(request):
             return render(request, 'search/search.html', context)
 
         hidden_columns = request.GET.get('hidden_columns', "")
-        observed_mutations = _get_observed_mutations(search_include_param_list, search_exclude_param_list)
+        show_global_filtered = request.GET.get('show_global_filtered', '') == '1'
+        show_exp_filtered = request.GET.get('show_exp_filtered', '') == '1'
+
+        # Stage 1: DB query + global/experiment filtering. Cost scales with the
+        # number of matched observed mutations, so broad searches dominate here.
+        filter_start = time.time()
+        observed_mutations = _get_observed_mutations(search_include_param_list, search_exclude_param_list,
+                                                     skip_global_filter=show_global_filtered,
+                                                     skip_experiment_filter=show_exp_filtered)
+        filter_seconds = time.time() - filter_start
+
+        # Stage 2: build the mutation table (header + body) from the filtered results.
+        build_start = time.time()
         reseq_dict = collections.OrderedDict({obs_mut.sequencing_experiment.id: obs_mut.sequencing_experiment
                                                   for obs_mut in observed_mutations})
 
@@ -68,6 +80,7 @@ def search(request):
         table_body = mutation_table_builder.get_mutation_table_body(request.user,
                                                                     observed_mutations,
                                                                     reseq_dict)
+        build_seconds = time.time() - build_start
 
         context.update({"table_body": mark_safe(json.dumps(table_body, cls=DjangoJSONEncoder)),
                         "title": "Search Results",
@@ -76,10 +89,18 @@ def search(request):
                         "observed_mutation_count": len(observed_mutations),
                         "tag_dropdown": common.constants.TAGS,
                         "refseq_column": REFSEQ_COLUMN_IN_MUT_TABLE,
+                        "show_global_filtered": show_global_filtered,
+                        "show_exp_filtered": show_exp_filtered,
                         })
+        # Split the total into filter vs build so a slow search points at its cause.
+        # Log the toggle state too, so the filtered vs unfiltered runs are distinguishable.
         logger.info("search performance", extra=join_extras(
             {"parameters": last_search},
-            {"time taken": time.time() - start_time}))
+            {"time taken": time.time() - start_time,
+             "filter_seconds": round(filter_seconds, 4),
+             "build_seconds": round(build_seconds, 4),
+             "skip_global_filter": show_global_filtered,
+             "skip_experiment_filter": show_exp_filtered}))
         return HttpResponse(template.render(context, request), content_type="text/html")
     except Exception as e:
         logger.exception("search broke", extra = user_extra(request))
@@ -88,13 +109,18 @@ def search(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 
-def _get_observed_mutations(search_include_param_list, search_exclude_param_list):
+def _get_observed_mutations(search_include_param_list, search_exclude_param_list,
+                            skip_global_filter=False, skip_experiment_filter=False):
     """
     :param request:
+    :param skip_global_filter: if True, do not hide globally-filtered mutations
+    :param skip_experiment_filter: if True, do not hide experiment-filtered mutations
     :return: mutation_queryset and observed_mutation_queryset based on user request and user permission
     """
     obs_mut_qryset = _get_mut_qryset(search_include_param_list, search_exclude_param_list)
-    observed_mutations = filter_observed_mutations(obs_mut_qryset)
+    observed_mutations = filter_observed_mutations(obs_mut_qryset,
+                                                   skip_global_filter=skip_global_filter,
+                                                   skip_experiment_filter=skip_experiment_filter)
     return observed_mutations
 
 

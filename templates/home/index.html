@@ -349,6 +349,16 @@
                 <input class="btn btn-danger home-key-btn" type="button" value="Clear" onclick="clear_search()">
             </div>
         <div class="col-sm-8" style="text-align: left;">
+                <div style="display: flex; flex-wrap: wrap; gap: 4px 16px;">
+                    <label style="font-weight: normal; margin: 0;">
+                        <input type="checkbox" name="show_global_filtered" value="1"
+                               {% if show_global_filtered %}checked{% endif %} /> Show Global Filtered
+                    </label>
+                    <label style="font-weight: normal; margin: 0;">
+                        <input type="checkbox" name="show_exp_filtered" value="1"
+                               {% if show_exp_filtered %}checked{% endif %} /> Show Experiment Filtered
+                    </label>
+                </div>
                 <p class="">When logged in, search will also include private projects you have access to as well</p>
             </div>
         </div>

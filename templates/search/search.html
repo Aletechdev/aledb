@@ -161,6 +161,18 @@
                 <input class="btn btn-danger" type="button" value="Clear" onclick="clear_search()">
                 <div></div>
             </div>
+            <div class="col-sm-8">
+                <div style="display: flex; flex-wrap: wrap; gap: 4px 16px;">
+                    <label style="font-weight: normal; margin: 0;">
+                        <input type="checkbox" name="show_global_filtered" value="1"
+                               {% if show_global_filtered %}checked{% endif %} /> Show Global Filtered
+                    </label>
+                    <label style="font-weight: normal; margin: 0;">
+                        <input type="checkbox" name="show_exp_filtered" value="1"
+                               {% if show_exp_filtered %}checked{% endif %} /> Show Experiment Filtered
+                    </label>
+                </div>
+            </div>
         </div>
         <div class="alert-danger">{{ message }}</div>
     </form>
