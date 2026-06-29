@@ -1,4 +1,4 @@
-# Bug: Duplicate `AleExperimentFilter` rows on experiment re-upload break the filter page
+# Bug: Duplicate `AleExperimentFilter` rows on experiment re-upload break the filter page #72
 
 ## Summary
 
@@ -121,3 +121,12 @@ But **user customizations are lost** (cutoffs, `ignored_mutations`, `ignored_gen
 | 2026-05-12 16:45 UTC | User hits `MultipleObjectsReturned` on `/filter/?ale_experiment_id=2658` |
 | 2026-05-12 17:44 UTC | Duplicate row manually deleted; filter page renders normally |
 | 2026-05-13 | Audit finds 6 other experiments with latent duplicate filter rows |
+
+---
+
+## Related
+
+This bug concerns the **per-experiment (local) filter** (`AleExperimentFilter`).
+For the separate **global** filter issue (an orphaned `GlobalFilter` hiding
+mutations with no management UI), see
+[ISSUE_1_orphaned_global_filter.md](ISSUE_1_orphaned_global_filter.md).

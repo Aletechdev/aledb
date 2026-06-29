@@ -1,10 +1,10 @@
-# Orphaned global filter hiding 11,697 observed mutations across 32 experiments
+# Orphaned global filter hiding 11,697 observed mutations across 32 experiments #47
 
 ## Summary
 
 A global filter (`GlobalFilter` id=1) contains 105 ignored mutation IDs, including 3 `NC_000913` mutations (ids: 1120627, 1120634, 1120640) from the pre-2021 upload. This filter hides **11,697 observed mutations across 32 experiments**.
 
-The global filter UI was disabled on November 22, 2021 (commit `5b466de` by muyao), but the backend filter logic still runs on every page load. There is no UI to view or manage the ignored mutations list. **The filter has been frozen since late 2021** — 53% of all experiments (558 of 1,054) were uploaded after the UI was disabled, with no global filter review applied to any of them.
+The global filter UI was disabled on November 22, 2021 (commit `2cdd3d8f` by muyao; the pre-history-scrub hash was `5b466de`), but the backend filter logic still runs on every page load and data export. There is no UI to view or manage the ignored mutations list. **The filter has been frozen since late 2021** — 53% of all experiments (558 of 1,054) were uploaded after the UI was disabled, with no global filter review applied to any of them.
 
 - **Nav link:** commented out in `templates/base.html:104`
 - **Mutation table button:** commented out in `seq/views/mutation_table_builder.py:36`
@@ -121,5 +121,14 @@ Select experiments on `/ale/experiments/`, click Export > Unfiltered Mutations. 
 | 2016-08-16 | Global filter feature added (dgosting) |
 | 2017-11-10 | Global filter button restricted to admins (Kai Chen) |
 | Before 2021-11-22 | 105 mutations added to global filter |
-| 2021-11-22 | Global filter UI disabled (muyao, commit `5b466de`) |
+| 2021-11-22 | Global filter UI disabled (muyao, commit `2cdd3d8f`; pre-scrub hash `5b466de`) |
 | Present | Filter still active, hiding data with no management UI |
+
+---
+
+## Related
+
+This issue concerns the **global** filter (`GlobalFilter`). For the separate
+**per-experiment (local) filter** bug — duplicate `AleExperimentFilter` rows on
+re-upload breaking the `/filter/` page — see
+[BUG_duplicate_ale_experiment_filter.md](BUG_duplicate_ale_experiment_filter.md).
