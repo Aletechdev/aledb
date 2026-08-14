@@ -7,6 +7,26 @@ verification — if we missed a consumer, rotating the old key surfaces the
 omission as 403s in logs. The parent audit + inventory is in
 [operations/audit_summary.md](operations/audit_summary.md).
 
+## Rotation log (non-secret)
+
+Running record of when credentials were last rotated and when they expire, so
+renewals aren't missed. **Only non-secret metadata belongs here** — KeyIds,
+dates, and identity GUIDs are safe to commit; never paste secret values or the
+`Hint` prefix (the hint is the leading characters of the actual secret).
+
+Azure service principal — App Registration `e4fccc0f-8557-4534-82cd-bffe18ff2de9`,
+subscription `aee8556f-d2fd-4efd-a6bd-f341a90fa76e`. `AZURE_CLIENT_SECRET`
+consumers: `.docker/one.env` (aledb) and
+`/var/www/pipeline/batch-amp/src/config.py:SECRET` (dormant).
+
+| Secret | Rotated | KeyId | Expires | Notes |
+|---|---|---|---|---|
+| SP client secret | 2026-08-14 | `0026e21c-16ad-46c9-acfd-c4b7d7dd7208` | **2027-08-14** | 1-year lifetime (`--years 1`). Renew before expiry or Batch pool creation fails with AADSTS/401. |
+
+To renew: follow [Rotation 3](#rotation-3--service-principal-secret-append-new-pattern),
+then update the row above and delete the superseded KeyId
+(`az ad app credential delete`).
+
 ## Context
 
 Each secret has two simultaneous consumers:

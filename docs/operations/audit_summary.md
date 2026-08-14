@@ -137,7 +137,9 @@ flipping the repository public.
 ## Cross-references
 
 - [`../rotation_runbook.md`](../rotation_runbook.md) — step-by-step
-  procedures for the four Azure rotations + SP role tightening.
+  procedures for the four Azure rotations + SP role tightening. Its
+  **Rotation log (non-secret)** section tracks current KeyIds and expiry
+  dates (e.g. SP client secret expires 2027-08-14) for renewal reminders.
 - [`git_history_scrub.md`](git_history_scrub.md) — runbook for the
   `git filter-repo` + force-push operation that removed historical
   user data and rotated credential literals from git history on
