@@ -35,3 +35,7 @@ core
 # versions of this content live as docs/operations/audit_summary.md (the
 # inventory + outcome) and docs/operations/git_history_scrub.md (the runbook).
 /audit_local/
+
+# Operator-local scratch/working notes. Not for publication — kept out of git
+# deliberately (may reference live infra, credentials, or internal ops detail).
+/docs/tmp/
