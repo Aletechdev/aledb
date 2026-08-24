@@ -68,7 +68,13 @@ def get_neighbor_ids(current_mutation, experiment_id):
 def get_next_mutation(current_mutation, experiment_id):
     mutations = get_mutations_from_observed_muations(get_all_observed_mutations_filtered(experiment_id))
     list_muts = sorted(mutations, key=lambda x: x.position)
-    ind = list_muts.index(current_mutation)
+    try:
+        ind = list_muts.index(current_mutation)
+    except ValueError:
+        # current mutation is hidden by the global/experiment filters, so it has
+        # no index in the visible list; jump to the next visible one by position
+        next_mutation = next((mut for mut in list_muts if mut.position > current_mutation.position), None)
+        return next_mutation.id if next_mutation else None
     if ind+1 == len(list_muts):
         return None
     else:
