@@ -130,6 +130,31 @@ docker exec aledb-web python manage.py set_run_status <run_name> error
 - Upload view has no ownership check (any logged-in user can trigger any run's upload). Pre-existing.
 - Dashboard functional-change update block matches `snp_type_synonymous` / `snp_type_nonsynonymous` but `FUNCTIONAL_CHANGE_TYPE_LIST` carries the plain names, so those two columns are never written. Pre-existing.
 
+## 6a. Where the upload app stands (2026-09-15)
+
+**More usable, not yet safe against repeat uploads.** The run page now tells the truth:
+`uploading` while the ingest runs (button disabled, page auto-refreshes), then
+`Upload Completed` or `Error` from the real outcome; repeat clicks during an active upload
+are ignored; a killed or failed ingest is marked `error` instead of `done`; metadata is
+applied before the memory-heavy steps so it can no longer be lost silently; the rebuild
+that needed ~25 GB now needs under 0.5 GB, so the OOM kills behind the whole chain should
+not recur at the current table size; every upload is logged on the host.
+
+**What is still manual.** Nothing prevents duplicates from being *created*: the guard only
+blocks clicks during an active upload. A retry after `error`, a second upload of a
+completed run, or a manual `manage.py upload` still appends a full second copy of every
+mutation row. Operator rule until step 3 of `docs/elt-split-plan.md` lands:
+
+- never re-upload a run to fix anything;
+- metadata problems → `manage.py load_md`; derived-data problems → the per-experiment
+  rebuild functions; both are idempotent;
+- if a re-upload did happen → `manage.py dedupe_observed_mutations <experiment id>`
+  (`docs/operations/observed_mutation_dedupe.md`), then rebuild.
+
+Cleaning up the duplicates that already exist in the other 139 experiments is manual by
+choice (command ready, deferred to leave time to document and inform owners). Preventing
+new ones is manual only until re-upload is made idempotent; then the rule above goes away.
+
 ## 7. Roadmap
 
 Ordered by priority. Tick items as they land and note the commit.
