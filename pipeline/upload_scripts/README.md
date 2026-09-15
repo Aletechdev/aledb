@@ -18,14 +18,28 @@ These scripts run on the **VM host** (not inside Docker containers) to handle th
 **What it does**:
 ```bash
 # 1. Create directory in blobfuse mount
-mkdir /data/aledata/{run_name}
+mkdir -p /data/aledata/{run_name}
 
 # 2. Extract all .tar.gz files from /output to /data/aledata
 find /output/{run_name} -name '*.tar.gz' -execdir tar -xzvf '{}' -C /data/aledata/{run_name} \;
 
 # 3. Import to database via Django management command
 docker exec aledb-web python manage.py upload /data/aledata/{run_name}
+
+# 4. Report the outcome back to the webapp's Run row ("uploaded" or "error")
+docker exec aledb-web python manage.py set_run_status {run_name} uploaded
 ```
+
+If extraction or the ingest fails (non-zero exit, including an OOM-killed
+ingest), the script sets the run status to `error` instead, so the webapp
+never shows a failed upload as completed. (`uploaded` = ingested into ALEdb;
+`done` remains the Azure-Batch-analysis-finished state.)
+
+Every invocation is logged to `/upload/logs/<run_name>_<UTC timestamp>.log`
+on the VM host (step markers with timestamps + elapsed seconds, full ingest
+output, failure reasons). Check there first when troubleshooting an upload. A run stuck in `uploading` (e.g. the
+host script itself was killed) can be reset manually:
+`docker exec aledb-web python manage.py set_run_status <run_name> error`
 
 **Input**: Run name (e.g., `Necator_ta06_final`)
 **Output**: Extracted experiments in `/data/aledata/{run_name}/` and database records created
@@ -132,16 +146,16 @@ ssh root@aledb.org /upload/webapp-upload.sh <test_run_name>
 @login_required(login_url='/accounts/login/')
 def upload(request, name):
     run = Run.objects.get(name=name)
+    if run.status == "uploading":
+        return redirect(pipeline)  # already running; ignore repeat clicks
     run.status = "uploading"
     run.save()
 
-    # SSH from container to host and run script
+    # SSH from container to host and run script; the script reports the final
+    # "uploaded"/"error" status back via `manage.py set_run_status` when it exits.
     upload_cmd = ['ssh', '-i', '/root/.ssh/aledb', 'root@aledb.org',
                   f'/upload/webapp-upload.sh {name}']
     subprocess.Popen(upload_cmd)  # Non-blocking async execution
-
-    run.status = "done"
-    run.save()
     return redirect(pipeline)
 ```
 

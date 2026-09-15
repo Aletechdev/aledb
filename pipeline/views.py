@@ -55,12 +55,15 @@ def upload(request, name):
     logger.info("uploading {} via webapp".format(name), extra=user_extra(request))
     try:
         run = Run.objects.get(name=name)
+        if run.status == "uploading":
+            logger.info("upload already in progress for {}, ignoring".format(name), extra=user_extra(request))
+            return redirect(pipeline)
         run.status = "uploading"
         run.save()
+        # The status stays "uploading" until webapp-upload.sh reports the real
+        # outcome via `manage.py set_run_status <name> uploaded|error`.
         upload_cmd = ['ssh', '-i', '/root/.ssh/aledb', 'root@aledb.org', '/upload/webapp-upload.sh {}'.format(name)]
         subprocess.Popen(upload_cmd)
-        run.status = "done"
-        run.save()
         return redirect(pipeline)
     except Exception:
         logger.exception("webapp upload broke", extra=user_extra(request))

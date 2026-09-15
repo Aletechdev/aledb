@@ -73,7 +73,7 @@
                     <td>{{ run.user }}</td>
                 {% endif %}
                 <td><a href="{{ run.xpmd }}" target="_blank">XPMD</a></td>
-                <td>{{ run.status }}</td>
+                <td>{{ run.get_status_display }}</td>
             </tr>
         {% endfor %}
         </tbody>

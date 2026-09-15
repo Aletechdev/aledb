@@ -10,7 +10,8 @@ class Run(models.Model):
     PIPELINE_RUN_STATUS = (
         ('new', 'New'), ('transferring', 'Transferring'), ('running', 'Running'),
         ('awaiting upload', 'Awaiting Upload'),
-        ('uploading', 'Uploading'), ('done', 'Done'), ('error', 'Error'))
+        ('uploading', 'Uploading'), ('uploaded', 'Upload Completed'),
+        ('done', 'Done'), ('error', 'Error'))
     status = models.CharField(max_length=25, default='new', blank=True, choices=PIPELINE_RUN_STATUS)
     xpmd = models.CharField(max_length=150)
 
