@@ -25,8 +25,10 @@ DEFAULT_ENCODING = "utf-8"
 
 
 def get_input_directory_contents(directory, blob_service_client):
+    # Trailing slash so 'foo' only matches the folder foo/, not foo_bar/
+    # (a bare prefix once pulled a neighboring folder's archived CSV into a run).
     return blob_service_client.get_container_client(container=config.INPUT_CONTAINER_NAME).list_blobs(
-        name_starts_with=directory)
+        name_starts_with=directory.rstrip('/') + '/')
 
 
 def get_input_directories():
