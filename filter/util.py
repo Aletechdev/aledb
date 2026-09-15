@@ -11,16 +11,13 @@ __author__ = 'Patrick Phaneuf, Muyao :)'
 NO_BREAK_STRING_CODE = u'\xa0'
 
 
-def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, filter_type=None,
-                              skip_global_filter=False, skip_experiment_filter=False):
+def build_filtered_observed_mutation_queryset(observed_mutation_queryset, experiment_id=None,
+                                              skip_global_filter=False, skip_experiment_filter=False):
     """
-    R. Cai - 1/19/2019
-    :param observed_mutation_queryset:
-    :param experiment_id: experiment_id for the observed_mutation_queryset
-    :param filter_type: 'AMP' or 'NOT_AMP' to filter by mutation type
-    :param skip_global_filter: if True, do not apply global filter exclusions
-    :param skip_experiment_filter: if True, do not apply experiment filter exclusions
-    :return: list of observed_mutations sorted and loaded with related objects
+    SQL half of filter_observed_mutations: applies the global and per-experiment
+    filter exclusions and returns (queryset, global_filter_genes, exp_filter_genes_map)
+    without materializing rows. The gene-based exclusions described by the two gene
+    collections still have to be applied per row by the caller.
     """
     if not skip_experiment_filter:
         if experiment_id:
@@ -66,6 +63,23 @@ def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, fi
         exp_q_query.add(q_exp, Q.AND)
         q_queries.add(exp_q_query, Q.OR)
     queryset = observed_mutation_queryset.exclude(q_queries)
+    return queryset, global_filter_genes, exp_filter_genes_map
+
+
+def filter_observed_mutations(observed_mutation_queryset, experiment_id=None, filter_type=None,
+                              skip_global_filter=False, skip_experiment_filter=False):
+    """
+    R. Cai - 1/19/2019
+    :param observed_mutation_queryset:
+    :param experiment_id: experiment_id for the observed_mutation_queryset
+    :param filter_type: 'AMP' or 'NOT_AMP' to filter by mutation type
+    :param skip_global_filter: if True, do not apply global filter exclusions
+    :param skip_experiment_filter: if True, do not apply experiment filter exclusions
+    :return: list of observed_mutations sorted and loaded with related objects
+    """
+    queryset, global_filter_genes, exp_filter_genes_map = build_filtered_observed_mutation_queryset(
+        observed_mutation_queryset, experiment_id=experiment_id,
+        skip_global_filter=skip_global_filter, skip_experiment_filter=skip_experiment_filter)
 
     # filter genes
     queryset = queryset.select_related(
