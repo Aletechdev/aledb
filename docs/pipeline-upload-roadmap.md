@@ -140,10 +140,13 @@ applied before the memory-heavy steps so it can no longer be lost silently; the 
 that needed ~25 GB now needs under 0.5 GB, so the OOM kills behind the whole chain should
 not recur at the current table size; every upload is logged on the host.
 
-**What is still manual.** Nothing prevents duplicates from being *created*: the guard only
-blocks clicks during an active upload. A retry after `error`, a second upload of a
-completed run, or a manual `manage.py upload` still appends a full second copy of every
-mutation row. Operator rule until step 3 of `docs/elt-split-plan.md` lands:
+**What is still manual.** Under the current UI a normal user can see an upload end in
+`Error` and click Upload again. That click triggers a full re-upload, not a resume: if the
+mutation registration went through on the first attempt (typically it did, the failure was
+in a later step), the second attempt appends a complete second copy of every mutation row,
+and the experiment then needs a manual dedupe. The guard only blocks clicks *during* an
+active upload; the same happens on a second upload of a completed run or a manual
+`manage.py upload`. Operator rule until step 3 of `docs/elt-split-plan.md` lands:
 
 - never re-upload a run to fix anything;
 - metadata problems → `manage.py load_md`; derived-data problems → the per-experiment
