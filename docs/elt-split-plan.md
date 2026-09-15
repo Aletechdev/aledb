@@ -48,6 +48,35 @@ rewrite of anything beyond what is already done, the Stats page.
 path when a transform fails or after a data repair (dedupe, isolate deletion, filter
 change), instead of re-uploading.
 
+### 2b. Load completeness — know the load finished before replaying
+
+Replaying transforms is only safe on a complete load, and today nothing proves one.
+The sample loop catches a failed sample, prints the traceback (`builder/ale_experiment.py`
+around the `traceback.print_exc()` in the ensemble loop) and continues, and the
+experiment still returns success; the only signal is stdout in the host log. Three parts:
+
+1. **Per-sample atomicity + outcome.** Wrap each sample's inserts in
+   `transaction.atomic()` so a sample is either fully loaded or absent, and collect the
+   failed sample names. The experiment result becomes "loaded N of M samples"; any failed
+   sample makes `manage.py upload` exit non-zero (it already does for a failed experiment)
+   and prints the list, so the host log and the Run status say *partial*.
+2. **Verification command** `manage.py check_upload <run folder> <experiment id>`
+   (read-only): compares the run folder against the database for that experiment —
+   sample directories under `breseq/` vs sample records; per sample, mutation entries in
+   `annotated.gd` vs distinct observed-mutation rows (allow a small tolerance for
+   evidence-derived entries); metadata CSVs vs strain/description/medium/library-prep set;
+   and flags duplicate sample records and duplicate rows. Prints a table and exits
+   non-zero on any gap. This is also the tool for the backfill sweep (roadmap §9 step 7).
+3. **Replay refuses on an incomplete load.** `rebuild_experiment` runs the same checks
+   first (given `--run-folder`, or at least the duplicate/row-sanity checks without one)
+   and stops with the report unless `--force` is given, so nobody rebuilds derived data on
+   a half-loaded experiment by mistake.
+
+Repair paths after a partial load, in order of preference: load only the missing samples
+(needs the idempotent ingest, roadmap §8.1, so a per-sample re-ingest skips what exists);
+until then, `check_upload` tells you exactly which samples are missing and the operator
+loads that sample's folder alone. Metadata gaps use `load_md`. Never a blind re-upload.
+
 ### 3. `rebuild_stats` — `ale/management/commands/rebuild_stats.py`
 
 Add a `help` string and a timing print. No behavioural change; it already calls
@@ -81,6 +110,8 @@ structurally closed: the ingest no longer touches the whole table).
 
 ## Verification
 
+0. `check_upload` on the dev run folder + experiment (clean) and on 2674 with one of its
+   source folders (must report the duplicate sample record and pass the row sanity check).
 1. `python -m py_compile` on touched files; `manage.py test builder dashboard filter`
    must show the same 9 pre-existing builder failures and nothing new (no test depends
    on the ingest doing the global rebuild — checked).
