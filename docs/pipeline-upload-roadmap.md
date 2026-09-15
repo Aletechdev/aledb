@@ -22,7 +22,7 @@ Related write-ups (all under `docs/`):
 | 2026-08-14 | Planning note for retry/cancel/cleanup in the web pipeline (commit `4f02c2b1`). |
 | 2026-09-09 | Same failure mode again on a production upload (experiment 2674, submitted through the webapp). The run page showed **Done** although the ingest had died. Metadata for that experiment must be backfilled. |
 | 2026-09-11 | Upload overhaul (this changeset). A dev test submission also surfaced the input-folder prefix bug and the run-name collision problem. End-to-end verified with a dev run (run 352, experiment 2678): status flow `uploading → Upload Completed`, per-run log written, metadata present, rebuild peak memory 0.4 GB. Host script deployed to `/upload/` (backup `/upload/webapp-upload.sh.bak-2026-09-11`), web container restarted. |
-| 2026-09-15 | Changeset reviewed and committed. Pre-check for the 2674 backfill exposes DB-wide duplicate observed-mutation rows from repeat uploads (§8) and one oversized experiment (2660); repair plan written (§9). Dedupe run the same day on 2674 and 2660; specifics in the private audit record. |
+| 2026-09-15 | Changeset reviewed and committed. Pre-check for the 2674 backfill exposes DB-wide duplicate observed-mutation rows from repeat uploads (§8) and one oversized experiment (2660); repair plan written (§9). Dedupe run the same day on 2674 and 2660, dashboard rebuilt, 2674 metadata backfilled; specifics in the private audit record. Kernel log confirms the OOM mechanism: python killed at ~25 GB on a 31 GB host with no container limit, once per Upload click. |
 
 ## 2. The problem chain
 
@@ -136,7 +136,7 @@ Ordered by priority. Tick items as they land and note the commit.
 
 ### Queued (approved in principle, confirm before running)
 
-- [ ] **Backfill metadata for experiment 2674** with `manage.py load_md` (checked: the experiment spans several pipeline runs and every sample has a metadata CSV in its run folder; see §9 step 4). Run after the mode-1 dedupe. **Do not re-upload the run**: re-ingest duplicates `ObservedMutation` rows.
+- [x] **Backfill metadata for experiment 2674** with `manage.py load_md` — done 2026-09-15, one call per source run folder, after the mode-1 dedupe; the sample that exists as two records was skipped by the parser and completed by hand (details in the private audit record). **Never re-upload a run to fix metadata**: re-ingest duplicates `ObservedMutation` rows.
 - [ ] **Clean up the dev test artifacts**: experiment 2678 and its dev project (`delete_ale_experiments([2678])`, ~25 min because it triggers the orphan sweep and rebuild), the run 352 row, and the dev folders under `/pipeline_inputs/`, `/output/`, and `/data/aledata/`.
 
 ### Next
