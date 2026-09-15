@@ -2,6 +2,8 @@
 
 _Draft for a GitHub issue. Investigated 2026-07-01/02 via the `ReducedGenomeEcoli_MS56_ALE_MS56_reJul1` upload (experiment id 2673)._
 
+_Update 2026-09-11: proposed fix 1 (reorder) and fix 3 (fail loud) are implemented — `parse_metadata` now runs before the rebuilds in `builder/ale_experiment.py`, and a failed/killed ingest marks the pipeline Run as `error` via `manage.py set_run_status`. Fix 2 (memory/query scoping) and the backfill of the ~252 affected experiments remain open._
+
 ## Summary
 When `manage.py upload` runs, per-isolate metadata (media, strain, library prep, description)
 is applied **last**, by `parse_metadata_post_experiment_upload`, *after* several expensive

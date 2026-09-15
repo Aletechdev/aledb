@@ -175,18 +175,22 @@ def upload_ale_experiment(experiment_path):
     k = _check_and_extract_parameters_from_metadata(experiment_path + "/metadata")
     if k:
         print(experiment_path, k[0], k[1], k[2])
-        create_ensemble_ale_experiment(experiment_path, k[0], k[1], k[2], experiment_path)
-    else:
-        return k
+        return create_ensemble_ale_experiment(experiment_path, k[0], k[1], k[2], experiment_path)
+    return k
 
 
 def upload_ale_collection(root_path):
-    upload_ale_experiments(find_experiment_paths(root_path))
+    experiment_paths = find_experiment_paths(root_path)
+    failed_paths = upload_ale_experiments(experiment_paths)
+    return len(experiment_paths), failed_paths
 
 
 def upload_ale_experiments(exp_files_path_list):
+    failed_paths = []
     for each in exp_files_path_list:
-        upload_ale_experiment(each)
+        if not upload_ale_experiment(each):
+            failed_paths.append(each)
+    return failed_paths
 
 
 def find_experiment_paths(root_path):
@@ -348,15 +352,31 @@ def create_ale_experiment(breseq_output_group_root_abs_path,
                                          freezer_box,
                                          is_wild_type=False)
 
+        # Metadata must be applied before the global rebuilds: the rebuilds can get
+        # the process OOM-killed, and any step after them is then silently skipped
+        # (docs/ISSUE_upload_metadata_skipped_on_oom.md). A metadata failure must
+        # not abort the rebuilds either, so it is only reflected in the return
+        # value; the metadata can be replayed later with `manage.py load_md`.
+        print("Applying per-isolate metadata...")
+        metadata_applied = True
+        try:
+            metadata.parser.parse_metadata_post_experiment_upload(root_abs_path+"/metadata", experiment.ale_id)
+        except Exception:
+            metadata_applied = False
+            logger.exception("metadata application failed for experiment %s" % experiment.ale_id)
+            print("Metadata application FAILED for", ale_exp_name, "- replay it with: manage.py load_md")
+
         default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
         AleExperimentFilter.objects.get_or_create(**default_filter_params)
+        print("Rebuilding converge mutations...")
         rebuild_converge_mutations(experiment.ale_id)
+        print("Rebuilding fixated mutations...")
         rebuild_fixated_mutations(experiment.ale_id)
+        print("Rebuilding static data...")
         generate_static_data(experiment.ale_id)
+        print("Rebuilding dashboard data...")
         rebuild_dashboard_data()
-
-        metadata.parser.parse_metadata_post_experiment_upload(root_abs_path+"/metadata", experiment.ale_id)
-        return True
+        return metadata_applied
     except Exception as e:
         logger.exception(e)
 
@@ -458,15 +478,31 @@ def create_ensemble_ale_experiment(breseq_output_group_root_abs_path,
                 traceback.print_exc()
 
 
+        # Metadata must be applied before the global rebuilds: the rebuilds can get
+        # the process OOM-killed, and any step after them is then silently skipped
+        # (docs/ISSUE_upload_metadata_skipped_on_oom.md). A metadata failure must
+        # not abort the rebuilds either, so it is only reflected in the return
+        # value; the metadata can be replayed later with `manage.py load_md`.
+        print("Applying per-isolate metadata...")
+        metadata_applied = True
+        try:
+            metadata.parser.parse_metadata_post_experiment_upload(root_abs_path+"/metadata", experiment.ale_id)
+        except Exception:
+            metadata_applied = False
+            logger.exception("metadata application failed for experiment %s" % experiment.ale_id)
+            print("Metadata application FAILED for", ale_exp_name, "- replay it with: manage.py load_md")
+
         default_filter_params = filter.models.get_default_experiment_filter_params(experiment)
         AleExperimentFilter.objects.get_or_create(**default_filter_params)
+        print("Rebuilding converge mutations...")
         rebuild_converge_mutations(experiment.ale_id)
+        print("Rebuilding fixated mutations...")
         rebuild_fixated_mutations(experiment.ale_id)
+        print("Rebuilding static data...")
         generate_static_data(experiment.ale_id)
+        print("Rebuilding dashboard data...")
         rebuild_dashboard_data()
-
-        metadata.parser.parse_metadata_post_experiment_upload(root_abs_path+"/metadata", experiment.ale_id)
-        return True
+        return metadata_applied
     except Exception as e:
         logger.exception(e)
 

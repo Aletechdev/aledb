@@ -1,4 +1,4 @@
-from django.core.management import BaseCommand
+from django.core.management import BaseCommand, CommandError
 from builder.ale_experiment import upload_ale_collection
 
 
@@ -11,6 +11,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         paths = options['path(s)']
+        errors = []
         for path in paths:
             print("Uploading", path)
-            upload_ale_collection(path)
+            experiment_count, failed_paths = upload_ale_collection(path)
+            if experiment_count == 0:
+                errors.append(
+                    "no experiments found under %s "
+                    "(expected <sample>/breseq and <sample>/metadata directories)" % path)
+            for failed_path in failed_paths:
+                errors.append("experiment failed: %s" % failed_path)
+            print("Finished", path, "-", experiment_count - len(failed_paths), "of", experiment_count, "experiments ok")
+        if errors:
+            raise CommandError("\n".join(errors))
