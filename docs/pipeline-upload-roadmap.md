@@ -199,26 +199,43 @@ total is inflated by ~18%.
    - Look up isolate/replicate records by their stable identity (ALE, flask, isolate,
      replicate numbers) rather than every field, so a re-run cannot mint a second sample record
      (mode 2).
-2. **Upload view guards** (`pipeline/views.py`): refuse a plain re-upload of a run already in
+2. **Take the global rebuild out of the ingest (ELT split).** `create_*_ale_experiment`
+   currently ends with `rebuild_dashboard_data()`, which recomputes the *whole-database*
+   sample and mutation count tables that only the home page reads. That is a global transform
+   riding on a per-experiment load: it made every upload's memory and time proportional to the
+   entire table (the OOM chain in §2) and it is where every metadata loss happened. Split it:
+   - **Load** (per upload): parse samples, insert rows, apply metadata. Must be cheap,
+     scoped to the experiment, and idempotent (item 1).
+   - **Per-experiment transforms** (convergence, fixation, static data): scoped and fast for a
+     normal experiment; keep them in the upload for now, but make them re-runnable on their own
+     (`rebuild_stats`-style command taking experiment ids) so a failed step can be replayed
+     without re-ingesting.
+   - **Global aggregates** (dashboard counts): drop the call from the ingest and run the
+     existing `manage.py rebuild_stats` on a schedule (host cron, nightly) and optionally at the
+     end of `webapp-upload.sh` as a separate process after the ingest has exited. Home-page
+     totals then lag an upload by at most a day, which is acceptable.
+   Cheapest item on this list (one call removed, one cron line) and it removes the whole-table
+   dependency from the upload path for good.
+3. **Upload view guards** (`pipeline/views.py`): refuse a plain re-upload of a run already in
    `uploaded`; require an explicit re-ingest action; add the ownership check.
-3. **Ingest data-quality gate**: after a sample is parsed, warn (and optionally refuse) when
+4. **Ingest data-quality gate**: after a sample is parsed, warn (and optionally refuse) when
    the mutation count is far above normal or when >90% of an experiment's mutations are shared
    by every sample. This is the cheap detector for a wrong reference genome (2660's profile).
-4. **Stats page counts in SQL** (`stats/util.py`, `stats/views.py`): the by-type and
+5. **Stats page counts in SQL** (`stats/util.py`, `stats/views.py`): the by-type and
    by-protein-change counts materialize every row exactly as the dashboard rebuild used to.
    Reuse `build_filtered_observed_mutation_queryset` + the streaming tally from
    `dashboard/util.py`. Same pattern, modest change, makes large experiments load in seconds.
-5. **Filter query-shape rewrite** (existing item; the NOT IN predicate forces a full scan).
-6. **Mutation table page size cap** for experiments above a few thousand mutations (paginate
+6. **Filter query-shape rewrite** (existing item; the NOT IN predicate forces a full scan).
+7. **Mutation table page size cap** for experiments above a few thousand mutations (paginate
    or require a gene/position filter) so one oversized experiment cannot take the site down.
-7. **Ingest atomicity**: wrap each sample's insert in a transaction so a killed ingest cannot
+8. **Ingest atomicity**: wrap each sample's insert in a transaction so a killed ingest cannot
    leave a half-inserted sample.
-7a. **Ingest split rows**: when breseq junction evidence and GATK both report the same
+8a. **Ingest split rows**: when breseq junction evidence and GATK both report the same
    mutation, the ingest writes two `ObservedMutation` rows for it (one with breseq evidence and
    frequency, one GATK-only) instead of one merged row. Seen for one mutation across many
    samples of one experiment. Merge into a single row at ingest; the unique constraint in item 1
    will enforce it.
-8. **Tests**: repair the 9 stale builder tests (fixture setup, list-valued frequency, the
+9. **Tests**: repair the 9 stale builder tests (fixture setup, list-valued frequency, the
    zero-mutation ingest of the LTEE fixture) and add tests for idempotent ingest and the
    dedupe command.
 9. The smaller items already listed in §6/§7.
