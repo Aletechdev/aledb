@@ -142,7 +142,7 @@ Ordered by priority. Tick items as they land and note the commit.
 ### Next
 
 - [ ] **Database repair, phase 1: remove duplicate observed-mutation rows** (see §9). Do this before any further rebuilds; it removes ~1.05M rows (18% of the table) and fixes experiment 2674's inflated samples as a side effect.
-- [ ] **Make ingest idempotent** (see §8 item 1): unique constraint on (sequencing_experiment, mutation) plus per-sample replace-or-skip in `builder/upload.py`. Without this the repair will not stick.
+- [ ] **Make ingest idempotent** (see §8 item 1 and `docs/elt-split-plan.md`, three steps: ELT split → builder test harness → idempotent upload with Re-upload button and unique constraint). Without this the repair will not stick.
 - [ ] **Filter query-shape rewrite.** The `NOT (mut IN (…) OR (exp AND freq))` predicate forces a full scan; rebuilds still take ~15 min. Memory is fixed, speed is not. Plan in `ISSUE_slow_upload_rebuild_full_table_scan.md`.
 - [ ] **Metadata backfill sweep** for the ~252 affected experiments. Discriminator query and `load_md` recipe in `ISSUE_upload_metadata_skipped_on_oom.md`.
 - [ ] **Run-name submission guard**, `JobExists` handling in `create_job`, and a proper error state on the run page instead of a 500. Proposed fixes in `ISSUE_run_name_collisions.md`. Longer term: `unique=True` on `Run.name` after deduping existing rows.

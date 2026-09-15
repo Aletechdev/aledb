@@ -1,27 +1,25 @@
-# Plan: take the global dashboard rebuild out of the ingest (ELT split)
+# Plan: robust upload in three steps (ELT split, test harness, idempotent re-upload)
 
-Status: **planned, not implemented** (2026-09-15). Roadmap item §8.2 in
-`docs/pipeline-upload-roadmap.md`. Investigation notes at the end.
+Status: **planned, not implemented** (2026-09-15, revised the same day). Covers roadmap
+items §8.1 and §8.2 in `docs/pipeline-upload-roadmap.md`.
 
-## Goal
+## Design decision
 
-An upload (load) must be cheap, scoped to its experiment, and independent of the size
-of the rest of the database. Per-experiment derived data (transform, scoped) stays with
-the upload but becomes replayable on its own. Whole-database aggregates (transform,
-global) run as their own scheduled process.
+The single recovery action for any upload problem is **re-upload**, and the upload itself
+is made safe to repeat: it loads what is missing, skips what is loaded, re-applies metadata,
+rebuilds the experiment's derived data, and reports. No separate "replay" or "check" tools
+for operators; those exist only as functions the upload calls. Whole-database aggregates
+leave the upload entirely and run on a schedule.
 
-## Scope
+Kept deliberately small. Rejected as unnecessary: a per-sample load ledger table (per-sample
+transactions make "sample record exists" a sufficient completeness test), a standalone
+completeness command as a deliverable, a user-facing transform-replay command.
 
-In: `builder/ale_experiment.py`, one new management command, `rebuild_stats` polish,
-`pipeline/upload_scripts/webapp-upload.sh`, one host cron line, dead cache helper
-removal, docs. Out: idempotent ingest / unique constraint (roadmap §8.1), the streaming
-rewrite of anything beyond what is already done, the Stats page.
+## Step 1 — ELT split (half a day, independent of the rest)
 
-## Steps
+Move the whole-database count rebuild out of the ingest.
 
-### 1. Code — `builder/ale_experiment.py`
-
-1. Add
+1. `builder/ale_experiment.py`: add
    ```python
    def rebuild_experiment_derived_data(ale_experiment_id):
        """Per-experiment transforms. Safe to re-run; touches only this experiment."""
@@ -29,122 +27,103 @@ rewrite of anything beyond what is already done, the Stats page.
        rebuild_fixated_mutations(ale_experiment_id)
        generate_static_data(ale_experiment_id)
    ```
-   next to the existing `rebuild_all_*` helpers.
-2. In `create_ale_experiment` and `create_ensemble_ale_experiment`, replace the three
-   per-experiment rebuild calls + `rebuild_dashboard_data()` with one call to the helper.
-   Keep the progress prints inside the helper.
-3. Remove `rebuild_dashboard_data()` from the two other call sites:
-   `delete_ale_experiments` (end of the delete; this is part of why a delete takes ~25
-   min) and `insert_starting_strain_flask`. Drop the import.
-4. Remove `clear_dashboard_cache()` calls (4 in this file, 2 in
-   `filter/views/ale_exp_filter.py` and `filter/views/global_filter.py`) and the helper in
-   `common/util.py`: its setters were deleted in 2017 (commit 7df1428e), nothing reads
-   those keys, the TODOs already say to remove it.
+   and call it from `create_ale_experiment` / `create_ensemble_ale_experiment` in place of
+   the inline block. Remove `rebuild_dashboard_data()` from all four call sites (the two
+   ingest functions, `delete_ale_experiments`, `insert_starting_strain_flask`) and its
+   import.
+2. Remove `clear_dashboard_cache()` and its six call sites (`builder/ale_experiment.py`,
+   `filter/views/ale_exp_filter.py`, `filter/views/global_filter.py`, helper in
+   `common/util.py`): the cache setters were deleted in 2017 (commit 7df1428e); nothing
+   reads those keys.
+3. `ale/management/commands/rebuild_stats.py`: add `help` and a timing print.
+4. `pipeline/upload_scripts/webapp-upload.sh`: after the ingest has exited and
+   `report_status` has run, a separate step:
+   ```bash
+   step "refreshing home-page counts (separate process; failure does not affect the run)"
+   sudo docker exec aledb-web python manage.py rebuild_stats --skip-checks \
+       || step "count refresh FAILED; nightly cron will retry"
+   ```
+5. Root crontab on the VM host (first scheduler on this box; note it in
+   `pipeline/upload_scripts/README.md`):
+   ```
+   15 3 * * * docker exec aledb-web python manage.py rebuild_stats --skip-checks >> /upload/logs/rebuild_stats.log 2>&1
+   ```
+   Home-page totals may lag a data change by up to a day; deletions and repairs no longer
+   refresh them inline.
 
-### 2. New command — `ale/management/commands/rebuild_experiment.py`
+Verification: `py_compile`; `manage.py test builder dashboard filter` shows the same 9
+pre-existing builder failures and nothing new (no test depends on the ingest doing the
+global rebuild); `rebuild_stats` standalone gives unchanged totals, record its duration;
+one dev upload through the webapp reaches `uploaded` with the count step logged after the
+status report; run the cron line by hand once.
 
-`manage.py rebuild_experiment <experiment id ...>`: validates ids, calls
-`rebuild_experiment_derived_data` per id, prints per-step progress. This is the replay
-path when a transform fails or after a data repair (dedupe, isolate deletion, filter
-change), instead of re-uploading.
+## Step 2 — Builder test harness (half a day, prerequisite for step 3)
 
-### 2b. Load completeness — know the load finished before replaying
+The ingest module (`builder/ale_experiment.py`, `builder/upload.py`) is where the risk is:
+two near-identical long functions, exceptions swallowed at several levels. Do not change
+its transaction boundaries without tests that exercise it.
 
-Replaying transforms is only safe on a complete load, and today nothing proves one.
-The sample loop catches a failed sample, prints the traceback (`builder/ale_experiment.py`
-around the `traceback.print_exc()` in the ensemble loop) and continues, and the
-experiment still returns success; the only signal is stdout in the host log. Three parts:
+1. `builder/tests/test_upload.py`: the four `test_add_breseq_results_*` errors are a
+   missing fixture (a `TechnicalReplicate` with id 1); create the ALE/flask/isolate/
+   replicate chain in `setUp`. The two `test_get_mutation_freq_*` failures expect a scalar;
+   `_get_mutation_freq` has returned `[frequency, frequency_gatk]` since 2021 — update the
+   expected values.
+2. `builder/tests/test_ale_experiment.py`: `test_create_ALE_experiment`,
+   `test_upload_ALE_collection`, `test_reseq_URL` get 0 mutations from a 27-mutation
+   fixture with no exception logged. Find why (evidence-free `.gd`, parser drift since
+   2021) and either fix the ingest edge case or refresh the fixture. Add a `metadata/`
+   folder to the fixtures so the metadata step no longer logs a FileNotFoundError.
+3. Add the tests step 3 needs: upload the same fixture twice → identical row counts and
+   one sample record per sample; a sample that fails mid-way leaves no partial rows.
 
-1. **Per-sample atomicity + outcome.** Wrap each sample's inserts in
-   `transaction.atomic()` so a sample is either fully loaded or absent, and collect the
-   failed sample names. The experiment result becomes "loaded N of M samples"; any failed
-   sample makes `manage.py upload` exit non-zero (it already does for a failed experiment)
-   and prints the list, so the host log and the Run status say *partial*.
-2. **Verification command** `manage.py check_upload <run folder> <experiment id>`
-   (read-only): compares the run folder against the database for that experiment —
-   sample directories under `breseq/` vs sample records; per sample, mutation entries in
-   `annotated.gd` vs distinct observed-mutation rows (allow a small tolerance for
-   evidence-derived entries); metadata CSVs vs strain/description/medium/library-prep set;
-   and flags duplicate sample records and duplicate rows. Prints a table and exits
-   non-zero on any gap. This is also the tool for the backfill sweep (roadmap §9 step 7).
-3. **Replay refuses on an incomplete load.** `rebuild_experiment` runs the same checks
-   first (given `--run-folder`, or at least the duplicate/row-sanity checks without one)
-   and stops with the report unless `--force` is given, so nobody rebuilds derived data on
-   a half-loaded experiment by mistake.
+Target: `manage.py test builder` green, so step 3 has a real harness.
 
-Repair paths after a partial load, in order of preference: load only the missing samples
-(needs the idempotent ingest, roadmap §8.1, so a per-sample re-ingest skips what exists);
-until then, `check_upload` tells you exactly which samples are missing and the operator
-loads that sample's folder alone. Metadata gaps use `load_md`. Never a blind re-upload.
+## Step 3 — Idempotent upload + Re-upload button (1–2 days)
 
-### 3. `rebuild_stats` — `ale/management/commands/rebuild_stats.py`
+1. **One transaction per sample.** In the sample loop, wrap the creation of the
+   isolate/replicate/sample records and the `bulk_create` of their rows in
+   `transaction.atomic()`. A sample then either exists completely or not at all.
+2. **Skip loaded samples.** Before loading a sample, look up its sample record by
+   experiment + ALE, flask, isolate, replicate numbers. Found → skip and print "already
+   loaded". Not found → load. Print "loaded N, skipped K, failed F of M samples" per
+   experiment; any failure keeps the non-zero exit the upload command already has.
+3. **Stable identity.** Restrict the isolate/replicate `get_or_create` lookups to the
+   identity numbers (move date/person/description to `defaults=`), so a re-run cannot mint
+   a second sample record (the 2674 duplicate-sample case).
+4. **Unique constraint** on `seq_observedmutation (sequencing_experiment_id, mutation_id)`
+   as the backstop, applied by a tracked SQL script in `docs/operations/` (migrations are
+   gitignored here). Prerequisite: the split-row ingest quirk (roadmap §8.8a) fixed and the
+   13 remaining split rows merged; and the mode-1 dedupe of the remaining experiments
+   (roadmap §9 step 1) done, otherwise the constraint cannot be created.
+5. **Metadata and derived data run every time** (already idempotent: media get-or-create
+   + field overwrite; delete-then-rebuild per experiment).
+6. **Re-upload button.** `pipeline/views.py` `upload`: keep the "already uploading" guard;
+   turn the `uploaded` and `error` states into a confirmation ("re-upload: loads missing
+   samples, re-applies metadata, rebuilds derived data") instead of a refusal; add the
+   ownership check. `run.html`: the error-state copy changes from "you can retry" to what
+   re-upload actually does.
+7. **Explicit replace path** (operator only, not a button): a management command that
+   deletes one sample record and its rows so the next upload reloads it — for a sample
+   that loaded completely but from a bad archive. Deliberate, logged, never automatic.
 
-Add a `help` string and a timing print. No behavioural change; it already calls
-`rebuild_dashboard_data()`, which (after commit ebf703ce) streams and peaks ~0.4 GB.
+Verification: the step-2 tests; on prod, re-upload of the dev run (queued for cleanup) is
+a no-op that reports all samples skipped and leaves row counts unchanged; then delete one
+of its samples with the replace command and re-upload → exactly that sample reloads.
 
-### 4. Host script — `pipeline/upload_scripts/webapp-upload.sh`
+## Deploy order and rollback
 
-After the ingest has exited and `report_status` has run, add a separate step:
-```bash
-step "refreshing home-page counts (separate process; failure does not affect the run)"
-sudo docker exec aledb-web python manage.py rebuild_stats --skip-checks \
-    || step "count refresh FAILED; nightly cron will retry"
-```
-The run status never depends on it. Deploy with the usual `sudo cp` to `/upload/`
-(backup `/upload/webapp-upload.sh.bak-<date>`).
-
-### 5. Nightly safety net — root crontab on the VM host
-
-```
-15 3 * * * docker exec aledb-web python manage.py rebuild_stats --skip-checks >> /upload/logs/rebuild_stats.log 2>&1
-```
-First scheduler on this host; note it in `pipeline/upload_scripts/README.md`. Home-page
-totals may lag a data change by up to a day; deletions and repairs no longer refresh
-them inline.
-
-### 6. Docs
-
-Tick roadmap §8.2; update `pipeline/upload_scripts/README.md` (new step, cron, replay
-command); add a line to `docs/ISSUE_upload_metadata_skipped_on_oom.md` (fix 2 now
-structurally closed: the ingest no longer touches the whole table).
-
-## Verification
-
-0. `check_upload` on the dev run folder + experiment (clean) and on 2674 with one of its
-   source folders (must report the duplicate sample record and pass the row sanity check).
-1. `python -m py_compile` on touched files; `manage.py test builder dashboard filter`
-   must show the same 9 pre-existing builder failures and nothing new (no test depends
-   on the ingest doing the global rebuild — checked).
-2. `manage.py rebuild_experiment 2674` on prod: convergence / fixation / static-data row
-   counts identical before and after (they are set-based; expected 6 / 1 / 1 rows).
-3. `manage.py rebuild_stats` standalone: totals unchanged from the last run; record the
-   duration.
-4. End-to-end: one dev upload through the webapp (reuse the dev run that is queued for
-   cleanup, or a fresh small one): run reaches `uploaded`, per-experiment tables built,
-   ingest peak memory well under 1 GB, count refresh step logged after `report_status`.
-5. Cron: run the line by hand once as root, check the log file, then let it fire.
-
-## Deploy order
-
-1. Merge code + docs (one commit), user pushes.
-2. `sudo cp` the host script; user restarts the web container (Python changed).
-3. Install the cron line (needs root; operator does it or approves it).
-4. Run verification steps 2–5.
-
-## Rollback
-
-`git revert` the commit and restart the container; restore
-`/upload/webapp-upload.sh.bak-<date>`; remove the cron line. The count tables are
-rebuildable at any time, so no data is at risk in either direction.
+Each step is one commit, user pushes; host script by `sudo cp` with a dated backup; the
+web container restart is user-run (Python changed); the cron line is installed by the
+operator. Rollback per step: `git revert` + restart, restore the script backup, remove the
+cron line; drop the unique constraint if step 3 has to be reverted. Count tables and
+derived tables are rebuildable at any time, so no data is at risk in either direction.
 
 ## Investigation notes (2026-09-15)
 
-- Home page reads `ObservedMutationCounts`, `UniqueMutationCounts`, `SampleCounts`
-  directly; no cache in the read path. `CACHES` is the DB backend; `cache_table` holds one
-  fossil dashboard key from 2017 that nothing reads.
+- Home page reads the count tables directly; no cache in the read path. `cache_table`
+  holds one fossil dashboard key from 2017 that nothing reads.
 - `rebuild_dashboard_data()` call sites: the two ingest functions, `delete_ale_experiments`,
   `insert_starting_strain_flask`.
-- Tests touching the count tables call the rebuild functions directly; ingest tests assert
-  per-experiment static data only.
-- No scheduler exists on the host (no cron entries, no celery/rq). Redis is used for
-  channels, not tasks.
+- The sample loop catches a failed sample, prints the traceback and continues; the
+  experiment still returns success. Partial loads are silent today.
+- No scheduler exists on the host (no cron entries, no celery/rq); Redis serves channels.
