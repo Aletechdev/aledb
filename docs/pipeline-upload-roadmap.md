@@ -23,6 +23,7 @@ Related write-ups (all under `docs/`):
 | 2026-09-09 | Same failure mode again on a production upload (experiment 2674, submitted through the webapp). The run page showed **Done** although the ingest had died. Metadata for that experiment must be backfilled. |
 | 2026-09-11 | Upload overhaul (this changeset). A dev test submission also surfaced the input-folder prefix bug and the run-name collision problem. End-to-end verified with a dev run (run 352, experiment 2678): status flow `uploading → Upload Completed`, per-run log written, metadata present, rebuild peak memory 0.4 GB. Host script deployed to `/upload/` (backup `/upload/webapp-upload.sh.bak-2026-09-11`), web container restarted. |
 | 2026-09-15 | Changeset reviewed and committed. Pre-check for the 2674 backfill exposes DB-wide duplicate observed-mutation rows from repeat uploads (§8) and one oversized experiment (2660); repair plan written (§9). Dedupe run the same day on 2674 and 2660, dashboard rebuilt, 2674 metadata backfilled; specifics in the private audit record. Kernel log confirms the OOM mechanism: python killed at ~25 GB on a 31 GB host with no container limit, once per Upload click. |
+| 2026-09-17 | Stopgap for repeat uploads: users keep the Upload button, `webapp-upload.sh` flags attempts that follow an earlier ingest and lists them in `/upload/logs/REUPLOADS.log` for an operator dedupe; run-page copy made honest about doubled counts (§6a). Duplicate-sample-record cause pinned to `reseq_date` in the isolate lookup (§8). |
 
 ## 2. The problem chain
 
@@ -146,13 +147,24 @@ mutation registration went through on the first attempt (typically it did, the f
 in a later step), the second attempt appends a complete second copy of every mutation row,
 and the experiment then needs a manual dedupe. The guard only blocks clicks *during* an
 active upload; the same happens on a second upload of a completed run or a manual
-`manage.py upload`. Operator rule until step 3 of `docs/elt-split-plan.md` lands:
+`manage.py upload`.
 
-- never re-upload a run to fix anything;
+**Stopgap (2026-09-17): allow, detect, repair.** "Never re-upload" cannot be asked of a
+user whose only tool is the Upload button, so the button stays as it is and the host script
+records repeat attempts instead: an attempt that follows one which already reached the
+ingest step is marked `REPEAT ATTEMPT … DEDUPE NEEDED` in its run log and appended to
+`/upload/logs/REUPLOADS.log`; the run page tells the user that counts will be doubled until
+an admin removes the copies. Mechanism, operator routine and the list of cases this does
+**not** cover are in `pipeline/upload_scripts/README.md` ("Repeat uploads"). Rules until
+step 3 of `docs/elt-split-plan.md` lands:
+
+- users may re-upload through the run page; operators check `REUPLOADS.log` weekly and run
+  `manage.py dedupe_observed_mutations <experiment id>`
+  (`docs/operations/observed_mutation_dedupe.md`), then `rebuild_stats`;
+- operators never re-ingest by hand (`manage.py upload`, `upload.sh`, `transfer.sh`): those
+  paths are not detected;
 - metadata problems → `manage.py load_md`; derived-data problems → the per-experiment
-  rebuild functions; both are idempotent;
-- if a re-upload did happen → `manage.py dedupe_observed_mutations <experiment id>`
-  (`docs/operations/observed_mutation_dedupe.md`), then rebuild.
+  rebuild functions; both are idempotent.
 
 Cleaning up the duplicates that already exist in the other 139 experiments is manual by
 choice (command ready, deferred to leave time to document and inform owners). Preventing
@@ -184,9 +196,9 @@ Ordered by priority. Tick items as they land and note the commit.
 
 ### Smaller fixes
 
-- [ ] Ingest dedupe guard or a distinct metadata-only failure state, and matching `run.html` copy (see §6, first item).
+- [ ] Ingest dedupe guard or a distinct metadata-only failure state (see §6, first item). `run.html` copy made honest and repeat attempts logged 2026-09-17 (§6a stopgap); the guard itself is step 3 of `docs/elt-split-plan.md`.
 - [ ] Make extraction failures detectable in `webapp-upload.sh` (shell loop over archives).
-- [ ] Fix "Done or Error" wording in `run.html`.
+- [x] Fix "Done or Error" wording in `run.html` (2026-09-17, with the repeat-upload stopgap).
 - [ ] Remove dead imports/helpers from `dashboard/util.py`.
 - [ ] Ownership check on the upload view.
 - [ ] Fix the `snp_type_*` name mismatch in the dashboard update block.
@@ -200,7 +212,7 @@ data for years. Two modes, with different symptoms:
 | Mode | What the repeat upload did | Visible where | Scale (whole DB) |
 |---|---|---|---|
 | 1. Duplicate rows under one sample record | Found the existing experiment/ALE/flask/isolate/replicate/sample records and appended a second full set of `ObservedMutation` rows to the same sample (`bulk_create`, no existence check) | Nowhere in the mutation table (grid is keyed by mutation × sample, copies overwrite the same cell). Only in row-based counts: home-page totals, Stats page "observed" counts, rebuild memory/time | 1,036,878 duplicate (sample, mutation) groups, 1,052,363 extra rows, 674 samples, 141 experiments; 99% are exact 2× copies, max 9× |
-| 2. Duplicate sample record | A lookup field differed (e.g. date/person on the isolate), so a new isolate/replicate/sample record was created | Extra column in the mutation table, extra row in the Stats sample list | 291 extra sample records in 19 experiments, mostly old (ids ~1086–1199) |
+| 2. Duplicate sample record | A lookup field on the isolate differed, so a new isolate/replicate/sample record was created. Verified 2026-09-17 for the recent case (a sample re-analysed in a later pipeline run): reference genome, breseq version, person and freezer box were identical; only `reseq_date`, the breseq output's creation timestamp, differed. Any re-analysis therefore mints a second sample record. Cause not checked for the 19 older experiments | Extra column in the mutation table, extra row in the Stats sample list | 291 extra sample records in 19 experiments, mostly old (ids ~1086–1199) |
 
 Verified: mode-1 copies are byte-identical in every non-id column for the experiments checked
 (2674, 2510, 2568, 904, 2539), apart from a handful of groups in 2660 explained by the ingest
@@ -215,6 +227,34 @@ Why mode 1 matters even though the table looks fine: the Stats page and the dash
 load every `ObservedMutation` row as an ORM object. The junk rows are a large part of the 25 GB
 peak that caused the OOM kills and of the ~15 min rebuild, and the home-page observed-mutation
 total is inflated by ~18%.
+
+### What a repeat upload does, by code path (added 2026-09-17)
+
+The ingest never rewrites or deletes mutation rows; it only appends. Which duplication mode a
+repeat produces depends on which `get_or_create` lookup still matches:
+
+| Case | Trigger | Lookups | Result |
+|---|---|---|---|
+| 1 (= mode 1) | The same run is uploaded again (second click on Upload, manual repeat of `manage.py upload`). | Isolate, replicate and resequencing record all match, because every field including the breseq creation timestamp is unchanged. | `bulk_create` (`builder/upload.py`) inserts the full mutation list again with no existence check, no prior delete and no DB constraint: every mutation is registered twice under the same sample. |
+| 2 (= mode 2) | The sample was re-analysed in a later pipeline run, or any isolate lookup field differs (`reseq_date`, reference, breseq version, person, freezer box, population/clonal). | The isolate lookup (`builder/ale_experiment.py`, all fields are lookup keys) finds nothing. | New isolate → new replicate → new resequencing record → new rows, next to the old chain. Two sample records with the same ALE-flask-isolate-replicate numbers; `load_md` then skips that sample (its replicate lookup matches two). |
+| 3 (new finding) | Same sample, unchanged isolate fields, but arriving from a different run folder. | Isolate and replicate match; the resequencing record is looked up by folder path and does not. | A second resequencing record under the same replicate, with its own rows. DB-wide: 194 replicates in 9 experiments carry more than one resequencing record. Checked 2026-09-17: a single historical event. Nine consecutive older experiments (ids 1191–1199) were uploaded from one storage folder and later uploaded again after the same files had been copied to a second folder. Every pair has exactly two records that differ only in the folder path, with identical mutation and frequency sets, and all second records were created in one batch. So case 3 is case 1 arriving from a moved folder, and it shows as a duplicate sample column. Neither the dedupe command nor a unique constraint on (sample, mutation) sees it, because both work within one resequencing record. Not reproducible through the webapp (a run always extracts to the same folder); only a manual `manage.py upload` of a moved or copied folder does this. |
+
+The only things an upload overwrites are the read statistics on the resequencing record, the
+starting-strain mutation list on the experiment filter (wild-type samples) and the fields the
+metadata step applies. **There is no overwrite path for results**: replacing a sample's or an
+experiment's mutations today means `delete_ale_experiments` plus a fresh upload.
+
+**What users see.** The mutation table page and all three mutation CSV exports (mutations,
+converged, fixed) build their data with the same function (`get_mutation_table_data`,
+`seq/views/mutation_table_builder.py`): a grid of distinct mutation × sample in which each
+observed-mutation row is *assigned* to its cell. Case-1 copies land in the same cell, so the
+table and the exports show each mutation once per sample and were never wrong because of
+them. Two caveats: when the copies are not identical (the split rows of item 8a) the cell
+shows whichever row the query returned last, with no warning; and cases 2 and 3 *are* visible,
+as an extra sample column in the table and the CSV. Row-based numbers (Stats page observed
+counts, home-page totals) are inflated by case 1, and every copy is still loaded and costs
+memory and time before the grid collapses it. Convergence and fixation are set-based and
+unaffected.
 
 ### Codebase improvements, in priority order
 
@@ -303,6 +343,11 @@ git). Operator procedure: `docs/operations/observed_mutation_dedupe.md`.
 6. **Mode-2 duplicates (19 experiments).** Per-experiment review with the owners; delete only
    confirmed accidental sample records (isolate → replicate → sample → rows), then rebuild those
    experiments.
+6a. **Case-3 duplicates (9 experiments, ids 1191–1199; added 2026-09-17).** Second
+   resequencing record per replicate from a historical upload of a moved folder (§8). Proposed
+   as data cleanup only, no prevention code: owner confirms the live folder, back up, delete the
+   other record of each pair (rows cascade), rebuild those experiments. Procedure sketch in
+   `docs/elt-split-plan.md`, "Idea for the review". Not approved yet.
 7. **Metadata backfill sweep** for the ~252 experiments with empty strain/description and the
    parser's default medium (discriminator query in `ISSUE_upload_metadata_skipped_on_oom.md`).
    Needs the source metadata folders; where they no longer exist, record the experiment as

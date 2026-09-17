@@ -110,6 +110,80 @@ Verification: the step-2 tests; on prod, re-upload of the dev run (queued for cl
 a no-op that reports all samples skipped and leaves row counts unchanged; then delete one
 of its samples with the replace command and re-upload → exactly that sample reloads.
 
+## Review notes for the next iteration (2026-09-17) — step 3 scope
+
+**Not decided; input for the review.** Concern: step 3 as written bundles seven items and
+risks over-engineering the upload. Findings since it was written (roadmap §8, "What a repeat
+upload does, by code path") sort the items by how much of the real problem each one removes.
+
+What actually happens in production: almost all damage is case 1 (same run uploaded again,
+mostly a second click after `Error`). Case 2 (re-analysed sample) is rare and visible as a
+second column. Case 3 (second resequencing record under one replicate) is unexplained.
+Case-1 copies never corrupted the mutation table or the CSV exports; they inflate counts and
+slow rebuilds.
+
+Proposed split:
+
+| Item | Proposal | Reason |
+|---|---|---|
+| 1. One transaction per sample | **Keep (core)** | Without it "sample has rows" is not a trustworthy test: a killed ingest leaves a partial sample that would then be skipped forever. |
+| 2. Skip loaded samples | **Keep (core)** | This alone stops case 1. Test should be "the replicate already has a resequencing record with rows", not "the replicate exists", so a sample cut off before its rows is reloaded and case 3 is not extended. |
+| 5. Metadata and derived data every time | **Keep (core)** | Already idempotent; no new code. |
+| 6. Re-upload button | **Shrink** to a `run.html` copy change. Once item 2 is in, the existing Upload button is safe to click again; no confirmation flow needed. The ownership check is worth doing but is an independent small fix. | |
+| 3. Stable identity | **Defer** | Small code change, but it changes behaviour: a re-analysed sample would be skipped silently instead of appearing as a second column, which then needs an answer to "how does a user replace results" (there is no overwrite path today). Until that is designed, the current visible duplicate is the safer failure. Cheap interim: print a warning when the numbers match an existing isolate but `reseq_date` or the reference differs. |
+| 4. Unique constraint | **Defer** | Backstop only; item 2 does the prevention. Its prerequisites are the expensive part (dedupe of the remaining 139 experiments, split-row ingest fix, merging the 13 split rows). Do it when the long-tail dedupe happens anyway. |
+| 7. Explicit replace path | **Defer** | Needed only once item 3 lands. Until then, replacing results stays an operator job (`delete_ale_experiments` + upload). |
+
+Core = items 1, 2, 5 and the copy change: roughly half a day to a day on top of the step-2
+tests (upload the same fixture twice → identical row counts; a sample that fails mid-way
+leaves no rows). When it lands, the repeat-upload stopgap (`REUPLOADS.log`) turns into an
+informational line and the weekly operator check can stop.
+
+### Idea for the review: clean the data for edge cases instead of building prevention
+
+Not every duplication case needs code. Proposed rule of thumb: **write prevention only for
+what the normal user path can produce again and again; for one-off, historical or
+operator-only cases, repair the database once and keep an operator rule.** Code in the
+ingest is the expensive, risky part (two near-identical long functions, thin tests); a
+one-off repair is cheap, reversible with a backup, and adds nothing to maintain.
+
+| Case (roadmap §8) | Can a webapp user cause it? | How often | Proposal |
+|---|---|---|---|
+| 1. Same run uploaded again | Yes, one click after `Error` | Recurring (141 experiments) | **Prevent in code** (core items 1, 2). Clean the existing copies with the dedupe command. |
+| 2. Sample re-analysed in a later run | Yes, but it takes a deliberate second pipeline run | Rare (one recent case, some old ones) | **Clean per case with the owner**; visible as a second column, so it gets noticed. Revisit prevention (item 3) only if it keeps happening. |
+| 3. Same files uploaded from a moved folder | No, manual `manage.py upload` only | Once (9 experiments, one batch) | **Clean the database only. No code.** Operator rule: never upload a copied or moved folder of an experiment that is already in the database. |
+
+Case 3 cleanup sketch (one-off, operator-run, needs the usual explicit go):
+
+1. Confirm with the owner which of the two folders is the live one; the surviving record's
+   path is the link to the breseq report, so keep the record whose folder still exists.
+2. Back up first: export the resequencing records to be deleted and their mutation rows
+   (private audit folder, same convention as the dedupe).
+3. Delete the unwanted resequencing record of each pair. Mutation rows and missing-coverage
+   evidence go with it (`on_delete=CASCADE` on both); isolate and replicate stay, they are
+   shared with the surviving record.
+4. Re-run the per-experiment derived data for the nine experiments and `rebuild_stats`;
+   check that each sample shows one column and that convergence/fixation counts are
+   unchanged (the pairs were verified identical).
+5. Record it in the private audit file and tick it in the roadmap repair plan (§9).
+
+Side effect worth noting: the core skip test ("the replicate already has a resequencing
+record with rows") would block case 3 anyway, at no extra cost, so choosing "clean only"
+here does not leave the door open once the core lands.
+
+Open questions for the review:
+
+- Is a user-facing "replace results" needed at all, or is re-analysis rare enough to stay an
+  admin request? This decides whether items 3 and 7 are ever built.
+- Case 3: answered 2026-09-17 (roadmap §8): one historical manual re-upload of nine
+  experiments from a moved folder, not reproducible through the webapp. No design work
+  needed; the item-2 skip test ("replicate already has a resequencing record with rows")
+  would have prevented it. Repair is a one-off: delete the second resequencing record of
+  each pair (rows cascade) after confirming with the owner which folder is the live one,
+  because the record's path is also the link to the breseq report.
+- If item 3 is built later: keep population/clonal in the lookup (different sample); decide
+  whether the reference stays a lookup key or moves to `defaults=` with a mismatch warning.
+
 ## Deploy order and rollback
 
 Each step is one commit, user pushes; host script by `sudo cp` with a dated backup; the
