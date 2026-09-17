@@ -118,7 +118,8 @@ upload does, by code path") sort the items by how much of the real problem each 
 
 What actually happens in production: almost all damage is case 1 (same run uploaded again,
 mostly a second click after `Error`). Case 2 (re-analysed sample) is rare and visible as a
-second column. Case 3 (second resequencing record under one replicate) is unexplained.
+second column. Case 3 (second resequencing record under one replicate) was one historical
+manual upload of a moved folder and cannot be produced through the webapp.
 Case-1 copies never corrupted the mutation table or the CSV exports; they inflate counts and
 slow rebuilds.
 
@@ -136,7 +137,7 @@ Proposed split:
 
 Core = items 1, 2, 5 and the copy change: roughly half a day to a day on top of the step-2
 tests (upload the same fixture twice → identical row counts; a sample that fails mid-way
-leaves no rows). When it lands, the repeat-upload stopgap (`REUPLOADS.log`) turns into an
+leaves no rows). When it lands, the repeat-upload logging (`REUPLOADS.log`) turns into an
 informational line and the weekly operator check can stop.
 
 ### Idea for the review: clean the data for edge cases instead of building prevention

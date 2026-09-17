@@ -23,7 +23,7 @@ Related write-ups (all under `docs/`):
 | 2026-09-09 | Same failure mode again on a production upload (experiment 2674, submitted through the webapp). The run page showed **Done** although the ingest had died. Metadata for that experiment must be backfilled. |
 | 2026-09-11 | Upload overhaul (this changeset). A dev test submission also surfaced the input-folder prefix bug and the run-name collision problem. End-to-end verified with a dev run (run 352, experiment 2678): status flow `uploading → Upload Completed`, per-run log written, metadata present, rebuild peak memory 0.4 GB. Host script deployed to `/upload/` (backup `/upload/webapp-upload.sh.bak-2026-09-11`), web container restarted. |
 | 2026-09-15 | Changeset reviewed and committed. Pre-check for the 2674 backfill exposes DB-wide duplicate observed-mutation rows from repeat uploads (§8) and one oversized experiment (2660); repair plan written (§9). Dedupe run the same day on 2674 and 2660, dashboard rebuilt, 2674 metadata backfilled; specifics in the private audit record. Kernel log confirms the OOM mechanism: python killed at ~25 GB on a 31 GB host with no container limit, once per Upload click. |
-| 2026-09-17 | Stopgap for repeat uploads: users keep the Upload button, `webapp-upload.sh` flags attempts that follow an earlier ingest and lists them in `/upload/logs/REUPLOADS.log` for an operator dedupe; run-page copy made honest about doubled counts (§6a). Duplicate-sample-record cause pinned to `reseq_date` in the isolate lookup (§8). |
+| 2026-09-17 | Repeat-upload logging (detects, does not prevent): users keep the Upload button, `webapp-upload.sh` flags attempts that follow an earlier ingest and lists them in `/upload/logs/REUPLOADS.log` for an operator dedupe; run-page copy made honest about doubled counts (§6a). Duplicate-sample-record cause pinned to `reseq_date` in the isolate lookup (§8). |
 
 ## 2. The problem chain
 
@@ -149,7 +149,7 @@ and the experiment then needs a manual dedupe. The guard only blocks clicks *dur
 active upload; the same happens on a second upload of a completed run or a manual
 `manage.py upload`.
 
-**Stopgap (2026-09-17): allow, detect, repair.** "Never re-upload" cannot be asked of a
+**Interim measure (2026-09-17): allow, detect, repair. It does not stop repeat uploads; it logs them for an admin cleanup.** "Never re-upload" cannot be asked of a
 user whose only tool is the Upload button, so the button stays as it is and the host script
 records repeat attempts instead: an attempt that follows one which already reached the
 ingest step is marked `REPEAT ATTEMPT … DEDUPE NEEDED` in its run log and appended to
@@ -196,9 +196,9 @@ Ordered by priority. Tick items as they land and note the commit.
 
 ### Smaller fixes
 
-- [ ] Ingest dedupe guard or a distinct metadata-only failure state (see §6, first item). `run.html` copy made honest and repeat attempts logged 2026-09-17 (§6a stopgap); the guard itself is step 3 of `docs/elt-split-plan.md`.
+- [ ] Ingest dedupe guard or a distinct metadata-only failure state (see §6, first item). `run.html` copy made honest and repeat attempts logged 2026-09-17 (§6a repeat-upload logging); the guard itself is step 3 of `docs/elt-split-plan.md`.
 - [ ] Make extraction failures detectable in `webapp-upload.sh` (shell loop over archives).
-- [x] Fix "Done or Error" wording in `run.html` (2026-09-17, with the repeat-upload stopgap).
+- [x] Fix "Done or Error" wording in `run.html` (2026-09-17, with the repeat-upload logging).
 - [ ] Remove dead imports/helpers from `dashboard/util.py`.
 - [ ] Ownership check on the upload view.
 - [ ] Fix the `snp_type_*` name mismatch in the dashboard update block.

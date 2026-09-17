@@ -45,7 +45,7 @@ host script itself was killed) can be reset manually:
 
 Users are allowed to click Upload again on a run in `Error` or `Upload Completed`.
 The ingest is not idempotent yet (`docs/elt-split-plan.md` step 3), so a second ingest
-of the same run appends a second copy of its `ObservedMutation` rows. As a stopgap the
+of the same run appends a second copy of its `ObservedMutation` rows. As an interim measure the
 script detects this and records it; it does not prevent it.
 
 - Before creating its own log the script looks for earlier logs of the same run name
