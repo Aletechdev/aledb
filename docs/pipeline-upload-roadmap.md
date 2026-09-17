@@ -188,11 +188,16 @@ Ordered by priority. Tick items as they land and note the commit.
 - [ ] **Run-name submission guard**, `JobExists` handling in `create_job`, and a proper error state on the run page instead of a 500. Proposed fixes in `ISSUE_run_name_collisions.md`. Longer term: `unique=True` on `Run.name` after deduping existing rows.
 - [ ] **Background poller** that flips `running → done` when Azure Batch finishes and cleans up drained pools (`pipeline-retry-and-cleanup.md`). `done` is reserved for it.
 
-### Needs the data owner
+### Needs the data owner — parked 2026-09-17
+
+_Decision 2026-09-17: active data repair is limited to the duplicate rows in the remaining 139
+experiments and the metadata backfill sweep. The three items below and the dev-artifact cleanup are
+parked in the private backlog (`/data/ops_audit/BACKLOG_data_repair.md` on the VM host, not in git),
+which holds the per-experiment facts. Nothing in them has been changed in the database._
 
 - [ ] **Experiment 2660 reference check.** An order of magnitude more mutations per sample than any normal experiment, nearly all of them present in every sample: almost certainly analysed against a reference that is not the parent strain. Options: re-analyse against the ancestor and re-upload, or delete. Until resolved it is the largest single contributor to the observed-mutation table and dominates every rebuild.
 - [ ] **Experiment 2674: one sample was re-run in a later pipeline run and ingested as a second sample record**, with different breseq results. Owner decides which copy to keep; metadata can be applied to both meanwhile.
-- [ ] **Mode 2 duplicates in 19 older experiments** (291 extra sample records): review per experiment, some may be deliberate re-sequencing.
+- [ ] **Duplicate sample records.** The 2026-09-15 figure (291 extra sample records in 19 experiments) turned out to be two things (checked 2026-09-17): 97 re-analysed samples in 10 experiments (case 2: in the older ones both the breseq timestamp and the breseq version differ and the mutation sets differ, i.e. deliberate re-analysis, so which set to keep is the owner's choice) and 194 replicates in 9 experiments with a second resequencing record from a moved folder (case 3: identical data, cleanup needs no scientific decision).
 
 ### Smaller fixes
 
@@ -212,7 +217,7 @@ data for years. Two modes, with different symptoms:
 | Mode | What the repeat upload did | Visible where | Scale (whole DB) |
 |---|---|---|---|
 | 1. Duplicate rows under one sample record | Found the existing experiment/ALE/flask/isolate/replicate/sample records and appended a second full set of `ObservedMutation` rows to the same sample (`bulk_create`, no existence check) | Nowhere in the mutation table (grid is keyed by mutation × sample, copies overwrite the same cell). Only in row-based counts: home-page totals, Stats page "observed" counts, rebuild memory/time | 1,036,878 duplicate (sample, mutation) groups, 1,052,363 extra rows, 674 samples, 141 experiments; 99% are exact 2× copies, max 9× |
-| 2. Duplicate sample record | A lookup field on the isolate differed, so a new isolate/replicate/sample record was created. Verified 2026-09-17 for the recent case (a sample re-analysed in a later pipeline run): reference genome, breseq version, person and freezer box were identical; only `reseq_date`, the breseq output's creation timestamp, differed. Any re-analysis therefore mints a second sample record. Cause not checked for the 19 older experiments | Extra column in the mutation table, extra row in the Stats sample list | 291 extra sample records in 19 experiments, mostly old (ids ~1086–1199) |
+| 2. Duplicate sample record | A lookup field on the isolate differed, so a new isolate/replicate/sample record was created. Verified 2026-09-17 for the recent case (a sample re-analysed in a later pipeline run): reference genome, breseq version, person and freezer box were identical; only `reseq_date`, the breseq output's creation timestamp, differed. Any re-analysis therefore mints a second sample record. Cause not checked for the 19 older experiments | Extra column in the mutation table, extra row in the Stats sample list | 97 extra sample records in 10 experiments (checked 2026-09-17; the 2026-09-15 figure of 291 in 19 experiments also contained the 194 case-3 replicates described below) |
 
 Verified: mode-1 copies are byte-identical in every non-id column for the experiments checked
 (2674, 2510, 2568, 904, 2539), apart from a handful of groups in 2660 explained by the ingest
@@ -338,18 +343,18 @@ git). Operator procedure: `docs/operations/observed_mutation_dedupe.md`.
    (`TechnicalReplicate.get` raises on two matches); apply its metadata to both copies
    with a short script until the owner picks one, then delete the other copy's isolate/replicate
    /sample/rows.
-5. **Experiment 2660.** Owner decision (re-analyse vs delete). Deleting an experiment of this
+5. **Experiment 2660 (parked 2026-09-17, private backlog).** Owner decision (re-analyse vs delete). Deleting an experiment of this
    size triggers the orphan sweep and full rebuild; plan for a long-running background job.
-6. **Mode-2 duplicates (19 experiments).** Per-experiment review with the owners; delete only
+6. **Mode-2 duplicates (10 experiments; parked 2026-09-17, private backlog).** Per-experiment review with the owners; delete only
    confirmed accidental sample records (isolate → replicate → sample → rows), then rebuild those
    experiments.
 6a. **Case-3 duplicates (9 experiments, ids 1191–1199; added 2026-09-17).** Second
    resequencing record per replicate from a historical upload of a moved folder (§8). Proposed
-   as data cleanup only, no prevention code: owner confirms the live folder, back up, delete the
+   as data cleanup only, no prevention code (parked 2026-09-17, private backlog): owner confirms the live folder, back up, delete the
    other record of each pair (rows cascade), rebuild those experiments. Procedure sketch in
    `docs/elt-split-plan.md`, "Idea for the review". Not approved yet.
 7. **Metadata backfill sweep** for the ~252 experiments with empty strain/description and the
    parser's default medium (discriminator query in `ISSUE_upload_metadata_skipped_on_oom.md`).
    Needs the source metadata folders; where they no longer exist, record the experiment as
    unrecoverable.
-8. **Dev artifacts cleanup** (experiment 2678, run 352, dev input/output/extract folders).
+8. **Dev artifacts cleanup** (experiment 2678, run 352, dev input/output/extract folders). Parked 2026-09-17; do it after the idempotent upload (#83) is verified, because that verification re-uploads this dev run.
