@@ -41,6 +41,70 @@ output, failure reasons). Check there first when troubleshooting an upload. A ru
 host script itself was killed) can be reset manually:
 `docker exec aledb-web python manage.py set_run_status <run_name> error`
 
+#### Repeat uploads (`REUPLOADS.log`)
+
+Users are allowed to click Upload again on a run in `Error` or `Upload Completed`.
+The ingest is not idempotent yet (`docs/elt-split-plan.md` step 3), so a second ingest
+of the same run appends a second copy of its `ObservedMutation` rows. As a stopgap the
+script detects this and records it; it does not prevent it.
+
+- Before creating its own log the script looks for earlier logs of the same run name
+  (`<run_name>_<8 digits>_<6 digits>.log`, exact match, so `foo` never picks up
+  `foo_bar`'s logs) and checks whether any of them contains the
+  `ingesting into database` step marker.
+- An earlier attempt reached the ingest → the current log gets a
+  `REPEAT ATTEMPT #n ... DEDUPE NEEDED` line and one line is appended to
+  `/upload/logs/REUPLOADS.log` (UTC time, run name, attempt number, number of earlier
+  ingests, path of this attempt's log).
+- Earlier attempts all died before the ingest (extraction failure) → a
+  `REPEAT ATTEMPT #n ... nothing to dedupe` line in the run log only.
+
+**Operator routine:** read `/upload/logs/REUPLOADS.log` weekly. For each new line, find
+the run's experiment ids (the upload log does not print them):
+
+```bash
+docker exec aledb-web python manage.py shell -c "
+from seq.models import ResequencingExperiment as R
+print(sorted(set(R.objects.filter(experiment_location__startswith='<run_name>/')
+    .values_list('tech_rep__isolate__flask__ale_id__ale_experiment__ale_id', flat=True))))"
+```
+
+then follow
+`docs/operations/observed_mutation_dedupe.md`: `dedupe_observed_mutations <ids> --dry-run`,
+the same without `--dry-run`, then `rebuild_stats`. Note the handled lines in the private
+audit record; the index file itself is append-only.
+
+**What this does not cover:**
+
+1. **It detects, it does not prevent.** From the repeat upload until the operator's dedupe,
+   the experiment carries duplicate rows: Stats-page "observed" counts and the home-page
+   totals are inflated, and rebuilds are slower. The mutation table itself looks normal
+   (copies land in the same cell).
+2. **A sample re-analysed in a different pipeline run.** This is not a repeat attempt of
+   one run, so nothing is flagged. The new run's breseq output carries a new creation
+   timestamp, and the ingest looks isolates up by every field including that timestamp
+   (`builder/ale_experiment.py`, `Isolate.objects.get_or_create(... reseq_date=...)`), so
+   it creates a second isolate/replicate/sample record for the same ALE-flask-isolate-
+   replicate numbers. Verified for the one recent case: the two records were identical in
+   reference genome, breseq version, person and freezer box, and differed only in
+   `reseq_date`. The dedupe command does not repair this (the rows are not exact copies
+   under one sample); `load_md` then skips that sample because the replicate lookup
+   matches two records. Needs an owner decision on which record to keep. Fix: stable
+   identity lookup, `docs/elt-split-plan.md` step 3 item 3.
+3. **Attempts older than the logs.** Per-run logs exist only since 2026-09-11. A run first
+   uploaded before that has no earlier log, so its first repeat upload is not flagged.
+4. **Uploads that bypass this script**: a manual `manage.py upload`, `upload.sh`,
+   `transfer.sh`. Operators still must not re-ingest a folder by hand; use `load_md` for
+   metadata and the per-experiment rebuild functions for derived data.
+5. **Partial first attempts.** If the earlier ingest was killed part-way, the repeat
+   upload duplicates the samples that had loaded and adds the ones that had not. The
+   flag and the dedupe handle this correctly (only exact copies are removed), but until
+   per-sample transactions exist (step 3 item 1) a sample that was cut off mid-insert
+   ends up with a full set plus a partial copy, which the dedupe also removes.
+6. **Renamed runs.** Detection is by run name. The same results uploaded under two run
+   names land in two folders and are not flagged (see `docs/ISSUE_run_name_collisions.md`
+   for the reverse problem, two runs sharing a name).
+
 **Input**: Run name (e.g., `Necator_ta06_final`)
 **Output**: Extracted experiments in `/data/aledata/{run_name}/` and database records created
 

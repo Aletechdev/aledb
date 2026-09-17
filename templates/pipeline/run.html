@@ -17,18 +17,23 @@
     {% if current_run.status == "uploading" %}
         <button disabled>Upload in progress&hellip;</button>
         <p>The results are being ingested into ALEdb. This can take from minutes to a few
-            hours for large runs; the status above will change to <b>Done</b> or <b>Error</b>
+            hours for large runs; the status above will change to <b>Upload Completed</b> or <b>Error</b>
             when it finishes. This page refreshes automatically &mdash; there is no need to
             click upload again.</p>
         <script>setTimeout(function () { location.reload(); }, 30000);</script>
     {% else %}
         {% if current_run.status == "error" %}
             <p><b>The last upload attempt failed.</b> Some samples may not have been ingested.
-                You can retry the upload below; if it fails again, contact the ALEdb admins
-                with the run name.</p>
+                You can retry the upload below. A retry loads the whole run again, so
+                mutations that were already ingested will be counted twice until the ALEdb
+                admins remove the copies; repeat uploads are recorded for them automatically.
+                If it fails again, contact the admins with the run name.</p>
         {% elif current_run.status == "uploaded" %}
-            <p>This run has already been uploaded to ALEdb. Uploading again will re-ingest
-                the same results.</p>
+            <p>This run has already been uploaded to ALEdb. Uploading again loads the same
+                results a second time, so mutation counts for its samples will be doubled
+                until the ALEdb admins remove the copies (repeat uploads are recorded for
+                them automatically). To fix sample metadata, contact the admins instead of
+                uploading again.</p>
         {% endif %}
         <a class="next" href="/pipeline/upload/{{ current_run.name }}">
             <button>Upload {{ current_run.name }}</button>

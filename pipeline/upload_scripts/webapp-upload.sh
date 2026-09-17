@@ -11,6 +11,24 @@ RUN_NAME="$1"
 
 LOG_DIR=/upload/logs
 sudo mkdir -p "$LOG_DIR"
+
+# Repeat-attempt detection. Stopgap until re-upload is idempotent
+# (docs/elt-split-plan.md step 3): users may click Upload again, but an attempt
+# that follows one which already reached the ingest step appends a second copy
+# of the run's ObservedMutation rows, so it is recorded in REUPLOADS.log for an
+# operator to dedupe. Must run before this attempt's own log file is created.
+REUPLOAD_INDEX="$LOG_DIR/REUPLOADS.log"
+D='[0-9]'
+PRIOR_ATTEMPTS=0
+PRIOR_INGESTS=0
+for prior_log in "$LOG_DIR/$RUN_NAME"_${D}${D}${D}${D}${D}${D}${D}${D}_${D}${D}${D}${D}${D}${D}.log; do
+    [ -f "$prior_log" ] || continue
+    PRIOR_ATTEMPTS=$((PRIOR_ATTEMPTS + 1))
+    if sudo grep -q "ingesting into database" "$prior_log"; then
+        PRIOR_INGESTS=$((PRIOR_INGESTS + 1))
+    fi
+done
+
 LOG_FILE="$LOG_DIR/${RUN_NAME}_$(date -u +%Y%m%d_%H%M%S).log"
 exec > >(sudo tee -a "$LOG_FILE") 2>&1
 
@@ -23,6 +41,15 @@ step() {
 }
 
 step "upload started for $RUN_NAME"
+
+if [ "$PRIOR_INGESTS" -gt 0 ]; then
+    step "REPEAT ATTEMPT #$((PRIOR_ATTEMPTS + 1)): $PRIOR_INGESTS earlier attempt(s) reached the ingest step. DEDUPE NEEDED after this upload; recorded in $REUPLOAD_INDEX"
+    echo "$(date -u +%FT%TZ) run=$RUN_NAME attempt=$((PRIOR_ATTEMPTS + 1)) prior_ingests=$PRIOR_INGESTS log=$LOG_FILE action='manage.py dedupe_observed_mutations <experiment ids of this run> --dry-run, then without --dry-run, then rebuild_stats (pipeline/upload_scripts/README.md, Repeat uploads)'" \
+        | sudo tee -a "$REUPLOAD_INDEX" > /dev/null
+elif [ "$PRIOR_ATTEMPTS" -gt 0 ]; then
+    step "REPEAT ATTEMPT #$((PRIOR_ATTEMPTS + 1)): no earlier attempt reached the ingest step, nothing to dedupe"
+fi
+
 sudo mkdir -p "/data/aledata/$RUN_NAME"
 
 step "extracting from /output/$RUN_NAME"
