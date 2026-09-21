@@ -1,7 +1,13 @@
 # Plan: robust upload in three steps (ELT split, test harness, idempotent re-upload)
 
-Status: **planned, not implemented** (2026-09-15, revised the same day). Covers roadmap
-items §8.1 and §8.2 in `docs/pipeline-upload-roadmap.md`.
+Status: **postponed** (2026-09-21, management decision: no further big changes to ALEdb for
+now). Planned 2026-09-15, revised the same day, not implemented; GitHub #81, #82, #83 stay open
+as the record. Covers roadmap items §8.1 and §8.2 in `docs/pipeline-upload-roadmap.md`.
+
+While postponed, the only safeguard against repeat uploads is the repeat-upload logging
+(`/upload/logs/REUPLOADS.log`, weekly operator check, `pipeline/upload_scripts/README.md`
+"Repeat uploads"). When the work is picked up again, start from the "Review notes" section
+below: it proposes a smaller step 3 than the one written on 2026-09-15.
 
 ## Design decision
 

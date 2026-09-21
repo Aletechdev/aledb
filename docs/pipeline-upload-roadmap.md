@@ -24,6 +24,7 @@ Related write-ups (all under `docs/`):
 | 2026-09-11 | Upload overhaul (this changeset). A dev test submission also surfaced the input-folder prefix bug and the run-name collision problem. End-to-end verified with a dev run (run 352, experiment 2678): status flow `uploading → Upload Completed`, per-run log written, metadata present, rebuild peak memory 0.4 GB. Host script deployed to `/upload/` (backup `/upload/webapp-upload.sh.bak-2026-09-11`), web container restarted. |
 | 2026-09-15 | Changeset reviewed and committed. Pre-check for the 2674 backfill exposes DB-wide duplicate observed-mutation rows from repeat uploads (§8) and one oversized experiment (2660); repair plan written (§9). Dedupe run the same day on 2674 and 2660, dashboard rebuilt, 2674 metadata backfilled; specifics in the private audit record. Kernel log confirms the OOM mechanism: python killed at ~25 GB on a 31 GB host with no container limit, once per Upload click. |
 | 2026-09-17 | Repeat-upload logging (detects, does not prevent): users keep the Upload button, `webapp-upload.sh` flags attempts that follow an earlier ingest and lists them in `/upload/logs/REUPLOADS.log` for an operator dedupe; run-page copy made honest about doubled counts (§6a). Duplicate-sample-record cause pinned to `reseq_date` in the isolate lookup (§8). |
+| 2026-09-21 | **Postponed.** Management decision: no further big changes to ALEdb for now. Code work (§7 "Next", `docs/elt-split-plan.md`, GitHub #81–#83) and the parked data repairs stay as recorded; the active data repairs (139-experiment dedupe, metadata sweep of 254 experiments of which 61 public and 228 recoverable from disk) wait for a go. Interim safeguard: repeat-upload logging + weekly `REUPLOADS.log` check. |
 
 ## 2. The problem chain
 
@@ -171,6 +172,9 @@ choice (command ready, deferred to leave time to document and inform owners). Pr
 new ones is manual only until re-upload is made idempotent; then the rule above goes away.
 
 ## 7. Roadmap
+
+_Postponed 2026-09-21 (see Timeline). Nothing below is in progress; the list is kept as the
+record for when the work resumes._
 
 Ordered by priority. Tick items as they land and note the commit.
 

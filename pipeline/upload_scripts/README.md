@@ -59,7 +59,8 @@ script detects this and records it; it does not prevent it.
 - Earlier attempts all died before the ingest (extraction failure) → a
   `REPEAT ATTEMPT #n ... nothing to dedupe` line in the run log only.
 
-**Operator routine:** read `/upload/logs/REUPLOADS.log` weekly. For each new line, find
+**Operator routine** (this is the only safeguard while the idempotent-upload work, GitHub #83,
+is postponed as of 2026-09-21): read `/upload/logs/REUPLOADS.log` weekly. For each new line, find
 the run's experiment ids (the upload log does not print them):
 
 ```bash
