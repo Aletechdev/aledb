@@ -172,11 +172,28 @@ is killed inside the container instead of exhausting the host, and
 `restart: unless-stopped` so the container comes back on its own. Status is
 tracked in `docker-compose-prod-asgi-host-nginx.yml`; as of 2026-09-22 the
 journald logging driver and daphne `--proxy-headers` are applied, the limit
-and restart policy are not yet.
+and restart policy are not yet (roadmap item 1 below).
 
 ### Roadmap
 
-1. **Long-form CSV download for refused searches** (next). Offer "download as
+1. **Container backstop: restart policy and memory limit** (small, do first).
+   On the `web` service in `docker-compose-prod-asgi-host-nginx.yml`:
+   ```yaml
+   restart: unless-stopped
+   mem_limit: 20g
+   ```
+   The limit means a runaway request is killed inside the container, alone,
+   instead of exhausting the 31 GB host and stalling redis, nginx and
+   blobfuse first; the restart policy brings the container back in seconds
+   instead of after a manual `up`. 20 GB leaves headroom for the rest of the
+   host and is far above any allowed search (~3 GB peak at `MAX_TABLE_CELLS`);
+   lower it once item 3 lands. Caveat: `docker-compose` 1.29 rejects
+   `mem_limit` under `version: "3"`, so change the version line to `"2.4"`
+   (both `docker-compose` and `docker compose` accept it); do not use
+   `deploy.resources.limits`, which 1.29 silently ignores. Both settings apply
+   on container recreation (`up -d`), not on a plain `restart`. Neither
+   fixes the search itself; they only bound the blast radius.
+2. **Long-form CSV download for refused searches** (next). Offer "download as
    CSV" on the refusal message instead of a dead end. Long form is one row per
    observed mutation (experiment, sample, reference, position, type, change,
    gene, frequency, frequency_gatk, breseq/gatk presence), *not* the wide
@@ -194,11 +211,11 @@ and restart policy are not yet.
    - The existing `/export` feature is a ZIP of per-experiment CSVs driven by
      experiment selection, not by search parameters; it is not a shortcut.
    - Test with the two refused searches above and one allowed one.
-2. **Serve table data from a separate endpoint** rather than embedding JSON in
+3. **Serve table data from a separate endpoint** rather than embedding JSON in
    the page. Removes the template and encoding copies (about 3x less peak
    memory for every search size) and makes the page itself small. Prerequisite
    for raising `MAX_TABLE_CELLS` safely.
-3. **Sparse cells or an aggregate view for wide searches.** Send only filled
+4. **Sparse cells or an aggregate view for wide searches.** Send only filled
    cells (rows and column indices) and let the JavaScript place them, or above
    some experiment count return one row per mutation with sample/experiment
    counts and a drill-down link. This is the only form in which a
