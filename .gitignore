@@ -17,6 +17,7 @@ config.sh
 .builder/
 .docker/data
 .docker/*.env
+.docker/*.env.*
 
 /pipeline/transfer/**
 

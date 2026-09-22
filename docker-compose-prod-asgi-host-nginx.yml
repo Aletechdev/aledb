@@ -21,8 +21,20 @@ services:
       - ./config:/srv/alelog/config:ro
       - /srv/alelog/uploads:/srv/alelog/uploads
 
-    command: bash -c "python manage.py collectstatic --no-input && daphne -b 0.0.0.0 -p 8000 aleinfo.asgi:application"
+    # --proxy-headers: daphne takes the client address from X-Forwarded-For
+    # (set by nginx to the real visitor address) instead of the Docker bridge
+    # address, so its per-request stdout line and Django's REMOTE_ADDR show
+    # who actually made the request. Takes effect on container recreation
+    # (`docker compose ... up -d web`), not on a plain restart.
+    command: bash -c "python manage.py collectstatic --no-input && daphne -b 0.0.0.0 -p 8000 --proxy-headers aleinfo.asgi:application"
     ports:
       - 8000:8000
+    # Send stdout/stderr to the host journal so the output survives
+    # `docker compose down` / container recreation. Read it with:
+    #   journalctl CONTAINER_NAME=aledb-web --since "<time>"
+    logging:
+      driver: journald
+      options:
+        tag: "{{.Name}}"
 volumes:
   static:
