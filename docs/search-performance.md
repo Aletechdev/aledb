@@ -105,10 +105,112 @@ The ~3.4s `gene__contains` floor is a separate, smaller item: a non-indexable
 substring match against a denormalized `gene` string. A proper gene index or
 the normalized gene table (fix 3) is the real remedy.
 
+## Memory: unbounded searches (2026-09-21 outage)
+
+The profile above covers *time*. Unbounded searches have a separate *memory*
+failure mode that the timers did not show, because the process dies after the
+"search performance" line is written.
+
+### What happened
+
+An anonymous reference-only search (`ref_seq=NC_000913`, every other field
+blank) was submitted at 04:28:07 container time on 2026-09-21. The view logged
+completion at 04:29:09 (`filter_seconds` 36, `build_seconds` 7). At 04:29:40 the
+kernel OOM-killed daphne at 27 GB resident on a 31 GB host with no swap, the
+container exited, and with no restart policy the site returned 502 for ~24 h
+until the container was recreated by hand.
+
+The "table build negligible" finding above is true of the Python loop but not
+of what follows it. For a broad search the cost is in **cells**, not rows:
+
+| Search (public projects, anonymous) | observed | distinct mutations | distinct seq. experiments | cells |
+|---|---|---|---|---|
+| `ref_seq=NC_000913` only | 234,119 | 69,594 | 3,176 | 221 M |
+| `strain=511145` only | 202,054 | 64,597 | 2,416 | 156 M |
+| `ref_seq=NC_002947` only | 91,314 | 34,024 | 348 | 11.8 M |
+| largest single project (124) | 29,545 | 17,952 | 737 | 13.2 M |
+
+`get_mutation_table_body()` allocates a dense mutations x experiments matrix
+(`_initialize_table`), copies each row on append, then the view `json.dumps`
+the whole matrix, the template embeds it as a script literal, and the response
+encodes it again. That is ~120 bytes per cell at peak across five copies, and
+221 M cells x 120 B is the 27 GB observed. The page that would have resulted is
+~7 GB of HTML, so the request was never going to be useful even if it had
+finished.
+
+### Current mitigation: refuse before building (in place)
+
+`search/views.py` runs one aggregate query after parameter parsing and before
+any row is materialised:
+
+```
+Count('mutation_id', distinct=True) x Count('sequencing_experiment_id', distinct=True)
+```
+
+If the product exceeds `MAX_TABLE_CELLS` (20,000,000) the view returns the
+search page with a message naming the two counts and asking the user to narrow
+by gene, project, position range or mutation type, and logs a warning
+(`"search refused: result too large to build"`) with the counts. Otherwise the
+search proceeds unchanged. Nothing is trimmed or sampled from an allowed
+result; a search is either built in full or refused with an explanation.
+
+Why 20 M: the largest project-scoped public search is 13.2 M cells and works
+today (~1.6 GB peak); the smallest unbounded one is 156 M. 20 M keeps peak
+memory near 3 GB and does not block any scoped search that currently exists.
+The check costs ~7 s on the 221 M case (the one being refused), ~0.1-0.7 s on
+normal searches. It counts the raw match, before global/experiment filters, so
+it is a slight over-estimate; that only matters at the boundary.
+
+Verified with Django's test client against production data (2026-09-22):
+`ref_seq=NC_000913` and `strain=511145` are refused in 8 s and 2 s;
+`project=15` and `gene=rpoB` build their tables as before.
+
+### Host-side backstop (compose file)
+
+Independent of the view: `mem_limit` on the web service so a runaway request
+is killed inside the container instead of exhausting the host, and
+`restart: unless-stopped` so the container comes back on its own. Status is
+tracked in `docker-compose-prod-asgi-host-nginx.yml`; as of 2026-09-22 the
+journald logging driver and daphne `--proxy-headers` are applied, the limit
+and restart policy are not yet.
+
+### Roadmap
+
+1. **Long-form CSV download for refused searches** (next). Offer "download as
+   CSV" on the refusal message instead of a dead end. Long form is one row per
+   observed mutation (experiment, sample, reference, position, type, change,
+   gene, frequency, frequency_gatk, breseq/gatk presence), *not* the wide
+   sample matrix, so the size is proportional to observed rows (~234 k rows,
+   ~50 MB for the NC_000913 case) rather than cells. Implementation notes:
+   - New endpoint reusing `_get_search_params()` / `_get_mut_qryset()` so
+     the search and the download can never disagree on what matches.
+   - `StreamingHttpResponse` over `queryset.iterator()` with the same
+     `select_related` as `filter_observed_mutations()`; constant memory.
+   - `filter_observed_mutations()` builds a list; it needs a generator
+     variant that applies the same global/experiment gene exclusion per row
+     while streaming. Keep one implementation of the exclusion rule.
+   - First byte arrives after the DB query (~36 s for NC_000913). nginx
+     `proxy_read_timeout` is 3600 s; the page should say it may take a minute.
+   - The existing `/export` feature is a ZIP of per-experiment CSVs driven by
+     experiment selection, not by search parameters; it is not a shortcut.
+   - Test with the two refused searches above and one allowed one.
+2. **Serve table data from a separate endpoint** rather than embedding JSON in
+   the page. Removes the template and encoding copies (about 3x less peak
+   memory for every search size) and makes the page itself small. Prerequisite
+   for raising `MAX_TABLE_CELLS` safely.
+3. **Sparse cells or an aggregate view for wide searches.** Send only filled
+   cells (rows and column indices) and let the JavaScript place them, or above
+   some experiment count return one row per mutation with sample/experiment
+   counts and a drill-down link. This is the only form in which a
+   reference-wide search is both memory-safe and readable; 3,176 columns is
+   not a usable table regardless of memory.
+
 ## Affected code
 
-- `search/views.py` — `search()` (stage timers, toggle reading),
-  `_get_observed_mutations()` (forwards skip flags)
+- `search/views.py` — `search()` (stage timers, toggle reading, `MAX_TABLE_CELLS`
+  size check), `_get_observed_mutations()` (forwards skip flags)
+- `seq/views/mutation_table_builder.py` — `_initialize_table()` (dense
+  mutations x experiments matrix), `get_mutation_table_body()`
 - `filter/util.py:14-105` — `filter_observed_mutations()`; SQL exclude at
   `filter/util.py:68`, Python gene loop at `filter/util.py:80-105`
 - `seq/models.py:151` — `ObservedMutation.get_experiment_id()` (per-row

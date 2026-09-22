@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 from django.template import loader
 from django.shortcuts import render
 from seq.models import ObservedMutation
-from django.db.models import Q
+from django.db.models import Q, Count
 import operator, collections, common
 from functools import reduce
 from seq.views import mutation_table_builder
@@ -21,6 +21,17 @@ from logs.aledb_logger import user_extra, join_extras
 import logging
 
 logger = logging.getLogger(__name__)
+
+# Upper bound on the mutation-table size a search may build, measured in cells
+# (distinct mutations x distinct sequencing experiments). The table is built as a
+# dense matrix, JSON-serialised, embedded in the page and encoded, which costs
+# roughly 120 bytes per cell at peak. On 2026-09-21 a reference-only search
+# (NC_000913: 69,594 x 3,176 = 221M cells) reached 27 GB and was OOM-killed,
+# taking the site down for a day. The largest public project-scoped search is
+# ~13M cells, so 20M allows every current scoped search (~3 GB peak) while
+# refusing the unbounded ones (a bare reference sequence or a bare E. coli
+# strain, both >150M cells).
+MAX_TABLE_CELLS = 20_000_000
 
 MUT_TYPES = ['AMP', 'CON', 'DEL', 'INS', 'INV', 'MOB', 'SNP', 'SUB']
 MUT_TYPES_DISPLAY = ["Amplification", "Conversion", "Deletion", "Insersion", "Inversion", "Mobil", "SNP", "Substitution"]
@@ -61,6 +72,26 @@ def search(request):
         hidden_columns = request.GET.get('hidden_columns', "")
         show_global_filtered = request.GET.get('show_global_filtered', '') == '1'
         show_exp_filtered = request.GET.get('show_exp_filtered', '') == '1'
+
+        # Stage 0: size check. One aggregate query (well under a second for a
+        # normal search, ~7 s for the worst case) to refuse a search whose table
+        # would exhaust memory, before any row is materialised. See MAX_TABLE_CELLS.
+        size = _get_mut_qryset(search_include_param_list, search_exclude_param_list).aggregate(
+            mutations=Count('mutation_id', distinct=True),
+            experiments=Count('sequencing_experiment_id', distinct=True))
+        cells = size['mutations'] * size['experiments']
+        if cells > MAX_TABLE_CELLS:
+            logger.warning("search refused: result too large to build", extra=join_extras(
+                user_extra(request),
+                {"parameters": last_search, "mutations": size['mutations'],
+                 "experiments": size['experiments'], "cells": cells, "max_cells": MAX_TABLE_CELLS}))
+            context.update({'message': (
+                "This search matches {:,} mutations across {:,} samples. Building that table "
+                "would overload the server, so it was not run. Please narrow the search, for "
+                "example by gene, project, position range or mutation type. We are designing "
+                "a way to get results this large directly as a CSV download."
+                ).format(size['mutations'], size['experiments'])})
+            return render(request, 'search/search.html', context)
 
         # Stage 1: DB query + global/experiment filtering. Cost scales with the
         # number of matched observed mutations, so broad searches dominate here.
