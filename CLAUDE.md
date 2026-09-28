@@ -11,6 +11,9 @@
 - The report is private ops data (contains visitor IPs). Never paste it into the public repo or a GitHub issue; aggregate numbers only.
 - Traffic context: ~85 % of requests are crawlers and a rotating-proxy scraper; genuine human visitors are 20–75 addresses/day. A jump in raw request counts is not, by itself, a usage increase. See GitHub issue #84.
 
+## Host-side changes (outside git)
+- Anything changed on the host itself (nginx, logrotate, journald, cron, packages) is recorded in `docs/operations/host-changelog.md`, and the config files are mirrored under `ops/host/` (same path layout as `/etc`). Rule: edit the repo copy, copy it to the live path, add a changelog line, commit both. The weekly traffic report flags `host config drift` when a live file stops matching its repo copy.
+
 ## Key References
 - Export architecture: see `docs/export-architecture.md`
 - Home page performance: see `docs/home-page-performance.md`

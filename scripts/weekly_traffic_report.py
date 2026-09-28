@@ -172,6 +172,28 @@ def port_8000_binding():
     return ", ".join(binds) or "not listening"
 
 
+def host_config_drift():
+    """Compare every file under ops/host/ with its live path; return a list of problems."""
+    root = os.path.join(os.path.dirname(HERE), "ops", "host")
+    problems = []
+    for dirpath, _, names in os.walk(root):
+        for name in names:
+            if name == "README.md":
+                continue
+            repo_file = os.path.join(dirpath, name)
+            live_file = "/" + os.path.relpath(repo_file, root)
+            if not os.path.exists(live_file):
+                problems.append("%s missing on host" % live_file)
+                continue
+            try:
+                with open(repo_file, "rb") as a, open(live_file, "rb") as b:
+                    if a.read() != b.read():
+                        problems.append("%s differs from ops/host copy" % live_file)
+            except OSError as e:
+                problems.append("%s unreadable: %s" % (live_file, e))
+    return problems
+
+
 def fmt_int(n):
     return "{:,}".format(n)
 
@@ -248,6 +270,9 @@ def main():
         flags.append("daphne port 8000 is bound to all interfaces (%s)" % port)
     if disk_free < DISK_FREE_MIN:
         flags.append("root filesystem %s free" % fmt_pct(disk_free))
+    drift = host_config_drift()
+    for d in drift:
+        flags.append("host config drift: %s" % d)
     if total == 0:
         flags.append("no nginx log lines found for the window")
 
@@ -286,6 +311,7 @@ def main():
     md.append("- Kernel OOM kills in window: %s" % (len(oom) if oom and not oom[0].startswith("journalctl unavailable") else (oom[0] if oom else 0)))
     md.append("- daphne port 8000 bound to: %s" % port)
     md.append("- Root filesystem free: %s" % fmt_pct(disk_free))
+    md.append("- Host config vs ops/host/: %s" % ("; ".join(drift) if drift else "all files match"))
     md.append("- Log files read: %d; status classes: %s" % (len(files), ", ".join("%sxx=%s" % (k, fmt_int(v)) for k, v in sorted(status.items()))))
     md.append("")
     md.append("_Generated %s UTC by scripts/weekly_traffic_report.py. Classes: crawler = declared bot user agent; "

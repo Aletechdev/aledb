@@ -48,3 +48,6 @@ core
 # Claude Code local (per-machine) settings: SessionStart hook that surfaces the
 # weekly traffic report flags. Paths are server-specific; not for publication.
 /.claude/settings.local.json
+
+# Host config mirror: the journald drop-in must be tracked despite the *.conf rule above.
+!/ops/host/etc/systemd/journald.conf.d/aledb.conf

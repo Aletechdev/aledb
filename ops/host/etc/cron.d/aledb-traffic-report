@@ -1,0 +1,5 @@
+# Weekly ALEdb traffic report (file-only) -> /data/ops_audit/traffic/
+# Runs Monday 07:00 UTC over the previous 7 full days. See scripts/README.md.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+0 7 * * 1 root /usr/bin/python3 /var/www/aledb/scripts/weekly_traffic_report.py >> /data/ops_audit/traffic/cron.log 2>&1
