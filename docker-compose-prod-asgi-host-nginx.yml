@@ -27,8 +27,16 @@ services:
     # who actually made the request. Takes effect on container recreation
     # (`docker compose ... up -d web`), not on a plain restart.
     command: bash -c "python manage.py collectstatic --no-input && daphne -b 0.0.0.0 -p 8000 --proxy-headers aleinfo.asgi:application"
+    # Bind daphne's port to localhost only, so the only way in is through
+    # nginx (which proxies to 127.0.0.1:8000). Every request is then logged
+    # by nginx and subject to whatever it enforces.
+    # History: until 2026-09-28 this was `8000:8000`, i.e. daphne was reachable
+    # directly from the internet. A check of the journal for 2026-09-22..28
+    # found no external direct connections (only the host itself), so nothing
+    # depended on it. Takes effect on container recreation
+    # (`docker compose ... up -d web`), not on a plain restart.
     ports:
-      - 8000:8000
+      - 127.0.0.1:8000:8000
     # Send stdout/stderr to the host journal so the output survives
     # `docker compose down` / container recreation. Read it with:
     #   journalctl CONTAINER_NAME=aledb-web --since "<time>"

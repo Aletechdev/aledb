@@ -287,7 +287,7 @@ LOGGING = {
             'class': 'logging.handlers.TimedRotatingFileHandler',
             'filename': 'logs/debug.log',
             'when': 'W0',
-            'backupCount': 5,
+            'backupCount': 9,  # weekly (W0) rotation, ~2 months
             'filters': ['uuidfilter'],
         },
         'console': {
