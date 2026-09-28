@@ -40,3 +40,11 @@ core
 # Operator-local scratch/working notes. Not for publication — kept out of git
 # deliberately (may reference live infra, credentials, or internal ops detail).
 /docs/tmp/
+
+# Vendored deps for scripts/weekly_traffic_report.py (installed with
+# `pip install --target scripts/_vendor geoip2fast`); not for publication.
+/scripts/_vendor/
+
+# Claude Code local (per-machine) settings: SessionStart hook that surfaces the
+# weekly traffic report flags. Paths are server-specific; not for publication.
+/.claude/settings.local.json
