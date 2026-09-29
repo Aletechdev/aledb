@@ -176,6 +176,13 @@ and restart policy are not yet (roadmap item 1 below).
 
 ### Roadmap
 
+**Decision (2026-09-29):** large searches should *work*, not only be refused.
+The database is not the constraint (a reference-wide search is ~234 k observed
+rows, trivial for MySQL); the dense mutations x experiments matrix is. Agreed
+direction: build **item 2 (CSV download)** and **item 4 (aggregate view)**, and
+keep the `MAX_TABLE_CELLS` gate as the safety net for the matrix view. Items 1
+and 5 are small independent cleanups; item 3 is optional after 2 and 4.
+
 1. **Container backstop: restart policy and memory limit** (small, do first).
    On the `web` service in `docker-compose-prod-asgi-host-nginx.yml`:
    ```yaml
@@ -215,12 +222,51 @@ and restart policy are not yet (roadmap item 1 below).
    the page. Removes the template and encoding copies (about 3x less peak
    memory for every search size) and makes the page itself small. Prerequisite
    for raising `MAX_TABLE_CELLS` safely.
-4. **Sparse cells or an aggregate view for wide searches.** Send only filled
-   cells (rows and column indices) and let the JavaScript place them, or above
-   some experiment count return one row per mutation with sample/experiment
-   counts and a drill-down link. This is the only form in which a
-   reference-wide search is both memory-safe and readable; 3,176 columns is
-   not a usable table regardless of memory.
+4. **Aggregate view for wide searches** (agreed, after item 2). When a search
+   is too wide for the matrix (over `MAX_TABLE_CELLS`, or above an experiment
+   count where the matrix stops being readable, e.g. ~100 columns), show one
+   row per *mutation* instead of one column per experiment. This is the only
+   form in which a reference-wide search is both memory-safe and readable;
+   3,176 columns is not a usable table regardless of memory. Implementation
+   notes:
+   - Columns: reference, position, mutation type, sequence change, protein
+     change, gene; then aggregates over the matching `ObservedMutation` rows:
+     number of ALE experiments, number of sequencing experiments/samples,
+     min/max `frequency`, and a drill-down link that reruns the normal matrix
+     search scoped to that mutation (or links to its evidence).
+   - Compute it in SQL: `values()` on the mutation fields + `annotate(Count(...,
+     distinct=True), Min('frequency'), Max('frequency'))` over the same
+     queryset `_get_mut_qryset()` returns, so the matches agree with the
+     matrix and CSV paths. ~69.6 k groups for `ref_seq=NC_000913`.
+   - The global/experiment gene exclusion in `filter_observed_mutations()` is
+     a Python loop today; for the aggregate path it must become an SQL
+     `exclude()` (or be applied before grouping), otherwise the counts
+     include rows the matrix view would hide. Share one definition of the
+     rule with item 2's generator variant.
+   - Paginate and sort on the server (DataTables server-side mode or plain
+     `?page=`), 100 rows per page, so neither the response nor the browser
+     holds 69.6 k rows. Default sort: most ALE experiments first.
+   - Offer the CSV download (item 2) on the same page for the full result.
+   - Link from the refusal message ("show summary instead") first; switching
+     wide searches to the aggregate view automatically can follow once it
+     has been used.
+   - If the grouped query is too slow (the NC_000913 filter stage is ~36 s
+     today), add a per-mutation summary table refreshed after each upload,
+     keyed by mutation id, and aggregate from it. Measure first.
+   - Test with `ref_seq=NC_000913`, `strain=511145` (both refused today) and
+     one project-scoped search, checking the per-mutation counts against the
+     matrix view for the project case.
+
+   A sparse matrix (send only filled cells as row/column indices, let the
+   JavaScript place them) was the alternative considered; it fixes memory but
+   not readability, so it is not planned.
+5. **Fix the `small_range` typo** in `_add_position_to_query()`:
+   `small_range = max - max < 1000` should be `max - min`. As written, any
+   search with both positions set passes the "please enter search criteria"
+   check, however wide the range. Not a safety issue since the
+   `MAX_TABLE_CELLS` gate still catches oversized results; the fix only
+   gives wide position-only searches the instant criteria message instead of
+   the ~7 s size check. One-line change.
 
 ## Affected code
 
