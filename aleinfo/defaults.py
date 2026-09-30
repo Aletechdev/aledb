@@ -124,6 +124,13 @@ CHANNEL_LAYERS = {
 }
 
 MIDDLEWARE = (
+    # Application-layer defense against automated traffic (see issue #84:
+    # 3.32M requests in a month, ~96% automated, incl. a residential-proxy
+    # scraping operation spread over 433k one-shot IPs on /mutations/details).
+    # djapi-guard adds in-process penetration detection, per-IP rate limiting
+    # and auto-banning. State is in-memory by default; set the redis_url in
+    # GUARD_SECURITY_CONFIG to share ban/rate state across replicas.
+    'djangoapi_guard.middleware.DjangoAPIGuard',
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -134,6 +141,46 @@ MIDDLEWARE = (
     'accounts.defender_middleware.FailedLoginMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+)
+
+# Guard Core (djapi-guard) configuration - tuned against the traffic
+# documented in issue #84: 3.32M requests in a month, ~96% automated,
+# including a residential-proxy scraping operation spread over 433k one-shot
+# IPs hammering /mutations/details. Human traffic is a few dozen researchers
+# a day, so these limits sit far above human behavior.
+#
+# - decode-then-match: payloads are unwrapped through up to seven encoding
+#   passes before 88 attack patterns across 18 categories run, with semantic
+#   scoring (entropy, obfuscation) on top
+# - behavioral rules read what the API answers and act on outcomes, with
+#   thresholds halved for IPs that already tripped the detection engine
+# - fail_secure: a broken check blocks instead of failing open
+# - Redis-backed state (already in the stack for django-defender) so bans
+#   and rate state hold across replicas
+from guard_core.models import BehaviorRuleConfig, SecurityConfig
+
+GUARD_SECURITY_CONFIG = SecurityConfig(
+    enable_penetration_detection=True,
+    enable_rate_limiting=True,
+    enable_rate_limit_auto_ban=True,
+    rate_limit=300,
+    rate_limit_window=60,
+    auto_ban_threshold=40,
+    auto_ban_duration=86400,
+    enable_ip_banning=True,
+    fail_secure=True,
+    enable_redis=True,
+    redis_url=os.environ.get("REDIS_URL", "redis://localhost:6379/0"),
+    global_behavior_rules=(
+        BehaviorRuleConfig(
+            rule_type="usage",
+            threshold=2000,
+            window=3600,
+            action="throttle",
+            correlate_with_detection=True,
+        ),
+    ),
+    behavior_scan_response_body=False,
 )
 
 AUTHENTICATION_BACKENDS = (
