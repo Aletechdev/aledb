@@ -124,13 +124,13 @@ CHANNEL_LAYERS = {
 }
 
 MIDDLEWARE = (
+    'djangoapi_guard.middleware.DjangoAPIGuard',
     # Application-layer defense against automated traffic (see issue #84:
     # 3.32M requests in a month, ~96% automated, incl. a residential-proxy
     # scraping operation spread over 433k one-shot IPs on /mutations/details).
     # djapi-guard adds in-process penetration detection, per-IP rate limiting
     # and auto-banning. State is in-memory by default; set the redis_url in
     # GUARD_SECURITY_CONFIG to share ban/rate state across replicas.
-    'djangoapi_guard.middleware.DjangoAPIGuard',
     'django.middleware.common.BrokenLinkEmailsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -140,8 +140,11 @@ MIDDLEWARE = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'accounts.defender_middleware.FailedLoginMiddleware',
     # Uncomment the next line for simple clickjacking protection:
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
+
+# Guard Core (djapi-guard) config shared with the route decorators.
+from aleinfo.guard import guard_config as GUARD_SECURITY_CONFIG
+
 
 # Guard Core (djapi-guard) configuration - tuned against the traffic
 # documented in issue #84: 3.32M requests in a month, ~96% automated,
