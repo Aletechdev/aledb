@@ -145,6 +145,13 @@ MIDDLEWARE = (
 # Guard Core (djapi-guard) config shared with the route decorators.
 from aleinfo.guard import guard_config as GUARD_SECURITY_CONFIG
 
+# scraper/bot UA patterns from the #84 traffic analysis
+GUARD_SECURITY_CONFIG.blocked_user_agents = [
+    "curl", "wget", "python-requests", "python-urllib",
+    "scrapy", "httpx", "go-http-client", "java/",
+    "sqlmap", "nikto", "nmap", "masscan",
+]
+
 
 # Guard Core (djapi-guard) configuration - tuned against the traffic
 # documented in issue #84: 3.32M requests in a month, ~96% automated,
