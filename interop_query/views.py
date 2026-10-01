@@ -1,3 +1,4 @@
+from aleinfo.guard import guard_deco
 import collections
 import json
 import logging
@@ -86,6 +87,8 @@ def _get_public_filtered_queryset():
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@guard_deco.usage_monitor(max_calls=500, window=3600, action="throttle")
+@guard_deco.suspicious_frequency(max_frequency=0.3, window=3600, action="ban")
 def genes(request):
     """
     Returns a list of all unique genes from mutations in public projects.
@@ -128,6 +131,8 @@ def genes(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@guard_deco.usage_monitor(max_calls=500, window=3600, action="throttle")
+@guard_deco.suspicious_frequency(max_frequency=0.3, window=3600, action="ban")
 def strains(request):
     """return list of strains"""
     logger.info("list strains", extra=user_extra(request))
@@ -153,6 +158,8 @@ def strains(request):
 
 @csrf_exempt
 @require_http_methods(["GET"])
+@guard_deco.usage_monitor(max_calls=500, window=3600, action="throttle")
+@guard_deco.suspicious_frequency(max_frequency=0.3, window=3600, action="ban")
 def gene_strain_pairs(request):
     """Returns all unique gene/strain pairs with search URLs."""
     logger.info("list gene-strain pairs", extra=user_extra(request))
@@ -192,6 +199,8 @@ def gene_strain_pairs(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@guard_deco.usage_monitor(max_calls=500, window=3600, action="throttle")
+@guard_deco.suspicious_frequency(max_frequency=0.3, window=3600, action="ban")
 def query_by_pair(request):
     logger.info("query by pair", extra=user_extra(request))
     try:
@@ -236,6 +245,8 @@ def query_by_pair(request):
 
 @csrf_exempt
 @require_POST
+@guard_deco.usage_monitor(max_calls=500, window=3600, action="throttle")
+@guard_deco.suspicious_frequency(max_frequency=0.3, window=3600, action="ban")
 def query_by_strain(request):
     logger.info("query by strain", extra=user_extra(request))
     try:
@@ -256,6 +267,8 @@ def query_by_strain(request):
 
 @csrf_exempt
 @require_POST
+@guard_deco.usage_monitor(max_calls=500, window=3600, action="throttle")
+@guard_deco.suspicious_frequency(max_frequency=0.3, window=3600, action="ban")
 def query_by_gene(request):
     logger.info("query by gene", extra=user_extra(request))
     try:
