@@ -8,12 +8,9 @@ import io, csv
 from md_export.util import get_md_csv_str
 from logs.aledb_logger import user_extra
 import logging
-import re
+from export.views import export_filename
 
 logger = logging.getLogger(__name__)
-
-def safe_filename(name):
-    return re.sub(r'[^a-zA-Z0-9_\-]', '_', name)
 
 def md_export(request):
     logger.info("md_export", extra = user_extra(request))
@@ -44,7 +41,7 @@ def md_export(request):
                     writer = csv.writer(csv_data)
                     writer.writerows(get_md_csv_str(experiment))
                     csv_data.seek(0)
-                    filename = f"md_Proj_{safe_filename(experiment.project.name)}_Exp_{safe_filename(experiment.name)}_ExpID{experiment.ale_id}.csv"
+                    filename = export_filename(experiment, prefix="md")
                     zip_file.writestr(filename, csv_data.read())
                 zip_file.close()
                 response = HttpResponse(zip_data.getvalue(), content_type='application/x-zip-compressed')
