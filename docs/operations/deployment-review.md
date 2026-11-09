@@ -9,7 +9,7 @@ A review of the current ALEDB production deployment on an Azure VM, with a stage
 - **Database**: Azure Database for MySQL (managed) at `ale.mysql.database.azure.com` — already off the VM. Good.
 - **Redis** in a container, port 6379 exposed on the host. No password.
 - **Docker Compose** ([docker-compose-prod-asgi-host-nginx.yml](../../docker-compose-prod-asgi-host-nginx.yml)) with the source tree bind-mounted live into the container (`- .:/app`). The Dockerfile `COPY . /app` is overwritten at runtime.
-- **`/data/aledata` is an Azure Blob Storage fuse mount** — bulk mutation data already lives in Azure Blob, not on VM disk. This is an important detail: it means the data layer is already partially cloud-native.
+- **`/data/aledata` is on an Azure Blob Storage fuse mount** (the mount point is `/data`) — bulk mutation data already lives in Azure Blob, not on VM disk. This is an important detail: it means the data layer is already partially cloud-native.
 - **`/srv/alelog/uploads`** is on VM disk (raw pipeline uploads).
 - **Secrets** live in `.docker/one.env`. `.gitignore` excludes `.docker/*.env` so current secrets are not in git. However, `git log --all -- '*.env'` shows a historical `app.env` that was committed — worth auditing whether old credentials leaked into git history.
 - **Host mounts into the web container**: `/home/muyao/.ssh:/root/.ssh` for the /pipeline upload feature ([docker-compose-prod-asgi-host-nginx.yml:20](../../docker-compose-prod-asgi-host-nginx.yml#L20)). The web app has full SSH credentials to a personal account.

@@ -47,8 +47,9 @@ The AleDB pipeline is a cloud-based bioinformatics workflow that automates mutat
 - `aledata` - Extracted experiment data ready for database import
 
 **4. Blobfuse Mounts** (on VM host)
-- `/output` → Azure Blob `output` container
-- `/data/aledata` → Azure Blob `aledata` container
+- `/pipeline_inputs` → Azure Blob `data` container (host only)
+- `/output` → Azure Blob `output` container (host only)
+- `/data` → Azure Blob `aledata` container. `/data/aledata` is a folder inside this mount and is the only path bind-mounted into the web container
 - ⚠️ Must be mounted BEFORE Docker containers start
 
 **5. MySQL Database**
@@ -264,7 +265,7 @@ return redirect(pipeline)
 ```
 
 💡 **Why SSH from container to host?**
-- Blobfuse mounts (`/output`, `/data/aledata`) are on the **host**
+- Blobfuse mounts (`/pipeline_inputs`, `/output`, `/data`) are on the **host**; only the `/data/aledata` folder is bind-mounted into the container
 - Upload script needs `sudo` privileges
 - Docker container SSHes to host to run privileged script
 
@@ -438,7 +439,7 @@ def find_experiment_paths(root_path):
 │   │   ├── breseq/output.gd                                      │
 │   │   └── metadata/experiment.json                             │
 │   └── sample2/...                                               │
-│   (Blobfuse mount of Azure Blob 'aledata' container)           │
+│   (Folder in /data, the blobfuse mount of container 'aledata')  │
 └────────────────────────────┬────────────────────────────────────┘
                              ↓ (Docker volume mount)
 ┌─────────────────────────────────────────────────────────────────┐
@@ -494,19 +495,31 @@ def find_experiment_paths(root_path):
 ⚠️ **Must be mounted BEFORE starting Docker containers!**
 
 ```bash
-# Mount output container (pipeline results)
+# Mount data container (pipeline inputs) at /pipeline_inputs
+sudo blobfuse /pipeline_inputs \
+  --tmp-path=/mnt/resource/indirtmp \
+  -o allow_other \
+  --config-file=/cfg/azure_pipeline_in.cfg \
+  -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
+
+# Mount output container (pipeline results) at /output
 sudo blobfuse /output \
   --tmp-path=/mnt/resource/outdirtmp \
+  -o allow_other \
   --config-file=/cfg/azure_pipeline_out.cfg \
   -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
 
-# Mount aledata container (extracted experiment data)
-sudo blobfuse /data/aledata \
+# Mount aledata container at /data (extracted experiments are in /data/aledata)
+sudo blobfuse /data \
   --tmp-path=/mnt/resource/blobfusetmp \
   -o allow_other \
   --config-file=/cfg/azure_aledata.cfg \
   -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
 ```
+
+The mount point for the `aledata` container is `/data`, **not** `/data/aledata`.
+Mounting at `/data/aledata` would put the run folders one level too high for
+`ALE_DATA_ROOT_DIR`.
 
 **Config file format** (`/cfg/azure_pipeline_out.cfg`):
 ```ini
@@ -522,7 +535,7 @@ containerName output
 services:
   web:
     volumes:
-      - /data/aledata:/data/aledata  # Share blobfuse mount with container
+      - /data/aledata:/data/aledata  # Folder inside the /data blobfuse mount
 ```
 
 ### SSH Access
@@ -550,8 +563,10 @@ sudo chown root:root /upload/*.sh
 
 | Path | Location | Purpose |
 |------|----------|---------|
-| `/output/` | VM host (blobfuse) | Pipeline results from Azure Batch |
-| `/data/aledata/` | VM host (blobfuse) | Extracted experiments ready for DB import |
+| `/pipeline_inputs/` | VM host (blobfuse mount of `data`) | Input FASTQs, reference genomes, CSV metadata |
+| `/output/` | VM host (blobfuse mount of `output`) | Pipeline results from Azure Batch |
+| `/data/` | VM host (blobfuse mount of `aledata`) | Mount point of the `aledata` container |
+| `/data/aledata/` | VM host + container (folder in the `/data` mount) | Extracted experiments ready for DB import |
 | `/upload/*.sh` | VM host | Upload orchestration scripts |
 | `/var/www/aledb/` | Docker container | Django application code |
 | `/app/` | Docker container | Application root (mapped to /var/www/aledb) |
@@ -590,7 +605,8 @@ python manage.py upload /data/aledata/{path}
 ### Check Blobfuse Mounts
 ```bash
 # On VM host
-mount | grep blobfuse
+mount | grep blobfuse     # expect /pipeline_inputs, /output and /data
+ls -la /pipeline_inputs
 ls -la /output
 ls -la /data/aledata
 ```
