@@ -161,7 +161,8 @@ docker exec -it aledb-web python manage.py upload /data/aledata/$1
 
    # Should see:
    # blobfuse on /output
-   # blobfuse on /data/aledata
+   # blobfuse on /pipeline_inputs
+   # blobfuse on /data          (the 'aledata' container; /data/aledata is a folder inside it)
    ```
 
 2. **Docker container must be running**:
@@ -225,7 +226,7 @@ def upload(request, name):
 ```
 
 **Why SSH from container to host?**
-- Blobfuse mounts (`/output`, `/data/aledata`) exist on the **host**, not in container
+- Blobfuse mounts (`/output`, `/data`) exist on the **host**; the container only gets the `/data/aledata` folder as a bind mount, not `/output`
 - Scripts need `sudo` privileges for filesystem operations
 - Container doesn't have direct access to blobfuse mount points
 
@@ -241,7 +242,7 @@ After successful execution, the data structure is:
 ├── sample2.tar.gz
 └── sample1_out.txt                           # Logs
 
-/data/aledata/{run_name}/                     # Blobfuse mount (Azure Blob 'aledata')
+/data/aledata/{run_name}/                     # Folder in the /data blobfuse mount (Azure Blob 'aledata')
 ├── sample1/                                  # Extracted experiment
 │   ├── breseq/
 │   │   ├── output.gd                         # Mutation calls
@@ -288,9 +289,11 @@ sudo chown root:root /upload/*.sh
 # Check mounts
 mount | grep blobfuse
 
-# Remount if needed
-sudo blobfuse /output --config-file=/cfg/azure_pipeline_out.cfg
-sudo blobfuse /data/aledata --config-file=/cfg/azure_aledata.cfg -o allow_other
+# Remount if needed (the 'aledata' container mounts at /data, NOT /data/aledata)
+sudo blobfuse /output --tmp-path=/mnt/resource/outdirtmp -o allow_other --config-file=/cfg/azure_pipeline_out.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
+sudo blobfuse /data --tmp-path=/mnt/resource/blobfusetmp -o allow_other --config-file=/cfg/azure_aledata.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
+
+# If /data was remounted, restart the web container so it rebinds /data/aledata
 ```
 
 ### SSH fails from container

@@ -32,10 +32,17 @@ Automated cloud-based bioinformatics pipeline for mutation calling analysis in A
 ### Critical Mounts (on VM host)
 
 ```
-/output          → Azure Blob 'output' container (blobfuse)
-/data/aledata    → Azure Blob 'aledata' container (blobfuse)
-                   Both shared with Docker via volume mounts
+/pipeline_inputs → Azure Blob 'data' container (blobfuse)     host only
+/output          → Azure Blob 'output' container (blobfuse)   host only
+/data            → Azure Blob 'aledata' container (blobfuse)
+                   /data/aledata is a folder inside this mount; it is the
+                   only path bind-mounted into the Docker web container
 ```
+
+The mount point for the `aledata` container is `/data`, **not** `/data/aledata`.
+Mounting at `/data/aledata` would put the run folders one level too high for
+`ALE_DATA_ROOT_DIR`. The web container reaches `/pipeline_inputs` and `/output`
+over SSH to the host, not through a volume.
 
 ---
 
@@ -205,8 +212,10 @@ Blobfuse (/data/aledata) → Docker volume → Django manage.py → MySQL
 
 | Path | Location | Purpose |
 |------|----------|---------|
-| `/output/` | VM host (blobfuse) | Pipeline results (.tar.gz) |
-| `/data/aledata/` | VM host + container (blobfuse + volume) | Extracted experiments |
+| `/pipeline_inputs/` | VM host (blobfuse mount of `data`) | Input FASTQs, reference genomes, CSV metadata |
+| `/output/` | VM host (blobfuse mount of `output`) | Pipeline results (.tar.gz) |
+| `/data/` | VM host (blobfuse mount of `aledata`) | Mount point of the `aledata` container |
+| `/data/aledata/` | VM host + container (folder in the `/data` mount, bind-mounted) | Extracted experiments |
 | `/upload/*.sh` | VM host | Upload orchestration scripts |
 | `/var/www/aledb/` | Docker container | Django application |
 
@@ -219,20 +228,29 @@ Blobfuse (/data/aledata) → Docker volume → Django manage.py → MySQL
 ⚠️ **Must exist before Docker starts**
 
 ```bash
-# Mount output container (pipeline results)
-blobfuse /output --config-file=/cfg/azure_pipeline_out.cfg \
-  -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
+# Mount data container (pipeline inputs) at /pipeline_inputs
+sudo blobfuse /pipeline_inputs --tmp-path=/mnt/resource/indirtmp \
+  --config-file=/cfg/azure_pipeline_in.cfg \
+  -o allow_other -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
 
-# Mount aledata container (extracted experiment data)
-blobfuse /data/aledata --config-file=/cfg/azure_aledata.cfg \
+# Mount output container (pipeline results) at /output
+sudo blobfuse /output --tmp-path=/mnt/resource/outdirtmp \
+  --config-file=/cfg/azure_pipeline_out.cfg \
+  -o allow_other -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
+
+# Mount aledata container at /data (extracted experiments are in /data/aledata)
+sudo blobfuse /data --tmp-path=/mnt/resource/blobfusetmp \
+  --config-file=/cfg/azure_aledata.cfg \
   -o allow_other -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
 ```
+
+Verify with `mount | grep blobfuse`: expect `/pipeline_inputs`, `/output` and `/data`.
 
 ### Docker Compose Volumes
 
 ```yaml
 volumes:
-  - /data/aledata:/data/aledata  # Share blobfuse mount
+  - /data/aledata:/data/aledata  # Folder inside the /data blobfuse mount
   - /home/muyao/.ssh:/root/.ssh  # SSH keys for host access
 ```
 

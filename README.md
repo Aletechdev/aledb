@@ -310,11 +310,21 @@ sudo certbot renew
 > accountName aledata
 > accountKey XXX
 > containerName output
+> # azure_pipeline_in.cfg:
+> accountName aledata
+> accountKey XXX
+> containerName data
 > ```
+>
+> | Mount point | Blob container | Holds |
+> |---|---|---|
+> | `/pipeline_inputs` | `data` | Raw pipeline inputs (FASTQs, reference genomes, CSV metadata) |
+> | `/output` | `output` | Raw pipeline output (`.tar.gz` per sample) |
+> | `/data` | `aledata` | Extracted results; `/data/aledata` is a folder inside this mount and the only path shared with the web container |
 >
 > ```bash
 > # Pipeline Output
-> sudo blobfuse /output --tmp-path=/mnt/resource/outdirtmp  --config-file=/cfg/azure_pipeline_out.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
+> sudo blobfuse /output --tmp-path=/mnt/resource/outdirtmp -o allow_other --config-file=/cfg/azure_pipeline_out.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
 > # Evidence Files and Upload
 > sudo blobfuse /data --tmp-path=/mnt/resource/blobfusetmp -o allow_other --config-file=/cfg/azure_aledata.cfg -o attr_timeout=240 -o entry_timeout=240 -o negative_timeout=120
 > # Input files:
@@ -323,6 +333,18 @@ eout=240 -o negative_timeout=120
 > ```
 >
 > **Note:** Always mount the Azure Blob storage BEFORE starting Docker containers. If Docker starts first, it will bind to an empty directory and require a restart after mounting: `sudo docker-compose -f docker-compose-prod-asgi-host-nginx.yml restart web`
+>
+> **After a VM reboot:** the three blobfuse mounts are started by hand and are not in `/etc/fstab` or a systemd unit, and the web container has no restart policy. Neither comes back by itself, so the site stays down until these steps are run:
+>
+> ```bash
+> # 1. Recreate the cache dirs (the /mnt resource disk can be wiped when Azure moves the VM)
+> sudo mkdir -p /mnt/resource/outdirtmp /mnt/resource/blobfusetmp /mnt/resource/indirtmp
+> # 2. Run the three `sudo blobfuse ...` commands above, then check all three are mounted
+> mount | grep blobfuse        # expect /output, /data and /pipeline_inputs
+> ls /data/aledata | head -3   # run folders must be visible BEFORE starting Docker
+> # 3. Start the containers
+> sudo docker-compose -f docker-compose-prod-asgi-host-nginx.yml up -d
+> ```
 
 ### Make necessary configuration changes:
 

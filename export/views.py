@@ -20,6 +20,21 @@ logger = logging.getLogger(__name__)
 def safe_filename(name):
     return re.sub(r'[^a-zA-Z0-9_\-]', '_', name)
 
+
+def export_filename(experiment, suffix=None, prefix=None):
+    """Per-experiment CSV name: fixed machine-readable tokens first, names last.
+
+    <prefix>_PUBLIC|PRIVATE_ProjID<id>_ExpID<id>[_<suffix>]_Proj_<name>_Exp_<name>.csv
+    Parse with a regex anchored on the fixed tokens; do not split on '_', because
+    project and experiment names contain underscores after sanitising.
+    See docs/export-architecture.md.
+    """
+    project = experiment.project
+    parts = [prefix, "PUBLIC" if project.is_public else "PRIVATE",
+             f"ProjID{project.pk}", f"ExpID{experiment.ale_id}", suffix,
+             f"Proj_{safe_filename(project.name)}", f"Exp_{safe_filename(experiment.name)}"]
+    return "_".join(p for p in parts if p) + ".csv"
+
 def export(request):
     logger.info("export", extra = user_extra(request))
     try:
@@ -47,7 +62,7 @@ def export(request):
                             csv_buffer = io.StringIO()
                             writer = csv.writer(csv_buffer)
                             writer.writerows(get_csv_str(experiment.ale_id, mut_type_str))
-                            filename = f"Proj_{safe_filename(experiment.project.name)}_Exp_{safe_filename(experiment.name)}_ExpID{experiment.ale_id}_{mut_type_str}.csv"
+                            filename = export_filename(experiment, mut_type_str)
                             zf.writestr(filename, csv_buffer.getvalue())
                             logger.info(f"Added {filename} to zip", extra=user_extra(request))
 
