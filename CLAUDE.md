@@ -17,5 +17,6 @@
 ## Key References
 - Export architecture: see `docs/export-architecture.md`
 - Home page performance: see `docs/home-page-performance.md`
+- Domain, DNS and TLS (how aledb.org reaches the VM, renewals): see `docs/operations/domain-and-dns.md`
 - Docker setup: container `aledb-web`, `/data/aledata` mounted at same path, `/data/export` is NOT mounted
 - Template AND Python changes need a restart: `sudo docker-compose -f docker-compose-prod-asgi-host-nginx.yml restart web`. Django 5 with `DEBUG=0` uses the cached template loader, so the running daphne process keeps serving the old template until restarted (confirmed 2026-10-16). A fresh `manage.py shell` process renders the new template, so an in-process test-client check does NOT prove the live site has picked it up. Restarts are run by the user.
