@@ -293,7 +293,7 @@ def add_tasks(batch_service_client, job_id, input_files_collection, output_conta
         input_files = input_files[1]
 
         output_file_path = '{}/alemutpipe-outputs/{}.tar.gz'.format(input_path, idx)
-        command = "/bin/bash -c \"sudo docker run -v $AZ_BATCH_TASK_WORKING_DIR/{}:/var/data -t --name amp{} " \
+        command = "/bin/bash -c \"sudo docker run --network none -v $AZ_BATCH_TASK_WORKING_DIR/{}:/var/data -t --name amp{} " \
                   "aletechdev/amp bash -i -c \\\"source /root/.bashrc && time /amp.sh\\\" && mv " \
                   "$AZ_BATCH_TASK_WORKING_DIR/{}/alemutpipe-outputs/*.tar.gz " \
                   "$AZ_BATCH_TASK_WORKING_DIR/{}/alemutpipe-outputs/{}.tar.gz\"".format(input_path, idx, input_path, input_path, idx)
