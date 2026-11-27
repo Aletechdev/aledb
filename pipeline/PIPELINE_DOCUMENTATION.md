@@ -170,13 +170,17 @@ For each CSV file:
 
 2️⃣ **Build Docker command**:
 ```bash
-docker run \
+docker run --rm --network none \
   -v $AZ_BATCH_TASK_WORKING_DIR/{input_dir}:/var/data \
   --name amp{sample_name} \
   aletechdev/amp \
   bash -i -c "source /root/.bashrc && time /amp.sh"
 ```
 - Mounts task directory into container
+- `--network none`: the container gets no network. `/amp.sh` starts with a `git pull` that never
+  succeeded (the container has no access to the repo) but did open a connection to github.com on
+  every task; without a network it fails at once and the run continues. Nothing else in the
+  pipeline needs the network
 - Runs `/amp.sh` (mutation calling pipeline)
 - Outputs to `alemutpipe-outputs/{sample_name}.tar.gz`
 
