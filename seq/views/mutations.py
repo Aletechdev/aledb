@@ -17,6 +17,7 @@ from aleinfo.views import show_amplifiction_data
 import json
 import common.constants
 from logs.aledb_logger import user_extra, join_extras
+from aleinfo.guard import guard_deco
 import logging
 
 __author__ = 'pphaneuf'
@@ -25,6 +26,7 @@ __author__ = 'pphaneuf'
 logger = logging.getLogger(__name__)
 
 
+@guard_deco.usage_monitor(max_calls=500, window=3600, action="throttle")
 def amplification_data(request):
     logger.info("amplification mutation usage", user_extra(request))
     try:
@@ -79,6 +81,7 @@ def amplification_data(request):
         return HttpResponse(template.render(context, request), content_type="text/html")
 
 
+@guard_deco.usage_monitor(max_calls=500, window=3600, action="throttle")
 def mutation_table(request):
     logger.info("mutation usage", user_extra(request))
     try:
@@ -140,6 +143,8 @@ def _get_table_body(experiment, ordered_reseq_dict, user, filter_type=None,
     return mutation_table_builder.get_mutation_table_body(user, obs_mutations, ordered_reseq_dict, experiment)
 
 
+@guard_deco.usage_monitor(max_calls=2000, window=3600, action="throttle")
+@guard_deco.suspicious_frequency(max_frequency=0.5, window=3600, action="ban")
 def evidence(request):
     template = loader.get_template("evidence/evidence.html")
     context = get_user_context(request.user)
@@ -147,6 +152,7 @@ def evidence(request):
 
 
 @ajax
+@guard_deco.usage_monitor(max_calls=200, window=3600, action="throttle")
 def add_to_global_filter(request):
     if permissions.can_add_global_filter(request.user):
         mut_id = request.POST['mut_id']
@@ -160,6 +166,7 @@ def add_to_global_filter(request):
 
 
 @ajax
+@guard_deco.usage_monitor(max_calls=200, window=3600, action="throttle")
 def add_to_exp_filter(request):
     try:
         mut_id = request.POST['mut_id']
@@ -179,6 +186,7 @@ def add_to_exp_filter(request):
 
 
 @ajax
+@guard_deco.usage_monitor(max_calls=200, window=3600, action="throttle")
 def save_mut_tag(request):
     mut_id = request.POST['mut_id']
     selected_tag = request.POST.get('tag_name')
@@ -197,6 +205,7 @@ def save_mut_tag(request):
 
 
 @ajax
+@guard_deco.usage_monitor(max_calls=200, window=3600, action="throttle")
 def save_rep_tag(request):
     rep_id = request.POST.get('rep_id')
     replicate = models.TechnicalReplicate.objects.get(id=rep_id)

@@ -16,6 +16,10 @@
                 <input type="password" name="password" id="password" class="form-control" placeholder="Password" required>
                 <label for="password" class="sr-only">Password</label>
             </div>
+            <!-- honeypot: hidden from humans, bots fill it and get 403'd -->
+            <div style="position:absolute;left:-9999px" aria-hidden="true">
+                <input type="text" name="website_url" id="website_url" tabindex="-1" autocomplete="off">
+            </div>
             <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
         </form>
     </div>
